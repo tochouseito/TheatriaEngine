@@ -2,7 +2,7 @@
 #pragma warning(disable:28251)
 
 // Engine
-#include"Cho.h"
+#include "Cho/Main/ChoEngine.h"
 
 // Windows
 #include<Windows.h>
@@ -11,8 +11,8 @@
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma warning(pop)
 
-	Cho::Operation();
-
+	std::unique_ptr<Engine> engine = std::make_unique<ChoEngine>();
+	engine->Operation();
 
 	return 0;
 }
