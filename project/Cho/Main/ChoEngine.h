@@ -20,8 +20,5 @@ public:// method
 	// 稼働
 	void Operation() override;
 private:// member
-
-	// Windowsアプリケーション
-	std::unique_ptr<WinApp> winApp = nullptr;
 };
 

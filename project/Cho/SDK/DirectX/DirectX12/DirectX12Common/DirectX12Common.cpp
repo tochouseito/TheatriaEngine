@@ -1,4 +1,4 @@
-#include "PrecompiledHeader.h"
+#include "pch.h"
 #include "DirectX12Common.h"
 
 ResourceLeakChecker::~ResourceLeakChecker()

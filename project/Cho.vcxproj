@@ -62,9 +62,9 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Cho;$(ProjectDir)Cho\Externals\assimp\include;$(ProjectDir)Cho\Externals\DirectXTex;$(ProjectDir)Cho\Externals\imgui;$(ProjectDir)Cho\PrecompiledHeader;$(ProjectDir)Cho\Externals\nlohmann;$(ProjectDir)Cho\Externals\ChoMath;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Cho;$(ProjectDir)Cho\Externals\assimp\include;$(ProjectDir)Cho\Externals\DirectXTex;$(ProjectDir)Cho\Externals\imgui;$(ProjectDir)Cho\Externals\nlohmann;$(ProjectDir)Cho\Externals\ChoMath;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>PrecompiledHeader.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -104,9 +104,9 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Cho;$(ProjectDir)Cho\Externals\assimp\include;$(ProjectDir)Cho\Externals\DirectXTex;$(ProjectDir)Cho\Externals\imgui;$(ProjectDir)Cho\PrecompiledHeader;$(ProjectDir)Cho\Externals\nlohmann;$(ProjectDir)Cho\Externals\ChoMath;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Cho;$(ProjectDir)Cho\Externals\assimp\include;$(ProjectDir)Cho\Externals\DirectXTex;$(ProjectDir)Cho\Externals\imgui;$(ProjectDir)Cho\Externals\nlohmann;$(ProjectDir)Cho\Externals\ChoMath;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>PrecompiledHeader.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -135,7 +135,6 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Cho\Main\ChoEngine.cpp" />
-    <ClCompile Include="Cho\PrecompiledHeader\PrecompiledHeader.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\DirectX12Common\DirectX12Common.cpp" />
     <ClCompile Include="Cho\Engine\Engine.cpp" />
     <ClCompile Include="Cho\Externals\meshoptimizer\allocator.cpp">
@@ -207,12 +206,16 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Cho\pch\pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
     <ClInclude Include="Cho\Main\ChoEngine.h" />
-    <ClInclude Include="Cho\PrecompiledHeader\PrecompiledHeader.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\DirectX12Common\DirectX12Common.h" />
     <ClInclude Include="Cho\Engine\Engine.h" />
     <ClInclude Include="Cho\Externals\meshoptimizer\meshoptimizer.h" />
     <ClInclude Include="Cho\OS\Windows\WinApp\WinApp.h" />
+    <ClInclude Include="Cho\pch\pch.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Cho\Externals\ChoMath\ChoMath.vcxproj">

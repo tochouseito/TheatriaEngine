@@ -22,22 +22,22 @@ public:// メンバ関数
 	~WinApp() = default;
 
 	// ゲームウィンドウの作成
-	void CreateGameWindow();
+	static void CreateGameWindow();
 
 	// メッセージ処理
-	bool ProcessMessage();
+	static bool ProcessMessage();
 
-	bool IsEndApp();
+	static bool IsEndApp();
 
 	// ウィンドウのタイトルバー変更
-	void SetWindowTitle(const wchar_t* title);
+	static void SetWindowTitle(const wchar_t* title);
 
 	// ウィンドウの破棄
-	void TerminateWindow();
+	static void TerminateWindow();
 
-	HWND GetHwnd() const { return hwnd_; }
+	static HWND GetHwnd() { return hwnd; }
 
-	HINSTANCE GetHInstance() const { return wc_.hInstance; }
+	static HINSTANCE GetHInstance() { return wc.hInstance; }
 
 private:
 
@@ -45,10 +45,10 @@ private:
 	static void OnWindowResize(int width, int height);
 
 private:// メンバ変数
-	static HWND hwnd_;
-
-	WNDCLASS wc_{}; // ウィンドウクラス
-
+	static HWND hwnd;
+	static WNDCLASS wc; // ウィンドウクラス
 	static bool isAppRunning; // アプリケーションが動作中かを示すフラグ
+	static int32_t windowWidth; // ウィンドウの幅
+	static int32_t windowHeight; // ウィンドウの高さ
 };
 

@@ -22,7 +22,7 @@
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\DirectX12Common\DirectX12Common.cpp" />
     <ClCompile Include="Cho\Engine\Engine.cpp" />
     <ClCompile Include="Cho\Main\ChoEngine.cpp" />
-    <ClCompile Include="Cho\PrecompiledHeader\PrecompiledHeader.cpp" />
+    <ClCompile Include="Cho\pch\pch.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cho\Externals\meshoptimizer\meshoptimizer.h" />
@@ -30,6 +30,6 @@
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\DirectX12Common\DirectX12Common.h" />
     <ClInclude Include="Cho\Engine\Engine.h" />
     <ClInclude Include="Cho\Main\ChoEngine.h" />
-    <ClInclude Include="Cho\PrecompiledHeader\PrecompiledHeader.h" />
+    <ClInclude Include="Cho\pch\pch.h" />
   </ItemGroup>
 </Project>

@@ -1,12 +1,19 @@
-#include "PrecompiledHeader.h"
+#include "pch.h"
 #include "ChoEngine.h"
+
+// Windowアプリケーション
+#include "Cho/OS/Windows/WinApp/WinApp.h"
 
 void ChoEngine::Initialize()
 {
+	// ウィンドウの作成
+	WinApp::CreateGameWindow();
 }
 
 void ChoEngine::Finalize()
 {
+	// ウィンドウの破棄
+	WinApp::TerminateWindow();
 }
 
 void ChoEngine::Operation()
@@ -16,7 +23,7 @@ void ChoEngine::Operation()
 
 	/*メインループ*/
 	while (true) {
-		if (winApp->ProcessMessage()) {
+		if (WinApp::ProcessMessage()) {
 			break;
 		}
 	}

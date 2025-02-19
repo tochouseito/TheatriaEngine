@@ -1,4 +1,4 @@
-#include "PrecompiledHeader.h"
+#include "pch.h"
 #include "WinApp.h"
 #pragma comment(lib,"winmm.lib")
 
@@ -8,14 +8,17 @@ ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 
 #include"imgui.h"
 
-HWND WinApp::hwnd_ = nullptr;
-bool WinApp::isAppRunning = true;
+HWND WinApp::hwnd = nullptr;
+WNDCLASS WinApp::wc = {}; // ウィンドウクラス
+bool WinApp::isAppRunning=true; // アプリケーションが動作中かを示すフラグ
+int32_t WinApp::windowWidth = 1280; // ウィンドウの幅
+int32_t WinApp::windowHeight = 720; // ウィンドウの高さ
 
 // ウィンドウプロシージャ
-LRESULT CALLBACK WinApp::WindowProc(HWND hwnd, UINT msg,
+LRESULT CALLBACK WinApp::WindowProc(HWND hWnd, UINT msg,
 	WPARAM wparam, LPARAM lparam) {
 //#ifdef _DEBUG
-	if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam)) {
+	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wparam, lparam)) {
 		return true;
 	}
 //#endif
@@ -42,7 +45,7 @@ LRESULT CALLBACK WinApp::WindowProc(HWND hwnd, UINT msg,
 		return 0;
 	}
 	// 標準のメッセージ処理を行う
-	return DefWindowProc(hwnd, msg, wparam, lparam);
+	return DefWindowProc(hWnd, msg, wparam, lparam);
 }
 
 // ゲームウィンドウの作成
@@ -54,26 +57,26 @@ void WinApp::CreateGameWindow() {
 	hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 
 	// ウィンドウプロシージャ
-	wc_.lpfnWndProc = WindowProc;
+	wc.lpfnWndProc = WindowProc;
 	// ウィンドウクラス名
-	wc_.lpszClassName = L"ChoWindowClass";
+	wc.lpszClassName = L"ChoWindowClass";
 	// インスタンスハンドル
-	wc_.hInstance = GetModuleHandle(nullptr);
+	wc.hInstance = GetModuleHandle(nullptr);
 	// カーソル
-	wc_.hCursor = LoadCursor(nullptr, IDC_ARROW);
+	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
 
 	// ウィンドウクラスを登録する
-	RegisterClass(&wc_);
+	RegisterClass(&wc);
 
 	// ウィンドウサイズを表す構造体にクライアント領域を入れる
-	RECT wrc = { 0,0,WindowWidth(),WindowHeight()};
+	RECT wrc = { 0,0,windowWidth,windowHeight};
 
 	// クライアント領域を元に実際のサイズにwrcを変更してもらう
 	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
 
 	// ウィンドウの生成
-	hwnd_ = CreateWindow(
-		wc_.lpszClassName,		// 利用するクラス名
+	hwnd = CreateWindow(
+		wc.lpszClassName,		// 利用するクラス名
 		L"Cho",					// タイトルバーの文字
 		WS_OVERLAPPEDWINDOW,	// よく見るウィンドウスタイル
 		CW_USEDEFAULT,			// 表示X座標
@@ -82,14 +85,14 @@ void WinApp::CreateGameWindow() {
 		wrc.bottom - wrc.top,	// ウィンドウ縦幅
 		nullptr,				// 親ウィンドウハンドル
 		nullptr,				// メニューハンドル
-		wc_.hInstance,			// インスタンスハンドル
+		wc.hInstance,			// インスタンスハンドル
 		nullptr);				// オプション
 
 	// システムタイマーの分解能を上げる
 	timeBeginPeriod(1);
 
 	// ウィンドウを表示する
-	ShowWindow(hwnd_, SW_SHOW);
+	ShowWindow(hwnd, SW_SHOW);
 }
 
 /// <summary>
@@ -118,16 +121,16 @@ bool WinApp::IsEndApp()
 
 void WinApp::SetWindowTitle(const wchar_t* title)
 {
-	SetWindowText(hwnd_, title);
+	SetWindowText(hwnd, title);
 }
 
 void WinApp::TerminateWindow()
 {
 	// ウィンドウを完全に閉じる
-	DestroyWindow(hwnd_);
+	DestroyWindow(hwnd);
 
 	// ウィンドウクラスを登録解除
-	UnregisterClass(wc_.lpszClassName, wc_.hInstance);
+	UnregisterClass(wc.lpszClassName, wc.hInstance);
 
 	// COM 終了
 	CoUninitialize();
@@ -136,11 +139,11 @@ void WinApp::TerminateWindow()
 // ウィンドウサイズ変更時の処理
 void WinApp::OnWindowResize(int width, int height) {
 	if (width != 0 && height != 0) {
-		SystemState::GetInstance().SetWindowWidth(width);
-		SystemState::GetInstance().SetWindowHeight(height);
+		windowWidth = width;
+		windowHeight = height;
 		// 新しいクライアント領域のサイズを hwnd_ から取得
 		RECT rect;
-		GetClientRect(hwnd_, &rect);
+		GetClientRect(hwnd, &rect);
 		int newWidth = rect.right - rect.left;
 		int newHeight = rect.bottom - rect.top;
 		newWidth;
