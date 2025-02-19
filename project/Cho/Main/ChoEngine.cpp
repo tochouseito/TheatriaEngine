@@ -6,12 +6,21 @@
 
 void ChoEngine::Initialize()
 {
+	// ResourceLeakChecker
+	resourceLeakChecker = std::make_unique<ResourceLeakChecker>();
+
 	// ウィンドウの作成
 	WinApp::CreateGameWindow();
+
+	// DirectX12初期化
+	dx12 = std::make_unique<DirectX12Common>();
+	dx12->Initialize();
 }
 
 void ChoEngine::Finalize()
 {
+	// DirectX12終了処理
+	dx12->Finalize();
 	// ウィンドウの破棄
 	WinApp::TerminateWindow();
 }

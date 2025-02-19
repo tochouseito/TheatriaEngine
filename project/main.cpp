@@ -5,7 +5,7 @@
 #include "Cho/Main/ChoEngine.h"
 
 // Windows
-#include<Windows.h>
+#include <Windows.h>
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
