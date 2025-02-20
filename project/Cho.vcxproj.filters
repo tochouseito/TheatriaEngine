@@ -28,6 +28,8 @@
     <ClCompile Include="Cho\Platform\Timer\Timer.cpp" />
     <ClCompile Include="Cho\SDK\ImGui\ImGuiManager\ImGuiManager.cpp" />
     <ClCompile Include="Cho\Platform\PlatformLayer\PlatformLayer.cpp" />
+    <ClCompile Include="Cho\Core\CoreSystem\CoreSystem.cpp" />
+    <ClCompile Include="Cho\Resources\ResourceManager\ResourceManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cho\Externals\meshoptimizer\meshoptimizer.h" />
@@ -41,5 +43,7 @@
     <ClInclude Include="Cho\Platform\Timer\Timer.h" />
     <ClInclude Include="Cho\SDK\ImGui\ImGuiManager\ImGuiManager.h" />
     <ClInclude Include="Cho\Platform\PlatformLayer\PlatformLayer.h" />
+    <ClInclude Include="Cho\Core\CoreSystem\CoreSystem.h" />
+    <ClInclude Include="Cho\Resources\ResourceManager\ResourceManager.h" />
   </ItemGroup>
 </Project>

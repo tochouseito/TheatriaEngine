@@ -19,6 +19,14 @@ void ChoEngine::Initialize()
 	// PlatformLayer初期化
 	platformLayer = std::make_unique<PlatformLayer>();
 	platformLayer->Initialize();
+
+	// CoreSystem初期化
+	coreSystem = std::make_unique<CoreSystem>();
+	coreSystem->Initialize();
+
+	// ResourceManager初期化
+	resourceManager = std::make_unique<ResourceManager>();
+	resourceManager->Initialize();
 }
 
 void ChoEngine::Finalize()

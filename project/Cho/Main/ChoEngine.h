@@ -15,6 +15,12 @@ ChoEngineクラス
 // PlatformLayer
 #include "Cho/Platform/PlatformLayer/PlatformLayer.h"
 
+// CoreSystem
+#include "Cho/Core/CoreSystem/CoreSystem.h"
+
+// Resource
+#include "Cho/Resources/ResourceManager/ResourceManager.h"
+
 class ChoEngine : public Engine
 {
 public:// method
@@ -44,5 +50,11 @@ private:// member
 
 	// PlatformLayer
 	std::unique_ptr<PlatformLayer> platformLayer = nullptr;// PlatformLayer
+
+	// CoreSystem
+	std::unique_ptr<CoreSystem> coreSystem = nullptr;// CoreSystem
+
+	// ResourceManager
+	std::unique_ptr<ResourceManager> resourceManager = nullptr;// ResourceManager
 };
 
