@@ -1,9 +1,11 @@
 #pragma once
 
-#include<wrl.h>
 /*--------------------------------------------
 DirectX12共通クラス
 --------------------------------------------*/
+
+#include<wrl.h>
+using Microsoft::WRL::ComPtr;
 
 #include<d3d12.h>
 #include<dxgi1_6.h>
@@ -18,8 +20,17 @@ public:// メンバ関数
 
 	// 終了処理
 	void Finalize();
-private:
 
+private:// メンバ関数
+
+	// DXGIファクトリーの生成
+	void CreateDXGIFactory(const bool& enableDebugLayer);
+
+	// デバイスの生成
+	void CreateDevice();
+private:// メンバ変数
+	ComPtr<IDXGIFactory7> dxgiFactory = nullptr;// DXGIファクトリ
+	ComPtr<ID3D12Device8> device = nullptr;// デバイス
 };
 
 /*--------------------------------------------
