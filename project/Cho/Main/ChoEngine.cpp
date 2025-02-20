@@ -15,10 +15,16 @@ void ChoEngine::Initialize()
 	// DirectX12初期化
 	dx12 = std::make_unique<DirectX12Common>();
 	dx12->Initialize();
+
+	// PlatformLayer初期化
+	platformLayer = std::make_unique<PlatformLayer>();
+	platformLayer->Initialize();
 }
 
 void ChoEngine::Finalize()
 {
+	// PlatformLayer終了処理
+	platformLayer->Finalize();
 	// DirectX12終了処理
 	dx12->Finalize();
 	// ウィンドウの破棄
@@ -35,8 +41,32 @@ void ChoEngine::Operation()
 		if (WinApp::ProcessMessage()) {
 			break;
 		}
+		// 開始
+		Start();
+		// 更新
+		Update();
+		// 終了
+		End();
 	}
 
 	/*終了処理*/
 	Finalize();
+}
+
+void ChoEngine::Update()
+{
+	// PlatformLayer更新
+	platformLayer->Update();
+}
+
+void ChoEngine::Start()
+{
+	// PlatformLayer記録開始
+	platformLayer->StartFrame();
+}
+
+void ChoEngine::End()
+{
+	// PlatformLayer記録終了
+	platformLayer->EndFrame();
 }

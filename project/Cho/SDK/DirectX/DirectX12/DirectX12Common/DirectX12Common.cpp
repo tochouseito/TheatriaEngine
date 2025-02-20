@@ -11,3 +11,11 @@ ResourceLeakChecker::~ResourceLeakChecker()
 		debug->ReportLiveObjects(DXGI_DEBUG_D3D12, DXGI_DEBUG_RLO_ALL);
 	}
 }
+
+void DirectX12Common::Initialize()
+{
+}
+
+void DirectX12Common::Finalize()
+{
+}

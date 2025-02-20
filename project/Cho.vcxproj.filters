@@ -23,6 +23,11 @@
     <ClCompile Include="Cho\Engine\Engine.cpp" />
     <ClCompile Include="Cho\Main\ChoEngine.cpp" />
     <ClCompile Include="Cho\pch\pch.cpp" />
+    <ClCompile Include="Cho\Platform\FileSystem\FileSystem.cpp" />
+    <ClCompile Include="Cho\Core\MathLibrary\MathLibrary.cpp" />
+    <ClCompile Include="Cho\Platform\Timer\Timer.cpp" />
+    <ClCompile Include="Cho\SDK\ImGui\ImGuiManager\ImGuiManager.cpp" />
+    <ClCompile Include="Cho\Platform\PlatformLayer\PlatformLayer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cho\Externals\meshoptimizer\meshoptimizer.h" />
@@ -31,5 +36,10 @@
     <ClInclude Include="Cho\Engine\Engine.h" />
     <ClInclude Include="Cho\Main\ChoEngine.h" />
     <ClInclude Include="Cho\pch\pch.h" />
+    <ClInclude Include="Cho\Platform\FileSystem\FileSystem.h" />
+    <ClInclude Include="Cho\Core\MathLibrary\MathLibrary.h" />
+    <ClInclude Include="Cho\Platform\Timer\Timer.h" />
+    <ClInclude Include="Cho\SDK\ImGui\ImGuiManager\ImGuiManager.h" />
+    <ClInclude Include="Cho\Platform\PlatformLayer\PlatformLayer.h" />
   </ItemGroup>
 </Project>

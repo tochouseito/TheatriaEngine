@@ -202,6 +202,8 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Cho\OS\Windows\WinApp\WinApp.cpp" />
+    <ClCompile Include="Cho\Platform\FileSystem\FileSystem.cpp" />
+    <ClCompile Include="Cho\SDK\ImGui\ImGuiManager\ImGuiManager.cpp" />
     <ClCompile Include="main.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
@@ -210,12 +212,20 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Cho\Core\MathLibrary\MathLibrary.cpp" />
+    <ClCompile Include="Cho\Platform\Timer\Timer.cpp" />
+    <ClCompile Include="Cho\Platform\PlatformLayer\PlatformLayer.cpp" />
     <ClInclude Include="Cho\Main\ChoEngine.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\DirectX12Common\DirectX12Common.h" />
     <ClInclude Include="Cho\Engine\Engine.h" />
     <ClInclude Include="Cho\Externals\meshoptimizer\meshoptimizer.h" />
     <ClInclude Include="Cho\OS\Windows\WinApp\WinApp.h" />
     <ClInclude Include="Cho\pch\pch.h" />
+    <ClInclude Include="Cho\Platform\FileSystem\FileSystem.h" />
+    <ClInclude Include="Cho\Core\MathLibrary\MathLibrary.h" />
+    <ClInclude Include="Cho\Platform\Timer\Timer.h" />
+    <ClInclude Include="Cho\SDK\ImGui\ImGuiManager\ImGuiManager.h" />
+    <ClInclude Include="Cho\Platform\PlatformLayer\PlatformLayer.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Cho\Externals\ChoMath\ChoMath.vcxproj">
