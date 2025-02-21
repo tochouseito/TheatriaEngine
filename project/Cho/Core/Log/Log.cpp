@@ -77,3 +77,14 @@ void ChoLog(const std::string& message) {
     WriteLog(message);
 #endif // NDEBUG
 }
+
+void ChoAssertLog(const std::string& message, const HRESULT& hr, const std::string& file, const int line)
+{
+	if (SUCCEEDED(hr)) {// hrが成功している場合は何もしない
+		return;
+	}
+	std::string logMessage = std::format("Error: {} in {} at line {}\n", hr, file, line);
+	ChoLog(logMessage);
+	ChoLog(message);
+	assert(SUCCEEDED(hr));
+}
