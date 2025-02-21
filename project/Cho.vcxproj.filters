@@ -30,6 +30,7 @@
     <ClCompile Include="Cho\Platform\PlatformLayer\PlatformLayer.cpp" />
     <ClCompile Include="Cho\Core\CoreSystem\CoreSystem.cpp" />
     <ClCompile Include="Cho\Resources\ResourceManager\ResourceManager.cpp" />
+    <ClCompile Include="Cho\Core\Log\Log.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cho\Externals\meshoptimizer\meshoptimizer.h" />
@@ -45,5 +46,6 @@
     <ClInclude Include="Cho\Platform\PlatformLayer\PlatformLayer.h" />
     <ClInclude Include="Cho\Core\CoreSystem\CoreSystem.h" />
     <ClInclude Include="Cho\Resources\ResourceManager\ResourceManager.h" />
+    <ClInclude Include="Cho\Core\Log\Log.h" />
   </ItemGroup>
 </Project>

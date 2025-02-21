@@ -6,7 +6,9 @@
 extern IMGUI_IMPL_API LRESULT
 ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-#include"imgui.h"
+#include "imgui.h"
+
+#include "Core/Log/Log.h"
 
 HWND WinApp::hwnd = nullptr;
 WNDCLASS WinApp::wc = {}; // ウィンドウクラス
@@ -50,6 +52,8 @@ LRESULT CALLBACK WinApp::WindowProc(HWND hWnd, UINT msg,
 
 // ゲームウィンドウの作成
 void WinApp::CreateGameWindow() {
+	// Log出力
+	ChoLog("CreateGameWindow");
 
 	HRESULT hr;
 
@@ -93,6 +97,9 @@ void WinApp::CreateGameWindow() {
 
 	// ウィンドウを表示する
 	ShowWindow(hwnd, SW_SHOW);
+
+	// Log出力
+	ChoLog("CreateGameWindow End");
 }
 
 /// <summary>
@@ -126,6 +133,9 @@ void WinApp::SetWindowTitle(const wchar_t* title)
 
 void WinApp::TerminateWindow()
 {
+	// Log出力
+	ChoLog("TerminateWindow");
+
 	// ウィンドウを完全に閉じる
 	DestroyWindow(hwnd);
 
@@ -134,6 +144,9 @@ void WinApp::TerminateWindow()
 
 	// COM 終了
 	CoUninitialize();
+
+	// Log出力
+	ChoLog("TerminateWindow End");
 }
 
 // ウィンドウサイズ変更時の処理

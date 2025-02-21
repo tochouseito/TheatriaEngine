@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "DirectX12Common.h"
 
+#include "Core/Log/Log.h"
+
 ResourceLeakChecker::~ResourceLeakChecker()
 {
 	// リソースリークチェック
@@ -14,6 +16,8 @@ ResourceLeakChecker::~ResourceLeakChecker()
 
 void DirectX12Common::Initialize()
 {
+	// Log出力
+	ChoLog("DirectX12Common::Initialize\n");
 	// DXGIファクトリーの生成
 	CreateDXGIFactory(true);
 	// デバイスの生成
@@ -34,6 +38,8 @@ void DirectX12Common::CreateDXGIFactory([[maybe_unused]] const bool& enableDebug
 	Microsoft::WRL::ComPtr<ID3D12Debug1> debugController;
 	if (enableDebugLayer) {
 		if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
+			// Log出力
+			ChoLog("Enable Debug Layer\n");
 
 			// デバッグレイヤーを有効化する
 			debugController->EnableDebugLayer();
@@ -44,8 +50,11 @@ void DirectX12Common::CreateDXGIFactory([[maybe_unused]] const bool& enableDebug
 	}
 #endif
 	// DXGIファクトリーの生成
+	// Log出力
+	ChoLog("Create DXGI Factory\n");
 	HRESULT hr;
 	hr = CreateDXGIFactory2(0, IID_PPV_ARGS(&dxgiFactory));
+	ChoLog("Create DXGI Factory End\n");
 #ifdef _DEBUG
 	assert(SUCCEEDED(hr));
 #endif // _DEBUG
@@ -104,7 +113,7 @@ void DirectX12Common::CreateDevice()
 		if (SUCCEEDED(hr)) {
 
 			// 生成できたのでログ出力を行ってループを抜ける
-			//Log(std::format("FeatureLevel : {}\n", featureLevelStrings[i]));
+			Log(std::format("FeatureLevel : {}\n", featureLevelStrings[i]));
 			break;
 		}
 	}
@@ -112,7 +121,7 @@ void DirectX12Common::CreateDevice()
 	assert(device != nullptr);
 
 	// 初期化完了ログ
-	//Log("Complete create D3D12Device!!!\n");
+	Log("Complete create D3D12Device!!!\n");
 
 	// シェーダモデルをチェック.
 	{
