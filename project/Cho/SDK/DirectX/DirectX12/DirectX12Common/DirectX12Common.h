@@ -21,6 +21,9 @@ public:// メンバ関数
 	// 終了処理
 	void Finalize();
 
+	/*Getter*/
+	ID3D12Device8* GetDevice() const { return device.Get(); }
+
 private:// メンバ関数
 
 	// DXGIファクトリーの生成
