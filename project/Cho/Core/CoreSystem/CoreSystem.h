@@ -1,8 +1,13 @@
 #pragma once
-
 /*--------------------------------------------
 CoreSystemクラス
 --------------------------------------------*/
+
+#include "Core/ThreadManager/ThreadManager.h"
+
+// C++
+#include <memory>
+
 class CoreSystem
 {
 public:// メンバ関数
@@ -14,5 +19,9 @@ public:// メンバ関数
 
 	// 初期化
 	void Initialize();
+
+private:
+	// スレッドマネージャー
+	std::unique_ptr<ThreadManager> threadManager = nullptr;
 };
 

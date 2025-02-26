@@ -4,6 +4,14 @@
 // Windowアプリケーション
 #include "Cho/OS/Windows/WinApp/WinApp.h"
 
+ChoEngine::ChoEngine()
+{
+}
+
+ChoEngine::~ChoEngine()
+{
+}
+
 void ChoEngine::Initialize()
 {
 	// ResourceLeakChecker
@@ -15,6 +23,9 @@ void ChoEngine::Initialize()
 	// DirectX12初期化
 	dx12 = std::make_unique<DirectX12Common>();
 	dx12->Initialize();
+
+	// CommandManager初期化
+	commandManager = std::make_unique<CommandManager>(dx12->GetDevice());
 
 	// PlatformLayer初期化
 	platformLayer = std::make_unique<PlatformLayer>();

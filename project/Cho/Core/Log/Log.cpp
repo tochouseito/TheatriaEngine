@@ -88,3 +88,12 @@ void ChoAssertLog(const std::string& message, const HRESULT& hr, const std::stri
 	ChoLog(message);
 	assert(SUCCEEDED(hr));
 }
+void ChoAssertLog(const std::string& message, const bool& flag, const std::string& file, const int line) {
+    if (flag) {// flagが成功している場合は何もしない
+        return;
+    }
+    std::string logMessage = std::format("Error: {} in {} at line {}\n", flag, file, line);
+    ChoLog(logMessage);
+    ChoLog(message);
+    assert(flag);
+}

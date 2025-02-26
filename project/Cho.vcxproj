@@ -207,6 +207,7 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClCompile Include="Cho\SDK\ImGui\ImGuiManager\ImGuiManager.cpp" />
     <ClCompile Include="Cho\Core\CoreSystem\CoreSystem.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\CommandManager\CommandManager.cpp" />
+    <ClCompile Include="Cho\SDK\DirectX\DirectX12\CommandContext\CommandContext.cpp" />
     <ClCompile Include="main.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
@@ -236,6 +237,7 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClInclude Include="Cho\Resources\ResourceManager\ResourceManager.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\CommandManager\CommandManager.h" />
     <ClInclude Include="Cho\Core\ThreadManager\ThreadManager.h" />
+    <ClInclude Include="Cho\SDK\DirectX\DirectX12\CommandContext\CommandContext.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Cho\Externals\ChoMath\ChoMath.vcxproj">

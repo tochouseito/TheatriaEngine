@@ -33,6 +33,7 @@
     <ClCompile Include="Cho\Core\Log\Log.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\CommandManager\CommandManager.cpp" />
     <ClCompile Include="Cho\Core\ThreadManager\ThreadManager.cpp" />
+    <ClCompile Include="Cho\SDK\DirectX\DirectX12\CommandContext\CommandContext.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cho\Externals\meshoptimizer\meshoptimizer.h" />
@@ -51,5 +52,6 @@
     <ClInclude Include="Cho\Core\Log\Log.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\CommandManager\CommandManager.h" />
     <ClInclude Include="Cho\Core\ThreadManager\ThreadManager.h" />
+    <ClInclude Include="Cho\SDK\DirectX\DirectX12\CommandContext\CommandContext.h" />
   </ItemGroup>
 </Project>

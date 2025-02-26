@@ -11,6 +11,7 @@ ChoEngineクラス
 
 // DirectX12
 #include "Cho/SDK/DirectX/DirectX12/DirectX12Common/DirectX12Common.h"
+#include "Cho/SDK/DirectX/DirectX12/CommandManager/CommandManager.h"
 
 // PlatformLayer
 #include "Cho/Platform/PlatformLayer/PlatformLayer.h"
@@ -24,6 +25,12 @@ ChoEngineクラス
 class ChoEngine : public Engine
 {
 public:// method
+
+	// コンストラクタ
+	ChoEngine();
+
+	// デストラクタ
+	~ChoEngine();
 
 	// 初期化
 	void Initialize() override;
@@ -47,6 +54,7 @@ private:// member
 	// DirectX12
 	std::unique_ptr<ResourceLeakChecker> resourceLeakChecker = nullptr;// ResourceLeakChecker
 	std::unique_ptr<DirectX12Common> dx12 = nullptr;// DirectX12Common
+	std::unique_ptr<CommandManager> commandManager = nullptr;// CommandManager
 
 	// PlatformLayer
 	std::unique_ptr<PlatformLayer> platformLayer = nullptr;// PlatformLayer
