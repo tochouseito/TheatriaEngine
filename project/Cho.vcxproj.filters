@@ -34,6 +34,8 @@
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\CommandManager\CommandManager.cpp" />
     <ClCompile Include="Cho\Core\ThreadManager\ThreadManager.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\CommandContext\CommandContext.cpp" />
+    <ClCompile Include="Cho\SDK\DirectX\DirectX12\SwapChain\SwapChain.cpp" />
+    <ClCompile Include="Cho\SDK\DirectX\DirectX12\stdafx\stdafx.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cho\Externals\meshoptimizer\meshoptimizer.h" />
@@ -53,5 +55,7 @@
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\CommandManager\CommandManager.h" />
     <ClInclude Include="Cho\Core\ThreadManager\ThreadManager.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\CommandContext\CommandContext.h" />
+    <ClInclude Include="Cho\SDK\DirectX\DirectX12\SwapChain\SwapChain.h" />
+    <ClInclude Include="Cho\SDK\DirectX\DirectX12\stdafx\stdafx.h" />
   </ItemGroup>
 </Project>

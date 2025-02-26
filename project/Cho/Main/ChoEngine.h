@@ -12,6 +12,7 @@ ChoEngineクラス
 // DirectX12
 #include "Cho/SDK/DirectX/DirectX12/DirectX12Common/DirectX12Common.h"
 #include "Cho/SDK/DirectX/DirectX12/CommandManager/CommandManager.h"
+#include "Cho/SDK/DirectX/DirectX12/SwapChain/SwapChain.h"
 
 // PlatformLayer
 #include "Cho/Platform/PlatformLayer/PlatformLayer.h"
@@ -55,6 +56,7 @@ private:// member
 	std::unique_ptr<ResourceLeakChecker> resourceLeakChecker = nullptr;// ResourceLeakChecker
 	std::unique_ptr<DirectX12Common> dx12 = nullptr;// DirectX12Common
 	std::unique_ptr<CommandManager> commandManager = nullptr;// CommandManager
+	std::unique_ptr<SwapChain> swapChain = nullptr;// SwapChain
 
 	// PlatformLayer
 	std::unique_ptr<PlatformLayer> platformLayer = nullptr;// PlatformLayer

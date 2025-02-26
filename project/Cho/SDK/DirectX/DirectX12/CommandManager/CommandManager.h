@@ -1,14 +1,11 @@
 #pragma once
 
-#include <d3d12.h>
-#include <wrl.h>
+#include "Cho/SDK/DirectX/DirectX12/stdafx/stdafx.h"
 #include <vector>
 #include <array>
 #include <queue>
 #include <mutex>
 #include <condition_variable>
-
-using namespace Microsoft::WRL;
 
 enum QueueType {
 	Graphics,
@@ -47,13 +44,7 @@ public:
     void Shutdown();
 
     // コマンドキュー取得
-	ID3D12CommandQueue* GetCommandQueue(const D3D12_COMMAND_LIST_TYPE& type);
-
- //   // コマンドアロケータの取得
- //   ID3D12CommandAllocator* GetAllocator(const D3D12_COMMAND_LIST_TYPE& type);
-
-	//// コマンドリストの取得
-	//ID3D12GraphicsCommandList6* GetCommandList(const D3D12_COMMAND_LIST_TYPE& type);
+	ID3D12CommandQueue* GetCommandQueue(QueueType type);
 
     // コマンドリストの実行
     uint64_t ExecuteCommandList(ID3D12GraphicsCommandList6* commandList, const D3D12_COMMAND_LIST_TYPE& type);
@@ -67,8 +58,5 @@ private:
 private:
     // コマンドキューコンテキスト
 	std::array<std::unique_ptr<QueueContext>, kQueueTypeCount> m_QueueContexts;
-
-	// コマンドコンテキスト
-	//std::vector<std::unique_ptr<CommandContext>> m_CommandContexts;
 };
 

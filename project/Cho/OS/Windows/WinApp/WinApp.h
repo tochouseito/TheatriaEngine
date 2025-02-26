@@ -35,20 +35,21 @@ public:// メンバ関数
 	// ウィンドウの破棄
 	static void TerminateWindow();
 
-	static HWND GetHwnd() { return hwnd; }
-
-	static HINSTANCE GetHInstance() { return wc.hInstance; }
-
+	/*Getter*/
+	static HWND GetHWND() { return m_HWND; }
+	static HINSTANCE GetHInstance() { return m_WC.hInstance; }
+	static int32_t GetWindowWidth() { return m_WindowWidth; }
+	static int32_t GetWindowHeight() { return m_WindowHeight; }
 private:
 
 	// ウィンドウサイズ変更時の処理
 	static void OnWindowResize(int width, int height);
 
 private:// メンバ変数
-	static HWND hwnd;
-	static WNDCLASS wc; // ウィンドウクラス
-	static bool isAppRunning; // アプリケーションが動作中かを示すフラグ
-	static int32_t windowWidth; // ウィンドウの幅
-	static int32_t windowHeight; // ウィンドウの高さ
+	static HWND m_HWND; // ウィンドウハンドル
+	static WNDCLASS m_WC; // ウィンドウクラス
+	static bool m_IsRun; // アプリケーションが動作中かを示すフラグ
+	static int32_t m_WindowWidth; // ウィンドウの幅
+	static int32_t m_WindowHeight; // ウィンドウの高さ
 };
 

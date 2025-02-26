@@ -1,14 +1,11 @@
 #pragma once
 
-#include <d3d12.h>
-#include <wrl.h>
+#include "Cho/SDK/DirectX/DirectX12/stdafx/stdafx.h"
 #include <vector>
 #include <array>
 #include <queue>
 #include <mutex>
 #include <condition_variable>
-
-using namespace Microsoft::WRL;
 
 class CommandContext {
 public:
@@ -16,6 +13,8 @@ public:
 	virtual void Create(ID3D12Device* device, D3D12_COMMAND_LIST_TYPE type);
 	virtual ~CommandContext();
 	virtual void Reset();
+	virtual void Close();
+	virtual void Flush();
 	virtual ID3D12GraphicsCommandList6* GetCommandList() { return m_CommandList.Get(); };
 	virtual D3D12_COMMAND_LIST_TYPE GetType() { return m_Type; };
 protected:

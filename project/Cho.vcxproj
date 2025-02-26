@@ -221,6 +221,8 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClCompile Include="Cho\Platform\PlatformLayer\PlatformLayer.cpp" />
     <ClCompile Include="Cho\Resources\ResourceManager\ResourceManager.cpp" />
     <ClCompile Include="Cho\Core\ThreadManager\ThreadManager.cpp" />
+    <ClCompile Include="Cho\SDK\DirectX\DirectX12\stdafx\stdafx.cpp" />
+    <ClCompile Include="Cho\SDK\DirectX\DirectX12\SwapChain\SwapChain.cpp" />
     <ClInclude Include="Cho\Core\Log\Log.h" />
     <ClInclude Include="Cho\Main\ChoEngine.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\DirectX12Common\DirectX12Common.h" />
@@ -238,6 +240,8 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\CommandManager\CommandManager.h" />
     <ClInclude Include="Cho\Core\ThreadManager\ThreadManager.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\CommandContext\CommandContext.h" />
+    <ClInclude Include="Cho\SDK\DirectX\DirectX12\stdafx\stdafx.h" />
+    <ClInclude Include="Cho\SDK\DirectX\DirectX12\SwapChain\SwapChain.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Cho\Externals\ChoMath\ChoMath.vcxproj">

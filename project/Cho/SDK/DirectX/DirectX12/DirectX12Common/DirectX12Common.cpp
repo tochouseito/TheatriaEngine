@@ -1,8 +1,6 @@
 #include "pch.h"
 #include "DirectX12Common.h"
 
-#include "Core/Log/Log.h"
-
 ResourceLeakChecker::~ResourceLeakChecker()
 {
 	// リソースリークチェック

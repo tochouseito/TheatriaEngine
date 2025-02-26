@@ -4,11 +4,8 @@
 DirectX12共通クラス
 --------------------------------------------*/
 
-#include<wrl.h>
-using Microsoft::WRL::ComPtr;
+#include "Cho/SDK/DirectX/DirectX12/stdafx/stdafx.h"
 
-#include<d3d12.h>
-#include<dxgi1_6.h>
 #include<dxgidebug.h>
 
 class DirectX12Common
@@ -23,6 +20,7 @@ public:// メンバ関数
 
 	/*Getter*/
 	ID3D12Device8* GetDevice() const { return m_Device.Get(); }
+	IDXGIFactory7* GetDXGIFactory() const { return m_DXGIFactory.Get(); }
 
 private:// メンバ関数
 

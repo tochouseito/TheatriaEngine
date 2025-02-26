@@ -1,8 +1,6 @@
 #include "pch.h"
 #include "CommandManager.h"
 
-#include "Core/Log/Log.h"
-
 CommandManager::CommandManager(ID3D12Device8* device)
 {
 	CreateQueueContexts(device);// デバイスを受け取り、キューコンテキストを作成する
@@ -20,7 +18,7 @@ void CommandManager::Shutdown()
 {
 }
 
-ID3D12CommandQueue* CommandManager::GetCommandQueue(const D3D12_COMMAND_LIST_TYPE& type)
+ID3D12CommandQueue* CommandManager::GetCommandQueue(QueueType type)
 {
 	return m_QueueContexts[type]->GetCommandQueue();
 }

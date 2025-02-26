@@ -1,8 +1,6 @@
 #include "pch.h"
 #include "CommandContext.h"
 
-#include "Core/Log/Log.h"
-
 void CommandContext::Create(ID3D12Device* device, D3D12_COMMAND_LIST_TYPE type)
 {
 	HRESULT hr = {};
@@ -34,6 +32,14 @@ CommandContext::~CommandContext()
 }
 
 void CommandContext::Reset()
+{
+}
+
+void CommandContext::Close()
+{
+}
+
+void CommandContext::Flush()
 {
 }
 
