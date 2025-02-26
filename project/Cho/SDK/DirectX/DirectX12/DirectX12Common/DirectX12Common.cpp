@@ -53,7 +53,7 @@ void DirectX12Common::CreateDXGIFactory([[maybe_unused]] const bool& enableDebug
 	// Log出力
 	ChoLog("Create DXGI Factory");
 	HRESULT hr;
-	hr = CreateDXGIFactory2(0, IID_PPV_ARGS(&dxgiFactory));
+	hr = CreateDXGIFactory2(0, IID_PPV_ARGS(&m_DXGIFactory));
 	ChoLog("Create DXGI Factory End");
 	ChoAssertLog("Failed to create DXGI Factory", hr, __FILE__, __LINE__);
 }
@@ -66,7 +66,7 @@ void DirectX12Common::CreateDevice()
 	Microsoft::WRL::ComPtr < IDXGIAdapter4> useAdapter = nullptr;
 
 	// 良い順にアダプタを頼む
-	for (UINT i = 0; dxgiFactory->EnumAdapterByGpuPreference(i,
+	for (UINT i = 0; m_DXGIFactory->EnumAdapterByGpuPreference(i,
 		DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&useAdapter)) !=
 		DXGI_ERROR_NOT_FOUND; ++i) {
 
@@ -105,7 +105,7 @@ void DirectX12Common::CreateDevice()
 	for (size_t i = 0; i < _countof(featureLevels); ++i) {
 
 		// 採用したアダプターでデバイスを生成
-		hr = D3D12CreateDevice(useAdapter.Get(), featureLevels[i], IID_PPV_ARGS(&device));
+		hr = D3D12CreateDevice(useAdapter.Get(), featureLevels[i], IID_PPV_ARGS(&m_Device));
 
 		// 指定した機能レベルでデバイスが生成できたか確認
 		if (SUCCEEDED(hr)) {
@@ -116,7 +116,7 @@ void DirectX12Common::CreateDevice()
 		}
 	}
 	// デバイスの生成がうまくいかなかったので起動できない
-	if (!device) {
+	if (!m_Device) {
 		ChoAssertLog("Failed to create D3D12 Device", hr, __FILE__, __LINE__);
 	}
 
@@ -126,7 +126,7 @@ void DirectX12Common::CreateDevice()
 	// シェーダモデルをチェック.
 	{
 		D3D12_FEATURE_DATA_SHADER_MODEL shaderModel = { D3D_SHADER_MODEL_6_5 };
-		hr = device->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &shaderModel, sizeof(shaderModel));
+		hr = m_Device->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &shaderModel, sizeof(shaderModel));
 		if (FAILED(hr) || (shaderModel.HighestShaderModel < D3D_SHADER_MODEL_6_5))
 		{
 			ChoAssertLog("Error : Shader Model 6.5 is not supported.", hr, __FILE__, __LINE__);
@@ -136,7 +136,7 @@ void DirectX12Common::CreateDevice()
 	// メッシュシェーダをサポートしているかどうかチェック.
 	{
 		D3D12_FEATURE_DATA_D3D12_OPTIONS7 features = {};
-		hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS7, &features, sizeof(features));
+		hr = m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS7, &features, sizeof(features));
 		if (FAILED(hr) || (features.MeshShaderTier == D3D12_MESH_SHADER_TIER_NOT_SUPPORTED))
 		{
 			ChoAssertLog("Error : Mesh Shader is not supported.", hr, __FILE__, __LINE__);
@@ -147,7 +147,7 @@ void DirectX12Common::CreateDevice()
 	Microsoft::WRL::ComPtr< ID3D12InfoQueue> infoQueue;
 	// フィルタリングを一時的に無効化してみる
 
-	if (SUCCEEDED(device->QueryInterface(IID_PPV_ARGS(&infoQueue)))) {
+	if (SUCCEEDED(m_Device->QueryInterface(IID_PPV_ARGS(&infoQueue)))) {
 		// ヤバいエラー時に止まる
 		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
 

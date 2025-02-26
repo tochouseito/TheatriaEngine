@@ -22,7 +22,7 @@ public:// メンバ関数
 	void Finalize();
 
 	/*Getter*/
-	ID3D12Device8* GetDevice() const { return device.Get(); }
+	ID3D12Device8* GetDevice() const { return m_Device.Get(); }
 
 private:// メンバ関数
 
@@ -32,8 +32,8 @@ private:// メンバ関数
 	// デバイスの生成
 	void CreateDevice();
 private:// メンバ変数
-	ComPtr<IDXGIFactory7> dxgiFactory = nullptr;// DXGIファクトリ
-	ComPtr<ID3D12Device8> device = nullptr;// デバイス
+	ComPtr<IDXGIFactory7> m_DXGIFactory = nullptr;// DXGIファクトリ
+	ComPtr<ID3D12Device8> m_Device = nullptr;// デバイス
 };
 
 /*--------------------------------------------
