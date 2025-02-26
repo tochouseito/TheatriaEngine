@@ -19,8 +19,12 @@ SwapChain::SwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue, cons
 
 	// コマンドキュー、ウィンドウハンドル、設定を渡して生成する
 	hr = dxgiFactory->CreateSwapChainForHwnd(
-		queue, hwnd, &m_SwapChainDesc,
-		nullptr, nullptr, reinterpret_cast<IDXGISwapChain1**>(m_SwapChain.GetAddressOf())
+		queue,
+		hwnd,
+		&m_SwapChainDesc,
+		nullptr,
+		nullptr,
+		reinterpret_cast<IDXGISwapChain1**>(m_SwapChain.GetAddressOf())
 	);
 
 	ChoAssertLog("Failed to create swap chain.", hr, __FILE__, __LINE__);
