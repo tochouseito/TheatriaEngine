@@ -75,7 +75,7 @@ QueueContext::QueueContext(ID3D12Device* device, D3D12_COMMAND_LIST_TYPE type)
 	ChoAssertLog("Failed to create fence.", hr, __FILE__, __LINE__);
 	// FenceのSignalを持つためのイベントを作成する
 	m_FenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-	ChoAssertLog("Failed to create fence event.", m_FenceEvent != nullptr, __FILE__, __LINE__);
+	ChoAssertLog("Failed to create fence event.", static_cast<bool>(m_FenceEvent != nullptr), __FILE__, __LINE__);
 
 	// コマンドキューの作成
 	D3D12_COMMAND_QUEUE_DESC desc{};
