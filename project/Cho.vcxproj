@@ -208,7 +208,7 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClCompile Include="Cho\Core\CoreSystem\CoreSystem.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\CommandManager\CommandManager.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\CommandContext\CommandContext.cpp" />
-    <ClCompile Include="Cho\SDK\DirectX\DirectX12\DescriptorPool\DescriptorPool.cpp" />
+    <ClCompile Include="Cho\SDK\DirectX\DirectX12\DescriptorHeap\DescriptorHeap.cpp" />
     <ClCompile Include="main.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
@@ -243,7 +243,7 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\CommandContext\CommandContext.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\stdafx\stdafx.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\SwapChain\SwapChain.h" />
-    <ClInclude Include="Cho\SDK\DirectX\DirectX12\DescriptorPool\DescriptorPool.h" />
+    <ClInclude Include="Cho\SDK\DirectX\DirectX12\DescriptorHeap\DescriptorHeap.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Cho\Externals\ChoMath\ChoMath.vcxproj">

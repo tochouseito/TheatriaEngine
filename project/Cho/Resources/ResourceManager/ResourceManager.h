@@ -4,7 +4,7 @@
 リソースマネージャクラス
 --------------------------------------------*/
 
-#include "SDK/DirectX/DirectX12/DescriptorPool/DescriptorPool.h"
+#include "SDK/DirectX/DirectX12/DescriptorHeap/DescriptorHeap.h"
 
 class ResourceManager
 {
@@ -23,20 +23,20 @@ public:
 	void Release();
 private:// methods
 	// SUVディスクリプタプールの生成
-	void CreateSUVDescriptorPool(ID3D12Device8* device);
+	void CreateSUVDescriptorHeap(ID3D12Device8* device);
 	// RTVディスクリプタプールの生成
-	void CreateRTVDescriptorPool(ID3D12Device8* device);
+	void CreateRTVDescriptorHeap(ID3D12Device8* device);
 	// DSVディスクリプタプールの生成
-	void CreateDSVDescriptorPool(ID3D12Device8* device);
+	void CreateDSVDescriptorHeap(ID3D12Device8* device);
 
 	// Pool生成
-	void CreatePool(ID3D12Device8* device);
+	void CreateHeap(ID3D12Device8* device);
 private:// members
 	// SUVディスクリプタプール
-	std::unique_ptr<SUVDescriptorPool> m_SUVDescriptorPool = nullptr;
+	std::unique_ptr<DescriptorHeap> m_SUVDescriptorHeap = nullptr;
 	// RTVディスクリプタプール
-	std::unique_ptr<RTVDescriptorPool> m_RTVDescriptorPool = nullptr;
+	std::unique_ptr<DescriptorHeap> m_RTVDescriptorHeap = nullptr;
 	// DSVディスクリプタプール
-	std::unique_ptr<DSVDescriptorPool> m_DSVDescriptorPool = nullptr;
+	std::unique_ptr<DescriptorHeap> m_DSVDescriptorHeap = nullptr;
 };
 

@@ -3,7 +3,7 @@
 
 ResourceManager::ResourceManager(ID3D12Device8* device)
 {
-	CreatePool(device);// デバイスを受け取り、プールを作成する
+	CreateHeap(device);// デバイスを受け取り、プールを作成する
 	Initialize();// 初期化
 }
 
@@ -28,24 +28,24 @@ void ResourceManager::Release()
 {
 }
 
-void ResourceManager::CreateSUVDescriptorPool(ID3D12Device8* device)
+void ResourceManager::CreateSUVDescriptorHeap(ID3D12Device8* device)
 {
-	m_SUVDescriptorPool = std::make_unique<SUVDescriptorPool>(device, 1024);
+	m_SUVDescriptorHeap = std::make_unique<SUVDescriptorHeap>(device, 1024);
 }
 
-void ResourceManager::CreateRTVDescriptorPool(ID3D12Device8* device)
+void ResourceManager::CreateRTVDescriptorHeap(ID3D12Device8* device)
 {
-	m_RTVDescriptorPool = std::make_unique<RTVDescriptorPool>(device, 16);
+	m_RTVDescriptorHeap = std::make_unique<RTVDescriptorHeap>(device, 16);
 }
 
-void ResourceManager::CreateDSVDescriptorPool(ID3D12Device8* device)
+void ResourceManager::CreateDSVDescriptorHeap(ID3D12Device8* device)
 {
-	m_DSVDescriptorPool = std::make_unique<DSVDescriptorPool>(device, 1);
+	m_DSVDescriptorHeap = std::make_unique<DSVDescriptorHeap>(device, 1);
 }
 
-void ResourceManager::CreatePool(ID3D12Device8* device)
+void ResourceManager::CreateHeap(ID3D12Device8* device)
 {
-	CreateSUVDescriptorPool(device);
-	CreateRTVDescriptorPool(device);
-	CreateDSVDescriptorPool(device);
+	CreateSUVDescriptorHeap(device);
+	CreateRTVDescriptorHeap(device);
+	CreateDSVDescriptorHeap(device);
 }
