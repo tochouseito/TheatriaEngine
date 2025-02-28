@@ -3,6 +3,7 @@
 
 CoreSystem::CoreSystem()
 {
+	Initialize();
 }
 
 CoreSystem::~CoreSystem()

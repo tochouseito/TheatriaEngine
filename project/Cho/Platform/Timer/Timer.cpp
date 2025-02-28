@@ -3,6 +3,7 @@
 
 Timer::Timer()
 {
+	Initialize();
 }
 
 Timer::~Timer()

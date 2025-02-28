@@ -12,6 +12,15 @@ ResourceLeakChecker::~ResourceLeakChecker()
 	}
 }
 
+DirectX12Common::DirectX12Common()
+{
+	Initialize();
+}
+
+DirectX12Common::~DirectX12Common()
+{
+}
+
 void DirectX12Common::Initialize()
 {
 	// Log出力

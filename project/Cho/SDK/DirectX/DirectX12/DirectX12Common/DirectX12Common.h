@@ -12,6 +12,11 @@ class DirectX12Common
 {
 public:// メンバ関数
 
+	// Constructor
+	DirectX12Common();
+	// Destructor
+	~DirectX12Common();
+
 	// 初期化
 	void Initialize();
 

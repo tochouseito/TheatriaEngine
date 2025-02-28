@@ -4,6 +4,7 @@
 CommandManager::CommandManager(ID3D12Device8* device)
 {
 	CreateQueueContexts(device);// デバイスを受け取り、キューコンテキストを作成する
+	Initialize();// 初期化
 }
 
 CommandManager::~CommandManager()

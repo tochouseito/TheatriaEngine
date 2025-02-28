@@ -3,6 +3,16 @@
 
 SwapChain::SwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue, const HWND& hwnd, const int32_t& width, const int32_t& height)
 {
+	CreateSwapChain(dxgiFactory, queue, hwnd, width, height);
+}
+
+SwapChain::~SwapChain()
+{
+
+}
+
+void SwapChain::CreateSwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue, const HWND& hwnd, const int32_t& width, const int32_t& height)
+{
 	HRESULT hr;
 
 	// スワップチェーンを生成する
@@ -42,8 +52,4 @@ SwapChain::SwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue, cons
 		hwnd,
 		DXGI_MWA_NO_WINDOW_CHANGES | DXGI_MWA_NO_ALT_ENTER
 	);
-}
-
-SwapChain::~SwapChain()
-{
 }

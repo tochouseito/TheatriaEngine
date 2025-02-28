@@ -3,6 +3,7 @@
 
 PlatformLayer::PlatformLayer()
 {
+	Initialize();
 }
 
 PlatformLayer::~PlatformLayer()
@@ -12,7 +13,6 @@ PlatformLayer::~PlatformLayer()
 void PlatformLayer::Initialize()
 {
 	timer = std::make_unique<Timer>();
-	timer->Initialize();
 }
 
 void PlatformLayer::Finalize()

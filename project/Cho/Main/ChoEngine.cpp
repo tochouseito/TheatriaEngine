@@ -22,7 +22,6 @@ void ChoEngine::Initialize()
 
 	// DirectX12初期化
 	dx12 = std::make_unique<DirectX12Common>();
-	dx12->Initialize();
 
 	// CommandManager初期化
 	commandManager = std::make_unique<CommandManager>(dx12->GetDevice());
@@ -38,15 +37,12 @@ void ChoEngine::Initialize()
 
 	// PlatformLayer初期化
 	platformLayer = std::make_unique<PlatformLayer>();
-	platformLayer->Initialize();
 
 	// CoreSystem初期化
 	coreSystem = std::make_unique<CoreSystem>();
-	coreSystem->Initialize();
 
 	// ResourceManager初期化
 	resourceManager = std::make_unique<ResourceManager>();
-	resourceManager->Initialize();
 }
 
 void ChoEngine::Finalize()
