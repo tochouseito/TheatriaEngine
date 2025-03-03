@@ -12,10 +12,11 @@ BufferManager::~BufferManager()
 {
 }
 
-uint32_t BufferManager::CreatePixelBuffer(const uint32_t& width, const uint32_t& height, DXGI_FORMAT format, D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE)
+uint32_t BufferManager::CreatePixelBuffer(ID3D12Device8* device, ResourceManager* resourceManager, const uint32_t& width, const uint32_t& height, DXGI_FORMAT format, D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE)
 {
 	PixelBuffer buffer;
 	buffer.Create(
+		m_Device,
 		width, height, format, flags,
 		m_ResourceManager->GetRTVDHeap()->Create()
 	);

@@ -2,6 +2,8 @@
 
 #include "SDK/DirectX/DirectX12/GpuResource/GpuResource.h"
 
+class ResourceManager;
+
 class PixelBuffer : public GpuResource
 {
 public:// メンバ関数
@@ -18,7 +20,8 @@ public:// メンバ関数
 	const DXGI_FORMAT& GetFormat() const { return m_Format; }
 	
 	// ピクセルバッファの生成
-	void Create(const uint32_t& width, const uint32_t& height, DXGI_FORMAT format, D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE,const uint32_t& DHandleIndex);
+	void Create(ID3D12Device8* device,ResourceManager* resourceManager,const uint32_t& width, const uint32_t& height, DXGI_FORMAT format, D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE);
+
 private:
 	// ピクセルバッファの幅
 	uint32_t m_Width;
