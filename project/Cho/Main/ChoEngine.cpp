@@ -26,15 +26,6 @@ void ChoEngine::Initialize()
 	// CommandManager初期化
 	commandManager = std::make_unique<CommandManager>(dx12->GetDevice());
 
-	// SwapChain初期化
-	swapChain = std::make_unique<SwapChain>(
-		dx12->GetDXGIFactory(),
-		commandManager->GetCommandQueue(QueueType::Graphics),
-		WinApp::GetHWND(),
-		WinApp::GetWindowWidth(),
-		WinApp::GetWindowHeight()
-	);
-
 	// PlatformLayer初期化
 	platformLayer = std::make_unique<PlatformLayer>();
 
@@ -43,6 +34,15 @@ void ChoEngine::Initialize()
 
 	// ResourceManager初期化
 	resourceManager = std::make_unique<ResourceManager>();
+
+	// SwapChain初期化
+	swapChain = std::make_unique<SwapChain>(
+		dx12->GetDXGIFactory(),
+		commandManager->GetCommandQueue(QueueType::Graphics),
+		WinApp::GetHWND(),
+		WinApp::GetWindowWidth(),
+		WinApp::GetWindowHeight()
+	);
 }
 
 void ChoEngine::Finalize()

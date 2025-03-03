@@ -4,6 +4,10 @@
 ResourceManager::ResourceManager(ID3D12Device8* device)
 {
 	CreateHeap(device);// デバイスを受け取り、プールを作成する
+
+	m_BufferManager = std::make_unique<BufferManager>(device, this);// バッファマネージャの生成
+	m_Device = device;// デバイスの設定
+
 	Initialize();// 初期化
 }
 

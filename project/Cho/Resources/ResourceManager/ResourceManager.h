@@ -5,6 +5,7 @@
 --------------------------------------------*/
 
 #include "SDK/DirectX/DirectX12/DescriptorHeap/DescriptorHeap.h"
+#include "SDK/DirectX/DirectX12/BufferManager/BufferManager.h"
 
 class ResourceManager
 {
@@ -21,22 +22,33 @@ public:
 	void Update();
 	// 解放
 	void Release();
+
+	// Getters
+	DescriptorHeap* GetSUVDHeap() const { return m_SUVDescriptorHeap.get(); }
+	DescriptorHeap* GetRTVDHeap() const { return m_RTVDescriptorHeap.get(); }
+	DescriptorHeap* GetDSVDHeap() const { return m_DSVDescriptorHeap.get(); }
 private:// methods
-	// SUVディスクリプタプールの生成
+	// SUVディスクリプタヒープの生成
 	void CreateSUVDescriptorHeap(ID3D12Device8* device);
-	// RTVディスクリプタプールの生成
+	// RTVディスクリプタヒープの生成
 	void CreateRTVDescriptorHeap(ID3D12Device8* device);
-	// DSVディスクリプタプールの生成
+	// DSVディスクリプタヒープの生成
 	void CreateDSVDescriptorHeap(ID3D12Device8* device);
 
 	// Pool生成
 	void CreateHeap(ID3D12Device8* device);
 private:// members
-	// SUVディスクリプタプール
+	// Device
+	ID3D12Device8* m_Device = nullptr;
+
+	// BufferManager
+	std::unique_ptr<BufferManager> m_BufferManager = nullptr;
+
+	// SUVディスクリプタヒープ
 	std::unique_ptr<DescriptorHeap> m_SUVDescriptorHeap = nullptr;
-	// RTVディスクリプタプール
+	// RTVディスクリプタヒープ
 	std::unique_ptr<DescriptorHeap> m_RTVDescriptorHeap = nullptr;
-	// DSVディスクリプタプール
+	// DSVディスクリプタヒープ
 	std::unique_ptr<DescriptorHeap> m_DSVDescriptorHeap = nullptr;
 };
 

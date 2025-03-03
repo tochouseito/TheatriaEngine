@@ -17,13 +17,18 @@ public:// methods
 	size_t GetCpuPtr() const { return m_CpuHandle.ptr; }
 	// GetGpuPtr
 	uint64_t GetGpuPtr() const { return m_GpuHandle.ptr; }
+	// SetCPUHandle
+	void SetCPUHandle(const D3D12_CPU_DESCRIPTOR_HANDLE& cpuHandle) { m_CpuHandle = cpuHandle; }
+	// SetGPUHandle
+	void SetGPUHandle(const D3D12_GPU_DESCRIPTOR_HANDLE& gpuHandle) { m_GpuHandle = gpuHandle; }
+
 	// NullCheck
 	//bool IsNull() const{ return m_CpuHandle.ptr == D3D12_GPU_VIRTUAL_ADDRESS_UNKNOWN; }
 	//bool IsShaderVisible() const { return m_GpuHandle.ptr != D3D12_GPU_VIRTUAL_ADDRESS_UNKNOWN; }
 private:// members
-	// CPUハンドル
+	// CPUHandle
 	D3D12_CPU_DESCRIPTOR_HANDLE m_CpuHandle = {};
-	// GPUハンドル
+	// GPUHandle
 	D3D12_GPU_DESCRIPTOR_HANDLE m_GpuHandle = {};
 };
 
@@ -40,6 +45,14 @@ public:// methods
 	virtual uint32_t GetSize() const;
 	// GetDescriptorHeap
 	virtual ID3D12DescriptorHeap* GetDescriptorHeap() const;
+	// CreateView
+	virtual uint32_t Create() = 0;
+protected:// methods
+	// CreateDescriptor
+	virtual void CreateDescriptor(ID3D12Device8* device, const uint32_t& num, D3D12_DESCRIPTOR_HEAP_TYPE type, const bool& shaderVisible);
+	// GetHandle
+	virtual D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(const uint32_t& index);
+	virtual D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(const uint32_t& index);
 protected:// members
 	// 最大ディスクリプタ数
 	uint32_t m_MaxDescriptor = {};
@@ -49,6 +62,8 @@ protected:// members
 	uint32_t m_Size = {};
 	// デスクリプタヒープ
 	ComPtr<ID3D12DescriptorHeap> m_DescriptorHeap = {};
+	// ハンドルコンテナ
+	FVector<DescriptorHandle> m_Handles;
 };
 
 /*============================================*/
@@ -64,6 +79,10 @@ public:// methods
 	SUVDescriptorHeap(ID3D12Device8* device, const uint32_t& maxDescriptor);
 	// Destructor
 	~SUVDescriptorHeap();
+	// CreateSUV
+	uint32_t Create() override;
+private:// methods
+	
 private:// members
 };
 
@@ -74,6 +93,8 @@ public:// methods
 	RTVDescriptorHeap(ID3D12Device8* device, const uint32_t& maxDescriptor);
 	// Destructor
 	~RTVDescriptorHeap();
+	// CreateRTV
+	uint32_t Create() override;
 private:// members
 };
 
@@ -84,5 +105,7 @@ public:// methods
 	DSVDescriptorHeap(ID3D12Device8* device, const uint32_t& maxDescriptor);
 	// Destructor
 	~DSVDescriptorHeap();
+	// CreateDSV
+	uint32_t Create() override;
 private:// members
 };

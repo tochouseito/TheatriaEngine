@@ -11,7 +11,15 @@
 #include <d3d12.h>
 #include <dxgi1_6.h>
 
+#ifndef D3D12_GPU_VIRTUAL_ADDRESS_NULL
+#define D3D12_GPU_VIRTUAL_ADDRESS_NULL ((D3D12_GPU_VIRTUAL_ADDRESS)0)
+#endif
+
 #include <wrl.h>
 using Microsoft::WRL::ComPtr;
 
 #include "Core/Log/Log.h"
+
+// FreeListContainer
+#include "Core/Utility/FArray.h"
+#include "Core/Utility/FVector.h"

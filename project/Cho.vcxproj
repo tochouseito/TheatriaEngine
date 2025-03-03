@@ -134,6 +134,8 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Cho\SDK\DirectX\DirectX12\BufferManager\BufferManager.cpp" />
+    <ClCompile Include="Cho\Core\ChoAssert\ChoAssert.cpp" />
     <ClCompile Include="Cho\Core\Log\Log.cpp" />
     <ClCompile Include="Cho\Main\ChoEngine.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\DirectX12Common\DirectX12Common.cpp" />
@@ -209,6 +211,8 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\CommandManager\CommandManager.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\CommandContext\CommandContext.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\DescriptorHeap\DescriptorHeap.cpp" />
+    <ClCompile Include="Cho\SDK\DirectX\DirectX12\GpuResource\GpuResource.cpp" />
+    <ClCompile Include="Cho\SDK\DirectX\DirectX12\GpuBuffer\GpuBuffer.cpp" />
     <ClCompile Include="main.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
@@ -224,7 +228,12 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClCompile Include="Cho\Core\ThreadManager\ThreadManager.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\stdafx\stdafx.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\SwapChain\SwapChain.cpp" />
+    <ClCompile Include="Cho\SDK\DirectX\DirectX12\PixelBuffer\PixelBuffer.cpp" />
+    <ClInclude Include="Cho\SDK\DirectX\DirectX12\BufferManager\BufferManager.h" />
+    <ClInclude Include="Cho\Core\ChoAssert\ChoAssert.h" />
     <ClInclude Include="Cho\Core\Log\Log.h" />
+    <ClInclude Include="Cho\Core\Utility\FArray.h" />
+    <ClInclude Include="Cho\Core\Utility\FVector.h" />
     <ClInclude Include="Cho\Main\ChoEngine.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\DirectX12Common\DirectX12Common.h" />
     <ClInclude Include="Cho\Engine\Engine.h" />
@@ -244,6 +253,9 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\stdafx\stdafx.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\SwapChain\SwapChain.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\DescriptorHeap\DescriptorHeap.h" />
+    <ClInclude Include="Cho\SDK\DirectX\DirectX12\GpuResource\GpuResource.h" />
+    <ClInclude Include="Cho\SDK\DirectX\DirectX12\GpuBuffer\GpuBuffer.h" />
+    <ClInclude Include="Cho\SDK\DirectX\DirectX12\PixelBuffer\PixelBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Cho\Externals\ChoMath\ChoMath.vcxproj">

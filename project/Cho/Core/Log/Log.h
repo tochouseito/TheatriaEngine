@@ -15,3 +15,4 @@ std::string ConvertString(const std::wstring& str);
 void WriteLog(const std::string& message);
 void ChoLog(const std::string& message);
 void ChoAssertLog(const std::string& message, const HRESULT& hr,const std::string& file, const int line);
+void ChoAssertLog(const std::string& message, const bool& flag, const std::string& file, const int line);

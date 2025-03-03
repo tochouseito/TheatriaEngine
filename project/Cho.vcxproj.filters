@@ -37,6 +37,11 @@
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\SwapChain\SwapChain.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\stdafx\stdafx.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\DescriptorHeap\DescriptorHeap.cpp" />
+    <ClCompile Include="Cho\SDK\DirectX\DirectX12\GpuResource\GpuResource.cpp" />
+    <ClCompile Include="Cho\SDK\DirectX\DirectX12\GpuBuffer\GpuBuffer.cpp" />
+    <ClCompile Include="Cho\SDK\DirectX\DirectX12\PixelBuffer\PixelBuffer.cpp" />
+    <ClCompile Include="Cho\Core\ChoAssert\ChoAssert.cpp" />
+    <ClCompile Include="Cho\SDK\DirectX\DirectX12\BufferManager\BufferManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cho\Externals\meshoptimizer\meshoptimizer.h" />
@@ -59,5 +64,12 @@
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\SwapChain\SwapChain.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\stdafx\stdafx.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\DescriptorHeap\DescriptorHeap.h" />
+    <ClInclude Include="Cho\SDK\DirectX\DirectX12\GpuResource\GpuResource.h" />
+    <ClInclude Include="Cho\SDK\DirectX\DirectX12\GpuBuffer\GpuBuffer.h" />
+    <ClInclude Include="Cho\SDK\DirectX\DirectX12\PixelBuffer\PixelBuffer.h" />
+    <ClInclude Include="Cho\Core\Utility\FVector.h" />
+    <ClInclude Include="Cho\Core\Utility\FArray.h" />
+    <ClInclude Include="Cho\Core\ChoAssert\ChoAssert.h" />
+    <ClInclude Include="Cho\SDK\DirectX\DirectX12\BufferManager\BufferManager.h" />
   </ItemGroup>
 </Project>
