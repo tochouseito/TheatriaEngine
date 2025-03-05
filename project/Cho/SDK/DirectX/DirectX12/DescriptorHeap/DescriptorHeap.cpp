@@ -7,6 +7,8 @@ DescriptorHandle::DescriptorHandle()
 
 DescriptorHandle::DescriptorHandle(const D3D12_CPU_DESCRIPTOR_HANDLE& cpuHandle, const D3D12_GPU_DESCRIPTOR_HANDLE& gpuHandle)
 {
+	m_CpuHandle = cpuHandle;
+	m_GpuHandle = gpuHandle;
 }
 
 DescriptorHeap::~DescriptorHeap()
@@ -75,6 +77,11 @@ SUVDescriptorHeap::~SUVDescriptorHeap()
 {
 }
 
+uint32_t SUVDescriptorHeap::Create()
+{
+	return 0;
+}
+
 RTVDescriptorHeap::RTVDescriptorHeap(ID3D12Device8* device, const uint32_t& maxDescriptor)
 {
 	CreateDescriptor(device, maxDescriptor, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, false);
@@ -88,7 +95,7 @@ uint32_t RTVDescriptorHeap::Create()
 {
 	uint32_t index = static_cast<uint32_t>(m_Handles.push_back(DescriptorHandle()));
 	m_Handles[index].SetCPUHandle(GetCPUDescriptorHandle(index));
-	m_Handles[index].SetGPUHandle(GetGPUDescriptorHandle(index));
+	//m_Handles[index].SetGPUHandle(GetGPUDescriptorHandle(index));
 	return index;
 }
 
@@ -99,4 +106,9 @@ DSVDescriptorHeap::DSVDescriptorHeap(ID3D12Device8* device, const uint32_t& maxD
 
 DSVDescriptorHeap::~DSVDescriptorHeap()
 {
+}
+
+uint32_t DSVDescriptorHeap::Create()
+{
+	return 0;
 }

@@ -1,11 +1,10 @@
 #include "pch.h"
 #include "SwapChain.h"
-#include "SDK/DirectX/DirectX12/DescriptorHeap/DescriptorHeap.h"
-#include "SDK/DirectX/DirectX12/BufferManager/BufferManager.h"
+#include "Resources/ResourceManager/ResourceManager.h"
 
-SwapChain::SwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue, RTVDescriptorHeap* heap, BufferManager* bufferManager, const HWND& hwnd, const int32_t& width, const int32_t& height)
+SwapChain::SwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue, ResourceManager* resourceManager, const HWND& hwnd, const int32_t& width, const int32_t& height)
 {
-	CreateSwapChain(dxgiFactory, queue, heap,bufferManager, hwnd, width, height);
+	CreateSwapChain(dxgiFactory, queue, resourceManager, hwnd, width, height);
 }
 
 SwapChain::~SwapChain()
@@ -13,14 +12,14 @@ SwapChain::~SwapChain()
 
 }
 
-void SwapChain::CreateSwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue, RTVDescriptorHeap* heap, BufferManager* bufferManager, const HWND& hwnd, const int32_t& width, const int32_t& height)
+void SwapChain::CreateSwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue, ResourceManager* resourceManager, const HWND& hwnd, const int32_t& width, const int32_t& height)
 {
 	HRESULT hr;
 
 	// スワップチェーンを生成する
 	m_SwapChainDesc.Width = width;                     // 画面の幅。ウィンドウのクライアント領域を同じものにしておく
 	m_SwapChainDesc.Height = height;                   // 画面の高さ。ウィンドウのクライアント領域を同じものにしておく
-	m_SwapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;          // 色の形式
+	m_SwapChainDesc.Format = PixelFormat;          // 色の形式
 	m_SwapChainDesc.SampleDesc.Count = 1;                         // マルチサンプルしない
 	m_SwapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;// 描画のターゲットとして利用する
 	m_SwapChainDesc.BufferCount = bufferCount;                              // ダブルバッファ
@@ -54,8 +53,20 @@ void SwapChain::CreateSwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* 
 		hwnd,
 		DXGI_MWA_NO_WINDOW_CHANGES | DXGI_MWA_NO_ALT_ENTER
 	);
-
-	// Resourceの生成
-	m_Index[0] = bufferManager->CreatePixelBuffer(width, height, DXGI_FORMAT_R8G8B8A8_UNORM, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, 0);
-	hr = m_SwapChain->GetBuffer(0, IID_PPV_ARGS(&bufferManager->GetPixelBuffer(m_));
+	{// 1つ目
+		// SwapChainからResourceを引っ張ってくる
+		ComPtr<ID3D12Resource> pResource = nullptr;
+		hr = m_SwapChain->GetBuffer(0, IID_PPV_ARGS(&pResource));
+		ChoAssertLog("Failed to get buffer from swap chain.", hr, __FILE__, __LINE__);
+		// ピクセルバッファの生成
+		m_Index[0] = resourceManager->CreatePixelBuffer(width, height, PixelFormat, pResource.Get());
+	}
+	{// 2つ目
+		// SwapChainからResourceを引っ張ってくる
+		ComPtr<ID3D12Resource> pResource = nullptr;
+		hr = m_SwapChain->GetBuffer(1, IID_PPV_ARGS(&pResource));
+		ChoAssertLog("Failed to get buffer from swap chain.", hr, __FILE__, __LINE__);
+		// ピクセルバッファの生成
+		m_Index[1] = resourceManager->CreatePixelBuffer(width, height, PixelFormat, pResource.Get());
+	}
 }

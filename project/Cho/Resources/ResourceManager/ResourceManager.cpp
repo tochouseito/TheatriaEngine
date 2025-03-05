@@ -53,3 +53,13 @@ void ResourceManager::CreateHeap(ID3D12Device8* device)
 	CreateRTVDescriptorHeap(device);
 	CreateDSVDescriptorHeap(device);
 }
+
+uint32_t ResourceManager::CreatePixelBuffer(const uint32_t& width, const uint32_t& height, DXGI_FORMAT format, ID3D12Resource* pResource)
+{
+	// DescriptorHandleの取得
+	uint32_t index = m_RTVDescriptorHeap->Create();
+	// ピクセルバッファの生成
+	m_BufferManager->CreatePixelBuffer(width, height, format, m_RTVDescriptorHeap->GetCpuHandle(index), index, pResource);
+
+	return 0;
+}

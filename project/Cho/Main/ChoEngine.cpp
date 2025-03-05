@@ -33,12 +33,13 @@ void ChoEngine::Initialize()
 	coreSystem = std::make_unique<CoreSystem>();
 
 	// ResourceManager初期化
-	resourceManager = std::make_unique<ResourceManager>();
+	resourceManager = std::make_unique<ResourceManager>(dx12->GetDevice());
 
 	// SwapChain初期化
 	swapChain = std::make_unique<SwapChain>(
 		dx12->GetDXGIFactory(),
 		commandManager->GetCommandQueue(QueueType::Graphics),
+		resourceManager.get(),
 		WinApp::GetHWND(),
 		WinApp::GetWindowWidth(),
 		WinApp::GetWindowHeight()

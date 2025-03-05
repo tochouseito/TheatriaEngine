@@ -15,6 +15,10 @@
 #define D3D12_GPU_VIRTUAL_ADDRESS_NULL ((D3D12_GPU_VIRTUAL_ADDRESS)0)
 #endif
 
+#ifndef PixelFormat
+#define PixelFormat (DXGI_FORMAT_R8G8B8A8_UNORM)
+#endif
+
 #include <wrl.h>
 using Microsoft::WRL::ComPtr;
 

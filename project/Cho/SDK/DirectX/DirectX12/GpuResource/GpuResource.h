@@ -44,6 +44,9 @@ public:
 
     uint32_t GetVersionID() const { return m_VersionID; }
 
+	uint32_t GetDHandleIndex() const { return m_DHandleIndex; }
+	void SetDHandleIndex(const uint32_t& index) { m_DHandleIndex = index; }
+
 protected:
 
     ComPtr<ID3D12Resource> m_pResource;

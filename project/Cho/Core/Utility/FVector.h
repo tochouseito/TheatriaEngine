@@ -35,7 +35,6 @@ public:
     // インデックスアクセス
     T& operator[](size_t index) {
         if (index >= nextIndex) {
-            throw std::out_of_range("Index out of range");
             ChoAssertLog("Index out of range", false, __FILE__, __LINE__);
         }
         return data[index];

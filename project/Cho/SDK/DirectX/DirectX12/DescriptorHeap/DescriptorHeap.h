@@ -45,6 +45,10 @@ public:// methods
 	virtual uint32_t GetSize() const;
 	// GetDescriptorHeap
 	virtual ID3D12DescriptorHeap* GetDescriptorHeap() const;
+	// GetHandle
+	virtual DescriptorHandle GetHandle(const uint32_t& index) const { return m_Handles[index]; }
+	virtual D3D12_CPU_DESCRIPTOR_HANDLE GetCpuHandle(const uint32_t& index) { return m_Handles[index].GetCpuHandle(); }
+	virtual D3D12_GPU_DESCRIPTOR_HANDLE GetGpuHandle(const uint32_t& index) { return m_Handles[index].GetGpuHandle(); }
 	// CreateView
 	virtual uint32_t Create() = 0;
 protected:// methods

@@ -23,10 +23,14 @@ public:
 	// 解放
 	void Release();
 
-	// Getters
+public:// BufferMethod
+	// CreatePixelBuffer
+	uint32_t CreatePixelBuffer(const uint32_t& width, const uint32_t& height, DXGI_FORMAT format,ID3D12Resource* pResource);
+public://Getters
 	DescriptorHeap* GetSUVDHeap() const { return m_SUVDescriptorHeap.get(); }
 	DescriptorHeap* GetRTVDHeap() const { return m_RTVDescriptorHeap.get(); }
 	DescriptorHeap* GetDSVDHeap() const { return m_DSVDescriptorHeap.get(); }
+	BufferManager* GetBufferManager() const { return m_BufferManager.get(); }
 private:// methods
 	// SUVディスクリプタヒープの生成
 	void CreateSUVDescriptorHeap(ID3D12Device8* device);
@@ -34,8 +38,7 @@ private:// methods
 	void CreateRTVDescriptorHeap(ID3D12Device8* device);
 	// DSVディスクリプタヒープの生成
 	void CreateDSVDescriptorHeap(ID3D12Device8* device);
-
-	// Pool生成
+	// Heap生成
 	void CreateHeap(ID3D12Device8* device);
 private:// members
 	// Device
