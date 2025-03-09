@@ -6,9 +6,9 @@
 
 #include "SDK/DirectX/DirectX12/DescriptorHeap/DescriptorHeap.h"
 #include "SDK/DirectX/DirectX12/BufferManager/BufferManager.h"
-#include "SDK/DirectX/DirectX12/SwapChain/SwapChain.h"
-
 #include <optional>
+
+class SwapChain;
 
 class ResourceManager
 {
@@ -26,7 +26,7 @@ public:
 	// 解放
 	void Release();
 
-	void CreateSwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue);
+	void CreateSwapChain(SwapChain* swapChain);
 
 	// BufferMethod
 	uint32_t CreateColorBuffer(BUFFER_COLOR_DESC& desc);
@@ -47,8 +47,6 @@ private:
 
 	// Device
 	ID3D12Device8* m_Device = nullptr;
-	// SwapChain
-	std::unique_ptr<SwapChain> m_SwapChain = nullptr;
 	// BufferManager
 	std::unique_ptr<BufferManager> m_BufferManager = nullptr;
 	// SUVディスクリプタヒープ

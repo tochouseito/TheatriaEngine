@@ -34,36 +34,28 @@ void ResourceManager::Release()
 {
 }
 
-void ResourceManager::CreateSwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue)
+void ResourceManager::CreateSwapChain(SwapChain* swapChain)
 {
-	// SwapChainの生成
-	m_SwapChain = std::make_unique<SwapChain>(
-		dxgiFactory,
-		queue,
-		WinApp::GetHWND(),
-		WinApp::GetWindowWidth(),
-		WinApp::GetWindowHeight()
-		);
 	// SwapChainのリソースでRTVを作成
 	{// Buffer0
 		uint32_t bufferindex = 0;
-		ComPtr<ID3D12Resource> pResource = m_SwapChain->GetBackBuffer(bufferindex);
+		ComPtr<ID3D12Resource> pResource = swapChain->GetBackBuffer(bufferindex);
 		BUFFER_COLOR_DESC desc = {};
 		desc.width = WinApp::GetWindowWidth();
 		desc.height = WinApp::GetWindowHeight();
 		desc.format = PixelFormat;
 		desc.dHIndex = m_RTVDescriptorHeap->Create();
-		m_SwapChain->SetIndex(bufferindex, m_BufferManager->CreateBuffer<BUFFER_COLOR_DESC>(desc, pResource.Get()));
+		swapChain->SetIndex(bufferindex, m_BufferManager->CreateBuffer<BUFFER_COLOR_DESC>(desc, pResource.Get()));
 	}
 	{// Buffer1
 		uint32_t bufferindex = 1;
-		ComPtr<ID3D12Resource> pResource = m_SwapChain->GetBackBuffer(bufferindex);
+		ComPtr<ID3D12Resource> pResource = swapChain->GetBackBuffer(bufferindex);
 		BUFFER_COLOR_DESC desc = {};
 		desc.width = WinApp::GetWindowWidth();
 		desc.height = WinApp::GetWindowHeight();
 		desc.format = PixelFormat;
 		desc.dHIndex = m_RTVDescriptorHeap->Create();
-		m_SwapChain->SetIndex(bufferindex, m_BufferManager->CreateBuffer<BUFFER_COLOR_DESC>(desc, pResource.Get()));
+		swapChain->SetIndex(bufferindex, m_BufferManager->CreateBuffer<BUFFER_COLOR_DESC>(desc, pResource.Get()));
 	}
 }
 

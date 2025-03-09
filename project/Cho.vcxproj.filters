@@ -44,6 +44,9 @@
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\BufferManager\BufferManager.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\ColorBuffer\ColorBuffer.cpp" />
     <ClCompile Include="Cho\Resources\TextureManager\TextureManager.cpp" />
+    <ClCompile Include="Cho\Graphics\Renderer\Renderer.cpp" />
+    <ClCompile Include="Cho\Graphics\GraphicsEngine\GraphicsEngine.cpp" />
+    <ClCompile Include="Cho\Graphics\GraphicsCore\GraphicsCore.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cho\Externals\meshoptimizer\meshoptimizer.h" />
@@ -77,5 +80,8 @@
     <ClInclude Include="Cho\Resources\TextureManager\TextureManager.h" />
     <ClInclude Include="Cho\Core\Utility\Color.h" />
     <ClInclude Include="Cho\Core\Utility\BufferID.h" />
+    <ClInclude Include="Cho\Graphics\Renderer\Renderer.h" />
+    <ClInclude Include="Cho\Graphics\GraphicsEngine\GraphicsEngine.h" />
+    <ClInclude Include="Cho\Graphics\GraphicsCore\GraphicsCore.h" />
   </ItemGroup>
 </Project>

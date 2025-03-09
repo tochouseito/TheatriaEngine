@@ -214,6 +214,8 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\GpuResource\GpuResource.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\GpuBuffer\GpuBuffer.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\ColorBuffer\ColorBuffer.cpp" />
+    <ClCompile Include="Cho\Graphics\GraphicsEngine\GraphicsEngine.cpp" />
+    <ClCompile Include="Cho\Graphics\GraphicsCore\GraphicsCore.cpp" />
     <ClCompile Include="main.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
@@ -231,6 +233,7 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\SwapChain\SwapChain.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\PixelBuffer\PixelBuffer.cpp" />
     <ClCompile Include="Cho\Resources\TextureManager\TextureManager.cpp" />
+    <ClCompile Include="Cho\Graphics\Renderer\Renderer.cpp" />
     <ClInclude Include="Cho\Core\Utility\BufferID.h" />
     <ClInclude Include="Cho\Core\Utility\Color.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\BufferManager\BufferManager.h" />
@@ -262,6 +265,9 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\PixelBuffer\PixelBuffer.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\ColorBuffer\ColorBuffer.h" />
     <ClInclude Include="Cho\Resources\TextureManager\TextureManager.h" />
+    <ClInclude Include="Cho\Graphics\Renderer\Renderer.h" />
+    <ClInclude Include="Cho\Graphics\GraphicsEngine\GraphicsEngine.h" />
+    <ClInclude Include="Cho\Graphics\GraphicsCore\GraphicsCore.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Cho\Externals\ChoMath\ChoMath.vcxproj">

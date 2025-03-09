@@ -11,7 +11,6 @@ ChoEngineクラス
 
 // DirectX12
 #include "Cho/SDK/DirectX/DirectX12/DirectX12Common/DirectX12Common.h"
-#include "Cho/SDK/DirectX/DirectX12/CommandManager/CommandManager.h"
 
 // PlatformLayer
 #include "Cho/Platform/PlatformLayer/PlatformLayer.h"
@@ -21,6 +20,9 @@ ChoEngineクラス
 
 // Resource
 #include "Cho/Resources/ResourceManager/ResourceManager.h"
+
+// GraphicsEngine
+#include "Cho/Graphics/GraphicsEngine/GraphicsEngine.h"
 
 class ChoEngine : public Engine
 {
@@ -54,7 +56,6 @@ private:// member
 	// DirectX12
 	std::unique_ptr<ResourceLeakChecker> resourceLeakChecker = nullptr;// ResourceLeakChecker
 	std::unique_ptr<DirectX12Common> dx12 = nullptr;// DirectX12Common
-	std::unique_ptr<CommandManager> commandManager = nullptr;// CommandManager
 
 	// PlatformLayer
 	std::unique_ptr<PlatformLayer> platformLayer = nullptr;// PlatformLayer
@@ -64,5 +65,8 @@ private:// member
 
 	// ResourceManager
 	std::unique_ptr<ResourceManager> resourceManager = nullptr;// ResourceManager
+
+	// GraphicsEngine
+	std::unique_ptr<GraphicsEngine> graphicsEngine = nullptr;// GraphicsEngine
 };
 

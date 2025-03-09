@@ -23,9 +23,6 @@ void ChoEngine::Initialize()
 	// DirectX12初期化
 	dx12 = std::make_unique<DirectX12Common>();
 
-	// CommandManager初期化
-	commandManager = std::make_unique<CommandManager>(dx12->GetDevice());
-
 	// PlatformLayer初期化
 	platformLayer = std::make_unique<PlatformLayer>();
 
@@ -35,11 +32,10 @@ void ChoEngine::Initialize()
 	// ResourceManager初期化
 	resourceManager = std::make_unique<ResourceManager>(dx12->GetDevice());
 
-	// SwapChain初期化
-	resourceManager->CreateSwapChain(
-		dx12->GetDXGIFactory(),
-		commandManager->GetCommandQueue(QueueType::Graphics)
-	);
+	// GraphicsEngine初期化
+	graphicsEngine = std::make_unique<GraphicsEngine>(dx12->GetDevice());
+	// SwapChainの生成
+	graphicsEngine->CreateSwapChain(dx12->GetDXGIFactory(), resourceManager.get());
 }
 
 void ChoEngine::Finalize()
