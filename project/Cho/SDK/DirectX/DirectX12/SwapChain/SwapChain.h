@@ -10,11 +10,15 @@ class SwapChain
 {
 public:
 	// Constructor
-	SwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue, ResourceManager* resourceManager, const HWND& hwnd, const int32_t& width, const int32_t& height);
+	SwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue, const HWND& hwnd, const int32_t& width, const int32_t& height);
 	// Destructor
 	~SwapChain();
 	// SwapChainの生成
-	void CreateSwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue, ResourceManager* resourceManager, const HWND& hwnd, const int32_t& width, const int32_t& height);
+	void CreateSwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue, const HWND& hwnd, const int32_t& width, const int32_t& height);
+	// GetBackBuffer
+	ID3D12Resource* GetBackBuffer(const uint32_t& index) const;
+	// SetIndex
+	void SetIndex(const uint32_t& index, const uint32_t& value) { m_Index[index] = value; }
 private:
 	ComPtr<IDXGISwapChain4> m_SwapChain = nullptr;
 	DXGI_SWAP_CHAIN_DESC1 m_SwapChainDesc = {};

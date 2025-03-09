@@ -2,9 +2,9 @@
 #include "SwapChain.h"
 #include "Resources/ResourceManager/ResourceManager.h"
 
-SwapChain::SwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue, ResourceManager* resourceManager, const HWND& hwnd, const int32_t& width, const int32_t& height)
+SwapChain::SwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue, const HWND& hwnd, const int32_t& width, const int32_t& height)
 {
-	CreateSwapChain(dxgiFactory, queue, resourceManager, hwnd, width, height);
+	CreateSwapChain(dxgiFactory, queue,  hwnd, width, height);
 }
 
 SwapChain::~SwapChain()
@@ -12,7 +12,7 @@ SwapChain::~SwapChain()
 
 }
 
-void SwapChain::CreateSwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue, ResourceManager* resourceManager, const HWND& hwnd, const int32_t& width, const int32_t& height)
+void SwapChain::CreateSwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue, const HWND& hwnd, const int32_t& width, const int32_t& height)
 {
 	HRESULT hr;
 
@@ -53,20 +53,30 @@ void SwapChain::CreateSwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* 
 		hwnd,
 		DXGI_MWA_NO_WINDOW_CHANGES | DXGI_MWA_NO_ALT_ENTER
 	);
-	{// 1つ目
-		// SwapChainからResourceを引っ張ってくる
-		ComPtr<ID3D12Resource> pResource = nullptr;
-		hr = m_SwapChain->GetBuffer(0, IID_PPV_ARGS(&pResource));
-		ChoAssertLog("Failed to get buffer from swap chain.", hr, __FILE__, __LINE__);
-		// ピクセルバッファの生成
-		m_Index[0] = resourceManager->CreatePixelBuffer(width, height, PixelFormat, pResource.Get());
-	}
-	{// 2つ目
-		// SwapChainからResourceを引っ張ってくる
-		ComPtr<ID3D12Resource> pResource = nullptr;
-		hr = m_SwapChain->GetBuffer(1, IID_PPV_ARGS(&pResource));
-		ChoAssertLog("Failed to get buffer from swap chain.", hr, __FILE__, __LINE__);
-		// ピクセルバッファの生成
-		m_Index[1] = resourceManager->CreatePixelBuffer(width, height, PixelFormat, pResource.Get());
-	}
+	//{// 1つ目
+	//	// SwapChainからResourceを引っ張ってくる
+	//	ComPtr<ID3D12Resource> pResource = nullptr;
+	//	hr = m_SwapChain->GetBuffer(0, IID_PPV_ARGS(&pResource));
+	//	ChoAssertLog("Failed to get buffer from swap chain.", hr, __FILE__, __LINE__);
+	//	// ピクセルバッファの作成
+	//	ColorBuffer
+
+	//	m_Index[0] = resourceManager->CreatePixelBuffer(width, height, PixelFormat, pResource.Get());
+	//}
+	//{// 2つ目
+	//	// SwapChainからResourceを引っ張ってくる
+	//	ComPtr<ID3D12Resource> pResource = nullptr;
+	//	hr = m_SwapChain->GetBuffer(1, IID_PPV_ARGS(&pResource));
+	//	ChoAssertLog("Failed to get buffer from swap chain.", hr, __FILE__, __LINE__);
+	//	// ピクセルバッファの生成
+	//	m_Index[1] = resourceManager->CreatePixelBuffer(width, height, PixelFormat, pResource.Get());
+	//}
+}
+
+ID3D12Resource* SwapChain::GetBackBuffer(const uint32_t& index) const
+{
+	ComPtr<ID3D12Resource> pResource = nullptr;
+	HRESULT hr = m_SwapChain->GetBuffer(index, IID_PPV_ARGS(&pResource));
+	ChoAssertLog("Failed to get buffer from swap chain.", hr, __FILE__, __LINE__);
+	return pResource.Get();
 }

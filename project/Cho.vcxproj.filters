@@ -42,6 +42,8 @@
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\PixelBuffer\PixelBuffer.cpp" />
     <ClCompile Include="Cho\Core\ChoAssert\ChoAssert.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\BufferManager\BufferManager.cpp" />
+    <ClCompile Include="Cho\SDK\DirectX\DirectX12\ColorBuffer\ColorBuffer.cpp" />
+    <ClCompile Include="Cho\Resources\TextureManager\TextureManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cho\Externals\meshoptimizer\meshoptimizer.h" />
@@ -71,5 +73,9 @@
     <ClInclude Include="Cho\Core\Utility\FArray.h" />
     <ClInclude Include="Cho\Core\ChoAssert\ChoAssert.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\BufferManager\BufferManager.h" />
+    <ClInclude Include="Cho\SDK\DirectX\DirectX12\ColorBuffer\ColorBuffer.h" />
+    <ClInclude Include="Cho\Resources\TextureManager\TextureManager.h" />
+    <ClInclude Include="Cho\Core\Utility\Color.h" />
+    <ClInclude Include="Cho\Core\Utility\BufferID.h" />
   </ItemGroup>
 </Project>

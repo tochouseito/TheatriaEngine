@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "ResourceManager.h"
+#include "OS/Windows/WinApp/WinApp.h"
+#include "SDK/DirectX/DirectX12/SwapChain/SwapChain.h"
 
 ResourceManager::ResourceManager(ID3D12Device8* device)
 {
@@ -32,6 +34,39 @@ void ResourceManager::Release()
 {
 }
 
+void ResourceManager::CreateSwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue)
+{
+	// SwapChainの生成
+	m_SwapChain = std::make_unique<SwapChain>(
+		dxgiFactory,
+		queue,
+		WinApp::GetHWND(),
+		WinApp::GetWindowWidth(),
+		WinApp::GetWindowHeight()
+		);
+	// SwapChainのリソースでRTVを作成
+	{// Buffer0
+		uint32_t bufferindex = 0;
+		ComPtr<ID3D12Resource> pResource = m_SwapChain->GetBackBuffer(bufferindex);
+		BUFFER_COLOR_DESC desc = {};
+		desc.width = WinApp::GetWindowWidth();
+		desc.height = WinApp::GetWindowHeight();
+		desc.format = PixelFormat;
+		desc.dHIndex = m_RTVDescriptorHeap->Create();
+		m_SwapChain->SetIndex(bufferindex, m_BufferManager->CreateBuffer<BUFFER_COLOR_DESC>(desc, pResource.Get()));
+	}
+	{// Buffer1
+		uint32_t bufferindex = 1;
+		ComPtr<ID3D12Resource> pResource = m_SwapChain->GetBackBuffer(bufferindex);
+		BUFFER_COLOR_DESC desc = {};
+		desc.width = WinApp::GetWindowWidth();
+		desc.height = WinApp::GetWindowHeight();
+		desc.format = PixelFormat;
+		desc.dHIndex = m_RTVDescriptorHeap->Create();
+		m_SwapChain->SetIndex(bufferindex, m_BufferManager->CreateBuffer<BUFFER_COLOR_DESC>(desc, pResource.Get()));
+	}
+}
+
 void ResourceManager::CreateSUVDescriptorHeap(ID3D12Device8* device)
 {
 	m_SUVDescriptorHeap = std::make_unique<SUVDescriptorHeap>(device, 1024);
@@ -54,12 +89,8 @@ void ResourceManager::CreateHeap(ID3D12Device8* device)
 	CreateDSVDescriptorHeap(device);
 }
 
-uint32_t ResourceManager::CreatePixelBuffer(const uint32_t& width, const uint32_t& height, DXGI_FORMAT format, ID3D12Resource* pResource)
+uint32_t ResourceManager::CreateColorBuffer(BUFFER_COLOR_DESC& desc)
 {
-	// DescriptorHandleの取得
-	uint32_t index = m_RTVDescriptorHeap->Create();
-	// ピクセルバッファの生成
-	m_BufferManager->CreatePixelBuffer(width, height, format, m_RTVDescriptorHeap->GetCpuHandle(index), index, pResource);
-
-	return 0;
+	desc.dHIndex = m_RTVDescriptorHeap->Create();
+	return m_BufferManager->CreateBuffer<BUFFER_COLOR_DESC>(desc);
 }

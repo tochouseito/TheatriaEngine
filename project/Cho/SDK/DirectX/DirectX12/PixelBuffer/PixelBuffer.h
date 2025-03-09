@@ -2,16 +2,25 @@
 
 #include "SDK/DirectX/DirectX12/GpuResource/GpuResource.h"
 
-class ResourceManager;
-
 class PixelBuffer : public GpuResource
 {
-public:// メンバ関数
-	// コンストラクタ
-	PixelBuffer() : m_Width(0), m_Height(0), m_Format(DXGI_FORMAT_UNKNOWN) {}
-	// コンストラクタ
-	PixelBuffer(ID3D12Resource* pResource, D3D12_RESOURCE_STATES CurrentState) : m_Width(0), m_Height(0), m_Format(DXGI_FORMAT_UNKNOWN), GpuResource(pResource,CurrentState){}
-	// デストラクタ
+public:
+	// Constructor
+	PixelBuffer() : 
+		m_Width(0), 
+		m_Height(0), 
+		m_Format(DXGI_FORMAT_UNKNOWN) 
+	{
+	}
+	// Constructor
+	PixelBuffer(ID3D12Resource* pResource, D3D12_RESOURCE_STATES CurrentState) : 
+		m_Width(0),
+		m_Height(0),
+		m_Format(DXGI_FORMAT_UNKNOWN),
+		GpuResource(pResource,CurrentState)
+	{
+	}
+	// Destructor
 	~PixelBuffer() = default;
 
 	// Getters
@@ -29,7 +38,7 @@ public:// メンバ関数
 	void SetHeight(const uint32_t& height) { m_Height = height; }
 	// ピクセルバッファのフォーマットを設定
 	void SetFormat(const DXGI_FORMAT& format) { m_Format = format; }
-private:
+protected:
 	// ピクセルバッファの幅
 	uint32_t m_Width;
 	// ピクセルバッファの高さ

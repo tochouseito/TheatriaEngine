@@ -6,6 +6,9 @@
 
 #include "SDK/DirectX/DirectX12/DescriptorHeap/DescriptorHeap.h"
 #include "SDK/DirectX/DirectX12/BufferManager/BufferManager.h"
+#include "SDK/DirectX/DirectX12/SwapChain/SwapChain.h"
+
+#include <optional>
 
 class ResourceManager
 {
@@ -23,15 +26,16 @@ public:
 	// 解放
 	void Release();
 
-public:// BufferMethod
-	// CreatePixelBuffer
-	uint32_t CreatePixelBuffer(const uint32_t& width, const uint32_t& height, DXGI_FORMAT format,ID3D12Resource* pResource);
-public://Getters
+	void CreateSwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue);
+
+	// BufferMethod
+	uint32_t CreateColorBuffer(BUFFER_COLOR_DESC& desc);
+	//Getters
 	DescriptorHeap* GetSUVDHeap() const { return m_SUVDescriptorHeap.get(); }
 	DescriptorHeap* GetRTVDHeap() const { return m_RTVDescriptorHeap.get(); }
 	DescriptorHeap* GetDSVDHeap() const { return m_DSVDescriptorHeap.get(); }
 	BufferManager* GetBufferManager() const { return m_BufferManager.get(); }
-private:// methods
+private:
 	// SUVディスクリプタヒープの生成
 	void CreateSUVDescriptorHeap(ID3D12Device8* device);
 	// RTVディスクリプタヒープの生成
@@ -40,13 +44,13 @@ private:// methods
 	void CreateDSVDescriptorHeap(ID3D12Device8* device);
 	// Heap生成
 	void CreateHeap(ID3D12Device8* device);
-private:// members
+
 	// Device
 	ID3D12Device8* m_Device = nullptr;
-
+	// SwapChain
+	std::unique_ptr<SwapChain> m_SwapChain = nullptr;
 	// BufferManager
 	std::unique_ptr<BufferManager> m_BufferManager = nullptr;
-
 	// SUVディスクリプタヒープ
 	std::unique_ptr<DescriptorHeap> m_SUVDescriptorHeap = nullptr;
 	// RTVディスクリプタヒープ

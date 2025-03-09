@@ -5,6 +5,15 @@
 class GpuBuffer : public GpuResource
 {
 public:
+	// Constructor
+	GpuBuffer() {}
+
+	// Constructor
+	GpuBuffer(ID3D12Resource* pResource, D3D12_RESOURCE_STATES CurrentState) :
+		GpuResource(pResource, CurrentState)
+	{
+	}
+
 	// Destructor
 	virtual ~GpuBuffer() { Destroy(); }
 

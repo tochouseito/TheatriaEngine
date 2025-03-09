@@ -2,13 +2,17 @@
 
 #include "Cho/SDK/DirectX/DirectX12/stdafx/stdafx.h"
 #include "Cho/SDK/DirectX/DirectX12/GpuBuffer/GpuBuffer.h"
-#include "Cho/SDK/DirectX/DirectX12/PixelBuffer/PixelBuffer.h"
+#include "Cho/SDK/DirectX/DirectX12/ColorBuffer/ColorBuffer.h"
 
 // 有効なBufferの型
-//template<typename T>
-//using BufferType = std::enable_if_t<
-//	std::is_same_v<T, PixelBuffer>
-//>;
+template<typename T>
+using BufferType = std::enable_if_t<
+	std::is_same_v<T, ColorBuffer>
+>;
+template<typename T>
+using BufferDescType = std::enable_if_t<
+	std::is_same_v<T, BUFFER_COLOR_DESC>
+>;
 
 class ResourceManager;
 class BufferManager
@@ -20,17 +24,21 @@ public:// メンバ関数
 	// Destructor
 	~BufferManager();
 	// Create Buffer
-	/*template<typename T, typename = BufferType<T>>
-	void CreateBuffer();*/
+	// return: BufferNumber
+	template<typename T, typename = BufferDescType<T>>
+	uint32_t CreateBuffer(const T& desc, ID3D12Resource* pResource = nullptr) { return CreateBufferProcess(desc, pResource); }
 
-	uint32_t AddPixelBuffer() { return static_cast<uint32_t>(m_PixelBuffers.push_back(PixelBuffer())); }
-	uint32_t CreatePixelBuffer(const uint32_t& width, const uint32_t& height, DXGI_FORMAT format,const D3D12_CPU_DESCRIPTOR_HANDLE& cpuHandle,const uint32_t& dhIndex, ID3D12Resource* pResource = nullptr);
 	// Get Buffer
-	PixelBuffer GetPixelBuffer(const uint32_t& index) const { return m_PixelBuffers[index]; }
-private:// メンバ変数
+	template<typename T, typename = BufferType<T>>
+	T* GetBuffer(const uint32_t& index) const { return GetBufferProcess(index); }
+private:
+	// ColorBufferProcess
+	uint32_t CreateBufferProcess(const BUFFER_COLOR_DESC& desc, ID3D12Resource* pResource = nullptr);
+	ColorBuffer* GetBufferProcess(const uint32_t& index) { return &m_ColorBuffers[index]; }
+
 	ID3D12Device8* m_Device = nullptr;
 	ResourceManager* m_ResourceManager = nullptr;
-
-	FVector<PixelBuffer> m_PixelBuffers;
+	// BufferContainer
+	FVector<ColorBuffer> m_ColorBuffers;
 };
 
