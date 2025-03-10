@@ -6,7 +6,7 @@ void PixelBuffer::CreateTextureResource(ID3D12Device8* device, const D3D12_RESOU
 	// 利用するHeapの設定
 	D3D12_HEAP_PROPERTIES heapProperties{};
 	heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;// VRAM上に作る
-	ID3D12Resource* pResource = GetResource();
+	ComPtr<ID3D12Resource> pResource = GetResource();
 	HRESULT hr = device->CreateCommittedResource(
 		&heapProperties,
 		D3D12_HEAP_FLAG_NONE,

@@ -89,5 +89,6 @@ uint32_t ResourceManager::CreateColorBuffer(BUFFER_COLOR_DESC& desc)
 
 uint32_t ResourceManager::CreateDepthBuffer(BUFFER_DEPTH_DESC& desc)
 {
-	return 0;
+	desc.dHIndex = m_DSVDescriptorHeap->Create();
+	return m_BufferManager->CreateBuffer<BUFFER_DEPTH_DESC>(desc);
 }

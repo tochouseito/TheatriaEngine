@@ -110,5 +110,8 @@ DSVDescriptorHeap::~DSVDescriptorHeap()
 
 uint32_t DSVDescriptorHeap::Create()
 {
-	return 0;
+	uint32_t index = static_cast<uint32_t>(m_Handles.push_back(DescriptorHandle()));
+	m_Handles[index].SetCPUHandle(GetCPUDescriptorHandle(index));
+	//m_Handles[index].SetGPUHandle(GetGPUDescriptorHandle(index));
+	return index;
 }

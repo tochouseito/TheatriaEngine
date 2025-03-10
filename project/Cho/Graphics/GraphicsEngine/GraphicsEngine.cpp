@@ -35,5 +35,11 @@ void GraphicsEngine::CreateDepthBuffer(ResourceManager* resourceManager)
 	// DepthBufferの生成
 	m_DepthManager = std::make_unique<DepthManager>();
 	// DepthBufferのリソースを作成
-	resourceManager->CreateDepthBuffer(m_DepthManager.get());
+	BUFFER_DEPTH_DESC desc = {};
+	desc.width = WinApp::GetWindowWidth();
+	desc.height = WinApp::GetWindowHeight();
+	desc.format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	desc.state = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+	// DepthBufferのリソースを作成
+	m_DepthManager->SetDepthBufferIndex(resourceManager->CreateDepthBuffer(desc));
 }
