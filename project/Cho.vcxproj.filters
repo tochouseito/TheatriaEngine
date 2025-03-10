@@ -47,6 +47,9 @@
     <ClCompile Include="Cho\Graphics\Renderer\Renderer.cpp" />
     <ClCompile Include="Cho\Graphics\GraphicsEngine\GraphicsEngine.cpp" />
     <ClCompile Include="Cho\Graphics\GraphicsCore\GraphicsCore.cpp" />
+    <ClCompile Include="Cho\Editor\EditorManager\EditorManager.cpp" />
+    <ClCompile Include="Cho\SDK\DirectX\DirectX12\DepthBuffer\DepthBuffer.cpp" />
+    <ClCompile Include="Cho\Graphics\DepthManager\DepthManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cho\Externals\meshoptimizer\meshoptimizer.h" />
@@ -83,5 +86,8 @@
     <ClInclude Include="Cho\Graphics\Renderer\Renderer.h" />
     <ClInclude Include="Cho\Graphics\GraphicsEngine\GraphicsEngine.h" />
     <ClInclude Include="Cho\Graphics\GraphicsCore\GraphicsCore.h" />
+    <ClInclude Include="Cho\Editor\EditorManager\EditorManager.h" />
+    <ClInclude Include="Cho\SDK\DirectX\DirectX12\DepthBuffer\DepthBuffer.h" />
+    <ClInclude Include="Cho\Graphics\DepthManager\DepthManager.h" />
   </ItemGroup>
 </Project>

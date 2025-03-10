@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine/Engine.h"
 #include "Graphics/GraphicsCore/GraphicsCore.h"
+#include "Graphics/DepthManager/DepthManager.h"
 #include "SDK/DirectX/DirectX12/SwapChain/SwapChain.h"
 #include "SDK/DirectX/DirectX12/DescriptorHeap/DescriptorHeap.h"
 #include "SDK/DirectX/DirectX12/GpuBuffer/GpuBuffer.h"
@@ -19,14 +20,15 @@ public:
 	}
 	// Destructor
 	~GraphicsEngine() = default;
-	void Initialize() override;
-	void Finalize() override;
-	void Operation() override;
+	void Init(IDXGIFactory7* dxgiFactory, ResourceManager* resourceManager);
 	void Update(ResourceManager& resourceManager);
-	void CreateSwapChain(IDXGIFactory7* dxgiFactory, ResourceManager* resourceManager);
 private:
+	void CreateSwapChain(IDXGIFactory7* dxgiFactory, ResourceManager* resourceManager);
+	void CreateDepthBuffer(ResourceManager* resourceManager);
+
 	ID3D12Device8* m_Device = nullptr;
 	std::unique_ptr<SwapChain> m_SwapChain = nullptr;
 	std::unique_ptr<GraphicsCore> m_GraphicsCore = nullptr;
+	std::unique_ptr<DepthManager> m_DepthManager = nullptr;
 };
 

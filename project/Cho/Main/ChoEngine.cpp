@@ -34,8 +34,7 @@ void ChoEngine::Initialize()
 
 	// GraphicsEngine初期化
 	graphicsEngine = std::make_unique<GraphicsEngine>(dx12->GetDevice());
-	// SwapChainの生成
-	graphicsEngine->CreateSwapChain(dx12->GetDXGIFactory(), resourceManager.get());
+	graphicsEngine->Init(dx12->GetDXGIFactory(), resourceManager.get());
 }
 
 void ChoEngine::Finalize()

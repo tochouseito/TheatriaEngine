@@ -45,3 +45,25 @@ uint32_t BufferManager::CreateBufferProcess(const BUFFER_COLOR_DESC& desc, ID3D1
 		return index;
 	}
 }
+
+uint32_t BufferManager::CreateBufferProcess(const BUFFER_DEPTH_DESC& desc, ID3D12Resource* pResource)
+{
+	if (pResource) {
+
+	} else {
+		DepthBuffer buffer(desc);
+		// DSVの設定
+		D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+		dsvDesc.Format = desc.format;
+		dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+		// Viewの生成
+		m_Device->CreateDepthStencilView(
+			buffer.GetResource(),
+			&dsvDesc,
+			m_ResourceManager->GetDSVDHeap()->GetCpuHandle(buffer.GetDHandleIndex())
+		);
+		// コンテナに移動
+		uint32_t index = static_cast<uint32_t>(m_DepthBuffers.push_back(std::move(buffer)));
+		return index;
+	}
+}
