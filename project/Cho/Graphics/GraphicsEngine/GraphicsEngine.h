@@ -21,7 +21,7 @@ public:
 	// Destructor
 	~GraphicsEngine() = default;
 	void Init(IDXGIFactory7* dxgiFactory, ResourceManager* resourceManager);
-	void Update(ResourceManager& resourceManager);
+	void Render(ResourceManager& resourceManager);
 private:
 	void CreateSwapChain(IDXGIFactory7* dxgiFactory, ResourceManager* resourceManager);
 	void CreateDepthBuffer(ResourceManager* resourceManager);

@@ -11,7 +11,7 @@ void GraphicsEngine::Init(IDXGIFactory7* dxgiFactory, ResourceManager* resourceM
 	CreateDepthBuffer(resourceManager);
 }
 
-void GraphicsEngine::Update(ResourceManager& resourceManager)
+void GraphicsEngine::Render(ResourceManager& resourceManager)
 {
 	resourceManager;
 }

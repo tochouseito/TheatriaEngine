@@ -75,6 +75,12 @@ void ChoEngine::Update()
 	platformLayer->Update();
 }
 
+void ChoEngine::Draw()
+{
+	// GraphicsEngine描画
+	graphicsEngine->Render(*resourceManager);
+}
+
 void ChoEngine::Start()
 {
 	// PlatformLayer記録開始

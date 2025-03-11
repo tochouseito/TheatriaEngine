@@ -46,6 +46,9 @@ public:// method
 	// 更新
 	void Update();
 
+	// 描画
+	void Draw();
+
 	// 開始
 	void Start();
 
