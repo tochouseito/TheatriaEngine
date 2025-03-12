@@ -50,6 +50,13 @@
     <ClCompile Include="Cho\Editor\EditorManager\EditorManager.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\DepthBuffer\DepthBuffer.cpp" />
     <ClCompile Include="Cho\Graphics\DepthManager\DepthManager.cpp" />
+    <ClCompile Include="Cho\GameCore\GameCore.cpp" />
+    <ClCompile Include="Cho\GameCore\SceneManager\SceneManager.cpp" />
+    <ClCompile Include="Cho\GameCore\ECS\ComponentManager\ComponentManager.cpp" />
+    <ClCompile Include="Cho\GameCore\ECS\EntityManager\EntityManager.cpp" />
+    <ClCompile Include="Cho\GameCore\ECS\SystemManager\SystemManager.cpp" />
+    <ClCompile Include="Cho\GameCore\GameObject\GameObject.cpp" />
+    <ClCompile Include="Cho\GameCore\ObjectContainer\ObjectContainer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cho\Externals\meshoptimizer\meshoptimizer.h" />
@@ -89,5 +96,12 @@
     <ClInclude Include="Cho\Editor\EditorManager\EditorManager.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\DepthBuffer\DepthBuffer.h" />
     <ClInclude Include="Cho\Graphics\DepthManager\DepthManager.h" />
+    <ClInclude Include="Cho\GameCore\GameCore.h" />
+    <ClInclude Include="Cho\GameCore\SceneManager\SceneManager.h" />
+    <ClInclude Include="Cho\GameCore\ECS\ComponentManager\ComponentManager.h" />
+    <ClInclude Include="Cho\GameCore\ECS\EntityManager\EntityManager.h" />
+    <ClInclude Include="Cho\GameCore\ECS\SystemManager\SystemManager.h" />
+    <ClInclude Include="Cho\GameCore\GameObject\GameObject.h" />
+    <ClInclude Include="Cho\GameCore\ObjectContainer\ObjectContainer.h" />
   </ItemGroup>
 </Project>

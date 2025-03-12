@@ -219,6 +219,10 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClCompile Include="Cho\Editor\EditorManager\EditorManager.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\DepthBuffer\DepthBuffer.cpp" />
     <ClCompile Include="Cho\Graphics\DepthManager\DepthManager.cpp" />
+    <ClCompile Include="Cho\GameCore\GameCore.cpp" />
+    <ClCompile Include="Cho\GameCore\ECS\ComponentManager\ComponentManager.cpp" />
+    <ClCompile Include="Cho\GameCore\ECS\EntityManager\EntityManager.cpp" />
+    <ClCompile Include="Cho\GameCore\GameObject\GameObject.cpp" />
     <ClCompile Include="main.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
@@ -237,6 +241,9 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\PixelBuffer\PixelBuffer.cpp" />
     <ClCompile Include="Cho\Resources\TextureManager\TextureManager.cpp" />
     <ClCompile Include="Cho\Graphics\Renderer\Renderer.cpp" />
+    <ClCompile Include="Cho\GameCore\SceneManager\SceneManager.cpp" />
+    <ClCompile Include="Cho\GameCore\ECS\SystemManager\SystemManager.cpp" />
+    <ClCompile Include="Cho\GameCore\ObjectContainer\ObjectContainer.cpp" />
     <ClInclude Include="Cho\Core\Utility\BufferID.h" />
     <ClInclude Include="Cho\Core\Utility\Color.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\BufferManager\BufferManager.h" />
@@ -274,6 +281,13 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClInclude Include="Cho\Editor\EditorManager\EditorManager.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\DepthBuffer\DepthBuffer.h" />
     <ClInclude Include="Cho\Graphics\DepthManager\DepthManager.h" />
+    <ClInclude Include="Cho\GameCore\GameCore.h" />
+    <ClInclude Include="Cho\GameCore\SceneManager\SceneManager.h" />
+    <ClInclude Include="Cho\GameCore\ECS\ComponentManager\ComponentManager.h" />
+    <ClInclude Include="Cho\GameCore\ECS\EntityManager\EntityManager.h" />
+    <ClInclude Include="Cho\GameCore\GameObject\GameObject.h" />
+    <ClInclude Include="Cho\GameCore\ECS\SystemManager\SystemManager.h" />
+    <ClInclude Include="Cho\GameCore\ObjectContainer\ObjectContainer.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Cho\Externals\ChoMath\ChoMath.vcxproj">

@@ -33,8 +33,12 @@ void ChoEngine::Initialize()
 	resourceManager = std::make_unique<ResourceManager>(dx12->GetDevice());
 
 	// GraphicsEngine初期化
-	graphicsEngine = std::make_unique<GraphicsEngine>(dx12->GetDevice());
-	graphicsEngine->Init(dx12->GetDXGIFactory(), resourceManager.get());
+	graphicsEngine = std::make_unique<GraphicsEngine>(dx12->GetDevice(),resourceManager.get());
+	graphicsEngine->Init(dx12->GetDXGIFactory());
+
+	// GameCore初期化
+	gameCore = std::make_unique<GameCore>();
+	gameCore->Initialize();
 }
 
 void ChoEngine::Finalize()
@@ -61,6 +65,8 @@ void ChoEngine::Operation()
 		Start();
 		// 更新
 		Update();
+		// 描画
+		Draw();
 		// 終了
 		End();
 	}
@@ -73,18 +79,21 @@ void ChoEngine::Update()
 {
 	// PlatformLayer更新
 	platformLayer->Update();
+	// GameCore更新
+	gameCore->Update(*resourceManager, *graphicsEngine);
 }
 
 void ChoEngine::Draw()
 {
-	// GraphicsEngine描画
-	graphicsEngine->Render(*resourceManager);
+	gameCore->Draw(*graphicsEngine);
 }
 
 void ChoEngine::Start()
 {
 	// PlatformLayer記録開始
 	platformLayer->StartFrame();
+	// GameCore開始
+	gameCore->Start(*resourceManager);
 }
 
 void ChoEngine::End()

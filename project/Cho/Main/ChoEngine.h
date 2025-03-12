@@ -24,6 +24,9 @@ ChoEngineクラス
 // GraphicsEngine
 #include "Cho/Graphics/GraphicsEngine/GraphicsEngine.h"
 
+// GameCore
+#include "Cho/GameCore/GameCore.h"
+
 class ChoEngine : public Engine
 {
 public:// method
@@ -71,5 +74,8 @@ private:// member
 
 	// GraphicsEngine
 	std::unique_ptr<GraphicsEngine> graphicsEngine = nullptr;// GraphicsEngine
+
+	// GameCore
+	std::unique_ptr<GameCore> gameCore = nullptr;// GameCore
 };
 

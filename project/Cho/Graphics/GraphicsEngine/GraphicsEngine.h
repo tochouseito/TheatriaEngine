@@ -13,20 +13,21 @@ class GraphicsEngine : public Engine
 {
 public:
 	// Constructor
-	GraphicsEngine(ID3D12Device8* device) : 
-		m_Device(device) 
+	GraphicsEngine(ID3D12Device8* device,ResourceManager* resourceManager) : 
+		m_Device(device), m_ResourceManager(resourceManager)
 	{
 		m_GraphicsCore = std::make_unique<GraphicsCore>(device);
 	}
 	// Destructor
 	~GraphicsEngine() = default;
-	void Init(IDXGIFactory7* dxgiFactory, ResourceManager* resourceManager);
-	void Render(ResourceManager& resourceManager);
+	void Init(IDXGIFactory7* dxgiFactory);
+	void Render();
 private:
-	void CreateSwapChain(IDXGIFactory7* dxgiFactory, ResourceManager* resourceManager);
-	void CreateDepthBuffer(ResourceManager* resourceManager);
+	void CreateSwapChain(IDXGIFactory7* dxgiFactory);
+	void CreateDepthBuffer();
 
 	ID3D12Device8* m_Device = nullptr;
+	ResourceManager* m_ResourceManager = nullptr;
 	std::unique_ptr<SwapChain> m_SwapChain = nullptr;
 	std::unique_ptr<GraphicsCore> m_GraphicsCore = nullptr;
 	std::unique_ptr<DepthManager> m_DepthManager = nullptr;

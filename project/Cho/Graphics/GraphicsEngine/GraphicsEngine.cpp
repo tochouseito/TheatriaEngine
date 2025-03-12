@@ -3,20 +3,20 @@
 #include "OS/Windows/WinApp/WinApp.h"
 #include "Resources/ResourceManager/ResourceManager.h"
 
-void GraphicsEngine::Init(IDXGIFactory7* dxgiFactory, ResourceManager* resourceManager)
+void GraphicsEngine::Init(IDXGIFactory7* dxgiFactory)
 {
 	// SwapChainの生成
-	CreateSwapChain(dxgiFactory, resourceManager);
+	CreateSwapChain(dxgiFactory);
 	// DepthBufferの生成
-	CreateDepthBuffer(resourceManager);
+	CreateDepthBuffer();
 }
 
-void GraphicsEngine::Render(ResourceManager& resourceManager)
+void GraphicsEngine::Render()
 {
-	resourceManager;
+	
 }
 
-void GraphicsEngine::CreateSwapChain(IDXGIFactory7* dxgiFactory, ResourceManager* resourceManager)
+void GraphicsEngine::CreateSwapChain(IDXGIFactory7* dxgiFactory)
 {	
 	// SwapChainの生成
 	m_SwapChain = std::make_unique<SwapChain>(
@@ -27,10 +27,10 @@ void GraphicsEngine::CreateSwapChain(IDXGIFactory7* dxgiFactory, ResourceManager
 		WinApp::GetWindowHeight()
 	);
 	// SwapChainのリソースでRTVを作成
-	resourceManager->CreateSwapChain(m_SwapChain.get());
+	m_ResourceManager->CreateSwapChain(m_SwapChain.get());
 }
 
-void GraphicsEngine::CreateDepthBuffer(ResourceManager* resourceManager)
+void GraphicsEngine::CreateDepthBuffer()
 {
 	// DepthBufferの生成
 	m_DepthManager = std::make_unique<DepthManager>();
@@ -41,5 +41,5 @@ void GraphicsEngine::CreateDepthBuffer(ResourceManager* resourceManager)
 	desc.format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	desc.state = D3D12_RESOURCE_STATE_DEPTH_WRITE;
 	// DepthBufferのリソースを作成
-	m_DepthManager->SetDepthBufferIndex(resourceManager->CreateDepthBuffer(desc));
+	m_DepthManager->SetDepthBufferIndex(m_ResourceManager->CreateDepthBuffer(desc));
 }
