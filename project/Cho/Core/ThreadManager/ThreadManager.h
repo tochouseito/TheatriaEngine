@@ -100,12 +100,13 @@ public:
         for (uint32_t i = 0; i < newCount; ++i) {
             m_Workers.emplace_back([this] { WorkerThread(); });
         }
-    }
+    }   
 
 private:
-    void WorkerThread();  // ワーカースレッドのメインループ
-    bool CanExecuteTask(const Task& task); // 依存関係が解決済みかチェック
-
+    // ワーカースレッドのメインループ
+    void WorkerThread();
+    // 依存関係が解決済みかチェック
+    bool CanExecuteTask(const Task& task);
 private:
     std::vector<std::thread> m_Workers;// ワーカースレッド
     std::priority_queue<Task> m_TaskQueue; // タスクキュー
