@@ -6,6 +6,8 @@
 #include <chrono>
 #include <ctime>
 #include <mutex>
+
+#define NOMINMAX // Windowのminmaxマクロを除外
 #include <Windows.h>
 
 void Log(const std::string& message);

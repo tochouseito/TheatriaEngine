@@ -4,6 +4,7 @@
 WinAppクラス
 --------------------------------------------*/
 
+#define NOMINMAX // Windowのminmaxマクロを除外
 #include <Windows.h>
 #include <ole2.h>
 #include <timeapi.h>

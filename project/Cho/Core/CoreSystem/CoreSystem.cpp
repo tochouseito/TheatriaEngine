@@ -14,5 +14,4 @@ void CoreSystem::Initialize()
 {
 	// スレッドマネージャー
 	threadManager = std::make_unique<ThreadManager>();
-	//threadManager->Initialize();
 }
