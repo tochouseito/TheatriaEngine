@@ -20,9 +20,11 @@ private:
 class SceneManager
 {
 public:
+	// Constructor
 	SceneManager()
 	{
 	}
+	// Destructor
 	~SceneManager()
 	{
 	}

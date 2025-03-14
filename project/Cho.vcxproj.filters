@@ -57,6 +57,7 @@
     <ClCompile Include="Cho\GameCore\ECS\SystemManager\SystemManager.cpp" />
     <ClCompile Include="Cho\GameCore\GameObject\GameObject.cpp" />
     <ClCompile Include="Cho\GameCore\ObjectContainer\ObjectContainer.cpp" />
+    <ClCompile Include="Cho\GameCore\ECS\ECSManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cho\Externals\meshoptimizer\meshoptimizer.h" />
@@ -103,5 +104,6 @@
     <ClInclude Include="Cho\GameCore\ECS\SystemManager\SystemManager.h" />
     <ClInclude Include="Cho\GameCore\GameObject\GameObject.h" />
     <ClInclude Include="Cho\GameCore\ObjectContainer\ObjectContainer.h" />
+    <ClInclude Include="Cho\GameCore\ECS\ECSManager.h" />
   </ItemGroup>
 </Project>

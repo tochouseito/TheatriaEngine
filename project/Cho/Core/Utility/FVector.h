@@ -69,6 +69,9 @@ public:
         data.reserve(newCapacity);
     }
 
+	// vectorの取得
+	std::vector<T>& GetVector() { return data; }
+
 private:
     std::vector<T> data;          // 実際のデータ
     std::vector<size_t> freeList; // 再利用可能なインデックス
