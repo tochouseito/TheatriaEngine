@@ -1,7 +1,10 @@
 #pragma once
-#include "Cho/GameCore/ECS/EntityManager/EntityManager.h"
+
+using Entity = uint32_t;
+
 class Prefab
 {
+public:
 	// Constructor
 	Prefab()
 	{
@@ -15,6 +18,7 @@ private:
 };
 class GameObject
 {
+public:
 	// Constructor
 	GameObject()
 	{

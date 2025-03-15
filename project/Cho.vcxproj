@@ -220,8 +220,6 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\DepthBuffer\DepthBuffer.cpp" />
     <ClCompile Include="Cho\Graphics\DepthManager\DepthManager.cpp" />
     <ClCompile Include="Cho\GameCore\GameCore.cpp" />
-    <ClCompile Include="Cho\GameCore\ECS\ComponentManager\ComponentManager.cpp" />
-    <ClCompile Include="Cho\GameCore\ECS\EntityManager\EntityManager.cpp" />
     <ClCompile Include="Cho\GameCore\GameObject\GameObject.cpp" />
     <ClCompile Include="Cho\GameCore\ECS\ECSManager.cpp" />
     <ClCompile Include="main.cpp">
@@ -243,7 +241,6 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClCompile Include="Cho\Resources\TextureManager\TextureManager.cpp" />
     <ClCompile Include="Cho\Graphics\Renderer\Renderer.cpp" />
     <ClCompile Include="Cho\GameCore\SceneManager\SceneManager.cpp" />
-    <ClCompile Include="Cho\GameCore\ECS\SystemManager\SystemManager.cpp" />
     <ClCompile Include="Cho\GameCore\ObjectContainer\ObjectContainer.cpp" />
     <ClInclude Include="Cho\Core\Utility\BufferID.h" />
     <ClInclude Include="Cho\Core\Utility\Color.h" />
@@ -284,10 +281,7 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClInclude Include="Cho\Graphics\DepthManager\DepthManager.h" />
     <ClInclude Include="Cho\GameCore\GameCore.h" />
     <ClInclude Include="Cho\GameCore\SceneManager\SceneManager.h" />
-    <ClInclude Include="Cho\GameCore\ECS\ComponentManager\ComponentManager.h" />
-    <ClInclude Include="Cho\GameCore\ECS\EntityManager\EntityManager.h" />
     <ClInclude Include="Cho\GameCore\GameObject\GameObject.h" />
-    <ClInclude Include="Cho\GameCore\ECS\SystemManager\SystemManager.h" />
     <ClInclude Include="Cho\GameCore\ObjectContainer\ObjectContainer.h" />
     <ClInclude Include="Cho\GameCore\ECS\ECSManager.h" />
   </ItemGroup>

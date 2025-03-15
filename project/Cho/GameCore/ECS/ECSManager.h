@@ -1,6 +1,6 @@
 #pragma once
-#include "Cho/Core/Utility/FVector.h"
-#include "Cho/Core/Utility/FArray.h"
+#include <vector>
+#include <array>
 #include <typeindex>
 #include <unordered_map>
 #include <memory>
@@ -9,142 +9,42 @@
 
 using Entity = uint32_t;
 using CompID = size_t;
-using Archetype = std::bitset<128>;
-
-// エンティティを管理するためのコンテナクラス
-class EntityContainer
-{
-public:
-	// エンティティを追加
-	inline void Add(const size_t a_entity)
-	{
-		m_Entities.emplace_back(a_entity);
-		if (m_EntityToIndex.size() < a_entity)
-		{
-			m_EntityToIndex.resize(a_entity + 1);
-		}
-		m_EntityToIndex[a_entity] = m_Entities.size() - 1;
-	}
-	// エンティティを削除
-	inline void Remove(const size_t a_entity)
-	{
-		if (m_EntityToIndex.size() < a_entity)
-		{
-			return;
-		}
-		size_t backIndex = m_Entities.size() - 1;
-		size_t backEntity = m_Entities.back();
-		size_t removeIndex = m_EntityToIndex[a_entity];
-		// 削除する要素が最後の要素でなければ
-		if (a_entity != m_Entities.back())
-		{
-			m_Entities[removeIndex] = backEntity;
-			m_EntityToIndex[backIndex] = removeIndex;
-		}
-		// 最後尾のEntityを削除
-		m_Entities.pop_back();
-	}
-private:
-	std::vector<size_t> m_Entities;
-	std::vector<size_t> m_EntityToIndex;
-public:
-	inline const std::vector<size_t>& GetEntities()const noexcept
-	{
-		return m_Entities;
-	}
-};
-
-// ComponentPoolを同じコンテナで扱うための基底クラス
-class IComponentPool
-{
-public:
-private:
-};
-
-// コンポーネントを管理するコンテナクラス
-template<typename CompType>
-class ComponentPool :public IComponentPool
-{
-public:
-	// コンテナのメモリを確保
-	ComponentPool(const size_t a_size)
-		:m_Components(a_size)
-	{
-	}
-	// コンポーネントを追加
-	inline CompType* AddComponent(const size_t a_entity)
-	{
-		if (m_Components.size() < a_entity)
-		{
-			m_Components.resize(a_entity, CompType());
-		}
-		m_Components[a_entity] = CompType();
-		return &m_Components[a_entity];
-	}
-
-	// コンポーネントを取得する
-	inline CompType* GetComponent(const size_t a_entity)noexcept
-	{
-		// エンティティが有効なら
-		if (m_Components.size() >= a_entity)
-		{
-			return &m_Components[a_entity];
-		}
-		return nullptr;
-	}
-private:
-	friend class ECSManager;
-	// コンポーネントのインスタンスを管理するコンテナ
-	std::vector<CompType> m_Components;
-	// このコンテナクラスが管理するコンポーネントが持つ一意なID
-	static size_t m_CompTypeID;
-public:
-	// CompTypeIDを取得する関数
-	static inline const size_t GetID()
-	{
-		// この関数を初めて読んだ時にIDを発行
-		if (!ComponentPool<CompType>::m_CompTypeID)
-		{
-			ComponentPool<CompType>::m_CompTypeID = ++ECSManager::m_NextCompTypeID;
-		}
-		return ComponentPool<CompType>::m_CompTypeID;
-	}
-};
+using Archetype = std::bitset<256>;
 
 class ECSManager
 {
 public:
 	// エンティティを新規作成
-	inline const size_t GenerateEntity()
+	inline const Entity GenerateEntity()
 	{
-		size_t nEntity;
+		Entity entity;
 		// リサイクル待ちエンティティがあればそこから1つ取り出す
 		if (m_RecycleEntities.size())
 		{
-			nEntity = m_RecycleEntities.back();
+			entity = m_RecycleEntities.back();
 			m_RecycleEntities.pop_back();
 		}
 		// 無ければ新規発行
 		else
 		{
-			nEntity = ++m_NextID;
+			entity = ++m_NextEntityID;
 		}
 		// エンティティを有効にする
-		if (m_EntityToActive.size() < nEntity)
+		if (m_EntityToActive.size() < entity)
 		{
-			m_EntityToActive.resize(nEntity + 1, false);
+			m_EntityToActive.resize(entity + 1, false);
 		}
-		m_EntityToActive[nEntity] = true;
+		m_EntityToActive[entity] = true;
 		// 生成したエンティティを返す
-		return nEntity;
+		return entity;
 	}
 
 	// コンポーネントを追加する
 	template<typename T>
-	T* AddComponent(const size_t a_entity)
+	T* AddComponent(const Entity& entity)
 	{
 		// コンポーネントの型のIDを取得
-		size_t type = ComponentPool<T>::GetID();
+		CompID type = ComponentPool<T>::GetID();
 		// 初めて生成するコンポーネントなら
 		if (!m_TypeToComponents[type])
 		{
@@ -154,40 +54,61 @@ public:
 		// 追加するコンポーネントを格納するコンテナクラスを取得
 		std::shared_ptr<ComponentPool<T>> spCompPool = std::static_pointer_cast<ComponentPool<T>>(m_TypeToComponents[type]);
 		// コンポーネントを追加し取得
-		T* pResultComp = spCompPool->AddComponent(a_entity);
+		T* pResultComp = spCompPool->AddComponent(entity);
 
 		// コンポーネントを追加する前のアーキタイプを取得
 		Archetype arch;
-		if (m_EntityToArchetype.size() > a_entity)
+		if (m_EntityToArchetype.size() > entity)
 		{
-			arch = m_EntityToArchetype[a_entity];
+			arch = m_EntityToArchetype[entity];
 		} else
 		{
-			m_EntityToArchetype.resize(a_entity + 1, Archetype());
+			m_EntityToArchetype.resize(entity + 1, Archetype());
 		}
 		// 前アーキタイプのエンティティリストからエンティティを削除
-		m_ArcheTypeToEntities[arch].Remove(a_entity);
+		m_ArchToEntities[arch].Remove(entity);
 		// アーキタイプを編集
 		arch.set(type);
 		// 新しいアーキタイプをセット
-		m_ArcheTypeToEntities[arch].Add(a_entity);
-		m_EntityToArchetype[a_entity] = arch;
+		m_ArchToEntities[arch].Add(entity);
+		m_EntityToArchetype[entity] = arch;
 		// 追加したコンポーネントを返す
 		return pResultComp;
 	}
 
+	// コンポーネントを取得する
+	template<typename T>
+	T* GetComponent(const Entity& entity)
+	{
+		CompID type = ComponentPool<T>::GetID();
+
+		// コンポーネントのマップに存在するかチェック
+		auto it = m_TypeToComponents.find(type);
+		if (it != m_TypeToComponents.end())
+		{
+			// 取得したComponentPoolを適切な型にキャスト
+			std::shared_ptr<ComponentPool<T>> spCompPool = std::static_pointer_cast<ComponentPool<T>>(it->second);
+
+			// エンティティのコンポーネントを取得
+			return spCompPool->GetComponent(entity);
+		}
+
+		// 該当するコンポーネントが存在しない場合は nullptr を返す
+		return nullptr;
+	}
+
 	// コンポーネントを削除する
 	template<typename T>
-	void RemvoeComponent(const size_t a_entity)
+	void RemvoeComponent(const Entity& entity)
 	{
 		// コンポーネントの型のIDを取得
-		size_t type = ComponentPool<T>::GetID();
+		CompID type = ComponentPool<T>::GetID();
 
 		Archetype arch;
 		// コンポーネントを削除する前のアーキタイプを取得
-		if (m_EntityToArchetype.size() > a_entity)
+		if (m_EntityToArchetype.size() > entity)
 		{
-			arch = m_EntityToArchetype[a_entity];
+			arch = m_EntityToArchetype[entity];
 		} else
 		{
 			return;
@@ -198,62 +119,161 @@ public:
 			return;
 		}
 		// 前アーキタイプのエンティティリストからエンティティを削除
-		m_ArcheTypeToEntities[arch].Remove(a_entity);
+		m_ArchToEntities[arch].Remove(entity);
 		// アーキタイプを編集
 		arch.reset(type);
 		// 新しいアーキタイプをセット
-		m_ArcheTypeToEntities[arch].Add(a_entity);
-		m_EntityToArchetype[a_entity] = arch;
+		m_ArchToEntities[arch].Add(entity);
+		m_EntityToArchetype[entity] = arch;
 	}
 
 	// エンティティを無効にする
-	inline void RemoveEntity(const size_t a_entity)
+	inline void RemoveEntity(const Entity& entity)
 	{
-		m_EntityToActive[a_entity] = false;
-		m_ArcheTypeToEntities[m_EntityToArchetype[a_entity]].Remove(a_entity);
-		m_RecycleEntities.emplace_back(a_entity);
+		m_EntityToActive[entity] = false;
+		m_ArchToEntities[m_EntityToArchetype[entity]].Remove(entity);
+		m_RecycleEntities.emplace_back(entity);
 	}
 
 	// 処理を実行する
 	template<typename ...T>
-	void RunFunction(std::function<void(T&...)> a_func)
+	void RunFunction(std::function<void(T&...)> func)
 	{
 		// 処理に必要なコンポーネントのアーキタイプを取得
 		Archetype arch;
 		(arch.set(ComponentPool<T>::GetID()), ...);
 		// 処理に必要なアーキタイプを含むアーキタイプを持つエンティティのリストを検索
-		for (auto&& entities : m_ArcheTypeToEntities)
+		for (auto&& entities : m_ArchToEntities)
 		{
 			if ((entities.first & arch) == arch)
 			{
 				for (auto&& entity : entities.second.GetEntities())
 				{
-					a_func(std::static_pointer_cast<ComponentPool<T>>(m_TypeToComponents[ComponentPool<T>::GetID()])->m_vComponents[entity]...);
+					func(std::static_pointer_cast<ComponentPool<T>>(m_TypeToComponents[ComponentPool<T>::GetID()])->m_Components[entity]...);
 				}
 			}
 		}
 	}
 
+	// エンティティを管理するためのコンテナクラス
+	class EntityContainer
+	{
+	public:
+		// エンティティを追加
+		inline void Add(const Entity& entity)
+		{
+			m_Entities.emplace_back(entity);
+			if (m_EntityToIndex.size() < entity)
+			{
+				m_EntityToIndex.resize(entity + 1);
+			}
+			m_EntityToIndex[entity] = static_cast<uint32_t>(m_Entities.size() - 1);
+		}
+		// エンティティを削除
+		inline void Remove(const Entity& entity)
+		{
+			if (m_EntityToIndex.size() < entity)
+			{
+				return;
+			}
+			size_t backIndex = m_Entities.size() - 1;
+			Entity backEntity = m_Entities.back();
+			uint32_t removeIndex = m_EntityToIndex[entity];
+			// 削除する要素が最後の要素でなければ
+			if (entity != m_Entities.back())
+			{
+				m_Entities[removeIndex] = backEntity;
+				m_EntityToIndex[backIndex] = removeIndex;
+			}
+			// 最後尾のEntityを削除
+			m_Entities.pop_back();
+		}
+	private:
+		std::vector<Entity> m_Entities;
+		std::vector<uint32_t> m_EntityToIndex;
+	public:
+		inline const std::vector<Entity>& GetEntities()const noexcept
+		{
+			return m_Entities;
+		}
+	};
+
+	// ComponentPoolを同じコンテナで扱うための基底クラス
+	class IComponentPool
+	{
+	public:
+	private:
+	};
+
+	// コンポーネントを管理するコンテナクラス
+	template<typename T>
+	class ComponentPool :public IComponentPool
+	{
+	public:
+		// コンテナのメモリを確保
+		ComponentPool(const size_t size)
+			:m_Components(size)
+		{
+		}
+		// コンポーネントを追加
+		inline T* AddComponent(const Entity& entity)
+		{
+			if (m_Components.size() < entity)
+			{
+				m_Components.resize(entity, T());
+			}
+			m_Components[entity] = T();
+			return &m_Components[entity];
+		}
+
+		// コンポーネントを取得する
+		inline T* GetComponent(const Entity& entity)noexcept
+		{
+			// エンティティが有効なら
+			if (m_Components.size() >= entity)
+			{
+				return &m_Components[entity];
+			}
+			return nullptr;
+		}
+	private:
+		friend class ECSManager;
+		// コンポーネントのインスタンスを管理するコンテナ
+		std::vector<T> m_Components;
+		// このコンテナクラスが管理するコンポーネントが持つ一意なID
+		static CompID m_CompTypeID;
+	public:
+		// CompTypeIDを取得する関数
+		static inline const CompID GetID()
+		{
+			// この関数を初めて読んだ時にIDを発行
+			if (!ComponentPool<T>::m_CompTypeID)
+			{
+				ComponentPool<T>::m_CompTypeID = ++ECSManager::m_NextCompTypeID;
+			}
+			return ComponentPool<T>::m_CompTypeID;
+		}
+	};
+
 private:
 	// コンポーネントをタイプ別で管理するコンテナ
-	std::unordered_map<size_t, std::shared_ptr<IComponentPool>> m_TypeToComponents;
+	std::unordered_map<CompID, std::shared_ptr<IComponentPool>> m_TypeToComponents;
 	// エンティティとアーキタイプを紐づけるコンテナ
 	std::vector<Archetype> m_EntityToArchetype;
 	// エンティティと有効フラグを紐づけるコンテナ
 	std::vector<bool> m_EntityToActive;
 	// エンティティをアーキタイプごとに分割したコンテナ
-	std::unordered_map<Archetype, EntityContainer> m_ArcheTypeToEntities;
+	std::unordered_map<Archetype, EntityContainer> m_ArchToEntities;
 	// 次に生成するエンティティのID
-	size_t m_NextID = 0;
+	Entity m_NextEntityID = 0;
 	// 再利用待ちのEntityのリスト
-	std::vector<size_t> m_RecycleEntities;
+	std::vector<Entity> m_RecycleEntities;
 	// 次に発行するCompTypeID
-	static size_t m_NextCompTypeID;
+	static CompID m_NextCompTypeID;
 public:
 
 };
 
-// スタティック変数の初期化
-size_t ECSManager::m_NextCompTypeID = 0;
+// Initialize static member
 template<typename CompType>
-size_t ComponentPool<CompType>::m_CompTypeID = 0;
+size_t ECSManager::ComponentPool<CompType>::m_CompTypeID = 0;

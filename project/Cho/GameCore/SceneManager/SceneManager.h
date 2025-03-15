@@ -1,7 +1,5 @@
 #pragma once
-#include "Cho/GameCore/ECS/EntityManager/EntityManager.h"
-#include "Cho/GameCore/ECS/ComponentManager/ComponentManager.h"
-#include "Cho/GameCore/ECS/SystemManager/SystemManager.h"
+#include "Cho/GameCore/ECS/ECSManager.h"
 #include "Cho/GameCore/ObjectContainer/ObjectContainer.h"
 class BaseScene {
 public:
@@ -31,9 +29,7 @@ public:
 private:
 	BaseScene* m_pCurrentScene = nullptr;
 	BaseScene* m_pNextScene = nullptr;
-	EntityManager m_EntityManager;
-	ComponentManager m_ComponentManager;
-	SystemManager m_SystemManager;
+	ECSManager m_ECSManager;
 	ObjectContainer m_ObjectContainer;
 };
 

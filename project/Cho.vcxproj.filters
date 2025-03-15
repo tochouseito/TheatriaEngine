@@ -52,9 +52,6 @@
     <ClCompile Include="Cho\Graphics\DepthManager\DepthManager.cpp" />
     <ClCompile Include="Cho\GameCore\GameCore.cpp" />
     <ClCompile Include="Cho\GameCore\SceneManager\SceneManager.cpp" />
-    <ClCompile Include="Cho\GameCore\ECS\ComponentManager\ComponentManager.cpp" />
-    <ClCompile Include="Cho\GameCore\ECS\EntityManager\EntityManager.cpp" />
-    <ClCompile Include="Cho\GameCore\ECS\SystemManager\SystemManager.cpp" />
     <ClCompile Include="Cho\GameCore\GameObject\GameObject.cpp" />
     <ClCompile Include="Cho\GameCore\ObjectContainer\ObjectContainer.cpp" />
     <ClCompile Include="Cho\GameCore\ECS\ECSManager.cpp" />
@@ -99,9 +96,6 @@
     <ClInclude Include="Cho\Graphics\DepthManager\DepthManager.h" />
     <ClInclude Include="Cho\GameCore\GameCore.h" />
     <ClInclude Include="Cho\GameCore\SceneManager\SceneManager.h" />
-    <ClInclude Include="Cho\GameCore\ECS\ComponentManager\ComponentManager.h" />
-    <ClInclude Include="Cho\GameCore\ECS\EntityManager\EntityManager.h" />
-    <ClInclude Include="Cho\GameCore\ECS\SystemManager\SystemManager.h" />
     <ClInclude Include="Cho\GameCore\GameObject\GameObject.h" />
     <ClInclude Include="Cho\GameCore\ObjectContainer\ObjectContainer.h" />
     <ClInclude Include="Cho\GameCore\ECS\ECSManager.h" />

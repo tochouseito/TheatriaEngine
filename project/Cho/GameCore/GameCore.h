@@ -1,5 +1,5 @@
 #pragma once
-
+#include "Cho/GameCore/SceneManager/SceneManager.h"
 class ResourceManager;
 class GraphicsEngine;
 
@@ -17,5 +17,6 @@ public:
 	void Update(ResourceManager& resourceManager, GraphicsEngine& graphicsEngine);
 	void Draw(GraphicsEngine& graphicsEngine);
 private:
+	std::unique_ptr<SceneManager> m_pSceneManager = nullptr;
 };
 
