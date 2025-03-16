@@ -15,9 +15,7 @@ void GraphicsEngine::Init(IDXGIFactory7* dxgiFactory)
 
 void GraphicsEngine::PreRender()
 {
-	/*CommandContext* context = m_GraphicsCore->GetCommandManager()->GetCommandContext();
-	context->Reset();
-	context->SetDescriptorHeap(m_ResourceManager->GetSUVDHeap()->GetDescriptorHeap());*/
+	
 }
 
 void GraphicsEngine::Render()
@@ -27,6 +25,7 @@ void GraphicsEngine::Render()
 
 void GraphicsEngine::PostRender()
 {
+	// コマンドリストの取得
 	CommandContext* context = m_GraphicsCore->GetCommandManager()->GetCommandContext();
 	context->Reset();
 	context->SetDescriptorHeap(m_ResourceManager->GetSUVDHeap()->GetDescriptorHeap());

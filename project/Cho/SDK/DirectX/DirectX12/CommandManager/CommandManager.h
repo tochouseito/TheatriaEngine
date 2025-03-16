@@ -65,7 +65,8 @@ public:
     // GPU 完了待機
     void WaitForFence(QueueType type);
 	// コマンドリスト取得
-	CommandContext* GetCommandContext() { return m_CommandPool->GetContext(); }
+	CommandContext* GetCommandCont
+		ext() { return m_CommandPool->GetContext(); }
 	// コマンドリスト返却
 	void ReturnCommandContext(CommandContext* context) { m_CommandPool->ReturnContext(context); }
 private:
