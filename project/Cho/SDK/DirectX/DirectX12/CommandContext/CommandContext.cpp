@@ -60,12 +60,3 @@ ComputeContext::ComputeContext(ID3D12Device* device)
 ComputeContext::~ComputeContext()
 {
 }
-
-CopyContext::CopyContext(ID3D12Device* device)
-{
-	Create(device, D3D12_COMMAND_LIST_TYPE_DIRECT);
-}
-
-CopyContext::~CopyContext()
-{
-}

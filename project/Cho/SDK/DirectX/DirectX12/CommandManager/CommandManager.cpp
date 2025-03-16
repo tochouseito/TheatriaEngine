@@ -1,8 +1,10 @@
 #include "pch.h"
 #include "CommandManager.h"
+#include "Cho/Core/ThreadManager/ThreadManager.h"
 
 CommandManager::CommandManager(ID3D12Device8* device)
 {
+	m_Device = device;
 	CreateQueueContexts(device);// デバイスを受け取り、キューコンテキストを作成する
 	Initialize();// 初期化
 }
@@ -13,6 +15,7 @@ CommandManager::~CommandManager()
 
 void CommandManager::Initialize()
 {
+	m_CommandPool = std::make_unique<CommandPool>(m_Device, D3D12_COMMAND_LIST_TYPE_DIRECT, ThreadManager::GetInstance().GetThreadCount());
 }
 
 void CommandManager::Shutdown()
@@ -99,4 +102,40 @@ void QueueContext::Initialize()
 
 void QueueContext::Reset()
 {
+}
+
+CommandPool::CommandPool(ID3D12Device* device, D3D12_COMMAND_LIST_TYPE type, size_t poolSize)
+	: m_Device(device), m_Type(type)
+{
+	for (size_t i = 0; i < poolSize; ++i)
+	{
+		auto context = std::make_unique<CommandContext>();
+		context->Create(device, type);
+		m_CommandPool.push(std::move(context));
+	}
+}
+
+CommandPool::~CommandPool()
+{
+}
+
+CommandContext* CommandPool::GetContext()
+{
+	std::lock_guard<std::mutex> lock(m_Mutex);
+	if (m_CommandPool.empty())
+	{
+		auto context = std::make_unique<CommandContext>();
+		context->Create(m_Device, m_Type);
+		return context.release();
+	}
+	auto context = std::move(m_CommandPool.front());
+	m_CommandPool.pop();
+	return context.release();
+}
+
+void CommandPool::ReturnContext(CommandContext* context)
+{
+	std::lock_guard<std::mutex> lock(m_Mutex);
+	context->Reset();
+	m_CommandPool.push(std::unique_ptr<CommandContext>(context));
 }

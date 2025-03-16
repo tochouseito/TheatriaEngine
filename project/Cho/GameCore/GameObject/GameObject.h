@@ -2,11 +2,12 @@
 
 using Entity = uint32_t;
 
-class Prefab
+class Prefab 
 {
 public:
 	// Constructor
-	Prefab()
+	Prefab(const Entity& entity) :
+		m_Entity(entity)
 	{
 	}
 	// Destructor
@@ -20,7 +21,8 @@ class GameObject
 {
 public:
 	// Constructor
-	GameObject()
+	GameObject(const Entity& entity):
+		m_Entity(entity)
 	{
 	}
 	// Destructor

@@ -20,8 +20,9 @@ public:// メンバ関数
 	// 初期化
 	void Initialize();
 
+	// 終了処理
+	void Finalize();
+
 private:
-	// スレッドマネージャー
-	std::unique_ptr<ThreadManager> threadManager = nullptr;
 };
 

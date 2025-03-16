@@ -26,5 +26,7 @@ public:
 	}
 	// Destructor
 	~ColorBuffer() = default;
+
+	void CreateTextureResource(ID3D12Device8* device, const D3D12_RESOURCE_DESC& desc, const D3D12_RESOURCE_STATES& state);
 };
 

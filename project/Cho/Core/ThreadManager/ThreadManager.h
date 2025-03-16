@@ -30,10 +30,18 @@ struct Task {
 
 class ThreadManager {
 public:
-    // Constructor
-    ThreadManager();
-    // Destructor
-    ~ThreadManager();
+    static ThreadManager& GetInstance()
+    {
+        static ThreadManager instance;
+        return instance;
+    }
+private:
+    ThreadManager() {}
+	ThreadManager(const ThreadManager&) = delete;
+	ThreadManager& operator=(const ThreadManager&) = delete;
+public:
+    // 初期化
+	void Initialize();
 
     // タスクをキューに追加（依存関係あり）
     std::shared_future<void> EnqueueTask(

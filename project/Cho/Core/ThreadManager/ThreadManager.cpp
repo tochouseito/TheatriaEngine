@@ -2,26 +2,26 @@
 #include "ThreadManager.h"
 #include "Cho/Core/Log/Log.h"
 
-// Constructor: CPUの論理コア数に応じたスレッドプールを作成
-ThreadManager::ThreadManager() {
+void ThreadManager::Initialize()
+{
+    // CPUの論理コア数に応じたスレッドプールを作成
     uint32_t numThreads = std::thread::hardware_concurrency();
-    if (numThreads == 0) numThreads = 4; // 取得できなかった場合のデフォルト
+    if (numThreads == 0)
+    {
+        numThreads = 4; // 取得できなかった場合のデフォルト
+    }
 
     uint32_t maxThreads = std::min(numThreads * 2, 64u); // 最大スレッド数（64スレッド上限）
-	m_WorkerCount = maxThreads; // スレッド数を記録
+    m_WorkerCount = maxThreads; // スレッド数を記録
 
-	// ログ出力
-	Log("Create Thread Pool: " + std::to_string(maxThreads) + " Threads");
+    // ログ出力
+    Log("Create Thread Pool: " + std::to_string(maxThreads) + " Threads");
 
     // スレッドを最大数まで作成
-    for (uint32_t i = 0; i < maxThreads; ++i) {
+    for (uint32_t i = 0; i < maxThreads; ++i)
+    {
         m_Workers.emplace_back([this] { WorkerThread(); });
     }
-}
-
-// Destructor: 全スレッドの停止
-ThreadManager::~ThreadManager() {
-    StopAllThreads();
 }
 
 // タスクをキューに追加（依存関係あり）
@@ -126,8 +126,11 @@ void ThreadManager::WorkerThread() {
             }
             // 実行できなかったタスクを戻す
             while (!tempQueue.empty()) {
-                m_TaskQueue.push(std::move(tempQueue.top())); // 元のキューに戻す
+                Task tempTask = std::move(tempQueue.top());
                 tempQueue.pop();
+                m_TaskQueue.push(std::move(tempTask));
+                //m_TaskQueue.push(std::move(tempQueue.top())); // 元のキューに戻す
+                //tempQueue.pop();
             }
         }
 

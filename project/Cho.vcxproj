@@ -239,11 +239,14 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\SwapChain\SwapChain.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\PixelBuffer\PixelBuffer.cpp" />
     <ClCompile Include="Cho\Resources\TextureManager\TextureManager.cpp" />
-    <ClCompile Include="Cho\Graphics\Renderer\Renderer.cpp" />
     <ClCompile Include="Cho\GameCore\SceneManager\SceneManager.cpp" />
     <ClCompile Include="Cho\GameCore\ObjectContainer\ObjectContainer.cpp" />
+    <ClCompile Include="Cho\Graphics\VisualEffect\VFXManager.cpp" />
+    <ClCompile Include="Cho\Graphics\PipelineManager\PipelineManager.cpp" />
     <ClInclude Include="Cho\Core\Utility\BufferID.h" />
     <ClInclude Include="Cho\Core\Utility\Color.h" />
+    <ClInclude Include="Cho\Core\Utility\CompBufferData.h" />
+    <ClInclude Include="Cho\Core\Utility\Components.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\BufferManager\BufferManager.h" />
     <ClInclude Include="Cho\Core\ChoAssert\ChoAssert.h" />
     <ClInclude Include="Cho\Core\Log\Log.h" />
@@ -273,7 +276,6 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\PixelBuffer\PixelBuffer.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\ColorBuffer\ColorBuffer.h" />
     <ClInclude Include="Cho\Resources\TextureManager\TextureManager.h" />
-    <ClInclude Include="Cho\Graphics\Renderer\Renderer.h" />
     <ClInclude Include="Cho\Graphics\GraphicsEngine\GraphicsEngine.h" />
     <ClInclude Include="Cho\Graphics\GraphicsCore\GraphicsCore.h" />
     <ClInclude Include="Cho\Editor\EditorManager\EditorManager.h" />
@@ -284,6 +286,8 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClInclude Include="Cho\GameCore\GameObject\GameObject.h" />
     <ClInclude Include="Cho\GameCore\ObjectContainer\ObjectContainer.h" />
     <ClInclude Include="Cho\GameCore\ECS\ECSManager.h" />
+    <ClInclude Include="Cho\Graphics\VisualEffect\VFXManager.h" />
+    <ClInclude Include="Cho\Graphics\PipelineManager\PipelineManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Cho\Externals\ChoMath\ChoMath.vcxproj">

@@ -21,15 +21,20 @@ public:
 	// Destructor
 	~GraphicsEngine() = default;
 	void Init(IDXGIFactory7* dxgiFactory);
+	void PreRender();
 	void Render();
+	void PostRender();
 private:
 	void CreateSwapChain(IDXGIFactory7* dxgiFactory);
 	void CreateDepthBuffer();
+	void CreateOffscreenBuffer();
 
 	ID3D12Device8* m_Device = nullptr;
 	ResourceManager* m_ResourceManager = nullptr;
 	std::unique_ptr<SwapChain> m_SwapChain = nullptr;
 	std::unique_ptr<GraphicsCore> m_GraphicsCore = nullptr;
 	std::unique_ptr<DepthManager> m_DepthManager = nullptr;
+
+	uint32_t m_OffscreenBufferIndex = 0;
 };
 

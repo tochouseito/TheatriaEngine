@@ -9,7 +9,6 @@
 
 class CommandContext {
 public:
-	CommandContext() = default;
 	virtual void Create(ID3D12Device* device, D3D12_COMMAND_LIST_TYPE type);
 	virtual ~CommandContext();
 	virtual void Reset();
@@ -20,11 +19,7 @@ public:
 protected:
 	ComPtr<ID3D12CommandAllocator> m_CommandAllocator;
 	ComPtr<ID3D12GraphicsCommandList6> m_CommandList;
-	D3D12_COMMAND_LIST_TYPE m_Type;
-	std::mutex m_AllocatorMutex;
-	std::condition_variable m_AllocatorCV;
-	std::mutex m_CommandListMutex;
-	std::condition_variable m_CommandListCV;
+	D3D12_COMMAND_LIST_TYPE m_Type = {};
 };
 
 class GraphicsContext : public CommandContext {
@@ -41,9 +36,11 @@ public:
 private:
 };
 
-class CopyContext : public CommandContext {
-public:
-	CopyContext(ID3D12Device* device);
-	~CopyContext();
-private:
-};
+
+
+//class CopyContext : public CommandContext {
+//public:
+//	CopyContext(ID3D12Device* device);
+//	~CopyContext();
+//private:
+//};

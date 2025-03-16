@@ -9,11 +9,23 @@ void GraphicsEngine::Init(IDXGIFactory7* dxgiFactory)
 	CreateSwapChain(dxgiFactory);
 	// DepthBufferの生成
 	CreateDepthBuffer();
+	// オフスクリーンレンダリング用のリソースを作成
+	
+}
+
+void GraphicsEngine::PreRender()
+{
+
 }
 
 void GraphicsEngine::Render()
 {
 	
+}
+
+void GraphicsEngine::PostRender()
+{
+
 }
 
 void GraphicsEngine::CreateSwapChain(IDXGIFactory7* dxgiFactory)
@@ -42,4 +54,14 @@ void GraphicsEngine::CreateDepthBuffer()
 	desc.state = D3D12_RESOURCE_STATE_DEPTH_WRITE;
 	// DepthBufferのリソースを作成
 	m_DepthManager->SetDepthBufferIndex(m_ResourceManager->CreateDepthBuffer(desc));
+}
+
+void GraphicsEngine::CreateOffscreenBuffer()
+{
+	BUFFER_COLOR_DESC desc = {};
+	desc.width = WinApp::GetWindowWidth();
+	desc.height = WinApp::GetWindowHeight();
+	desc.format = PixelFormat;
+	desc.state = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+	m_OffscreenBufferIndex = m_ResourceManager->CreateColorBuffer(desc);
 }
