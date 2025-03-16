@@ -15,7 +15,9 @@ void GraphicsEngine::Init(IDXGIFactory7* dxgiFactory)
 
 void GraphicsEngine::PreRender()
 {
-
+	/*CommandContext* context = m_GraphicsCore->GetCommandManager()->GetCommandContext();
+	context->Reset();
+	context->SetDescriptorHeap(m_ResourceManager->GetSUVDHeap()->GetDescriptorHeap());*/
 }
 
 void GraphicsEngine::Render()
@@ -25,7 +27,57 @@ void GraphicsEngine::Render()
 
 void GraphicsEngine::PostRender()
 {
-
+	CommandContext* context = m_GraphicsCore->GetCommandManager()->GetCommandContext();
+	context->Reset();
+	context->SetDescriptorHeap(m_ResourceManager->GetSUVDHeap()->GetDescriptorHeap());
+	// SwapChainのBackBufferIndexを取得
+	UINT backBufferIndex = m_SwapChain->GetBackBufferIndex();
+	// SwapChainResourceの状態遷移
+	context->BarrierTransition(
+		m_SwapChain->GetBackBuffer(backBufferIndex),
+		D3D12_RESOURCE_STATE_PRESENT, 
+		D3D12_RESOURCE_STATE_RENDER_TARGET
+	);
+	// RTVの設定
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = m_ResourceManager->GetRTVDHeap()->GetCpuHandle(backBufferIndex);
+	context->SetRenderTarget(rtvHandle);
+	context->ClearRenderTarget(rtvHandle);
+	// ビューポートの設定
+	D3D12_VIEWPORT viewport =
+		D3D12_VIEWPORT(
+			0.0f, 0.0f,
+			static_cast<float>(WinApp::GetWindowWidth()),
+			static_cast<float>(WinApp::GetWindowHeight()),
+			0.0f, 1.0f
+		);
+	context->SetViewport(viewport);
+	// シザーレクトの設定
+	D3D12_RECT rect = D3D12_RECT(
+		0, 0,
+		WinApp::GetWindowWidth(),
+		WinApp::GetWindowHeight()
+	);
+	context->SetScissorRect(rect);
+	// プリミティブトポロジの設定
+	context->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	// SwapChainResourceの状態遷移
+	context->BarrierTransition(
+		m_SwapChain->GetBackBuffer(backBufferIndex),
+		D3D12_RESOURCE_STATE_RENDER_TARGET,
+		D3D12_RESOURCE_STATE_PRESENT
+	);
+	// コマンドリストのクローズ
+	context->Close();
+	// コマンドリストの実行
+	m_GraphicsCore->GetCommandManager()->ExecuteCommandList(context->GetCommandList(), QueueType::Graphics);
+	// SwapChainのPresent
+	m_SwapChain->Present();
+	// シグナル
+	m_GraphicsCore->GetCommandManager()->Signal(QueueType::Graphics);
+	// GPUの完了待ち
+	m_GraphicsCore->GetCommandManager()->WaitForFence(QueueType::Graphics);
+	// コマンドリストの返却
+	m_GraphicsCore->GetCommandManager()->ReturnCommandContext(context);
 }
 
 void GraphicsEngine::CreateSwapChain(IDXGIFactory7* dxgiFactory)

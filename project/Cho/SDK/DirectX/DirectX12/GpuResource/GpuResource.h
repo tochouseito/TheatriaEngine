@@ -46,6 +46,8 @@ public:
 
 	uint32_t GetDHandleIndex() const { return m_DHandleIndex; }
 	void SetDHandleIndex(const uint32_t& index) { m_DHandleIndex = index; }
+	D3D12_RESOURCE_STATES GetUsageState() const { return m_UsageState; }
+	void SetResourceState(const D3D12_RESOURCE_STATES& state) { m_UsageState = state; }
 
 protected:
 
@@ -54,6 +56,6 @@ protected:
 	D3D12_RESOURCE_STATES m_TransitioningState;// 遷移直前の状態
     D3D12_GPU_VIRTUAL_ADDRESS m_GpuVirtualAddress;
 	uint32_t m_VersionID = 0;// このリソースのバージョンID。リソースが再利用されるとインクリメントされます。
-	uint32_t m_DHandleIndex = 0;// このリソースがディスクリプタヒープに割り当てられたインデックス
+	uint32_t m_DHandleIndex = UINT32_MAX;// このリソースがディスクリプタヒープに割り当てられたインデックス
 };
 

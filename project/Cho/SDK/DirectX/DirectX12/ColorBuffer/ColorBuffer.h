@@ -18,15 +18,19 @@ public:
 		SetHeight(desc.height);
 		SetFormat(desc.format);
 		SetDHandleIndex(desc.dHIndex);
+		SetResourceState(desc.state);
 	}
 	// Constructor
 	ColorBuffer(ID3D12Resource* pResource, BUFFER_COLOR_DESC desc) :
 		PixelBuffer(pResource, desc.state) 
 	{
+		SetWidth(desc.width);
+		SetHeight(desc.height);
+		SetFormat(desc.format);
+		SetDHandleIndex(desc.dHIndex);
 	}
 	// Destructor
 	~ColorBuffer() = default;
 
-	void CreateTextureResource(ID3D12Device8* device, const D3D12_RESOURCE_DESC& desc, const D3D12_RESOURCE_STATES& state);
 };
 

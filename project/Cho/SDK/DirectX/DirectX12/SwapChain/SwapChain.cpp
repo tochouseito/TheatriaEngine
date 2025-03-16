@@ -73,6 +73,12 @@ void SwapChain::CreateSwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* 
 	//}
 }
 
+void SwapChain::Present()
+{
+	HRESULT hr = m_SwapChain->Present(1, 0);
+	ChoAssertLog("Failed to present.", hr, __FILE__, __LINE__);
+}
+
 ID3D12Resource* SwapChain::GetBackBuffer(const uint32_t& index) const
 {
 	ComPtr<ID3D12Resource> pResource = nullptr;

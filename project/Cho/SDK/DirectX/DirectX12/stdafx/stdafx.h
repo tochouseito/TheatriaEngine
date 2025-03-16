@@ -20,6 +20,8 @@
 #define PixelFormat (DXGI_FORMAT_R8G8B8A8_UNORM)
 #endif
 
+static const float kClearColor[] = { 0.1f,0.25f,0.5f,1.0f };
+
 #include <wrl.h>
 using Microsoft::WRL::ComPtr;
 

@@ -27,16 +27,16 @@ ID3D12CommandQueue* CommandManager::GetCommandQueue(QueueType type)
 	return m_QueueContexts[type]->GetCommandQueue();
 }
 
-uint64_t CommandManager::ExecuteCommandList(ID3D12GraphicsCommandList6* commandList, const D3D12_COMMAND_LIST_TYPE& type)
+uint64_t CommandManager::ExecuteCommandList(ID3D12GraphicsCommandList6* commandList, QueueType type)
 {
-	commandList;
 	switch (type)
 	{
-	case D3D12_COMMAND_LIST_TYPE_DIRECT:
+	case Graphics:
+		m_QueueContexts[Graphics]->ExecuteCommandLists(commandList);
 		break;
-	case D3D12_COMMAND_LIST_TYPE_COMPUTE:
+	case Compute:
 		break;
-	case D3D12_COMMAND_LIST_TYPE_COPY:
+	case Copy:
 		break;
 	default:
 		break;
@@ -45,16 +45,32 @@ uint64_t CommandManager::ExecuteCommandList(ID3D12GraphicsCommandList6* commandL
 	return 0;
 }
 
-void CommandManager::WaitForFence(const uint64_t& fenceValue, const D3D12_COMMAND_LIST_TYPE& type)
+void CommandManager::Signal(QueueType type)
 {
-	fenceValue;
 	switch (type)
 	{
-	case D3D12_COMMAND_LIST_TYPE_DIRECT:
+	case Graphics:
+		m_QueueContexts[Graphics]->Signal();
 		break;
-	case D3D12_COMMAND_LIST_TYPE_COMPUTE:
+	case Compute:
 		break;
-	case D3D12_COMMAND_LIST_TYPE_COPY:
+	case Copy:
+		break;
+	default:
+		break;
+	}
+}
+
+void CommandManager::WaitForFence(QueueType type)
+{
+	switch (type)
+	{
+	case Graphics:
+		m_QueueContexts[Graphics]->WaitForFence();
+		break;
+	case Compute:
+		break;
+	case Copy:
 		break;
 	default:
 		break;
@@ -104,6 +120,32 @@ void QueueContext::Reset()
 {
 }
 
+void QueueContext::ExecuteCommandLists(ID3D12GraphicsCommandList6* commandList)
+{
+	ComPtr<ID3D12CommandList> ppCommandLists[] = { commandList };
+	m_CommandQueue->ExecuteCommandLists(1, ppCommandLists->GetAddressOf());
+}
+
+void QueueContext::Signal()
+{
+	m_FenceValue++;
+	// GPUがここまでたどり着いたときに、Fenceの値を指定した値に代入するようにSignalを送る
+	m_CommandQueue->Signal(m_Fence.Get(), m_FenceValue);
+}
+
+void QueueContext::WaitForFence()
+{
+	// Fenceの値が指定したSignal値にたどり着いているか確認する
+	// GetCompletedValueの初期値はFence作成時に渡した初期値
+	if (m_Fence->GetCompletedValue() < m_FenceValue)
+	{
+		// 指定したSignalにたどり着いていないので、たどり着くまで待つようにイベントを設定する
+		m_Fence->SetEventOnCompletion(m_FenceValue, m_FenceEvent);
+		// イベント待つ
+		WaitForSingleObject(m_FenceEvent, INFINITE);
+	}
+}
+
 CommandPool::CommandPool(ID3D12Device* device, D3D12_COMMAND_LIST_TYPE type, size_t poolSize)
 	: m_Device(device), m_Type(type)
 {
@@ -136,6 +178,5 @@ CommandContext* CommandPool::GetContext()
 void CommandPool::ReturnContext(CommandContext* context)
 {
 	std::lock_guard<std::mutex> lock(m_Mutex);
-	context->Reset();
 	m_CommandPool.push(std::unique_ptr<CommandContext>(context));
 }

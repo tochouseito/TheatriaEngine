@@ -30,8 +30,10 @@ public:// メンバ関数
 	// Create Buffer
 	// return: BufferNumber
 	template<typename T, typename = BufferDescType<T>>
-	uint32_t CreateBuffer(const T& desc, ID3D12Resource* pResource = nullptr) { return CreateBufferProcess(desc, pResource); }
-	void RemakeBuffer(const uint32_t& index, const BUFFER_COLOR_DESC& desc) { RemakeBufferProcess(index, desc); }
+	uint32_t CreateBuffer(const T& desc) { return CreateBufferProcess(desc); }
+
+	template<typename T, typename = BufferDescType<T>>
+	void RemakeBuffer(const uint32_t& index, const T& desc) { RemakeBufferProcess(index, desc); }
 
 	// Get Buffer
 	ColorBuffer* GetColorBuffer(const uint32_t& index) { return &m_ColorBuffers[index]; }
@@ -41,9 +43,9 @@ public:// メンバ関数
 private:
 	uint32_t CreateBufferForSwapChain(const BUFFER_COLOR_DESC& desc, ID3D12Resource* pResource);
 	// ColorBufferProcess
-	uint32_t CreateBufferProcess(const BUFFER_COLOR_DESC& desc, ID3D12Resource* pResource = nullptr);
+	uint32_t CreateBufferProcess(const BUFFER_COLOR_DESC& desc);
 	// DepthBufferProcess
-	uint32_t CreateBufferProcess(const BUFFER_DEPTH_DESC& desc, ID3D12Resource* pResource = nullptr);
+	uint32_t CreateBufferProcess(const BUFFER_DEPTH_DESC& desc);
 
 	void RemakeBufferProcess(const uint32_t& index, const BUFFER_COLOR_DESC& desc);
 	void RemakeBufferProcess(const uint32_t& index, const BUFFER_DEPTH_DESC& desc);

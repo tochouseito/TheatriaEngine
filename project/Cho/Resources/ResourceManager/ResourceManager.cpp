@@ -55,7 +55,7 @@ void ResourceManager::CreateSwapChain(SwapChain* swapChain)
 		desc.height = WinApp::GetWindowHeight();
 		desc.format = PixelFormat;
 		desc.dHIndex = m_RTVDescriptorHeap->Create();
-		swapChain->SetIndex(bufferindex, m_BufferManager->CreateBuffer<BUFFER_COLOR_DESC>(desc, pResource.Get()));
+		swapChain->SetIndex(bufferindex, m_BufferManager->CreateForSwapChain(desc, pResource.Get()));
 	}
 }
 
@@ -123,4 +123,14 @@ uint32_t ResourceManager::CreateDepthBuffer(BUFFER_DEPTH_DESC& desc)
 {
 	desc.dHIndex = m_DSVDescriptorHeap->Create();
 	return m_BufferManager->CreateBuffer<BUFFER_DEPTH_DESC>(desc);
+}
+
+void ResourceManager::RemakeColorBuffer(const uint32_t& index, BUFFER_COLOR_DESC& desc)
+{
+	m_BufferManager->RemakeBuffer(index, desc);
+}
+
+void ResourceManager::RemakeDepthBuffer(const uint32_t& index, BUFFER_DEPTH_DESC& desc)
+{
+	m_BufferManager->RemakeBuffer(index, desc);
 }

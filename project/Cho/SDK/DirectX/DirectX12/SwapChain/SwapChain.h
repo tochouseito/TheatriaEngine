@@ -15,10 +15,15 @@ public:
 	~SwapChain();
 	// SwapChainの生成
 	void CreateSwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue, const HWND& hwnd, const int32_t& width, const int32_t& height);
+	// Present
+	void Present();
+
 	// GetBackBuffer
 	ID3D12Resource* GetBackBuffer(const uint32_t& index) const;
 	// SetIndex
 	void SetIndex(const uint32_t& index, const uint32_t& value) { m_Index[index] = value; }
+	// GetBackBufferIndex
+	UINT GetBackBufferIndex() const { return m_SwapChain->GetCurrentBackBufferIndex(); }
 private:
 	ComPtr<IDXGISwapChain4> m_SwapChain = nullptr;
 	DXGI_SWAP_CHAIN_DESC1 m_SwapChainDesc = {};

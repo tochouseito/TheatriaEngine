@@ -16,10 +16,13 @@ public:
 
 	void Initialize();
 	void Reset();
+	void ExecuteCommandLists(ID3D12GraphicsCommandList6* commandList);
+	void Signal();
+	void WaitForFence();
+
 	ID3D12CommandQueue* GetCommandQueue() { return m_CommandQueue.Get(); };
 	ID3D12Fence* GetFence() { return m_Fence.Get(); };
 	uint64_t GetFenceValue() { return m_FenceValue; };
-
 private:
     ComPtr<ID3D12CommandQueue> m_CommandQueue = nullptr;
     ComPtr<ID3D12Fence> m_Fence = nullptr;
@@ -56,11 +59,15 @@ public:
     // コマンドキュー取得
 	ID3D12CommandQueue* GetCommandQueue(QueueType type);
     // コマンドリストの実行
-    uint64_t ExecuteCommandList(ID3D12GraphicsCommandList6* commandList, const D3D12_COMMAND_LIST_TYPE& type);
+    uint64_t ExecuteCommandList(ID3D12GraphicsCommandList6* commandList, QueueType type);
+	// シグナル
+	void Signal(QueueType type);
     // GPU 完了待機
-    void WaitForFence(const uint64_t& fenceValue, const D3D12_COMMAND_LIST_TYPE& type);
+    void WaitForFence(QueueType type);
 	// コマンドリスト取得
 	CommandContext* GetCommandContext() { return m_CommandPool->GetContext(); }
+	// コマンドリスト返却
+	void ReturnCommandContext(CommandContext* context) { m_CommandPool->ReturnContext(context); }
 private:
 	// コマンドキューコンテキストの生成
 	void CreateQueueContexts(ID3D12Device8* device);
