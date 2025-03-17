@@ -35,15 +35,10 @@ protected:
     D3D12_RESOURCE_FLAGS m_ResourceFlags = {};
 };
 
-class ByteAddressBuffer : public GpuBuffer
+class ConstantBuffer : public GpuBuffer
 {
 public:
-    
-};
-
-class IndirectArgsBuffer : public ByteAddressBuffer
-{
-public:
+private:
 };
 
 class StructuredBuffer : public GpuBuffer
@@ -52,9 +47,4 @@ public:
 private:
 };
 
-class TypedBuffer : public GpuBuffer
-{
-public:
-protected:
-};
 

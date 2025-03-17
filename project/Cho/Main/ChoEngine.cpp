@@ -36,13 +36,25 @@ void ChoEngine::Initialize()
 	graphicsEngine = std::make_unique<GraphicsEngine>(dx12->GetDevice(),resourceManager.get());
 	graphicsEngine->Init(dx12->GetDXGIFactory());
 
+	// ImGuiManager初期化
+	imGuiManager = std::make_unique<ImGuiManager>();
+	imGuiManager->Initialize(dx12->GetDevice(), resourceManager.get());
+
 	// GameCore初期化
 	gameCore = std::make_unique<GameCore>();
 	gameCore->Initialize();
+
+	// EditorManager初期化
+	editorManager = std::make_unique<EditorManager>();
+	editorManager->Initialize();
 }
 
 void ChoEngine::Finalize()
 {
+	// GameCore終了処理
+	
+	// ImGuiManager終了処理
+	imGuiManager->Finalize();
 	// PlatformLayer終了処理
 	platformLayer->Finalize();
 	// DirectX12終了処理
@@ -81,8 +93,14 @@ void ChoEngine::Update()
 {
 	// PlatformLayer更新
 	platformLayer->Update();
+	// ImGuiManager開始
+	imGuiManager->Begin();
+	// EditorManager更新
+	editorManager->Update();
 	// GameCore更新
 	gameCore->Update(*resourceManager, *graphicsEngine);
+	// ImGuiManager終了
+	imGuiManager->End();
 }
 
 void ChoEngine::Draw()
@@ -92,7 +110,8 @@ void ChoEngine::Draw()
 	// GameCore描画
 	gameCore->Draw(*graphicsEngine);
 	// 描画後片付け
-	graphicsEngine->PostRender();
+	//graphicsEngine->PostRender();
+	graphicsEngine->PostRenderWithImGui(imGuiManager.get());
 }
 
 void ChoEngine::Start()

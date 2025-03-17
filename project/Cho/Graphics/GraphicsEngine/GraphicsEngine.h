@@ -9,7 +9,7 @@
 #include "SDK/DirectX/DirectX12/ColorBuffer/ColorBuffer.h"
 
 class ResourceManager;
-
+class ImGuiManager;
 class GraphicsEngine : public Engine
 {
 public:
@@ -27,6 +27,7 @@ public:
 	void PreRender();
 	void Render();
 	void PostRender();
+	void PostRenderWithImGui(ImGuiManager* imgui);
 private:
 	void CreateSwapChain(IDXGIFactory7* dxgiFactory);
 	void CreateDepthBuffer();

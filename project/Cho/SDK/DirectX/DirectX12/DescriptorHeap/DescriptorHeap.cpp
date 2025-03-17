@@ -79,7 +79,10 @@ SUVDescriptorHeap::~SUVDescriptorHeap()
 
 uint32_t SUVDescriptorHeap::Create()
 {
-	return 0;
+	uint32_t index = static_cast<uint32_t>(m_Handles.push_back(DescriptorHandle()));
+	m_Handles[index].SetCPUHandle(GetCPUDescriptorHandle(index));
+	m_Handles[index].SetGPUHandle(GetGPUDescriptorHandle(index));
+	return index;
 }
 
 RTVDescriptorHeap::RTVDescriptorHeap(ID3D12Device8* device, const uint32_t& maxDescriptor)

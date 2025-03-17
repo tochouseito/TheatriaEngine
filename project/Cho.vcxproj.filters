@@ -1,22 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="Cho\Externals\meshoptimizer\allocator.cpp" />
-    <ClCompile Include="Cho\Externals\meshoptimizer\clusterizer.cpp" />
-    <ClCompile Include="Cho\Externals\meshoptimizer\indexcodec.cpp" />
-    <ClCompile Include="Cho\Externals\meshoptimizer\indexgenerator.cpp" />
-    <ClCompile Include="Cho\Externals\meshoptimizer\overdrawanalyzer.cpp" />
-    <ClCompile Include="Cho\Externals\meshoptimizer\overdrawoptimizer.cpp" />
-    <ClCompile Include="Cho\Externals\meshoptimizer\quantization.cpp" />
-    <ClCompile Include="Cho\Externals\meshoptimizer\simplifier.cpp" />
-    <ClCompile Include="Cho\Externals\meshoptimizer\spatialorder.cpp" />
-    <ClCompile Include="Cho\Externals\meshoptimizer\stripifier.cpp" />
-    <ClCompile Include="Cho\Externals\meshoptimizer\vcacheanalyzer.cpp" />
-    <ClCompile Include="Cho\Externals\meshoptimizer\vcacheoptimizer.cpp" />
-    <ClCompile Include="Cho\Externals\meshoptimizer\vertexcodec.cpp" />
-    <ClCompile Include="Cho\Externals\meshoptimizer\vertexfilter.cpp" />
-    <ClCompile Include="Cho\Externals\meshoptimizer\vfetchanalyzer.cpp" />
-    <ClCompile Include="Cho\Externals\meshoptimizer\vfetchoptimizer.cpp" />
     <ClCompile Include="Cho\OS\Windows\WinApp\WinApp.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\DirectX12Common\DirectX12Common.cpp" />
@@ -57,9 +41,9 @@
     <ClCompile Include="Cho\Graphics\VisualEffect\VFXManager.cpp" />
     <ClCompile Include="Cho\Graphics\PipelineManager\PipelineManager.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DXC\DXShaderCompiler.cpp" />
+    <ClCompile Include="Cho\Editor\MainMenu\MainMenu.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Cho\Externals\meshoptimizer\meshoptimizer.h" />
     <ClInclude Include="Cho\OS\Windows\WinApp\WinApp.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\DirectX12Common\DirectX12Common.h" />
     <ClInclude Include="Cho\Engine\Engine.h" />
@@ -105,6 +89,7 @@
     <ClInclude Include="Cho\Graphics\VisualEffect\VFXManager.h" />
     <ClInclude Include="Cho\Graphics\PipelineManager\PipelineManager.h" />
     <ClInclude Include="Cho\SDK\DirectX\DXC\DXShaderCompiler.h" />
+    <ClInclude Include="Cho\Editor\MainMenu\MainMenu.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Cho\Resources\Shader\header\Demo.hlsli" />

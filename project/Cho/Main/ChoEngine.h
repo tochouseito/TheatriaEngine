@@ -24,8 +24,14 @@ ChoEngineクラス
 // GraphicsEngine
 #include "Cho/Graphics/GraphicsEngine/GraphicsEngine.h"
 
+// ImGuiManager
+#include "Cho/SDK/ImGui/ImGuiManager/ImGuiManager.h"
+
 // GameCore
 #include "Cho/GameCore/GameCore.h"
+
+// EditorManager
+#include "Cho/Editor/EditorManager/EditorManager.h"
 
 class ChoEngine : public Engine
 {
@@ -75,7 +81,13 @@ private:// member
 	// GraphicsEngine
 	std::unique_ptr<GraphicsEngine> graphicsEngine = nullptr;// GraphicsEngine
 
+	// ImGuiManager
+	std::unique_ptr<ImGuiManager> imGuiManager = nullptr;// ImGuiManager
+
 	// GameCore
 	std::unique_ptr<GameCore> gameCore = nullptr;// GameCore
+
+	// EditorManager
+	std::unique_ptr<EditorManager> editorManager = nullptr;// EditorManager
 };
 
