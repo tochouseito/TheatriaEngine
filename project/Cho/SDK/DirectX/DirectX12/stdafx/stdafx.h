@@ -10,6 +10,9 @@
 
 #include <d3d12.h>
 #include <dxgi1_6.h>
+#include <d3d12shader.h>
+#include <d3dcompiler.h>
+#include <dxcapi.h>
 
 // なぜか定義されていないので追加
 #ifndef D3D12_GPU_VIRTUAL_ADDRESS_NULL

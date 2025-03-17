@@ -56,6 +56,7 @@
     <ClCompile Include="Cho\GameCore\ECS\ECSManager.cpp" />
     <ClCompile Include="Cho\Graphics\VisualEffect\VFXManager.cpp" />
     <ClCompile Include="Cho\Graphics\PipelineManager\PipelineManager.cpp" />
+    <ClCompile Include="Cho\SDK\DirectX\DXC\DXShaderCompiler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cho\Externals\meshoptimizer\meshoptimizer.h" />
@@ -103,5 +104,16 @@
     <ClInclude Include="Cho\Core\Utility\CompBufferData.h" />
     <ClInclude Include="Cho\Graphics\VisualEffect\VFXManager.h" />
     <ClInclude Include="Cho\Graphics\PipelineManager\PipelineManager.h" />
+    <ClInclude Include="Cho\SDK\DirectX\DXC\DXShaderCompiler.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Cho\Resources\Shader\header\Demo.hlsli" />
+    <None Include="Cho\Resources\Shader\header\ScreenCopy.hlsli" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Cho\Resources\Shader\ScreenCopy\ScreenCopy.VS.hlsl" />
+    <FxCompile Include="Cho\Resources\Shader\ScreenCopy\ScreenCopy.PS.hlsl" />
+    <FxCompile Include="Cho\Resources\Shader\Demo\Demo.PS.hlsl" />
+    <FxCompile Include="Cho\Resources\Shader\Demo\Demo.VS.hlsl" />
   </ItemGroup>
 </Project>

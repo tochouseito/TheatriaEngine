@@ -11,6 +11,8 @@ void GraphicsEngine::Init(IDXGIFactory7* dxgiFactory)
 	CreateDepthBuffer();
 	// オフスクリーンレンダリング用のリソースを作成
 	
+	// パイプラインの生成
+	m_PipelineManager->Initialize(m_Device);
 }
 
 void GraphicsEngine::PreRender()
@@ -96,7 +98,6 @@ void GraphicsEngine::CreateSwapChain(IDXGIFactory7* dxgiFactory)
 void GraphicsEngine::CreateDepthBuffer()
 {
 	// DepthBufferの生成
-	m_DepthManager = std::make_unique<DepthManager>();
 	// DepthBufferのリソースを作成
 	BUFFER_DEPTH_DESC desc = {};
 	desc.width = WinApp::GetWindowWidth();
