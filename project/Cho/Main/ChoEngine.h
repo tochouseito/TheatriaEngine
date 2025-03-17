@@ -89,5 +89,6 @@ private:// member
 
 	// EditorManager
 	std::unique_ptr<EditorManager> editorManager = nullptr;// EditorManager
+	std::unique_ptr<EditorCommand> editorCommand = nullptr;// EditorCommand
 };
 

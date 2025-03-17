@@ -159,6 +159,7 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClCompile Include="Cho\GameCore\GameObject\GameObject.cpp" />
     <ClCompile Include="Cho\GameCore\ECS\ECSManager.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DXC\DXShaderCompiler.cpp" />
+    <ClCompile Include="Cho\Editor\EditorCommand\EditorCommand.cpp" />
     <ClCompile Include="main.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
@@ -227,6 +228,7 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClInclude Include="Cho\Graphics\PipelineManager\PipelineManager.h" />
     <ClInclude Include="Cho\SDK\DirectX\DXC\DXShaderCompiler.h" />
     <ClInclude Include="Cho\Editor\MainMenu\MainMenu.h" />
+    <ClInclude Include="Cho\Editor\EditorCommand\EditorCommand.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Cho\Externals\ChoMath\ChoMath.vcxproj">

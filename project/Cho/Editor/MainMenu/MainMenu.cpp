@@ -90,7 +90,6 @@ void MainMenu::LayoutMenu()
     static bool showDemoImGui = false;
     // ドッキング解除を無効にするフラグ
     ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDocking;
-
     if (ImGui::BeginMenu("レイアウト"))
     {
         if (ImGui::MenuItem("Show Style Editor"))

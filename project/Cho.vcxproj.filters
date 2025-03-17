@@ -42,6 +42,7 @@
     <ClCompile Include="Cho\Graphics\PipelineManager\PipelineManager.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DXC\DXShaderCompiler.cpp" />
     <ClCompile Include="Cho\Editor\MainMenu\MainMenu.cpp" />
+    <ClCompile Include="Cho\Editor\EditorCommand\EditorCommand.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cho\OS\Windows\WinApp\WinApp.h" />
@@ -90,6 +91,7 @@
     <ClInclude Include="Cho\Graphics\PipelineManager\PipelineManager.h" />
     <ClInclude Include="Cho\SDK\DirectX\DXC\DXShaderCompiler.h" />
     <ClInclude Include="Cho\Editor\MainMenu\MainMenu.h" />
+    <ClInclude Include="Cho\Editor\EditorCommand\EditorCommand.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Cho\Resources\Shader\header\Demo.hlsli" />
