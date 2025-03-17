@@ -14,10 +14,17 @@ void ImGuiManager::Initialize(ID3D12Device8* device, ResourceManager* resourceMa
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Dockingを有効化
 	io.Fonts->AddFontFromFileTTF(
-		"C:\\Windows\\Fonts\\Arial.ttf", 16.0f // フォントファイルのパスとフォントサイズ
-	);
+		//"C:\\Windows\\Fonts\\Arial.ttf",
+		"C:/Windows/Fonts/msgothic.ttc",
+		16.0f,// フォントファイルのパスとフォントサイズ
+		nullptr, io.Fonts->GetGlyphRangesJapanese()// フォントの範囲
+		);
+	unsigned char* texPixels = nullptr;
+	int texWidth, texHeight;
+	io.Fonts->GetTexDataAsAlpha8(&texPixels, &texWidth, &texHeight);
 	// 標準フォントを追加する
 	io.Fonts->AddFontDefault();
+	//io.Fonts->Build();
 	// ImGuiのスタイルを設定
 	ImGui::StyleColorsDark();
 
