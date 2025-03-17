@@ -36,6 +36,9 @@ public:// メンバ関数
 	// ウィンドウの破棄
 	static void TerminateWindow();
 
+	// webを開く
+	static void OpenWebURL(const wchar_t* url);
+
 	/*Getter*/
 	static HWND GetHWND() { return m_HWND; }
 	static HINSTANCE GetHInstance() { return m_WC.hInstance; }

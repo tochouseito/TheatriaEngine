@@ -21,6 +21,7 @@ private:
 	void EditMenu();
 	void LayoutMenu();
 	void EngineInfoMenu();
+	void HelpMenu();
 
 	EditorManager* m_EditorManager = nullptr;
 };

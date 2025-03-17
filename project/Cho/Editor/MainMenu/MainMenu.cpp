@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "MainMenu.h"
 #include <imgui.h>
+#include "Cho/OS/Windows/WinApp/WinApp.h"
 
 void MainMenu::Initialize()
 {
@@ -67,6 +68,9 @@ void MainMenu::MenuBar()
         // Engine情報を表示
         EngineInfoMenu();
 
+		// Helpメニュー
+		HelpMenu();
+
         ImGui::EndMenuBar(); // メニューバーを終了
     }
 }
@@ -122,4 +126,17 @@ void MainMenu::LayoutMenu()
 
 void MainMenu::EngineInfoMenu()
 {
+}
+
+void MainMenu::HelpMenu()
+{
+    if (ImGui::BeginMenu("Help"))
+    {
+        if(ImGui::Button("https://tochouseito.github.io/ChoEngine_Docs/"))
+        {
+			WinApp::OpenWebURL(L"https://tochouseito.github.io/ChoEngine_Docs/");
+        }
+        
+        ImGui::EndMenu();
+    }
 }

@@ -1,14 +1,12 @@
 #include "pch.h"
 #include "WinApp.h"
 #pragma comment(lib,"winmm.lib")
-
+#include <shellapi.h>
+#include "Core/Log/Log.h"
+#include <imgui.h>
 #include <imgui_impl_win32.h>
 extern IMGUI_IMPL_API LRESULT
 ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-
-#include "imgui.h"
-
-#include "Core/Log/Log.h"
 
 HWND WinApp::m_HWND = nullptr;
 WNDCLASS WinApp::m_WC = {}; // ウィンドウクラス
@@ -147,6 +145,11 @@ void WinApp::TerminateWindow()
 
 	// Log出力
 	ChoLog("TerminateWindow End");
+}
+
+void WinApp::OpenWebURL(const wchar_t* url)
+{
+	ShellExecuteW(nullptr, L"open", url, nullptr, nullptr, SW_SHOWNORMAL);
 }
 
 // ウィンドウサイズ変更時の処理
