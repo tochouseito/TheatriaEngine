@@ -176,12 +176,14 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\stdafx\stdafx.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\SwapChain\SwapChain.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\PixelBuffer\PixelBuffer.cpp" />
-    <ClCompile Include="Cho\Resources\TextureManager\TextureManager.cpp" />
     <ClCompile Include="Cho\GameCore\SceneManager\SceneManager.cpp" />
     <ClCompile Include="Cho\GameCore\ObjectContainer\ObjectContainer.cpp" />
     <ClCompile Include="Cho\Graphics\VisualEffect\VFXManager.cpp" />
     <ClCompile Include="Cho\Graphics\PipelineManager\PipelineManager.cpp" />
     <ClCompile Include="Cho\Editor\MainMenu\MainMenu.cpp" />
+    <ClCompile Include="Cho\Resources\ModelManager\ModelManager.cpp" />
+    <ClCompile Include="Cho\Resources\TextureManager\TextureManager.cpp" />
+    <ClCompile Include="Cho\SDK\DirectX\DirectX12\VertexBuffer\VertexBuffer.cpp" />
     <ClInclude Include="Cho\Core\Utility\BufferID.h" />
     <ClInclude Include="Cho\Core\Utility\Color.h" />
     <ClInclude Include="Cho\Core\Utility\CompBufferData.h" />
@@ -213,7 +215,6 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\GpuBuffer\GpuBuffer.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\PixelBuffer\PixelBuffer.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\ColorBuffer\ColorBuffer.h" />
-    <ClInclude Include="Cho\Resources\TextureManager\TextureManager.h" />
     <ClInclude Include="Cho\Graphics\GraphicsEngine\GraphicsEngine.h" />
     <ClInclude Include="Cho\Graphics\GraphicsCore\GraphicsCore.h" />
     <ClInclude Include="Cho\Editor\EditorManager\EditorManager.h" />
@@ -229,6 +230,9 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClInclude Include="Cho\SDK\DirectX\DXC\DXShaderCompiler.h" />
     <ClInclude Include="Cho\Editor\MainMenu\MainMenu.h" />
     <ClInclude Include="Cho\Editor\EditorCommand\EditorCommand.h" />
+    <ClInclude Include="Cho\Resources\ModelManager\ModelManager.h" />
+    <ClInclude Include="Cho\Resources\TextureManager\TextureManager.h" />
+    <ClInclude Include="Cho\SDK\DirectX\DirectX12\VertexBuffer\VertexBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Cho\Externals\ChoMath\ChoMath.vcxproj">

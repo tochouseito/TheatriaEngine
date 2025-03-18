@@ -6,6 +6,8 @@
 
 #include "SDK/DirectX/DirectX12/DescriptorHeap/DescriptorHeap.h"
 #include "SDK/DirectX/DirectX12/BufferManager/BufferManager.h"
+#include "Resources/ModelManager/ModelManager.h"
+#include "Resources/TextureManager/TextureManager.h"
 #include <optional>
 
 class SwapChain;
@@ -62,5 +64,9 @@ private:
 	std::unique_ptr<DescriptorHeap> m_RTVDescriptorHeap = nullptr;
 	// DSVディスクリプタヒープ
 	std::unique_ptr<DescriptorHeap> m_DSVDescriptorHeap = nullptr;
+	// テクスチャマネージャ
+	std::unique_ptr<TextureManager> m_TextureManager = nullptr;
+	// モデルマネージャ
+	std::unique_ptr<ModelManager> m_ModelManager = nullptr;
 };
 

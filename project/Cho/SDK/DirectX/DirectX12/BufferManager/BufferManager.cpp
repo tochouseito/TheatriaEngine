@@ -130,6 +130,17 @@ uint32_t BufferManager::CreateBufferProcess(const BUFFER_DEPTH_DESC& desc)
 	return index;
 }
 
+uint32_t BufferManager::CreateBufferProcess(const BUFFER_VERTEX_DESC& desc)
+{
+	VertexBuffer buffer(desc);
+	// Resourceの生成
+	buffer.CreateVertexResource(m_Device, desc.numElements, desc.structuredByteStride);
+
+	// コンテナに移動
+	uint32_t index = static_cast<uint32_t>(m_VertexBuffers.push_back(std::move(VertexBuffer(desc))));
+	return 0;
+}
+
 void BufferManager::RemakeBufferProcess(const uint32_t& index, const BUFFER_COLOR_DESC& desc)
 {
 	index;

@@ -4,17 +4,20 @@
 #include "Cho/SDK/DirectX/DirectX12/GpuBuffer/GpuBuffer.h"
 #include "Cho/SDK/DirectX/DirectX12/ColorBuffer/ColorBuffer.h"
 #include "Cho/SDK/DirectX/DirectX12/DepthBuffer/DepthBuffer.h"
+#include "Cho/SDK/DirectX/DirectX12/VertexBuffer/VertexBuffer.h"
 
 // 有効なBufferの型
 template<typename T>
 using BufferType = std::enable_if_t<
 	std::is_same_v<T, ColorBuffer> ||
-	std::is_same_v<T, DepthBuffer>
+	std::is_same_v<T, DepthBuffer> ||
+	std::is_same_v<T, VertexBuffer>
 >;
 template<typename T>
 using BufferDescType = std::enable_if_t<
 	std::is_same_v<T, BUFFER_COLOR_DESC> ||
-	std::is_same_v<T, BUFFER_DEPTH_DESC>
+	std::is_same_v<T, BUFFER_DEPTH_DESC> ||
+	std::is_same_v<T, BUFFER_VERTEX_DESC>
 >;
 
 class ResourceManager;
@@ -46,6 +49,8 @@ private:
 	uint32_t CreateBufferProcess(const BUFFER_COLOR_DESC& desc);
 	// DepthBufferProcess
 	uint32_t CreateBufferProcess(const BUFFER_DEPTH_DESC& desc);
+	// VertexBufferProcess
+	uint32_t CreateBufferProcess(const BUFFER_VERTEX_DESC& desc);
 
 	void RemakeBufferProcess(const uint32_t& index, const BUFFER_COLOR_DESC& desc);
 	void RemakeBufferProcess(const uint32_t& index, const BUFFER_DEPTH_DESC& desc);
@@ -55,5 +60,6 @@ private:
 	// BufferContainer
 	FVector<ColorBuffer> m_ColorBuffers;
 	FVector<DepthBuffer> m_DepthBuffers;
+	FVector<VertexBuffer> m_VertexBuffers;
 };
 

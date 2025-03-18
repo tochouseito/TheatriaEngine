@@ -64,3 +64,9 @@ struct CameraComponent final
     //ConstBufferDataViewProjection* constData = nullptr;
     uint32_t cbvIndex = 0;
 };
+
+// メッシュコンポーネント
+struct MeshComponent final
+{
+	uint32_t modelID = 0;// Model選択用ID
+};

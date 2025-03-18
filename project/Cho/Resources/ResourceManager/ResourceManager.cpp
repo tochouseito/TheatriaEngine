@@ -8,8 +8,10 @@ ResourceManager::ResourceManager(ID3D12Device8* device)
 	CreateHeap(device);// デバイスを受け取り、プールを作成する
 
 	m_BufferManager = std::make_unique<BufferManager>(device, this);// バッファマネージャの生成
+	m_TextureManager = std::make_unique<TextureManager>();// テクスチャマネージャの生成
+	m_ModelManager = std::make_unique<ModelManager>(m_BufferManager.get());// モデルマネージャの生成
 	m_Device = device;// デバイスの設定
-
+	
 	Initialize();// 初期化
 }
 

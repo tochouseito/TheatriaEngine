@@ -27,7 +27,6 @@
     <ClCompile Include="Cho\Core\ChoAssert\ChoAssert.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\BufferManager\BufferManager.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\ColorBuffer\ColorBuffer.cpp" />
-    <ClCompile Include="Cho\Resources\TextureManager\TextureManager.cpp" />
     <ClCompile Include="Cho\Graphics\GraphicsEngine\GraphicsEngine.cpp" />
     <ClCompile Include="Cho\Graphics\GraphicsCore\GraphicsCore.cpp" />
     <ClCompile Include="Cho\Editor\EditorManager\EditorManager.cpp" />
@@ -43,6 +42,9 @@
     <ClCompile Include="Cho\SDK\DirectX\DXC\DXShaderCompiler.cpp" />
     <ClCompile Include="Cho\Editor\MainMenu\MainMenu.cpp" />
     <ClCompile Include="Cho\Editor\EditorCommand\EditorCommand.cpp" />
+    <ClCompile Include="Cho\Resources\TextureManager\TextureManager.cpp" />
+    <ClCompile Include="Cho\Resources\ModelManager\ModelManager.cpp" />
+    <ClCompile Include="Cho\SDK\DirectX\DirectX12\VertexBuffer\VertexBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cho\OS\Windows\WinApp\WinApp.h" />
@@ -72,7 +74,6 @@
     <ClInclude Include="Cho\Core\ChoAssert\ChoAssert.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\BufferManager\BufferManager.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\ColorBuffer\ColorBuffer.h" />
-    <ClInclude Include="Cho\Resources\TextureManager\TextureManager.h" />
     <ClInclude Include="Cho\Core\Utility\Color.h" />
     <ClInclude Include="Cho\Core\Utility\BufferID.h" />
     <ClInclude Include="Cho\Graphics\GraphicsEngine\GraphicsEngine.h" />
@@ -92,6 +93,9 @@
     <ClInclude Include="Cho\SDK\DirectX\DXC\DXShaderCompiler.h" />
     <ClInclude Include="Cho\Editor\MainMenu\MainMenu.h" />
     <ClInclude Include="Cho\Editor\EditorCommand\EditorCommand.h" />
+    <ClInclude Include="Cho\Resources\TextureManager\TextureManager.h" />
+    <ClInclude Include="Cho\Resources\ModelManager\ModelManager.h" />
+    <ClInclude Include="Cho\SDK\DirectX\DirectX12\VertexBuffer\VertexBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Cho\Resources\Shader\header\Demo.hlsli" />
