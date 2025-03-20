@@ -135,9 +135,24 @@ uint32_t BufferManager::CreateBufferProcess(const BUFFER_VERTEX_DESC& desc)
 	VertexBuffer buffer(desc);
 	// Resourceの生成
 	buffer.CreateVertexResource(m_Device, desc.numElements, desc.structuredByteStride);
+	// SRVの設定
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+	srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+	srvDesc.Buffer.FirstElement = 0;
+	srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+	srvDesc.Buffer.NumElements = desc.numElements;
+	srvDesc.Buffer.StructureByteStride = desc.structuredByteStride;
+	// Viewの作成
+	m_Device->CreateShaderResourceView(
+		buffer.GetResource(),
+		&srvDesc,
+		m_ResourceManager->GetSUVDHeap()->GetCpuHandle(desc.dHIndex)
+	);
 
 	// コンテナに移動
-	uint32_t index = static_cast<uint32_t>(m_VertexBuffers.push_back(std::move(VertexBuffer(desc))));
+	uint32_t index = static_cast<uint32_t>(m_VertexBuffers.push_back(std::move(buffer)));
 	return 0;
 }
 
@@ -148,6 +163,12 @@ void BufferManager::RemakeBufferProcess(const uint32_t& index, const BUFFER_COLO
 }
 
 void BufferManager::RemakeBufferProcess(const uint32_t& index, const BUFFER_DEPTH_DESC& desc)
+{
+	index;
+	desc;
+}
+
+void BufferManager::RemakeBufferProcess(const uint32_t& index, const BUFFER_VERTEX_DESC& desc)
 {
 	index;
 	desc;

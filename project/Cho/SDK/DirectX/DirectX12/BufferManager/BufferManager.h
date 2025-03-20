@@ -54,6 +54,7 @@ private:
 
 	void RemakeBufferProcess(const uint32_t& index, const BUFFER_COLOR_DESC& desc);
 	void RemakeBufferProcess(const uint32_t& index, const BUFFER_DEPTH_DESC& desc);
+	void RemakeBufferProcess(const uint32_t& index, const BUFFER_VERTEX_DESC& desc);
 
 	ID3D12Device8* m_Device = nullptr;
 	ResourceManager* m_ResourceManager = nullptr;

@@ -127,12 +127,23 @@ uint32_t ResourceManager::CreateDepthBuffer(BUFFER_DEPTH_DESC& desc)
 	return m_BufferManager->CreateBuffer<BUFFER_DEPTH_DESC>(desc);
 }
 
+uint32_t ResourceManager::CreateVertexBuffer(BUFFER_VERTEX_DESC& desc)
+{
+	desc.dHIndex = m_SUVDescriptorHeap->Create();
+	return m_BufferManager->CreateBuffer<BUFFER_VERTEX_DESC>(desc);
+}
+
 void ResourceManager::RemakeColorBuffer(const uint32_t& index, BUFFER_COLOR_DESC& desc)
 {
 	m_BufferManager->RemakeBuffer(index, desc);
 }
 
 void ResourceManager::RemakeDepthBuffer(const uint32_t& index, BUFFER_DEPTH_DESC& desc)
+{
+	m_BufferManager->RemakeBuffer(index, desc);
+}
+
+void ResourceManager::RemakeVertexBuffer(const uint32_t& index, BUFFER_VERTEX_DESC& desc)
 {
 	m_BufferManager->RemakeBuffer(index, desc);
 }

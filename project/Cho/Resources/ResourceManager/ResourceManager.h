@@ -33,10 +33,12 @@ public:
 	// BufferMethod
 	uint32_t CreateColorBuffer(BUFFER_COLOR_DESC& desc);
 	uint32_t CreateDepthBuffer(BUFFER_DEPTH_DESC& desc);
+	uint32_t CreateVertexBuffer(BUFFER_VERTEX_DESC& desc);
 
 	// RemakeMethod
 	void RemakeColorBuffer(const uint32_t& index, BUFFER_COLOR_DESC& desc);
 	void RemakeDepthBuffer(const uint32_t& index, BUFFER_DEPTH_DESC& desc);
+	void RemakeVertexBuffer(const uint32_t& index, BUFFER_VERTEX_DESC& desc);
 	//Getters
 	DescriptorHeap* GetSUVDHeap() const { return m_SUVDescriptorHeap.get(); }
 	DescriptorHeap* GetRTVDHeap() const { return m_RTVDescriptorHeap.get(); }
