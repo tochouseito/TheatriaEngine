@@ -6,6 +6,12 @@ struct BUFFER_VERTEX_DESC
 	UINT structuredByteStride;
 	D3D12_RESOURCE_STATES state;
 	uint32_t dHIndex;
+	uint32_t dHIndexForIBV;
+	UINT numElementsForIBV;
+	UINT structuredByteStrideForIBV;
+	// マップ用データにコピーするためのポインタ
+	void* mappedVertices = nullptr;
+	void* mappedIndices = nullptr;
 };
 class VertexBuffer : public GpuBuffer
 {
@@ -15,6 +21,7 @@ public:
 	{
 		SetDHandleIndex(desc.dHIndex);
 		SetResourceState(desc.state);
+		m_IndexBuffer.SetDHandleIndex(desc.dHIndexForIBV);
 	}
 	// Constructor
 	VertexBuffer(ID3D12Resource* pResource, BUFFER_VERTEX_DESC desc) :
@@ -25,8 +32,16 @@ public:
 	~VertexBuffer()
 	{
 	}
-	void CreateVertexResource(ID3D12Device8* device, const UINT& numElements, const UINT& structuredByteStride);
-private:
+	// DestoryIndexBuffer
+	void DestroyIndexBuffer() { m_IndexBuffer.Destroy(); }
+	ID3D12Resource* GetIndexResource() { return m_IndexBuffer.GetResource(); }
 
+	uint32_t GetIndexBufferDHandleIndex() const { return m_IndexBuffer.GetDHandleIndex(); }
+	void CreateVertexResource(ID3D12Device8* device, const UINT& numElements, const UINT& structuredByteStride);
+	void CreateIndexResource(ID3D12Device8* device, const UINT& numElements, const UINT& structuredByteStride);
+private:
+	GpuBuffer m_IndexBuffer;// IndexBufferResource
+	D3D12_VERTEX_BUFFER_VIEW m_VertexBufferView = {};
+	D3D12_INDEX_BUFFER_VIEW m_IndexBufferView = {};
 };
 

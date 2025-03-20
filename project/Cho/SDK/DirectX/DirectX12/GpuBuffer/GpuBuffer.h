@@ -24,6 +24,10 @@ public:
     size_t GetBufferSize() const { return m_BufferSize; }
     uint32_t GetElementCount() const { return m_ElementCount; }
     uint32_t GetElementSize() const { return m_ElementSize; }
+
+	// Setter
+	void SetElementCount(const uint32_t& elementCount) { m_ElementCount = elementCount; }
+	void SetElementSize(const uint32_t& elementSize) { m_ElementSize = elementSize; }
 protected:
     size_t m_BufferSize = {};
     uint32_t m_ElementCount = {};

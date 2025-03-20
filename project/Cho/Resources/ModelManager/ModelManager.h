@@ -14,6 +14,7 @@ struct MeshData
 	std::wstring name;
 	std::vector<VertexData> vertices;
 	std::vector<uint32_t> indices;
+	uint32_t vertexBufferIndex = UINT32_MAX;
 };
 struct ModelData
 {
@@ -21,12 +22,12 @@ struct ModelData
 	std::vector<MeshData> meshes;
 };
 
-class BufferManager;
+class ResourceManager;
 class ModelManager
 {
 public:
-	ModelManager(BufferManager* bufferManager)
-		:m_BufferManager(bufferManager)
+	ModelManager(ResourceManager* resourceManager)
+		:m_ResourceManager(resourceManager)
 	{
 		CreateDefaultMesh();
 	}
@@ -39,7 +40,7 @@ private:
 	// デフォルトメッシュの生成
 	void CreateDefaultMesh();
 
-	BufferManager* m_BufferManager = nullptr;
+	ResourceManager* m_ResourceManager = nullptr;
 	// モデルデータコンテナ
 	FVector<ModelData> m_Models;
 };

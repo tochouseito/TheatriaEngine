@@ -9,7 +9,7 @@ ResourceManager::ResourceManager(ID3D12Device8* device)
 
 	m_BufferManager = std::make_unique<BufferManager>(device, this);// バッファマネージャの生成
 	m_TextureManager = std::make_unique<TextureManager>();// テクスチャマネージャの生成
-	m_ModelManager = std::make_unique<ModelManager>(m_BufferManager.get());// モデルマネージャの生成
+	m_ModelManager = std::make_unique<ModelManager>(this);// モデルマネージャの生成
 	m_Device = device;// デバイスの設定
 	
 	Initialize();// 初期化
@@ -130,6 +130,7 @@ uint32_t ResourceManager::CreateDepthBuffer(BUFFER_DEPTH_DESC& desc)
 uint32_t ResourceManager::CreateVertexBuffer(BUFFER_VERTEX_DESC& desc)
 {
 	desc.dHIndex = m_SUVDescriptorHeap->Create();
+	desc.dHIndexForIBV = m_SUVDescriptorHeap->Create();
 	return m_BufferManager->CreateBuffer<BUFFER_VERTEX_DESC>(desc);
 }
 

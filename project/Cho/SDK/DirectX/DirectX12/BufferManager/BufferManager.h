@@ -51,11 +51,11 @@ public:// メンバ関数
 private:
 	uint32_t CreateBufferForSwapChain(const BUFFER_COLOR_DESC& desc, ID3D12Resource* pResource);
 	// ColorBufferProcess
-	uint32_t CreateBufferProcess(const BUFFER_COLOR_DESC& desc);
+	uint32_t CreateBufferProcess(BUFFER_COLOR_DESC& desc);
 	// DepthBufferProcess
-	uint32_t CreateBufferProcess(const BUFFER_DEPTH_DESC& desc);
+	uint32_t CreateBufferProcess(BUFFER_DEPTH_DESC& desc);
 	// VertexBufferProcess
-	uint32_t CreateBufferProcess(const BUFFER_VERTEX_DESC& desc);
+	uint32_t CreateBufferProcess(BUFFER_VERTEX_DESC& desc);
 
 	void RemakeBufferProcess(const uint32_t& index, const BUFFER_COLOR_DESC& desc);
 	void RemakeBufferProcess(const uint32_t& index, const BUFFER_DEPTH_DESC& desc);

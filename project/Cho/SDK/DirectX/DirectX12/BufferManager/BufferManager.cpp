@@ -29,7 +29,9 @@ void BufferManager::ReleaseDepthBuffer(const uint32_t& index)
 
 void BufferManager::ReleaseVertexBuffer(const uint32_t& index)
 {
+	m_ResourceManager->GetSUVDHeap()->RemoveHandle(m_VertexBuffers[index].GetIndexBufferDHandleIndex());
 	m_ResourceManager->GetSUVDHeap()->RemoveHandle(m_VertexBuffers[index].GetDHandleIndex());
+	m_VertexBuffers[index].DestroyIndexBuffer();
 	m_VertexBuffers[index].Destroy();
 	m_VertexBuffers.erase(index);
 }
@@ -52,7 +54,7 @@ uint32_t BufferManager::CreateBufferForSwapChain(const BUFFER_COLOR_DESC& desc, 
 	return index;
 }
 
-uint32_t BufferManager::CreateBufferProcess(const BUFFER_COLOR_DESC& desc)
+uint32_t BufferManager::CreateBufferProcess(BUFFER_COLOR_DESC& desc)
 {
 	if (!desc.width || !desc.height)
 	{
@@ -112,7 +114,7 @@ uint32_t BufferManager::CreateBufferProcess(const BUFFER_COLOR_DESC& desc)
 	return index;
 }
 
-uint32_t BufferManager::CreateBufferProcess(const BUFFER_DEPTH_DESC& desc)
+uint32_t BufferManager::CreateBufferProcess(BUFFER_DEPTH_DESC& desc)
 {
 	DepthBuffer buffer(desc);
 	// 生成するResourceの設定
@@ -151,27 +153,48 @@ uint32_t BufferManager::CreateBufferProcess(const BUFFER_DEPTH_DESC& desc)
 	return index;
 }
 
-uint32_t BufferManager::CreateBufferProcess(const BUFFER_VERTEX_DESC& desc)
+uint32_t BufferManager::CreateBufferProcess(BUFFER_VERTEX_DESC& desc)
 {
 	VertexBuffer buffer(desc);
 	// Resourceの生成
-	buffer.CreateVertexResource(m_Device, desc.numElements, desc.structuredByteStride);
-	// SRVの設定
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-	srvDesc.Format = DXGI_FORMAT_UNKNOWN;
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-	srvDesc.Buffer.FirstElement = 0;
-	srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-	srvDesc.Buffer.NumElements = desc.numElements;
-	srvDesc.Buffer.StructureByteStride = desc.structuredByteStride;
-	// Viewの作成
-	m_Device->CreateShaderResourceView(
-		buffer.GetResource(),
-		&srvDesc,
-		m_ResourceManager->GetSUVDHeap()->GetCpuHandle(desc.dHIndex)
-	);
-
+	{// VertexBuffer
+		buffer.CreateVertexResource(m_Device, desc.numElements, desc.structuredByteStride);
+		// SRVの設定
+		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+		srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+		srvDesc.Buffer.FirstElement = 0;
+		srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+		srvDesc.Buffer.NumElements = desc.numElements;
+		srvDesc.Buffer.StructureByteStride = desc.structuredByteStride;
+		// Viewの作成
+		m_Device->CreateShaderResourceView(
+			buffer.GetResource(),
+			&srvDesc,
+			m_ResourceManager->GetSUVDHeap()->GetCpuHandle(desc.dHIndex)
+		);
+		// Mapping
+		buffer.GetResource()->Map(0, nullptr, &desc.mappedVertices);
+	}
+	{// IndexBuffer
+		buffer.CreateIndexResource(m_Device, desc.numElementsForIBV, desc.structuredByteStrideForIBV);
+		// SRVの設定
+		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+		srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+		srvDesc.Buffer.FirstElement = 0;
+		srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+		srvDesc.Buffer.NumElements = desc.numElementsForIBV;
+		srvDesc.Buffer.StructureByteStride = desc.structuredByteStrideForIBV;
+		// Viewの作成
+		m_Device->CreateShaderResourceView(
+			buffer.GetIndexResource(),
+			&srvDesc,
+			m_ResourceManager->GetSUVDHeap()->GetCpuHandle(desc.dHIndexForIBV)
+		);
+	}
 	// コンテナに移動
 	uint32_t index = static_cast<uint32_t>(m_VertexBuffers.push_back(std::move(buffer)));
 	return 0;
