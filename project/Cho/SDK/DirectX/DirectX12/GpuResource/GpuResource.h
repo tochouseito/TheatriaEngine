@@ -30,6 +30,7 @@ public:
         m_pResource = nullptr;
         m_GpuVirtualAddress = D3D12_GPU_VIRTUAL_ADDRESS_NULL;
         ++m_VersionID;
+        m_DHandleIndex = UINT32_MAX;
     }
 
     ID3D12Resource* operator->() { return m_pResource.Get(); }

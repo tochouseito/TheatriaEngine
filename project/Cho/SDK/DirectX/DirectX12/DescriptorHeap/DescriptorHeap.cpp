@@ -35,6 +35,12 @@ ID3D12DescriptorHeap* DescriptorHeap::GetDescriptorHeap() const
 	return m_DescriptorHeap.Get();
 }
 
+void DescriptorHeap::RemoveHandle(const uint32_t& index)
+{
+	m_Handles[index].Initialize();
+	m_Handles.erase(index);
+}
+
 void DescriptorHeap::CreateDescriptor(ID3D12Device8* device, const uint32_t& num, D3D12_DESCRIPTOR_HEAP_TYPE type, const bool& shaderVisible)
 {
 	m_MaxDescriptor = num;

@@ -147,3 +147,8 @@ void ResourceManager::RemakeVertexBuffer(const uint32_t& index, BUFFER_VERTEX_DE
 {
 	m_BufferManager->RemakeBuffer(index, desc);
 }
+
+void ResourceManager::ReleaseColorBuffer(const uint32_t& index)
+{
+
+}

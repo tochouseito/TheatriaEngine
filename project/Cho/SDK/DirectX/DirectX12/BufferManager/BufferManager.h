@@ -34,13 +34,18 @@ public:// メンバ関数
 	// return: BufferNumber
 	template<typename T, typename = BufferDescType<T>>
 	uint32_t CreateBuffer(const T& desc) { return CreateBufferProcess(desc); }
-
+	// RemakeBuffer
 	template<typename T, typename = BufferDescType<T>>
 	void RemakeBuffer(const uint32_t& index, const T& desc) { RemakeBufferProcess(index, desc); }
+	// ReleaseBuffer
+	void ReleaseColorBuffer(const uint32_t& index);
+	void ReleaseDepthBuffer(const uint32_t& index);
+	void ReleaseVertexBuffer(const uint32_t& index);
 
 	// Get Buffer
 	ColorBuffer* GetColorBuffer(const uint32_t& index) { return &m_ColorBuffers[index]; }
 	DepthBuffer* GetDepthBuffer(const uint32_t& index) { return &m_DepthBuffers[index]; }
+	VertexBuffer* GetVertexBuffer(const uint32_t& index) { return &m_VertexBuffers[index]; }
 	//template<typename T, typename = BufferType<T>>
 	//T* GetBuffer(const uint32_t& index) const { return GetBufferProcess(index); }
 private:

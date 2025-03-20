@@ -13,6 +13,27 @@ BufferManager::~BufferManager()
 {
 }
 
+void BufferManager::ReleaseColorBuffer(const uint32_t& index)
+{
+	m_ResourceManager->GetRTVDHeap()->RemoveHandle(m_ColorBuffers[index].GetDHandleIndex());
+	m_ColorBuffers[index].Destroy();
+	m_ColorBuffers.erase(index);
+}
+
+void BufferManager::ReleaseDepthBuffer(const uint32_t& index)
+{
+	m_ResourceManager->GetDSVDHeap()->RemoveHandle(m_DepthBuffers[index].GetDHandleIndex());
+	m_DepthBuffers[index].Destroy();
+	m_DepthBuffers.erase(index);
+}
+
+void BufferManager::ReleaseVertexBuffer(const uint32_t& index)
+{
+	m_ResourceManager->GetSUVDHeap()->RemoveHandle(m_VertexBuffers[index].GetDHandleIndex());
+	m_VertexBuffers[index].Destroy();
+	m_VertexBuffers.erase(index);
+}
+
 uint32_t BufferManager::CreateBufferForSwapChain(const BUFFER_COLOR_DESC& desc, ID3D12Resource* pResource)
 {
 	ColorBuffer buffer(pResource, desc);

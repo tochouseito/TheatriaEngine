@@ -39,6 +39,12 @@ public:
 	void RemakeColorBuffer(const uint32_t& index, BUFFER_COLOR_DESC& desc);
 	void RemakeDepthBuffer(const uint32_t& index, BUFFER_DEPTH_DESC& desc);
 	void RemakeVertexBuffer(const uint32_t& index, BUFFER_VERTEX_DESC& desc);
+
+	// ReleaseMethod
+	void ReleaseColorBuffer(const uint32_t& index);
+	void ReleaseDepthBuffer(const uint32_t& index);
+	void ReleaseVertexBuffer(const uint32_t& index);
+
 	//Getters
 	DescriptorHeap* GetSUVDHeap() const { return m_SUVDescriptorHeap.get(); }
 	DescriptorHeap* GetRTVDHeap() const { return m_RTVDescriptorHeap.get(); }

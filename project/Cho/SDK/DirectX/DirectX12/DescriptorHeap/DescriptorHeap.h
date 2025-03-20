@@ -25,6 +25,8 @@ public:// methods
 	// NullCheck
 	//bool IsNull() const{ return m_CpuHandle.ptr == D3D12_GPU_VIRTUAL_ADDRESS_UNKNOWN; }
 	//bool IsShaderVisible() const { return m_GpuHandle.ptr != D3D12_GPU_VIRTUAL_ADDRESS_UNKNOWN; }
+	// Initialize
+	void Initialize() { m_CpuHandle.ptr = 0; m_GpuHandle.ptr = 0; }
 private:// members
 	// CPUHandle
 	D3D12_CPU_DESCRIPTOR_HANDLE m_CpuHandle = {};
@@ -51,6 +53,8 @@ public:// methods
 	virtual D3D12_GPU_DESCRIPTOR_HANDLE GetGpuHandle(const uint32_t& index) { return m_Handles[index].GetGpuHandle(); }
 	// CreateView
 	virtual uint32_t Create() = 0;
+	// RemoveHandle
+	virtual void RemoveHandle(const uint32_t& index);
 protected:// methods
 	// CreateDescriptor
 	virtual void CreateDescriptor(ID3D12Device8* device, const uint32_t& num, D3D12_DESCRIPTOR_HEAP_TYPE type, const bool& shaderVisible);
