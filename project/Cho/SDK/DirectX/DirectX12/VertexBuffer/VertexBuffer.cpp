@@ -1,6 +1,12 @@
 #include "pch.h"
 #include "VertexBuffer.h"
 
+void VertexBuffer::UnMap()
+{
+	GpuBuffer::UnMap();
+	m_IndexBuffer.UnMap();
+}
+
 void VertexBuffer::CreateVertexResource(ID3D12Device8* device, const UINT& numElements, const UINT& structuredByteStride)
 {
 	// リソース用のヒープの設定
@@ -19,22 +25,13 @@ void VertexBuffer::CreateVertexResource(ID3D12Device8* device, const UINT& numEl
 	// バッファの場合ははこれにする決まり
 	resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 	// 実際にリソースを作る
-	ComPtr<ID3D12Resource> pResource = GetResource();
+	Create(device, heapProperties, D3D12_HEAP_FLAG_NONE, resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ);
 	m_ElementCount = numElements;
 	m_ElementSize = structuredByteStride;
-	HRESULT hr = device->CreateCommittedResource(
-		&heapProperties,
-		D3D12_HEAP_FLAG_NONE,
-		&resourceDesc,
-		D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr,
-		IID_PPV_ARGS(&pResource)
-	);
-	ChoAssertLog("Failed to create gpu resource.", hr, __FILE__, __LINE__);
 	// VertexBufferViewの作成
 	// Resourceの先頭のアドレスから使う
-	m_VertexBufferView.BufferLocation = pResource->GetGPUVirtualAddress();
-	// 使用するResourceのsizeは頂点のsize
+	m_VertexBufferView.BufferLocation = GetResource()->GetGPUVirtualAddress();
+	// 使用するResourceのサイズは頂点のサイズ
 	m_VertexBufferView.SizeInBytes = structuredByteStride * numElements;
 	// 1頂点のサイズ
 	m_VertexBufferView.StrideInBytes = structuredByteStride;
@@ -57,23 +54,17 @@ void VertexBuffer::CreateIndexResource(ID3D12Device8* device, const UINT& numEle
 	resourceDesc.SampleDesc.Count = 1;
 	// バッファの場合ははこれにする決まり
 	resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-	// 実際にリソースを作る
-	ComPtr<ID3D12Resource> pResource = m_IndexBuffer.GetResource();// IndexBufferのResourceに対して作成する
+	// IndexBufferのResourceに対して作成する
+	m_IndexBuffer.Create(
+		device, heapProperties, D3D12_HEAP_FLAG_NONE,
+		resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ
+	);
 	m_IndexBuffer.SetElementCount(numElements);
 	m_IndexBuffer.SetElementSize(structuredByteStride);
-	HRESULT hr = device->CreateCommittedResource(
-		&heapProperties,
-		D3D12_HEAP_FLAG_NONE,
-		&resourceDesc,
-		D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr,
-		IID_PPV_ARGS(&pResource)
-	);
-	ChoAssertLog("Failed to create gpu resource.", hr, __FILE__, __LINE__);
 	// IndexBufferViewの作成
 	// Resourceの先頭のアドレスから使う
-	m_IndexBufferView.BufferLocation = pResource->GetGPUVirtualAddress();
-	// 使用するResourceのsizeは頂点のsize
+	m_IndexBufferView.BufferLocation = m_IndexBuffer.GetResource()->GetGPUVirtualAddress();
+	// 使用するResourceのサイズは頂点のサイズ
 	m_IndexBufferView.SizeInBytes = structuredByteStride * numElements;
 	// 1頂点のサイズ
 	m_IndexBufferView.Format = DXGI_FORMAT_R32_UINT;

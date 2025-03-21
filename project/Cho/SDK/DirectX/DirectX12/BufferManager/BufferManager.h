@@ -33,7 +33,7 @@ public:// メンバ関数
 	// Create Buffer
 	// return: BufferNumber
 	template<typename T, typename = BufferDescType<T>>
-	uint32_t CreateBuffer(const T& desc) { return CreateBufferProcess(desc); }
+	uint32_t CreateBuffer(T& desc) { return CreateBufferProcess(desc); }
 	// RemakeBuffer
 	template<typename T, typename = BufferDescType<T>>
 	void RemakeBuffer(const uint32_t& index, const T& desc) { RemakeBufferProcess(index, desc); }

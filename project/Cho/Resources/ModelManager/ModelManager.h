@@ -6,7 +6,7 @@
 struct VertexData
 {
 	Vector4 position = { 0.0f };
-	Vector2 texcoord = { 0.0f };
+	Vector2 texCoord = { 0.0f };
 	Vector3 normal = { 0.0f };
 };
 struct MeshData

@@ -194,10 +194,12 @@ uint32_t BufferManager::CreateBufferProcess(BUFFER_VERTEX_DESC& desc)
 			&srvDesc,
 			m_ResourceManager->GetSUVDHeap()->GetCpuHandle(desc.dHIndexForIBV)
 		);
+		// Mapping
+		buffer.GetIndexResource()->Map(0, nullptr, &desc.mappedIndices);
 	}
 	// コンテナに移動
 	uint32_t index = static_cast<uint32_t>(m_VertexBuffers.push_back(std::move(buffer)));
-	return 0;
+	return index;
 }
 
 void BufferManager::RemakeBufferProcess(const uint32_t& index, const BUFFER_COLOR_DESC& desc)

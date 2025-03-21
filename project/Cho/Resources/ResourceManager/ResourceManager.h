@@ -59,8 +59,6 @@ private:
 	void CreateDSVDescriptorHeap(ID3D12Device8* device);
 	// Heap生成
 	void CreateHeap(ID3D12Device8* device);
-	// GPUリソースの生成
-	ID3D12Resource* CreateGpuResource(ID3D12Device8* device, const size_t& sizeInBytes);
 
 	// Device
 	ID3D12Device8* m_Device = nullptr;

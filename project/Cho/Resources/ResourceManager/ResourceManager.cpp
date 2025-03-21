@@ -83,38 +83,6 @@ void ResourceManager::CreateHeap(ID3D12Device8* device)
 	CreateDSVDescriptorHeap(device);
 }
 
-ID3D12Resource* ResourceManager::CreateGpuResource(ID3D12Device8* device, const size_t& sizeInBytes)
-{
-	// リソース用のヒープの設定
-	D3D12_HEAP_PROPERTIES heapProperties{};
-	heapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;// UploadHeapを使う
-	// リソースの設定
-	D3D12_RESOURCE_DESC desc{};
-	// バッファリソース。テクスチャの場合はまた別の設定をする
-	desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	desc.Width = sizeInBytes;// リソースのサイズ。今回はVector4を３頂点分
-	// バッファの場合はこれらは1にする決まり
-	desc.Height = 1;
-	desc.DepthOrArraySize = 1;
-	desc.MipLevels = 1;
-	desc.SampleDesc.Count = 1;
-	// バッファの場合ははこれにする決まり
-	desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-	// 実際にリソースを作る
-	ComPtr<ID3D12Resource> resource = nullptr;
-	HRESULT hr;
-	hr = device->CreateCommittedResource(
-		&heapProperties,
-		D3D12_HEAP_FLAG_NONE,
-		&desc,
-		D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr,
-		IID_PPV_ARGS(&resource)
-	);
-	ChoAssertLog("Failed to create gpu resource.", hr, __FILE__, __LINE__);
-	return resource.Get();
-}
-
 uint32_t ResourceManager::CreateColorBuffer(BUFFER_COLOR_DESC& desc)
 {
 	desc.dHIndex = m_RTVDescriptorHeap->Create();
@@ -151,5 +119,16 @@ void ResourceManager::RemakeVertexBuffer(const uint32_t& index, BUFFER_VERTEX_DE
 
 void ResourceManager::ReleaseColorBuffer(const uint32_t& index)
 {
-
+	index;
 }
+
+void ResourceManager::ReleaseDepthBuffer(const uint32_t& index)
+{
+	index;
+}
+
+void ResourceManager::ReleaseVertexBuffer(const uint32_t& index)
+{
+	index;
+}
+

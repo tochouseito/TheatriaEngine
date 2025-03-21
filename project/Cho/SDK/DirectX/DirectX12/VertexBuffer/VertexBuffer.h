@@ -32,10 +32,10 @@ public:
 	~VertexBuffer()
 	{
 	}
-	// DestoryIndexBuffer
+	// DestroyIndexBuffer
 	void DestroyIndexBuffer() { m_IndexBuffer.Destroy(); }
 	ID3D12Resource* GetIndexResource() { return m_IndexBuffer.GetResource(); }
-
+	void UnMap();
 	uint32_t GetIndexBufferDHandleIndex() const { return m_IndexBuffer.GetDHandleIndex(); }
 	void CreateVertexResource(ID3D12Device8* device, const UINT& numElements, const UINT& structuredByteStride);
 	void CreateIndexResource(ID3D12Device8* device, const UINT& numElements, const UINT& structuredByteStride);
