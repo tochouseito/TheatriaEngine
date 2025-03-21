@@ -87,8 +87,14 @@ void ModelManager::CreateDefaultMesh()
 	meshData.indices[33] = 22; meshData.indices[34] = 23; meshData.indices[35] = 21;
 #pragma endregion
 	// コピー
-	memcpy(desc.mappedVertices, meshData.vertices.data(), sizeof(VertexData) * vertices);
-	memcpy(desc.mappedIndices, meshData.indices.data(), sizeof(uint32_t) * indices);
+	if (desc.mappedVertices != nullptr && desc.mappedIndices != nullptr)
+	{
+		memcpy(desc.mappedVertices, meshData.vertices.data(), sizeof(VertexData) * vertices);
+		memcpy(desc.mappedIndices, meshData.indices.data(), sizeof(uint32_t) * indices);
+	} else
+	{
+		ChoAssertLog("Failed to copy vertices and indices.", false, __FILE__, __LINE__);
+	}
 	// マップ解除
 	m_ResourceManager->GetBufferManager()->GetVertexBuffer(meshData.vertexBufferIndex)->UnMap();
 	desc.mappedVertices = nullptr;
