@@ -19,6 +19,8 @@ public:
 	}
 	void Initialize();
 	void Update();
+
+	EditorCommand* GetEditorCommand() { return m_EditorCommand; }
 private:
 	EditorCommand* m_EditorCommand = nullptr;
 	std::unique_ptr<MainMenu> m_MainMenu = nullptr;

@@ -30,6 +30,7 @@ protected:
 	SceneID m_SceneID = 0;
 	std::wstring m_SceneName = L"";
 	SceneManager* m_SceneManager = nullptr;
+	std::vector<uint32_t> useObjects;
 };
 
 class ScenePrefab : public BaseScene {
@@ -50,6 +51,7 @@ private:
 
 class SceneManager
 {
+	friend class AddGameObjectCommand;
 public:
 	// Constructor
 	SceneManager()
@@ -81,6 +83,8 @@ public:
 private:
 	// シーンを変更
 	void ChangeScene();
+	// GameObjectを作成
+	void AddGameObject();
 
 	// 現在のシーン
 	BaseScene* m_pCurrentScene = nullptr;

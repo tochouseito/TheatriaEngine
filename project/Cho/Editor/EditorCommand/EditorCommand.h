@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <vector>
+class EditorCommand;
 class ICommand
 {
 public:
@@ -8,10 +9,16 @@ public:
 	ICommand() = default;
 	// Destructor
 	virtual ~ICommand() = default;
-	virtual void Execute() = 0;
-	virtual void Undo() = 0;
+	virtual void Execute(EditorCommand* edit) = 0;
+	virtual void Undo(EditorCommand* edit) = 0;
 };
 
+class AddGameObjectCommand :public ICommand
+{
+public:
+	void Execute(EditorCommand* edit)override;
+	void Undo(EditorCommand* edit)override;
+};
 
 class ResourceManager;
 class GraphicsEngine;
@@ -30,17 +37,20 @@ public:
 	}
 	void ExecuteCommand(std::unique_ptr<ICommand> command)
 	{
-		command->Execute();
+		command->Execute(this);
 		m_Commands.push_back(std::move(command));
 	}
 	void Undo()
 	{
 		if (!m_Commands.empty())
 		{
-			m_Commands.back()->Undo();
+			m_Commands.back()->Undo(this);
 			m_Commands.pop_back();
 		}
 	};
+	ResourceManager* GetResourceManagerPtr() { return m_ResourceManager; }
+	GraphicsEngine* GetGraphicsEnginePtr() { return m_GraphicsEngine; }
+	GameCore* GetGameCorePtr() { return m_GameCore; }
 private:
 	std::vector<std::unique_ptr<ICommand>> m_Commands;
 	ResourceManager* m_ResourceManager = nullptr;

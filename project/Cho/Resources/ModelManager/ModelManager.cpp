@@ -5,8 +5,9 @@
 void ModelManager::CreateDefaultMesh()
 {
 	// Cube
+	std::wstring modelName = L"Cube";
 	ModelData modelData;
-	modelData.name = L"Cube";
+	modelData.name = modelName;
 	MeshData meshData;
 	meshData.name = L"Cube";
 	
@@ -99,4 +100,9 @@ void ModelManager::CreateDefaultMesh()
 	m_ResourceManager->GetBufferManager()->GetVertexBuffer(meshData.vertexBufferIndex)->UnMap();
 	desc.mappedVertices = nullptr;
 	desc.mappedIndices = nullptr;
+	// コンテナに追加
+	m_ModelNameContainer[modelName];
+	modelData.meshes.push_back(meshData);
+	uint32_t index = static_cast<uint32_t>(m_Models.push_back(std::move(modelData)));
+	m_ModelNameContainer[modelName] = index;
 }

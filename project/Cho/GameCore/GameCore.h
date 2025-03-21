@@ -16,6 +16,7 @@ public:
 	void Start(ResourceManager& resourceManager);
 	void Update(ResourceManager& resourceManager, GraphicsEngine& graphicsEngine);
 	void Draw(GraphicsEngine& graphicsEngine);
+	SceneManager* GetSceneManager() { return m_pSceneManager.get(); }
 private:
 	std::unique_ptr<SceneManager> m_pSceneManager = nullptr;
 };

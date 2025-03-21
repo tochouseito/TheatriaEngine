@@ -39,3 +39,9 @@ void SceneManager::ChangeScene()
 	m_pCurrentScene = m_pNextScene;
 	m_pCurrentScene->Start();
 }
+
+void SceneManager::AddGameObject()
+{
+	Entity entity = m_pECSManager->GenerateEntity();
+	m_pObjectContainer->AddGameObject(entity);
+}

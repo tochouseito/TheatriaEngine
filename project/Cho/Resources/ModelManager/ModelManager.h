@@ -2,6 +2,7 @@
 #include "ChoMath.h"
 #include "Cho/Core/Utility/FVector.h"
 #include "Cho/SDK/DirectX/DirectX12/stdafx/stdafx.h"
+#include <unordered_map>
 // 頂点データ構造体
 struct VertexData
 {
@@ -43,5 +44,7 @@ private:
 	ResourceManager* m_ResourceManager = nullptr;
 	// モデルデータコンテナ
 	FVector<ModelData> m_Models;
+	// モデルのキーを名前で管理するコンテナ
+	std::unordered_map<std::wstring, uint32_t> m_ModelNameContainer;
 };
 

@@ -2,6 +2,7 @@
 #include "MainMenu.h"
 #include <imgui.h>
 #include "Cho/OS/Windows/WinApp/WinApp.h"
+#include "Cho/Editor/EditorManager/EditorManager.h"
 
 void MainMenu::Initialize()
 {
@@ -81,6 +82,18 @@ void MainMenu::FileMenu()
 
 void MainMenu::EditMenu()
 {
+    if (ImGui::BeginMenu("Edit"))
+    {
+        // 編集アクションをここに追加
+
+        if (ImGui::MenuItem("Test AddGameObject"))
+        {
+            std::unique_ptr<AddGameObjectCommand> cmd = std::make_unique<AddGameObjectCommand>();
+            m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(cmd));
+        }
+
+        ImGui::EndMenu(); // 「Edit」メニューを終了
+    }
 }
 
 void MainMenu::LayoutMenu()
