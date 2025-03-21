@@ -6,6 +6,7 @@
 #include <memory>
 #include <functional>
 #include <bitset>
+#include "Cho/Core/Utility/Components.h"
 
 using Entity = uint32_t;
 using CompID = size_t;

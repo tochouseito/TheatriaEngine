@@ -88,8 +88,10 @@ void MainMenu::EditMenu()
 
         if (ImGui::MenuItem("Test AddGameObject"))
         {
-            std::unique_ptr<AddGameObjectCommand> cmd = std::make_unique<AddGameObjectCommand>();
-            m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(cmd));
+            std::unique_ptr<AddGameObjectCommand> addGameObj = std::make_unique<AddGameObjectCommand>();
+            m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addGameObj));
+            std::unique_ptr<AddTransformComponent> addTFComp = std::make_unique<AddTransformComponent>(1);
+            m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addTFComp));
         }
 
         ImGui::EndMenu(); // 「Edit」メニューを終了

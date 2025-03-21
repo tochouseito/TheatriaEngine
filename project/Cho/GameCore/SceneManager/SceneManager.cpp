@@ -45,3 +45,8 @@ void SceneManager::AddGameObject()
 	Entity entity = m_pECSManager->GenerateEntity();
 	m_pObjectContainer->AddGameObject(entity);
 }
+
+void SceneManager::AddTransformComponent(const uint32_t& entity)
+{
+	m_pECSManager->AddComponent<TransformComponent>(entity);
+}

@@ -12,12 +12,25 @@ public:
 	virtual void Execute(EditorCommand* edit) = 0;
 	virtual void Undo(EditorCommand* edit) = 0;
 };
-
+// Test:GameObjectを追加する
 class AddGameObjectCommand :public ICommand
 {
 public:
 	void Execute(EditorCommand* edit)override;
 	void Undo(EditorCommand* edit)override;
+};
+class AddTransformComponent :public ICommand
+{
+public:
+	AddTransformComponent(const uint32_t& entity):
+		m_Entity(entity)
+	{
+
+	}
+	void Execute(EditorCommand* edit)override;
+	void Undo(EditorCommand* edit)override;
+private:
+	uint32_t m_Entity;
 };
 
 class ResourceManager;

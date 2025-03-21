@@ -52,6 +52,7 @@ private:
 class SceneManager
 {
 	friend class AddGameObjectCommand;
+	friend class AddTransformComponent;
 public:
 	// Constructor
 	SceneManager()
@@ -85,6 +86,8 @@ private:
 	void ChangeScene();
 	// GameObjectを作成
 	void AddGameObject();
+	// TransformComponentを追加
+	void AddTransformComponent(const uint32_t& entity);
 
 	// 現在のシーン
 	BaseScene* m_pCurrentScene = nullptr;
