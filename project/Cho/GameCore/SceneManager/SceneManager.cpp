@@ -40,6 +40,16 @@ void SceneManager::ChangeScene()
 	m_pCurrentScene->Start();
 }
 
+void SceneManager::AddMeshComponent(const uint32_t& entity)
+{
+	m_pECSManager->AddComponent<MeshComponent>(entity);
+}
+
+void SceneManager::AddCameraComponent(const uint32_t& entity)
+{
+	m_pECSManager->AddComponent<CameraComponent>(entity);
+}
+
 void SceneManager::AddGameObject()
 {
 	Entity entity = m_pECSManager->GenerateEntity();

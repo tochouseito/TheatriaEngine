@@ -88,10 +88,19 @@ void MainMenu::EditMenu()
 
         if (ImGui::MenuItem("Test AddGameObject"))
         {
+            // テスト用
             std::unique_ptr<AddGameObjectCommand> addGameObj = std::make_unique<AddGameObjectCommand>();
             m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addGameObj));
             std::unique_ptr<AddTransformComponent> addTFComp = std::make_unique<AddTransformComponent>(1);
             m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addTFComp));
+			std::unique_ptr<AddMeshComponent> addMeshComp = std::make_unique<AddMeshComponent>(1);
+			m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addMeshComp));
+			std::unique_ptr<AddGameObjectCommand> addGameObj2 = std::make_unique<AddGameObjectCommand>();
+			m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addGameObj2));
+			std::unique_ptr<AddTransformComponent> addTFComp2 = std::make_unique<AddTransformComponent>(2);
+			m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addTFComp2));
+			std::unique_ptr<AddCameraComponent> addCamComp = std::make_unique<AddCameraComponent>(2);
+			m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addCamComp));
         }
 
         ImGui::EndMenu(); // 「Edit」メニューを終了

@@ -23,3 +23,23 @@ void AddTransformComponent::Undo(EditorCommand* edit)
 {
 	edit;
 }
+
+void AddMeshComponent::Execute(EditorCommand* edit)
+{
+	edit->GetGameCorePtr()->GetSceneManager()->AddMeshComponent(m_Entity);
+}
+
+void AddMeshComponent::Undo(EditorCommand* edit)
+{
+	edit;
+}
+
+void AddCameraComponent::Execute(EditorCommand* edit)
+{
+	edit->GetGameCorePtr()->GetSceneManager()->AddCameraComponent(m_Entity);
+}
+
+void AddCameraComponent::Undo(EditorCommand* edit)
+{
+	edit;
+}

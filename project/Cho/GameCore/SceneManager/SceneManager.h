@@ -53,6 +53,8 @@ class SceneManager
 {
 	friend class AddGameObjectCommand;
 	friend class AddTransformComponent;
+	friend class AddMeshComponent;
+	friend class AddCameraComponent;
 public:
 	// Constructor
 	SceneManager()
@@ -88,6 +90,10 @@ private:
 	void AddGameObject();
 	// TransformComponentを追加
 	void AddTransformComponent(const uint32_t& entity);
+	// MeshComponentを追加
+	void AddMeshComponent(const uint32_t& entity);
+	// CameraComponentを追加
+	void AddCameraComponent(const uint32_t& entity);
 
 	// 現在のシーン
 	BaseScene* m_pCurrentScene = nullptr;

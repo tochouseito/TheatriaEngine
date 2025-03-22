@@ -32,6 +32,30 @@ public:
 private:
 	uint32_t m_Entity;
 };
+class AddMeshComponent :public ICommand
+{
+public:
+	AddMeshComponent(const uint32_t& entity) :
+		m_Entity(entity)
+	{
+	}
+	void Execute(EditorCommand* edit)override;
+	void Undo(EditorCommand* edit)override;
+private:
+	uint32_t m_Entity;
+};
+class AddCameraComponent :public ICommand
+{
+public:
+	AddCameraComponent(const uint32_t& entity) :
+		m_Entity(entity)
+	{
+	}
+	void Execute(EditorCommand* edit)override;
+	void Undo(EditorCommand* edit)override;
+private:
+	uint32_t m_Entity;
+};
 
 class ResourceManager;
 class GraphicsEngine;
