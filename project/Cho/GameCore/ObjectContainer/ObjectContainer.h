@@ -14,9 +14,9 @@ public:
 	}
 
 	// ゲームオブジェクトを追加
-	uint32_t AddGameObject(const Entity& entity) { return static_cast<uint32_t>(m_GameObjects.push_back(GameObject(entity))); }
+	ObjectID AddGameObject(const Entity& entity) { return static_cast<ObjectID>(m_GameObjects.push_back(GameObject(entity))); }
 	// プレハブを追加
-	uint32_t AddPrefab(const Entity& entity) { return static_cast<uint32_t>(m_Prefabs.push_back(Prefab(entity))); }
+	PrefabID AddPrefab(const Entity& entity) { return static_cast<PrefabID>(m_Prefabs.push_back(Prefab(entity))); }
 	// ゲームオブジェクトを取得
 	GameObject* GetGameObject(const uint32_t index) { return &m_GameObjects[index]; }
 	// プレハブを取得

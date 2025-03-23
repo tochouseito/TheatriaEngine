@@ -31,13 +31,19 @@ void SceneManager::ChangeScene()
 {
 	if (!m_pCurrentScene)// 現在のシーンがない場合
 	{
-		ChoLog("Current Scene is nullptr");
-		return;
+		// 次のシーンを現在のシーンにセット
+		m_pCurrentScene = m_pNextScene;
+		m_pNextScene = nullptr;
+		m_pCurrentScene->Start();
+	} else
+	{
+		// 現在のシーンを終了
+		m_pCurrentScene->Finalize();
+		m_pCurrentScene = nullptr;
+		m_pCurrentScene = m_pNextScene;
+		m_pNextScene = nullptr;
+		m_pCurrentScene->Start();
 	}
-	m_pCurrentScene->Finalize();
-	delete m_pCurrentScene;
-	m_pCurrentScene = m_pNextScene;
-	m_pCurrentScene->Start();
 }
 
 void SceneManager::AddMeshComponent(const uint32_t& entity)
@@ -52,8 +58,13 @@ void SceneManager::AddCameraComponent(const uint32_t& entity)
 
 void SceneManager::AddGameObject()
 {
+	if (!m_pCurrentScene)
+	{
+		ChoLog("Current Scene is nullptr");
+		return;
+	}
 	Entity entity = m_pECSManager->GenerateEntity();
-	m_pObjectContainer->AddGameObject(entity);
+	m_pCurrentScene->AddUseObject(m_pObjectContainer->AddGameObject(entity));
 }
 
 void SceneManager::AddTransformComponent(const uint32_t& entity)

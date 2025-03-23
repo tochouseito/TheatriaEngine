@@ -1,6 +1,8 @@
 #pragma once
 
 using Entity = uint32_t;
+using ObjectID = uint32_t;
+using PrefabID = uint32_t;
 
 class Prefab 
 {
