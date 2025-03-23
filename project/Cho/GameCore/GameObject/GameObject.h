@@ -1,5 +1,5 @@
 #pragma once
-
+#include <string>
 using Entity = uint32_t;
 using ObjectID = uint32_t;
 using PrefabID = uint32_t;
@@ -17,7 +17,8 @@ public:
 	{
 	}
 private:
-	Entity m_Entity;
+	Entity m_Entity;// エンティティ
+	std::wstring m_Name = L"";// プレハブ名
 };
 class GameObject
 {
@@ -32,6 +33,7 @@ public:
 	{
 	}
 private:
-	Entity m_Entity;
+	Entity m_Entity;// エンティティ
+	std::wstring m_Name = L"";// ゲームオブジェクト名
 };
 

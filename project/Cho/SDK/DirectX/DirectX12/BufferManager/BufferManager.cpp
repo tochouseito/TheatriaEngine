@@ -15,14 +15,15 @@ BufferManager::~BufferManager()
 
 void BufferManager::ReleaseColorBuffer(const uint32_t& index)
 {
-	m_ResourceManager->GetRTVDHeap()->RemoveHandle(m_ColorBuffers[index].GetDHandleIndex());
+	m_ResourceManager->GetRTVDHeap()->RemoveHandle(m_ColorBuffers[index].GetRTVHandleIndex());
+	m_ResourceManager->GetSUVDHeap()->RemoveHandle(m_ColorBuffers[index].GetSUVHandleIndex());
 	m_ColorBuffers[index].Destroy();
 	m_ColorBuffers.erase(index);
 }
 
 void BufferManager::ReleaseDepthBuffer(const uint32_t& index)
 {
-	m_ResourceManager->GetDSVDHeap()->RemoveHandle(m_DepthBuffers[index].GetDHandleIndex());
+	m_ResourceManager->GetDSVDHeap()->RemoveHandle(m_DepthBuffers[index].GetDSVHandleIndex());
 	m_DepthBuffers[index].Destroy();
 	m_DepthBuffers.erase(index);
 }
@@ -30,7 +31,7 @@ void BufferManager::ReleaseDepthBuffer(const uint32_t& index)
 void BufferManager::ReleaseVertexBuffer(const uint32_t& index)
 {
 	m_ResourceManager->GetSUVDHeap()->RemoveHandle(m_VertexBuffers[index].GetIndexBufferDHandleIndex());
-	m_ResourceManager->GetSUVDHeap()->RemoveHandle(m_VertexBuffers[index].GetDHandleIndex());
+	m_ResourceManager->GetSUVDHeap()->RemoveHandle(m_VertexBuffers[index].GetSUVHandleIndex());
 	m_VertexBuffers[index].DestroyIndexBuffer();
 	m_VertexBuffers[index].Destroy();
 	m_VertexBuffers.erase(index);
@@ -47,7 +48,7 @@ uint32_t BufferManager::CreateBufferForSwapChain(const BUFFER_COLOR_DESC& desc, 
 	m_Device->CreateRenderTargetView(
 		buffer.GetResource(),
 		&rtvDesc,
-		m_ResourceManager->GetRTVDHeap()->GetCpuHandle(buffer.GetDHandleIndex())
+		m_ResourceManager->GetRTVDHeap()->GetCpuHandle(buffer.GetRTVHandleIndex())
 	);
 	// コンテナに移動
 	uint32_t index = static_cast<uint32_t>(m_ColorBuffers.push_back(std::move(buffer)));
@@ -68,7 +69,7 @@ uint32_t BufferManager::CreateBufferProcess(BUFFER_COLOR_DESC& desc)
 	{
 		ChoAssertLog("Invalid buffer state", false, __FILE__, __LINE__);
 	}
-	if(desc.dHIndex == UINT32_MAX)
+	if(desc.rtvDHIndex == UINT32_MAX)
 	{
 		ChoAssertLog("Invalid buffer dHIndex", false, __FILE__, __LINE__);
 	}
@@ -94,21 +95,35 @@ uint32_t BufferManager::CreateBufferProcess(BUFFER_COLOR_DESC& desc)
 	buffer.CreateTextureResource(
 		m_Device,
 		resourceDesc,
-		clearValue,
+		&clearValue,
 		desc.state
+	);
+
+	// SRVの設定
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+	// metadataを基にSRVの設定
+	srvDesc.Format = desc.format;
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MipLevels = 1;
+	// Viewの生成
+	m_Device->CreateShaderResourceView(
+		buffer.GetResource(),
+		&srvDesc,
+		m_ResourceManager->GetSUVDHeap()->GetCpuHandle(buffer.GetSUVHandleIndex())
 	);
 
 	// RTVの設定
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
 	rtvDesc.Format = desc.format;
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;// 2dテクスチャとして書き込む
-
 	// Viewの生成
 	m_Device->CreateRenderTargetView(
 		buffer.GetResource(),
 		&rtvDesc,
-		m_ResourceManager->GetRTVDHeap()->GetCpuHandle(buffer.GetDHandleIndex())
+		m_ResourceManager->GetRTVDHeap()->GetCpuHandle(buffer.GetRTVHandleIndex())
 	);
+
 	// コンテナに移動
 	uint32_t index = static_cast<uint32_t>(m_ColorBuffers.push_back(std::move(buffer)));
 	return index;
@@ -135,7 +150,7 @@ uint32_t BufferManager::CreateBufferProcess(BUFFER_DEPTH_DESC& desc)
 	buffer.CreateTextureResource(
 		m_Device,
 		resourceDesc,
-		clearValue,
+		&clearValue,
 		desc.state
 	);
 	// DSVの設定
@@ -146,7 +161,7 @@ uint32_t BufferManager::CreateBufferProcess(BUFFER_DEPTH_DESC& desc)
 	m_Device->CreateDepthStencilView(
 		buffer.GetResource(),
 		&dsvDesc,
-		m_ResourceManager->GetDSVDHeap()->GetCpuHandle(buffer.GetDHandleIndex())
+		m_ResourceManager->GetDSVDHeap()->GetCpuHandle(buffer.GetDSVHandleIndex())
 	);
 	// コンテナに移動
 	uint32_t index = static_cast<uint32_t>(m_DepthBuffers.push_back(std::move(buffer)));
@@ -172,7 +187,7 @@ uint32_t BufferManager::CreateBufferProcess(BUFFER_VERTEX_DESC& desc)
 		m_Device->CreateShaderResourceView(
 			buffer.GetResource(),
 			&srvDesc,
-			m_ResourceManager->GetSUVDHeap()->GetCpuHandle(desc.dHIndex)
+			m_ResourceManager->GetSUVDHeap()->GetCpuHandle(desc.suvDHIndex)
 		);
 		// Mapping
 		buffer.GetResource()->Map(0, nullptr, &desc.mappedVertices);
@@ -192,7 +207,7 @@ uint32_t BufferManager::CreateBufferProcess(BUFFER_VERTEX_DESC& desc)
 		m_Device->CreateShaderResourceView(
 			buffer.GetIndexResource(),
 			&srvDesc,
-			m_ResourceManager->GetSUVDHeap()->GetCpuHandle(desc.dHIndexForIBV)
+			m_ResourceManager->GetSUVDHeap()->GetCpuHandle(desc.suvDHIndexForIBV)
 		);
 		// Mapping
 		buffer.GetIndexResource()->Map(0, nullptr, &desc.mappedIndices);

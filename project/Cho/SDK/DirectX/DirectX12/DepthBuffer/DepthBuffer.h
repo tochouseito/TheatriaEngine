@@ -6,7 +6,7 @@ struct BUFFER_DEPTH_DESC
 	uint32_t height;
 	DXGI_FORMAT format;
 	D3D12_RESOURCE_STATES state;
-	uint32_t dHIndex;
+	uint32_t dsvDHIndex;
 };
 class DepthBuffer : public PixelBuffer
 {
@@ -17,7 +17,7 @@ public:
 	{
 		SetWidth(desc.width);
 		SetHeight(desc.height);
-		SetDHandleIndex(desc.dHIndex);
+		SetDSVHandleIndex(desc.dsvDHIndex);
 	}
 	// Constructor
 	DepthBuffer(ID3D12Resource* pResource,const BUFFER_DEPTH_DESC& desc) :

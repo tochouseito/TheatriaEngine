@@ -46,7 +46,7 @@ void ResourceManager::CreateSwapChain(SwapChain* swapChain)
 		desc.width = WinApp::GetWindowWidth();
 		desc.height = WinApp::GetWindowHeight();
 		desc.format = PixelFormat;
-		desc.dHIndex = m_RTVDescriptorHeap->Create();
+		desc.rtvDHIndex = m_RTVDescriptorHeap->Create();
 		swapChain->SetIndex(bufferindex, m_BufferManager->CreateForSwapChain(desc, pResource.Get()));
 	}
 	{// Buffer1
@@ -56,7 +56,7 @@ void ResourceManager::CreateSwapChain(SwapChain* swapChain)
 		desc.width = WinApp::GetWindowWidth();
 		desc.height = WinApp::GetWindowHeight();
 		desc.format = PixelFormat;
-		desc.dHIndex = m_RTVDescriptorHeap->Create();
+		desc.rtvDHIndex = m_RTVDescriptorHeap->Create();
 		swapChain->SetIndex(bufferindex, m_BufferManager->CreateForSwapChain(desc, pResource.Get()));
 	}
 }
@@ -85,20 +85,21 @@ void ResourceManager::CreateHeap(ID3D12Device8* device)
 
 uint32_t ResourceManager::CreateColorBuffer(BUFFER_COLOR_DESC& desc)
 {
-	desc.dHIndex = m_RTVDescriptorHeap->Create();
+	desc.rtvDHIndex = m_RTVDescriptorHeap->Create();
+	desc.srvDHIndex = m_SUVDescriptorHeap->Create();
 	return m_BufferManager->CreateBuffer<BUFFER_COLOR_DESC>(desc);
 }
 
 uint32_t ResourceManager::CreateDepthBuffer(BUFFER_DEPTH_DESC& desc)
 {
-	desc.dHIndex = m_DSVDescriptorHeap->Create();
+	desc.dsvDHIndex = m_DSVDescriptorHeap->Create();
 	return m_BufferManager->CreateBuffer<BUFFER_DEPTH_DESC>(desc);
 }
 
 uint32_t ResourceManager::CreateVertexBuffer(BUFFER_VERTEX_DESC& desc)
 {
-	desc.dHIndex = m_SUVDescriptorHeap->Create();
-	desc.dHIndexForIBV = m_SUVDescriptorHeap->Create();
+	desc.suvDHIndex = m_SUVDescriptorHeap->Create();
+	desc.suvDHIndexForIBV = m_SUVDescriptorHeap->Create();
 	return m_BufferManager->CreateBuffer<BUFFER_VERTEX_DESC>(desc);
 }
 

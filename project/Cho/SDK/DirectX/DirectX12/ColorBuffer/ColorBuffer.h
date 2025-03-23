@@ -6,7 +6,8 @@ struct BUFFER_COLOR_DESC
 	uint32_t height;
 	DXGI_FORMAT format;
 	D3D12_RESOURCE_STATES state;
-	uint32_t dHIndex;
+	uint32_t rtvDHIndex;
+	uint32_t srvDHIndex;
 };
 class ColorBuffer : public PixelBuffer
 {
@@ -17,7 +18,8 @@ public:
 		SetWidth(desc.width);
 		SetHeight(desc.height);
 		SetFormat(desc.format);
-		SetDHandleIndex(desc.dHIndex);
+		SetSUVHandleIndex(desc.srvDHIndex);
+		SetRTVHandleIndex(desc.rtvDHIndex);
 		SetResourceState(desc.state);
 	}
 	// Constructor
@@ -27,7 +29,8 @@ public:
 		SetWidth(desc.width);
 		SetHeight(desc.height);
 		SetFormat(desc.format);
-		SetDHandleIndex(desc.dHIndex);
+		SetSUVHandleIndex(desc.srvDHIndex);
+		SetRTVHandleIndex(desc.rtvDHIndex);
 	}
 	// Destructor
 	~ColorBuffer() = default;

@@ -5,8 +5,8 @@ struct BUFFER_VERTEX_DESC
 	UINT numElements;
 	UINT structuredByteStride;
 	D3D12_RESOURCE_STATES state;
-	uint32_t dHIndex;
-	uint32_t dHIndexForIBV;
+	uint32_t suvDHIndex;
+	uint32_t suvDHIndexForIBV;
 	UINT numElementsForIBV;
 	UINT structuredByteStrideForIBV;
 	// マップ用データにコピーするためのポインタ
@@ -19,9 +19,9 @@ public:
 	// Constructor
 	VertexBuffer(BUFFER_VERTEX_DESC desc) : GpuBuffer()
 	{
-		SetDHandleIndex(desc.dHIndex);
+		SetSUVHandleIndex(desc.suvDHIndex);
 		SetResourceState(desc.state);
-		m_IndexBuffer.SetDHandleIndex(desc.dHIndexForIBV);
+		m_IndexBuffer.SetSUVHandleIndex(desc.suvDHIndexForIBV);
 	}
 	// Constructor
 	VertexBuffer(ID3D12Resource* pResource, BUFFER_VERTEX_DESC desc) :
@@ -36,7 +36,7 @@ public:
 	void DestroyIndexBuffer() { m_IndexBuffer.Destroy(); }
 	ID3D12Resource* GetIndexResource() { return m_IndexBuffer.GetResource(); }
 	void UnMap();
-	uint32_t GetIndexBufferDHandleIndex() const { return m_IndexBuffer.GetDHandleIndex(); }
+	uint32_t GetIndexBufferDHandleIndex() const { return m_IndexBuffer.GetSUVHandleIndex(); }
 	void CreateVertexResource(ID3D12Device8* device, const UINT& numElements, const UINT& structuredByteStride);
 	void CreateIndexResource(ID3D12Device8* device, const UINT& numElements, const UINT& structuredByteStride);
 private:

@@ -113,6 +113,30 @@ void CommandContext::SetPrimitiveTopology(D3D12_PRIMITIVE_TOPOLOGY topology)
 	m_CommandList->IASetPrimitiveTopology(topology);
 }
 
+void CommandContext::SetGraphicsPipelineState(ID3D12PipelineState* pso)
+{
+	// パイプラインステートの設定
+	m_CommandList->SetPipelineState(pso);
+}
+
+void CommandContext::SetGraphicsRootSignature(ID3D12RootSignature* rootSignature)
+{
+	// ルートシグネチャの設定
+	m_CommandList->SetGraphicsRootSignature(rootSignature);
+}
+
+void CommandContext::SetGraphicsRootDescriptorTable(UINT RootParameterIndex, D3D12_GPU_DESCRIPTOR_HANDLE BaseDescriptor)
+{
+	// ルートディスクリプタテーブルの設定
+	m_CommandList->SetGraphicsRootDescriptorTable(RootParameterIndex, BaseDescriptor);
+}
+
+void CommandContext::DrawInstanced(UINT VertexCountPerInstance, UINT InstanceCount, UINT StartVertexLocation, UINT StartInstanceLocation)
+{
+	// 描画
+	m_CommandList->DrawInstanced(VertexCountPerInstance, InstanceCount, StartVertexLocation, StartInstanceLocation);
+}
+
 GraphicsContext::GraphicsContext(ID3D12Device* device)
 {
 	Create(device, D3D12_COMMAND_LIST_TYPE_DIRECT);	

@@ -30,7 +30,9 @@ public:
         m_pResource = nullptr;
         m_GpuVirtualAddress = D3D12_GPU_VIRTUAL_ADDRESS_NULL;
         ++m_VersionID;
-        m_DHandleIndex = UINT32_MAX;
+		m_SUVHandleIndex = UINT32_MAX;
+		m_RTVHandleIndex = UINT32_MAX;
+		m_DSVHandleIndex = UINT32_MAX;
     }
 
     ID3D12Resource* operator->() { return m_pResource.Get(); }
@@ -54,8 +56,12 @@ public:
         D3D12_CLEAR_VALUE* pClearValue = nullptr
     );
 	void UnMap() { m_pResource->Unmap(0, nullptr); }
-	uint32_t GetDHandleIndex() const { return m_DHandleIndex; }
-	void SetDHandleIndex(const uint32_t& index) { m_DHandleIndex = index; }
+	uint32_t GetSUVHandleIndex() const { return m_SUVHandleIndex; }
+	void SetSUVHandleIndex(const uint32_t& index) { m_SUVHandleIndex = index; }
+	uint32_t GetRTVHandleIndex() const { return m_RTVHandleIndex; }
+	void SetRTVHandleIndex(const uint32_t& index) { m_RTVHandleIndex = index; }
+	uint32_t GetDSVHandleIndex() const { return m_DSVHandleIndex; }
+	void SetDSVHandleIndex(const uint32_t& index) { m_DSVHandleIndex = index; }
 	D3D12_RESOURCE_STATES GetUsageState() const { return m_UsageState; }
 	void SetResourceState(const D3D12_RESOURCE_STATES& state) { m_UsageState = state; }
 
@@ -66,6 +72,8 @@ protected:
 	D3D12_RESOURCE_STATES m_TransitioningState;// 遷移直前の状態
     D3D12_GPU_VIRTUAL_ADDRESS m_GpuVirtualAddress;
 	uint32_t m_VersionID = 0;// このリソースのバージョンID。リソースが再利用されるとインクリメントされます。
-	uint32_t m_DHandleIndex = UINT32_MAX;// このリソースがディスクリプタヒープに割り当てられたインデックス
+	uint32_t m_SUVHandleIndex = UINT32_MAX;// このリソースがディスクリプタヒープに割り当てられたインデックス
+	uint32_t m_RTVHandleIndex = UINT32_MAX;// このリソースがディスクリプタヒープに割り当てられたインデックス
+	uint32_t m_DSVHandleIndex = UINT32_MAX;// このリソースがディスクリプタヒープに割り当てられたインデックス
 };
 

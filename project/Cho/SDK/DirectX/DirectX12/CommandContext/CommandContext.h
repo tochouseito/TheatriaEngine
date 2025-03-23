@@ -24,6 +24,10 @@ public:
 	virtual void SetViewport(const D3D12_VIEWPORT& viewport);
 	virtual void SetScissorRect(const D3D12_RECT& rect);
 	virtual void SetPrimitiveTopology(D3D12_PRIMITIVE_TOPOLOGY topology);
+	virtual void SetGraphicsPipelineState(ID3D12PipelineState* pso);
+	virtual void SetGraphicsRootSignature(ID3D12RootSignature* rootSignature);
+	virtual void SetGraphicsRootDescriptorTable(UINT RootParameterIndex, D3D12_GPU_DESCRIPTOR_HANDLE BaseDescriptor);
+	virtual void DrawInstanced(UINT VertexCountPerInstance, UINT InstanceCount, UINT StartVertexLocation, UINT StartInstanceLocation);
 protected:
 	ComPtr<ID3D12CommandAllocator> m_CommandAllocator;
 	ComPtr<ID3D12GraphicsCommandList6> m_CommandList;

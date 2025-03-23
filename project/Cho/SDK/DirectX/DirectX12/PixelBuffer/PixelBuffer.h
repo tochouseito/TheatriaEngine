@@ -23,7 +23,7 @@ public:
 	// Destructor
 	~PixelBuffer() = default;
 
-	void CreateTextureResource(ID3D12Device8* device,const D3D12_RESOURCE_DESC& desc,const D3D12_CLEAR_VALUE& clearValue,const D3D12_RESOURCE_STATES& state);
+	void CreateTextureResource(ID3D12Device8* device,D3D12_RESOURCE_DESC& desc,D3D12_CLEAR_VALUE* clearValue,D3D12_RESOURCE_STATES& state);
 
 	// Getters
 	// ピクセルバッファの幅を取得

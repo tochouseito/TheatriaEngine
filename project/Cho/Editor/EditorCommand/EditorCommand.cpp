@@ -43,3 +43,13 @@ void AddCameraComponent::Undo(EditorCommand* edit)
 {
 	edit;
 }
+
+void SetMainCamera::Execute(EditorCommand* edit)
+{
+	m_PreCameraID = edit->GetGameCorePtr()->GetSceneManager()->SetMainCamera(m_SetCameraID);
+}
+
+void SetMainCamera::Undo(EditorCommand* edit)
+{
+	edit;
+}

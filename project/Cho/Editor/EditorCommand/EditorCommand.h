@@ -56,6 +56,19 @@ public:
 private:
 	uint32_t m_Entity;
 };
+class SetMainCamera :public ICommand
+{
+public:
+	SetMainCamera(const uint32_t& setCameraID) :
+		m_SetCameraID(setCameraID)
+	{
+	}
+	void Execute(EditorCommand* edit)override;
+	void Undo(EditorCommand* edit)override;
+private:
+	uint32_t m_PreCameraID = UINT32_MAX;
+	uint32_t m_SetCameraID = UINT32_MAX;
+};
 
 class ResourceManager;
 class GraphicsEngine;

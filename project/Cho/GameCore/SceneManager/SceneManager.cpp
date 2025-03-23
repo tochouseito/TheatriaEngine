@@ -56,6 +56,18 @@ void SceneManager::AddCameraComponent(const uint32_t& entity)
 	m_pECSManager->AddComponent<CameraComponent>(entity);
 }
 
+uint32_t SceneManager::SetMainCamera(const uint32_t& setCameraID)
+{
+	if (!m_pCurrentScene)
+	{
+		ChoLog("Current Scene is nullptr");
+		return UINT32_MAX;
+	}
+	uint32_t preCameraID = m_pCurrentScene->GetMainCameraID();
+	m_pCurrentScene->SetMainCameraID(setCameraID);
+	return preCameraID;
+}
+
 void SceneManager::AddGameObject()
 {
 	if (!m_pCurrentScene)

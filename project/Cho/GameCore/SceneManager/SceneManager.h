@@ -22,6 +22,8 @@ public:
 	virtual inline const std::wstring& GetSceneName() const noexcept { return m_SceneName; }
 	virtual inline void SetSceneName(const std::wstring& sceneName) { m_SceneName = sceneName; }
 	virtual inline void AddUseObject(const ObjectID& objectID) { useObjects.push_back(objectID); }
+	virtual inline void SetMainCameraID(const ObjectID& cameraID) { m_MainCameraID = cameraID; }
+	virtual inline ObjectID GetMainCameraID() const noexcept { return m_MainCameraID; }
 	virtual void Start() = 0;
 	virtual void Update() = 0;
 	virtual void Finalize() = 0;
@@ -57,6 +59,7 @@ class SceneManager
 	friend class AddTransformComponent;
 	friend class AddMeshComponent;
 	friend class AddCameraComponent;
+	friend class SetMainCamera;
 public:
 	// Constructor
 	SceneManager()
@@ -90,6 +93,7 @@ public:
 	void ChangeSceneRequest(const SceneID& sceneID) noexcept { m_pNextScene = m_pScenes[sceneID].get(); }
 
 	FVector<std::unique_ptr<ScenePrefab>>& GetScenes() noexcept { return m_pScenes; }
+	ScenePrefab* GetCurrentScene() const noexcept { return m_pCurrentScene; }
 	ECSManager* GetECSManager() const noexcept { return m_pECSManager.get(); }
 	ObjectContainer* GetObjectContainer() const noexcept{ return m_pObjectContainer.get(); }
 private:
@@ -103,11 +107,13 @@ private:
 	void AddMeshComponent(const uint32_t& entity);
 	// CameraComponentを追加
 	void AddCameraComponent(const uint32_t& entity);
+	// SceneのMainCameraを設定
+	uint32_t SetMainCamera(const uint32_t& setCameraID);
 
 	// 現在のシーン
-	BaseScene* m_pCurrentScene = nullptr;
+	ScenePrefab* m_pCurrentScene = nullptr;
 	// 次のシーン
-	BaseScene* m_pNextScene = nullptr;
+	ScenePrefab* m_pNextScene = nullptr;
 	// シーンコンテナ（フリーリスト付き）
 	FVector<std::unique_ptr<ScenePrefab>> m_pScenes;
 	// 名前検索用補助コンテナ

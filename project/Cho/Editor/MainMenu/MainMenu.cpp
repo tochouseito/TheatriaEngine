@@ -103,6 +103,12 @@ void MainMenu::EditMenu()
 			m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addCamComp));
         }
 
+        if (ImGui::MenuItem("Test SetCamera"))
+        {
+			std::unique_ptr<SetMainCamera> setCam = std::make_unique<SetMainCamera>(1);
+			m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(setCam));
+        }
+
         ImGui::EndMenu(); // 「Edit」メニューを終了
     }
 }

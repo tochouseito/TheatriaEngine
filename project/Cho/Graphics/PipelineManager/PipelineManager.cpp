@@ -373,14 +373,10 @@ void PipelineManager::CreatePipelineScreenCopy(ID3D12Device8* device)
 	// 三角形の中を塗りつぶす
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 
-	// DepthStencilState
+	// DepthStencilStateの設定
 	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
-	// Depthの機能を有効化する
-	depthStencilDesc.DepthEnable = true;
-	// 書き込みをします
-	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-	// 比較関数はLessEqual。つまり、近ければ描画される
-	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	// Depthの機能を無効化
+	depthStencilDesc.DepthEnable = false;
 
 	// Create PSO
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc{};

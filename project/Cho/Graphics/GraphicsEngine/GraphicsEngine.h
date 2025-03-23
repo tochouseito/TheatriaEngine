@@ -7,6 +7,20 @@
 #include "SDK/DirectX/DirectX12/DescriptorHeap/DescriptorHeap.h"
 #include "SDK/DirectX/DirectX12/GpuBuffer/GpuBuffer.h"
 #include "SDK/DirectX/DirectX12/ColorBuffer/ColorBuffer.h"
+#include <array>
+
+enum RenderTextureType
+{
+	OffScreen=0,// ゲーム画面用描画結果
+	TypeCount,// 種類数(使用禁止)
+};
+
+struct RenderTexture
+{
+	uint32_t m_BufferID = UINT32_MAX;
+	uint32_t m_Width = 0;
+	uint32_t m_Height = 0;
+};
 
 class ResourceManager;
 class ImGuiManager;
@@ -40,6 +54,6 @@ private:
 	std::unique_ptr<DepthManager> m_DepthManager = nullptr;
 	std::unique_ptr<PipelineManager> m_PipelineManager = nullptr;
 
-	uint32_t m_OffscreenBufferIndex = 0;
+	std::array<RenderTexture, TypeCount> m_RenderTextures;
 };
 
