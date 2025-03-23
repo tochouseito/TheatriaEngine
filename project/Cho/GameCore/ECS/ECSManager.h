@@ -31,7 +31,7 @@ public:
 			entity = ++m_NextEntityID;
 		}
 		// エンティティを有効にする
-		if (m_EntityToActive.size() < entity)
+		if (m_EntityToActive.size() <= entity)
 		{
 			m_EntityToActive.resize(entity + 1, false);
 		}
@@ -100,7 +100,7 @@ public:
 
 	// コンポーネントを削除する
 	template<typename T>
-	void RemvoeComponent(const Entity& entity)
+	void RemoveComponent(const Entity& entity)
 	{
 		// コンポーネントの型のIDを取得
 		CompID type = ComponentPool<T>::GetID();
@@ -164,7 +164,7 @@ public:
 		inline void Add(const Entity& entity)
 		{
 			m_Entities.emplace_back(entity);
-			if (m_EntityToIndex.size() < entity)
+			if (m_EntityToIndex.size() <= entity)
 			{
 				m_EntityToIndex.resize(entity + 1);
 			}
