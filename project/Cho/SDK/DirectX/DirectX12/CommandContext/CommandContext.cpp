@@ -83,16 +83,22 @@ void CommandContext::BarrierTransition(ID3D12Resource* pResource, D3D12_RESOURCE
 	m_CommandList->ResourceBarrier(1, &barrier);
 }
 
-void CommandContext::SetRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE handle)
+void CommandContext::SetRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE* rtvHandle, D3D12_CPU_DESCRIPTOR_HANDLE* dsvHandle)
 {
 	// レンダーターゲットビューの設定
-	m_CommandList->OMSetRenderTargets(1, &handle, false, nullptr);
+	m_CommandList->OMSetRenderTargets(1, rtvHandle, false, dsvHandle);
 }
 
 void CommandContext::ClearRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE handle)
 {
 	// 指定した色で画面全体をクリアする
 	m_CommandList->ClearRenderTargetView(handle, kClearColor, 0, nullptr);
+}
+
+void CommandContext::ClearDepthStencil(D3D12_CPU_DESCRIPTOR_HANDLE handle)
+{
+	// 深度ステンシルビューのクリア
+	m_CommandList->ClearDepthStencilView(handle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 }
 
 void CommandContext::SetViewport(const D3D12_VIEWPORT& viewport)

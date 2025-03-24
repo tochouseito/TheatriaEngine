@@ -1,6 +1,7 @@
 #pragma once
 class DepthManager
 {
+	friend class GraphicsEngine;
 public:
 	// Constructor
 	DepthManager()

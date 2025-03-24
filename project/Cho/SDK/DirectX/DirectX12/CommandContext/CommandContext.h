@@ -19,8 +19,9 @@ public:
 
 	virtual void SetDescriptorHeap(ID3D12DescriptorHeap* heap);
 	virtual void BarrierTransition(ID3D12Resource* pResource, D3D12_RESOURCE_STATES Before, D3D12_RESOURCE_STATES After);
-	virtual void SetRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE handle);
+	virtual void SetRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE* rtvHandle, D3D12_CPU_DESCRIPTOR_HANDLE* dsvHandle = nullptr);
 	virtual void ClearRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE handle);
+	virtual void ClearDepthStencil(D3D12_CPU_DESCRIPTOR_HANDLE handle);
 	virtual void SetViewport(const D3D12_VIEWPORT& viewport);
 	virtual void SetScissorRect(const D3D12_RECT& rect);
 	virtual void SetPrimitiveTopology(D3D12_PRIMITIVE_TOPOLOGY topology);

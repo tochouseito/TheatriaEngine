@@ -15,6 +15,16 @@ enum RenderTextureType
 	TypeCount,// 種類数(使用禁止)
 };
 
+enum DrawPass
+{
+	GBuffers = 0,
+	Lighting,
+	Forward,
+	PostProcess,// ポストプロセス、最終描画
+	SwapChainPass,// SwapChainのバックバッファへの描画
+	PassCount,
+};
+
 struct RenderTexture
 {
 	uint32_t m_BufferID = UINT32_MAX;
@@ -24,6 +34,7 @@ struct RenderTexture
 
 class ResourceManager;
 class ImGuiManager;
+class GameCore;
 class GraphicsEngine : public Engine
 {
 public:
@@ -39,10 +50,26 @@ public:
 	~GraphicsEngine() = default;
 	void Init(IDXGIFactory7* dxgiFactory);
 	void PreRender();
-	void Render();
+	void Render(ResourceManager& resourceManager, GameCore& gameCore);
 	void PostRender();
 	void PostRenderWithImGui(ImGuiManager* imgui);
 private:
+	// コマンドコンテキストの取得
+	CommandContext* GetCommandContext() { return m_GraphicsCore->GetCommandManager()->GetCommandContext(); }
+	// 記録開始
+	void BeginCommandContext(CommandContext* context);
+	// 記録終了
+	void EndCommandContext(CommandContext* context);
+	// GPU待機
+	void WaitForGPU();
+	// レンダーターゲットの設定
+	void SetRenderTargets(CommandContext* context,DrawPass pass);
+	// 描画設定コマンド
+	void SetRenderState(CommandContext* context);
+	void DrawGBuffers(ResourceManager& resourceManager, GameCore& gameCore);
+	void DrawLighting(ResourceManager& resourceManager, GameCore& gameCore);
+	void DrawForward(ResourceManager& resourceManager, GameCore& gameCore);
+	void DrawPostProcess(ResourceManager& resourceManager, GameCore& gameCore);
 	void CreateSwapChain(IDXGIFactory7* dxgiFactory);
 	void CreateDepthBuffer();
 	void CreateOffscreenBuffer();

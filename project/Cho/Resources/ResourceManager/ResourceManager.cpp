@@ -83,6 +83,26 @@ void ResourceManager::CreateHeap(ID3D12Device8* device)
 	CreateDSVDescriptorHeap(device);
 }
 
+D3D12_CPU_DESCRIPTOR_HANDLE ResourceManager::GetCPUHandle(const uint32_t& index, D3D12_DESCRIPTOR_HEAP_TYPE type)
+{
+	switch (type)
+	{
+	case D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV:
+		break;
+	case D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER:
+		break;
+	case D3D12_DESCRIPTOR_HEAP_TYPE_RTV:
+		return m_RTVDescriptorHeap->GetCpuHandle(m_BufferManager->GetColorBuffer(index)->GetRTVHandleIndex());
+		break;
+	case D3D12_DESCRIPTOR_HEAP_TYPE_DSV:
+		return m_DSVDescriptorHeap->GetCpuHandle(m_BufferManager->GetDepthBuffer(index)->GetDSVHandleIndex());
+		break;
+	default:
+		break;
+	}
+	return D3D12_CPU_DESCRIPTOR_HANDLE();
+}
+
 uint32_t ResourceManager::CreateColorBuffer(BUFFER_COLOR_DESC& desc)
 {
 	desc.rtvDHIndex = m_RTVDescriptorHeap->Create();

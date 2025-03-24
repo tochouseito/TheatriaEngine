@@ -14,6 +14,7 @@ class SwapChain;
 
 class ResourceManager
 {
+	friend class GraphicsEngine;
 public:
 	// コンストラクタ
 	ResourceManager(ID3D12Device8* device);
@@ -59,6 +60,8 @@ private:
 	void CreateDSVDescriptorHeap(ID3D12Device8* device);
 	// Heap生成
 	void CreateHeap(ID3D12Device8* device);
+	// CPUHandleの取得
+	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandle(const uint32_t& index,D3D12_DESCRIPTOR_HEAP_TYPE type);
 
 	// Device
 	ID3D12Device8* m_Device = nullptr;

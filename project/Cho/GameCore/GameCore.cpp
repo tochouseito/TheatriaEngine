@@ -19,7 +19,3 @@ void GameCore::Update(ResourceManager& resourceManager, GraphicsEngine& graphics
 	graphicsEngine;
 }
 
-void GameCore::Draw(GraphicsEngine& graphicsEngine)
-{
-	graphicsEngine;
-}
