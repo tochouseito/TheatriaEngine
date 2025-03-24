@@ -49,9 +49,19 @@ public:
 private:
 };
 
+struct BUFFER_STRUCT_DESC
+{
+	UINT numElements;
+	UINT structuredByteStride;
+	D3D12_RESOURCE_STATES state;
+	uint32_t suvDHIndex;
+	// マップ用データにコピーするためのポインタ
+	void* mappedData = nullptr;
+};
 class StructuredBuffer : public GpuBuffer
 {
 public:
+
 private:
 };
 
