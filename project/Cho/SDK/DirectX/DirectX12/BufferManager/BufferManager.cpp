@@ -217,6 +217,16 @@ uint32_t BufferManager::CreateBufferProcess(BUFFER_VERTEX_DESC& desc)
 	return index;
 }
 
+uint32_t BufferManager::CreateBufferProcess(BUFFER_CONSTANT_DESC& desc)
+{
+	return 0;
+}
+
+uint32_t BufferManager::CreateBufferProcess(BUFFER_STRUCTURED_DESC& desc)
+{
+	return 0;
+}
+
 void BufferManager::RemakeBufferProcess(const uint32_t& index, const BUFFER_COLOR_DESC& desc)
 {
 	index;

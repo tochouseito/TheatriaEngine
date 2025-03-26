@@ -55,6 +55,7 @@ public:
         D3D12_RESOURCE_STATES InitialState,
         D3D12_CLEAR_VALUE* pClearValue = nullptr
     );
+	void Map(void** pData) { m_pResource->Map(0, nullptr, pData); }
 	void UnMap() { m_pResource->Unmap(0, nullptr); }
 	uint32_t GetSUVHandleIndex() const { return m_SUVHandleIndex; }
 	void SetSUVHandleIndex(const uint32_t& index) { m_SUVHandleIndex = index; }

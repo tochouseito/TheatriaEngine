@@ -26,6 +26,7 @@ public:
 		D3D12_RESOURCE_STATES InitialState,
 		D3D12_CLEAR_VALUE* pClearValue = nullptr
 	);
+	void Map(void** pData) { GpuResource::Map(pData); }
 	void UnMap() { GpuResource::UnMap(); }
 
 	// Getters
@@ -43,25 +44,57 @@ protected:
     D3D12_RESOURCE_FLAGS m_ResourceFlags = {};
 };
 
+struct BUFFER_CONSTANT_DESC
+{
+	UINT numElements;
+	UINT structuredByteStride;
+	D3D12_RESOURCE_STATES state;
+};
 class ConstantBuffer : public GpuBuffer
 {
 public:
+	// Constructor
+	ConstantBuffer(BUFFER_CONSTANT_DESC desc) : GpuBuffer()
+	{
+		SetResourceState(desc.state);
+	}
+	// Constructor
+	ConstantBuffer(ID3D12Resource* pResource, BUFFER_CONSTANT_DESC desc) :
+		GpuBuffer(pResource, desc.state)
+	{
+	}
+	// Destructor
+	~ConstantBuffer()
+	{
+	}
 private:
 };
 
-struct BUFFER_STRUCT_DESC
+struct BUFFER_STRUCTURED_DESC
 {
 	UINT numElements;
 	UINT structuredByteStride;
 	D3D12_RESOURCE_STATES state;
 	uint32_t suvDHIndex;
-	// マップ用データにコピーするためのポインタ
-	void* mappedData = nullptr;
 };
 class StructuredBuffer : public GpuBuffer
 {
 public:
-
+	// Constructor
+	StructuredBuffer(BUFFER_STRUCTURED_DESC desc) : GpuBuffer()
+	{
+		SetSUVHandleIndex(desc.suvDHIndex);
+		SetResourceState(desc.state);
+	}
+	// Constructor
+	StructuredBuffer(ID3D12Resource* pResource, BUFFER_STRUCTURED_DESC desc) :
+		GpuBuffer(pResource, desc.state)
+	{
+	}
+	// Destructor
+	~StructuredBuffer()
+	{
+	}
 private:
 };
 

@@ -56,7 +56,12 @@ private:
 	uint32_t CreateBufferProcess(BUFFER_DEPTH_DESC& desc);
 	// VertexBufferProcess
 	uint32_t CreateBufferProcess(BUFFER_VERTEX_DESC& desc);
+	// ConstantBufferProcess
+	uint32_t CreateBufferProcess(BUFFER_CONSTANT_DESC& desc);
+	// StructuredBufferProcess
+	uint32_t CreateBufferProcess(BUFFER_STRUCTURED_DESC& desc);
 
+	// RemakeBufferProcess
 	void RemakeBufferProcess(const uint32_t& index, const BUFFER_COLOR_DESC& desc);
 	void RemakeBufferProcess(const uint32_t& index, const BUFFER_DEPTH_DESC& desc);
 	void RemakeBufferProcess(const uint32_t& index, const BUFFER_VERTEX_DESC& desc);
@@ -64,8 +69,10 @@ private:
 	ID3D12Device8* m_Device = nullptr;
 	ResourceManager* m_ResourceManager = nullptr;
 	// BufferContainer
-	FVector<ColorBuffer> m_ColorBuffers;
-	FVector<DepthBuffer> m_DepthBuffers;
-	FVector<VertexBuffer> m_VertexBuffers;
+	FVector<ColorBuffer> m_ColorBuffers;			// カラーバッファ
+	FVector<DepthBuffer> m_DepthBuffers;			// 深度バッファ
+	FVector<VertexBuffer> m_VertexBuffers;			// 頂点バッファ,インデックスバッファ
+	FVector<ConstantBuffer> m_ConstantBuffers;		// 定数バッファ
+	FVector<StructuredBuffer> m_StructuredBuffers;	// 構造化バッファ
 };
 
