@@ -160,6 +160,7 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClCompile Include="Cho\GameCore\ECS\ECSManager.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DXC\DXShaderCompiler.cpp" />
     <ClCompile Include="Cho\Editor\EditorCommand\EditorCommand.cpp" />
+    <ClCompile Include="Cho\GameCore\IntegrationBuffer\IntegrationBuffer.cpp" />
     <ClCompile Include="main.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
@@ -233,6 +234,7 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClInclude Include="Cho\Resources\ModelManager\ModelManager.h" />
     <ClInclude Include="Cho\Resources\TextureManager\TextureManager.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\VertexBuffer\VertexBuffer.h" />
+    <ClInclude Include="Cho\GameCore\IntegrationBuffer\IntegrationBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Cho\Externals\ChoMath\ChoMath.vcxproj">
@@ -257,6 +259,18 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Cho\Resources\Shader\Demo\Demo.VS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Cho\Resources\Shader\IntegrationDraw\IntegrationDraw.PS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Cho\Resources\Shader\IntegrationDraw\IntegrationDraw.VS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>

@@ -14,6 +14,15 @@ struct VertexShaderOutput
     float3 cameraPosition : CAMERAPOS0;
 };
 
+struct VSOut 
+{
+    float4 position : SV_POSITION;
+    float2 texcoord : TEXCOORD0;
+    float3 normal : NORMAL0;
+    float3 worldPosition : POSITION0;
+    float3 cameraPosition : CAMERAPOS0;
+};
+
 struct ViewProjection
 {
     float4x4 view;

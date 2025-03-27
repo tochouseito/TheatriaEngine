@@ -36,7 +36,8 @@ public:
 	{
 
 	}
-	
+	// モデルデータを取得する
+	ModelData* GetModelData(const uint32_t& index) { return &m_Models[index]; }
 private:
 	// デフォルトメッシュの生成
 	void CreateDefaultMesh();

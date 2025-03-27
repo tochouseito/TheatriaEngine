@@ -42,7 +42,7 @@ void ChoEngine::Initialize()
 
 	// GameCore初期化
 	gameCore = std::make_unique<GameCore>();
-	gameCore->Initialize();
+	gameCore->Initialize(resourceManager.get());
 
 	// EditorCommand初期化
 	editorCommand = std::make_unique<EditorCommand>(resourceManager.get(), graphicsEngine.get(), gameCore.get());

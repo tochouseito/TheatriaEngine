@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "SceneManager.h"
 #include "Cho/Core/Log/Log.h"
+#include "Cho/Resources/ResourceManager/ResourceManager.h"
 
 void ScenePrefab::Start()
 {
@@ -53,7 +54,16 @@ void SceneManager::AddMeshComponent(const uint32_t& entity)
 
 void SceneManager::AddCameraComponent(const uint32_t& entity)
 {
-	m_pECSManager->AddComponent<CameraComponent>(entity);
+	CameraComponent* camera = m_pECSManager->AddComponent<CameraComponent>(entity);
+	if (!camera)
+	{
+		ChoAssertLog("CameraComponent is nullptr", false, __FILE__, __LINE__);
+	}
+	// Resourceの生成
+	// 生成するResourceの設定
+	BUFFER_CONSTANT_DESC desc = {};
+	desc.
+	camera->bufferIndex=m_pResourceManager->CreateConstantBuffer
 }
 
 uint32_t SceneManager::SetMainCamera(const uint32_t& setCameraID)
@@ -82,4 +92,6 @@ void SceneManager::AddGameObject()
 void SceneManager::AddTransformComponent(const uint32_t& entity)
 {
 	m_pECSManager->AddComponent<TransformComponent>(entity);
+	// Resourceの生成
+	
 }

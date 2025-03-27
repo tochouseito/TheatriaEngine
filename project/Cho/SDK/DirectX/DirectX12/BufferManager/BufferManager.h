@@ -50,6 +50,8 @@ public:// メンバ関数
 	ColorBuffer* GetColorBuffer(const uint32_t& index) { return &m_ColorBuffers[index]; }
 	DepthBuffer* GetDepthBuffer(const uint32_t& index) { return &m_DepthBuffers[index]; }
 	VertexBuffer* GetVertexBuffer(const uint32_t& index) { return &m_VertexBuffers[index]; }
+	ConstantBuffer* GetConstantBuffer(const uint32_t& index) { return &m_ConstantBuffers[index]; }
+	StructuredBuffer* GetStructuredBuffer(const uint32_t& index) { return &m_StructuredBuffers[index]; }
 	//template<typename T, typename = BufferType<T>>
 	//T* GetBuffer(const uint32_t& index) const { return GetBufferProcess(index); }
 private:

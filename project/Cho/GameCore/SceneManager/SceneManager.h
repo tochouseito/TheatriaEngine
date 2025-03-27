@@ -1,6 +1,7 @@
 #pragma once
 #include "Cho/GameCore/ECS/ECSManager.h"
 #include "Cho/GameCore/ObjectContainer/ObjectContainer.h"
+#include "Cho/GameCore/IntegrationBuffer/IntegrationBuffer.h"
 #include <string>
 using SceneID = uint32_t;
 class SceneManager;
@@ -53,6 +54,7 @@ public:
 private:
 };
 
+class ResourceManager;
 class SceneManager
 {
 	friend class AddGameObjectCommand;
@@ -62,10 +64,12 @@ class SceneManager
 	friend class SetMainCamera;
 public:
 	// Constructor
-	SceneManager()
+	SceneManager(ResourceManager* resourceManager):
+		m_pResourceManager(resourceManager)
 	{
 		m_pECSManager = std::make_unique<ECSManager>();
 		m_pObjectContainer = std::make_unique<ObjectContainer>();
+		m_pIntegrationBuffer = std::make_unique<IntegrationBuffer>();
 		AddScene(L"MainScene");
 		ChangeSceneRequest(m_SceneNameToID[L"MainScene"]);
 	}
@@ -96,6 +100,7 @@ public:
 	ScenePrefab* GetCurrentScene() const noexcept { return m_pCurrentScene; }
 	ECSManager* GetECSManager() const noexcept { return m_pECSManager.get(); }
 	ObjectContainer* GetObjectContainer() const noexcept{ return m_pObjectContainer.get(); }
+	IntegrationBuffer* GetIntegrationBuffer() const noexcept { return m_pIntegrationBuffer.get(); }
 private:
 	// シーンを変更
 	void ChangeScene();
@@ -110,6 +115,8 @@ private:
 	// SceneのMainCameraを設定
 	uint32_t SetMainCamera(const uint32_t& setCameraID);
 
+	// ResourceManager
+	ResourceManager* m_pResourceManager = nullptr;
 	// 現在のシーン
 	ScenePrefab* m_pCurrentScene = nullptr;
 	// 次のシーン
@@ -122,5 +129,7 @@ private:
 	std::unique_ptr<ECSManager> m_pECSManager = nullptr;
 	// オブジェクトコンテナ
 	std::unique_ptr<ObjectContainer> m_pObjectContainer = nullptr;
+	// 統合バッファ
+	std::unique_ptr<IntegrationBuffer> m_pIntegrationBuffer = nullptr;
 };
 

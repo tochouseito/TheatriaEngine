@@ -26,7 +26,10 @@ public:
 	// プレハブコンテナを取得
 	FVector<Prefab>& GetPrefabs() { return m_Prefabs; }
 private:
+	// ゲームオブジェクトコンテナ
 	FVector<GameObject> m_GameObjects;
+	// プレファブコンテナ
 	FVector<Prefab> m_Prefabs;
+
 };
 

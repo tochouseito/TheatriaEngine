@@ -27,6 +27,9 @@ public:
 	virtual void SetPrimitiveTopology(D3D12_PRIMITIVE_TOPOLOGY topology);
 	virtual void SetGraphicsPipelineState(ID3D12PipelineState* pso);
 	virtual void SetGraphicsRootSignature(ID3D12RootSignature* rootSignature);
+	virtual void SetVertexBuffers(UINT StartSlot, UINT Count, const D3D12_VERTEX_BUFFER_VIEW* pViews);
+	virtual void SetIndexBuffer(const D3D12_INDEX_BUFFER_VIEW* pView);
+	virtual void SetGraphicsRootConstantBufferView(UINT RootParameterIndex, D3D12_GPU_VIRTUAL_ADDRESS BufferLocation);
 	virtual void SetGraphicsRootDescriptorTable(UINT RootParameterIndex, D3D12_GPU_DESCRIPTOR_HANDLE BaseDescriptor);
 	virtual void DrawInstanced(UINT VertexCountPerInstance, UINT InstanceCount, UINT StartVertexLocation, UINT StartInstanceLocation);
 protected:

@@ -2,9 +2,9 @@
 #include "GameCore.h"
 #include "Graphics/GraphicsEngine/GraphicsEngine.h"
 
-void GameCore::Initialize()
+void GameCore::Initialize(ResourceManager* resourceManager)
 {
-	m_pSceneManager = std::make_unique<SceneManager>();
+	m_pSceneManager = std::make_unique<SceneManager>(resourceManager);
 }
 
 void GameCore::Start(ResourceManager& resourceManager)

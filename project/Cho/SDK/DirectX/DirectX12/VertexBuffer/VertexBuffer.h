@@ -39,6 +39,8 @@ public:
 	uint32_t GetIndexBufferDHandleIndex() const { return m_IndexBuffer.GetSUVHandleIndex(); }
 	void CreateVertexResource(ID3D12Device8* device, const UINT& numElements, const UINT& structuredByteStride);
 	void CreateIndexResource(ID3D12Device8* device, const UINT& numElements, const UINT& structuredByteStride);
+	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() { return &m_VertexBufferView; }
+	D3D12_INDEX_BUFFER_VIEW* GetIndexBufferView() { return &m_IndexBufferView; }
 private:
 	GpuBuffer m_IndexBuffer;// IndexBufferResource
 	D3D12_VERTEX_BUFFER_VIEW m_VertexBufferView = {};

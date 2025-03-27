@@ -12,7 +12,7 @@ public:
 	~GameCore() 
 	{
 	}
-	void Initialize();
+	void Initialize(ResourceManager* resourceManager);
 	void Start(ResourceManager& resourceManager);
 	void Update(ResourceManager& resourceManager, GraphicsEngine& graphicsEngine);
 	SceneManager* GetSceneManager() { return m_pSceneManager.get(); }

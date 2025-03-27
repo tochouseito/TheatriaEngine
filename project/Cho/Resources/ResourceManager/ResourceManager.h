@@ -35,6 +35,8 @@ public:
 	uint32_t CreateColorBuffer(BUFFER_COLOR_DESC& desc);
 	uint32_t CreateDepthBuffer(BUFFER_DEPTH_DESC& desc);
 	uint32_t CreateVertexBuffer(BUFFER_VERTEX_DESC& desc);
+	uint32_t CreateConstantBuffer(BUFFER_CONSTANT_DESC& desc);
+	uint32_t CreateStructuredBuffer(BUFFER_STRUCTURED_DESC& desc);
 
 	// RemakeMethod
 	void RemakeColorBuffer(const uint32_t& index, BUFFER_COLOR_DESC& desc);
@@ -51,6 +53,8 @@ public:
 	DescriptorHeap* GetRTVDHeap() const { return m_RTVDescriptorHeap.get(); }
 	DescriptorHeap* GetDSVDHeap() const { return m_DSVDescriptorHeap.get(); }
 	BufferManager* GetBufferManager() const { return m_BufferManager.get(); }
+	//TextureManager* GetTextureManager() const { return m_TextureManager.get(); }
+	ModelManager* GetModelManager() const { return m_ModelManager.get(); }
 private:
 	// SUVディスクリプタヒープの生成
 	void CreateSUVDescriptorHeap(ID3D12Device8* device);

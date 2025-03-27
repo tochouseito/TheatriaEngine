@@ -131,6 +131,24 @@ void CommandContext::SetGraphicsRootSignature(ID3D12RootSignature* rootSignature
 	m_CommandList->SetGraphicsRootSignature(rootSignature);
 }
 
+void CommandContext::SetVertexBuffers(UINT StartSlot, UINT Count, const D3D12_VERTEX_BUFFER_VIEW* pViews)
+{
+	// 頂点バッファの設定
+	m_CommandList->IASetVertexBuffers(StartSlot, Count, pViews);
+}
+
+void CommandContext::SetIndexBuffer(const D3D12_INDEX_BUFFER_VIEW* pView)
+{
+	// インデックスバッファの設定
+	m_CommandList->IASetIndexBuffer(pView);
+}
+
+void CommandContext::SetGraphicsRootConstantBufferView(UINT RootParameterIndex, D3D12_GPU_VIRTUAL_ADDRESS BufferLocation)
+{
+	// ルート定数バッファビューの設定
+	m_CommandList->SetGraphicsRootConstantBufferView(RootParameterIndex, BufferLocation);
+}
+
 void CommandContext::SetGraphicsRootDescriptorTable(UINT RootParameterIndex, D3D12_GPU_DESCRIPTOR_HANDLE BaseDescriptor)
 {
 	// ルートディスクリプタテーブルの設定
