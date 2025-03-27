@@ -11,13 +11,17 @@ template<typename T>
 using BufferType = std::enable_if_t<
 	std::is_same_v<T, ColorBuffer> ||
 	std::is_same_v<T, DepthBuffer> ||
-	std::is_same_v<T, VertexBuffer>
+	std::is_same_v<T, VertexBuffer>||
+	std::is_same_v<T, ConstantBuffer>||
+	std::is_same_v<T, StructuredBuffer>
 >;
 template<typename T>
 using BufferDescType = std::enable_if_t<
 	std::is_same_v<T, BUFFER_COLOR_DESC> ||
 	std::is_same_v<T, BUFFER_DEPTH_DESC> ||
-	std::is_same_v<T, BUFFER_VERTEX_DESC>
+	std::is_same_v<T, BUFFER_VERTEX_DESC>||
+	std::is_same_v<T, BUFFER_CONSTANT_DESC>||
+	std::is_same_v<T, BUFFER_STRUCTURED_DESC>
 >;
 
 class ResourceManager;
