@@ -4,7 +4,7 @@
 void IntegrationBuffer::AddNewGroup(const size_t& size)
 {
 	// モデルの数とフラグの数が一致していない場合
-	if (m_TransformIntegrationData.useVertexToTransformIndex.GetVector().size() != size &&
+	if (m_TransformIntegrationData.useVertexToTransformIndex.GetVector().size() != size ||
 		m_UseVertexFlag.GetVector().size() != size)
 	{
 		ChoAssertLog("Size is not match", false, __FILE__, __LINE__);

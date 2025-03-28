@@ -10,8 +10,9 @@
 #include "Resources/TextureManager/TextureManager.h"
 #include <optional>
 
+class GraphicsEngine;
 class SwapChain;
-
+class IntegrationBuffer;
 class ResourceManager
 {
 	friend class GraphicsEngine;
@@ -30,6 +31,7 @@ public:
 	void Release();
 
 	void CreateSwapChain(SwapChain* swapChain);
+	void GenerateManager(GraphicsEngine* graphicsEngine, IntegrationBuffer* intBuf);
 
 	// BufferMethod
 	uint32_t CreateColorBuffer(BUFFER_COLOR_DESC& desc);
@@ -37,6 +39,7 @@ public:
 	uint32_t CreateVertexBuffer(BUFFER_VERTEX_DESC& desc);
 	uint32_t CreateConstantBuffer(BUFFER_CONSTANT_DESC& desc);
 	uint32_t CreateStructuredBuffer(BUFFER_STRUCTURED_DESC& desc);
+	uint32_t CreateTextureBuffer(BUFFER_TEXTURE_DESC& desc);
 
 	// RemakeMethod
 	void RemakeColorBuffer(const uint32_t& index, BUFFER_COLOR_DESC& desc);

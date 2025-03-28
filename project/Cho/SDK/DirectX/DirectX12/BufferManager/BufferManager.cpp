@@ -219,11 +219,19 @@ uint32_t BufferManager::CreateBufferProcess(BUFFER_VERTEX_DESC& desc)
 
 uint32_t BufferManager::CreateBufferProcess(BUFFER_CONSTANT_DESC& desc)
 {
+	desc;
 	return 0;
 }
 
 uint32_t BufferManager::CreateBufferProcess(BUFFER_STRUCTURED_DESC& desc)
 {
+	desc;
+	return 0;
+}
+
+uint32_t BufferManager::CreateBufferProcess(BUFFER_TEXTURE_DESC& desc)
+{
+	desc;
 	return 0;
 }
 

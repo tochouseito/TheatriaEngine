@@ -185,6 +185,7 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClCompile Include="Cho\Resources\ModelManager\ModelManager.cpp" />
     <ClCompile Include="Cho\Resources\TextureManager\TextureManager.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\VertexBuffer\VertexBuffer.cpp" />
+    <ClCompile Include="Cho\SDK\DirectX\DirectX12\TextureBuffer\TextureBuffer.cpp" />
     <ClInclude Include="Cho\Core\Utility\BufferID.h" />
     <ClInclude Include="Cho\Core\Utility\Color.h" />
     <ClInclude Include="Cho\Core\Utility\CompBufferData.h" />
@@ -235,6 +236,7 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClInclude Include="Cho\Resources\TextureManager\TextureManager.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\VertexBuffer\VertexBuffer.h" />
     <ClInclude Include="Cho\GameCore\IntegrationBuffer\IntegrationBuffer.h" />
+    <ClInclude Include="Cho\SDK\DirectX\DirectX12\TextureBuffer\TextureBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Cho\Externals\ChoMath\ChoMath.vcxproj">

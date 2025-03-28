@@ -8,8 +8,6 @@ ResourceManager::ResourceManager(ID3D12Device8* device)
 	CreateHeap(device);// デバイスを受け取り、プールを作成する
 
 	m_BufferManager = std::make_unique<BufferManager>(device, this);// バッファマネージャの生成
-	m_TextureManager = std::make_unique<TextureManager>();// テクスチャマネージャの生成
-	m_ModelManager = std::make_unique<ModelManager>(this);// モデルマネージャの生成
 	m_Device = device;// デバイスの設定
 	
 	Initialize();// 初期化
@@ -59,6 +57,12 @@ void ResourceManager::CreateSwapChain(SwapChain* swapChain)
 		desc.rtvDHIndex = m_RTVDescriptorHeap->Create();
 		swapChain->SetIndex(bufferindex, m_BufferManager->CreateForSwapChain(desc, pResource.Get()));
 	}
+}
+
+void ResourceManager::GenerateManager(GraphicsEngine* graphicsEngine, IntegrationBuffer* intBuf)
+{
+	m_ModelManager = std::make_unique<ModelManager>(this, intBuf);
+	m_TextureManager = std::make_unique<TextureManager>(this, graphicsEngine);
 }
 
 void ResourceManager::CreateSUVDescriptorHeap(ID3D12Device8* device)
@@ -132,6 +136,12 @@ uint32_t ResourceManager::CreateStructuredBuffer(BUFFER_STRUCTURED_DESC& desc)
 {
 	desc.suvDHIndex = m_SUVDescriptorHeap->Create();
 	return m_BufferManager->CreateBuffer<BUFFER_STRUCTURED_DESC>(desc);
+}
+
+uint32_t ResourceManager::CreateTextureBuffer(BUFFER_TEXTURE_DESC& desc)
+{
+	desc.suvDHIndex = m_SUVDescriptorHeap->Create();
+	return m_BufferManager->CreateBuffer<BUFFER_TEXTURE_DESC>(desc);
 }
 
 void ResourceManager::RemakeColorBuffer(const uint32_t& index, BUFFER_COLOR_DESC& desc)

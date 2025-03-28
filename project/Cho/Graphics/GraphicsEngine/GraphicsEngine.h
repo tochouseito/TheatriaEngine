@@ -37,6 +37,7 @@ class ImGuiManager;
 class GameCore;
 class GraphicsEngine : public Engine
 {
+	friend class TextureManager;
 public:
 	// Constructor
 	GraphicsEngine(ID3D12Device8* device,ResourceManager* resourceManager) : 

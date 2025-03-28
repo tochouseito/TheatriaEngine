@@ -12,14 +12,14 @@ struct VertexData
 };
 struct MeshData
 {
-	std::wstring name;
+	std::string name;
 	std::vector<VertexData> vertices;
 	std::vector<uint32_t> indices;
 	uint32_t vertexBufferIndex = UINT32_MAX;
 };
 struct ModelData
 {
-	std::wstring name;
+	std::string name;
 	std::vector<MeshData> meshes;
 };
 
@@ -43,13 +43,13 @@ private:
 	// デフォルトメッシュの生成
 	void CreateDefaultMesh();
 	// ModelDataの追加
-	uint32_t AddModelData(ModelData& modelData,const std::wstring& name);
+	uint32_t AddModelData(ModelData& modelData,const std::string& name);
 
 	ResourceManager* m_ResourceManager = nullptr;
 	IntegrationBuffer* m_IntegrationBuffer = nullptr;
 	// モデルデータコンテナ
 	FVector<ModelData> m_Models;
 	// モデルのキーを名前で管理するコンテナ
-	std::unordered_map<std::wstring, uint32_t> m_ModelNameContainer;
+	std::unordered_map<std::string, uint32_t> m_ModelNameContainer;
 };
 

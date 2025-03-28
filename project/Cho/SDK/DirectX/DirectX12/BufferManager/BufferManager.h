@@ -5,6 +5,7 @@
 #include "Cho/SDK/DirectX/DirectX12/ColorBuffer/ColorBuffer.h"
 #include "Cho/SDK/DirectX/DirectX12/DepthBuffer/DepthBuffer.h"
 #include "Cho/SDK/DirectX/DirectX12/VertexBuffer/VertexBuffer.h"
+#include "Cho/SDK/DirectX/DirectX12/TextureBuffer/TextureBuffer.h"
 
 // 有効なBufferの型
 template<typename T>
@@ -13,7 +14,8 @@ using BufferType = std::enable_if_t<
 	std::is_same_v<T, DepthBuffer> ||
 	std::is_same_v<T, VertexBuffer>||
 	std::is_same_v<T, ConstantBuffer>||
-	std::is_same_v<T, StructuredBuffer>
+	std::is_same_v<T, StructuredBuffer>||
+	std::is_same_v<T, TextureBuffer>
 >;
 template<typename T>
 using BufferDescType = std::enable_if_t<
@@ -21,7 +23,8 @@ using BufferDescType = std::enable_if_t<
 	std::is_same_v<T, BUFFER_DEPTH_DESC> ||
 	std::is_same_v<T, BUFFER_VERTEX_DESC>||
 	std::is_same_v<T, BUFFER_CONSTANT_DESC>||
-	std::is_same_v<T, BUFFER_STRUCTURED_DESC>
+	std::is_same_v<T, BUFFER_STRUCTURED_DESC>||
+	std::is_same_v<T, BUFFER_TEXTURE_DESC>
 >;
 
 class ResourceManager;
@@ -52,6 +55,7 @@ public:// メンバ関数
 	VertexBuffer* GetVertexBuffer(const uint32_t& index) { return &m_VertexBuffers[index]; }
 	ConstantBuffer* GetConstantBuffer(const uint32_t& index) { return &m_ConstantBuffers[index]; }
 	StructuredBuffer* GetStructuredBuffer(const uint32_t& index) { return &m_StructuredBuffers[index]; }
+	TextureBuffer* GetTextureBuffer(const uint32_t& index) { return &m_TextureBuffers[index]; }
 	//template<typename T, typename = BufferType<T>>
 	//T* GetBuffer(const uint32_t& index) const { return GetBufferProcess(index); }
 private:
@@ -66,6 +70,8 @@ private:
 	uint32_t CreateBufferProcess(BUFFER_CONSTANT_DESC& desc);
 	// StructuredBufferProcess
 	uint32_t CreateBufferProcess(BUFFER_STRUCTURED_DESC& desc);
+	// TextureBufferProcess
+	uint32_t CreateBufferProcess(BUFFER_TEXTURE_DESC& desc);
 
 	// RemakeBufferProcess
 	void RemakeBufferProcess(const uint32_t& index, const BUFFER_COLOR_DESC& desc);
@@ -80,5 +86,6 @@ private:
 	FVector<VertexBuffer> m_VertexBuffers;			// 頂点バッファ,インデックスバッファ
 	FVector<ConstantBuffer> m_ConstantBuffers;		// 定数バッファ
 	FVector<StructuredBuffer> m_StructuredBuffers;	// 構造化バッファ
+	FVector<TextureBuffer> m_TextureBuffers;		// テクスチャバッファ
 };
 

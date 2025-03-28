@@ -6,11 +6,11 @@
 void ModelManager::CreateDefaultMesh()
 {
 	// Cube
-	std::wstring modelName = L"Cube";
+	std::string modelName = "Cube";
 	ModelData modelData;
 	modelData.name = modelName;
 	MeshData meshData;
-	meshData.name = L"Cube";
+	meshData.name = "Cube";
 	
 	uint32_t vertices = 24;// 頂点数
 	uint32_t indices = 36;// インデックス数
@@ -107,12 +107,11 @@ void ModelManager::CreateDefaultMesh()
 }
 
 // ModelDataの追加
-uint32_t ModelManager::AddModelData(ModelData& modelData, const std::wstring& name)
+uint32_t ModelManager::AddModelData(ModelData& modelData, const std::string& name)
 {
-	m_ModelNameContainer[name];
 	uint32_t index = static_cast<uint32_t>(m_Models.push_back(std::move(modelData)));
 	m_ModelNameContainer[name] = index;
 	// 統合バッファも合わせる
-	m_IntegrationBuffer->AddNewGroup(m_Models.GetVector().size());
+	m_IntegrationBuffer->AddNewGroup(m_Models.GetVector().size() - 1);
 	return index;
 }

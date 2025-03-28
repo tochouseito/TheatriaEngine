@@ -46,6 +46,7 @@
     <ClCompile Include="Cho\Resources\ModelManager\ModelManager.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\VertexBuffer\VertexBuffer.cpp" />
     <ClCompile Include="Cho\GameCore\IntegrationBuffer\IntegrationBuffer.cpp" />
+    <ClCompile Include="Cho\SDK\DirectX\DirectX12\TextureBuffer\TextureBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cho\OS\Windows\WinApp\WinApp.h" />
@@ -98,6 +99,7 @@
     <ClInclude Include="Cho\Resources\ModelManager\ModelManager.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\VertexBuffer\VertexBuffer.h" />
     <ClInclude Include="Cho\GameCore\IntegrationBuffer\IntegrationBuffer.h" />
+    <ClInclude Include="Cho\SDK\DirectX\DirectX12\TextureBuffer\TextureBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Cho\Resources\Shader\header\Demo.hlsli" />

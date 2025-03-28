@@ -62,8 +62,6 @@ void SceneManager::AddCameraComponent(const uint32_t& entity)
 	// Resourceの生成
 	// 生成するResourceの設定
 	BUFFER_CONSTANT_DESC desc = {};
-	desc.
-	camera->bufferIndex=m_pResourceManager->CreateConstantBuffer
 }
 
 uint32_t SceneManager::SetMainCamera(const uint32_t& setCameraID)
