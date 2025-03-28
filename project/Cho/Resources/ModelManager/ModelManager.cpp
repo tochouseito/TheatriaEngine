@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "ModelManager.h"
 #include "Resources/ResourceManager/ResourceManager.h"
+#include "Cho/GameCore/IntegrationBuffer/IntegrationBuffer.h"
 
 void ModelManager::CreateDefaultMesh()
 {
@@ -101,8 +102,17 @@ void ModelManager::CreateDefaultMesh()
 	desc.mappedVertices = nullptr;
 	desc.mappedIndices = nullptr;
 	// コンテナに追加
-	m_ModelNameContainer[modelName];
 	modelData.meshes.push_back(meshData);
+	AddModelData(modelData, modelName);
+}
+
+// ModelDataの追加
+uint32_t ModelManager::AddModelData(ModelData& modelData, const std::wstring& name)
+{
+	m_ModelNameContainer[name];
 	uint32_t index = static_cast<uint32_t>(m_Models.push_back(std::move(modelData)));
-	m_ModelNameContainer[modelName] = index;
+	m_ModelNameContainer[name] = index;
+	// 統合バッファも合わせる
+	m_IntegrationBuffer->AddNewGroup(m_Models.GetVector().size());
+	return index;
 }

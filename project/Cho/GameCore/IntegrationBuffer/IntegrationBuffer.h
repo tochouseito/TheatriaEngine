@@ -24,6 +24,7 @@ struct TransformIntegrationData
 class BufferManager;
 class IntegrationBuffer
 {
+	friend class ModelManager;
 public:
 	// Constructor
 	IntegrationBuffer()
@@ -40,6 +41,9 @@ public:
 	// どの頂点データが使用されているかどうかのコンテナを取得する
 	std::vector<bool>& GetUseVertexFlag() { return m_UseVertexFlag.GetVector(); }
 private:
+	// 新たなモデルが追加されたときに新しいグループようのフラグと要素を追加する
+	void AddNewGroup(const size_t& size);
+
 	// Transform用統合データ
 	TransformIntegrationData m_TransformIntegrationData;
 	// 頂点データが使用されているかどうかのフラグコンテナ

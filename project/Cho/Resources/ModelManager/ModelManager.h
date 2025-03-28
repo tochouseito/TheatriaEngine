@@ -24,11 +24,12 @@ struct ModelData
 };
 
 class ResourceManager;
+class IntegrationBuffer;
 class ModelManager
 {
 public:
-	ModelManager(ResourceManager* resourceManager)
-		:m_ResourceManager(resourceManager)
+	ModelManager(ResourceManager* resourceManager,IntegrationBuffer* integrationBuffer)
+		:m_ResourceManager(resourceManager), m_IntegrationBuffer(integrationBuffer)
 	{
 		CreateDefaultMesh();
 	}
@@ -41,8 +42,11 @@ public:
 private:
 	// デフォルトメッシュの生成
 	void CreateDefaultMesh();
+	// ModelDataの追加
+	uint32_t AddModelData(ModelData& modelData,const std::wstring& name);
 
 	ResourceManager* m_ResourceManager = nullptr;
+	IntegrationBuffer* m_IntegrationBuffer = nullptr;
 	// モデルデータコンテナ
 	FVector<ModelData> m_Models;
 	// モデルのキーを名前で管理するコンテナ
