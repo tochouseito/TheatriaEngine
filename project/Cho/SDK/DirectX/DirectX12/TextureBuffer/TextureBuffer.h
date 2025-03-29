@@ -4,7 +4,10 @@ struct BUFFER_TEXTURE_DESC
 {
 	UINT width;
 	UINT height;
+	UINT16 mipLevels;
+	UINT16 arraySize;
 	DXGI_FORMAT format;
+	D3D12_RESOURCE_DIMENSION dimension;
 	D3D12_RESOURCE_STATES state;
 	uint32_t suvDHIndex;
 };

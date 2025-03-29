@@ -34,35 +34,27 @@ void ResourceManager::Release()
 {
 }
 
-void ResourceManager::CreateSwapChain(SwapChain* swapChain)
-{
-	// SwapChainのリソースでRTVを作成
-	{// Buffer0
-		uint32_t bufferindex = 0;
-		ComPtr<ID3D12Resource> pResource = swapChain->GetBackBuffer(bufferindex);
-		BUFFER_COLOR_DESC desc = {};
-		desc.width = WinApp::GetWindowWidth();
-		desc.height = WinApp::GetWindowHeight();
-		desc.format = PixelFormat;
-		desc.rtvDHIndex = m_RTVDescriptorHeap->Create();
-		swapChain->SetIndex(bufferindex, m_BufferManager->CreateForSwapChain(desc, pResource.Get()));
-	}
-	{// Buffer1
-		uint32_t bufferindex = 1;
-		ComPtr<ID3D12Resource> pResource = swapChain->GetBackBuffer(bufferindex);
-		BUFFER_COLOR_DESC desc = {};
-		desc.width = WinApp::GetWindowWidth();
-		desc.height = WinApp::GetWindowHeight();
-		desc.format = PixelFormat;
-		desc.rtvDHIndex = m_RTVDescriptorHeap->Create();
-		swapChain->SetIndex(bufferindex, m_BufferManager->CreateForSwapChain(desc, pResource.Get()));
-	}
-}
-
 void ResourceManager::GenerateManager(GraphicsEngine* graphicsEngine, IntegrationBuffer* intBuf)
 {
-	m_ModelManager = std::make_unique<ModelManager>(this, intBuf);
-	m_TextureManager = std::make_unique<TextureManager>(this, graphicsEngine);
+	graphicsEngine;
+	intBuf;
+
+	//m_ModelManager = std::make_unique<ModelManager>(this, intBuf);
+	//m_TextureManager = std::make_unique<TextureManager>(this, graphicsEngine,m_Device);
+}
+
+ComPtr<ID3D12Resource> ResourceManager::CreateGPUResource(const D3D12_HEAP_PROPERTIES& heapProp, const D3D12_RESOURCE_DESC& desc, const D3D12_RESOURCE_STATES& state, const D3D12_CLEAR_VALUE* clearValue)
+{
+	ComPtr<ID3D12Resource> resource;
+	m_Device->CreateCommittedResource(
+		&heapProp,
+		D3D12_HEAP_FLAG_NONE,
+		&desc,
+		state,
+		clearValue,
+		IID_PPV_ARGS(&resource)
+	);
+	return resource;
 }
 
 void ResourceManager::CreateSUVDescriptorHeap(ID3D12Device8* device)

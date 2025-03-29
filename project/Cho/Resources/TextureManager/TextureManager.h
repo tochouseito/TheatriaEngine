@@ -13,17 +13,19 @@ namespace fs = std::filesystem;
 struct TextureData
 {
 	std::string name;
-	DirectX::TexMetadata metadata;
+	DirectX::TexMetadata metadata = {};
 	uint32_t bufferIndex = UINT32_MAX;
 };
 class ResourceManager;
 class GraphicsEngine;
+class CommandContext;
 class TextureManager
 {
 public:
-	TextureManager(ResourceManager* resourceManager,GraphicsEngine* graphicsEngine):
-		m_ResourceManager(resourceManager), m_GraphicsEngine(graphicsEngine)
+	TextureManager(ResourceManager* resourceManager,GraphicsEngine* graphicsEngine,ID3D12Device8* device):
+		m_ResourceManager(resourceManager), m_GraphicsEngine(graphicsEngine), m_Device(device)
 	{
+		//LoadEngineTexture();
 	}
 	~TextureManager()
 	{
@@ -31,9 +33,12 @@ public:
 	}
 	// Engineのリソースをロード
 	void LoadEngineTexture();
+	// Resourceのアップロード
+	void UploadTextureDataEx(CommandContext* context,ID3D12Resource* resource,const DirectX::ScratchImage& mipImages);
 private:
 	ResourceManager* m_ResourceManager = nullptr;
 	GraphicsEngine* m_GraphicsEngine = nullptr;
+	ID3D12Device8* m_Device = nullptr;
 
 	// TextureDataContainer
 	FVector<TextureData> m_Textures;

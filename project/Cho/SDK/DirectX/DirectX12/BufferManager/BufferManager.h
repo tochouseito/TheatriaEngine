@@ -36,7 +36,7 @@ public:// メンバ関数
 	BufferManager(ID3D12Device8* device,ResourceManager* resourceManager);
 	// Destructor
 	~BufferManager();
-	uint32_t CreateForSwapChain(const BUFFER_COLOR_DESC& desc, ID3D12Resource* pResource) { return CreateBufferForSwapChain(desc,pResource); }
+	
 	// Create Buffer
 	// return: BufferNumber
 	template<typename T, typename = BufferDescType<T>>
@@ -50,16 +50,15 @@ public:// メンバ関数
 	void ReleaseVertexBuffer(const uint32_t& index);
 
 	// Get Buffer
-	ColorBuffer* GetColorBuffer(const uint32_t& index) { return &m_ColorBuffers[index]; }
-	DepthBuffer* GetDepthBuffer(const uint32_t& index) { return &m_DepthBuffers[index]; }
-	VertexBuffer* GetVertexBuffer(const uint32_t& index) { return &m_VertexBuffers[index]; }
-	ConstantBuffer* GetConstantBuffer(const uint32_t& index) { return &m_ConstantBuffers[index]; }
-	StructuredBuffer* GetStructuredBuffer(const uint32_t& index) { return &m_StructuredBuffers[index]; }
-	TextureBuffer* GetTextureBuffer(const uint32_t& index) { return &m_TextureBuffers[index]; }
+	ColorBuffer* GetColorBuffer(const uint32_t& index) { return m_ColorBuffers[index].get(); }
+	DepthBuffer* GetDepthBuffer(const uint32_t& index) { return m_DepthBuffers[index].get(); }
+	VertexBuffer* GetVertexBuffer(const uint32_t& index) { return m_VertexBuffers[index].get(); }
+	ConstantBuffer* GetConstantBuffer(const uint32_t& index) { return m_ConstantBuffers[index].get(); }
+	StructuredBuffer* GetStructuredBuffer(const uint32_t& index) { return m_StructuredBuffers[index].get(); }
+	TextureBuffer* GetTextureBuffer(const uint32_t& index) { return m_TextureBuffers[index].get(); }
 	//template<typename T, typename = BufferType<T>>
 	//T* GetBuffer(const uint32_t& index) const { return GetBufferProcess(index); }
 private:
-	uint32_t CreateBufferForSwapChain(const BUFFER_COLOR_DESC& desc, ID3D12Resource* pResource);
 	// ColorBufferProcess
 	uint32_t CreateBufferProcess(BUFFER_COLOR_DESC& desc);
 	// DepthBufferProcess
@@ -81,11 +80,11 @@ private:
 	ID3D12Device8* m_Device = nullptr;
 	ResourceManager* m_ResourceManager = nullptr;
 	// BufferContainer
-	FVector<ColorBuffer> m_ColorBuffers;			// カラーバッファ
-	FVector<DepthBuffer> m_DepthBuffers;			// 深度バッファ
-	FVector<VertexBuffer> m_VertexBuffers;			// 頂点バッファ,インデックスバッファ
-	FVector<ConstantBuffer> m_ConstantBuffers;		// 定数バッファ
-	FVector<StructuredBuffer> m_StructuredBuffers;	// 構造化バッファ
-	FVector<TextureBuffer> m_TextureBuffers;		// テクスチャバッファ
+	FVector<std::unique_ptr<ColorBuffer>> m_ColorBuffers;			// カラーバッファ
+	FVector<std::unique_ptr<DepthBuffer>> m_DepthBuffers;			// 深度バッファ
+	FVector<std::unique_ptr<VertexBuffer>> m_VertexBuffers;			// 頂点バッファ,インデックスバッファ
+	FVector<std::unique_ptr<ConstantBuffer>> m_ConstantBuffers;		// 定数バッファ
+	FVector<std::unique_ptr<StructuredBuffer>> m_StructuredBuffers;	// 構造化バッファ
+	FVector<std::unique_ptr<TextureBuffer>> m_TextureBuffers;		// テクスチャバッファ
 };
 

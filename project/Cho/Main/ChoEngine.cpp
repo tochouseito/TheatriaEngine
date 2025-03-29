@@ -34,7 +34,8 @@ void ChoEngine::Initialize()
 
 	// GraphicsEngine初期化
 	graphicsEngine = std::make_unique<GraphicsEngine>(dx12->GetDevice(),resourceManager.get());
-	graphicsEngine->Init(dx12->GetDXGIFactory());
+	graphicsEngine->CreateSwapChain(dx12->GetDXGIFactory());
+	graphicsEngine->Init();
 
 	// ImGuiManager初期化
 	imGuiManager = std::make_unique<ImGuiManager>();
@@ -44,7 +45,7 @@ void ChoEngine::Initialize()
 	gameCore = std::make_unique<GameCore>();
 	gameCore->Initialize(resourceManager.get());
 
-	resourceManager->GenerateManager(gameCore->GetSceneManager()->GetIntegrationBuffer());
+	resourceManager->GenerateManager(graphicsEngine.get(), gameCore->GetSceneManager()->GetIntegrationBuffer());
 
 	// EditorCommand初期化
 	editorCommand = std::make_unique<EditorCommand>(resourceManager.get(), graphicsEngine.get(), gameCore.get());
@@ -55,6 +56,8 @@ void ChoEngine::Initialize()
 
 void ChoEngine::Finalize()
 {
+	// GPUの完了待ち
+	graphicsEngine->Finalize();
 	// GameCore終了処理
 	
 	// ImGuiManager終了処理
@@ -67,6 +70,17 @@ void ChoEngine::Finalize()
 	coreSystem->Finalize();
 	// ウィンドウの破棄
 	WinApp::TerminateWindow();
+
+	// 各種手動解放
+	editorManager.reset();
+	editorCommand.reset();
+	gameCore.reset();
+	imGuiManager.reset();
+	graphicsEngine.reset();
+	resourceManager.reset();
+	coreSystem.reset();
+	platformLayer.reset();
+	dx12.reset();
 }
 
 void ChoEngine::Operation()
@@ -112,7 +126,7 @@ void ChoEngine::Draw()
 	//　描画準備
 	graphicsEngine->PreRender();
 	// 描画
-	graphicsEngine->Render(*resourceManager, *gameCore);
+	//graphicsEngine->Render(*resourceManager, *gameCore);
 	// 描画後片付け
 	graphicsEngine->PostRender();
 	//graphicsEngine->PostRenderWithImGui(imGuiManager.get());

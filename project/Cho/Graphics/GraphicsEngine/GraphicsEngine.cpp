@@ -5,10 +5,8 @@
 #include "Cho/SDK/ImGui/ImGuiManager/ImGuiManager.h"
 #include "Cho/GameCore/GameCore.h"
 
-void GraphicsEngine::Init(IDXGIFactory7* dxgiFactory)
+void GraphicsEngine::Init()
 {
-	// SwapChainの生成
-	CreateSwapChain(dxgiFactory);
 	// DepthBufferの生成
 	CreateDepthBuffer();
 	// オフスクリーンレンダリング用のリソースを作成
@@ -25,28 +23,30 @@ void GraphicsEngine::PreRender()
 	CommandContext* context = commandManager->GetCommandContext();
 	BeginCommandContext(context);
 
-	ColorBuffer* offScreenTex = m_ResourceManager->GetBufferManager()->GetColorBuffer(m_RenderTextures[RenderTextureType::OffScreen].m_BufferID);
+	/*ColorBuffer* offScreenTex = m_ResourceManager->GetBufferManager()->GetColorBuffer(m_RenderTextures[RenderTextureType::OffScreen].m_BufferID);
 	context->BarrierTransition(
 		offScreenTex->GetResource(),
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
 		D3D12_RESOURCE_STATE_RENDER_TARGET
-	);
+	);*/
 	
-	EndCommandContext(context);
+	EndCommandContext(context,Graphics);
 	// GPUの完了待ち
-	WaitForGPU();
+	WaitForGPU(Graphics);
 }
 
 void GraphicsEngine::Render(ResourceManager& resourceManager, GameCore& gameCore)
 {
-	// ディファードレンダリング
-	DrawGBuffers(resourceManager, gameCore);
-	// ライティング
-	DrawLighting(resourceManager, gameCore);
-	// フォワードレンダリング
-	DrawForward(resourceManager, gameCore);
-	// ポストプロセス
-	DrawPostProcess(resourceManager, gameCore);
+	resourceManager;
+	gameCore;
+	//// ディファードレンダリング
+	//DrawGBuffers(resourceManager, gameCore);
+	//// ライティング
+	//DrawLighting(resourceManager, gameCore);
+	//// フォワードレンダリング
+	//DrawForward(resourceManager, gameCore);
+	//// ポストプロセス
+	//DrawPostProcess(resourceManager, gameCore);
 }
 
 void GraphicsEngine::PostRender()
@@ -57,38 +57,40 @@ void GraphicsEngine::PostRender()
 	CommandContext* context = commandManager->GetCommandContext();
 	BeginCommandContext(context);
 	// SwapChainのBackBufferIndexを取得
-	UINT backBufferIndex = m_SwapChain->GetBackBufferIndex();
+	UINT backBufferIndex = m_SwapChain->GetCurrentBackBufferIndex();
 	// SwapChainResourceの状態遷移
 	context->BarrierTransition(
-		m_SwapChain->GetBackBuffer(backBufferIndex),
+		m_SwapChain->GetBuffer(backBufferIndex)->pResource.Get(),
 		D3D12_RESOURCE_STATE_PRESENT, 
 		D3D12_RESOURCE_STATE_RENDER_TARGET
 	);
-	// RTVの設定
-	SetRenderTargets(context, DrawPass::SwapChainPass);
-	SetRenderState(context);
+	//// RTVの設定
+	//SetRenderTargets(context, DrawPass::SwapChainPass);
+	//SetRenderState(context);
 	// レンダリング結果をスワップチェーンに描画
-	ColorBuffer* offScreenTex = m_ResourceManager->GetBufferManager()->GetColorBuffer(m_RenderTextures[RenderTextureType::OffScreen].m_BufferID);
+	/*ColorBuffer* offScreenTex = m_ResourceManager->GetBufferManager()->GetColorBuffer(m_RenderTextures[RenderTextureType::OffScreen].m_BufferID);
 	context->BarrierTransition(
 		offScreenTex->GetResource(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET,
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
-	);
-	context->SetGraphicsPipelineState(m_PipelineManager->GetScreenCopyPSO().pso.Get());
-	context->SetGraphicsRootSignature(m_PipelineManager->GetScreenCopyPSO().rootSignature.Get());
-	context->SetGraphicsRootDescriptorTable(0, m_ResourceManager->GetSUVDHeap()->GetGpuHandle(offScreenTex->GetSUVHandleIndex()));
-	context->DrawInstanced(3, 1, 0, 0);
+	);*/
+	//context->SetGraphicsPipelineState(m_PipelineManager->GetScreenCopyPSO().pso.Get());
+	//context->SetGraphicsRootSignature(m_PipelineManager->GetScreenCopyPSO().rootSignature.Get());
+	//context->SetGraphicsRootDescriptorTable(0, m_ResourceManager->GetSUVDHeap()->GetGpuHandle(offScreenTex->GetSUVHandleIndex()));
+	//context->DrawInstanced(3, 1, 0, 0);
 	// SwapChainResourceの状態遷移
 	context->BarrierTransition(
-		m_SwapChain->GetBackBuffer(backBufferIndex),
+		m_SwapChain->GetBuffer(backBufferIndex)->pResource.Get(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET,
 		D3D12_RESOURCE_STATE_PRESENT
 	);
-	EndCommandContext(context);
+	EndCommandContext(context,Graphics);
+	static bool isOnce = false;
 	// SwapChainのPresent
 	m_SwapChain->Present();
+	isOnce = true;
 	// GPUの完了待ち
-	WaitForGPU();
+	WaitForGPU(Graphics);
 }
 
 void GraphicsEngine::PostRenderWithImGui(ImGuiManager* imgui)
@@ -99,10 +101,10 @@ void GraphicsEngine::PostRenderWithImGui(ImGuiManager* imgui)
 	CommandContext* context = commandManager->GetCommandContext();
 	BeginCommandContext(context);
 	// SwapChainのBackBufferIndexを取得
-	UINT backBufferIndex = m_SwapChain->GetBackBufferIndex();
+	UINT backBufferIndex = m_SwapChain->GetCurrentBackBufferIndex();
 	// SwapChainResourceの状態遷移
 	context->BarrierTransition(
-		m_SwapChain->GetBackBuffer(backBufferIndex),
+		m_ResourceManager->GetBufferManager()->GetColorBuffer(backBufferIndex)->GetResource(),
 		D3D12_RESOURCE_STATE_PRESENT,
 		D3D12_RESOURCE_STATE_RENDER_TARGET
 	);
@@ -113,15 +115,15 @@ void GraphicsEngine::PostRenderWithImGui(ImGuiManager* imgui)
 	imgui->Draw(context->GetCommandList());
 	// SwapChainResourceの状態遷移
 	context->BarrierTransition(
-		m_SwapChain->GetBackBuffer(backBufferIndex),
+		m_ResourceManager->GetBufferManager()->GetColorBuffer(backBufferIndex)->GetResource(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET,
 		D3D12_RESOURCE_STATE_PRESENT
 	);
-	EndCommandContext(context);
+	EndCommandContext(context,Graphics);
 	// SwapChainのPresent
 	m_SwapChain->Present();
 	// GPUの完了待ち
-	WaitForGPU();
+	WaitForGPU(Graphics);
 }
 
 void GraphicsEngine::BeginCommandContext(CommandContext* context)
@@ -132,22 +134,22 @@ void GraphicsEngine::BeginCommandContext(CommandContext* context)
 	context->SetDescriptorHeap(m_ResourceManager->GetSUVDHeap()->GetDescriptorHeap());
 }
 
-void GraphicsEngine::EndCommandContext(CommandContext* context)
+void GraphicsEngine::EndCommandContext(CommandContext* context, const QueueType& queue)
 {
 	// コマンドリストのクローズ
 	context->Close();
 	// コマンドリストの実行
-	m_GraphicsCore->GetCommandManager()->ExecuteCommandList(context->GetCommandList(), QueueType::Graphics);
+	m_GraphicsCore->GetCommandManager()->ExecuteCommandList(context->GetCommandList(), queue);
 	// シグナル
-	m_GraphicsCore->GetCommandManager()->Signal(QueueType::Graphics);
+	m_GraphicsCore->GetCommandManager()->Signal(queue);
 	// コマンドリストの返却
 	m_GraphicsCore->GetCommandManager()->ReturnCommandContext(context);
 }
 
-void GraphicsEngine::WaitForGPU()
+void GraphicsEngine::WaitForGPU(const QueueType& queue)
 {
 	// GPUの完了待ち
-	m_GraphicsCore->GetCommandManager()->WaitForFence(QueueType::Graphics);
+	m_GraphicsCore->GetCommandManager()->WaitForFence(queue);
 }
 
 void GraphicsEngine::SetRenderTargets(CommandContext* context, DrawPass pass)
@@ -172,7 +174,7 @@ void GraphicsEngine::SetRenderTargets(CommandContext* context, DrawPass pass)
 		break;
 	case SwapChainPass:
 		// RTV,DSVの設定
-		rtvHandle = m_ResourceManager->GetCPUHandle(m_SwapChain->GetBackBufferIndex(), D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+		rtvHandle = m_ResourceManager->GetCPUHandle(m_SwapChain->GetCurrentBackBufferIndex(), D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 		context->SetRenderTarget(&rtvHandle);
 		context->ClearRenderTarget(rtvHandle);
 		break;
@@ -252,9 +254,9 @@ void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& ga
 	context->SetGraphicsRootDescriptorTable(1, resourceManager.GetSUVDHeap()->GetGpuHandle(transformBuffer->GetSUVHandleIndex()));
 
 	// コマンドリスト終了
-	EndCommandContext(context);
+	EndCommandContext(context,Graphics);
 	// GPUの完了待ち
-	WaitForGPU();
+	WaitForGPU(Graphics);
 }
 
 void GraphicsEngine::DrawLighting(ResourceManager& resourceManager, GameCore& gameCore)
@@ -286,7 +288,7 @@ void GraphicsEngine::CreateSwapChain(IDXGIFactory7* dxgiFactory)
 		WinApp::GetWindowHeight()
 	);
 	// SwapChainのリソースでRTVを作成
-	m_ResourceManager->CreateSwapChain(m_SwapChain.get());
+	m_SwapChain->CreateResource(m_Device, m_ResourceManager);
 }
 
 void GraphicsEngine::CreateDepthBuffer()

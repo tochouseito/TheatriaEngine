@@ -19,6 +19,7 @@ public:
 
 	virtual void SetDescriptorHeap(ID3D12DescriptorHeap* heap);
 	virtual void BarrierTransition(ID3D12Resource* pResource, D3D12_RESOURCE_STATES Before, D3D12_RESOURCE_STATES After);
+	virtual void ResourceBarrier(UINT NumBarriers, const D3D12_RESOURCE_BARRIER* pBarriers);
 	virtual void SetRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE* rtvHandle, D3D12_CPU_DESCRIPTOR_HANDLE* dsvHandle = nullptr);
 	virtual void ClearRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE handle);
 	virtual void ClearDepthStencil(D3D12_CPU_DESCRIPTOR_HANDLE handle);

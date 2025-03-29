@@ -83,6 +83,12 @@ void CommandContext::BarrierTransition(ID3D12Resource* pResource, D3D12_RESOURCE
 	m_CommandList->ResourceBarrier(1, &barrier);
 }
 
+void CommandContext::ResourceBarrier(UINT NumBarriers, const D3D12_RESOURCE_BARRIER* pBarriers)
+{
+	// リソースバリアの設定
+	m_CommandList->ResourceBarrier(NumBarriers, pBarriers);
+}
+
 void CommandContext::SetRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE* rtvHandle, D3D12_CPU_DESCRIPTOR_HANDLE* dsvHandle)
 {
 	// レンダーターゲットビューの設定

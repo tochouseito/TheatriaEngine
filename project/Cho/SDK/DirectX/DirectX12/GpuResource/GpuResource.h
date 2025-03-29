@@ -23,7 +23,7 @@ public:
     }
 
     // Destructor
-    ~GpuResource() { Destroy(); }
+    ~GpuResource() {  }
 
     virtual void Destroy()
     {

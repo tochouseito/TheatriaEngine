@@ -30,8 +30,8 @@ public:
 	// 解放
 	void Release();
 
-	void CreateSwapChain(SwapChain* swapChain);
 	void GenerateManager(GraphicsEngine* graphicsEngine, IntegrationBuffer* intBuf);
+	ComPtr<ID3D12Resource> CreateGPUResource(const D3D12_HEAP_PROPERTIES& heapProp, const D3D12_RESOURCE_DESC& desc, const D3D12_RESOURCE_STATES& state, const D3D12_CLEAR_VALUE* clearValue);
 
 	// BufferMethod
 	uint32_t CreateColorBuffer(BUFFER_COLOR_DESC& desc);

@@ -48,8 +48,22 @@ public:
 		m_PipelineManager = std::make_unique<PipelineManager>();
 	}
 	// Destructor
-	~GraphicsEngine() = default;
-	void Init(IDXGIFactory7* dxgiFactory);
+	~GraphicsEngine()
+	{
+		// 各種解放
+		m_PipelineManager.reset();
+		m_DepthManager.reset();
+		m_GraphicsCore.reset();
+		m_SwapChain.reset();
+	}
+	void Init();
+	void Finalize()
+	{
+		WaitForGPU(Graphics);
+		WaitForGPU(Compute);
+		WaitForGPU(Copy);
+	}
+	void CreateSwapChain(IDXGIFactory7* dxgiFactory);
 	void PreRender();
 	void Render(ResourceManager& resourceManager, GameCore& gameCore);
 	void PostRender();
@@ -60,9 +74,9 @@ private:
 	// 記録開始
 	void BeginCommandContext(CommandContext* context);
 	// 記録終了
-	void EndCommandContext(CommandContext* context);
+	void EndCommandContext(CommandContext* context,const QueueType& queue);
 	// GPU待機
-	void WaitForGPU();
+	void WaitForGPU(const QueueType& queue);
 	// レンダーターゲットの設定
 	void SetRenderTargets(CommandContext* context,DrawPass pass);
 	// 描画設定コマンド
@@ -71,7 +85,6 @@ private:
 	void DrawLighting(ResourceManager& resourceManager, GameCore& gameCore);
 	void DrawForward(ResourceManager& resourceManager, GameCore& gameCore);
 	void DrawPostProcess(ResourceManager& resourceManager, GameCore& gameCore);
-	void CreateSwapChain(IDXGIFactory7* dxgiFactory);
 	void CreateDepthBuffer();
 	void CreateOffscreenBuffer();
 

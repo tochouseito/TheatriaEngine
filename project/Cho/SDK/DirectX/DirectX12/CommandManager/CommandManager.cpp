@@ -35,8 +35,10 @@ uint64_t CommandManager::ExecuteCommandList(ID3D12GraphicsCommandList6* commandL
 		m_QueueContexts[Graphics]->ExecuteCommandLists(commandList);
 		break;
 	case Compute:
+		m_QueueContexts[Compute]->ExecuteCommandLists(commandList);
 		break;
 	case Copy:
+		m_QueueContexts[Copy]->ExecuteCommandLists(commandList);
 		break;
 	default:
 		break;
@@ -53,8 +55,10 @@ void CommandManager::Signal(QueueType type)
 		m_QueueContexts[Graphics]->Signal();
 		break;
 	case Compute:
+		m_QueueContexts[Compute]->Signal();
 		break;
 	case Copy:
+		m_QueueContexts[Copy]->Signal();
 		break;
 	default:
 		break;
@@ -69,8 +73,10 @@ void CommandManager::WaitForFence(QueueType type)
 		m_QueueContexts[Graphics]->WaitForFence();
 		break;
 	case Compute:
+		m_QueueContexts[Compute]->WaitForFence();
 		break;
 	case Copy:
+		m_QueueContexts[Copy]->WaitForFence();
 		break;
 	default:
 		break;
