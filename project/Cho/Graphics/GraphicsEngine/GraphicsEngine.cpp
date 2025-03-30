@@ -77,9 +77,9 @@ void GraphicsEngine::PostRender()
 		D3D12_RESOURCE_STATE_PRESENT, 
 		D3D12_RESOURCE_STATE_RENDER_TARGET
 	);
-	//// RTVの設定
-	//SetRenderTargets(context, DrawPass::SwapChainPass);
-	//SetRenderState(context);
+	// RTVの設定
+	SetRenderTargets(context, DrawPass::SwapChainPass);
+	SetRenderState(context);
 	// レンダリング結果をスワップチェーンに描画
 	ColorBuffer* offScreenTex = m_ResourceManager->GetBufferManager()->GetColorBuffer(m_RenderTextures[RenderTextureType::OffScreen].m_BufferID);
 		context->BarrierTransition(
@@ -100,7 +100,6 @@ void GraphicsEngine::PostRender()
 	EndCommandContext(context,Graphics);
 	// SwapChainのPresent
 	m_SwapChain->Present();
-	isOnce = true;
 	// GPUの完了待ち
 	WaitForGPU(Graphics);
 }
