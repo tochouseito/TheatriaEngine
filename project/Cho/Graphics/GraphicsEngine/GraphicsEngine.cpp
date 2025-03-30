@@ -50,16 +50,14 @@ void GraphicsEngine::PreRender()
 
 void GraphicsEngine::Render(ResourceManager& resourceManager, GameCore& gameCore)
 {
-	resourceManager;
-	gameCore;
-	//// ディファードレンダリング
-	//DrawGBuffers(resourceManager, gameCore);
-	//// ライティング
-	//DrawLighting(resourceManager, gameCore);
-	//// フォワードレンダリング
-	//DrawForward(resourceManager, gameCore);
-	//// ポストプロセス
-	//DrawPostProcess(resourceManager, gameCore);
+	// ディファードレンダリング
+	DrawGBuffers(resourceManager, gameCore);
+	// ライティング
+	DrawLighting(resourceManager, gameCore);
+	// フォワードレンダリング
+	DrawForward(resourceManager, gameCore);
+	// ポストプロセス
+	DrawPostProcess(resourceManager, gameCore);
 }
 
 void GraphicsEngine::PostRender()
@@ -68,7 +66,9 @@ void GraphicsEngine::PostRender()
 	CommandManager* commandManager = m_GraphicsCore->GetCommandManager();
 	// コマンドリストの取得
 	CommandContext* context = commandManager->GetCommandContext();
-	BeginCommandContext(context);
+	//BeginCommandContext(context);
+	context->Reset();
+	context->SetDescriptorHeap(m_ResourceManager->GetSUVDHeap()->GetDescriptorHeap());
 	// SwapChainのBackBufferIndexを取得
 	UINT backBufferIndex = m_SwapChain->GetCurrentBackBufferIndex();
 	// SwapChainResourceの状態遷移
@@ -78,8 +78,34 @@ void GraphicsEngine::PostRender()
 		D3D12_RESOURCE_STATE_RENDER_TARGET
 	);
 	// RTVの設定
-	SetRenderTargets(context, DrawPass::SwapChainPass);
-	SetRenderState(context);
+	//SetRenderTargets(context, DrawPass::SwapChainPass);
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle;
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle;
+	// RTV,DSVの設定
+	dsvHandle = m_ResourceManager->GetDSVDHeap()->GetCpuHandle(m_ResourceManager->GetBufferManager()->GetDepthBuffer(m_DepthManager->GetDepthBufferIndex())->GetDSVHandleIndex());
+	rtvHandle = m_ResourceManager->GetRTVDHeap()->GetCpuHandle(m_SwapChain->GetBuffer(backBufferIndex)->dHIndex);
+	context->SetRenderTarget(&rtvHandle, &dsvHandle);
+	context->ClearRenderTarget(rtvHandle);
+	//SetRenderState(context);
+	// ビューポートの設定
+	D3D12_VIEWPORT viewport =
+		D3D12_VIEWPORT(
+			0.0f, 0.0f,
+			static_cast<float>(WinApp::GetWindowWidth()),
+			static_cast<float>(WinApp::GetWindowHeight()),
+			0.0f, 1.0f
+		);
+	context->SetViewport(viewport);
+	// シザーレクトの設定
+	D3D12_RECT rect = D3D12_RECT(
+		0, 0,
+		WinApp::GetWindowWidth(),
+		WinApp::GetWindowHeight()
+	);
+	context->SetScissorRect(rect);
+	// プリミティブトポロジの設定
+	context->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	
 	// レンダリング結果をスワップチェーンに描画
 	ColorBuffer* offScreenTex = m_ResourceManager->GetBufferManager()->GetColorBuffer(m_RenderTextures[RenderTextureType::OffScreen].m_BufferID);
 		context->BarrierTransition(
@@ -97,9 +123,16 @@ void GraphicsEngine::PostRender()
 		D3D12_RESOURCE_STATE_RENDER_TARGET,
 		D3D12_RESOURCE_STATE_PRESENT
 	);
-	EndCommandContext(context,Graphics);
+	// コマンドリストのクローズ
+	context->Close();
+	// コマンドリストの実行
+	m_GraphicsCore->GetCommandManager()->ExecuteCommandList(context->GetCommandList(), Graphics);
 	// SwapChainのPresent
 	m_SwapChain->Present();
+	// シグナル
+	m_GraphicsCore->GetCommandManager()->Signal(Graphics);
+	// コマンドリストの返却
+	m_GraphicsCore->GetCommandManager()->ReturnCommandContext(context);
 	// GPUの完了待ち
 	WaitForGPU(Graphics);
 }
@@ -225,13 +258,13 @@ void GraphicsEngine::SetRenderState(CommandContext* context)
 void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& gameCore)
 {
 	// コンテキスト取得
-	//CommandContext* context = GetCommandContext();
+	CommandContext* context = GetCommandContext();
 	// コマンドリスト開始
-	//BeginCommandContext(context);
-	//// レンダーターゲットの設定
-	//SetRenderTargets(context, DrawPass::GBuffers);
-	//// 描画設定
-	//SetRenderState(context);
+	BeginCommandContext(context);
+	// レンダーターゲットの設定
+	SetRenderTargets(context, DrawPass::GBuffers);
+	// 描画設定
+	SetRenderState(context);
 
 	resourceManager;
 	gameCore;
@@ -267,9 +300,9 @@ void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& ga
 	//context->SetGraphicsRootDescriptorTable(1, resourceManager.GetSUVDHeap()->GetGpuHandle(transformBuffer->GetSUVHandleIndex()));
 
 	// コマンドリスト終了
-	//EndCommandContext(context,Graphics);
+	EndCommandContext(context,Graphics);
 	// GPUの完了待ち
-	//WaitForGPU(Graphics);
+	WaitForGPU(Graphics);
 }
 
 void GraphicsEngine::DrawLighting(ResourceManager& resourceManager, GameCore& gameCore)
