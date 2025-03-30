@@ -95,7 +95,6 @@ uint32_t BufferManager::CreateBufferProcess(BUFFER_COLOR_DESC& desc)
 		&srvDesc,
 		m_ResourceManager->GetSUVDHeap()->GetCpuHandle(buffer.GetSUVHandleIndex())
 	);
-
 	// RTVの設定
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
 	rtvDesc.Format = desc.format;
@@ -106,7 +105,6 @@ uint32_t BufferManager::CreateBufferProcess(BUFFER_COLOR_DESC& desc)
 		&rtvDesc,
 		m_ResourceManager->GetRTVDHeap()->GetCpuHandle(buffer.GetRTVHandleIndex())
 	);
-
 	// コンテナに移動
 	uint32_t index = static_cast<uint32_t>(m_ColorBuffers.push_back(std::move(buffer)));
 	return index;

@@ -71,17 +71,6 @@ void ChoEngine::Finalize()
 	coreSystem->Finalize();
 	// ウィンドウの破棄
 	WinApp::TerminateWindow();
-
-	// 各種手動解放
-	editorManager.reset();
-	editorCommand.reset();
-	gameCore.reset();
-	imGuiManager.reset();
-	graphicsEngine.reset();
-	resourceManager.reset();
-	coreSystem.reset();
-	platformLayer.reset();
-	dx12.reset();
 }
 
 void ChoEngine::Operation()

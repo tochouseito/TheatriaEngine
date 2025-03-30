@@ -66,9 +66,7 @@ void GraphicsEngine::PostRender()
 	CommandManager* commandManager = m_GraphicsCore->GetCommandManager();
 	// コマンドリストの取得
 	CommandContext* context = commandManager->GetCommandContext();
-	//BeginCommandContext(context);
-	context->Reset();
-	context->SetDescriptorHeap(m_ResourceManager->GetSUVDHeap()->GetDescriptorHeap());
+	BeginCommandContext(context);
 	// SwapChainのBackBufferIndexを取得
 	UINT backBufferIndex = m_SwapChain->GetCurrentBackBufferIndex();
 	// SwapChainResourceの状態遷移
@@ -78,41 +76,16 @@ void GraphicsEngine::PostRender()
 		D3D12_RESOURCE_STATE_RENDER_TARGET
 	);
 	// RTVの設定
-	//SetRenderTargets(context, DrawPass::SwapChainPass);
-	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle;
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle;
-	// RTV,DSVの設定
-	dsvHandle = m_ResourceManager->GetDSVDHeap()->GetCpuHandle(m_ResourceManager->GetBufferManager()->GetDepthBuffer(m_DepthManager->GetDepthBufferIndex())->GetDSVHandleIndex());
-	rtvHandle = m_ResourceManager->GetRTVDHeap()->GetCpuHandle(m_SwapChain->GetBuffer(backBufferIndex)->dHIndex);
-	context->SetRenderTarget(&rtvHandle, &dsvHandle);
-	context->ClearRenderTarget(rtvHandle);
-	//SetRenderState(context);
-	// ビューポートの設定
-	D3D12_VIEWPORT viewport =
-		D3D12_VIEWPORT(
-			0.0f, 0.0f,
-			static_cast<float>(WinApp::GetWindowWidth()),
-			static_cast<float>(WinApp::GetWindowHeight()),
-			0.0f, 1.0f
-		);
-	context->SetViewport(viewport);
-	// シザーレクトの設定
-	D3D12_RECT rect = D3D12_RECT(
-		0, 0,
-		WinApp::GetWindowWidth(),
-		WinApp::GetWindowHeight()
-	);
-	context->SetScissorRect(rect);
-	// プリミティブトポロジの設定
-	context->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	SetRenderTargets(context, DrawPass::SwapChainPass);
+	SetRenderState(context);
 	
 	// レンダリング結果をスワップチェーンに描画
 	ColorBuffer* offScreenTex = m_ResourceManager->GetBufferManager()->GetColorBuffer(m_RenderTextures[RenderTextureType::OffScreen].m_BufferID);
-		context->BarrierTransition(
-			offScreenTex->GetResource(),
-			D3D12_RESOURCE_STATE_RENDER_TARGET,
-			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
-		);
+	context->BarrierTransition(
+		offScreenTex->GetResource(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET,
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+	);
 	context->SetGraphicsPipelineState(m_PipelineManager->GetScreenCopyPSO().pso.Get());
 	context->SetGraphicsRootSignature(m_PipelineManager->GetScreenCopyPSO().rootSignature.Get());
 	context->SetGraphicsRootDescriptorTable(0, m_ResourceManager->GetSUVDHeap()->GetGpuHandle(offScreenTex->GetSUVHandleIndex()));
