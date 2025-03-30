@@ -37,6 +37,8 @@ public:
 	{
 
 	}
+	// モデルコンテナの要素数を取得する
+	uint32_t GetModelDataSize() { return static_cast<uint32_t>(m_Models.size()); }
 	// モデルデータを取得する
 	ModelData* GetModelData(const uint32_t& index) { return &m_Models[index]; }
 private:

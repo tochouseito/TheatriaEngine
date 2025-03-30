@@ -2,9 +2,9 @@
 #include <d3d12.h>
 #include <DirectXTex.h>
 #include <d3dx12.h>
-#include <string>
 #include "Cho/Core/Utility/FVector.h"
 #include <memory>
+#include <string>
 #include <unordered_map>
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -18,6 +18,7 @@ struct TextureData
 class ResourceManager;
 class GraphicsEngine;
 class CommandContext;
+class TextureBuffer;
 class TextureManager
 {
 public:
@@ -34,6 +35,8 @@ public:
 	void LoadEngineTexture();
 	// Resourceのアップロード
 	void UploadTextureDataEx(CommandContext* context, ID3D12Resource* resource, const DirectX::ScratchImage& mipImages);
+	// ダミーテクスチャバッファを取得
+	TextureBuffer* GetDummyTextureBuffer();
 private:
 	ResourceManager* m_ResourceManager = nullptr;
 	GraphicsEngine* m_GraphicsEngine = nullptr;

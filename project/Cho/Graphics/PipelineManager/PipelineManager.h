@@ -26,6 +26,7 @@ public:
 	// Get PSO
 	PSO GetDemoPSO() { return m_DemoPSO; }
 	PSO GetScreenCopyPSO() { return m_ScreenCopyPSO; }
+	PSO GetIntegratePSO() { return m_IntegratePSO; }
 private:
 	std::vector<std::pair<uint32_t, std::string>> CreateRootParameters(
 		ID3D12ShaderReflection* pReflector,
@@ -35,9 +36,11 @@ private:
 	);
 	void CreatePipelineDemo(ID3D12Device8* device);
 	void CreatePipelineScreenCopy(ID3D12Device8* device);
+	void CreatePipelineIntegrate(ID3D12Device8* device);
 
 	std::unique_ptr<DXShaderCompiler> m_pShaderCompiler = nullptr;
 	PSO m_DemoPSO;
 	PSO m_ScreenCopyPSO;
+	PSO m_IntegratePSO;
 };
 

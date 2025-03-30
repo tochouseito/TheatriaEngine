@@ -94,7 +94,7 @@ void TextureManager::LoadEngineTexture()
                     mipImages
                 );
                 // テクスチャデータを追加
-                m_Textures.push_back(std::move(texData));
+                m_TextureNameContainer[fileName] = static_cast<uint32_t>(m_Textures.push_back(std::move(texData)));
             }
         }
     }
@@ -142,4 +142,16 @@ void TextureManager::UploadTextureDataEx(CommandContext* context, ID3D12Resource
     context->ResourceBarrier(1, &barrier);
     m_GraphicsEngine->EndCommandContext(context, QueueType::Copy);
     m_GraphicsEngine->WaitForGPU(QueueType::Copy);
+}
+
+// ダミーテクスチャバッファを取得
+TextureBuffer* TextureManager::GetDummyTextureBuffer()
+{
+    std::wstring fileName = L"Dummy202411181622.png";
+    if (!m_TextureNameContainer.contains(fileName))
+    {
+        ChoAssertLog("DummyTexture is not found", false, __FILE__, __LINE__);
+    }
+    uint32_t index = m_TextureNameContainer[fileName];
+    return m_ResourceManager->GetBufferManager()->GetTextureBuffer(m_Textures[index].bufferIndex);
 }

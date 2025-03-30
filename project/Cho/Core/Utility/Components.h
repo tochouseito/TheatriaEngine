@@ -13,7 +13,9 @@ struct TransformComponent final
 	Vector3 preRot = { 0.0f,0.0f,0.0f };			// 回転差分計算用
 	Scale preScale = { 1.0f,1.0f,1.0f };			// スケール差分計算用
 	Matrix4 preParent = ChoMath::MakeIdentity4x4();
-	uint32_t bufferIndex = UINT32_MAX;				// バッファーインデックス
+	uint32_t bufferIndex = UINT32_MAX;	
+	// バッファーインデックス
+	uint32_t mappedIndex = UINT32_MAX;				// マップインデックス
 };
 // Node用Transform構造体
 struct NodeTransform
@@ -35,10 +37,18 @@ struct CameraComponent final
     float farZ = 1000.0f;
 	// バッファーインデックス
 	uint32_t bufferIndex = UINT32_MAX;
+	// マップインデックス
+	uint32_t mappedIndex = UINT32_MAX;
 };
 
 // メッシュコンポーネント
 struct MeshComponent final
 {
 	uint32_t modelID = 0;// Model選択用ID
+};
+
+// 描画コンポーネント
+struct RenderComponent final
+{
+	bool isRender = true;// 描画フラグ
 };

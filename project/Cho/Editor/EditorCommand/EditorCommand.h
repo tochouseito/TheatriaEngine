@@ -44,6 +44,18 @@ public:
 private:
 	uint32_t m_Entity;
 };
+class AddRenderComponent :public ICommand
+{
+public:
+	AddRenderComponent(const uint32_t& entity) :
+		m_Entity(entity)
+	{
+	}
+	void Execute(EditorCommand* edit)override;
+	void Undo(EditorCommand* edit)override;
+private:
+	uint32_t m_Entity;
+};
 class AddCameraComponent :public ICommand
 {
 public:

@@ -53,3 +53,13 @@ void SetMainCamera::Undo(EditorCommand* edit)
 {
 	edit;
 }
+
+void AddRenderComponent::Execute(EditorCommand* edit)
+{
+	edit->GetGameCorePtr()->GetSceneManager()->AddRenderComponent(m_Entity);
+}
+
+void AddRenderComponent::Undo(EditorCommand* edit)
+{
+	edit;
+}

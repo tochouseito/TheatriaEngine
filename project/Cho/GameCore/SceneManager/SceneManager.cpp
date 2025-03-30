@@ -52,6 +52,11 @@ void SceneManager::AddMeshComponent(const uint32_t& entity)
 	m_pECSManager->AddComponent<MeshComponent>(entity);
 }
 
+void SceneManager::AddRenderComponent(const uint32_t& entity)
+{
+	m_pECSManager->AddComponent<RenderComponent>(entity);
+}
+
 void SceneManager::AddCameraComponent(const uint32_t& entity)
 {
 	CameraComponent* camera = m_pECSManager->AddComponent<CameraComponent>(entity);
@@ -62,8 +67,10 @@ void SceneManager::AddCameraComponent(const uint32_t& entity)
 	// Resourceの生成
 	// 生成するResourceの設定
 	BUFFER_CONSTANT_DESC desc = {};
-	desc;
-	//camera->bufferIndex=m_pResourceManager->CreateConstantBuffer
+	desc.sizeInBytes = sizeof(BUFFER_DATA_VIEWPROJECTION);
+	desc.state = D3D12_RESOURCE_STATE_GENERIC_READ;
+	camera->bufferIndex= m_pResourceManager->CreateConstantBuffer(desc);
+	camera->mappedIndex = m_pResourceManager->CreateMappedViewProjection(camera->bufferIndex);
 }
 
 uint32_t SceneManager::SetMainCamera(const uint32_t& setCameraID)
@@ -93,5 +100,4 @@ void SceneManager::AddTransformComponent(const uint32_t& entity)
 {
 	m_pECSManager->AddComponent<TransformComponent>(entity);
 	// Resourceの生成
-	
 }

@@ -46,10 +46,8 @@ protected:
 
 struct BUFFER_CONSTANT_DESC
 {
-	UINT numElements;
-	UINT structuredByteStride;
+	size_t sizeInBytes;
 	D3D12_RESOURCE_STATES state;
-	void** mappedData;
 };
 class ConstantBuffer : public GpuBuffer
 {
@@ -68,6 +66,7 @@ public:
 	~ConstantBuffer()
 	{
 	}
+	void CreateResource(ID3D12Device* device, const size_t& sizeInBytes);
 private:
 };
 
@@ -76,7 +75,6 @@ struct BUFFER_STRUCTURED_DESC
 	UINT numElements;
 	UINT structuredByteStride;
 	D3D12_RESOURCE_STATES state;
-	void** mappedData;
 	uint32_t suvDHIndex;
 };
 class StructuredBuffer : public GpuBuffer
@@ -97,6 +95,7 @@ public:
 	~StructuredBuffer()
 	{
 	}
+	void CreateResource(ID3D12Device* device, const size_t& sizeInBytes);
 private:
 };
 

@@ -50,12 +50,12 @@ void GraphicsEngine::PreRender()
 
 void GraphicsEngine::Render(ResourceManager& resourceManager, GameCore& gameCore)
 {
-	// ディファードレンダリング
-	DrawGBuffers(resourceManager, gameCore);
-	// ライティング
-	DrawLighting(resourceManager, gameCore);
-	// フォワードレンダリング
-	DrawForward(resourceManager, gameCore);
+	//// ディファードレンダリング
+	//DrawGBuffers(resourceManager, gameCore);
+	//// ライティング
+	//DrawLighting(resourceManager, gameCore);
+	//// フォワードレンダリング
+	//DrawForward(resourceManager, gameCore);
 	// ポストプロセス
 	DrawPostProcess(resourceManager, gameCore);
 }
@@ -238,39 +238,40 @@ void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& ga
 	SetRenderTargets(context, DrawPass::GBuffers);
 	// 描画設定
 	SetRenderState(context);
-
-	resourceManager;
-	gameCore;
 	// パイプラインセット
+	context->SetGraphicsPipelineState(m_PipelineManager->GetIntegratePSO().pso.Get());
 	// ルートシグネチャセット
+	context->SetGraphicsRootSignature(m_PipelineManager->GetIntegratePSO().rootSignature.Get());
 	// 頂点バッファセット
 	// インデックスバッファセット
 	// シーンに含まれている頂点データを使用しているオブジェクトグループごとに
-	//std::vector<bool> isUsedMesh = gameCore.GetSceneManager()->GetIntegrationBuffer()->GetUseVertexFlag();
-	//for (uint32_t i = 0;i < isUsedMesh.size();i++)
-	//{
-	//	// 使用していないメッシュはスキップ
-	//	if (!isUsedMesh[i]) { continue; }
-	//	// VertexBufferを取得
-	//	ModelData* modelData = resourceManager.GetModelManager()->GetModelData(i);
-	//	D3D12_VERTEX_BUFFER_VIEW* vbv = resourceManager.GetBufferManager()->GetVertexBuffer(modelData->meshes[0].vertexBufferIndex)->GetVertexBufferView();
-	//	D3D12_INDEX_BUFFER_VIEW* ibv = resourceManager.GetBufferManager()->GetVertexBuffer(modelData->meshes[0].vertexBufferIndex)->GetIndexBufferView();
-	//	// 一旦最初のメッシュのみを使用
-	//	context->SetVertexBuffers(0, 1, vbv);
-	//	context->SetIndexBuffer(ibv);
-	//	// 使用するトランスフォームSRVのインデックスをセット
-	//	StructuredBuffer* transformIndexBuffer = resourceManager.GetBufferManager()->GetStructuredBuffer(gameCore.GetSceneManager()->GetIntegrationBuffer()->GetTransformIndexBufferIndex());
-	//	context->SetGraphicsRootDescriptorTable(2, resourceManager.GetSUVDHeap()->GetGpuHandle(transformIndexBuffer->GetSUVHandleIndex()));
-	//}
-	//// カメラセット
-	//// MainCameraを取得
-	//uint32_t cameraEntity = gameCore.GetSceneManager()->GetCurrentScene()->GetMainCameraID();
-	//CameraComponent* camera = gameCore.GetSceneManager()->GetECSManager()->GetComponent<CameraComponent>(cameraEntity);
-	//ConstantBuffer* cameraBuffer = resourceManager.GetBufferManager()->GetConstantBuffer(camera->bufferIndex);
-	//context->SetGraphicsRootConstantBufferView(0, cameraBuffer->GetResource()->GetGPUVirtualAddress());
-	//// トランスフォームセット
-	//StructuredBuffer* transformBuffer = resourceManager.GetBufferManager()->GetStructuredBuffer(gameCore.GetSceneManager()->GetIntegrationBuffer()->GetTransformBufferIndex());
-	//context->SetGraphicsRootDescriptorTable(1, resourceManager.GetSUVDHeap()->GetGpuHandle(transformBuffer->GetSUVHandleIndex()));
+	for (uint32_t i = 0;i < resourceManager.GetModelManager()->GetModelDataSize();i++)
+	{
+		// 使用しているTFがないならスキップ
+		if (gameCore.GetSceneManager()->GetIntegrationBuffer()->GetUseVertexToList(i).empty()) { continue; }
+		// VertexBufferを取得
+		ModelData* modelData = resourceManager.GetModelManager()->GetModelData(i);
+		D3D12_VERTEX_BUFFER_VIEW* vbv = resourceManager.GetBufferManager()->GetVertexBuffer(modelData->meshes[0].vertexBufferIndex)->GetVertexBufferView();
+		D3D12_INDEX_BUFFER_VIEW* ibv = resourceManager.GetBufferManager()->GetVertexBuffer(modelData->meshes[0].vertexBufferIndex)->GetIndexBufferView();
+		// 一旦最初のメッシュのみを使用
+		context->SetVertexBuffers(0, 1, vbv);
+		context->SetIndexBuffer(ibv);
+		// カメラ
+		// MainCameraを取得
+		uint32_t cameraEntity = gameCore.GetSceneManager()->GetCurrentScene()->GetMainCameraID();
+		CameraComponent* camera = gameCore.GetSceneManager()->GetECSManager()->GetComponent<CameraComponent>(cameraEntity);
+		ConstantBuffer* cameraBuffer = resourceManager.GetBufferManager()->GetConstantBuffer(camera->bufferIndex);
+		context->SetGraphicsRootConstantBufferView(0, cameraBuffer->GetResource()->GetGPUVirtualAddress());
+		// トランスフォーム統合バッファ
+		StructuredBuffer* transformBuffer = gameCore.GetSceneManager()->GetIntegrationBuffer()->GetTFBuffer();
+		context->SetGraphicsRootDescriptorTable(1, resourceManager.GetSUVDHeap()->GetGpuHandle(transformBuffer->GetSUVHandleIndex()));
+		// 描画に使用するTF統合バッファのインデックスリストのバッファ
+		StructuredBuffer* useTFBuffer = gameCore.GetSceneManager()->GetIntegrationBuffer()->GetUseInstanceBuffer(i);
+		context->SetGraphicsRootDescriptorTable(2, resourceManager.GetSUVDHeap()->GetGpuHandle(useTFBuffer->GetSUVHandleIndex()));
+		// 一旦ダミーテクスチャをセット
+		TextureBuffer* dummyTexture = resourceManager.GetBufferManager()->GetTextureBuffer(0);
+		context->SetGraphicsRootDescriptorTable(3, resourceManager.GetSUVDHeap()->GetGpuHandle(dummyTexture->GetSUVHandleIndex()));
+	}
 
 	// コマンドリスト終了
 	EndCommandContext(context,Graphics);

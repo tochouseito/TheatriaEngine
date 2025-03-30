@@ -60,6 +60,7 @@ class SceneManager
 	friend class AddGameObjectCommand;
 	friend class AddTransformComponent;
 	friend class AddMeshComponent;
+	friend class AddRenderComponent;
 	friend class AddCameraComponent;
 	friend class SetMainCamera;
 public:
@@ -69,7 +70,7 @@ public:
 	{
 		m_pECSManager = std::make_unique<ECSManager>();
 		m_pObjectContainer = std::make_unique<ObjectContainer>();
-		m_pIntegrationBuffer = std::make_unique<IntegrationBuffer>();
+		m_pIntegrationBuffer = std::make_unique<IntegrationBuffer>(resourceManager);
 		AddScene(L"MainScene");
 		ChangeSceneRequest(m_SceneNameToID[L"MainScene"]);
 	}
@@ -110,6 +111,8 @@ private:
 	void AddTransformComponent(const uint32_t& entity);
 	// MeshComponentを追加
 	void AddMeshComponent(const uint32_t& entity);
+	// RenderComponentを追加
+	void AddRenderComponent(const uint32_t& entity);
 	// CameraComponentを追加
 	void AddCameraComponent(const uint32_t& entity);
 	// SceneのMainCameraを設定
