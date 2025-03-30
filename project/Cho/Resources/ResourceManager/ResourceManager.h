@@ -13,6 +13,7 @@
 class GraphicsEngine;
 class SwapChain;
 class IntegrationBuffer;
+class GraphicsEngine;
 class ResourceManager
 {
 	friend class GraphicsEngine;
@@ -30,8 +31,12 @@ public:
 	// 解放
 	void Release();
 
-	void GenerateManager(GraphicsEngine* graphicsEngine, IntegrationBuffer* intBuf);
-	ComPtr<ID3D12Resource> CreateGPUResource(const D3D12_HEAP_PROPERTIES& heapProp, const D3D12_RESOURCE_DESC& desc, const D3D12_RESOURCE_STATES& state, const D3D12_CLEAR_VALUE* clearValue);
+	void GenerateManager(IntegrationBuffer* integrationBuffer,GraphicsEngine* graphicsEngine)
+	{
+		m_ModelManager = std::make_unique<ModelManager>(this, integrationBuffer);
+		m_TextureManager = std::make_unique<TextureManager>(this, graphicsEngine, m_Device);
+	}
+	void CreateGPUResource(ComPtr<ID3D12Resource>& pResource ,const D3D12_HEAP_PROPERTIES& heapProp, const D3D12_RESOURCE_DESC& desc, const D3D12_RESOURCE_STATES& state, const D3D12_CLEAR_VALUE* clearValue);
 
 	// BufferMethod
 	uint32_t CreateColorBuffer(BUFFER_COLOR_DESC& desc);
@@ -67,8 +72,6 @@ private:
 	void CreateDSVDescriptorHeap(ID3D12Device8* device);
 	// Heap生成
 	void CreateHeap(ID3D12Device8* device);
-	// CPUHandleの取得
-	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandle(const uint32_t& index,D3D12_DESCRIPTOR_HEAP_TYPE type);
 
 	// Device
 	ID3D12Device8* m_Device = nullptr;

@@ -142,6 +142,7 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClCompile Include="Cho\Engine\Engine.cpp" />
     <ClCompile Include="Cho\OS\Windows\WinApp\WinApp.cpp" />
     <ClCompile Include="Cho\Platform\FileSystem\FileSystem.cpp" />
+    <ClCompile Include="Cho\SDK\DirectX\DirectX12\TextureBuffer\TextureBuffer.cpp" />
     <ClCompile Include="Cho\SDK\ImGui\ImGuiManager\ImGuiManager.cpp" />
     <ClCompile Include="Cho\Core\CoreSystem\CoreSystem.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\CommandManager\CommandManager.cpp" />
@@ -203,6 +204,7 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClInclude Include="Cho\Platform\FileSystem\FileSystem.h" />
     <ClInclude Include="Cho\Core\MathLibrary\MathLibrary.h" />
     <ClInclude Include="Cho\Platform\Timer\Timer.h" />
+    <ClInclude Include="Cho\SDK\DirectX\DirectX12\TextureBuffer\TextureBuffer.h" />
     <ClInclude Include="Cho\SDK\ImGui\ImGuiManager\ImGuiManager.h" />
     <ClInclude Include="Cho\Platform\PlatformLayer\PlatformLayer.h" />
     <ClInclude Include="Cho\Core\CoreSystem\CoreSystem.h" />

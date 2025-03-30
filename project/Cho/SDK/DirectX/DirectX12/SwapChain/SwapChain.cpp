@@ -7,7 +7,6 @@ SwapChain::SwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue, cons
 	CreateSwapChain(dxgiFactory, queue,  hwnd, width, height);
 }
 
-
 void SwapChain::CreateSwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue, const HWND& hwnd, const int32_t& width, const int32_t& height)
 {
 	HRESULT hr;
@@ -80,11 +79,5 @@ void SwapChain::Present()
 {
 	HRESULT hr = m_SwapChain->Present(1, 0);
 	ChoAssertLog("Failed to present.", hr, __FILE__, __LINE__);
-}
-
-void SwapChain::WaitForGPU()
-{
-	HANDLE hWaitable = m_SwapChain->GetFrameLatencyWaitableObject();
-	WaitForSingleObject(hWaitable, INFINITE);
 }
 

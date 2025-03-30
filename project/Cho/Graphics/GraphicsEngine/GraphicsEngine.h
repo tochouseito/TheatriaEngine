@@ -11,7 +11,7 @@
 
 enum RenderTextureType
 {
-	OffScreen=0,// ゲーム画面用描画結果
+	OffScreen = 0,// ゲーム画面用描画結果
 	TypeCount,// 種類数(使用禁止)
 };
 
@@ -48,21 +48,8 @@ public:
 		m_PipelineManager = std::make_unique<PipelineManager>();
 	}
 	// Destructor
-	~GraphicsEngine()
-	{
-		// 各種解放
-		m_PipelineManager.reset();
-		m_DepthManager.reset();
-		m_GraphicsCore.reset();
-		m_SwapChain.reset();
-	}
+	~GraphicsEngine() = default;
 	void Init();
-	void Finalize()
-	{
-		WaitForGPU(Graphics);
-		WaitForGPU(Compute);
-		WaitForGPU(Copy);
-	}
 	void CreateSwapChain(IDXGIFactory7* dxgiFactory);
 	void PreRender();
 	void Render(ResourceManager& resourceManager, GameCore& gameCore);

@@ -1,12 +1,12 @@
 #include "pch.h"
 #include "TextureManager.h"
-#include "Cho/Graphics/GraphicsEngine/GraphicsEngine.h"
 #include "Cho/Resources/ResourceManager/ResourceManager.h"
+#include "Cho/Graphics/GraphicsEngine/GraphicsEngine.h"
 
 void TextureManager::LoadEngineTexture()
 {
-	// テクスチャデータの読み込み
-	std::string path = "Cho/Resources/Texture";
+    // テクスチャデータの読み込み
+    std::string path = "Cho/Resources/Texture";
     // ファイルパスのリストを取得
     for (const auto& entry : fs::directory_iterator(path))
     {
@@ -16,10 +16,10 @@ void TextureManager::LoadEngineTexture()
             std::string filePath = entry.path().string();
 
             // ファイル名部分のみ取得（ディレクトリパスを除去）
-            std::string fileName = entry.path().filename().string();
+            std::wstring fileName = entry.path().filename().wstring();
 
             // テクスチャファイルの形式をチェック（.dds, .png, .jpg など）
-            if (fileName.ends_with(".dds") || fileName.ends_with(".png") || fileName.ends_with(".jpg"))
+            if (fileName.ends_with(L".dds") || fileName.ends_with(L".png") || fileName.ends_with(L".jpg"))
             {
                 // 読み込み済みテクスチャを検索
                 if (m_TextureNameContainer.contains(fileName))
@@ -74,21 +74,21 @@ void TextureManager::LoadEngineTexture()
                 const DirectX::TexMetadata& metadata = mipImages.GetMetadata();
 
                 // Resource作成
-				BUFFER_TEXTURE_DESC desc = {};
-				desc.width = static_cast<UINT>(metadata.width);// Textureの幅
-				desc.height = static_cast<UINT>(metadata.height);// Textureの高さ
-				desc.mipLevels = static_cast<UINT16>(metadata.mipLevels);// mipmapの数
-				desc.arraySize = static_cast<UINT16>(metadata.arraySize);// 奥行き or 配列Textureの配列数
-				desc.format = metadata.format;// Textureのフォーマット
-				desc.dimension = D3D12_RESOURCE_DIMENSION(metadata.dimension);// Textureの次元
-				desc.state = D3D12_RESOURCE_STATE_COPY_DEST;// 読むだけなのでCOPY_DEST
+                BUFFER_TEXTURE_DESC desc = {};
+                desc.width = static_cast<UINT>(metadata.width);// Textureの幅
+                desc.height = static_cast<UINT>(metadata.height);// Textureの高さ
+                desc.mipLevels = static_cast<UINT16>(metadata.mipLevels);// mipmapの数
+                desc.arraySize = static_cast<UINT16>(metadata.arraySize);// 奥行き or 配列Textureの配列数
+                desc.format = metadata.format;// Textureのフォーマット
+                desc.dimension = D3D12_RESOURCE_DIMENSION(metadata.dimension);// Textureの次元
+                desc.state = D3D12_RESOURCE_STATE_COPY_DEST;// 読むだけなのでCOPY_DEST
                 TextureData texData;
-				texData.name = fileName;// テクスチャ名
-				texData.bufferIndex = m_ResourceManager->CreateTextureBuffer(desc);// テクスチャバッファの作成
-				texData.metadata = metadata;// メタデータ
-				// テクスチャデータをコピー
+                texData.name = fileName;// テクスチャ名
+                texData.bufferIndex = m_ResourceManager->CreateTextureBuffer(desc);// テクスチャバッファの作成
+                texData.metadata = metadata;// メタデータ
+                // テクスチャデータをコピー
                 CommandContext* context = m_GraphicsEngine->GetCommandContext();
-				UploadTextureDataEx(
+                UploadTextureDataEx(
                     context,
                     m_ResourceManager->GetBufferManager()->GetTextureBuffer(texData.bufferIndex)->GetResource(),
                     mipImages
@@ -100,11 +100,11 @@ void TextureManager::LoadEngineTexture()
     }
 }
 
-void TextureManager::UploadTextureDataEx(CommandContext* context,ID3D12Resource* resource, const DirectX::ScratchImage& mipImages)
+void TextureManager::UploadTextureDataEx(CommandContext* context, ID3D12Resource* resource, const DirectX::ScratchImage& mipImages)
 {
-	std::vector<D3D12_SUBRESOURCE_DATA> subresources;
+    std::vector<D3D12_SUBRESOURCE_DATA> subresources;
     DirectX::PrepareUpload(m_Device, mipImages.GetImages(), mipImages.GetImageCount(), mipImages.GetMetadata(), subresources);
-	UINT64 intermediateSize = GetRequiredIntermediateSize(resource, 0, static_cast<UINT>(subresources.size()));
+    UINT64 intermediateSize = GetRequiredIntermediateSize(resource, 0, static_cast<UINT>(subresources.size()));
     // Resourceの各種設定
     D3D12_HEAP_PROPERTIES heapProperties{};
     heapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;// UploadHeapを使う
@@ -116,11 +116,12 @@ void TextureManager::UploadTextureDataEx(CommandContext* context,ID3D12Resource*
     resourceDesc.MipLevels = 1;
     resourceDesc.SampleDesc.Count = 1;
     resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-    ComPtr<ID3D12Resource> intermediate = m_ResourceManager->CreateGPUResource(heapProperties, resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr);
-	// メモリにデータをコピー
-	m_GraphicsEngine->BeginCommandContext(context);
+    ComPtr<ID3D12Resource> intermediate = nullptr;
+    m_ResourceManager->CreateGPUResource(intermediate, heapProperties, resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr);
+    // メモリにデータをコピー
+    m_GraphicsEngine->BeginCommandContext(context);
     UpdateSubresources(
-		context->GetCommandList(),
+        context->GetCommandList(),
         resource,
         intermediate.Get(),
         0, 0,
@@ -138,7 +139,7 @@ void TextureManager::UploadTextureDataEx(CommandContext* context,ID3D12Resource*
     barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
     barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
     barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_GENERIC_READ;
-	context->ResourceBarrier(1, &barrier);
-	m_GraphicsEngine->EndCommandContext(context,QueueType::Copy);
-	m_GraphicsEngine->WaitForGPU(QueueType::Copy);
+    context->ResourceBarrier(1, &barrier);
+    m_GraphicsEngine->EndCommandContext(context, QueueType::Copy);
+    m_GraphicsEngine->WaitForGPU(QueueType::Copy);
 }

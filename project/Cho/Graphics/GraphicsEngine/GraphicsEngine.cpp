@@ -15,6 +15,20 @@ void GraphicsEngine::Init()
 	m_PipelineManager->Initialize(m_Device);
 }
 
+void GraphicsEngine::CreateSwapChain(IDXGIFactory7* dxgiFactory)
+{
+	// SwapChainの生成
+	m_SwapChain = std::make_unique<SwapChain>(
+		dxgiFactory,
+		m_GraphicsCore->GetCommandQueue(QueueType::Graphics),
+		WinApp::GetHWND(),
+		WinApp::GetWindowWidth(),
+		WinApp::GetWindowHeight()
+	);
+	// SwapChainのリソースでRTVを作成
+	m_SwapChain->CreateResource(m_Device, m_ResourceManager);
+}
+
 void GraphicsEngine::PreRender()
 {
 	// コマンドマネージャー
@@ -22,14 +36,13 @@ void GraphicsEngine::PreRender()
 	// コマンドリストの取得
 	CommandContext* context = commandManager->GetCommandContext();
 	BeginCommandContext(context);
-
-	/*ColorBuffer* offScreenTex = m_ResourceManager->GetBufferManager()->GetColorBuffer(m_RenderTextures[RenderTextureType::OffScreen].m_BufferID);
+	// レンダーターゲットの設定
+	ColorBuffer* offScreenTex = m_ResourceManager->GetBufferManager()->GetColorBuffer(m_RenderTextures[RenderTextureType::OffScreen].m_BufferID);
 	context->BarrierTransition(
 		offScreenTex->GetResource(),
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
 		D3D12_RESOURCE_STATE_RENDER_TARGET
-	);*/
-	
+	);
 	EndCommandContext(context,Graphics);
 	// GPUの完了待ち
 	WaitForGPU(Graphics);
@@ -68,16 +81,16 @@ void GraphicsEngine::PostRender()
 	//SetRenderTargets(context, DrawPass::SwapChainPass);
 	//SetRenderState(context);
 	// レンダリング結果をスワップチェーンに描画
-	/*ColorBuffer* offScreenTex = m_ResourceManager->GetBufferManager()->GetColorBuffer(m_RenderTextures[RenderTextureType::OffScreen].m_BufferID);
-	context->BarrierTransition(
-		offScreenTex->GetResource(),
-		D3D12_RESOURCE_STATE_RENDER_TARGET,
-		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
-	);*/
-	//context->SetGraphicsPipelineState(m_PipelineManager->GetScreenCopyPSO().pso.Get());
-	//context->SetGraphicsRootSignature(m_PipelineManager->GetScreenCopyPSO().rootSignature.Get());
-	//context->SetGraphicsRootDescriptorTable(0, m_ResourceManager->GetSUVDHeap()->GetGpuHandle(offScreenTex->GetSUVHandleIndex()));
-	//context->DrawInstanced(3, 1, 0, 0);
+	ColorBuffer* offScreenTex = m_ResourceManager->GetBufferManager()->GetColorBuffer(m_RenderTextures[RenderTextureType::OffScreen].m_BufferID);
+		context->BarrierTransition(
+			offScreenTex->GetResource(),
+			D3D12_RESOURCE_STATE_RENDER_TARGET,
+			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+		);
+	context->SetGraphicsPipelineState(m_PipelineManager->GetScreenCopyPSO().pso.Get());
+	context->SetGraphicsRootSignature(m_PipelineManager->GetScreenCopyPSO().rootSignature.Get());
+	context->SetGraphicsRootDescriptorTable(0, m_ResourceManager->GetSUVDHeap()->GetGpuHandle(offScreenTex->GetSUVHandleIndex()));
+	context->DrawInstanced(3, 1, 0, 0);
 	// SwapChainResourceの状態遷移
 	context->BarrierTransition(
 		m_SwapChain->GetBuffer(backBufferIndex)->pResource.Get(),
@@ -85,7 +98,6 @@ void GraphicsEngine::PostRender()
 		D3D12_RESOURCE_STATE_PRESENT
 	);
 	EndCommandContext(context,Graphics);
-	static bool isOnce = false;
 	// SwapChainのPresent
 	m_SwapChain->Present();
 	isOnce = true;
@@ -104,7 +116,7 @@ void GraphicsEngine::PostRenderWithImGui(ImGuiManager* imgui)
 	UINT backBufferIndex = m_SwapChain->GetCurrentBackBufferIndex();
 	// SwapChainResourceの状態遷移
 	context->BarrierTransition(
-		m_ResourceManager->GetBufferManager()->GetColorBuffer(backBufferIndex)->GetResource(),
+		m_SwapChain->GetBuffer(backBufferIndex)->pResource.Get(),
 		D3D12_RESOURCE_STATE_PRESENT,
 		D3D12_RESOURCE_STATE_RENDER_TARGET
 	);
@@ -115,7 +127,7 @@ void GraphicsEngine::PostRenderWithImGui(ImGuiManager* imgui)
 	imgui->Draw(context->GetCommandList());
 	// SwapChainResourceの状態遷移
 	context->BarrierTransition(
-		m_ResourceManager->GetBufferManager()->GetColorBuffer(backBufferIndex)->GetResource(),
+		m_SwapChain->GetBuffer(backBufferIndex)->pResource.Get(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET,
 		D3D12_RESOURCE_STATE_PRESENT
 	);
@@ -160,8 +172,8 @@ void GraphicsEngine::SetRenderTargets(CommandContext* context, DrawPass pass)
 	{
 	case GBuffers:
 		// RTV,DSVの設定
-		dsvHandle = m_ResourceManager->GetCPUHandle(m_DepthManager->m_DepthBufferIndex, D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
-		rtvHandle = m_ResourceManager->GetCPUHandle(m_RenderTextures[OffScreen].m_BufferID, D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+		dsvHandle = m_ResourceManager->GetDSVDHeap()->GetCpuHandle(m_ResourceManager->GetBufferManager()->GetDepthBuffer(m_DepthManager->GetDepthBufferIndex())->GetDSVHandleIndex());
+		rtvHandle = m_ResourceManager->GetRTVDHeap()->GetCpuHandle(m_ResourceManager->GetBufferManager()->GetColorBuffer(m_RenderTextures[OffScreen].m_BufferID)->GetRTVHandleIndex());
 		context->SetRenderTarget(&rtvHandle, &dsvHandle);
 		context->ClearRenderTarget(rtvHandle);
 		context->ClearDepthStencil(dsvHandle);
@@ -174,7 +186,7 @@ void GraphicsEngine::SetRenderTargets(CommandContext* context, DrawPass pass)
 		break;
 	case SwapChainPass:
 		// RTV,DSVの設定
-		rtvHandle = m_ResourceManager->GetCPUHandle(m_SwapChain->GetCurrentBackBufferIndex(), D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+		rtvHandle = m_ResourceManager->GetRTVDHeap()->GetCpuHandle(m_SwapChain->GetBuffer(m_SwapChain->GetCurrentBackBufferIndex())->dHIndex);
 		context->SetRenderTarget(&rtvHandle);
 		context->ClearRenderTarget(rtvHandle);
 		break;
@@ -214,49 +226,51 @@ void GraphicsEngine::SetRenderState(CommandContext* context)
 void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& gameCore)
 {
 	// コンテキスト取得
-	CommandContext* context = GetCommandContext();
+	//CommandContext* context = GetCommandContext();
 	// コマンドリスト開始
-	BeginCommandContext(context);
-	// レンダーターゲットの設定
-	SetRenderTargets(context, DrawPass::GBuffers);
-	// 描画設定
-	SetRenderState(context);
+	//BeginCommandContext(context);
+	//// レンダーターゲットの設定
+	//SetRenderTargets(context, DrawPass::GBuffers);
+	//// 描画設定
+	//SetRenderState(context);
 
+	resourceManager;
+	gameCore;
 	// パイプラインセット
 	// ルートシグネチャセット
 	// 頂点バッファセット
 	// インデックスバッファセット
 	// シーンに含まれている頂点データを使用しているオブジェクトグループごとに
-	std::vector<bool> isUsedMesh = gameCore.GetSceneManager()->GetIntegrationBuffer()->GetUseVertexFlag();
-	for (uint32_t i = 0;i < isUsedMesh.size();i++)
-	{
-		// 使用していないメッシュはスキップ
-		if (!isUsedMesh[i]) { continue; }
-		// VertexBufferを取得
-		ModelData* modelData = resourceManager.GetModelManager()->GetModelData(i);
-		D3D12_VERTEX_BUFFER_VIEW* vbv = resourceManager.GetBufferManager()->GetVertexBuffer(modelData->meshes[0].vertexBufferIndex)->GetVertexBufferView();
-		D3D12_INDEX_BUFFER_VIEW* ibv = resourceManager.GetBufferManager()->GetVertexBuffer(modelData->meshes[0].vertexBufferIndex)->GetIndexBufferView();
-		// 一旦最初のメッシュのみを使用
-		context->SetVertexBuffers(0, 1, vbv);
-		context->SetIndexBuffer(ibv);
-		// 使用するトランスフォームSRVのインデックスをセット
-		StructuredBuffer* transformIndexBuffer = resourceManager.GetBufferManager()->GetStructuredBuffer(gameCore.GetSceneManager()->GetIntegrationBuffer()->GetTransformIndexBufferIndex());
-		context->SetGraphicsRootDescriptorTable(2, resourceManager.GetSUVDHeap()->GetGpuHandle(transformIndexBuffer->GetSUVHandleIndex()));
-	}
-	// カメラセット
-	// MainCameraを取得
-	uint32_t cameraEntity = gameCore.GetSceneManager()->GetCurrentScene()->GetMainCameraID();
-	CameraComponent* camera = gameCore.GetSceneManager()->GetECSManager()->GetComponent<CameraComponent>(cameraEntity);
-	ConstantBuffer* cameraBuffer = resourceManager.GetBufferManager()->GetConstantBuffer(camera->bufferIndex);
-	context->SetGraphicsRootConstantBufferView(0, cameraBuffer->GetResource()->GetGPUVirtualAddress());
-	// トランスフォームセット
-	StructuredBuffer* transformBuffer = resourceManager.GetBufferManager()->GetStructuredBuffer(gameCore.GetSceneManager()->GetIntegrationBuffer()->GetTransformBufferIndex());
-	context->SetGraphicsRootDescriptorTable(1, resourceManager.GetSUVDHeap()->GetGpuHandle(transformBuffer->GetSUVHandleIndex()));
+	//std::vector<bool> isUsedMesh = gameCore.GetSceneManager()->GetIntegrationBuffer()->GetUseVertexFlag();
+	//for (uint32_t i = 0;i < isUsedMesh.size();i++)
+	//{
+	//	// 使用していないメッシュはスキップ
+	//	if (!isUsedMesh[i]) { continue; }
+	//	// VertexBufferを取得
+	//	ModelData* modelData = resourceManager.GetModelManager()->GetModelData(i);
+	//	D3D12_VERTEX_BUFFER_VIEW* vbv = resourceManager.GetBufferManager()->GetVertexBuffer(modelData->meshes[0].vertexBufferIndex)->GetVertexBufferView();
+	//	D3D12_INDEX_BUFFER_VIEW* ibv = resourceManager.GetBufferManager()->GetVertexBuffer(modelData->meshes[0].vertexBufferIndex)->GetIndexBufferView();
+	//	// 一旦最初のメッシュのみを使用
+	//	context->SetVertexBuffers(0, 1, vbv);
+	//	context->SetIndexBuffer(ibv);
+	//	// 使用するトランスフォームSRVのインデックスをセット
+	//	StructuredBuffer* transformIndexBuffer = resourceManager.GetBufferManager()->GetStructuredBuffer(gameCore.GetSceneManager()->GetIntegrationBuffer()->GetTransformIndexBufferIndex());
+	//	context->SetGraphicsRootDescriptorTable(2, resourceManager.GetSUVDHeap()->GetGpuHandle(transformIndexBuffer->GetSUVHandleIndex()));
+	//}
+	//// カメラセット
+	//// MainCameraを取得
+	//uint32_t cameraEntity = gameCore.GetSceneManager()->GetCurrentScene()->GetMainCameraID();
+	//CameraComponent* camera = gameCore.GetSceneManager()->GetECSManager()->GetComponent<CameraComponent>(cameraEntity);
+	//ConstantBuffer* cameraBuffer = resourceManager.GetBufferManager()->GetConstantBuffer(camera->bufferIndex);
+	//context->SetGraphicsRootConstantBufferView(0, cameraBuffer->GetResource()->GetGPUVirtualAddress());
+	//// トランスフォームセット
+	//StructuredBuffer* transformBuffer = resourceManager.GetBufferManager()->GetStructuredBuffer(gameCore.GetSceneManager()->GetIntegrationBuffer()->GetTransformBufferIndex());
+	//context->SetGraphicsRootDescriptorTable(1, resourceManager.GetSUVDHeap()->GetGpuHandle(transformBuffer->GetSUVHandleIndex()));
 
 	// コマンドリスト終了
-	EndCommandContext(context,Graphics);
+	//EndCommandContext(context,Graphics);
 	// GPUの完了待ち
-	WaitForGPU(Graphics);
+	//WaitForGPU(Graphics);
 }
 
 void GraphicsEngine::DrawLighting(ResourceManager& resourceManager, GameCore& gameCore)
@@ -275,20 +289,6 @@ void GraphicsEngine::DrawPostProcess(ResourceManager& resourceManager, GameCore&
 {
 	resourceManager;
 	gameCore;
-}
-
-void GraphicsEngine::CreateSwapChain(IDXGIFactory7* dxgiFactory)
-{	
-	// SwapChainの生成
-	m_SwapChain = std::make_unique<SwapChain>(
-		dxgiFactory,
-		m_GraphicsCore->GetCommandQueue(QueueType::Graphics),
-		WinApp::GetHWND(),
-		WinApp::GetWindowWidth(),
-		WinApp::GetWindowHeight()
-	);
-	// SwapChainのリソースでRTVを作成
-	m_SwapChain->CreateResource(m_Device, m_ResourceManager);
 }
 
 void GraphicsEngine::CreateDepthBuffer()

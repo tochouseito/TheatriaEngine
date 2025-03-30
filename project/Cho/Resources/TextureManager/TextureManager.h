@@ -1,5 +1,4 @@
 #pragma once
-
 #include <d3d12.h>
 #include <DirectXTex.h>
 #include <d3dx12.h>
@@ -12,8 +11,8 @@ namespace fs = std::filesystem;
 
 struct TextureData
 {
-	std::string name;
-	DirectX::TexMetadata metadata = {};
+	std::wstring name;
+	DirectX::TexMetadata metadata;
 	uint32_t bufferIndex = UINT32_MAX;
 };
 class ResourceManager;
@@ -22,10 +21,10 @@ class CommandContext;
 class TextureManager
 {
 public:
-	TextureManager(ResourceManager* resourceManager,GraphicsEngine* graphicsEngine,ID3D12Device8* device):
+	TextureManager(ResourceManager* resourceManager, GraphicsEngine* graphicsEngine, ID3D12Device8* device) :
 		m_ResourceManager(resourceManager), m_GraphicsEngine(graphicsEngine), m_Device(device)
 	{
-		//LoadEngineTexture();
+		LoadEngineTexture();
 	}
 	~TextureManager()
 	{
@@ -34,7 +33,7 @@ public:
 	// Engineのリソースをロード
 	void LoadEngineTexture();
 	// Resourceのアップロード
-	void UploadTextureDataEx(CommandContext* context,ID3D12Resource* resource,const DirectX::ScratchImage& mipImages);
+	void UploadTextureDataEx(CommandContext* context, ID3D12Resource* resource, const DirectX::ScratchImage& mipImages);
 private:
 	ResourceManager* m_ResourceManager = nullptr;
 	GraphicsEngine* m_GraphicsEngine = nullptr;
@@ -43,6 +42,6 @@ private:
 	// TextureDataContainer
 	FVector<TextureData> m_Textures;
 	// 検索用名前コンテナ
-	std::unordered_map<std::string, uint32_t> m_TextureNameContainer;
+	std::unordered_map<std::wstring, uint32_t> m_TextureNameContainer;
 };
 

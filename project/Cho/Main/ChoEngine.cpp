@@ -45,7 +45,8 @@ void ChoEngine::Initialize()
 	gameCore = std::make_unique<GameCore>();
 	gameCore->Initialize(resourceManager.get());
 
-	resourceManager->GenerateManager(graphicsEngine.get(), gameCore->GetSceneManager()->GetIntegrationBuffer());
+	// Model,TextureManager初期化
+	resourceManager->GenerateManager(gameCore->GetSceneManager()->GetIntegrationBuffer(),graphicsEngine.get());
 
 	// EditorCommand初期化
 	editorCommand = std::make_unique<EditorCommand>(resourceManager.get(), graphicsEngine.get(), gameCore.get());

@@ -214,7 +214,7 @@ uint32_t BufferManager::CreateBufferProcess(BUFFER_STRUCTURED_DESC& desc)
 
 uint32_t BufferManager::CreateBufferProcess(BUFFER_TEXTURE_DESC& desc)
 {
-	std::unique_ptr<TextureBuffer> buffer = std::make_unique<TextureBuffer>(desc);
+	TextureBuffer buffer(desc);
 	// 生成するResourceの設定
 	D3D12_RESOURCE_DESC resourceDesc{};
 	resourceDesc.Width = static_cast<UINT64>(desc.width);// Textureの幅
@@ -224,7 +224,7 @@ uint32_t BufferManager::CreateBufferProcess(BUFFER_TEXTURE_DESC& desc)
 	resourceDesc.Format = desc.format;// Textureのフォーマット
 	resourceDesc.SampleDesc.Count = 1;// サンプリングカウント。1固定。
 	resourceDesc.Dimension = desc.dimension;// Textureの次元
-	buffer->CreateTextureResource(m_Device, resourceDesc, nullptr, desc.state);
+	buffer.CreateTextureResource(m_Device, resourceDesc, nullptr, desc.state);
 	// SRVの設定
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	srvDesc.Format = desc.format;
@@ -232,7 +232,7 @@ uint32_t BufferManager::CreateBufferProcess(BUFFER_TEXTURE_DESC& desc)
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;// 2Dテクスチャとして利用
 	srvDesc.Texture2D.MipLevels = static_cast<UINT>(desc.mipLevels);// mipmapの数
 	m_Device->CreateShaderResourceView(
-		buffer->GetResource(),
+		buffer.GetResource(),
 		&srvDesc,
 		m_ResourceManager->GetSUVDHeap()->GetCpuHandle(desc.suvDHIndex)
 	);

@@ -34,29 +34,6 @@ void ResourceManager::Release()
 {
 }
 
-void ResourceManager::GenerateManager(GraphicsEngine* graphicsEngine, IntegrationBuffer* intBuf)
-{
-	graphicsEngine;
-	intBuf;
-
-	//m_ModelManager = std::make_unique<ModelManager>(this, intBuf);
-	//m_TextureManager = std::make_unique<TextureManager>(this, graphicsEngine,m_Device);
-}
-
-ComPtr<ID3D12Resource> ResourceManager::CreateGPUResource(const D3D12_HEAP_PROPERTIES& heapProp, const D3D12_RESOURCE_DESC& desc, const D3D12_RESOURCE_STATES& state, const D3D12_CLEAR_VALUE* clearValue)
-{
-	ComPtr<ID3D12Resource> resource;
-	m_Device->CreateCommittedResource(
-		&heapProp,
-		D3D12_HEAP_FLAG_NONE,
-		&desc,
-		state,
-		clearValue,
-		IID_PPV_ARGS(&resource)
-	);
-	return resource;
-}
-
 void ResourceManager::CreateSUVDescriptorHeap(ID3D12Device8* device)
 {
 	m_SUVDescriptorHeap = std::make_unique<SUVDescriptorHeap>(device, 1024);
@@ -79,24 +56,9 @@ void ResourceManager::CreateHeap(ID3D12Device8* device)
 	CreateDSVDescriptorHeap(device);
 }
 
-D3D12_CPU_DESCRIPTOR_HANDLE ResourceManager::GetCPUHandle(const uint32_t& index, D3D12_DESCRIPTOR_HEAP_TYPE type)
+void ResourceManager::CreateGPUResource(ComPtr<ID3D12Resource>& pResource, const D3D12_HEAP_PROPERTIES& heapProp, const D3D12_RESOURCE_DESC& desc, const D3D12_RESOURCE_STATES& state, const D3D12_CLEAR_VALUE* clearValue)
 {
-	switch (type)
-	{
-	case D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV:
-		break;
-	case D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER:
-		break;
-	case D3D12_DESCRIPTOR_HEAP_TYPE_RTV:
-		return m_RTVDescriptorHeap->GetCpuHandle(m_BufferManager->GetColorBuffer(index)->GetRTVHandleIndex());
-		break;
-	case D3D12_DESCRIPTOR_HEAP_TYPE_DSV:
-		return m_DSVDescriptorHeap->GetCpuHandle(m_BufferManager->GetDepthBuffer(index)->GetDSVHandleIndex());
-		break;
-	default:
-		break;
-	}
-	return D3D12_CPU_DESCRIPTOR_HANDLE();
+	m_Device->CreateCommittedResource(&heapProp, D3D12_HEAP_FLAG_NONE, &desc, state, clearValue, IID_PPV_ARGS(&pResource));
 }
 
 uint32_t ResourceManager::CreateColorBuffer(BUFFER_COLOR_DESC& desc)
