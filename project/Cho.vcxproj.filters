@@ -48,6 +48,7 @@
     <ClCompile Include="Cho\GameCore\IntegrationBuffer\IntegrationBuffer.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\TextureBuffer\TextureBuffer.cpp" />
     <ClCompile Include="Cho\GameCore\SystemManager\SystemManager.cpp" />
+    <ClCompile Include="Cho\Editor\SceneView\SceneView.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cho\OS\Windows\WinApp\WinApp.h" />
@@ -102,6 +103,7 @@
     <ClInclude Include="Cho\GameCore\IntegrationBuffer\IntegrationBuffer.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\TextureBuffer\TextureBuffer.h" />
     <ClInclude Include="Cho\GameCore\SystemManager\SystemManager.h" />
+    <ClInclude Include="Cho\Editor\SceneView\SceneView.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Cho\Resources\Shader\header\Demo.hlsli" />

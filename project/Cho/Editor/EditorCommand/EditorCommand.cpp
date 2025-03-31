@@ -63,3 +63,9 @@ void AddRenderComponent::Undo(EditorCommand* edit)
 {
 	edit;
 }
+
+// レンダリングテクスチャのハンドルを取得
+D3D12_GPU_DESCRIPTOR_HANDLE EditorCommand::GetSceneTextureHandle()
+{
+	return m_ResourceManager->GetSUVDHeap()->GetGpuHandle(m_ResourceManager->GetBufferManager()->GetColorBuffer(m_GraphicsEngine->GetSceneTextureBufferID())->GetSUVHandleIndex());
+}

@@ -55,6 +55,9 @@ public:
 	void Render(ResourceManager& resourceManager, GameCore& gameCore);
 	void PostRender(ImGuiManager* imgui);
 	void PostRenderWithImGui(ImGuiManager* imgui);
+
+	// SceneTextureのBufferIDを取得
+	uint32_t GetSceneTextureBufferID() { return m_RenderTextures[OffScreen].m_BufferID; }
 private:
 	// コマンドコンテキストの取得
 	CommandContext* GetCommandContext() { return m_GraphicsCore->GetCommandManager()->GetCommandContext(); }

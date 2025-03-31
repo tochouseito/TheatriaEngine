@@ -1,6 +1,5 @@
 #pragma once
-#include <memory>
-#include <vector>
+#include "SDK/DirectX/DirectX12/stdafx/stdafx.h"
 class EditorCommand;
 class ICommand
 {
@@ -113,6 +112,9 @@ public:
 	ResourceManager* GetResourceManagerPtr() { return m_ResourceManager; }
 	GraphicsEngine* GetGraphicsEnginePtr() { return m_GraphicsEngine; }
 	GameCore* GetGameCorePtr() { return m_GameCore; }
+
+	// レンダリングテクスチャのハンドルを取得
+	D3D12_GPU_DESCRIPTOR_HANDLE GetSceneTextureHandle();
 private:
 	std::vector<std::unique_ptr<ICommand>> m_Commands;
 	ResourceManager* m_ResourceManager = nullptr;
