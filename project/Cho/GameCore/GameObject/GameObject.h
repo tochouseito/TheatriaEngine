@@ -16,6 +16,7 @@ public:
 	~Prefab()
 	{
 	}
+	Entity GetEntity() const noexcept { return m_Entity; }
 private:
 	Entity m_Entity;// エンティティ
 	std::wstring m_Name = L"";// プレハブ名
@@ -32,6 +33,7 @@ public:
 	~GameObject()
 	{
 	}
+	Entity GetEntity() const noexcept { return m_Entity; }
 private:
 	Entity m_Entity;// エンティティ
 	std::wstring m_Name = L"";// ゲームオブジェクト名

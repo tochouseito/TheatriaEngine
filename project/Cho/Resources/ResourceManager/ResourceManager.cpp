@@ -128,10 +128,3 @@ void ResourceManager::ReleaseVertexBuffer(const uint32_t& index)
 	index;
 }
 
-uint32_t ResourceManager::CreateMappedViewProjection(const uint32_t& bufferIndex)
-{
-	uint32_t index = static_cast<uint32_t>(m_MappedViewProjection.push_back(nullptr));
-	m_BufferManager->GetConstantBuffer(bufferIndex)->Map(reinterpret_cast<void**>(&m_MappedViewProjection[index]));
-	return index;
-}
-

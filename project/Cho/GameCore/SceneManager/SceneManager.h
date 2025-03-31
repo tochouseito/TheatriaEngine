@@ -1,5 +1,5 @@
 #pragma once
-#include "Cho/GameCore/ECS/ECSManager.h"
+#include "GameCore/SystemManager/SystemManager.h"
 #include "Cho/GameCore/ObjectContainer/ObjectContainer.h"
 #include "Cho/GameCore/IntegrationBuffer/IntegrationBuffer.h"
 #include <string>
@@ -69,10 +69,12 @@ public:
 		m_pResourceManager(resourceManager)
 	{
 		m_pECSManager = std::make_unique<ECSManager>();
+		m_pSystemManager = std::make_unique<SystemManager>();
 		m_pObjectContainer = std::make_unique<ObjectContainer>();
 		m_pIntegrationBuffer = std::make_unique<IntegrationBuffer>(resourceManager);
 		AddScene(L"MainScene");
 		ChangeSceneRequest(m_SceneNameToID[L"MainScene"]);
+		CreateSystem();
 	}
 	// Destructor
 	~SceneManager()
@@ -82,24 +84,17 @@ public:
 	// シーンを更新
 	void Update();
 	// シーンを追加
-	void AddScene(const std::wstring& sceneName)
-	{
-		// 同じ名前のシーンがある場合は追加しない
-		if (m_SceneNameToID.contains(sceneName)) { return; }
-		// シーンの名前とIDを紐づけて追加
-		std::unique_ptr<ScenePrefab> pScene = std::make_unique<ScenePrefab>(this);
-		SceneID sceneID = static_cast<SceneID>(m_pScenes.push_back(std::move(pScene)));
-		m_pScenes[sceneID]->SetSceneID(sceneID);
-		m_pScenes[sceneID]->SetSceneName(sceneName);
-		// 補助コンテナに追加
-		m_SceneNameToID[sceneName] = sceneID;
-	}
+	void AddScene(const std::wstring& sceneName);
 	// シーンを変更リクエスト
 	void ChangeSceneRequest(const SceneID& sceneID) noexcept { m_pNextScene = m_pScenes[sceneID].get(); }
+
+	// System
+	void CreateSystem() noexcept;
 
 	FVector<std::unique_ptr<ScenePrefab>>& GetScenes() noexcept { return m_pScenes; }
 	ScenePrefab* GetCurrentScene() const noexcept { return m_pCurrentScene; }
 	ECSManager* GetECSManager() const noexcept { return m_pECSManager.get(); }
+	SystemManager* GetSystemManager() const noexcept { return m_pSystemManager.get(); }
 	ObjectContainer* GetObjectContainer() const noexcept{ return m_pObjectContainer.get(); }
 	IntegrationBuffer* GetIntegrationBuffer() const noexcept { return m_pIntegrationBuffer.get(); }
 private:
@@ -130,6 +125,8 @@ private:
 	std::unordered_map<std::wstring, SceneID> m_SceneNameToID;
 	// ECSマネージャ
 	std::unique_ptr<ECSManager> m_pECSManager = nullptr;
+	// Systemマネージャ
+	std::unique_ptr<SystemManager> m_pSystemManager = nullptr;
 	// オブジェクトコンテナ
 	std::unique_ptr<ObjectContainer> m_pObjectContainer = nullptr;
 	// 統合バッファ

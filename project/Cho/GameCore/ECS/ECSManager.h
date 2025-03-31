@@ -256,6 +256,47 @@ public:
 		}
 	};
 
+	class ISystem
+	{
+	public:
+		ISystem() = default;
+		virtual void Update(ECSManager* ecs) = 0;
+		virtual ~ISystem() = default;
+	};
+
+	template<typename... T>
+	class System : public ISystem
+	{
+	public:
+		using FuncType = std::function<void(T&...)>;
+
+		System(FuncType func) : m_Func(func) {}
+
+		void Update(ECSManager* ecs) override
+		{
+			Archetype required;
+			(required.set(ECSManager::ComponentPool<T>::GetID()), ...);
+
+			for (const auto& [arch, container] : ecs->m_ArchToEntities)
+			{
+				if ((arch & required) == required)
+				{
+					for (Entity e : container.GetEntities())
+					{
+						m_Func(*ecs->GetComponent<T>(e)...);
+					}
+				}
+			}
+		}
+
+	private:
+		FuncType m_Func;
+	};
+
+	std::unordered_map<Archetype, EntityContainer>& GetArchToEntities()
+	{
+		return m_ArchToEntities;
+	}
 private:
 	// コンポーネントをタイプ別で管理するコンテナ
 	std::unordered_map<CompID, std::shared_ptr<IComponentPool>> m_TypeToComponents;

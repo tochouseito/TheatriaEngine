@@ -50,17 +50,17 @@ void GraphicsEngine::PreRender()
 
 void GraphicsEngine::Render(ResourceManager& resourceManager, GameCore& gameCore)
 {
-	//// ディファードレンダリング
-	//DrawGBuffers(resourceManager, gameCore);
-	//// ライティング
-	//DrawLighting(resourceManager, gameCore);
-	//// フォワードレンダリング
-	//DrawForward(resourceManager, gameCore);
+	// ディファードレンダリング
+	DrawGBuffers(resourceManager, gameCore);
+	// ライティング
+	DrawLighting(resourceManager, gameCore);
+	// フォワードレンダリング
+	DrawForward(resourceManager, gameCore);
 	// ポストプロセス
 	DrawPostProcess(resourceManager, gameCore);
 }
 
-void GraphicsEngine::PostRender()
+void GraphicsEngine::PostRender(ImGuiManager* imgui)
 {
 	// コマンドマネージャー
 	CommandManager* commandManager = m_GraphicsCore->GetCommandManager();
@@ -90,6 +90,8 @@ void GraphicsEngine::PostRender()
 	context->SetGraphicsRootSignature(m_PipelineManager->GetScreenCopyPSO().rootSignature.Get());
 	context->SetGraphicsRootDescriptorTable(0, m_ResourceManager->GetSUVDHeap()->GetGpuHandle(offScreenTex->GetSUVHandleIndex()));
 	context->DrawInstanced(3, 1, 0, 0);
+	// ImGuiの描画
+	imgui->Draw(context->GetCommandList());
 	// SwapChainResourceの状態遷移
 	context->BarrierTransition(
 		m_SwapChain->GetBuffer(backBufferIndex)->pResource.Get(),
@@ -248,7 +250,9 @@ void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& ga
 	for (uint32_t i = 0;i < resourceManager.GetModelManager()->GetModelDataSize();i++)
 	{
 		// 使用しているTFがないならスキップ
-		if (gameCore.GetSceneManager()->GetIntegrationBuffer()->GetUseVertexToList(i).empty()) { continue; }
+		if (!gameCore.GetSceneManager()->GetIntegrationBuffer()->IsUsedModels(i)) { continue; }
+		// 使用しているTFの数を取得
+		UINT numInstance = static_cast<UINT>(gameCore.GetSceneManager()->GetIntegrationBuffer()->GetUseVertexToList(i).size());
 		// VertexBufferを取得
 		ModelData* modelData = resourceManager.GetModelManager()->GetModelData(i);
 		D3D12_VERTEX_BUFFER_VIEW* vbv = resourceManager.GetBufferManager()->GetVertexBuffer(modelData->meshes[0].vertexBufferIndex)->GetVertexBufferView();
@@ -258,7 +262,7 @@ void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& ga
 		context->SetIndexBuffer(ibv);
 		// カメラ
 		// MainCameraを取得
-		uint32_t cameraEntity = gameCore.GetSceneManager()->GetCurrentScene()->GetMainCameraID();
+		uint32_t cameraEntity = gameCore.GetSceneManager()->GetObjectContainer()->GetGameObject(gameCore.GetSceneManager()->GetCurrentScene()->GetMainCameraID())->GetEntity();
 		CameraComponent* camera = gameCore.GetSceneManager()->GetECSManager()->GetComponent<CameraComponent>(cameraEntity);
 		ConstantBuffer* cameraBuffer = resourceManager.GetBufferManager()->GetConstantBuffer(camera->bufferIndex);
 		context->SetGraphicsRootConstantBufferView(0, cameraBuffer->GetResource()->GetGPUVirtualAddress());
@@ -271,6 +275,8 @@ void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& ga
 		// 一旦ダミーテクスチャをセット
 		TextureBuffer* dummyTexture = resourceManager.GetBufferManager()->GetTextureBuffer(0);
 		context->SetGraphicsRootDescriptorTable(3, resourceManager.GetSUVDHeap()->GetGpuHandle(dummyTexture->GetSUVHandleIndex()));
+		// DrawCall
+		context->DrawIndexedInstanced(static_cast<UINT>(modelData->meshes[0].indices.size()), numInstance, 0, 0, 0);
 	}
 
 	// コマンドリスト終了

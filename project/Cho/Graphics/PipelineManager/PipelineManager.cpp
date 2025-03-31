@@ -433,7 +433,7 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 	parameterPair = CreateRootParameters(pVSReflection.Get(), rootParameters, descriptorRange, D3D12_SHADER_VISIBILITY_VERTEX);
 	for (std::pair<uint32_t, std::string> rootParam : parameterPair)
 	{
-		m_DemoPSO.rootParameters.push_back(rootParam);
+		m_IntegratePSO.rootParameters.push_back(rootParam);
 	}
 	// Pixel Shader
 	parameterPair = CreateRootParameters(pPSReflection.Get(), rootParameters, descriptorRange, D3D12_SHADER_VISIBILITY_PIXEL);
@@ -441,7 +441,7 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 	for (std::pair<uint32_t, std::string> rootParam : parameterPair)
 	{
 		rootParam.first += offset;
-		m_DemoPSO.rootParameters.push_back(rootParam);
+		m_IntegratePSO.rootParameters.push_back(rootParam);
 	}
 	for (int32_t i = 0; i < rootParameters.size(); ++i)
 	{
@@ -480,7 +480,7 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 		0,
 		pSignature->GetBufferPointer(),
 		pSignature->GetBufferSize(),
-		IID_PPV_ARGS(&m_DemoPSO.rootSignature)
+		IID_PPV_ARGS(&m_IntegratePSO.rootSignature)
 	);
 	ChoAssertLog("Failed to create root signature", hr, __FILE__, __LINE__);
 	// InputLayout
@@ -525,7 +525,7 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 
 	// Create PSO
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc{};
-	psoDesc.pRootSignature = m_DemoPSO.rootSignature.Get();
+	psoDesc.pRootSignature = m_IntegratePSO.rootSignature.Get();
 	psoDesc.VS = { pVSBlob->GetBufferPointer(),pVSBlob->GetBufferSize() };
 	psoDesc.PS = { pPSBlob->GetBufferPointer(),pPSBlob->GetBufferSize() };
 	psoDesc.InputLayout = inputLayoutDesc;
@@ -541,7 +541,7 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 	// Create PSO
 	hr = device->CreateGraphicsPipelineState(
 		&psoDesc,
-		IID_PPV_ARGS(&m_DemoPSO.pso)
+		IID_PPV_ARGS(&m_IntegratePSO.pso)
 	);
 	ChoAssertLog("Failed to create pipeline state", hr, __FILE__, __LINE__);
 }

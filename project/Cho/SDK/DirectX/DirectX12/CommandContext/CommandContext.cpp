@@ -167,6 +167,12 @@ void CommandContext::DrawInstanced(UINT VertexCountPerInstance, UINT InstanceCou
 	m_CommandList->DrawInstanced(VertexCountPerInstance, InstanceCount, StartVertexLocation, StartInstanceLocation);
 }
 
+void CommandContext::DrawIndexedInstanced(UINT IndexCountPerInstance, UINT InstanceCount, UINT StartIndexLocation, INT BaseVertexLocation, UINT StartInstanceLocation)
+{
+	// インデックス付き描画
+	m_CommandList->DrawIndexedInstanced(IndexCountPerInstance, InstanceCount, StartIndexLocation, BaseVertexLocation, StartInstanceLocation);
+}
+
 GraphicsContext::GraphicsContext(ID3D12Device* device)
 {
 	Create(device, D3D12_COMMAND_LIST_TYPE_DIRECT);	

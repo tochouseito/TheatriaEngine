@@ -53,7 +53,7 @@ public:
 	void CreateSwapChain(IDXGIFactory7* dxgiFactory);
 	void PreRender();
 	void Render(ResourceManager& resourceManager, GameCore& gameCore);
-	void PostRender();
+	void PostRender(ImGuiManager* imgui);
 	void PostRenderWithImGui(ImGuiManager* imgui);
 private:
 	// コマンドコンテキストの取得

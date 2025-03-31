@@ -95,18 +95,21 @@ void MainMenu::EditMenu()
             m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addTFComp));
 			std::unique_ptr<AddMeshComponent> addMeshComp = std::make_unique<AddMeshComponent>(1);
 			m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addMeshComp));
+			std::unique_ptr<AddRenderComponent> addRenderComp = std::make_unique<AddRenderComponent>(1);
+			m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addRenderComp));
 			std::unique_ptr<AddGameObjectCommand> addGameObj2 = std::make_unique<AddGameObjectCommand>();
 			m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addGameObj2));
 			std::unique_ptr<AddTransformComponent> addTFComp2 = std::make_unique<AddTransformComponent>(2);
 			m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addTFComp2));
 			std::unique_ptr<AddCameraComponent> addCamComp = std::make_unique<AddCameraComponent>(2);
 			m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addCamComp));
+            std::unique_ptr<SetMainCamera> setCam = std::make_unique<SetMainCamera>(1);
+            m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(setCam));
         }
 
         if (ImGui::MenuItem("Test SetCamera"))
         {
-			std::unique_ptr<SetMainCamera> setCam = std::make_unique<SetMainCamera>(1);
-			m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(setCam));
+			
         }
 
         ImGui::EndMenu(); // 「Edit」メニューを終了

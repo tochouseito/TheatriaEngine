@@ -26,6 +26,29 @@ void SceneManager::Update()
 		return;
 	}
 	m_pCurrentScene->Update();
+	m_pSystemManager->UpdateAll(m_pECSManager.get());
+}
+
+// シーンを追加
+void SceneManager::AddScene(const std::wstring& sceneName)
+{
+	// 同じ名前のシーンがある場合は追加しない
+	if (m_SceneNameToID.contains(sceneName)) { return; }
+	// シーンの名前とIDを紐づけて追加
+	std::unique_ptr<ScenePrefab> pScene = std::make_unique<ScenePrefab>(this);
+	SceneID sceneID = static_cast<SceneID>(m_pScenes.push_back(std::move(pScene)));
+	m_pScenes[sceneID]->SetSceneID(sceneID);
+	m_pScenes[sceneID]->SetSceneName(sceneName);
+	// 補助コンテナに追加
+	m_SceneNameToID[sceneName] = sceneID;
+}
+
+void SceneManager::CreateSystem() noexcept
+{
+	std::unique_ptr<ECSManager::ISystem> transformSystem = std::make_unique<ObjectSystem>(m_pECSManager.get(),m_pIntegrationBuffer.get());
+	m_pSystemManager->RegisterSystem(std::move(transformSystem));
+	std::unique_ptr<ECSManager::ISystem> cameraSystem = std::make_unique<CameraSystem>(m_pECSManager.get(), m_pIntegrationBuffer.get());
+	m_pSystemManager->RegisterSystem(std::move(cameraSystem));
 }
 
 void SceneManager::ChangeScene()
@@ -49,12 +72,24 @@ void SceneManager::ChangeScene()
 
 void SceneManager::AddMeshComponent(const uint32_t& entity)
 {
-	m_pECSManager->AddComponent<MeshComponent>(entity);
+	MeshComponent* mesh = m_pECSManager->AddComponent<MeshComponent>(entity);
+	mesh->modelID = 0;// 一旦0にしておく
+	// Transformがあるとき、連携する
+	TransformComponent* transform = m_pECSManager->GetComponent<TransformComponent>(entity);
+	if (transform)
+	{
+		// ModelのUseListに登録
+		m_pIntegrationBuffer->AddUseIndex(mesh->modelID, transform->mapID);
+	} else
+	{
+		ChoAssertLog("TransformComponent is nullptr", false, __FILE__, __LINE__);
+	}
 }
 
 void SceneManager::AddRenderComponent(const uint32_t& entity)
 {
-	m_pECSManager->AddComponent<RenderComponent>(entity);
+	RenderComponent* render = m_pECSManager->AddComponent<RenderComponent>(entity);
+	render->visible = true;
 }
 
 void SceneManager::AddCameraComponent(const uint32_t& entity)
@@ -70,7 +105,7 @@ void SceneManager::AddCameraComponent(const uint32_t& entity)
 	desc.sizeInBytes = sizeof(BUFFER_DATA_VIEWPROJECTION);
 	desc.state = D3D12_RESOURCE_STATE_GENERIC_READ;
 	camera->bufferIndex= m_pResourceManager->CreateConstantBuffer(desc);
-	camera->mappedIndex = m_pResourceManager->CreateMappedViewProjection(camera->bufferIndex);
+	camera->mappedIndex = m_pIntegrationBuffer->GetMappedVPID(camera->bufferIndex);
 }
 
 uint32_t SceneManager::SetMainCamera(const uint32_t& setCameraID)
@@ -98,6 +133,7 @@ void SceneManager::AddGameObject()
 
 void SceneManager::AddTransformComponent(const uint32_t& entity)
 {
-	m_pECSManager->AddComponent<TransformComponent>(entity);
-	// Resourceの生成
+	TransformComponent* transform = m_pECSManager->AddComponent<TransformComponent>(entity);
+	// mapIDを取得
+	transform->mapID = m_pIntegrationBuffer->GetNextMapID();
 }

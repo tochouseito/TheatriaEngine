@@ -58,10 +58,10 @@ public:
 	void ReleaseVertexBuffer(const uint32_t& index);
 
 	// MapMethod
-	uint32_t CreateMappedTF() { m_MappedTF.push_back(nullptr); }
+	/*uint32_t CreateMappedTF() { m_MappedTF.push_back(nullptr); }
 	BUFFER_DATA_TF* GetMappedTF(const uint32_t& index) { return m_MappedTF[index]; }
 	uint32_t CreateMappedViewProjection(const uint32_t& bufferIndex);
-	BUFFER_DATA_VIEWPROJECTION* GetMappedViewProjection(const uint32_t& index) { return m_MappedViewProjection[index]; }
+	BUFFER_DATA_VIEWPROJECTION* GetMappedViewProjection(const uint32_t& index) { return m_MappedViewProjection[index]; }*/
 
 	//Getters
 	DescriptorHeap* GetSUVDHeap() const { return m_SUVDescriptorHeap.get(); }
@@ -94,8 +94,8 @@ private:
 	std::unique_ptr<TextureManager> m_TextureManager = nullptr;
 	// モデルマネージャ
 	std::unique_ptr<ModelManager> m_ModelManager = nullptr;
-	// GPUResourceUpdate用のマッピングデータ
-	FVector<BUFFER_DATA_TF*> m_MappedTF;
-	FVector<BUFFER_DATA_VIEWPROJECTION*> m_MappedViewProjection;
+	//// GPUResourceUpdate用のマッピングデータ
+	//FVector<BUFFER_DATA_TF*> m_MappedTF;
+	//FVector<BUFFER_DATA_VIEWPROJECTION*> m_MappedViewProjection;
 };
 

@@ -6,16 +6,14 @@ struct TransformComponent final
 	Quaternion rotation = { 0.0f, 0.0f, 0.0f,1.0f };// 回転
 	Scale scale = { 1.0f, 1.0f, 1.0f };				// スケール
 	Matrix4 matWorld = ChoMath::MakeIdentity4x4();	// ワールド行列
-	Matrix4* parent = nullptr;						// 親のワールド行列
 	Matrix4 rootMatrix = ChoMath::MakeIdentity4x4();// ルートのワールド行列
 	Vector3 degrees = { 0.0f,0.0f,0.0f };			// 度数表示,操作用変数
 	Vector3 prePos = { 0.0f,0.0f,0.0f };			// 位置差分計算用
 	Vector3 preRot = { 0.0f,0.0f,0.0f };			// 回転差分計算用
 	Scale preScale = { 1.0f,1.0f,1.0f };			// スケール差分計算用
-	Matrix4 preParent = ChoMath::MakeIdentity4x4();
-	uint32_t bufferIndex = UINT32_MAX;	
-	// バッファーインデックス
-	uint32_t mappedIndex = UINT32_MAX;				// マップインデックス
+	uint32_t parentEntity = UINT32_MAX;				// 親のEntity
+	//uint32_t bufferIndex = UINT32_MAX;				// バッファーインデックス
+	uint32_t mapID = UINT32_MAX;					// マップインデックス
 };
 // Node用Transform構造体
 struct NodeTransform
@@ -50,5 +48,5 @@ struct MeshComponent final
 // 描画コンポーネント
 struct RenderComponent final
 {
-	bool isRender = true;// 描画フラグ
+	bool visible = true;// 描画フラグ
 };
