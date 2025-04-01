@@ -179,6 +179,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Cho\Editor\BaseEditor\BaseEditor.cpp" />
+    <ClCompile Include="Cho\Editor\PipelineEditor\PipelineEditor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cho\Editor\AnimationEditor\AnimationEditor.h">
@@ -374,6 +375,7 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Cho\Editor\BaseEditor\BaseEditor.h" />
+    <ClInclude Include="Cho\Editor\PipelineEditor\PipelineEditor.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Cho\Resources\Shader\header\Demo.hlsli">
