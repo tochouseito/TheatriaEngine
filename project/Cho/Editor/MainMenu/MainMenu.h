@@ -1,10 +1,10 @@
 #pragma once
-class EditorManager;
-class MainMenu
+#include "Editor/BaseEditor/BaseEditor.h"
+class MainMenu : public BaseEditor
 {
 public:
 	MainMenu(EditorManager* editorManager):
-		m_EditorManager(editorManager)
+		BaseEditor(editorManager)
 	{
 
 	}
@@ -12,17 +12,15 @@ public:
 	{
 
 	}
-	void Initialize();
-	void Update();
+	void Initialize() override;
+	void Update() override;
+	void Window() override;
 private:
-	void BackWindow();
 	void MenuBar();
 	void FileMenu();
 	void EditMenu();
 	void LayoutMenu();
 	void EngineInfoMenu();
 	void HelpMenu();
-
-	EditorManager* m_EditorManager = nullptr;
 };
 

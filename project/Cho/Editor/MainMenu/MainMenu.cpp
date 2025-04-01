@@ -13,11 +13,11 @@ void MainMenu::Update()
     ImGuiIO& io = ImGui::GetIO();
     if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
     {
-        BackWindow();
+        Window();
     }
 }
 
-void MainMenu::BackWindow()
+void MainMenu::Window()
 {
     // ビューポート全体をカバーするドックスペースを作成
     ImGuiViewport* viewport = ImGui::GetMainViewport();

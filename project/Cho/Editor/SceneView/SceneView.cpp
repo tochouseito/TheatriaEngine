@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "SceneView.h"
 #include "Editor/EditorManager/EditorManager.h"
-#include "imgui.h"
 
 void SceneView::Initialize()
 {
@@ -9,11 +8,10 @@ void SceneView::Initialize()
 
 void SceneView::Update()
 {
-	SceneViewWindow();
-	GameViewWindow();
+    Window();
 }
 
-void SceneView::SceneViewWindow()
+void SceneView::Window()
 {
     // ウィンドウのパディングをゼロに設定
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
@@ -81,8 +79,4 @@ void SceneView::SceneViewWindow()
 
     // スタイルを元に戻す
     ImGui::PopStyleVar();
-}
-
-void SceneView::GameViewWindow()
-{
 }

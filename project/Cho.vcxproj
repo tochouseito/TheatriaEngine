@@ -134,6 +134,7 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Cho\Editor\BaseEditor\BaseEditor.cpp" />
     <ClCompile Include="Cho\Editor\AnimationEditor\AnimationEditor.cpp" />
     <ClCompile Include="Cho\Editor\AssetBrowser\AssetBrowser.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\BufferManager\BufferManager.cpp" />
@@ -199,6 +200,7 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClCompile Include="Cho\Editor\Setting\Setting.cpp" />
     <ClCompile Include="Cho\Editor\ShaderEditor\ShaderEditor.cpp" />
     <ClCompile Include="Cho\Editor\Timeline\Timeline.cpp" />
+    <ClInclude Include="Cho\Editor\BaseEditor\BaseEditor.h" />
     <ClInclude Include="Cho\Editor\AnimationEditor\AnimationEditor.h" />
     <ClInclude Include="Cho\Editor\AssetBrowser\AssetBrowser.h" />
     <ClInclude Include="Cho\Core\Utility\BufferID.h" />

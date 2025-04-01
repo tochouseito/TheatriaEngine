@@ -1,21 +1,17 @@
 #pragma once
-class EditorManager;
-class SceneView
+#include "Editor/BaseEditor/BaseEditor.h"
+class SceneView : public BaseEditor
 {
 public:
 	SceneView(EditorManager* editorManager) :
-		m_EditorManager(editorManager)
+		BaseEditor(editorManager)
 	{
 	}
 	~SceneView()
 	{
 	}
-	void Initialize();
-	void Update();
-private:
-	void SceneViewWindow();
-	void GameViewWindow();
-
-	EditorManager* m_EditorManager = nullptr;
+	void Initialize() override;
+	void Update() override;
+	void Window() override;
 };
 

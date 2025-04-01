@@ -7,6 +7,7 @@ void EditorManager::Initialize()
 	m_MainMenu->Initialize();
 	// SceneView
 	m_SceneView->Initialize();
+
 }
 
 void EditorManager::Update()
