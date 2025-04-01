@@ -3,6 +3,8 @@
 
 PlatformLayer::PlatformLayer()
 {
+	m_Timer = std::make_unique<Timer>();
+	m_InputManager = std::make_unique<InputManager>();
 	Initialize();
 }
 
@@ -12,7 +14,6 @@ PlatformLayer::~PlatformLayer()
 
 void PlatformLayer::Initialize()
 {
-	timer = std::make_unique<Timer>();
 }
 
 void PlatformLayer::Finalize()
@@ -22,15 +23,16 @@ void PlatformLayer::Finalize()
 
 void PlatformLayer::Update()
 {
-	timer->Update();
+	m_Timer->Update();
+	m_InputManager->Update();
 }
 
 void PlatformLayer::StartFrame()
 {
-	timer->Start();
+	m_Timer->Start();
 }
 
 void PlatformLayer::EndFrame()
 {
-	timer->End();
+	m_Timer->End();
 }

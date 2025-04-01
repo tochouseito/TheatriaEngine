@@ -168,6 +168,7 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClCompile Include="Cho\Editor\Hierarchy\Hierarchy.cpp" />
     <ClCompile Include="Cho\Editor\Inspector\Inspector.cpp" />
     <ClCompile Include="Cho\Editor\Console\Console.cpp" />
+    <ClCompile Include="Cho\Platform\InputManager\InputManager.cpp" />
     <ClCompile Include="main.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
@@ -201,6 +202,7 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClCompile Include="Cho\Editor\ShaderEditor\ShaderEditor.cpp" />
     <ClCompile Include="Cho\Editor\Timeline\Timeline.cpp" />
     <ClCompile Include="Cho\Editor\PipelineEditor\PipelineEditor.cpp" />
+    <ClCompile Include="Cho\Editor\PopupMenu\PopupMenu.cpp" />
     <ClInclude Include="Cho\Editor\BaseEditor\BaseEditor.h" />
     <ClInclude Include="Cho\Editor\AnimationEditor\AnimationEditor.h" />
     <ClInclude Include="Cho\Editor\AssetBrowser\AssetBrowser.h" />
@@ -267,6 +269,8 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClInclude Include="Cho\Editor\Timeline\Timeline.h" />
     <ClInclude Include="Cho\Editor\Console\Console.h" />
     <ClInclude Include="Cho\Editor\PipelineEditor\PipelineEditor.h" />
+    <ClInclude Include="Cho\Editor\PopupMenu\PopupMenu.h" />
+    <ClInclude Include="Cho\Platform\InputManager\InputManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Cho\Externals\ChoMath\ChoMath.vcxproj">

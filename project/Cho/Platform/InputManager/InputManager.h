@@ -1,0 +1,131 @@
+#pragma once
+#include "SDK/DirectX/DirectX12/stdafx/stdafx.h"
+#include "ChoMath.h"
+#include<Xinput.h>
+#define DIRECTINPUT_VERSION 0x0800 // DirectInputのバージョン指定
+#include<dinput.h>
+
+enum class PadButton
+{
+	A = XINPUT_GAMEPAD_A,
+	B = XINPUT_GAMEPAD_B,
+	X = XINPUT_GAMEPAD_X,
+	Y = XINPUT_GAMEPAD_Y,
+	Up = XINPUT_GAMEPAD_DPAD_UP,
+	Down = XINPUT_GAMEPAD_DPAD_DOWN,
+	Left = XINPUT_GAMEPAD_DPAD_LEFT,
+	Right = XINPUT_GAMEPAD_DPAD_RIGHT,
+	Start = XINPUT_GAMEPAD_START,
+	Back = XINPUT_GAMEPAD_BACK,
+	LThumb = XINPUT_GAMEPAD_LEFT_THUMB,
+	RThumb = XINPUT_GAMEPAD_RIGHT_THUMB,
+	LShoulder = XINPUT_GAMEPAD_LEFT_SHOULDER,
+	RShoulder = XINPUT_GAMEPAD_RIGHT_SHOULDER,
+	LTrigger = VK_PAD_LTRIGGER,
+	RTrigger = VK_PAD_RTRIGGER,
+};
+
+enum MouseButton
+{
+	Left = 0,
+	Right,
+	Center,
+	Extra1,
+	Extra2,
+};
+
+enum class LR
+{
+	LEFT = 0,
+	RIGHT
+};
+
+class InputManager
+{
+public:
+
+	struct MouseMove
+	{
+		LONG lX;
+		LONG lY;
+		LONG lZ;
+	};
+	enum class PadType
+	{
+		DirectInput,
+		XInput,
+	};
+	// variantがC++17から
+	union State
+	{
+		XINPUT_STATE xInput;
+		DIJOYSTATE2 directInput;
+	};
+	struct Joystick
+	{
+		ComPtr<IDirectInputDevice8> device;
+		int32_t deadZoneL;
+		int32_t deadZoneR;
+		PadType type;
+		State state;
+		State statePre;
+	};
+
+	InputManager()
+	{
+		Initialize();
+	}
+	~InputManager()
+	{
+
+	}
+	void Initialize();
+	void Update();
+	// キーの押下をチェック
+	bool PushKey(const uint8_t& keyNumber) const;
+	// キーのトリガーをチェック
+	bool TriggerKey(const uint8_t& keyNumber) const;
+	// 全マウス情報取得
+	const DIMOUSESTATE2& GetAllMouse() const;
+	// マウスの押下をチェック
+	bool IsPressMouse(const int32_t& mouseNumber) const;
+	// マウスのトリガーをチェック。押した瞬間だけtrueになる
+	bool IsTriggerMouse(const int32_t& buttonNumber) const;
+	// マウス移動量を取得
+	MouseMove GetMouseMove();
+	// ホイールスクロール量を取得する
+	int32_t GetWheel() const;
+	// マウスの位置を取得する（ウィンドウ座標系）
+	const Vector2& GetMouseWindowPosition() const;
+	// マウスの位置を取得する（スクリーン座標系）
+	Vector2 GetMouseScreenPosition() const;
+	// 現在のジョイスティック状態を取得する
+	bool GetJoystickState(const int32_t& stickNo, XINPUT_STATE& out) const;
+	// 前回のジョイスティック状態を取得する
+	bool GetJoystickStatePrevious(const int32_t& stickNo, XINPUT_STATE& out) const;
+	// デッドゾーンを設定する
+	void SetJoystickDeadZone(const int32_t& stickNo, const int32_t& deadZoneL, const int32_t& deadZoneR);
+
+	// 接続されているジョイスティック数を取得する
+	size_t GetNumberOfJoysticks();
+
+	// パッドの押されているボタン、スティックの値を取得
+	bool IsTriggerPadButton(const PadButton& button, int32_t stickNo = 0);
+	bool IsPressPadButton(const PadButton& button, int32_t stickNo = 0);
+	Vector2 GetStickValue(const LR& padStick, int32_t stickNo = 0);
+	float GetLRTrigger(const LR& LorR, int32_t stickNo = 0);
+	Vector2 CheckAndWarpMouse();
+private:
+	bool IsTriggerTrigger(const LR& LorR, int32_t stickNo = 0);
+public:
+	ComPtr<IDirectInput8> m_DirectInput = nullptr;
+	ComPtr<IDirectInputDevice8> m_Keyboard = nullptr;
+	ComPtr<IDirectInputDevice8> m_DIMouse = nullptr;
+	std::vector<Joystick> m_Joysticks;
+	BYTE m_Key[256] = {};
+	BYTE m_PreKey[256] = {};
+	DIMOUSESTATE2 m_Mouse = {};
+	DIMOUSESTATE2 m_MousePre = {};
+	Vector2 m_MousePosition;
+};
+

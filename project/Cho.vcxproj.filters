@@ -180,6 +180,8 @@
     </ClCompile>
     <ClCompile Include="Cho\Editor\BaseEditor\BaseEditor.cpp" />
     <ClCompile Include="Cho\Editor\PipelineEditor\PipelineEditor.cpp" />
+    <ClCompile Include="Cho\Editor\PopupMenu\PopupMenu.cpp" />
+    <ClCompile Include="Cho\Platform\InputManager\InputManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cho\Editor\AnimationEditor\AnimationEditor.h">
@@ -376,6 +378,8 @@
     </ClInclude>
     <ClInclude Include="Cho\Editor\BaseEditor\BaseEditor.h" />
     <ClInclude Include="Cho\Editor\PipelineEditor\PipelineEditor.h" />
+    <ClInclude Include="Cho\Editor\PopupMenu\PopupMenu.h" />
+    <ClInclude Include="Cho\Platform\InputManager\InputManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Cho\Resources\Shader\header\Demo.hlsli">

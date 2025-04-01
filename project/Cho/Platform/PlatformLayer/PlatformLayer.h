@@ -4,6 +4,7 @@
 プラットフォーム独立層
 --------------------------------------------*/
 #include "Cho/Platform/Timer/Timer.h"
+#include "Platform/InputManager/InputManager.h"
 
 //C++
 #include <memory>
@@ -33,6 +34,7 @@ public:// メンバ関数
 	// 記録終了
 	void EndFrame();
 private:// メンバ変数
-	std::unique_ptr<Timer> timer = nullptr;
+	std::unique_ptr<Timer> m_Timer = nullptr;
+	std::unique_ptr<InputManager> m_InputManager = nullptr;
 };
 

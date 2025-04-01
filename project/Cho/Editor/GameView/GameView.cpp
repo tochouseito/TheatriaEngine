@@ -19,4 +19,6 @@ void GameView::Window()
 	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
 	ImGui::Begin("GameView", nullptr, windowFlags);
 	ImGui::End();
+	// スタイルを元に戻す
+	ImGui::PopStyleVar();
 }
