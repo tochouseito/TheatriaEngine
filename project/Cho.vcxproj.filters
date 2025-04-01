@@ -49,6 +49,17 @@
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\TextureBuffer\TextureBuffer.cpp" />
     <ClCompile Include="Cho\GameCore\SystemManager\SystemManager.cpp" />
     <ClCompile Include="Cho\Editor\SceneView\SceneView.cpp" />
+    <ClCompile Include="Cho\Editor\GameView\GameView.cpp" />
+    <ClCompile Include="Cho\Editor\Hierarchy\Hierarchy.cpp" />
+    <ClCompile Include="Cho\Editor\Inspector\Inspector.cpp" />
+    <ClCompile Include="Cho\Editor\AssetBrowser\AssetBrowser.cpp" />
+    <ClCompile Include="Cho\Editor\MaterialEditor\MaterialEditor.cpp" />
+    <ClCompile Include="Cho\Editor\ShaderEditor\ShaderEditor.cpp" />
+    <ClCompile Include="Cho\Editor\Profiler\Profiler.cpp" />
+    <ClCompile Include="Cho\Editor\AnimationEditor\AnimationEditor.cpp" />
+    <ClCompile Include="Cho\Editor\Timeline\Timeline.cpp" />
+    <ClCompile Include="Cho\Editor\Setting\Setting.cpp" />
+    <ClCompile Include="Cho\Editor\Console\Console.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cho\OS\Windows\WinApp\WinApp.h" />
@@ -104,6 +115,17 @@
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\TextureBuffer\TextureBuffer.h" />
     <ClInclude Include="Cho\GameCore\SystemManager\SystemManager.h" />
     <ClInclude Include="Cho\Editor\SceneView\SceneView.h" />
+    <ClInclude Include="Cho\Editor\GameView\GameView.h" />
+    <ClInclude Include="Cho\Editor\Hierarchy\Hierarchy.h" />
+    <ClInclude Include="Cho\Editor\Inspector\Inspector.h" />
+    <ClInclude Include="Cho\Editor\AssetBrowser\AssetBrowser.h" />
+    <ClInclude Include="Cho\Editor\MaterialEditor\MaterialEditor.h" />
+    <ClInclude Include="Cho\Editor\ShaderEditor\ShaderEditor.h" />
+    <ClInclude Include="Cho\Editor\Profiler\Profiler.h" />
+    <ClInclude Include="Cho\Editor\AnimationEditor\AnimationEditor.h" />
+    <ClInclude Include="Cho\Editor\Timeline\Timeline.h" />
+    <ClInclude Include="Cho\Editor\Setting\Setting.h" />
+    <ClInclude Include="Cho\Editor\Console\Console.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Cho\Resources\Shader\header\Demo.hlsli" />
