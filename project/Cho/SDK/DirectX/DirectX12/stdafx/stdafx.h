@@ -7,6 +7,16 @@
 #include <windows.h>
 #include <stdint.h>
 #include <memory>
+#include <algorithm>
+#include <string>
+#include <vector>
+#include <unordered_map>
+#include <variant>
+#include <array>
+#include <functional>
+#include <optional>
+#include <span>
+#include <bit>
 
 #include <d3d12.h>
 #include <dxgi1_6.h>

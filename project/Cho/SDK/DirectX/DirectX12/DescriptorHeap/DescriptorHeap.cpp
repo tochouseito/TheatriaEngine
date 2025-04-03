@@ -1,20 +1,6 @@
 #include "pch.h"
 #include "DescriptorHeap.h"
 
-DescriptorHandle::DescriptorHandle()
-{
-}
-
-DescriptorHandle::DescriptorHandle(const D3D12_CPU_DESCRIPTOR_HANDLE& cpuHandle, const D3D12_GPU_DESCRIPTOR_HANDLE& gpuHandle)
-{
-	m_CpuHandle = cpuHandle;
-	m_GpuHandle = gpuHandle;
-}
-
-DescriptorHeap::~DescriptorHeap()
-{
-}
-
 uint32_t DescriptorHeap::GetMaxDescriptor() const
 {
 	return m_MaxDescriptor;
@@ -35,28 +21,53 @@ ID3D12DescriptorHeap* DescriptorHeap::GetDescriptorHeap() const
 	return m_DescriptorHeap.Get();
 }
 
-void DescriptorHeap::RemoveHandle(const uint32_t& index)
+std::optional<uint32_t> DescriptorHeap::Allocate()
 {
-	m_Handles[index].Initialize();
-	m_Handles.erase(index);
+	// 返却されたインデックスがあればそれを使用
+	if (!m_RemovedHandleIndex.empty())
+	{
+		uint32_t result = m_RemovedHandleIndex.back();
+		m_RemovedHandleIndex.pop_back();
+		return result;
+	}
+	// 最大数を超えた場合はnullptrを返す
+	if (m_MaxDescriptor <= m_NextHandleIndex)
+	{
+		Log::Write(LogLevel::Warn, "DescriptorHeap is full");
+		return std::nullopt;
+	}
+	// 返却されたインデックスがなければ次のインデックスを使用
+	uint32_t result = m_NextHandleIndex;
+	m_NextHandleIndex++;
+	return result;
+}
+
+bool DescriptorHeap::RemoveHandle(const uint32_t& index)
+{
+	// 返却されたインデックスが最大数を超えた場合はエラー
+	if (index >= m_MaxDescriptor)
+	{
+		Log::Write(LogLevel::Assert, "Invalid index for DescriptorHeap");
+		return false;
+	}
+	// 返却されたインデックスをリサイクルコンテナに追加
+	m_RemovedHandleIndex.push_back(index);
+	return true;
 }
 
 void DescriptorHeap::CreateDescriptor(ID3D12Device8* device, const uint32_t& num, D3D12_DESCRIPTOR_HEAP_TYPE type, const bool& shaderVisible)
 {
 	m_MaxDescriptor = num;
 	m_Type = type;
-	m_Size = device->GetDescriptorHandleIncrementSize(m_Type);
-
+	m_Size = device->GetDescriptorHandleIncrementSize(type);
 	// Create Descriptor Heap
-	HRESULT hr = {};
 	m_DescriptorHeap = nullptr;
 	D3D12_DESCRIPTOR_HEAP_DESC desc = {};
 	desc.Type = m_Type;
 	desc.NumDescriptors = m_MaxDescriptor;
 	desc.Flags = shaderVisible ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-
-	hr = device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_DescriptorHeap));
-	ChoAssertLog("CreateDescriptorHeap Failed.", hr, __FILE__, __LINE__);
+	HRESULT hr = device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_DescriptorHeap));
+	Log::Write(LogLevel::Assert, "CreateDescriptorHeap", hr);
 }
 
 // GetHandle
@@ -72,55 +83,4 @@ D3D12_GPU_DESCRIPTOR_HANDLE DescriptorHeap::GetGPUDescriptorHandle(const uint32_
 	D3D12_GPU_DESCRIPTOR_HANDLE handleGPU = m_DescriptorHeap->GetGPUDescriptorHandleForHeapStart();
 	handleGPU.ptr += (m_Size* index);
 	return handleGPU;
-}
-
-SUVDescriptorHeap::SUVDescriptorHeap(ID3D12Device8* device, const uint32_t& maxDescriptor)
-{
-	CreateDescriptor(device, maxDescriptor, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, true);
-}
-
-SUVDescriptorHeap::~SUVDescriptorHeap()
-{
-}
-
-uint32_t SUVDescriptorHeap::Create()
-{
-	uint32_t index = static_cast<uint32_t>(m_Handles.push_back(DescriptorHandle()));
-	m_Handles[index].SetCPUHandle(GetCPUDescriptorHandle(index));
-	m_Handles[index].SetGPUHandle(GetGPUDescriptorHandle(index));
-	return index;
-}
-
-RTVDescriptorHeap::RTVDescriptorHeap(ID3D12Device8* device, const uint32_t& maxDescriptor)
-{
-	CreateDescriptor(device, maxDescriptor, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, false);
-}
-
-RTVDescriptorHeap::~RTVDescriptorHeap()
-{
-}
-
-uint32_t RTVDescriptorHeap::Create()
-{
-	uint32_t index = static_cast<uint32_t>(m_Handles.push_back(DescriptorHandle()));
-	m_Handles[index].SetCPUHandle(GetCPUDescriptorHandle(index));
-	//m_Handles[index].SetGPUHandle(GetGPUDescriptorHandle(index));
-	return index;
-}
-
-DSVDescriptorHeap::DSVDescriptorHeap(ID3D12Device8* device, const uint32_t& maxDescriptor)
-{
-	CreateDescriptor(device, maxDescriptor, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, false);
-}
-
-DSVDescriptorHeap::~DSVDescriptorHeap()
-{
-}
-
-uint32_t DSVDescriptorHeap::Create()
-{
-	uint32_t index = static_cast<uint32_t>(m_Handles.push_back(DescriptorHandle()));
-	m_Handles[index].SetCPUHandle(GetCPUDescriptorHandle(index));
-	//m_Handles[index].SetGPUHandle(GetGPUDescriptorHandle(index));
-	return index;
 }

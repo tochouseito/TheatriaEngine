@@ -1,53 +1,44 @@
 #pragma once
 
-#include "SDK/DirectX/DirectX12/stdafx/stdafx.h"
+#include "SDK/DirectX/DirectX12/DescriptorHeap/DescriptorHeap.h"
 
 class GpuResource
 {
 public:
     // Constructor
-    GpuResource() :
-        m_GpuVirtualAddress(D3D12_GPU_VIRTUAL_ADDRESS_NULL),
-        m_UsageState(D3D12_RESOURCE_STATE_COMMON),
-        m_TransitioningState((D3D12_RESOURCE_STATES)-1)
-    {
-    }
-
-    // Constructor
+    GpuResource():
+		m_UseState(D3D12_RESOURCE_STATE_COMMON)
+	{
+	}
+	// Constructor
     GpuResource(ID3D12Resource* pResource, D3D12_RESOURCE_STATES CurrentState) :
-        m_GpuVirtualAddress(D3D12_GPU_VIRTUAL_ADDRESS_NULL),
-        m_pResource(pResource),
-        m_UsageState(CurrentState),
-        m_TransitioningState((D3D12_RESOURCE_STATES)-1)
+        m_pResource(pResource), m_UseState(CurrentState)
     {
+
     }
-
     // Destructor
-    ~GpuResource() {  }
-
+    virtual ~GpuResource()
+    {
+        Destroy();
+    }
     virtual void Destroy()
     {
         m_pResource = nullptr;
-        m_GpuVirtualAddress = D3D12_GPU_VIRTUAL_ADDRESS_NULL;
+		m_UseState = D3D12_RESOURCE_STATE_COMMON;
         ++m_VersionID;
-		m_SUVHandleIndex = UINT32_MAX;
-		m_RTVHandleIndex = UINT32_MAX;
-		m_DSVHandleIndex = UINT32_MAX;
     }
-
+	// 直接リソースを取得する演算子
     ID3D12Resource* operator->() { return m_pResource.Get(); }
     const ID3D12Resource* operator->() const { return m_pResource.Get(); }
-
+	// リソースを取得
     ID3D12Resource* GetResource() { return m_pResource.Get(); }
     const ID3D12Resource* GetResource() const { return m_pResource.Get(); }
-
+	// リソースのポインタを取得
     ID3D12Resource** GetAddressOf() { return m_pResource.GetAddressOf(); }
-
-    D3D12_GPU_VIRTUAL_ADDRESS GetGpuVirtualAddress() const { return m_GpuVirtualAddress; }
-
+	// リソースのバージョンIDを取得
     uint32_t GetVersionID() const { return m_VersionID; }
-
-    void Create(
+	// リソースを作成
+    void CreateResource(
         ID3D12Device* device,
         D3D12_HEAP_PROPERTIES& heapProperties,
         D3D12_HEAP_FLAGS heapFlags,
@@ -55,26 +46,12 @@ public:
         D3D12_RESOURCE_STATES InitialState,
         D3D12_CLEAR_VALUE* pClearValue = nullptr
     );
-	void Map(void** pData) { m_pResource->Map(0, nullptr, pData); }
-	void UnMap() { m_pResource->Unmap(0, nullptr); }
-	uint32_t GetSUVHandleIndex() const { return m_SUVHandleIndex; }
-	void SetSUVHandleIndex(const uint32_t& index) { m_SUVHandleIndex = index; }
-	uint32_t GetRTVHandleIndex() const { return m_RTVHandleIndex; }
-	void SetRTVHandleIndex(const uint32_t& index) { m_RTVHandleIndex = index; }
-	uint32_t GetDSVHandleIndex() const { return m_DSVHandleIndex; }
-	void SetDSVHandleIndex(const uint32_t& index) { m_DSVHandleIndex = index; }
-	D3D12_RESOURCE_STATES GetUsageState() const { return m_UsageState; }
-	void SetResourceState(const D3D12_RESOURCE_STATES& state) { m_UsageState = state; }
-
 protected:
-
-    ComPtr<ID3D12Resource> m_pResource;
-	D3D12_RESOURCE_STATES m_UsageState;// リソースの使用状態
-	D3D12_RESOURCE_STATES m_TransitioningState;// 遷移直前の状態
-    D3D12_GPU_VIRTUAL_ADDRESS m_GpuVirtualAddress;
-	uint32_t m_VersionID = 0;// このリソースのバージョンID。リソースが再利用されるとインクリメントされます。
-	uint32_t m_SUVHandleIndex = UINT32_MAX;// このリソースがディスクリプタヒープに割り当てられたインデックス
-	uint32_t m_RTVHandleIndex = UINT32_MAX;// このリソースがディスクリプタヒープに割り当てられたインデックス
-	uint32_t m_DSVHandleIndex = UINT32_MAX;// このリソースがディスクリプタヒープに割り当てられたインデックス
+    // リソース
+    ComPtr<ID3D12Resource> m_pResource = nullptr;
+    // リソースの使用状態
+    D3D12_RESOURCE_STATES m_UseState;
+    // このリソースのバージョンID。リソースが再利用されるとインクリメントされます。
+	uint32_t m_VersionID = 0;
 };
 
