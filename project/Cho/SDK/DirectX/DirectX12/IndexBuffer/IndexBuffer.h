@@ -1,16 +1,34 @@
 #pragma once
 #include "SDK/DirectX/DirectX12/GpuBuffer/GpuBuffer.h"
-template<typename T>
-class IndexBuffer : public GpuBuffer
+
+// インデックスバッファのインタフェース
+class IIndexBuffer : public GpuBuffer
 {
 public:
 	// Constructor
-	IndexBuffer() : GpuBuffer()
+	IIndexBuffer() : GpuBuffer()
+	{
+	}
+	// Constructor
+	IIndexBuffer(ID3D12Resource* pResource, D3D12_RESOURCE_STATES CurrentState) :
+		GpuBuffer(pResource, CurrentState)
+	{
+	}
+	// Destructor
+	virtual ~IIndexBuffer() = default;
+};
+
+template<typename T>
+class IndexBuffer : public IIndexBuffer
+{
+public:
+	// Constructor
+	IndexBuffer() : IIndexBuffer()
 	{
 	}
 	// Constructor
 	IndexBuffer(ID3D12Resource* pResource, D3D12_RESOURCE_STATES CurrentState) :
-		GpuBuffer(pResource, CurrentState)
+		IIndexBuffer(pResource, CurrentState)
 	{
 	}
 	// Destructor

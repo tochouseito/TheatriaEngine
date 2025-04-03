@@ -88,7 +88,7 @@
     <ClCompile Include="Cho\Editor\Inspector\Inspector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Cho\GameCore\IntegrationBuffer\IntegrationBuffer.cpp">
+    <ClCompile Include="Cho\Resources\IntegrationBuffer\IntegrationBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Cho\Resources\ModelManager\ModelManager.cpp">
@@ -283,7 +283,7 @@
     <ClInclude Include="Cho\Editor\Inspector\Inspector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Cho\GameCore\IntegrationBuffer\IntegrationBuffer.h">
+    <ClInclude Include="Cho\Resources\IntegrationBuffer\IntegrationBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Cho\Editor\MainMenu\MainMenu.h">

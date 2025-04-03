@@ -166,7 +166,7 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClCompile Include="Cho\GameCore\ECS\ECSManager.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DXC\DXShaderCompiler.cpp" />
     <ClCompile Include="Cho\Editor\EditorCommand\EditorCommand.cpp" />
-    <ClCompile Include="Cho\GameCore\IntegrationBuffer\IntegrationBuffer.cpp" />
+    <ClCompile Include="Cho\Resources\IntegrationBuffer\IntegrationBuffer.cpp" />
     <ClCompile Include="Cho\Editor\GameView\GameView.cpp" />
     <ClCompile Include="Cho\Editor\Hierarchy\Hierarchy.cpp" />
     <ClCompile Include="Cho\Editor\Inspector\Inspector.cpp" />
@@ -258,7 +258,7 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClInclude Include="Cho\Resources\ModelManager\ModelManager.h" />
     <ClInclude Include="Cho\Resources\TextureManager\TextureManager.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\VertexBuffer\VertexBuffer.h" />
-    <ClInclude Include="Cho\GameCore\IntegrationBuffer\IntegrationBuffer.h" />
+    <ClInclude Include="Cho\Resources\IntegrationBuffer\IntegrationBuffer.h" />
     <ClInclude Include="Cho\GameCore\SystemManager\SystemManager.h" />
     <ClInclude Include="Cho\Editor\SceneView\SceneView.h" />
     <ClInclude Include="Cho\Editor\GameView\GameView.h" />

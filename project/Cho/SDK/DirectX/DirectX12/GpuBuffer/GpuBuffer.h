@@ -38,17 +38,34 @@ protected:
     UINT m_StructureByteStride = {};
 };
 
-template<typename T>
-class ConstantBuffer : public GpuBuffer
+// 定数バッファのインターフェース
+class IConstantBuffer : public GpuBuffer 
 {
 public:
 	// Constructor
-	ConstantBuffer() : GpuBuffer()
+	IConstantBuffer() : GpuBuffer()
+	{
+	}
+	// Constructor
+	IConstantBuffer(ID3D12Resource* pResource, D3D12_RESOURCE_STATES CurrentState) :
+		GpuBuffer(pResource, CurrentState)
+	{
+	}
+	// Destructor
+	virtual ~IConstantBuffer() = default;
+};
+
+template<typename T>
+class ConstantBuffer : public IConstantBuffer
+{
+public:
+	// Constructor
+	ConstantBuffer() : IConstantBuffer()
 	{
 	}
 	// Constructor
 	ConstantBuffer(ID3D12Resource* pResource, D3D12_RESOURCE_STATES CurrentState) :
-		GpuBuffer(pResource, CurrentState)
+		IConstantBuffer(pResource, CurrentState)
 	{
 	}
 	// Destructor
@@ -97,17 +114,34 @@ private:
 	std::span<T> m_MappedData = nullptr;
 };
 
-template<typename T>
-class StructuredBuffer : public GpuBuffer
+// 構造化バッファのインターフェース
+class IStructuredBuffer : public GpuBuffer
 {
 public:
 	// Constructor
-	StructuredBuffer() : GpuBuffer()
+	IStructuredBuffer() : GpuBuffer()
+	{
+	}
+	// Constructor
+	IStructuredBuffer(ID3D12Resource* pResource, D3D12_RESOURCE_STATES CurrentState) :
+		GpuBuffer(pResource, CurrentState)
+	{
+	}
+	// Destructor
+	virtual ~IStructuredBuffer() = default;
+};
+
+template<typename T>
+class StructuredBuffer : public IStructuredBuffer
+{
+public:
+	// Constructor
+	StructuredBuffer() : IStructuredBuffer()
 	{
 	}
 	// Constructor
 	StructuredBuffer(ID3D12Resource* pResource, D3D12_RESOURCE_STATES CurrentState) :
-		GpuBuffer(pResource, CurrentState)
+		IStructuredBuffer(pResource, CurrentState)
 	{
 	}
 	// Destructor

@@ -5,12 +5,12 @@
 
 ResourceManager::ResourceManager(ID3D12Device8* device)
 {
-	CreateHeap(device);// デバイスを受け取り、プールを作成する
-
-	m_BufferManager = std::make_unique<BufferManager>(device, this);// バッファマネージャの生成
-	m_Device = device;// デバイスの設定
-	
-	Initialize();// 初期化
+	// デバイスの設定
+	m_Device = device;
+	// ヒープの作成
+	CreateHeap(device);
+	// 初期化
+	Initialize();
 }
 
 ResourceManager::~ResourceManager()
@@ -34,31 +34,11 @@ void ResourceManager::Release()
 {
 }
 
-void ResourceManager::CreateSUVDescriptorHeap(ID3D12Device8* device)
-{
-	m_SUVDescriptorHeap = std::make_unique<SUVDescriptorHeap>(device, 1024);
-}
-
-void ResourceManager::CreateRTVDescriptorHeap(ID3D12Device8* device)
-{
-	m_RTVDescriptorHeap = std::make_unique<RTVDescriptorHeap>(device, 16);
-}
-
-void ResourceManager::CreateDSVDescriptorHeap(ID3D12Device8* device)
-{
-	m_DSVDescriptorHeap = std::make_unique<DSVDescriptorHeap>(device, 1);
-}
-
 void ResourceManager::CreateHeap(ID3D12Device8* device)
 {
-	CreateSUVDescriptorHeap(device);
-	CreateRTVDescriptorHeap(device);
-	CreateDSVDescriptorHeap(device);
-}
-
-void ResourceManager::CreateGPUResource(ComPtr<ID3D12Resource>& pResource, const D3D12_HEAP_PROPERTIES& heapProp, const D3D12_RESOURCE_DESC& desc, const D3D12_RESOURCE_STATES& state, const D3D12_CLEAR_VALUE* clearValue)
-{
-	m_Device->CreateCommittedResource(&heapProp, D3D12_HEAP_FLAG_NONE, &desc, state, clearValue, IID_PPV_ARGS(&pResource));
+	m_SUVDescriptorHeap = std::make_unique<DescriptorHeap>(device, kMaxSUVDescriptorHeapSize, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, true);
+	m_RTVDescriptorHeap = std::make_unique<DescriptorHeap>(device, kMaxRTVDescriptorHeapSize, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, false);
+	m_DSVDescriptorHeap = std::make_unique<DescriptorHeap>(device, kMaxDSVDescriptorHeapSize, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, false);
 }
 
 uint32_t ResourceManager::CreateColorBuffer(BUFFER_COLOR_DESC& desc)

@@ -1,16 +1,34 @@
 #pragma once
 #include "SDK/DirectX/DirectX12/GpuBuffer/GpuBuffer.h"
-template<typename T>
-class VertexBuffer : public GpuBuffer
+
+// 頂点バッファのインタフェース
+class IVertexBuffer : public GpuBuffer
 {
 public:
 	// Constructor
-	VertexBuffer() : GpuBuffer()
+	IVertexBuffer() : GpuBuffer()
+	{
+	}
+	// Constructor
+	IVertexBuffer(ID3D12Resource* pResource, D3D12_RESOURCE_STATES CurrentState) :
+		GpuBuffer(pResource, CurrentState)
+	{
+	}
+	// Destructor
+	virtual ~IVertexBuffer() = default;
+};
+
+template<typename T>
+class VertexBuffer : public IVertexBuffer
+{
+public:
+	// Constructor
+	VertexBuffer() : IVertexBuffer()
 	{
 	}
 	// Constructor
 	VertexBuffer(ID3D12Resource* pResource, D3D12_RESOURCE_STATES CurrentState) :
-		GpuBuffer(pResource, CurrentState)
+		IVertexBuffer(pResource, CurrentState)
 	{
 	}
 	// Destructor

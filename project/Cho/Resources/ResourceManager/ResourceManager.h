@@ -5,7 +5,11 @@
 --------------------------------------------*/
 
 #include "SDK/DirectX/DirectX12/DescriptorHeap/DescriptorHeap.h"
-#include "SDK/DirectX/DirectX12/BufferManager/BufferManager.h"
+#include "SDK/DirectX/DirectX12/GpuBuffer/GpuBuffer.h"
+#include "SDK/DirectX/DirectX12/VertexBuffer/VertexBuffer.h"
+#include "SDK/DirectX/DirectX12/IndexBuffer/IndexBuffer.h"
+#include "SDK/DirectX/DirectX12/ColorBuffer/ColorBuffer.h"
+#include "SDK/DirectX/DirectX12/DepthBuffer/DepthBuffer.h"
 #include "Resources/ModelManager/ModelManager.h"
 #include "Resources/TextureManager/TextureManager.h"
 #include "Core/Utility/CompBufferData.h"
@@ -37,7 +41,6 @@ public:
 		m_ModelManager = std::make_unique<ModelManager>(this, integrationBuffer);
 		m_TextureManager = std::make_unique<TextureManager>(this, graphicsEngine, m_Device);
 	}
-	void CreateGPUResource(ComPtr<ID3D12Resource>& pResource ,const D3D12_HEAP_PROPERTIES& heapProp, const D3D12_RESOURCE_DESC& desc, const D3D12_RESOURCE_STATES& state, const D3D12_CLEAR_VALUE* clearValue);
 
 	// BufferMethod
 	uint32_t CreateColorBuffer(BUFFER_COLOR_DESC& desc);
@@ -67,23 +70,17 @@ public:
 	DescriptorHeap* GetSUVDHeap() const { return m_SUVDescriptorHeap.get(); }
 	DescriptorHeap* GetRTVDHeap() const { return m_RTVDescriptorHeap.get(); }
 	DescriptorHeap* GetDSVDHeap() const { return m_DSVDescriptorHeap.get(); }
-	BufferManager* GetBufferManager() const { return m_BufferManager.get(); }
-	//TextureManager* GetTextureManager() const { return m_TextureManager.get(); }
+	TextureManager* GetTextureManager() const { return m_TextureManager.get(); }
 	ModelManager* GetModelManager() const { return m_ModelManager.get(); }
 private:
-	// SUVディスクリプタヒープの生成
-	void CreateSUVDescriptorHeap(ID3D12Device8* device);
-	// RTVディスクリプタヒープの生成
-	void CreateRTVDescriptorHeap(ID3D12Device8* device);
-	// DSVディスクリプタヒープの生成
-	void CreateDSVDescriptorHeap(ID3D12Device8* device);
 	// Heap生成
 	void CreateHeap(ID3D12Device8* device);
+	static const uint32_t kMaxSUVDescriptorHeapSize = 1024;
+	static const uint32_t kMaxRTVDescriptorHeapSize = 16;
+	static const uint32_t kMaxDSVDescriptorHeapSize = 1;
 
 	// Device
 	ID3D12Device8* m_Device = nullptr;
-	// BufferManager
-	std::unique_ptr<BufferManager> m_BufferManager = nullptr;
 	// SUVディスクリプタヒープ
 	std::unique_ptr<DescriptorHeap> m_SUVDescriptorHeap = nullptr;
 	// RTVディスクリプタヒープ
@@ -97,5 +94,19 @@ private:
 	//// GPUResourceUpdate用のマッピングデータ
 	//FVector<BUFFER_DATA_TF*> m_MappedTF;
 	//FVector<BUFFER_DATA_VIEWPROJECTION*> m_MappedViewProjection;
+	// 定数バッファ
+	FVector<std::unique_ptr<IConstantBuffer>> m_ConstantBuffers;
+	// 構造化バッファ
+	FVector<std::unique_ptr<IStructuredBuffer>> m_StructuredBuffers;
+	// 頂点バッファ
+	FVector<std::unique_ptr<IVertexBuffer>> m_VertexBuffers;
+	// インデックスバッファ
+	FVector<std::unique_ptr<IIndexBuffer>> m_IndexBuffers;
+	// カラーバッファ
+	FVector<std::unique_ptr<ColorBuffer>> m_ColorBuffers;
+	// 深度バッファ
+	FVector<std::unique_ptr<DepthBuffer>> m_DepthBuffers;
+	// テクスチャバッファ
+	FVector<std::unique_ptr<PixelBuffer>> m_TextureBuffers;
 };
 
