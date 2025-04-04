@@ -3,12 +3,16 @@
 #include "OS/Windows/WinApp/WinApp.h"
 #include "SDK/DirectX/DirectX12/SwapChain/SwapChain.h"
 
-ResourceManager::ResourceManager(ID3D12Device8* device)
+ResourceManager::ResourceManager(ID3D12Device8* device,GraphicsEngine* graphicsEngine)
 {
-	// デバイスの設定
+	// ポインタをセット
 	m_Device = device;
+	m_TextureManager = std::make_unique<TextureManager>(this, graphicsEngine, m_Device);
+	m_ModelManager = std::make_unique<ModelManager>(this);
 	// ヒープの作成
 	CreateHeap(device);
+	// 統合データの作成
+	CreateIntegrationBuffers();
 	// 初期化
 	Initialize();
 }
@@ -34,77 +38,71 @@ void ResourceManager::Release()
 {
 }
 
+uint32_t ResourceManager::CreateColorBuffer(D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES& state)
+{
+	std::unique_ptr<ColorBuffer> buffer = std::make_unique<ColorBuffer>();
+	buffer->CreatePixelBufferResource(m_Device, desc, clearValue, state);
+	// SRVの設定
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Format = desc.Format;
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MipLevels = 1;
+	// Viewの生成
+	buffer->CreateSRV(m_Device, srvDesc, m_SUVDescriptorHeap.get());
+	// RTVの設定
+	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
+	rtvDesc.Format = desc.Format;
+	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+	// Viewの生成
+	buffer->CreateRTV(m_Device, rtvDesc, m_RTVDescriptorHeap.get());
+	// コンテナに移動
+	uint32_t index = static_cast<uint32_t>(m_ColorBuffers.push_back(std::move(buffer)));
+	return index;
+}
+
+uint32_t ResourceManager::CreateDepthBuffer(D3D12_RESOURCE_DESC& desc, D3D12_RESOURCE_STATES& state)
+{
+	std::unique_ptr<DepthBuffer> buffer = std::make_unique<DepthBuffer>();
+	buffer->CreateDepthBufferResource(m_Device, desc, state);
+	// DSVの設定
+	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+	dsvDesc.Format = desc.Format;
+	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+	// Viewの生成
+	buffer->CreateDSV(m_Device, dsvDesc, m_DSVDescriptorHeap.get());
+	// コンテナに移動
+	uint32_t index = static_cast<uint32_t>(m_DepthBuffers.push_back(std::move(buffer)));
+	return index;
+}
+
+uint32_t ResourceManager::CreateTextureBuffer(D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES& state)
+{
+	std::unique_ptr<PixelBuffer> buffer = std::make_unique<PixelBuffer>();
+	buffer->CreatePixelBufferResource(m_Device, desc, clearValue, state);
+	// SRVの設定
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Format = desc.Format;
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MipLevels = static_cast<UINT>(desc.MipLevels);
+	// Viewの生成
+	buffer->CreateSRV(m_Device, srvDesc, m_SUVDescriptorHeap.get());
+	// コンテナに移動
+	uint32_t index = static_cast<uint32_t>(m_TextureBuffers.push_back(std::move(buffer)));
+	return index;
+}
+
+void ResourceManager::CreateIntegrationBuffers()
+{
+	// Transform統合バッファ
+	std::optional<uint32_t> index = CreateStructuredBuffer<BUFFER_DATA_TF>(100);
+	m_IntegrationData[Transform] = std::make_unique<IntegrationData<BUFFER_DATA_TF>>(index);
+}
+
 void ResourceManager::CreateHeap(ID3D12Device8* device)
 {
 	m_SUVDescriptorHeap = std::make_unique<DescriptorHeap>(device, kMaxSUVDescriptorHeapSize, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, true);
 	m_RTVDescriptorHeap = std::make_unique<DescriptorHeap>(device, kMaxRTVDescriptorHeapSize, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, false);
 	m_DSVDescriptorHeap = std::make_unique<DescriptorHeap>(device, kMaxDSVDescriptorHeapSize, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, false);
 }
-
-uint32_t ResourceManager::CreateColorBuffer(BUFFER_COLOR_DESC& desc)
-{
-	desc.rtvDHIndex = m_RTVDescriptorHeap->Create();
-	desc.srvDHIndex = m_SUVDescriptorHeap->Create();
-	return m_BufferManager->CreateBuffer<BUFFER_COLOR_DESC>(desc);
-}
-
-uint32_t ResourceManager::CreateDepthBuffer(BUFFER_DEPTH_DESC& desc)
-{
-	desc.dsvDHIndex = m_DSVDescriptorHeap->Create();
-	return m_BufferManager->CreateBuffer<BUFFER_DEPTH_DESC>(desc);
-}
-
-uint32_t ResourceManager::CreateVertexBuffer(BUFFER_VERTEX_DESC& desc)
-{
-	desc.suvDHIndex = m_SUVDescriptorHeap->Create();
-	desc.suvDHIndexForIBV = m_SUVDescriptorHeap->Create();
-	return m_BufferManager->CreateBuffer<BUFFER_VERTEX_DESC>(desc);
-}
-
-uint32_t ResourceManager::CreateConstantBuffer(BUFFER_CONSTANT_DESC& desc)
-{
-	return m_BufferManager->CreateBuffer<BUFFER_CONSTANT_DESC>(desc);
-}
-
-uint32_t ResourceManager::CreateStructuredBuffer(BUFFER_STRUCTURED_DESC& desc)
-{
-	desc.suvDHIndex = m_SUVDescriptorHeap->Create();
-	return m_BufferManager->CreateBuffer<BUFFER_STRUCTURED_DESC>(desc);
-}
-
-uint32_t ResourceManager::CreateTextureBuffer(BUFFER_TEXTURE_DESC& desc)
-{
-	desc.suvDHIndex = m_SUVDescriptorHeap->Create();
-	return m_BufferManager->CreateBuffer<BUFFER_TEXTURE_DESC>(desc);
-}
-
-void ResourceManager::RemakeColorBuffer(const uint32_t& index, BUFFER_COLOR_DESC& desc)
-{
-	m_BufferManager->RemakeBuffer(index, desc);
-}
-
-void ResourceManager::RemakeDepthBuffer(const uint32_t& index, BUFFER_DEPTH_DESC& desc)
-{
-	m_BufferManager->RemakeBuffer(index, desc);
-}
-
-void ResourceManager::RemakeVertexBuffer(const uint32_t& index, BUFFER_VERTEX_DESC& desc)
-{
-	m_BufferManager->RemakeBuffer(index, desc);
-}
-
-void ResourceManager::ReleaseColorBuffer(const uint32_t& index)
-{
-	index;
-}
-
-void ResourceManager::ReleaseDepthBuffer(const uint32_t& index)
-{
-	index;
-}
-
-void ResourceManager::ReleaseVertexBuffer(const uint32_t& index)
-{
-	index;
-}
-

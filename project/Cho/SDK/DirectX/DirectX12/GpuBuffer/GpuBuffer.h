@@ -26,15 +26,15 @@ public:
 		D3D12_HEAP_FLAGS heapFlags,
 		D3D12_RESOURCE_STATES InitialState,
 		D3D12_RESOURCE_FLAGS resourceFlags,
-		const UINT& numElementes,
+		const UINT& numElements,
 		const UINT& structureByteStride);
 	// Getters
 	UINT64 GetBufferSize() const { return m_BufferSize; }
-	UINT GetNumElements() const { return m_NumElementes; }
+	UINT GetNumElements() const { return m_NumElements; }
 	UINT GetStructureByteStride() const { return m_StructureByteStride; }
 protected:
     UINT64 m_BufferSize = {};
-    UINT m_NumElementes = {};
+    UINT m_NumElements = {};
     UINT m_StructureByteStride = {};
 };
 
@@ -152,7 +152,7 @@ public:
 		m_SRVGpuHandle = {};
 		m_SRVHandleIndex = std::nullopt;
 	}
-	void CreateStructuredBufferResource(ID3D12Device* device, const UINT& numElementes)
+	void CreateStructuredBufferResource(ID3D12Device* device, const UINT& numElements)
 	{
 		// リソースのサイズ
 		UINT structureByteStride = static_cast<UINT>(sizeof(T));
@@ -163,12 +163,12 @@ public:
 			device, heapProperties, D3D12_HEAP_FLAG_NONE,
 			D3D12_RESOURCE_STATE_GENERIC_READ,
 			D3D12_RESOURCE_FLAG_NONE,
-			numElementes, structureByteStride);
+			numElements, structureByteStride);
 		// マッピング
 		T* mappedData = nullptr;// 一時マップ用
 		GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&mappedData));
 		// マップしたデータをspanに変換
-		m_MappedData = std::span<T>(mappedData, numElementes);
+		m_MappedData = std::span<T>(mappedData, numElements);
 	}
 	bool CreateSRV(ID3D12Device8* device, D3D12_SHADER_RESOURCE_VIEW_DESC& srvDesc, DescriptorHeap* pDescriptorHeap)
 	{

@@ -68,10 +68,6 @@ public:
 	SceneManager(ResourceManager* resourceManager):
 		m_pResourceManager(resourceManager)
 	{
-		m_pECSManager = std::make_unique<ECSManager>();
-		m_pSystemManager = std::make_unique<SystemManager>();
-		m_pObjectContainer = std::make_unique<ObjectContainer>();
-		m_pIntegrationBuffer = std::make_unique<IntegrationBuffer>(resourceManager);
 		AddScene(L"MainScene");
 		ChangeSceneRequest(m_SceneNameToID[L"MainScene"]);
 		CreateSystem();
@@ -93,10 +89,6 @@ public:
 
 	FVector<std::unique_ptr<ScenePrefab>>& GetScenes() noexcept { return m_pScenes; }
 	ScenePrefab* GetCurrentScene() const noexcept { return m_pCurrentScene; }
-	ECSManager* GetECSManager() const noexcept { return m_pECSManager.get(); }
-	SystemManager* GetSystemManager() const noexcept { return m_pSystemManager.get(); }
-	ObjectContainer* GetObjectContainer() const noexcept{ return m_pObjectContainer.get(); }
-	IntegrationBuffer* GetIntegrationBuffer() const noexcept { return m_pIntegrationBuffer.get(); }
 private:
 	// シーンを変更
 	void ChangeScene();
@@ -123,12 +115,6 @@ private:
 	FVector<std::unique_ptr<ScenePrefab>> m_pScenes;
 	// 名前検索用補助コンテナ
 	std::unordered_map<std::wstring, SceneID> m_SceneNameToID;
-	// ECSマネージャ
-	std::unique_ptr<ECSManager> m_pECSManager = nullptr;
-	// Systemマネージャ
-	std::unique_ptr<SystemManager> m_pSystemManager = nullptr;
-	// オブジェクトコンテナ
-	std::unique_ptr<ObjectContainer> m_pObjectContainer = nullptr;
 	// 統合バッファ
 	std::unique_ptr<IntegrationBuffer> m_pIntegrationBuffer = nullptr;
 };

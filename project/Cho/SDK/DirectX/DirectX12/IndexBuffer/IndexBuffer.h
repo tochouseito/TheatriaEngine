@@ -38,7 +38,7 @@ public:
 		m_MappedData = std::span<T>{};
 	}
 	// リソースを作成
-	void CreateIndexBufferResource(ID3D12Device8* device,const UINT& numElementes)
+	void CreateIndexBufferResource(ID3D12Device8* device,const UINT& numElements)
 	{
 		// リソースのサイズ
 		UINT structureByteStride = static_cast<UINT>(sizeof(T));
@@ -49,12 +49,12 @@ public:
 			device, heapProperties, D3D12_HEAP_FLAG_NONE,
 			D3D12_RESOURCE_STATE_GENERIC_READ,
 			D3D12_RESOURCE_FLAG_NONE,
-			numElementes, structureByteStride);
+			numElements, structureByteStride);
 		// マッピング
 		T* mappedData = nullptr;// 一時マップ用
 		GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&mappedData));
 		// マップしたデータをspanに変換
-		m_MappedData = std::span<T>(mappedData, numElementes);
+		m_MappedData = std::span<T>(mappedData, numElements);
 	}
 	bool CreateIBV()
 	{
@@ -94,6 +94,26 @@ public:
 	bool CreateUAV()
 	{
 		return true;
+	}
+	void UpdateData(const T& data, const uint32_t& index)
+	{
+		if (!m_MappedData.size() <= index)
+		{
+			m_MappedData[index] = data;
+		} else
+		{
+			Log::Write(LogLevel::Assert, "Index out of range");
+		}
+	}
+	void MappedDataCopy(std::vector<T>& data)
+	{
+		if (!m_MappedData.empty())
+		{
+			memcpy(m_MappedData.data(), data.data(), sizeof(T) * GetNumElements());
+		} else
+		{
+			Log::Write(LogLevel::Assert, "MappedData is null");
+		}
 	}
 private:
 	// インデックスバッファビュー
