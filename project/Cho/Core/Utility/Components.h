@@ -35,8 +35,6 @@ struct CameraComponent final
     float farZ = 1000.0f;
 	// バッファーインデックス
 	uint32_t bufferIndex = UINT32_MAX;
-	// マップインデックス
-	uint32_t mappedIndex = UINT32_MAX;
 };
 
 // メッシュコンポーネント

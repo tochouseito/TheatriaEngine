@@ -14,6 +14,12 @@ public:
 	}
 	// Destructor
 	virtual ~IIntegrationData() = default;
+	// サイズを取得
+	virtual size_t size() const = 0;
+	// バッファのインデックスを取得
+	virtual std::optional<uint32_t> GetBufferIndex() const = 0;
+	// MapIDを取得
+	virtual uint32_t GetMapID() const = 0;
 };
 
 class ResourceManager;

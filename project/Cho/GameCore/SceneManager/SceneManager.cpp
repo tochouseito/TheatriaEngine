@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "SceneManager.h"
-#include "Cho/Core/Log/Log.h"
 #include "Cho/Resources/ResourceManager/ResourceManager.h"
 
 void ScenePrefab::Start()
@@ -26,7 +25,6 @@ void SceneManager::Update()
 		return;
 	}
 	m_pCurrentScene->Update();
-	m_pSystemManager->UpdateAll(m_pECSManager.get());
 }
 
 // シーンを追加
@@ -45,10 +43,7 @@ void SceneManager::AddScene(const std::wstring& sceneName)
 
 void SceneManager::CreateSystem() noexcept
 {
-	std::unique_ptr<ECSManager::ISystem> transformSystem = std::make_unique<ObjectSystem>(m_pECSManager.get(),m_pIntegrationBuffer.get());
-	m_pSystemManager->RegisterSystem(std::move(transformSystem));
-	std::unique_ptr<ECSManager::ISystem> cameraSystem = std::make_unique<CameraSystem>(m_pECSManager.get(), m_pIntegrationBuffer.get());
-	m_pSystemManager->RegisterSystem(std::move(cameraSystem));
+	
 }
 
 void SceneManager::ChangeScene()

@@ -35,6 +35,8 @@ public:
 	ObjectContainer* GetObjectContainer() { return m_pObjectContainer.get(); }
 	GameCoreCommand* GetGameCoreCommand() { return m_pGameCoreCommand.get(); }
 private:
+	void CreateSystems(ResourceManager* resourceManager);
+
 	// シーンマネージャー
 	std::unique_ptr<SceneManager> m_pSceneManager = nullptr;
 	// ECSマネージャ

@@ -16,6 +16,14 @@ public:
 	}
 	// Destructor
 	virtual ~IIndexBuffer() = default;
+	// リソース作成
+	virtual void CreateIndexBufferResource(ID3D12Device* device, const UINT& numElements) = 0;
+	// View作成
+	virtual bool CreateIBV() = 0;
+	// SRV作成
+	virtual bool CreateSRV(ID3D12Device8* device, D3D12_SHADER_RESOURCE_VIEW_DESC& srvDesc, DescriptorHeap* pDescriptorHeap) = 0;
+	// UAV作成
+	virtual bool CreateUAV() = 0;
 };
 
 template<typename T>

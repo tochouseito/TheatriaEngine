@@ -103,6 +103,13 @@ public:
 
 	// 統合バッファ
 	void CreateIntegrationBuffers();
+	IStructuredBuffer* GetIntegrationBuffer(const IntegrationDataType & type) const
+	{
+		if (type == IntegrationDataType::Transform)
+		{
+			return GetBuffer<IStructuredBuffer>(m_IntegrationData[IntegrationDataType::Transform]->GetBufferIndex());
+		}
+	}
 
 	// GetBuffer
 	template<typename T>
@@ -118,14 +125,16 @@ public:
 		} else if constexpr (std::is_same_v<T, DepthBuffer>)
 		{
 			return m_DepthBuffers[index].get();
-		} else if constexpr (std::is_same_v<T, IVertexBuffer>)
-
+		} else if constexpr (std::is_same_v<T, VertexBuffer>)
 		{
 			return m_VertexBuffers[index].get();
-		} else if constexpr (std::is_same_v<T, IConstantBuffer>)
+		} else if constexpr (std::is_same_v<T, IndexBuffer>)
+		{
+			return m_VertexBuffers[index].get();
+		} else if constexpr (std::is_same_v<T, ConstantBuffer>)
 		{
 			return m_ConstantBuffers[index].get();
-		} else if constexpr (std::is_same_v<T, IStructuredBuffer>)
+		} else if constexpr (std::is_same_v<T, StructuredBuffer>)
 		{
 			return m_StructuredBuffers[index].get();
 		} else if constexpr (std::is_same_v<T, PixelBuffer>)

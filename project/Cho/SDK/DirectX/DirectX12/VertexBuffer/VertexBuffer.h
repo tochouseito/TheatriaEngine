@@ -16,6 +16,14 @@ public:
 	}
 	// Destructor
 	virtual ~IVertexBuffer() = default;
+	// リソース作成
+	virtual void CreateVertexBufferResource(ID3D12Device* device, const UINT& numElements) = 0;
+	// View作成
+	virtual bool CreateVBV() = 0;
+	// SRV作成
+	virtual bool CreateSRV() = 0;
+	// UAV作成
+	virtual bool CreateUAV() = 0;
 };
 
 template<typename T>

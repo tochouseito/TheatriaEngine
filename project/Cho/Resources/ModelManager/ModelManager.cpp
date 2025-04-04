@@ -3,7 +3,8 @@
 #include "Resources/ResourceManager/ResourceManager.h"
 #include "SDK/DirectX/DirectX12/VertexBuffer/VertexBuffer.h"
 #include "SDK/DirectX/DirectX12/IndexBuffer/IndexBuffer.h"
-
+#include "Core/ChoLog/ChoLog.h"
+using namespace Cho;
 
 // 名前で検索してインデックスを取得する
 std::optional<uint32_t> ModelManager::GetModelDataIndex(const std::wstring& name, std::optional<uint32_t>& transformIndex)
@@ -54,7 +55,7 @@ void ModelManager::CreateDefaultMesh()
 	modelData.name = modelName;
 	MeshData meshData;
 	meshData.name = L"Cube";
-	
+	// 頂点数とインデックス数
 	uint32_t vertices = 24;// 頂点数
 	uint32_t indices = 36;// インデックス数
 	// メモリ確保
@@ -133,17 +134,17 @@ void ModelManager::AddModelData(ModelData& modelData)
 {
 	for (MeshData& mesh : modelData.meshes)
 	{
-		// VertexBuffer作成
+		// VertexBuffer,IndexBuffer作成
 		mesh.vertexBufferIndex = m_pResourceManager->CreateVertexBuffer<VertexData>(mesh.vertices.size());
-		// VBV作成
-		m_pResourceManager->GetBuffer<VertexBuffer<VertexData>>(mesh.vertexBufferIndex)->CreateVBV();
-		// IndexBuffer作成
 		mesh.indexBufferIndex = m_pResourceManager->CreateIndexBuffer<uint32_t>(mesh.indices.size());
-		// IBV作成
-		m_pResourceManager->GetBuffer<IndexBuffer<uint32_t>>(mesh.indexBufferIndex)->CreateIBV();
+		VertexBuffer<VertexData>* vertexBuffer = dynamic_cast<VertexBuffer<VertexData>*>(m_pResourceManager->GetBuffer<IVertexBuffer>(mesh.vertexBufferIndex));
+		IndexBuffer<uint32_t>* indexBuffer = dynamic_cast<IndexBuffer<uint32_t>*>(m_pResourceManager->GetBuffer<IIndexBuffer>(mesh.indexBufferIndex));
+		// VBV,IBV作成
+		vertexBuffer->CreateVBV();
+		indexBuffer->CreateIBV();
 		// コピー
-		m_pResourceManager->GetBuffer<VertexBuffer<VertexData>>(mesh.vertexBufferIndex)->MappedDataCopy(mesh.vertices);
-		m_pResourceManager->GetBuffer<IndexBuffer<uint32_t>>(mesh.indexBufferIndex)->MappedDataCopy(mesh.indices);
+		vertexBuffer->MappedDataCopy(mesh.vertices);
+		indexBuffer->MappedDataCopy(mesh.indices);
 	}
 	// モデルに登録されているTransformのインデックスのリソースを作成
 	uint32_t useTFBufferIndex = m_pResourceManager->CreateStructuredBuffer<uint32_t>(kUseTransformOffset);

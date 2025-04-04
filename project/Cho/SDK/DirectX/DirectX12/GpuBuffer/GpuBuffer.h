@@ -53,6 +53,10 @@ public:
 	}
 	// Destructor
 	virtual ~IConstantBuffer() = default;
+	// リソース作成
+	virtual void CreateConstantBufferResource(ID3D12Device* device) = 0;
+	// マッピング
+	virtual void Unmap() = 0;
 };
 
 template<typename T>
@@ -129,6 +133,10 @@ public:
 	}
 	// Destructor
 	virtual ~IStructuredBuffer() = default;
+	// リソース作成
+	virtual void CreateStructuredBufferResource(ID3D12Device* device, const UINT& numElements) = 0;
+	// SRV作成
+	virtual bool CreateSRV(ID3D12Device8* device, D3D12_SHADER_RESOURCE_VIEW_DESC& srvDesc, DescriptorHeap* pDescriptorHeap) = 0;
 };
 
 template<typename T>
