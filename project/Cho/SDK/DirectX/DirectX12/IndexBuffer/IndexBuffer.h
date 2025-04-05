@@ -1,56 +1,54 @@
 #pragma once
 #include "SDK/DirectX/DirectX12/GpuBuffer/GpuBuffer.h"
 
-// 頂点バッファのインタフェース
-class IVertexBuffer : public GpuBuffer
+// インデックスバッファのインタフェース
+class IIndexBuffer : public GpuBuffer
 {
 public:
 	// Constructor
-	IVertexBuffer() : GpuBuffer()
+	IIndexBuffer() : GpuBuffer()
 	{
 	}
 	// Constructor
-	IVertexBuffer(ID3D12Resource* pResource, D3D12_RESOURCE_STATES CurrentState) :
+	IIndexBuffer(ID3D12Resource* pResource, D3D12_RESOURCE_STATES CurrentState) :
 		GpuBuffer(pResource, CurrentState)
 	{
 	}
 	// Destructor
-	virtual ~IVertexBuffer() = default;
+	virtual ~IIndexBuffer() = default;
 	// リソース作成
-	virtual void CreateVertexBufferResource(ID3D12Device* device, const UINT& numElements) = 0;
+	virtual void CreateIndexBufferResource(ID3D12Device8* device, const UINT& numElements) = 0;
 	// View作成
-	virtual bool CreateVBV() = 0;
+	virtual bool CreateIBV() = 0;
 	// SRV作成
-	virtual bool CreateSRV() = 0;
+	virtual bool CreateSRV(ID3D12Device8* device, D3D12_SHADER_RESOURCE_VIEW_DESC& srvDesc, DescriptorHeap* pDescriptorHeap) = 0;
 	// UAV作成
 	virtual bool CreateUAV() = 0;
-	// 頂点バッファビューを取得
-	virtual D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() = 0;
-protected:
-
+	// インデックスバッファビューを取得
+	virtual D3D12_INDEX_BUFFER_VIEW* GetIndexBufferView() = 0;
 };
 
 template<typename T>
-class VertexBuffer : public IVertexBuffer
+class IndexBuffer : public IIndexBuffer
 {
 public:
 	// Constructor
-	VertexBuffer() : IVertexBuffer()
+	IndexBuffer() : IIndexBuffer()
 	{
 	}
 	// Constructor
-	VertexBuffer(ID3D12Resource* pResource, D3D12_RESOURCE_STATES CurrentState) :
-		IVertexBuffer(pResource, CurrentState)
+	IndexBuffer(ID3D12Resource* pResource, D3D12_RESOURCE_STATES CurrentState) :
+		IIndexBuffer(pResource, CurrentState)
 	{
 	}
 	// Destructor
-	~VertexBuffer()
+	~IndexBuffer()
 	{
 		m_View = {};
 		m_MappedData = std::span<T>{};
 	}
 	// リソースを作成
-	void CreateVertexBufferResource(ID3D12Device* device, const UINT& numElements) override
+	void CreateIndexBufferResource(ID3D12Device8* device,const UINT& numElements) override
 	{
 		// リソースのサイズ
 		UINT structureByteStride = static_cast<UINT>(sizeof(T));
@@ -68,7 +66,7 @@ public:
 		// マップしたデータをspanに変換
 		m_MappedData = std::span<T>(mappedData, static_cast<size_t>(numElements));
 	}
-	bool CreateVBV() override
+	bool CreateIBV() override
 	{
 		// Viewの作成
 		// リソースがあるかどうか確認
@@ -82,12 +80,27 @@ public:
 		// 使用するResourceのサイズ
 		m_View.SizeInBytes = static_cast<UINT>(GetBufferSize());
 		// 要素一つ分のサイズ
-		m_View.StrideInBytes = GetStructureByteStride();
+		//m_View.StrideInBytes = GetStructureByteStride();
+		// インデックスの形式
+		if constexpr (std::is_same_v<T, uint16_t>)
+		{
+			m_View.Format = DXGI_FORMAT_R16_UINT;
+		} else if constexpr (std::is_same_v<T, uint32_t>)
+		{
+			m_View.Format = DXGI_FORMAT_R32_UINT;
+		} else
+		{
+			Log::Write(LogLevel::Assert, "IndexBuffer is not uint16_t or uint32_t");
+			return false;
+		}
 		return true;
 	}
 	// スキニング用SRV
-	bool CreateSRV() override
+	bool CreateSRV(ID3D12Device8* device, D3D12_SHADER_RESOURCE_VIEW_DESC& srvDesc, DescriptorHeap* pDescriptorHeap) override
 	{
+		device;
+		srvDesc;
+		pDescriptorHeap;
 		return true;
 	}
 	// スキニング用UAV
@@ -95,9 +108,9 @@ public:
 	{
 		return true;
 	}
-	void UpdateData(const T& data,const uint32_t& index)
+	void UpdateData(const T& data, const uint32_t& index)
 	{
-		if (!m_MappedData.size()<=index)
+		if (!m_MappedData.size() <= index)
 		{
 			m_MappedData[index] = data;
 		} else
@@ -115,15 +128,13 @@ public:
 			Log::Write(LogLevel::Assert, "MappedData is null");
 		}
 	}
-	// 頂点バッファビューを取得
-	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() override
+	D3D12_INDEX_BUFFER_VIEW* GetIndexBufferView() override
 	{
 		return &m_View;
 	}
 private:
-	// 頂点バッファビュー
-	D3D12_VERTEX_BUFFER_VIEW m_View = {};
+	// インデックスバッファビュー
+	D3D12_INDEX_BUFFER_VIEW m_View = {};
 	// マップ用データにコピーするためのポインタ
 	std::span<T> m_MappedData;
 };
-

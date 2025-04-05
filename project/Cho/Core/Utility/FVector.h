@@ -1,7 +1,8 @@
 #pragma once
 #include <vector>
 #include <cstdint>
-#include "Cho/Core/Log/Log.h"
+#include "Core/ChoLog/ChoLog.h"
+using namespace Cho;
 // フリーリスト付き可変長配列
 template <typename T>
 class FVector {
@@ -27,7 +28,7 @@ public:
     // 指定インデックスの要素を削除（フリーリストに追加）
     void erase(size_t index) {
         if (index >= nextIndex) {
-			ChoAssertLog("Invalid index out_of_range",false,__FILE__,__LINE__);
+			Log::Write(LogLevel::Assert, "Invalid index out_of_range");
         }
         freeList.push_back(index);
     }
@@ -35,14 +36,14 @@ public:
     // インデックスアクセス
     T& operator[](size_t index) {
         if (index >= nextIndex) {
-            ChoAssertLog("Index out of range", false, __FILE__, __LINE__);
+			Log::Write(LogLevel::Assert, "Index out of range");
         }
         return data[index];
     }
 
     const T& operator[](size_t index) const {
         if (index >= nextIndex) {
-            ChoAssertLog("Index out of range", false, __FILE__, __LINE__);
+			Log::Write(LogLevel::Assert, "Index out of range");
         }
         return data[index];
     }

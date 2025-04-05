@@ -42,8 +42,8 @@ public:// メンバ関数
 	/*Getter*/
 	static HWND GetHWND() { return m_HWND; }
 	static HINSTANCE GetHInstance() { return m_WC.hInstance; }
-	static int32_t GetWindowWidth() { return m_WindowWidth; }
-	static int32_t GetWindowHeight() { return m_WindowHeight; }
+	static UINT64 GetWindowWidth() { return m_WindowWidth; }
+	static UINT GetWindowHeight() { return m_WindowHeight; }
 private:
 
 	// ウィンドウサイズ変更時の処理
@@ -53,7 +53,7 @@ private:// メンバ変数
 	static HWND m_HWND; // ウィンドウハンドル
 	static WNDCLASS m_WC; // ウィンドウクラス
 	static bool m_IsRun; // アプリケーションが動作中かを示すフラグ
-	static int32_t m_WindowWidth; // ウィンドウの幅
-	static int32_t m_WindowHeight; // ウィンドウの高さ
+	static UINT64 m_WindowWidth; // ウィンドウの幅
+	static UINT m_WindowHeight; // ウィンドウの高さ
 };
 

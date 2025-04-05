@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "ThreadManager.h"
-#include "Cho/Core/Log/Log.h"
+#include "Core/ChoLog/ChoLog.h"
+using namespace Cho;
 
 void ThreadManager::Initialize()
 {
@@ -15,7 +16,8 @@ void ThreadManager::Initialize()
     m_WorkerCount = maxThreads; // スレッド数を記録
 
     // ログ出力
-    Log("Create Thread Pool: " + std::to_string(maxThreads) + " Threads");
+	std::string msg = "Thread Pool Created: " + std::to_string(maxThreads) + " Threads";
+    Log::Write(LogLevel::Info, msg);
 
     // スレッドを最大数まで作成
     for (uint32_t i = 0; i < maxThreads; ++i)
@@ -39,7 +41,8 @@ std::shared_future<void> ThreadManager::EnqueueTask(
         m_TaskQueue.push({
             taskName,
             [task, promise, taskName]() { // ラムダ式によりタスクを登録
-				Log("Execute Task: " + taskName); // タスク名をログ出力
+				std::string msg = "Task: " + taskName + " is executing.";
+				Log::Write(LogLevel::Info, msg); // タスク実行中のログ出力
                 task(); // タスクの実行
                 promise->set_value(); // タスク完了を通知
             }, priority, dependencies
@@ -60,7 +63,8 @@ std::shared_future<void> ThreadManager::EnqueueBatchTask(
 
     // バッチ処理を一つのタスクとして登録
     EnqueueTask(batchName,[tasks, promise, batchName]() {
-		Log("Execute Batch Task: " + batchName); // バッチ名をログ出力
+		std::string msg = "Batch Task: " + batchName + " is executing.";
+		Log::Write(LogLevel::Info, msg); // バッチ実行中のログ出力
         for (auto& task : tasks) {
             task(); // 各タスクを順に実行
         }

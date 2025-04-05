@@ -7,6 +7,16 @@
 #include <windows.h>
 #include <stdint.h>
 #include <memory>
+#include <algorithm>
+#include <string>
+#include <vector>
+#include <unordered_map>
+#include <variant>
+#include <array>
+#include <functional>
+#include <optional>
+#include <span>
+#include <bit>
 
 #include <d3d12.h>
 #include <dxgi1_6.h>
@@ -27,8 +37,8 @@ static const float kClearColor[] = { 0.1f,0.25f,0.5f,1.0f };
 
 #include <wrl.h>
 using Microsoft::WRL::ComPtr;
-
-#include "Core/Log/Log.h"
+#include "Core/ChoLog/ChoLog.h"
+using namespace Cho;
 
 // FreeListContainer
 #include "Core/Utility/FArray.h"

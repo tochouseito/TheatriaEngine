@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "CommandContext.h"
+#include "Core/ChoLog/ChoLog.h"
+using namespace Cho;
 
 void CommandContext::Create(ID3D12Device* device, D3D12_COMMAND_LIST_TYPE type)
 {
@@ -10,7 +12,7 @@ void CommandContext::Create(ID3D12Device* device, D3D12_COMMAND_LIST_TYPE type)
 		IID_PPV_ARGS(&m_CommandAllocator)
 	);
 	// コマンドアロケータの生成がうまくいかなかったので起動できない
-	ChoAssertLog("Failed to create command allocator.", hr, __FILE__, __LINE__);
+	Log::Write(LogLevel::Assert, "CommandAllocator created.", hr);
 
 	// コマンドリストを生成する
 	hr = device->CreateCommandList(
@@ -21,7 +23,7 @@ void CommandContext::Create(ID3D12Device* device, D3D12_COMMAND_LIST_TYPE type)
 		IID_PPV_ARGS(&m_CommandList)
 	);
 	// コマンドリストの生成がうまくいかなかったので起動できない
-	assert(SUCCEEDED(hr));
+	Log::Write(LogLevel::Assert, "CommandList created.", hr);
 
 	m_Type = type;
 	m_CommandList->Close();  // 初期状態で閉じておく
@@ -37,11 +39,11 @@ void CommandContext::Reset()
 	// コマンドアロケータをリセットする
 	hr = m_CommandAllocator->Reset();
 	// コマンドアロケータのリセットがうまくいかなかったので起動できない
-	ChoAssertLog("Failed to reset command allocator.", hr, __FILE__, __LINE__);
+	Log::Write(LogLevel::Assert, "CommandAllocator reset.", hr);
 	// コマンドリストをリセットする
 	hr = m_CommandList->Reset(m_CommandAllocator.Get(), nullptr);
 	// コマンドリストのリセットがうまくいかなかったので起動できない
-	ChoAssertLog("Failed to reset command list.", hr, __FILE__, __LINE__);
+	Log::Write(LogLevel::Assert, "CommandList reset.", hr);
 }
 
 void CommandContext::Close()
@@ -50,7 +52,7 @@ void CommandContext::Close()
 	// コマンドリストを閉じる
 	hr = m_CommandList->Close();
 	// コマンドリストのクローズがうまくいかなかったので起動できない
-	ChoAssertLog("Failed to close command list.", hr, __FILE__, __LINE__);
+	Log::Write(LogLevel::Assert, "CommandList closed.", hr);
 }
 
 void CommandContext::Flush()

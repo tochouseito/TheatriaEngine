@@ -134,12 +134,14 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Cho\Core\ChoLog\ChoLog.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Cho\Resources\AssetManager\AssetManager.cpp" />
     <ClCompile Include="Cho\Editor\BaseEditor\BaseEditor.cpp" />
     <ClCompile Include="Cho\Editor\AnimationEditor\AnimationEditor.cpp" />
     <ClCompile Include="Cho\Editor\AssetBrowser\AssetBrowser.cpp" />
-    <ClCompile Include="Cho\SDK\DirectX\DirectX12\BufferManager\BufferManager.cpp" />
-    <ClCompile Include="Cho\Core\ChoAssert\ChoAssert.cpp" />
-    <ClCompile Include="Cho\Core\Log\Log.cpp" />
     <ClCompile Include="Cho\Main\ChoEngine.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\DirectX12Common\DirectX12Common.cpp" />
     <ClCompile Include="Cho\Engine\Engine.cpp" />
@@ -163,12 +165,14 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClCompile Include="Cho\GameCore\ECS\ECSManager.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DXC\DXShaderCompiler.cpp" />
     <ClCompile Include="Cho\Editor\EditorCommand\EditorCommand.cpp" />
-    <ClCompile Include="Cho\GameCore\IntegrationBuffer\IntegrationBuffer.cpp" />
+    <ClCompile Include="Cho\Resources\IntegrationData\IntegrationData.cpp" />
     <ClCompile Include="Cho\Editor\GameView\GameView.cpp" />
     <ClCompile Include="Cho\Editor\Hierarchy\Hierarchy.cpp" />
     <ClCompile Include="Cho\Editor\Inspector\Inspector.cpp" />
     <ClCompile Include="Cho\Editor\Console\Console.cpp" />
     <ClCompile Include="Cho\Platform\InputManager\InputManager.cpp" />
+    <ClCompile Include="Cho\SDK\DirectX\DirectX12\IndexBuffer\IndexBuffer.cpp" />
+    <ClCompile Include="Cho\GameCore\GameCoreCommand\GameCoreCommand.cpp" />
     <ClCompile Include="main.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
@@ -193,7 +197,6 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClCompile Include="Cho\Resources\ModelManager\ModelManager.cpp" />
     <ClCompile Include="Cho\Resources\TextureManager\TextureManager.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\VertexBuffer\VertexBuffer.cpp" />
-    <ClCompile Include="Cho\SDK\DirectX\DirectX12\TextureBuffer\TextureBuffer.cpp" />
     <ClCompile Include="Cho\GameCore\SystemManager\SystemManager.cpp" />
     <ClCompile Include="Cho\Editor\SceneView\SceneView.cpp" />
     <ClCompile Include="Cho\Editor\MaterialEditor\MaterialEditor.cpp" />
@@ -203,6 +206,8 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClCompile Include="Cho\Editor\Timeline\Timeline.cpp" />
     <ClCompile Include="Cho\Editor\PipelineEditor\PipelineEditor.cpp" />
     <ClCompile Include="Cho\Editor\PopupMenu\PopupMenu.cpp" />
+    <ClInclude Include="Cho\Core\ChoLog\ChoLog.h" />
+    <ClInclude Include="Cho\Resources\AssetManager\AssetManager.h" />
     <ClInclude Include="Cho\Editor\BaseEditor\BaseEditor.h" />
     <ClInclude Include="Cho\Editor\AnimationEditor\AnimationEditor.h" />
     <ClInclude Include="Cho\Editor\AssetBrowser\AssetBrowser.h" />
@@ -210,9 +215,6 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClInclude Include="Cho\Core\Utility\Color.h" />
     <ClInclude Include="Cho\Core\Utility\CompBufferData.h" />
     <ClInclude Include="Cho\Core\Utility\Components.h" />
-    <ClInclude Include="Cho\SDK\DirectX\DirectX12\BufferManager\BufferManager.h" />
-    <ClInclude Include="Cho\Core\ChoAssert\ChoAssert.h" />
-    <ClInclude Include="Cho\Core\Log\Log.h" />
     <ClInclude Include="Cho\Core\Utility\FArray.h" />
     <ClInclude Include="Cho\Core\Utility\FVector.h" />
     <ClInclude Include="Cho\Main\ChoEngine.h" />
@@ -255,8 +257,7 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClInclude Include="Cho\Resources\ModelManager\ModelManager.h" />
     <ClInclude Include="Cho\Resources\TextureManager\TextureManager.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\VertexBuffer\VertexBuffer.h" />
-    <ClInclude Include="Cho\GameCore\IntegrationBuffer\IntegrationBuffer.h" />
-    <ClInclude Include="Cho\SDK\DirectX\DirectX12\TextureBuffer\TextureBuffer.h" />
+    <ClInclude Include="Cho\Resources\IntegrationData\IntegrationData.h" />
     <ClInclude Include="Cho\GameCore\SystemManager\SystemManager.h" />
     <ClInclude Include="Cho\Editor\SceneView\SceneView.h" />
     <ClInclude Include="Cho\Editor\GameView\GameView.h" />
@@ -271,6 +272,8 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClInclude Include="Cho\Editor\PipelineEditor\PipelineEditor.h" />
     <ClInclude Include="Cho\Editor\PopupMenu\PopupMenu.h" />
     <ClInclude Include="Cho\Platform\InputManager\InputManager.h" />
+    <ClInclude Include="Cho\SDK\DirectX\DirectX12\IndexBuffer\IndexBuffer.h" />
+    <ClInclude Include="Cho\GameCore\GameCoreCommand\GameCoreCommand.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Cho\Externals\ChoMath\ChoMath.vcxproj">

@@ -1,26 +1,27 @@
 #include "pch.h"
 #include "DXShaderCompiler.h"
-#include "Cho/Core/Log/Log.h"
+#include "Core/ChoLog/ChoLog.h"
+using namespace Cho;
 
 void DXShaderCompiler::Initialize(ID3D12Device8* device)
 {
 	device;
 	HRESULT hr = {};
 	hr = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&m_pUtils));
-	ChoAssertLog("Failed to create DXC Utils", hr,__FILE__,__LINE__);
+	Log::Write(LogLevel::Assert, "DXC Utils created", hr);
 	hr = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&m_pCompiler));
-	ChoAssertLog("Failed to create DXC Compiler", hr, __FILE__, __LINE__);
+	Log::Write(LogLevel::Assert, "DXC Compiler created", hr);
 	hr = m_pUtils->CreateDefaultIncludeHandler(&m_pIncludeHandler);
-	ChoAssertLog("Failed to create DXC Include Handler", hr, __FILE__, __LINE__);
+	Log::Write(LogLevel::Assert, "DXC Include Handler created", hr);
 }
 
 IDxcBlob* DXShaderCompiler::CompileShader(const std::wstring& filePath, const wchar_t* profile)
 {
 	HRESULT hr = {};
-	ChoLog(ConvertString(std::format(L"Begin CompilerShader,path:{},profile:{}\n", filePath, profile)));
+	Log::Write(LogLevel::Info, ConvertString(std::format(L"Begin CompilerShader,path:{},profile:{}\n", filePath, profile)).c_str());
 	ComPtr<IDxcBlobEncoding> pSource = nullptr;
 	hr = m_pUtils.Get()->LoadFile(filePath.c_str(), nullptr, &pSource);
-	ChoAssertLog("Failed to load file", hr, __FILE__, __LINE__);
+	Log::Write(LogLevel::Assert, "DXC LoadFile", hr);
 	DxcBuffer sourceBuffer;
 	sourceBuffer.Ptr = pSource->GetBufferPointer();
 	sourceBuffer.Size = pSource->GetBufferSize();
@@ -41,19 +42,19 @@ IDxcBlob* DXShaderCompiler::CompileShader(const std::wstring& filePath, const wc
 		m_pIncludeHandler.Get(),// includeが含まれた諸々
 		IID_PPV_ARGS(&pResult)	// コンパイル結果
 	);
-	ChoAssertLog("Failed to compile shader", hr, __FILE__, __LINE__);
+	Log::Write(LogLevel::Assert, "DXC Compile", hr);
 	ComPtr<IDxcBlobUtf8> pErrors = nullptr;
 	ComPtr<IDxcBlobUtf16> pErrorsUtf16;
 	hr = pResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&pErrors), &pErrorsUtf16);
 	if (pErrors != nullptr && pErrors->GetStringLength() != 0)
 	{
-		ChoLog(pErrors->GetStringPointer());
-		ChoAssertLog("Failed to compile shader", false, __FILE__, __LINE__);
+		Log::Write(LogLevel::Error, pErrors->GetStringPointer());
+		Log::Write(LogLevel::Assert, "DXC Compile Error");
 	}
 	IDxcBlob* pShader = nullptr;
 	hr = pResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&pShader), &pErrorsUtf16);
-	ChoAssertLog("Failed to compile shader", hr, __FILE__, __LINE__);
-	ChoLog(ConvertString(std::format(L"Compile Succeeded,path:{},profile:{}\n", filePath, profile)));
+	Log::Write(LogLevel::Assert, "DXC Compile Succeeded", hr);
+	Log::Write(LogLevel::Info, ConvertString(std::format(L"End CompilerShader,path:{},profile:{}\n", filePath, profile)).c_str());
 	return pShader;
 }
 
@@ -62,14 +63,14 @@ ID3D12ShaderReflection* DXShaderCompiler::ReflectShader(IDxcBlob* shaderBlob)
 	HRESULT hr = {};
 	ComPtr<IDxcContainerReflection> pReflection = nullptr;
 	hr = DxcCreateInstance(CLSID_DxcContainerReflection, IID_PPV_ARGS(&pReflection));
-	ChoAssertLog("Failed to create DXC Container Reflection", hr, __FILE__, __LINE__);
+	Log::Write(LogLevel::Assert, "DXC Container Reflection created", hr);
 	hr = pReflection->Load(shaderBlob);
-	ChoAssertLog("Failed to load shader blob", hr, __FILE__, __LINE__);
+	Log::Write(LogLevel::Assert, "DXC Load shader blob", hr);
 	UINT32 partIndex = 0;
 	hr = pReflection->FindFirstPartKind(DXC_PART_DXIL, &partIndex);
-	ChoAssertLog("Failed to find first part kind", hr, __FILE__, __LINE__);
+	Log::Write(LogLevel::Assert, "DXC Find first part kind", hr);
 	ID3D12ShaderReflection* pShaderReflection = nullptr;
 	hr = pReflection->GetPartReflection(partIndex, IID_PPV_ARGS(&pShaderReflection));
-	ChoAssertLog("Failed to get part reflection", hr, __FILE__, __LINE__);
+	Log::Write(LogLevel::Assert, "DXC Get part reflection", hr);
 	return pShaderReflection;
 }

@@ -1,7 +1,65 @@
 #include "pch.h"
 #include "ModelManager.h"
 #include "Resources/ResourceManager/ResourceManager.h"
-#include "Cho/GameCore/IntegrationBuffer/IntegrationBuffer.h"
+#include "SDK/DirectX/DirectX12/VertexBuffer/VertexBuffer.h"
+#include "SDK/DirectX/DirectX12/IndexBuffer/IndexBuffer.h"
+#include "Core/ChoLog/ChoLog.h"
+using namespace Cho;
+
+// 名前で検索してインデックスを取得する
+std::optional<uint32_t> ModelManager::GetModelDataIndex(const std::wstring& name, std::optional<uint32_t>& transformIndex)
+{
+	if (m_ModelNameContainer.contains(name))
+	{
+		// 既にUseListに登録されている場合は、インデックスを取得
+		if (m_Models[m_ModelNameContainer[name]].useTransformIndex.size() > 0)
+		{
+			for (auto& index : m_Models[m_ModelNameContainer[name]].useTransformIndex)
+			{
+				if (index == transformIndex.value())
+				{
+					return m_ModelNameContainer[name];
+				}
+			}
+			// ほかのモデルに登録されていたら、削除して追加
+			for (auto& model : m_Models.GetVector())
+			{
+				if (model.useTransformIndex.size() > 0)
+				{
+					for (auto& index : model.useTransformIndex)
+					{
+						if (index == transformIndex.value())
+						{
+							model.useTransformIndex.remove(index);
+							break;
+						}
+					}
+				}
+			}
+		}
+		// モデルの使用Transformインデックスにない場合は、追加
+		m_Models[m_ModelNameContainer[name]].useTransformIndex.push_back(transformIndex.value());
+		// バッファも更新
+		StructuredBuffer<uint32_t>* buffer = dynamic_cast<StructuredBuffer<uint32_t>*>(m_pResourceManager->GetBuffer<IStructuredBuffer>(m_Models[m_ModelNameContainer[name]].useTransformBufferIndex));
+		if (buffer)
+		{
+			uint32_t i = 0;
+			for (uint32_t& useIndex : m_Models[m_ModelNameContainer[name]].useTransformIndex)
+			{
+				buffer->UpdateData(useIndex, i);
+				i++;
+			}
+		} else
+		{
+			Log::Write(LogLevel::Assert, "Buffer is nullptr");
+		}
+		return m_ModelNameContainer[name];
+	}
+	std::string modelName = ConvertString(name);
+	std::string msg = "Model name not found: " + modelName;
+	Log::Write(LogLevel::Assert, msg);
+	return std::nullopt;
+}
 
 void ModelManager::CreateDefaultMesh()
 {
@@ -11,21 +69,12 @@ void ModelManager::CreateDefaultMesh()
 	modelData.name = modelName;
 	MeshData meshData;
 	meshData.name = L"Cube";
-	
+	// 頂点数とインデックス数
 	uint32_t vertices = 24;// 頂点数
 	uint32_t indices = 36;// インデックス数
 	// メモリ確保
 	meshData.vertices.resize(vertices);
 	meshData.indices.resize(indices);
-
-	// VertexBuffer作成
-	BUFFER_VERTEX_DESC desc = {};
-	desc.numElements = static_cast<UINT>(vertices);
-	desc.structuredByteStride = static_cast<UINT>(sizeof(VertexData));
-	desc.state = D3D12_RESOURCE_STATE_GENERIC_READ;
-	desc.numElementsForIBV = static_cast<UINT>(indices);
-	desc.structuredByteStrideForIBV = static_cast<UINT>(sizeof(uint32_t));
-	meshData.vertexBufferIndex = m_ResourceManager->CreateVertexBuffer(desc);
 	// 頂点データを設定
 #pragma region
 	// 右面
@@ -88,30 +137,37 @@ void ModelManager::CreateDefaultMesh()
 	meshData.indices[30] = 20; meshData.indices[31] = 22; meshData.indices[32] = 21;
 	meshData.indices[33] = 22; meshData.indices[34] = 23; meshData.indices[35] = 21;
 #pragma endregion
-	// コピー
-	if (desc.mappedVertices != nullptr && desc.mappedIndices != nullptr)
-	{
-		memcpy(desc.mappedVertices, meshData.vertices.data(), sizeof(VertexData) * vertices);
-		memcpy(desc.mappedIndices, meshData.indices.data(), sizeof(uint32_t) * indices);
-	} else
-	{
-		ChoAssertLog("Failed to copy vertices and indices.", false, __FILE__, __LINE__);
-	}
-	// マップ解除
-	m_ResourceManager->GetBufferManager()->GetVertexBuffer(meshData.vertexBufferIndex)->UnMap();
-	desc.mappedVertices = nullptr;
-	desc.mappedIndices = nullptr;
 	// コンテナに追加
 	modelData.meshes.push_back(meshData);
-	AddModelData(modelData, modelName);
+	// modelDataを追加
+	AddModelData(modelData);
 }
 
 // ModelDataの追加
-uint32_t ModelManager::AddModelData(ModelData& modelData, const std::wstring& name)
+void ModelManager::AddModelData(ModelData& modelData)
 {
+	for (MeshData& mesh : modelData.meshes)
+	{
+		// VertexBuffer,IndexBuffer作成
+		mesh.vertexBufferIndex = m_pResourceManager->CreateVertexBuffer<VertexData>(static_cast<UINT>(mesh.vertices.size()));
+		mesh.indexBufferIndex = m_pResourceManager->CreateIndexBuffer<uint32_t>(static_cast<UINT>(mesh.indices.size()));
+		VertexBuffer<VertexData>* vertexBuffer = dynamic_cast<VertexBuffer<VertexData>*>(m_pResourceManager->GetBuffer<IVertexBuffer>(mesh.vertexBufferIndex));
+		IndexBuffer<uint32_t>* indexBuffer = dynamic_cast<IndexBuffer<uint32_t>*>(m_pResourceManager->GetBuffer<IIndexBuffer>(mesh.indexBufferIndex));
+		// VBV,IBV作成
+		vertexBuffer->CreateVBV();
+		indexBuffer->CreateIBV();
+		// コピー
+		vertexBuffer->MappedDataCopy(mesh.vertices);
+		indexBuffer->MappedDataCopy(mesh.indices);
+	}
+	// UseTransformのリソースを作成
+	modelData.useTransformBufferIndex = m_pResourceManager->CreateStructuredBuffer<uint32_t>(kUseTransformOffset);
+	// 名前が重複していたら、エラー
+	// ここに処理を追加する
+
+	// モデルをコンテナに追加
+	std::wstring name = modelData.name;
 	uint32_t index = static_cast<uint32_t>(m_Models.push_back(std::move(modelData)));
+	// 名前コンテナに登録
 	m_ModelNameContainer[name] = index;
-	// 統合バッファも合わせる
-	m_IntegrationBuffer->AddNewGroup(m_Models.GetVector().size() - 1);
-	return index;
 }

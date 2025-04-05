@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "SceneManager.h"
-#include "Cho/Core/Log/Log.h"
 #include "Cho/Resources/ResourceManager/ResourceManager.h"
 
 void ScenePrefab::Start()
@@ -26,7 +25,6 @@ void SceneManager::Update()
 		return;
 	}
 	m_pCurrentScene->Update();
-	m_pSystemManager->UpdateAll(m_pECSManager.get());
 }
 
 // シーンを追加
@@ -45,10 +43,7 @@ void SceneManager::AddScene(const std::wstring& sceneName)
 
 void SceneManager::CreateSystem() noexcept
 {
-	std::unique_ptr<ECSManager::ISystem> transformSystem = std::make_unique<ObjectSystem>(m_pECSManager.get(),m_pIntegrationBuffer.get());
-	m_pSystemManager->RegisterSystem(std::move(transformSystem));
-	std::unique_ptr<ECSManager::ISystem> cameraSystem = std::make_unique<CameraSystem>(m_pECSManager.get(), m_pIntegrationBuffer.get());
-	m_pSystemManager->RegisterSystem(std::move(cameraSystem));
+	
 }
 
 void SceneManager::ChangeScene()
@@ -68,72 +63,4 @@ void SceneManager::ChangeScene()
 		m_pNextScene = nullptr;
 		m_pCurrentScene->Start();
 	}
-}
-
-void SceneManager::AddMeshComponent(const uint32_t& entity)
-{
-	MeshComponent* mesh = m_pECSManager->AddComponent<MeshComponent>(entity);
-	mesh->modelID = 0;// 一旦0にしておく
-	// Transformがあるとき、連携する
-	TransformComponent* transform = m_pECSManager->GetComponent<TransformComponent>(entity);
-	if (transform)
-	{
-		// ModelのUseListに登録
-		m_pIntegrationBuffer->AddUseIndex(mesh->modelID, transform->mapID);
-	} else
-	{
-		ChoAssertLog("TransformComponent is nullptr", false, __FILE__, __LINE__);
-	}
-}
-
-void SceneManager::AddRenderComponent(const uint32_t& entity)
-{
-	RenderComponent* render = m_pECSManager->AddComponent<RenderComponent>(entity);
-	render->visible = true;
-}
-
-void SceneManager::AddCameraComponent(const uint32_t& entity)
-{
-	CameraComponent* camera = m_pECSManager->AddComponent<CameraComponent>(entity);
-	if (!camera)
-	{
-		ChoAssertLog("CameraComponent is nullptr", false, __FILE__, __LINE__);
-	}
-	// Resourceの生成
-	// 生成するResourceの設定
-	BUFFER_CONSTANT_DESC desc = {};
-	desc.sizeInBytes = sizeof(BUFFER_DATA_VIEWPROJECTION);
-	desc.state = D3D12_RESOURCE_STATE_GENERIC_READ;
-	camera->bufferIndex= m_pResourceManager->CreateConstantBuffer(desc);
-	camera->mappedIndex = m_pIntegrationBuffer->GetMappedVPID(camera->bufferIndex);
-}
-
-uint32_t SceneManager::SetMainCamera(const uint32_t& setCameraID)
-{
-	if (!m_pCurrentScene)
-	{
-		ChoLog("Current Scene is nullptr");
-		return UINT32_MAX;
-	}
-	uint32_t preCameraID = m_pCurrentScene->GetMainCameraID();
-	m_pCurrentScene->SetMainCameraID(setCameraID);
-	return preCameraID;
-}
-
-void SceneManager::AddGameObject()
-{
-	if (!m_pCurrentScene)
-	{
-		ChoLog("Current Scene is nullptr");
-		return;
-	}
-	Entity entity = m_pECSManager->GenerateEntity();
-	m_pCurrentScene->AddUseObject(m_pObjectContainer->AddGameObject(entity));
-}
-
-void SceneManager::AddTransformComponent(const uint32_t& entity)
-{
-	TransformComponent* transform = m_pECSManager->AddComponent<TransformComponent>(entity);
-	// mapIDを取得
-	transform->mapID = m_pIntegrationBuffer->GetNextMapID();
 }

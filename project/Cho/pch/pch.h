@@ -9,3 +9,5 @@
 
 #include "ChoMath.h"
 using namespace ChoMath;
+#include "Core/ChoLog/ChoLog.h"
+using namespace Cho;

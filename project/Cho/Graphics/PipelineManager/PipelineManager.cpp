@@ -127,7 +127,6 @@ void PipelineManager::CreatePipelineDemo(ID3D12Device8* device)
 			L"Cho/Resources/Shader/Demo/Demo.VS.hlsl",
 			L"vs_6_5"
 			);
-	ChoAssertLog("Failed to compile vertex shader", pVSBlob.Get(), __FILE__, __LINE__);
 	ComPtr<ID3D12ShaderReflection> pVSReflection = m_pShaderCompiler->ReflectShader(pVSBlob.Get());
 
 	ComPtr<IDxcBlob> pPSBlob =
@@ -135,7 +134,6 @@ void PipelineManager::CreatePipelineDemo(ID3D12Device8* device)
 			L"Cho/Resources/Shader/Demo/Demo.PS.hlsl",
 			L"ps_6_5"
 		);
-	ChoAssertLog("Failed to compile pixel shader", pPSBlob.Get(), __FILE__, __LINE__);
 	ComPtr<ID3D12ShaderReflection> pPSReflection = m_pShaderCompiler->ReflectShader(pPSBlob.Get());
 	// CreateRootSignature
 	D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc = {};
@@ -188,9 +186,8 @@ void PipelineManager::CreatePipelineDemo(ID3D12Device8* device)
 	);
 	if (FAILED(hr))
 	{
-		ChoLog(reinterpret_cast<const char*>(pError->GetBufferPointer()));
+		Log::Write(LogLevel::Info, reinterpret_cast<const char*>(pError->GetBufferPointer()));
 	}
-	ChoAssertLog("Failed to serialize root signature", hr, __FILE__, __LINE__);
 	// Create RootSignature
 	hr = device->CreateRootSignature(
 		0,
@@ -198,7 +195,7 @@ void PipelineManager::CreatePipelineDemo(ID3D12Device8* device)
 		pSignature->GetBufferSize(),
 		IID_PPV_ARGS(&m_DemoPSO.rootSignature)
 	);
-	ChoAssertLog("Failed to create root signature", hr, __FILE__, __LINE__);
+	Log::Write(LogLevel::Assert, "Root signature created.", hr);
 	// InputLayout
 	D3D12_INPUT_ELEMENT_DESC inputElementDesc[3] = {};
 	inputElementDesc[0].SemanticName = "POSITION";
@@ -259,7 +256,7 @@ void PipelineManager::CreatePipelineDemo(ID3D12Device8* device)
 		&psoDesc,
 		IID_PPV_ARGS(&m_DemoPSO.pso)
 	);
-	ChoAssertLog("Failed to create pipeline state", hr, __FILE__, __LINE__);
+	Log::Write(LogLevel::Assert, "Pipeline state created.", hr);
 }
 
 void PipelineManager::CreatePipelineScreenCopy(ID3D12Device8* device)
@@ -271,7 +268,6 @@ void PipelineManager::CreatePipelineScreenCopy(ID3D12Device8* device)
 			L"Cho/Resources/Shader/ScreenCopy/ScreenCopy.VS.hlsl",
 			L"vs_6_5"
 		);
-	ChoAssertLog("Failed to compile vertex shader", pVSBlob.Get(), __FILE__, __LINE__);
 	ComPtr<ID3D12ShaderReflection> pVSReflection = m_pShaderCompiler->ReflectShader(pVSBlob.Get());
 
 	ComPtr<IDxcBlob> pPSBlob =
@@ -279,7 +275,6 @@ void PipelineManager::CreatePipelineScreenCopy(ID3D12Device8* device)
 			L"Cho/Resources/Shader/ScreenCopy/ScreenCopy.PS.hlsl",
 			L"ps_6_5"
 		);
-	ChoAssertLog("Failed to compile pixel shader", pPSBlob.Get(), __FILE__, __LINE__);
 	ComPtr<ID3D12ShaderReflection> pPSReflection = m_pShaderCompiler->ReflectShader(pPSBlob.Get());
 	// CreateRootSignature
 	D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc = {};
@@ -332,9 +327,8 @@ void PipelineManager::CreatePipelineScreenCopy(ID3D12Device8* device)
 	);
 	if (FAILED(hr))
 	{
-		ChoLog(reinterpret_cast<const char*>(pError->GetBufferPointer()));
+		Log::Write(LogLevel::Error, reinterpret_cast<const char*>(pError->GetBufferPointer()));
 	}
-	ChoAssertLog("Failed to serialize root signature", hr, __FILE__, __LINE__);
 	// Create RootSignature
 	hr = device->CreateRootSignature(
 		0,
@@ -342,7 +336,7 @@ void PipelineManager::CreatePipelineScreenCopy(ID3D12Device8* device)
 		pSignature->GetBufferSize(),
 		IID_PPV_ARGS(&m_ScreenCopyPSO.rootSignature)
 	);
-	ChoAssertLog("Failed to create root signature", hr, __FILE__, __LINE__);
+	Log::Write(LogLevel::Assert, "Root signature created.", hr);
 	// InputLayout
 	D3D12_INPUT_ELEMENT_DESC inputElementDesc[3] = {};
 	inputElementDesc[0].SemanticName = "POSITION";
@@ -399,7 +393,7 @@ void PipelineManager::CreatePipelineScreenCopy(ID3D12Device8* device)
 		&psoDesc,
 		IID_PPV_ARGS(&m_ScreenCopyPSO.pso)
 	);
-	ChoAssertLog("Failed to create pipeline state", hr, __FILE__, __LINE__);
+	Log::Write(LogLevel::Assert, "Pipeline state created.", hr);
 }
 
 void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
@@ -411,7 +405,6 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 			L"Cho/Resources/Shader/IntegrationDraw/IntegrationDraw.VS.hlsl",
 			L"vs_6_5"
 		);
-	ChoAssertLog("Failed to compile vertex shader", pVSBlob.Get(), __FILE__, __LINE__);
 	ComPtr<ID3D12ShaderReflection> pVSReflection = m_pShaderCompiler->ReflectShader(pVSBlob.Get());
 
 	ComPtr<IDxcBlob> pPSBlob =
@@ -419,7 +412,6 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 			L"Cho/Resources/Shader/IntegrationDraw/IntegrationDraw.PS.hlsl",
 			L"ps_6_5"
 		);
-	ChoAssertLog("Failed to compile pixel shader", pPSBlob.Get(), __FILE__, __LINE__);
 	ComPtr<ID3D12ShaderReflection> pPSReflection = m_pShaderCompiler->ReflectShader(pPSBlob.Get());
 	// CreateRootSignature
 	D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc = {};
@@ -472,9 +464,8 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 	);
 	if (FAILED(hr))
 	{
-		ChoLog(reinterpret_cast<const char*>(pError->GetBufferPointer()));
+		Log::Write(LogLevel::Error, reinterpret_cast<const char*>(pError->GetBufferPointer()));
 	}
-	ChoAssertLog("Failed to serialize root signature", hr, __FILE__, __LINE__);
 	// Create RootSignature
 	hr = device->CreateRootSignature(
 		0,
@@ -482,7 +473,7 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 		pSignature->GetBufferSize(),
 		IID_PPV_ARGS(&m_IntegratePSO.rootSignature)
 	);
-	ChoAssertLog("Failed to create root signature", hr, __FILE__, __LINE__);
+	Log::Write(LogLevel::Assert, "Root signature created.", hr);
 	// InputLayout
 	D3D12_INPUT_ELEMENT_DESC inputElementDesc[3] = {};
 	inputElementDesc[0].SemanticName = "POSITION";
@@ -543,5 +534,5 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 		&psoDesc,
 		IID_PPV_ARGS(&m_IntegratePSO.pso)
 	);
-	ChoAssertLog("Failed to create pipeline state", hr, __FILE__, __LINE__);
+	Log::Write(LogLevel::Assert, "Pipeline state created.", hr);
 }

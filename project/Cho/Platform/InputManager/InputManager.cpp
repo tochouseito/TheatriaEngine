@@ -10,33 +10,33 @@ void InputManager::Initialize()
 	hr = DirectInput8Create(
 		WinApp::GetHInstance(), DIRECTINPUT_VERSION, IID_IDirectInput8,
 		(void**)&m_DirectInput, nullptr);
-	ChoAssertLog("Failed to create DirectInput8", hr, __FILE__, __LINE__);
+	Log::Write(LogLevel::Assert, "DirectInput8 created.", hr);
 
 	// キーボードデバイスの生成
 	hr = m_DirectInput->CreateDevice(GUID_SysKeyboard, &m_Keyboard, NULL);
-	ChoAssertLog("Failed to create Keyboard", hr, __FILE__, __LINE__);
+	Log::Write(LogLevel::Assert, "Keyboard created.", hr);
 
 	// 入力データの形式のセット
 	hr = m_Keyboard->SetDataFormat(&c_dfDIKeyboard);// 標準形式
-	ChoAssertLog("Failed to set data format", hr, __FILE__, __LINE__);
+	Log::Write(LogLevel::Assert, "Set data format.", hr);
 
 	// 排他制御レベルのセット
 	hr = m_Keyboard->SetCooperativeLevel(
 		WinApp::GetHWND(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
-	ChoAssertLog("Failed to set cooperative level", hr, __FILE__, __LINE__);
+	Log::Write(LogLevel::Assert, "Set cooperative level.", hr);
 
 	/*マウスデバイスの生成*/
 	hr = m_DirectInput->CreateDevice(GUID_SysMouse, &m_DIMouse, NULL);
-	ChoAssertLog("Failed to create Mouse", hr, __FILE__, __LINE__);
+	Log::Write(LogLevel::Assert, "Mouse created.", hr);
 
 	/*入力データの形式のセット*/
 	hr = m_DIMouse->SetDataFormat(&c_dfDIMouse2);/*標準形式*/
-	ChoAssertLog("Failed to set data format", hr, __FILE__, __LINE__);
+	Log::Write(LogLevel::Assert, "Set data format.", hr);
 
 	/*排他制御レベルのセット*/
 	hr = m_DIMouse->SetCooperativeLevel(
 		WinApp::GetHWND(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
-	ChoAssertLog("Failed to set cooperative level", hr, __FILE__, __LINE__);
+	Log::Write(LogLevel::Assert, "Set cooperative level.", hr);
 
 	// XInputパッドの準備（4つのパッドに対応）
 	for (int i = 0; i < 4; ++i)

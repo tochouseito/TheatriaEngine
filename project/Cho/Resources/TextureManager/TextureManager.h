@@ -7,6 +7,7 @@
 #include <string>
 #include <unordered_map>
 #include <filesystem>
+
 namespace fs = std::filesystem;
 
 struct TextureData
@@ -18,7 +19,7 @@ struct TextureData
 class ResourceManager;
 class GraphicsEngine;
 class CommandContext;
-class TextureBuffer;
+class PixelBuffer;
 class TextureManager
 {
 public:
@@ -34,9 +35,9 @@ public:
 	// Engineのリソースをロード
 	void LoadEngineTexture();
 	// Resourceのアップロード
-	void UploadTextureDataEx(CommandContext* context, ID3D12Resource* resource, const DirectX::ScratchImage& mipImages);
+	void UploadTextureDataEx(ID3D12Resource* resource, const DirectX::ScratchImage& mipImages);
 	// ダミーテクスチャバッファを取得
-	TextureBuffer* GetDummyTextureBuffer();
+	PixelBuffer* GetDummyTextureBuffer();
 private:
 	ResourceManager* m_ResourceManager = nullptr;
 	GraphicsEngine* m_GraphicsEngine = nullptr;

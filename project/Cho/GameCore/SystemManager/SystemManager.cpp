@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "SystemManager.h"
-#include "GameCore/IntegrationBuffer/IntegrationBuffer.h"
+#include "Resources/ResourceManager/ResourceManager.h"
 
 void ObjectSystem::Update(ECSManager* ecs)
 {
@@ -83,21 +83,21 @@ void ObjectSystem::TransferMatrix(TransformComponent& transform)
 	data.matWorld = transform.matWorld;
 	data.worldInverse = ChoMath::Transpose(Matrix4::Inverse(transform.matWorld));
 	data.rootMatrix = transform.rootMatrix;
-	m_IntegrationBuffer->TransferTFData(transform.mapID, data);
+	m_pIntegrationBuffer->UpdateData(data, transform.mapID.value());
 }
 
 void ObjectSystem::UpdateRecursive(Entity entity, std::unordered_set<Entity>& updated)
 {
 	if (updated.contains(entity)) return;
 
-	auto* transform = m_ECS->GetComponent<TransformComponent>(entity);
+	auto* transform = m_pECS->GetComponent<TransformComponent>(entity);
 	if (!transform) return;
 
 	// 親がいれば先に更新
 	if (transform->parentEntity != UINT32_MAX)
 	{
-		UpdateRecursive(transform->parentEntity, updated);
-		auto* parentTransform = m_ECS->GetComponent<TransformComponent>(transform->parentEntity);
+		UpdateRecursive(transform->parentEntity.value(), updated);
+		auto* parentTransform = m_pECS->GetComponent<TransformComponent>(transform->parentEntity.value());
 		if (parentTransform)
 		{
 			UpdateMatrix(*transform, parentTransform);
@@ -132,5 +132,5 @@ void CameraSystem::TransferMatrix(TransformComponent& transform, CameraComponent
 	data.projection = ChoMath::MakePerspectiveFovMatrix(camera.fovAngleY, camera.aspectRatio, camera.nearZ, camera.farZ);
 	data.projectionInverse = Matrix4::Inverse(data.projection);
 	data.cameraPosition = transform.translation;
-	m_IntegrationBuffer->TransferVPData(camera.mappedIndex, data);
+	m_pIntegrationBuffer->UpdateData(data, 0);
 }

@@ -2,18 +2,18 @@
 #include "ChoMath.h"
 struct TransformComponent final
 {
-	Vector3 translation = { 0.0f, 0.0f, 0.0f };		// 位置
-	Quaternion rotation = { 0.0f, 0.0f, 0.0f,1.0f };// 回転
-	Scale scale = { 1.0f, 1.0f, 1.0f };				// スケール
-	Matrix4 matWorld = ChoMath::MakeIdentity4x4();	// ワールド行列
-	Matrix4 rootMatrix = ChoMath::MakeIdentity4x4();// ルートのワールド行列
-	Vector3 degrees = { 0.0f,0.0f,0.0f };			// 度数表示,操作用変数
-	Vector3 prePos = { 0.0f,0.0f,0.0f };			// 位置差分計算用
-	Vector3 preRot = { 0.0f,0.0f,0.0f };			// 回転差分計算用
-	Scale preScale = { 1.0f,1.0f,1.0f };			// スケール差分計算用
-	uint32_t parentEntity = UINT32_MAX;				// 親のEntity
+	Vector3 translation = { 0.0f, 0.0f, 0.0f };			// 位置
+	Quaternion rotation = { 0.0f, 0.0f, 0.0f,1.0f };	// 回転
+	Scale scale = { 1.0f, 1.0f, 1.0f };					// スケール
+	Matrix4 matWorld = ChoMath::MakeIdentity4x4();		// ワールド行列
+	Matrix4 rootMatrix = ChoMath::MakeIdentity4x4();	// ルートのワールド行列
+	Vector3 degrees = { 0.0f,0.0f,0.0f };				// 度数表示,操作用変数
+	Vector3 prePos = { 0.0f,0.0f,0.0f };				// 位置差分計算用
+	Vector3 preRot = { 0.0f,0.0f,0.0f };				// 回転差分計算用
+	Scale preScale = { 1.0f,1.0f,1.0f };				// スケール差分計算用
+	std::optional<uint32_t> parentEntity = std::nullopt;// 親のEntity
 	//uint32_t bufferIndex = UINT32_MAX;				// バッファーインデックス
-	uint32_t mapID = UINT32_MAX;					// マップインデックス
+	std::optional<uint32_t> mapID = std::nullopt;		// マップインデックス
 };
 // Node用Transform構造体
 struct NodeTransform
@@ -34,15 +34,13 @@ struct CameraComponent final
     // 深度限界（奥側）
     float farZ = 1000.0f;
 	// バッファーインデックス
-	uint32_t bufferIndex = UINT32_MAX;
-	// マップインデックス
-	uint32_t mappedIndex = UINT32_MAX;
+	std::optional<uint32_t> bufferIndex = std::nullopt;
 };
 
 // メッシュコンポーネント
 struct MeshComponent final
 {
-	uint32_t modelID = 0;// Model選択用ID
+	std::optional<uint32_t> modelID = std::nullopt;// Model選択用ID
 };
 
 // 描画コンポーネント

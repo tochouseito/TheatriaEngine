@@ -1,18 +1,20 @@
 #include "pch.h"
 #include "SwapChain.h"
 #include "Resources/ResourceManager/ResourceManager.h"
+#include "Core/ChoLog/ChoLog.h"
+using namespace Cho;
 
-SwapChain::SwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue, const HWND& hwnd, const int32_t& width, const int32_t& height)
+SwapChain::SwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue, const HWND& hwnd, const UINT64& width, const UINT& height)
 {
 	CreateSwapChain(dxgiFactory, queue,  hwnd, width, height);
 }
 
-void SwapChain::CreateSwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue, const HWND& hwnd, const int32_t& width, const int32_t& height)
+void SwapChain::CreateSwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue, const HWND& hwnd, const UINT64& width, const UINT& height)
 {
 	HRESULT hr;
 
 	// スワップチェーンを生成する
-	m_Desc.Width = width;                     // 画面の幅。ウィンドウのクライアント領域を同じものにしておく
+	m_Desc.Width = static_cast<UINT>(width);                     // 画面の幅。ウィンドウのクライアント領域を同じものにしておく
 	m_Desc.Height = height;                   // 画面の高さ。ウィンドウのクライアント領域を同じものにしておく
 	m_Desc.Format = PixelFormat;          // 色の形式
 	m_Desc.SampleDesc.Count = 1;                         // マルチサンプルしない
@@ -33,7 +35,7 @@ void SwapChain::CreateSwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* 
 		reinterpret_cast<IDXGISwapChain1**>(m_SwapChain.GetAddressOf())
 	);
 
-	ChoAssertLog("Failed to create swap chain.", hr, __FILE__, __LINE__);
+	Log::Write(LogLevel::Assert, "SwapChain created.", hr);
 
 	// リフレッシュレートを取得。floatで取るのは大変なので大体あってれば良いので整数で。
 	HDC hdc = GetDC(hwnd);
@@ -58,10 +60,12 @@ void SwapChain::CreateResource(ID3D12Device8* device, ResourceManager* resourceM
 		m_BufferData[i]->pResource.Attach(nullptr);
 		ID3D12Resource* pResource = nullptr;
 		HRESULT hr = m_SwapChain->GetBuffer(i, IID_PPV_ARGS(&pResource));
-		ChoAssertLog("Failed to get buffer from swap chain.", hr, __FILE__, __LINE__);
+		Log::Write(LogLevel::Assert, "SwapChain buffer created.", hr);
+
 		m_BufferData[i]->pResource.Attach(pResource);
-		m_BufferData[i]->index = i;
-		m_BufferData[i]->dHIndex = resourceManager->GetRTVDHeap()->Create();
+		m_BufferData[i]->backBufferIndex = i;
+		m_BufferData[i]->m_RTVHandleIndex = resourceManager->GetRTVDHeap()->Allocate();
+		m_BufferData[i]->m_RTVCpuHandle = resourceManager->GetRTVDHeap()->GetCPUDescriptorHandle(m_BufferData[i]->m_RTVHandleIndex.value());
 		// RTVの設定
 		D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
 		rtvDesc.Format = m_Desc.Format;
@@ -70,7 +74,7 @@ void SwapChain::CreateResource(ID3D12Device8* device, ResourceManager* resourceM
 		device->CreateRenderTargetView(
 			m_BufferData[i]->pResource.Get(),
 			&rtvDesc,
-			resourceManager->GetRTVDHeap()->GetCpuHandle(m_BufferData[i]->dHIndex)
+			m_BufferData[i]->m_RTVCpuHandle
 		);
 	}
 }
@@ -78,6 +82,6 @@ void SwapChain::CreateResource(ID3D12Device8* device, ResourceManager* resourceM
 void SwapChain::Present()
 {
 	HRESULT hr = m_SwapChain->Present(1, 0);
-	ChoAssertLog("Failed to present.", hr, __FILE__, __LINE__);
+	Log::Write(LogLevel::Assert, "SwapChain presented.", hr);
 }
 

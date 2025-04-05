@@ -98,10 +98,10 @@ QueueContext::QueueContext(ID3D12Device* device, D3D12_COMMAND_LIST_TYPE type)
 	// 初期値0でFenceを作る
 	m_Fence = nullptr;
 	hr = device->CreateFence(m_FenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_Fence));
-	ChoAssertLog("Failed to create fence.", hr, __FILE__, __LINE__);
+	Log::Write(LogLevel::Assert, "Fence created.", hr);
 	// FenceのSignalを持つためのイベントを作成する
 	m_FenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-	ChoAssertLog("Failed to create fence event.", static_cast<bool>(m_FenceEvent != nullptr), __FILE__, __LINE__);
+	Log::Write(LogLevel::Assert, "Fence event created.", static_cast<bool>(m_FenceEvent != nullptr));
 
 	// コマンドキューの作成
 	D3D12_COMMAND_QUEUE_DESC desc{};
@@ -110,7 +110,7 @@ QueueContext::QueueContext(ID3D12Device* device, D3D12_COMMAND_LIST_TYPE type)
 		&desc,
 		IID_PPV_ARGS(&m_CommandQueue)
 	);
-	ChoAssertLog("Failed to create command queue.", hr, __FILE__, __LINE__);
+	Log::Write(LogLevel::Assert, "Command queue created.", hr);
 }
 
 QueueContext::~QueueContext()

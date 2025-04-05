@@ -7,12 +7,6 @@
     <ClCompile Include="Cho\Editor\AssetBrowser\AssetBrowser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Cho\SDK\DirectX\DirectX12\BufferManager\BufferManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Cho\Core\ChoAssert\ChoAssert.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Cho\Main\ChoEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -91,7 +85,7 @@
     <ClCompile Include="Cho\Editor\Inspector\Inspector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Cho\GameCore\IntegrationBuffer\IntegrationBuffer.cpp">
+    <ClCompile Include="Cho\Resources\IntegrationData\IntegrationData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Cho\Resources\ModelManager\ModelManager.cpp">
@@ -107,9 +101,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Cho\Core\Log\Log.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Cho\GameCore\ObjectContainer\ObjectContainer.cpp">
@@ -154,9 +145,6 @@
     <ClCompile Include="Cho\GameCore\SystemManager\SystemManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Cho\SDK\DirectX\DirectX12\TextureBuffer\TextureBuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Cho\Resources\TextureManager\TextureManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -182,6 +170,10 @@
     <ClCompile Include="Cho\Editor\PipelineEditor\PipelineEditor.cpp" />
     <ClCompile Include="Cho\Editor\PopupMenu\PopupMenu.cpp" />
     <ClCompile Include="Cho\Platform\InputManager\InputManager.cpp" />
+    <ClCompile Include="Cho\Resources\AssetManager\AssetManager.cpp" />
+    <ClCompile Include="Cho\Core\ChoLog\ChoLog.cpp" />
+    <ClCompile Include="Cho\SDK\DirectX\DirectX12\IndexBuffer\IndexBuffer.cpp" />
+    <ClCompile Include="Cho\GameCore\GameCoreCommand\GameCoreCommand.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cho\Editor\AnimationEditor\AnimationEditor.h">
@@ -191,12 +183,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Cho\Core\Utility\BufferID.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Cho\SDK\DirectX\DirectX12\BufferManager\BufferManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Cho\Core\ChoAssert\ChoAssert.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Cho\Main\ChoEngine.h">
@@ -292,10 +278,7 @@
     <ClInclude Include="Cho\Editor\Inspector\Inspector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Cho\GameCore\IntegrationBuffer\IntegrationBuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Cho\Core\Log\Log.h">
+    <ClInclude Include="Cho\Resources\IntegrationData\IntegrationData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Cho\Editor\MainMenu\MainMenu.h">
@@ -352,9 +335,6 @@
     <ClInclude Include="Cho\GameCore\SystemManager\SystemManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Cho\SDK\DirectX\DirectX12\TextureBuffer\TextureBuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Cho\Resources\TextureManager\TextureManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -380,6 +360,10 @@
     <ClInclude Include="Cho\Editor\PipelineEditor\PipelineEditor.h" />
     <ClInclude Include="Cho\Editor\PopupMenu\PopupMenu.h" />
     <ClInclude Include="Cho\Platform\InputManager\InputManager.h" />
+    <ClInclude Include="Cho\Resources\AssetManager\AssetManager.h" />
+    <ClInclude Include="Cho\Core\ChoLog\ChoLog.h" />
+    <ClInclude Include="Cho\SDK\DirectX\DirectX12\IndexBuffer\IndexBuffer.h" />
+    <ClInclude Include="Cho\GameCore\GameCoreCommand\GameCoreCommand.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Cho\Resources\Shader\header\Demo.hlsli">

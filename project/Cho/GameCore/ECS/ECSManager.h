@@ -15,6 +15,17 @@ using Archetype = std::bitset<256>;
 class ECSManager
 {
 public:
+	// Constructor
+	ECSManager()
+		: m_NextEntityID(0)
+	{
+	}
+	// Destructor
+	~ECSManager()
+	{
+		
+	}
+
 	// エンティティを新規作成
 	inline const Entity GenerateEntity()
 	{

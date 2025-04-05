@@ -1,7 +1,6 @@
 #pragma once
 #include "GameCore/SystemManager/SystemManager.h"
 #include "Cho/GameCore/ObjectContainer/ObjectContainer.h"
-#include "Cho/GameCore/IntegrationBuffer/IntegrationBuffer.h"
 #include <string>
 using SceneID = uint32_t;
 class SceneManager;
@@ -18,24 +17,22 @@ public:
 	{
 
 	}
-
 	virtual inline SceneID GetSceneID() const noexcept { return m_SceneID;}
 	virtual inline const std::wstring& GetSceneName() const noexcept { return m_SceneName; }
 	virtual inline void SetSceneName(const std::wstring& sceneName) { m_SceneName = sceneName; }
 	virtual inline void AddUseObject(const ObjectID& objectID) { useObjects.push_back(objectID); }
 	virtual inline void SetMainCameraID(const ObjectID& cameraID) { m_MainCameraID = cameraID; }
-	virtual inline ObjectID GetMainCameraID() const noexcept { return m_MainCameraID; }
+	virtual inline std::optional<ObjectID> GetMainCameraID() const noexcept { return m_MainCameraID; }
 	virtual void Start() = 0;
 	virtual void Update() = 0;
 	virtual void Finalize() = 0;
-
 	inline void SetSceneID(const SceneID sceneID) { m_SceneID = sceneID; }
 protected:
 	SceneID m_SceneID = 0;
 	std::wstring m_SceneName = L"";
 	SceneManager* m_SceneManager = nullptr;
 	std::vector<ObjectID> useObjects;
-	ObjectID m_MainCameraID = UINT32_MAX;
+	std::optional<ObjectID> m_MainCameraID = std::nullopt;
 };
 
 class ScenePrefab : public BaseScene {
@@ -57,21 +54,11 @@ private:
 class ResourceManager;
 class SceneManager
 {
-	friend class AddGameObjectCommand;
-	friend class AddTransformComponent;
-	friend class AddMeshComponent;
-	friend class AddRenderComponent;
-	friend class AddCameraComponent;
-	friend class SetMainCamera;
 public:
 	// Constructor
 	SceneManager(ResourceManager* resourceManager):
 		m_pResourceManager(resourceManager)
 	{
-		m_pECSManager = std::make_unique<ECSManager>();
-		m_pSystemManager = std::make_unique<SystemManager>();
-		m_pObjectContainer = std::make_unique<ObjectContainer>();
-		m_pIntegrationBuffer = std::make_unique<IntegrationBuffer>(resourceManager);
 		AddScene(L"MainScene");
 		ChangeSceneRequest(m_SceneNameToID[L"MainScene"]);
 		CreateSystem();
@@ -93,25 +80,9 @@ public:
 
 	FVector<std::unique_ptr<ScenePrefab>>& GetScenes() noexcept { return m_pScenes; }
 	ScenePrefab* GetCurrentScene() const noexcept { return m_pCurrentScene; }
-	ECSManager* GetECSManager() const noexcept { return m_pECSManager.get(); }
-	SystemManager* GetSystemManager() const noexcept { return m_pSystemManager.get(); }
-	ObjectContainer* GetObjectContainer() const noexcept{ return m_pObjectContainer.get(); }
-	IntegrationBuffer* GetIntegrationBuffer() const noexcept { return m_pIntegrationBuffer.get(); }
 private:
 	// シーンを変更
 	void ChangeScene();
-	// GameObjectを作成
-	void AddGameObject();
-	// TransformComponentを追加
-	void AddTransformComponent(const uint32_t& entity);
-	// MeshComponentを追加
-	void AddMeshComponent(const uint32_t& entity);
-	// RenderComponentを追加
-	void AddRenderComponent(const uint32_t& entity);
-	// CameraComponentを追加
-	void AddCameraComponent(const uint32_t& entity);
-	// SceneのMainCameraを設定
-	uint32_t SetMainCamera(const uint32_t& setCameraID);
 
 	// ResourceManager
 	ResourceManager* m_pResourceManager = nullptr;
@@ -123,13 +94,5 @@ private:
 	FVector<std::unique_ptr<ScenePrefab>> m_pScenes;
 	// 名前検索用補助コンテナ
 	std::unordered_map<std::wstring, SceneID> m_SceneNameToID;
-	// ECSマネージャ
-	std::unique_ptr<ECSManager> m_pECSManager = nullptr;
-	// Systemマネージャ
-	std::unique_ptr<SystemManager> m_pSystemManager = nullptr;
-	// オブジェクトコンテナ
-	std::unique_ptr<ObjectContainer> m_pObjectContainer = nullptr;
-	// 統合バッファ
-	std::unique_ptr<IntegrationBuffer> m_pIntegrationBuffer = nullptr;
 };
 
