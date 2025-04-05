@@ -242,8 +242,6 @@ void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& ga
 	SetRenderTargets(context, DrawPass::GBuffers);
 	// 描画設定
 	SetRenderState(context);
-	// メインカメラを取得
-	IConstantBuffer* cameraBuffer = resourceManager.GetBuffer<IConstantBuffer>(gameCore.GetSceneManager()->GetCurrentScene()->GetMainCameraID());
 	// パイプラインセット
 	context->SetGraphicsPipelineState(m_PipelineManager->GetIntegratePSO().pso.Get());
 	// ルートシグネチャセット
@@ -251,6 +249,18 @@ void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& ga
 	// シーンに存在するメッシュを所持しているオブジェクトを全て描画
 	for (ModelData& modelData : resourceManager.GetModelManager()->GetModelDataContainer())
 	{
+		// メインカメラを取得
+		// カメラオブジェクトのIDを取得
+		std::optional<uint32_t> cameraID = gameCore.GetSceneManager()->GetCurrentScene()->GetMainCameraID();
+		if (!cameraID) { continue; }
+		// カメラオブジェクトを取得
+		GameObject* cameraObject = gameCore.GetObjectContainer()->GetGameObject(cameraID.value());
+		if (!cameraObject) { continue; }
+		// カメラのバッファインデックスを取得
+		CameraComponent* cameraComponent = gameCore.GetECSManager()->GetComponent<CameraComponent>(cameraObject->GetEntity());
+		if (!cameraComponent) { continue; }
+		// カメラのバッファを取得
+		IConstantBuffer* cameraBuffer = resourceManager.GetBuffer<IConstantBuffer>(cameraComponent->bufferIndex);
 		// カメラがないならスキップ
 		if (!cameraBuffer) { continue; }
 		// 登録されているTransformがないならスキップ
