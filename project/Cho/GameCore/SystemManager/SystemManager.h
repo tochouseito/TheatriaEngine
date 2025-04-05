@@ -8,6 +8,11 @@ class ResourceManager;
 class SystemManager
 {
 public:
+	// Constructor
+	SystemManager() = default;
+	// Destructor
+	~SystemManager() = default;
+
     void RegisterSystem(std::unique_ptr<ECSManager::ISystem> system)
     {
         m_Systems.emplace_back(std::move(system));

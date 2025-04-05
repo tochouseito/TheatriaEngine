@@ -2,6 +2,8 @@
 #include "TextureManager.h"
 #include "Cho/Resources/ResourceManager/ResourceManager.h"
 #include "Cho/Graphics/GraphicsEngine/GraphicsEngine.h"
+#include "Core/ChoLog/ChoLog.h"
+using namespace Cho;
 
 void TextureManager::LoadEngineTexture()
 {
@@ -40,7 +42,7 @@ void TextureManager::LoadEngineTexture()
                     // 他のフォーマット (.png, .jpg など) を読み込む
                     hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
                 }
-				ChoAssertLog("Failed to load texture", hr, __FILE__, __LINE__);
+				Log::Write(LogLevel::Assert, "Texture loaded.", hr);
 
                 // ミップマップの生成
                 DirectX::ScratchImage mipImages{};
@@ -69,28 +71,27 @@ void TextureManager::LoadEngineTexture()
                         mipImages = std::move(image);
                     }
                 }
-                assert(SUCCEEDED(hr));
-
+				Log::Write(LogLevel::Assert, "Mipmaps generated.", hr);
+				// メタデータを取得
                 const DirectX::TexMetadata& metadata = mipImages.GetMetadata();
 
-                // Resource作成
-                BUFFER_TEXTURE_DESC desc = {};
-                desc.width = static_cast<UINT>(metadata.width);// Textureの幅
-                desc.height = static_cast<UINT>(metadata.height);// Textureの高さ
-                desc.mipLevels = static_cast<UINT16>(metadata.mipLevels);// mipmapの数
-                desc.arraySize = static_cast<UINT16>(metadata.arraySize);// 奥行き or 配列Textureの配列数
-                desc.format = metadata.format;// Textureのフォーマット
-                desc.dimension = D3D12_RESOURCE_DIMENSION(metadata.dimension);// Textureの次元
-                desc.state = D3D12_RESOURCE_STATE_COPY_DEST;// 読むだけなのでCOPY_DEST
+                // TextureData作成
                 TextureData texData;
-                texData.name = fileName;// テクスチャ名
-                texData.bufferIndex = m_ResourceManager->CreateTextureBuffer(desc);// テクスチャバッファの作成
-                texData.metadata = metadata;// メタデータ
+				texData.name = fileName;// テクスチャ名
+				texData.metadata = metadata;// メタデータ
+				// テクスチャバッファの作成
+				D3D12_RESOURCE_DESC resourceDesc = {};
+				resourceDesc.Width = static_cast<UINT>(metadata.width);// Textureの幅
+				resourceDesc.Height = static_cast<UINT>(metadata.height);// Textureの高さ
+				resourceDesc.MipLevels = static_cast<UINT16>(metadata.mipLevels);// mipmapの数
+				resourceDesc.DepthOrArraySize = static_cast<UINT16>(metadata.arraySize);// 奥行き or 配列Textureの配列数
+				resourceDesc.Format = metadata.format;// Textureのフォーマット
+				resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION(metadata.dimension);// Textureの次元
+				resourceDesc.SampleDesc.Count = 1;// サンプル数
+				texData.bufferIndex = m_ResourceManager->CreateTextureBuffer(resourceDesc, nullptr, D3D12_RESOURCE_STATE_COPY_DEST);
                 // テクスチャデータをコピー
-                CommandContext* context = m_GraphicsEngine->GetCommandContext();
                 UploadTextureDataEx(
-                    context,
-                    m_ResourceManager->GetBufferManager()->GetTextureBuffer(texData.bufferIndex)->GetResource(),
+                    m_ResourceManager->GetBuffer<PixelBuffer>(texData.bufferIndex)->GetResource(),
                     mipImages
                 );
                 // テクスチャデータを追加
@@ -100,8 +101,9 @@ void TextureManager::LoadEngineTexture()
     }
 }
 
-void TextureManager::UploadTextureDataEx(CommandContext* context, ID3D12Resource* resource, const DirectX::ScratchImage& mipImages)
+void TextureManager::UploadTextureDataEx(ID3D12Resource* resource, const DirectX::ScratchImage& mipImages)
 {
+    CommandContext* context = m_GraphicsEngine->GetCommandContext();
     std::vector<D3D12_SUBRESOURCE_DATA> subresources;
     DirectX::PrepareUpload(m_Device, mipImages.GetImages(), mipImages.GetImageCount(), mipImages.GetMetadata(), subresources);
     UINT64 intermediateSize = GetRequiredIntermediateSize(resource, 0, static_cast<UINT>(subresources.size()));
@@ -116,14 +118,14 @@ void TextureManager::UploadTextureDataEx(CommandContext* context, ID3D12Resource
     resourceDesc.MipLevels = 1;
     resourceDesc.SampleDesc.Count = 1;
     resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-    ComPtr<ID3D12Resource> intermediate = nullptr;
-    m_ResourceManager->CreateGPUResource(intermediate, heapProperties, resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr);
+    std::unique_ptr<GpuResource> intermediateResource = std::make_unique<GpuResource>();
+    intermediateResource->CreateResource(m_Device, heapProperties, D3D12_HEAP_FLAG_NONE, resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ);
     // メモリにデータをコピー
     m_GraphicsEngine->BeginCommandContext(context);
     UpdateSubresources(
         context->GetCommandList(),
         resource,
-        intermediate.Get(),
+        intermediateResource->GetResource(),
         0, 0,
         static_cast<UINT>(subresources.size()),
         subresources.data()
@@ -145,13 +147,13 @@ void TextureManager::UploadTextureDataEx(CommandContext* context, ID3D12Resource
 }
 
 // ダミーテクスチャバッファを取得
-TextureBuffer* TextureManager::GetDummyTextureBuffer()
+PixelBuffer* TextureManager::GetDummyTextureBuffer()
 {
     std::wstring fileName = L"Dummy202411181622.png";
     if (!m_TextureNameContainer.contains(fileName))
     {
-        ChoAssertLog("DummyTexture is not found", false, __FILE__, __LINE__);
+		Log::Write(LogLevel::Assert, "DummyTexture is not found");
     }
     uint32_t index = m_TextureNameContainer[fileName];
-    return m_ResourceManager->GetBufferManager()->GetTextureBuffer(m_Textures[index].bufferIndex);
+    return m_ResourceManager->GetBuffer<PixelBuffer>(m_Textures[index].bufferIndex);
 }

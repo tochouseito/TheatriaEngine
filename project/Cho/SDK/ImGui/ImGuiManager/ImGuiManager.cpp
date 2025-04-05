@@ -30,12 +30,12 @@ void ImGuiManager::Initialize(ID3D12Device8* device, ResourceManager* resourceMa
 
 	// プラットフォームとレンダラーのバックエンドを設定する
 	ImGui_ImplWin32_Init(WinApp::GetHWND());
-	m_DHandleIndex = resourceManager->GetSUVDHeap()->Create();
+	m_DescriptorHeapIndex = resourceManager->GetSUVDHeap()->Allocate();
 	ImGui_ImplDX12_Init(
 		device, 2,
 		PixelFormat, resourceManager->GetSUVDHeap()->GetDescriptorHeap(),
-		resourceManager->GetSUVDHeap()->GetCpuHandle(m_DHandleIndex),
-		resourceManager->GetSUVDHeap()->GetGpuHandle(m_DHandleIndex)
+		resourceManager->GetSUVDHeap()->GetCPUDescriptorHandle(m_DescriptorHeapIndex.value()),
+		resourceManager->GetSUVDHeap()->GetGPUDescriptorHandle(m_DescriptorHeapIndex.value())
 	);
 }
 

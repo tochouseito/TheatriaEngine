@@ -24,6 +24,10 @@ public:
 	virtual bool CreateSRV() = 0;
 	// UAV作成
 	virtual bool CreateUAV() = 0;
+	// 頂点バッファビューを取得
+	virtual D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() = 0;
+protected:
+
 };
 
 template<typename T>
@@ -46,7 +50,7 @@ public:
 		m_MappedData = std::span<T>{};
 	}
 	// リソースを作成
-	void CreateVertexBufferResource(ID3D12Device* device, const UINT& numElements)
+	void CreateVertexBufferResource(ID3D12Device* device, const UINT& numElements) override
 	{
 		// リソースのサイズ
 		UINT structureByteStride = static_cast<UINT>(sizeof(T));
@@ -62,9 +66,9 @@ public:
 		T* mappedData = nullptr;// 一時マップ用
 		GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&mappedData));
 		// マップしたデータをspanに変換
-		m_MappedData = std::span<T>(mappedData, numElements);
+		m_MappedData = std::span<T>(mappedData, static_cast<size_t>(numElements));
 	}
-	bool CreateVBV()
+	bool CreateVBV() override
 	{
 		// Viewの作成
 		// リソースがあるかどうか確認
@@ -82,12 +86,12 @@ public:
 		return true;
 	}
 	// スキニング用SRV
-	bool CreateSRV()
+	bool CreateSRV() override
 	{
 		return true;
 	}
 	// スキニング用UAV
-	bool CreateUAV()
+	bool CreateUAV() override
 	{
 		return true;
 	}
@@ -111,10 +115,15 @@ public:
 			Log::Write(LogLevel::Assert, "MappedData is null");
 		}
 	}
+	// 頂点バッファビューを取得
+	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() override
+	{
+		return &m_View;
+	}
 private:
-	// インデックスバッファビュー
+	// 頂点バッファビュー
 	D3D12_VERTEX_BUFFER_VIEW m_View = {};
 	// マップ用データにコピーするためのポインタ
-	std::span<T> m_MappedData = nullptr;
+	std::span<T> m_MappedData;
 };
 

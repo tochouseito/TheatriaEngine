@@ -12,16 +12,7 @@ class GameCore
 public:
 	GameCore()
 	{
-		// シーンマネージャーの生成
-		m_pSceneManager = std::make_unique<SceneManager>();
-		// ECSマネージャの生成
-		m_pECSManager = std::make_unique<ECSManager>();
-		// Systemマネージャの生成
-		m_pSystemManager = std::make_unique<SystemManager>();
-		// オブジェクトコンテナの生成
-		m_pObjectContainer = std::make_unique<ObjectContainer>();
-		// コマンドの生成
-		m_pGameCoreCommand = std::make_unique<GameCoreCommand>(m_pSceneManager.get(), m_pECSManager.get(), m_pSystemManager.get(), m_pObjectContainer.get());
+		
 	}
 	~GameCore() 
 	{

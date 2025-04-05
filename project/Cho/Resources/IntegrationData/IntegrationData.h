@@ -2,53 +2,32 @@
 #include "Cho/Core/Utility/FVector.h"
 #include "Cho/Core/Utility/CompBufferData.h"
 #include <list>
-
+#include <optional>
+class ResourceManager;
 // 統合バッファのインタフェース
 class IIntegrationData
 {
 public:
 	// Constructor
-	IIntegrationData()
-	{
-
-	}
-	// Destructor
-	virtual ~IIntegrationData() = default;
-	// サイズを取得
-	virtual size_t size() const = 0;
-	// バッファのインデックスを取得
-	virtual std::optional<uint32_t> GetBufferIndex() const = 0;
-	// MapIDを取得
-	virtual uint32_t GetMapID() const = 0;
-};
-
-class ResourceManager;
-template<typename T>
-class IntegrationData : public IIntegrationData
-{
-public:
-	// Constructor
-	IntegrationBuffer(std::optional<uint32_t>& index)
+	IIntegrationData(std::optional<uint32_t>& index)
 		: m_StructuredBufferIndex(index)
 	{
 		m_Size = 100;// 初期サイズ
 	}
 	// Destructor
-	~IntegrationBuffer()
-	{
-	}
+	virtual ~IIntegrationData() = default;
 	// サイズを取得
-	size_t size() const
+	virtual size_t size() const
 	{
 		return m_Size;
 	}
 	// バッファのインデックスを取得
-	std::optional<uint32_t> GetBufferIndex() const
+	virtual std::optional<uint32_t> GetBufferIndex() const
 	{
 		return m_StructuredBufferIndex;
 	}
 	// MapIDを取得
-	uint32_t GetMapID() const
+	virtual uint32_t GetMapID()
 	{
 		// 返却されたIDがあるなら取得
 		if (!m_RemoveMapID.empty())
@@ -63,7 +42,7 @@ public:
 		m_NextMapID++;
 		return id;
 	}
-private:
+protected:
 	// リソースマネージャーのポインタ
 	ResourceManager* m_ResourceManager = nullptr;
 	// 構造化バッファのインデックス
@@ -77,4 +56,25 @@ private:
 
 	// 統合データのサイズオフセット
 	static const uint32_t kSizeOffset = 50;
+};
+
+class ResourceManager;
+template<typename T>
+class IntegrationData : public IIntegrationData
+{
+public:
+	// Constructor
+	IntegrationData(std::optional<uint32_t>& index)
+		: IIntegrationData(index)
+	{
+		
+	}
+	// Destructor
+	~IntegrationData()
+	{
+
+	}
+	
+private:
+
 };

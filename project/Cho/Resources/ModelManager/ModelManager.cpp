@@ -38,11 +38,25 @@ std::optional<uint32_t> ModelManager::GetModelDataIndex(const std::wstring& name
 			}
 		}
 		// モデルの使用Transformインデックスにない場合は、追加
-
 		m_Models[m_ModelNameContainer[name]].useTransformIndex.push_back(transformIndex.value());
+		// バッファも更新
+		StructuredBuffer<uint32_t>* buffer = dynamic_cast<StructuredBuffer<uint32_t>*>(m_pResourceManager->GetBuffer<IStructuredBuffer>(m_Models[m_ModelNameContainer[name]].useTransformBufferIndex));
+		if (buffer)
+		{
+			uint32_t i = 0;
+			for (uint32_t& useIndex : m_Models[m_ModelNameContainer[name]].useTransformIndex)
+			{
+				buffer->UpdateData(useIndex, i);
+				i++;
+			}
+		} else
+		{
+			Log::Write(LogLevel::Assert, "Buffer is nullptr");
+		}
 		return m_ModelNameContainer[name];
 	}
-	std::string msg = "Model name not found: " + std::string(name.begin(), name.end());
+	std::string modelName = ConvertString(name);
+	std::string msg = "Model name not found: " + modelName;
 	Log::Write(LogLevel::Assert, msg);
 	return std::nullopt;
 }
@@ -135,8 +149,8 @@ void ModelManager::AddModelData(ModelData& modelData)
 	for (MeshData& mesh : modelData.meshes)
 	{
 		// VertexBuffer,IndexBuffer作成
-		mesh.vertexBufferIndex = m_pResourceManager->CreateVertexBuffer<VertexData>(mesh.vertices.size());
-		mesh.indexBufferIndex = m_pResourceManager->CreateIndexBuffer<uint32_t>(mesh.indices.size());
+		mesh.vertexBufferIndex = m_pResourceManager->CreateVertexBuffer<VertexData>(static_cast<UINT>(mesh.vertices.size()));
+		mesh.indexBufferIndex = m_pResourceManager->CreateIndexBuffer<uint32_t>(static_cast<UINT>(mesh.indices.size()));
 		VertexBuffer<VertexData>* vertexBuffer = dynamic_cast<VertexBuffer<VertexData>*>(m_pResourceManager->GetBuffer<IVertexBuffer>(mesh.vertexBufferIndex));
 		IndexBuffer<uint32_t>* indexBuffer = dynamic_cast<IndexBuffer<uint32_t>*>(m_pResourceManager->GetBuffer<IIndexBuffer>(mesh.indexBufferIndex));
 		// VBV,IBV作成
@@ -146,9 +160,8 @@ void ModelManager::AddModelData(ModelData& modelData)
 		vertexBuffer->MappedDataCopy(mesh.vertices);
 		indexBuffer->MappedDataCopy(mesh.indices);
 	}
-	// モデルに登録されているTransformのインデックスのリソースを作成
-	uint32_t useTFBufferIndex = m_pResourceManager->CreateStructuredBuffer<uint32_t>(kUseTransformOffset);
-	modelData.useTransformIndex.push_back(useTFBufferIndex);
+	// UseTransformのリソースを作成
+	modelData.useTransformBufferIndex = m_pResourceManager->CreateStructuredBuffer<uint32_t>(kUseTransformOffset);
 	// 名前が重複していたら、エラー
 	// ここに処理を追加する
 

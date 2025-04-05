@@ -27,9 +27,9 @@ enum DrawPass
 
 struct RenderTexture
 {
-	uint32_t m_BufferID = UINT32_MAX;
-	uint32_t m_Width = 0;
-	uint32_t m_Height = 0;
+	std::optional<uint32_t> m_BufferIndex = std::nullopt;
+	UINT64 m_Width = 0;
+	UINT m_Height = 0;
 };
 
 class ResourceManager;
@@ -57,7 +57,7 @@ public:
 	void PostRenderWithImGui(ImGuiManager* imgui);
 
 	// SceneTextureのBufferIDを取得
-	uint32_t GetSceneTextureBufferID() { return m_RenderTextures[OffScreen].m_BufferID; }
+	uint32_t GetSceneTextureBufferID() { return m_RenderTextures[OffScreen].m_BufferIndex.value(); }
 private:
 	// コマンドコンテキストの取得
 	CommandContext* GetCommandContext() { return m_GraphicsCore->GetCommandManager()->GetCommandContext(); }

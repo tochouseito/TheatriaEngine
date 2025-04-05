@@ -3,12 +3,10 @@
 #include "OS/Windows/WinApp/WinApp.h"
 #include "SDK/DirectX/DirectX12/SwapChain/SwapChain.h"
 
-ResourceManager::ResourceManager(ID3D12Device8* device,GraphicsEngine* graphicsEngine)
+ResourceManager::ResourceManager(ID3D12Device8* device)
 {
 	// ポインタをセット
 	m_Device = device;
-	m_TextureManager = std::make_unique<TextureManager>(this, graphicsEngine, m_Device);
-	m_ModelManager = std::make_unique<ModelManager>(this);
 	// ヒープの作成
 	CreateHeap(device);
 	// 統合データの作成
@@ -38,7 +36,13 @@ void ResourceManager::Release()
 {
 }
 
-uint32_t ResourceManager::CreateColorBuffer(D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES& state)
+void ResourceManager::GenerateManager(GraphicsEngine* graphicsEngine)
+{
+	m_TextureManager = std::make_unique<TextureManager>(this, graphicsEngine, m_Device);
+	m_ModelManager = std::make_unique<ModelManager>(this);
+}
+
+uint32_t ResourceManager::CreateColorBuffer(D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES state)
 {
 	std::unique_ptr<ColorBuffer> buffer = std::make_unique<ColorBuffer>();
 	buffer->CreatePixelBufferResource(m_Device, desc, clearValue, state);
@@ -61,7 +65,7 @@ uint32_t ResourceManager::CreateColorBuffer(D3D12_RESOURCE_DESC& desc, D3D12_CLE
 	return index;
 }
 
-uint32_t ResourceManager::CreateDepthBuffer(D3D12_RESOURCE_DESC& desc, D3D12_RESOURCE_STATES& state)
+uint32_t ResourceManager::CreateDepthBuffer(D3D12_RESOURCE_DESC& desc, D3D12_RESOURCE_STATES state)
 {
 	std::unique_ptr<DepthBuffer> buffer = std::make_unique<DepthBuffer>();
 	buffer->CreateDepthBufferResource(m_Device, desc, state);
@@ -76,7 +80,7 @@ uint32_t ResourceManager::CreateDepthBuffer(D3D12_RESOURCE_DESC& desc, D3D12_RES
 	return index;
 }
 
-uint32_t ResourceManager::CreateTextureBuffer(D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES& state)
+uint32_t ResourceManager::CreateTextureBuffer(D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES state)
 {
 	std::unique_ptr<PixelBuffer> buffer = std::make_unique<PixelBuffer>();
 	buffer->CreatePixelBufferResource(m_Device, desc, clearValue, state);
@@ -97,7 +101,7 @@ void ResourceManager::CreateIntegrationBuffers()
 {
 	// Transform統合バッファ
 	std::optional<uint32_t> index = CreateStructuredBuffer<BUFFER_DATA_TF>(100);
-	m_IntegrationData[Transform] = std::make_unique<IntegrationData<BUFFER_DATA_TF>>(index);
+	m_IntegrationData[IntegrationDataType::Transform] = std::make_unique<IntegrationData<BUFFER_DATA_TF>>(index);
 }
 
 void ResourceManager::CreateHeap(ID3D12Device8* device)

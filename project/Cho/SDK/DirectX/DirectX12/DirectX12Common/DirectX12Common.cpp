@@ -24,7 +24,7 @@ DirectX12Common::~DirectX12Common()
 void DirectX12Common::Initialize()
 {
 	// Log出力
-	ChoLog("DirectX12Common::Initialize");
+	Log::Write(LogLevel::Info, "DirectX12Common::Initialize");
 	// DXGIファクトリーの生成
 	CreateDXGIFactory(true);
 	// デバイスの生成
@@ -46,7 +46,7 @@ void DirectX12Common::CreateDXGIFactory([[maybe_unused]] const bool& enableDebug
 	if (enableDebugLayer) {
 		if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
 			// Log出力
-			ChoLog("Enable Debug Layer");
+			Log::Write(LogLevel::Info, "Enable Debug Layer");
 
 			// デバッグレイヤーを有効化する
 			debugController->EnableDebugLayer();
@@ -58,11 +58,10 @@ void DirectX12Common::CreateDXGIFactory([[maybe_unused]] const bool& enableDebug
 #endif
 	// DXGIファクトリーの生成
 	// Log出力
-	ChoLog("Create DXGI Factory");
+	Log::Write(LogLevel::Info, "Create DXGI Factory");
 	HRESULT hr;
 	hr = CreateDXGIFactory2(0, IID_PPV_ARGS(&m_DXGIFactory));
-	ChoLog("Create DXGI Factory End");
-	ChoAssertLog("Failed to create DXGI Factory", hr, __FILE__, __LINE__);
+	Log::Write(LogLevel::Assert, "DXGI Factory created.", hr);
 }
 
 void DirectX12Common::CreateDevice()
@@ -82,12 +81,12 @@ void DirectX12Common::CreateDevice()
 		hr = useAdapter->GetDesc3(&adapterDesc);
 
 		// 取得できないのは一大事
-		ChoAssertLog("Failed to get adapter description", hr, __FILE__, __LINE__);
+		Log::Write(LogLevel::Assert, "Adapter description", hr);
 
 		// ソフトウェアアダプタでなければ
 		if (!(adapterDesc.Flags & DXGI_ADAPTER_FLAG3_SOFTWARE)) {
 			// 採用したアダプタの情報をログに出力。wstringの方なので注意
-			ChoLog(ConvertString(std::format(L"Use Adapter:{}\n", adapterDesc.Description)));
+			Log::Write(LogLevel::Info, ConvertString(std::format(L"Use Adapter:{}\n", adapterDesc.Description)));
 			break;
 		}
 		// ソフトウェアアダプタの場合は見なかったことにする
@@ -118,17 +117,17 @@ void DirectX12Common::CreateDevice()
 		if (SUCCEEDED(hr)) {
 
 			// 生成できたのでログ出力を行ってループを抜ける
-			ChoLog(std::format("FeatureLevel : {}\n", featureLevelStrings[i]));
+			Log::Write(LogLevel::Info, std::format("Create D3D12 Device : {}", featureLevelStrings[i]));
 			break;
 		}
 	}
 	// デバイスの生成がうまくいかなかったので起動できない
 	if (!m_Device) {
-		ChoAssertLog("Failed to create D3D12 Device", hr, __FILE__, __LINE__);
+		Log::Write(LogLevel::Assert, "Failed to create D3D12 Device");
 	}
 
 	// 初期化完了ログ
-	ChoLog("Complete create D3D12Device!!!\n");
+	Log::Write(LogLevel::Info, "Complete create D3D12Device!!!");
 
 	// シェーダモデルをチェック.
 	{
@@ -136,7 +135,7 @@ void DirectX12Common::CreateDevice()
 		hr = m_Device->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &shaderModel, sizeof(shaderModel));
 		if (FAILED(hr) || (shaderModel.HighestShaderModel < D3D_SHADER_MODEL_6_5))
 		{
-			ChoAssertLog("Error : Shader Model 6.5 is not supported.", hr, __FILE__, __LINE__);
+			Log::Write(LogLevel::Assert, "Shader Model 6.5 is not supported");
 		}
 	}
 
@@ -146,7 +145,7 @@ void DirectX12Common::CreateDevice()
 		hr = m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS7, &features, sizeof(features));
 		if (FAILED(hr) || (features.MeshShaderTier == D3D12_MESH_SHADER_TIER_NOT_SUPPORTED))
 		{
-			ChoAssertLog("Error : Mesh Shader is not supported.", hr, __FILE__, __LINE__);
+			Log::Write(LogLevel::Assert, "Mesh Shader is not supported");
 		}
 	}
 

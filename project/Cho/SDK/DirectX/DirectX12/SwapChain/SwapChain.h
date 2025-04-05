@@ -8,21 +8,22 @@ static const uint32_t bufferCount = 2;
 struct SwapChainBuffer
 {
 	ComPtr<ID3D12Resource> pResource;
-	uint32_t index = UINT32_MAX;
-	uint32_t dHIndex = UINT32_MAX;
+	std::optional<uint32_t> backBufferIndex = std::nullopt;
+	D3D12_CPU_DESCRIPTOR_HANDLE m_RTVCpuHandle = {};
+	std::optional<uint32_t> m_RTVHandleIndex = std::nullopt;
 };
 class SwapChain
 {
 public:
 	// Constructor
-	SwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue, const HWND& hwnd, const int32_t& width, const int32_t& height);
+	SwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue, const HWND& hwnd, const UINT64& width, const UINT& height);
 	// Destructor
 	~SwapChain()
 	{
 
 	}
 	// SwapChainの生成
-	void CreateSwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue, const HWND& hwnd, const int32_t& width, const int32_t& height);
+	void CreateSwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue, const HWND& hwnd, const UINT64& width, const UINT& height);
 	// Resourceの生成
 	void CreateResource(ID3D12Device8* device, ResourceManager* resourceManager);
 	// Present

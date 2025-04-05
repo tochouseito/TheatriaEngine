@@ -26,7 +26,7 @@ struct ModelData
 	// このモデルを使用しているTransformのインデックス
 	std::list<uint32_t> useTransformIndex;
 	// このモデルを使用しているTFリストのバッファインデックス
-	std::optional<uint32_t> bufferIndex = std::nullopt;
+	std::optional<uint32_t> useTransformBufferIndex = std::nullopt;
 };
 
 class ResourceManager;
@@ -44,6 +44,8 @@ public:
 	}
 	// 名前コンテナを取得する
 	std::unordered_map<std::wstring, uint32_t>& GetModelNameContainer() { return m_ModelNameContainer; }
+	// モデルデータコンテナを取得する
+	std::vector<ModelData>& GetModelDataContainer() { return m_Models.GetVector(); }
 	// 名前で検索してインデックスを取得する
 	std::optional<uint32_t> GetModelDataIndex(const std::wstring& name,std::optional<uint32_t>& transformIndex);
 private:

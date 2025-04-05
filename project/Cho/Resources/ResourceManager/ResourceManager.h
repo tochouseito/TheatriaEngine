@@ -29,7 +29,7 @@ class ResourceManager
 	friend class GraphicsEngine;
 public:
 	// コンストラクタ
-	ResourceManager(ID3D12Device8* device,GraphicsEngine* graphicsEngine);
+	ResourceManager(ID3D12Device8* device);
 	// デストラクタ
 	~ResourceManager();
 	// 初期化
@@ -40,7 +40,8 @@ public:
 	void Update();
 	// 解放
 	void Release();
-
+	// モデル、テクスチャマネージャー生成
+	void GenerateManager(GraphicsEngine* graphicsEngine);
 	// CreateBuffer
 	template<typename T>
 	uint32_t CreateConstantBuffer()
@@ -48,7 +49,7 @@ public:
 		// 定数バッファの生成
 		std::unique_ptr<ConstantBuffer<T>> buffer = std::make_unique<ConstantBuffer<T>>();
 		buffer->CreateConstantBufferResource(m_Device);
-		uint32_t index = m_ConstantBuffers.push_back(std::move(buffer));
+		uint32_t index = static_cast<uint32_t>(m_ConstantBuffers.push_back(std::move(buffer)));
 		return index;
 	}
 	template<typename T>
@@ -67,7 +68,7 @@ public:
 		srvDesc.Buffer.NumElements = buffer->GetNumElements();
 		srvDesc.Buffer.StructureByteStride = buffer->GetStructureByteStride();
 		buffer->CreateSRV(m_Device, srvDesc, m_SUVDescriptorHeap.get());
-		uint32_t index = m_StructuredBuffers.push_back(std::move(buffer));
+		uint32_t index = static_cast<uint32_t>(m_StructuredBuffers.push_back(std::move(buffer)));
 		return index;
 	}
 	template<typename T>
@@ -77,8 +78,8 @@ public:
 		std::unique_ptr<VertexBuffer<T>> buffer = std::make_unique<VertexBuffer<T>>();
 		buffer->CreateVertexBufferResource(m_Device, numElements);
 		// CreateVBV
-		buffer->CreateVBV(numElements);
-		uint32_t index = m_VertexBuffers.push_back(std::move(buffer));
+		buffer->CreateVBV();
+		uint32_t index = static_cast<uint32_t>(m_VertexBuffers.push_back(std::move(buffer)));
 		return index;
 	}
 	template<typename T>
@@ -89,12 +90,12 @@ public:
 		buffer->CreateIndexBufferResource(m_Device, numElements);
 		// CreateIBV
 		buffer->CreateIBV();
-		uint32_t index = m_IndexBuffers.push_back(std::move(buffer));
+		uint32_t index = static_cast<uint32_t>(m_IndexBuffers.push_back(std::move(buffer)));
 		return index;
 	}
-	uint32_t CreateColorBuffer(D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES& state);
-	uint32_t CreateDepthBuffer(D3D12_RESOURCE_DESC& desc, D3D12_RESOURCE_STATES& state);
-	uint32_t CreateTextureBuffer(D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES& state);
+	uint32_t CreateColorBuffer(D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES state);
+	uint32_t CreateDepthBuffer(D3D12_RESOURCE_DESC& desc, D3D12_RESOURCE_STATES state);
+	uint32_t CreateTextureBuffer(D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES state);
 
 
 	// RemakeBuffer
@@ -109,6 +110,7 @@ public:
 		{
 			return GetBuffer<IStructuredBuffer>(m_IntegrationData[IntegrationDataType::Transform]->GetBufferIndex());
 		}
+		return nullptr;
 	}
 
 	// GetBuffer
@@ -121,25 +123,25 @@ public:
 		}
 		if constexpr (std::is_same_v<T, ColorBuffer>)
 		{
-			return m_ColorBuffers[index].get();
+			return m_ColorBuffers[index.value()].get();
 		} else if constexpr (std::is_same_v<T, DepthBuffer>)
 		{
-			return m_DepthBuffers[index].get();
-		} else if constexpr (std::is_same_v<T, VertexBuffer>)
+			return m_DepthBuffers[index.value()].get();
+		} else if constexpr (std::is_same_v<T, IVertexBuffer>)
 		{
-			return m_VertexBuffers[index].get();
-		} else if constexpr (std::is_same_v<T, IndexBuffer>)
+			return m_VertexBuffers[index.value()].get();
+		} else if constexpr (std::is_same_v<T, IIndexBuffer>)
 		{
-			return m_VertexBuffers[index].get();
-		} else if constexpr (std::is_same_v<T, ConstantBuffer>)
+			return m_IndexBuffers[index.value()].get();
+		} else if constexpr (std::is_same_v<T, IConstantBuffer>)
 		{
-			return m_ConstantBuffers[index].get();
-		} else if constexpr (std::is_same_v<T, StructuredBuffer>)
+			return m_ConstantBuffers[index.value()].get();
+		} else if constexpr (std::is_same_v<T, IStructuredBuffer>)
 		{
-			return m_StructuredBuffers[index].get();
+			return m_StructuredBuffers[index.value()].get();
 		} else if constexpr (std::is_same_v<T, PixelBuffer>)
 		{
-			return m_TextureBuffers[index].get();
+			return m_TextureBuffers[index.value()].get();
 		} else
 			assert(false && "Invalid buffer type");
 	}
@@ -156,6 +158,14 @@ public:
 	DescriptorHeap* GetDSVDHeap() const { return m_DSVDescriptorHeap.get(); }
 	TextureManager* GetTextureManager() const { return m_TextureManager.get(); }
 	ModelManager* GetModelManager() const { return m_ModelManager.get(); }
+	IIntegrationData* GetIntegrationData(const IntegrationDataType& type) const
+	{
+		if (type == IntegrationDataType::Transform)
+		{
+			return m_IntegrationData[IntegrationDataType::Transform].get();
+		}
+		return nullptr;
+	}
 private:
 	// Heap生成
 	void CreateHeap(ID3D12Device8* device);

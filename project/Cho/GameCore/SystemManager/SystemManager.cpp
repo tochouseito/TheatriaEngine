@@ -83,7 +83,7 @@ void ObjectSystem::TransferMatrix(TransformComponent& transform)
 	data.matWorld = transform.matWorld;
 	data.worldInverse = ChoMath::Transpose(Matrix4::Inverse(transform.matWorld));
 	data.rootMatrix = transform.rootMatrix;
-	m_pIntegrationBuffer->UpdateData(data, transform.mapID);
+	m_pIntegrationBuffer->UpdateData(data, transform.mapID.value());
 }
 
 void ObjectSystem::UpdateRecursive(Entity entity, std::unordered_set<Entity>& updated)
@@ -96,8 +96,8 @@ void ObjectSystem::UpdateRecursive(Entity entity, std::unordered_set<Entity>& up
 	// 親がいれば先に更新
 	if (transform->parentEntity != UINT32_MAX)
 	{
-		UpdateRecursive(transform->parentEntity, updated);
-		auto* parentTransform = m_pECS->GetComponent<TransformComponent>(transform->parentEntity);
+		UpdateRecursive(transform->parentEntity.value(), updated);
+		auto* parentTransform = m_pECS->GetComponent<TransformComponent>(transform->parentEntity.value());
 		if (parentTransform)
 		{
 			UpdateMatrix(*transform, parentTransform);

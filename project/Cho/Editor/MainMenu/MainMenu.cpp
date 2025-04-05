@@ -3,6 +3,7 @@
 #include <imgui.h>
 #include "Cho/OS/Windows/WinApp/WinApp.h"
 #include "Cho/Editor/EditorManager/EditorManager.h"
+#include "GameCore/GameObject/GameObject.h"
 
 void MainMenu::Initialize()
 {
@@ -89,21 +90,21 @@ void MainMenu::EditMenu()
         if (ImGui::MenuItem("Test AddGameObject"))
         {
             // テスト用
-            std::unique_ptr<AddGameObjectCommand> addGameObj = std::make_unique<AddGameObjectCommand>();
+            std::unique_ptr<AddGameObjectCommand> addGameObj = std::make_unique<AddGameObjectCommand>(std::wstring(L"GameObject1"),static_cast<uint32_t>(ObjectType::MeshObject));
             m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addGameObj));
-            std::unique_ptr<AddTransformComponent> addTFComp = std::make_unique<AddTransformComponent>(1);
+            std::unique_ptr<AddTransformComponent> addTFComp = std::make_unique<AddTransformComponent>(uint32_t(1));
             m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addTFComp));
-			std::unique_ptr<AddMeshComponent> addMeshComp = std::make_unique<AddMeshComponent>(1);
+			std::unique_ptr<AddMeshComponent> addMeshComp = std::make_unique<AddMeshComponent>(uint32_t(1));
 			m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addMeshComp));
-			std::unique_ptr<AddRenderComponent> addRenderComp = std::make_unique<AddRenderComponent>(1);
+			std::unique_ptr<AddRenderComponent> addRenderComp = std::make_unique<AddRenderComponent>(uint32_t(1));
 			m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addRenderComp));
-			std::unique_ptr<AddGameObjectCommand> addGameObj2 = std::make_unique<AddGameObjectCommand>();
+			std::unique_ptr<AddGameObjectCommand> addGameObj2 = std::make_unique<AddGameObjectCommand>(std::wstring(L"Camera"), static_cast<uint32_t>(ObjectType::Camera));
 			m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addGameObj2));
-			std::unique_ptr<AddTransformComponent> addTFComp2 = std::make_unique<AddTransformComponent>(2);
+			std::unique_ptr<AddTransformComponent> addTFComp2 = std::make_unique<AddTransformComponent>(uint32_t(2));
 			m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addTFComp2));
-			std::unique_ptr<AddCameraComponent> addCamComp = std::make_unique<AddCameraComponent>(2);
+			std::unique_ptr<AddCameraComponent> addCamComp = std::make_unique<AddCameraComponent>(uint32_t(2));
 			m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addCamComp));
-            std::unique_ptr<SetMainCamera> setCam = std::make_unique<SetMainCamera>(1);
+            std::unique_ptr<SetMainCamera> setCam = std::make_unique<SetMainCamera>(uint32_t(1));
             m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(setCam));
         }
 

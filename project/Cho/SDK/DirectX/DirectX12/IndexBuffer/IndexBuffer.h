@@ -17,13 +17,15 @@ public:
 	// Destructor
 	virtual ~IIndexBuffer() = default;
 	// リソース作成
-	virtual void CreateIndexBufferResource(ID3D12Device* device, const UINT& numElements) = 0;
+	virtual void CreateIndexBufferResource(ID3D12Device8* device, const UINT& numElements) = 0;
 	// View作成
 	virtual bool CreateIBV() = 0;
 	// SRV作成
 	virtual bool CreateSRV(ID3D12Device8* device, D3D12_SHADER_RESOURCE_VIEW_DESC& srvDesc, DescriptorHeap* pDescriptorHeap) = 0;
 	// UAV作成
 	virtual bool CreateUAV() = 0;
+	// インデックスバッファビューを取得
+	virtual D3D12_INDEX_BUFFER_VIEW* GetIndexBufferView() = 0;
 };
 
 template<typename T>
@@ -46,7 +48,7 @@ public:
 		m_MappedData = std::span<T>{};
 	}
 	// リソースを作成
-	void CreateIndexBufferResource(ID3D12Device8* device,const UINT& numElements)
+	void CreateIndexBufferResource(ID3D12Device8* device,const UINT& numElements) override
 	{
 		// リソースのサイズ
 		UINT structureByteStride = static_cast<UINT>(sizeof(T));
@@ -62,9 +64,9 @@ public:
 		T* mappedData = nullptr;// 一時マップ用
 		GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&mappedData));
 		// マップしたデータをspanに変換
-		m_MappedData = std::span<T>(mappedData, numElements);
+		m_MappedData = std::span<T>(mappedData, static_cast<size_t>(numElements));
 	}
-	bool CreateIBV()
+	bool CreateIBV() override
 	{
 		// Viewの作成
 		// リソースがあるかどうか確認
@@ -94,12 +96,15 @@ public:
 		return true;
 	}
 	// スキニング用SRV
-	bool CreateSRV(ID3D12Device8* device, D3D12_SHADER_RESOURCE_VIEW_DESC& srvDesc, DescriptorHeap* pDescriptorHeap)
+	bool CreateSRV(ID3D12Device8* device, D3D12_SHADER_RESOURCE_VIEW_DESC& srvDesc, DescriptorHeap* pDescriptorHeap) override
 	{
+		device;
+		srvDesc;
+		pDescriptorHeap;
 		return true;
 	}
 	// スキニング用UAV
-	bool CreateUAV()
+	bool CreateUAV() override
 	{
 		return true;
 	}
@@ -123,9 +128,13 @@ public:
 			Log::Write(LogLevel::Assert, "MappedData is null");
 		}
 	}
+	D3D12_INDEX_BUFFER_VIEW* GetIndexBufferView() override
+	{
+		return &m_View;
+	}
 private:
 	// インデックスバッファビュー
 	D3D12_INDEX_BUFFER_VIEW m_View = {};
 	// マップ用データにコピーするためのポインタ
-	std::span<T> m_MappedData = nullptr;
+	std::span<T> m_MappedData;
 };

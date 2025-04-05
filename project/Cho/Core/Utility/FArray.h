@@ -2,7 +2,7 @@
 #include <array>
 #include <vector>
 #include <cstdint>
-#include "Cho/Core/Log/Log.h"
+#include "Core/ChoLog/ChoLog.h"
 
 // フリーリスト付き固定配列
 template <typename T, size_t N>
@@ -13,7 +13,7 @@ public:
     // 新しい要素を追加し、インデックスを返す
     size_t push_back(T&& value) {
         if (activeCount >= N) {
-			ChoAssertLog("FArray is full", false, __FILE__, __LINE__);
+			Log::Write(LogLevel::Assert, "FArray is full");
         }
 
         size_t index;
@@ -32,7 +32,7 @@ public:
     // 指定インデックスの要素を削除（フリーリストに追加）
     void erase(size_t index) {
         if (index >= nextIndex) {
-			ChoAssertLog("Invalid index out_of_range", false, __FILE__, __LINE__);
+			Log::Write(LogLevel::Assert, "Invalid index out_of_range");
         }
         if (activeCount == 0) {
             return;
@@ -44,14 +44,14 @@ public:
     // インデックスアクセス
     T& operator[](size_t index) {
         if (index >= nextIndex) {
-			ChoAssertLog("Index out of range", false, __FILE__, __LINE__);
+			Log::Write(LogLevel::Assert, "Index out of range");
         }
         return data[index];
     }
 
     const T& operator[](size_t index) const {
         if (index >= nextIndex) {
-			ChoAssertLog("Index out of range", false, __FILE__, __LINE__);
+			Log::Write(LogLevel::Assert, "Index out of range");
         }
         return data[index];
     }

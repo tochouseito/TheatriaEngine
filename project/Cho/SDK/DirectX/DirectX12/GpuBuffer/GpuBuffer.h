@@ -78,7 +78,7 @@ public:
 		m_MappedData = std::span<T>{};
 	}
 	// リソースを作成
-	void CreateConstantBufferResource(ID3D12Device* device)
+	void CreateConstantBufferResource(ID3D12Device* device) override
 	{
 		// リソースのサイズ
 		UINT structureByteStride = static_cast<UINT>(sizeof(T));
@@ -92,11 +92,12 @@ public:
 			1, structureByteStride);
 		// マッピング
 		T* mappedData = nullptr;// 一時マップ用
+		size_t bufferSize = 1;
 		GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&mappedData));
 		// マップしたデータをspanに変換
-		m_MappedData = std::span<T>(mappedData, 1);
+		m_MappedData = std::span<T>(mappedData, bufferSize);
 	}
-	void Unmap()
+	void Unmap() override
 	{
 		if (GetResource())
 		{
@@ -115,7 +116,7 @@ public:
 	}
 private:
 	// マッピングデータ
-	std::span<T> m_MappedData = nullptr;
+	std::span<T> m_MappedData;
 };
 
 // 構造化バッファのインターフェース
@@ -137,6 +138,11 @@ public:
 	virtual void CreateStructuredBufferResource(ID3D12Device* device, const UINT& numElements) = 0;
 	// SRV作成
 	virtual bool CreateSRV(ID3D12Device8* device, D3D12_SHADER_RESOURCE_VIEW_DESC& srvDesc, DescriptorHeap* pDescriptorHeap) = 0;
+	// ディスクリプタハンドルを取得
+	virtual D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCpuHandle() const = 0;
+	virtual D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGpuHandle() const = 0;
+	// ディスクリプタハンドルインデックスを取得
+	virtual std::optional<uint32_t> GetSRVHandleIndex() const = 0;
 };
 
 template<typename T>
@@ -160,7 +166,7 @@ public:
 		m_SRVGpuHandle = {};
 		m_SRVHandleIndex = std::nullopt;
 	}
-	void CreateStructuredBufferResource(ID3D12Device* device, const UINT& numElements)
+	void CreateStructuredBufferResource(ID3D12Device* device, const UINT& numElements) override
 	{
 		// リソースのサイズ
 		UINT structureByteStride = static_cast<UINT>(sizeof(T));
@@ -176,9 +182,9 @@ public:
 		T* mappedData = nullptr;// 一時マップ用
 		GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&mappedData));
 		// マップしたデータをspanに変換
-		m_MappedData = std::span<T>(mappedData, numElements);
+		m_MappedData = std::span<T>(mappedData, static_cast<size_t>(numElements));
 	}
-	bool CreateSRV(ID3D12Device8* device, D3D12_SHADER_RESOURCE_VIEW_DESC& srvDesc, DescriptorHeap* pDescriptorHeap)
+	bool CreateSRV(ID3D12Device8* device, D3D12_SHADER_RESOURCE_VIEW_DESC& srvDesc, DescriptorHeap* pDescriptorHeap) override
 	{
 		// ヒープがSRVタイプかどうか確認
 		if (pDescriptorHeap->GetType() != D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV)
@@ -233,9 +239,14 @@ public:
 			Log::Write(LogLevel::Assert, "Index out of range");
 		}
 	}
+	// ディスクリプタハンドルを取得
+	D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCpuHandle() const override { return m_SRVCpuHandle; }
+	D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGpuHandle() const override { return m_SRVGpuHandle; }
+	// ディスクリプタハンドルインデックスを取得
+	std::optional<uint32_t> GetSRVHandleIndex() const override { return m_SRVHandleIndex; }
 private:
 	// マッピングデータ
-	std::span<T> m_MappedData = nullptr;
+	std::span<T> m_MappedData;
 	// ディスクリプタハンドル
 	D3D12_CPU_DESCRIPTOR_HANDLE m_SRVCpuHandle = {};
 	D3D12_GPU_DESCRIPTOR_HANDLE m_SRVGpuHandle = {};

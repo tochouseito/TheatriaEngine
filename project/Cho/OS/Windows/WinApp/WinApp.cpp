@@ -2,17 +2,18 @@
 #include "WinApp.h"
 #pragma comment(lib,"winmm.lib")
 #include <shellapi.h>
-#include "Core/Log/Log.h"
 #include <imgui.h>
 #include <imgui_impl_win32.h>
+#include "Core/ChoLog/ChoLog.h"
+using namespace Cho;
 extern IMGUI_IMPL_API LRESULT
 ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 HWND WinApp::m_HWND = nullptr;
 WNDCLASS WinApp::m_WC = {}; // ウィンドウクラス
 bool WinApp::m_IsRun=true; // アプリケーションが動作中かを示すフラグ
-int32_t WinApp::m_WindowWidth = 1280; // ウィンドウの幅
-int32_t WinApp::m_WindowHeight = 720; // ウィンドウの高さ
+UINT64 WinApp::m_WindowWidth = 1280; // ウィンドウの幅
+UINT WinApp::m_WindowHeight = 720; // ウィンドウの高さ
 
 // ウィンドウプロシージャ
 LRESULT CALLBACK WinApp::WindowProc(HWND hWnd, UINT msg,
@@ -51,7 +52,7 @@ LRESULT CALLBACK WinApp::WindowProc(HWND hWnd, UINT msg,
 // ゲームウィンドウの作成
 void WinApp::CreateGameWindow() {
 	// Log出力
-	ChoLog("CreateGameWindow");
+	Log::Write(LogLevel::Info, "CreateGameWindow");
 
 	HRESULT hr;
 
@@ -71,7 +72,9 @@ void WinApp::CreateGameWindow() {
 	RegisterClass(&m_WC);
 
 	// ウィンドウサイズを表す構造体にクライアント領域を入れる
-	RECT wrc = { 0,0,m_WindowWidth,m_WindowHeight};
+	RECT wrc = { 0,0,
+		static_cast<LONG>(m_WindowWidth),
+		static_cast<LONG>(m_WindowHeight) };
 
 	// クライアント領域を元に実際のサイズにwrcを変更してもらう
 	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
@@ -97,7 +100,7 @@ void WinApp::CreateGameWindow() {
 	ShowWindow(m_HWND, SW_SHOW);
 
 	// Log出力
-	ChoLog("CreateGameWindow End");
+	Log::Write(LogLevel::Info, "CreateGameWindow End");
 }
 
 /// <summary>
@@ -137,7 +140,9 @@ void WinApp::SetWindowTitle(const wchar_t* title)
 void WinApp::TerminateWindow()
 {
 	// Log出力
-	ChoLog("TerminateWindow");
+	Log::Write(LogLevel::Info, "TerminateWindow");
+	// システムタイマーの分解能を戻す
+	timeEndPeriod(1);
 
 	// ウィンドウを完全に閉じる
 	DestroyWindow(m_HWND);
@@ -149,7 +154,7 @@ void WinApp::TerminateWindow()
 	CoUninitialize();
 
 	// Log出力
-	ChoLog("TerminateWindow End");
+	Log::Write(LogLevel::Info, "TerminateWindow End");
 }
 
 void WinApp::OpenWebURL(const wchar_t* url)

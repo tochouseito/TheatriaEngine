@@ -1,5 +1,6 @@
 #pragma once
 #include <d3d12.h>
+#include <optional>
 class ResourceManager;
 class ImGuiManager
 {
@@ -11,6 +12,6 @@ public:
 	void End();
 	void Draw(ID3D12GraphicsCommandList6* commandList);
 private:
-	uint32_t m_DHandleIndex = {};
+	std::optional<uint32_t> m_DescriptorHeapIndex = std::nullopt;
 };
 

@@ -15,8 +15,15 @@ public:
 class AddGameObjectCommand :public ICommand
 {
 public:
+	AddGameObjectCommand(const std::wstring& name,const uint32_t& type)
+		:m_Name(name), m_Type(type)
+	{
+	}
 	void Execute(EditorCommand* edit)override;
 	void Undo(EditorCommand* edit)override;
+private:
+	std::wstring m_Name;
+	uint32_t m_Type;
 };
 class AddTransformComponent :public ICommand
 {
@@ -30,6 +37,7 @@ public:
 	void Undo(EditorCommand* edit)override;
 private:
 	uint32_t m_Entity;
+	uint32_t m_MapID;
 };
 class AddMeshComponent :public ICommand
 {
@@ -77,19 +85,19 @@ public:
 	void Execute(EditorCommand* edit)override;
 	void Undo(EditorCommand* edit)override;
 private:
-	uint32_t m_PreCameraID = UINT32_MAX;
-	uint32_t m_SetCameraID = UINT32_MAX;
+	std::optional<uint32_t> m_PreCameraID = std::nullopt;
+	std::optional<uint32_t> m_SetCameraID = std::nullopt;
 };
 
 class ResourceManager;
 class GraphicsEngine;
-class GameCore;
+class GameCoreCommand;
 class EditorCommand
 {
 public:
 	// Constructor
-	EditorCommand(ResourceManager* resourceManager,GraphicsEngine* graphicsEngine,GameCore* gameCore):
-		m_ResourceManager(resourceManager), m_GraphicsEngine(graphicsEngine), m_GameCore(gameCore)
+	EditorCommand(ResourceManager* resourceManager,GraphicsEngine* graphicsEngine,GameCoreCommand* gameCoreCommand):
+		m_ResourceManager(resourceManager), m_GraphicsEngine(graphicsEngine), m_GameCoreCommand(gameCoreCommand)
 	{
 	}
 	// Destructor
@@ -111,7 +119,7 @@ public:
 	};
 	ResourceManager* GetResourceManagerPtr() { return m_ResourceManager; }
 	GraphicsEngine* GetGraphicsEnginePtr() { return m_GraphicsEngine; }
-	GameCore* GetGameCorePtr() { return m_GameCore; }
+	GameCoreCommand* GetGameCoreCommandPtr() { return m_GameCoreCommand; }
 
 	// レンダリングテクスチャのハンドルを取得
 	D3D12_GPU_DESCRIPTOR_HANDLE GetSceneTextureHandle();
@@ -119,6 +127,6 @@ private:
 	std::vector<std::unique_ptr<ICommand>> m_Commands;
 	ResourceManager* m_ResourceManager = nullptr;
 	GraphicsEngine* m_GraphicsEngine = nullptr;
-	GameCore* m_GameCore = nullptr;
+	GameCoreCommand* m_GameCoreCommand = nullptr;
 };
 
