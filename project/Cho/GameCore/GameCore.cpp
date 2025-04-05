@@ -11,6 +11,8 @@ void GameCore::Initialize(ResourceManager* resourceManager)
 	m_pECSManager = std::make_unique<ECSManager>();
 	// Systemマネージャの生成
 	m_pSystemManager = std::make_unique<SystemManager>();
+	// システムの生成
+	CreateSystems(resourceManager);
 	// オブジェクトコンテナの生成
 	m_pObjectContainer = std::make_unique<ObjectContainer>();
 	// コマンドの生成

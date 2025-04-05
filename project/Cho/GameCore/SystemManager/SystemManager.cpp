@@ -94,7 +94,7 @@ void ObjectSystem::UpdateRecursive(Entity entity, std::unordered_set<Entity>& up
 	if (!transform) return;
 
 	// 親がいれば先に更新
-	if (transform->parentEntity != UINT32_MAX)
+	if (transform->parentEntity)
 	{
 		UpdateRecursive(transform->parentEntity.value(), updated);
 		auto* parentTransform = m_pECS->GetComponent<TransformComponent>(transform->parentEntity.value());
@@ -132,5 +132,6 @@ void CameraSystem::TransferMatrix(TransformComponent& transform, CameraComponent
 	data.projection = ChoMath::MakePerspectiveFovMatrix(camera.fovAngleY, camera.aspectRatio, camera.nearZ, camera.farZ);
 	data.projectionInverse = Matrix4::Inverse(data.projection);
 	data.cameraPosition = transform.translation;
-	m_pIntegrationBuffer->UpdateData(data, 0);
+	ConstantBuffer<BUFFER_DATA_VIEWPROJECTION>* buffer = dynamic_cast<ConstantBuffer<BUFFER_DATA_VIEWPROJECTION>*>(m_pResourceManager->GetBuffer<IConstantBuffer>(camera.bufferIndex));
+	buffer->UpdateData(data);
 }

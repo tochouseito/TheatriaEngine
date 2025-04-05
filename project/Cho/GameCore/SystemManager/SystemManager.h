@@ -63,7 +63,7 @@ public:
 			}),
 		m_ECS(ecs), m_pResourceManager(resourceManager)
 	{
-		m_pIntegrationBuffer = dynamic_cast<StructuredBuffer<BUFFER_DATA_VIEWPROJECTION>*>(integrationBuffer);
+		m_pIntegrationBuffer = dynamic_cast<StructuredBuffer<BUFFER_DATA_TF>*>(integrationBuffer);
 	}
 	~CameraSystem() = default;
 private:
@@ -72,5 +72,5 @@ private:
 
 	ECSManager* m_ECS = nullptr;
 	ResourceManager* m_pResourceManager = nullptr;
-	StructuredBuffer<BUFFER_DATA_VIEWPROJECTION>* m_pIntegrationBuffer = nullptr;
+	StructuredBuffer<BUFFER_DATA_TF>* m_pIntegrationBuffer = nullptr;
 };
