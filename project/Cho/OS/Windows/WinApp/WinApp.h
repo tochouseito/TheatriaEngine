@@ -8,7 +8,7 @@ WinAppクラス
 #include <Windows.h>
 #include <ole2.h>
 #include <timeapi.h>
-#include<cstdint>
+#include <cstdint>
 
 class WinApp
 {

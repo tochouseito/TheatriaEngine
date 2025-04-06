@@ -56,6 +56,7 @@ void Toolbar::Window()
             if (ImGui::Selectable(ConvertString(object.GetName()).c_str(), is_selected))
             {
                 currentTool = n;
+				m_EditorCommand->GetGameCoreCommandPtr()->GetSceneManagerPtr()->GetCurrentScene()->SetMainCameraID(n);
             }
             if (is_selected)
             {
