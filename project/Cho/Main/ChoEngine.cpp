@@ -53,6 +53,10 @@ void ChoEngine::Initialize()
 	// EditorManager初期化
 	editorManager = std::make_unique<EditorManager>(editorCommand.get(),platformLayer->GetInputManager());
 	editorManager->Initialize();
+
+	// HubManager初期化
+	hubManager = std::make_unique<HubManager>(platformLayer.get(),coreSystem.get());
+	hubManager->Initialize();
 }
 
 void ChoEngine::Finalize()
@@ -103,8 +107,15 @@ void ChoEngine::Update()
 	platformLayer->Update();
 	// ImGuiManager開始
 	imGuiManager->Begin();
-	// EditorManager更新
-	editorManager->Update();
+	if (hubManager->IsRun())
+	{
+		// HubManager更新
+		hubManager->Update();
+	} else
+	{
+		// EditorManager更新
+		editorManager->Update();
+	}
 	// GameCore更新
 	gameCore->Update(*resourceManager, *graphicsEngine);
 	// ImGuiManager終了

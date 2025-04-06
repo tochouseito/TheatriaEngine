@@ -65,7 +65,7 @@ void Toolbar::Window()
 			n++;
         }
         ImGui::EndCombo();
-       /* for (int n = 0; n < IM_ARRAYSIZE(toolItems); n++)
+       /*for (int n = 0; n < IM_ARRAYSIZE(toolItems); n++)
         {
             bool is_selected = (currentTool == n);
             if (ImGui::Selectable(toolItems[n], is_selected))

@@ -33,6 +33,9 @@ ChoEngineクラス
 // EditorManager
 #include "Cho/Editor/EditorManager/EditorManager.h"
 
+// HubManager
+#include "Hub/HubManager.h"
+
 class ChoEngine : public Engine
 {
 public:// method
@@ -90,5 +93,8 @@ private:// member
 	// EditorManager
 	std::unique_ptr<EditorManager> editorManager = nullptr;// EditorManager
 	std::unique_ptr<EditorCommand> editorCommand = nullptr;// EditorCommand
+
+	// HubManager
+	std::unique_ptr<HubManager> hubManager = nullptr;// HubManager
 };
 
