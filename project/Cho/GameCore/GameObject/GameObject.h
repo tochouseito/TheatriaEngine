@@ -34,10 +34,13 @@ public:
 	~Prefab()
 	{
 	}
+	ObjectID GetID() const noexcept { return m_ID; }
 	Entity GetEntity() const noexcept { return m_Entity; }
 	std::wstring GetName() const noexcept { return m_Name; }
 	ObjectType GetType() const noexcept { return m_Type; }
+	void SetID(const ObjectID& id) noexcept { m_ID = id; }
 private:
+	PrefabID m_ID;// プレハブID
 	Entity m_Entity;// エンティティ
 	std::wstring m_Name = L"";// プレハブ名
 	ObjectType m_Type;// プレハブのタイプ
@@ -54,10 +57,13 @@ public:
 	~GameObject()
 	{
 	}
+	ObjectID GetID() const noexcept { return m_ID; }
 	Entity GetEntity() const noexcept { return m_Entity; }
 	std::wstring GetName() const noexcept { return m_Name; }
 	ObjectType GetType() const noexcept { return m_Type; }
+	void SetID(const ObjectID& id) noexcept { m_ID = id; }
 private:
+	ObjectID m_ID;// オブジェクトID
 	Entity m_Entity;// エンティティ
 	std::wstring m_Name = L"";// ゲームオブジェクト名
 	ObjectType m_Type;// ゲームオブジェクトのタイプ

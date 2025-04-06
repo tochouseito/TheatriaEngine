@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Toolbar.h"
 #include "Editor/EditorManager/EditorManager.h"
+#include "GameCore/GameCore.h"
 #include "Core/ChoLog/ChoLog.h"
 
 void Toolbar::Initialize()
@@ -33,6 +34,47 @@ void Toolbar::Window()
     // 上部に余白（例：4px）
     ImGui::Dummy(ImVec2(1, 4));
 
+    // 左側にプルダウン（Combo）
+    ImGui::SetCursorPosX(8); // 左端に寄せる
+    static ObjectID currentTool = 0;
+    //const char* toolItems[] = { "Hand", "Move", "Rotate", "Scale" };
+	GameObject* currentToolObject = m_EditorCommand->GetGameCoreCommandPtr()->GetObjectContainerPtr()->GetGameObject(currentTool);
+	std::string name = "None";
+    if(currentToolObject)
+    name = ConvertString(currentToolObject->GetName());
+    ImGui::SetNextItemWidth(100); // プルダウンの横幅指定
+    if (ImGui::BeginCombo("##ToolSelector", name.c_str()))
+    {
+        ObjectID n = 0;
+        for (GameObject& object : m_EditorCommand->GetGameCoreCommandPtr()->GetObjectContainerPtr()->GetGameObjects().GetVector())
+        {
+			if (object.GetType() != ObjectType::Camera) {
+				n++;
+                continue;
+            }
+            bool is_selected = (currentTool == n);
+            if (ImGui::Selectable(ConvertString(object.GetName()).c_str(), is_selected))
+            {
+                currentTool = n;
+            }
+            if (is_selected)
+            {
+                ImGui::SetItemDefaultFocus();
+            }
+			n++;
+        }
+        ImGui::EndCombo();
+       /* for (int n = 0; n < IM_ARRAYSIZE(toolItems); n++)
+        {
+            bool is_selected = (currentTool == n);
+            if (ImGui::Selectable(toolItems[n], is_selected))
+                currentTool = n;
+            if (is_selected)
+                ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndCombo();*/
+    }
+    ImGui::SameLine();
     // 中央に配置するための計算
     float toolbarWidth = 0.0f;
     float buttonSize = 28.0f; // ボタンサイズ

@@ -19,6 +19,7 @@ public:
 	{ 
 		ObjectID id = static_cast<ObjectID>(m_GameObjects.push_back(GameObject(entity, name, type)));
 		m_NameToObjectID[name] = id;
+		m_GameObjects[id].SetID(id);
 		return id;
 	}
 	// プレハブを追加
@@ -26,12 +27,25 @@ public:
 	{ 
 		PrefabID id = static_cast<PrefabID>(m_Prefabs.push_back(Prefab(entity, name, type)));
 		m_NameToPrefabID[name] = id;
+		m_Prefabs[id].SetID(id);
 		return id;
 	}
 	// ゲームオブジェクトを取得
-	GameObject* GetGameObject(const ObjectID& index) { return &m_GameObjects[index]; }
+	GameObject* GetGameObject(const ObjectID& index) {
+		if (index >= m_GameObjects.size())
+		{
+			return nullptr;
+		}
+		return &m_GameObjects[index];
+	}
 	// プレハブを取得
-	Prefab* GetPrefab(const ObjectID& index) { return &m_Prefabs[index]; }
+	Prefab* GetPrefab(const ObjectID& index) {
+		if (index >= m_Prefabs.size())
+		{
+			return nullptr;
+		}
+		return &m_Prefabs[index];
+	}
 	// ゲームオブジェクトコンテナを取得
 	FVector<GameObject>& GetGameObjects() { return m_GameObjects; }
 	// プレハブコンテナを取得
