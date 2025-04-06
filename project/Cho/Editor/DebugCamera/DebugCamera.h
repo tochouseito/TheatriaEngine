@@ -19,6 +19,7 @@ public:
 	void Update();
 	void UpdateMatrix();
 	void TransferMatrix();
+	void SetAspect(const float& aspect) { m_CameraComponent.aspectRatio = aspect; }
 private:
 	EditorManager* m_pEditorManager = nullptr;
 	TransformComponent m_TransformComponent;

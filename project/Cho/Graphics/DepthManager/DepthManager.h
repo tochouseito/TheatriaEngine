@@ -1,4 +1,6 @@
 #pragma once
+#include "SDK/DirectX/DirectX12/stdafx/stdafx.h"
+class ResourceManager;
 class DepthManager
 {
 	friend class GraphicsEngine;
@@ -9,7 +11,7 @@ public:
 	}
 	// Destructor
 	~DepthManager() = default;
-	
+	void ResizeDepthBuffer(ID3D12Device8* device, ResourceManager* resourceManager, const UINT64& width, const UINT& height);
 	// Getter
 	uint32_t GetDepthBufferIndex() const { return m_DepthBufferIndex; }
 	uint32_t GetDebugDepthBufferIndex() const { return m_DebugDepthBufferIndex; }

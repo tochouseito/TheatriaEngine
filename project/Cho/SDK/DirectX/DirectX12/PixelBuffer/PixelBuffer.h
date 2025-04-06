@@ -41,6 +41,9 @@ public:
 	}
 	// リソースの生成
 	void CreatePixelBufferResource(ID3D12Device8* device, D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES& state);
+	// リソースの再生成
+	void RemakePixelBufferResource(ID3D12Device8* device, D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES& state);
+	// SRVの生成
 	bool CreateSRV(ID3D12Device8* device, D3D12_SHADER_RESOURCE_VIEW_DESC& srvDesc, DescriptorHeap* pDescriptorHeap);
 	// ピクセルバッファの幅を取得
 	UINT64 GetWidth() const { return m_Width; }

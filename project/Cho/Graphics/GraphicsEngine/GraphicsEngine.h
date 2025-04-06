@@ -65,6 +65,8 @@ public:
 	void Render(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode = RenderMode::Game);
 	void PostRender(ImGuiManager* imgui, RenderMode mode);
 	void PostRenderWithImGui(ImGuiManager* imgui);
+	// レンダーターゲットテクスチャ、ImGui、スワップチェーンのリサイズ
+	void ScreenResize();
 
 	// GameTextureのBufferIDを取得
 	uint32_t GetGameTextureBufferID() { return m_RenderTextures[GameScreen].m_BufferIndex.value(); }

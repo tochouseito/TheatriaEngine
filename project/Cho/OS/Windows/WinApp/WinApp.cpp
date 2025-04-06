@@ -14,6 +14,7 @@ WNDCLASS WinApp::m_WC = {}; // ウィンドウクラス
 bool WinApp::m_IsRun=true; // アプリケーションが動作中かを示すフラグ
 UINT64 WinApp::m_WindowWidth = 1280; // ウィンドウの幅
 UINT WinApp::m_WindowHeight = 720; // ウィンドウの高さ
+bool WinApp::m_IsResize = false; // ウィンドウのリサイズフラグ
 
 // ウィンドウプロシージャ
 LRESULT CALLBACK WinApp::WindowProc(HWND hWnd, UINT msg,
@@ -36,7 +37,7 @@ LRESULT CALLBACK WinApp::WindowProc(HWND hWnd, UINT msg,
 		if (wparam != SIZE_MINIMIZED) {
 			int width = LOWORD(lparam);
 			int height = HIWORD(lparam);
-			OnWindowResize(width, height);
+			OnWindowResize(static_cast<UINT64>(width), static_cast<UINT>(height));
 		}
 		break;
 
@@ -162,8 +163,20 @@ void WinApp::OpenWebURL(const wchar_t* url)
 	ShellExecuteW(nullptr, L"open", url, nullptr, nullptr, SW_SHOWNORMAL);
 }
 
+bool WinApp::IsResizeWindow()
+{
+	if (m_IsResize)
+	{
+		m_IsResize = false;
+		return true;
+	} else
+	{
+		return false;
+	}
+}
+
 // ウィンドウサイズ変更時の処理
-void WinApp::OnWindowResize(int width, int height) {
+void WinApp::OnWindowResize(UINT64 width, UINT height) {
 	if (width != 0 && height != 0) {
 		m_WindowWidth = width;
 		m_WindowHeight = height;
@@ -174,13 +187,6 @@ void WinApp::OnWindowResize(int width, int height) {
 		int newHeight = rect.bottom - rect.top;
 		newWidth;
 		newHeight;
-		static bool flag = false;
-		if (flag) {
-			// ImGuiのディスプレイサイズを更新
-			ImGuiIO& io = ImGui::GetIO();
-			io.DisplaySize = ImVec2(static_cast<float>(width), static_cast<float>(height));
-
-		}
-		flag = true;
+		m_IsResize = true;
 	}
 }

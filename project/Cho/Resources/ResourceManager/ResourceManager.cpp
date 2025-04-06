@@ -97,6 +97,27 @@ uint32_t ResourceManager::CreateTextureBuffer(D3D12_RESOURCE_DESC& desc, D3D12_C
 	return index;
 }
 
+bool ResourceManager::RemakeColorBuffer(std::optional<uint32_t>& index, D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES state)
+{
+	ColorBuffer* buffer = GetBuffer<ColorBuffer>(index);
+	buffer->RemakePixelBufferResource(m_Device, desc, clearValue, state);
+	// SRVの設定
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Format = desc.Format;
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MipLevels = 1;
+	// Viewの生成
+	buffer->CreateSRV(m_Device, srvDesc, m_SUVDescriptorHeap.get());
+	// RTVの設定
+	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
+	rtvDesc.Format = desc.Format;
+	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+	// Viewの生成
+	buffer->CreateRTV(m_Device, rtvDesc, m_RTVDescriptorHeap.get());
+	return true;
+}
+
 void ResourceManager::CreateIntegrationBuffers()
 {
 	// Transform統合バッファ

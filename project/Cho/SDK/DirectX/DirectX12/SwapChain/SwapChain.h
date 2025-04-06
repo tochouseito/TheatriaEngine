@@ -28,6 +28,8 @@ public:
 	void CreateResource(ID3D12Device8* device, ResourceManager* resourceManager);
 	// Present
 	void Present();
+	// Resize
+	void Resize(ID3D12Device8* device, const UINT64& width, const UINT& height);
 	SwapChainBuffer* GetBuffer(const uint32_t& index) { return m_BufferData[index].get(); }
 	// GetBackBufferIndex
 	UINT GetCurrentBackBufferIndex() const { return m_SwapChain->GetCurrentBackBufferIndex(); }

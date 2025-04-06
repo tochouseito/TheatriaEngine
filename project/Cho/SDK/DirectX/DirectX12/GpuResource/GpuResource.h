@@ -23,7 +23,7 @@ public:
     }
     virtual void Destroy()
     {
-        m_pResource = nullptr;
+        m_pResource.Reset();
 		m_UseState = D3D12_RESOURCE_STATE_COMMON;
         ++m_VersionID;
     }
@@ -46,6 +46,15 @@ public:
         D3D12_RESOURCE_STATES InitialState,
         D3D12_CLEAR_VALUE* pClearValue = nullptr
     );
+    // リソースを再生成
+	void RemakeResource(
+		ID3D12Device* device,
+		D3D12_HEAP_PROPERTIES& heapProperties,
+		D3D12_HEAP_FLAGS heapFlags,
+		D3D12_RESOURCE_DESC& desc,
+		D3D12_RESOURCE_STATES InitialState,
+		D3D12_CLEAR_VALUE* pClearValue = nullptr
+	);
 protected:
     // リソース
     ComPtr<ID3D12Resource> m_pResource = nullptr;

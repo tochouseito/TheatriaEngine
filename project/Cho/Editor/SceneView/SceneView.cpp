@@ -34,8 +34,8 @@ void SceneView::Window()
     }*/
     //debugCamera_->SetCurrentMousePos(vec);
     // アスペクト比を計算してカメラに設定
-    //float newAspect = availableSize.x / availableSize.y;
-    //debugCamera_->SetAspect(newAspect);
+    float newAspect = availableSize.x / availableSize.y;
+	m_DebugCamera->SetAspect(newAspect);
 
     // テクスチャを描画
     D3D12_GPU_DESCRIPTOR_HANDLE srvHandle = m_EditorManager->GetEditorCommand()->GetSceneTextureHandle();

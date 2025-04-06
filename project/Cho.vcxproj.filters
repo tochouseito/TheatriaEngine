@@ -366,6 +366,7 @@
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\IndexBuffer\IndexBuffer.h" />
     <ClInclude Include="Cho\GameCore\GameCoreCommand\GameCoreCommand.h" />
     <ClInclude Include="Cho\Editor\DebugCamera\DebugCamera.h" />
+    <ClInclude Include="Cho\SDK\ImGui\ImGuiUtlity\ImGuiUtlity.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Cho\Resources\Shader\header\Demo.hlsli">

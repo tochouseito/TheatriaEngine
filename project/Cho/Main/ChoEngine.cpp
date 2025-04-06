@@ -128,6 +128,11 @@ void ChoEngine::Start()
 {
 	// PlatformLayer記録開始
 	platformLayer->StartFrame();
+	// ウィンドウのリサイズ処理
+	if (WinApp::IsResizeWindow())
+	{
+		graphicsEngine->ScreenResize();
+	}
 	// GameCore開始
 	gameCore->Start(*resourceManager);
 }

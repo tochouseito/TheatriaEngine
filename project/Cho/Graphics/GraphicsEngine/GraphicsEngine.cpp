@@ -5,6 +5,7 @@
 #include "Cho/SDK/ImGui/ImGuiManager/ImGuiManager.h"
 #include "Cho/GameCore/GameCore.h"
 #include "Core/ChoLog/ChoLog.h"
+#include "SDK/ImGui/ImGuiUtlity/ImGuiUtlity.h"
 using namespace Cho;
 
 void GraphicsEngine::Init()
@@ -131,6 +132,61 @@ void GraphicsEngine::PostRenderWithImGui(ImGuiManager* imgui)
 	m_SwapChain->Present();
 	// GPUの完了待ち
 	WaitForGPU(Graphics);
+}
+
+void GraphicsEngine::ScreenResize()
+{
+	// GPUの完了待ち
+	WaitForGPU(Graphics);
+	WaitForGPU(Compute);
+	WaitForGPU(Copy);
+	// ImGuiのリサイズ
+	ImGuiUtility::DisplayResize(static_cast<float>(WinApp::GetWindowWidth()), static_cast<float>(WinApp::GetWindowHeight()));
+	// SwapChainのリサイズ
+	m_SwapChain->Resize(m_Device, WinApp::GetWindowWidth(), WinApp::GetWindowHeight());
+	// DepthBufferのリサイズ
+	m_DepthManager->ResizeDepthBuffer(m_Device, m_ResourceManager, WinApp::GetWindowWidth(), WinApp::GetWindowHeight());
+	// オフスクリーンレンダリング用のリソースをリサイズ
+	// オフスクリーンレンダリング用のリソースを作成
+	D3D12_RESOURCE_DESC resourceDesc = {};
+	resourceDesc.Width = WinApp::GetWindowWidth();
+	resourceDesc.Height = WinApp::GetWindowHeight();
+	resourceDesc.MipLevels = 1;
+	resourceDesc.DepthOrArraySize = 1;
+	resourceDesc.SampleDesc.Count = 1;
+	resourceDesc.Format = PixelFormat;
+	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+	// クリア値の設定
+	D3D12_CLEAR_VALUE clearValue = {};
+	clearValue.Format = PixelFormat;
+	clearValue.Color[0] = kClearColor[0];
+	clearValue.Color[1] = kClearColor[1];
+	clearValue.Color[2] = kClearColor[2];
+	clearValue.Color[3] = kClearColor[3];
+	for (int i =0 ; i<static_cast<int>(RenderTextureType::RenderTextureTypeCount);i++)
+	{
+		RenderTextureType renderTexType = static_cast<RenderTextureType>(i);
+		switch (renderTexType)
+		{
+		case GameScreen:
+			// リサイズ
+			m_ResourceManager->RemakeColorBuffer(m_RenderTextures[renderTexType].m_BufferIndex, resourceDesc, &clearValue, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			m_RenderTextures[renderTexType].m_Width = WinApp::GetWindowWidth();
+			m_RenderTextures[renderTexType].m_Height = WinApp::GetWindowHeight();
+			break;
+		case SceneScreen:
+			// リサイズ
+			m_ResourceManager->RemakeColorBuffer(m_RenderTextures[renderTexType].m_BufferIndex, resourceDesc, &clearValue, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			m_RenderTextures[renderTexType].m_Width = WinApp::GetWindowWidth();
+			m_RenderTextures[renderTexType].m_Height = WinApp::GetWindowHeight();
+			break;
+		case RenderTextureTypeCount:
+			break;
+		default:
+			break;
+		}
+	}
 }
 
 void GraphicsEngine::BeginCommandContext(CommandContext* context)
@@ -410,22 +466,6 @@ void GraphicsEngine::CreateOffscreenBuffer()
 
 void GraphicsEngine::CreateDebugOffscreenBuffer()
 {
-	// DepthBufferの生成
-	D3D12_RESOURCE_DESC resourceDesc = {};
-	resourceDesc.Width = WinApp::GetWindowWidth();
-	resourceDesc.Height = WinApp::GetWindowHeight();
-	resourceDesc.MipLevels = 1;
-	resourceDesc.DepthOrArraySize = 1;
-	resourceDesc.SampleDesc.Count = 1;
-	resourceDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-	resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
-	// デバッグ用DepthBufferの生成
-	m_DepthManager->SetDebugDepthBufferIndex(m_ResourceManager->CreateDepthBuffer(resourceDesc, D3D12_RESOURCE_STATE_DEPTH_WRITE));
-}
-
-void GraphicsEngine::CreateDebugDepthBuffer()
-{
 	// デバッグ用オフスクリーンレンダリング用のリソースを作成
 	D3D12_RESOURCE_DESC resourceDesc = {};
 	resourceDesc.Width = WinApp::GetWindowWidth();
@@ -446,4 +486,20 @@ void GraphicsEngine::CreateDebugDepthBuffer()
 	m_RenderTextures[RenderTextureType::SceneScreen].m_BufferIndex = m_ResourceManager->CreateColorBuffer(resourceDesc, &clearValue, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 	m_RenderTextures[RenderTextureType::SceneScreen].m_Width = resourceDesc.Width;
 	m_RenderTextures[RenderTextureType::SceneScreen].m_Height = resourceDesc.Height;
+}
+
+void GraphicsEngine::CreateDebugDepthBuffer()
+{
+	// DepthBufferの生成
+	D3D12_RESOURCE_DESC resourceDesc = {};
+	resourceDesc.Width = WinApp::GetWindowWidth();
+	resourceDesc.Height = WinApp::GetWindowHeight();
+	resourceDesc.MipLevels = 1;
+	resourceDesc.DepthOrArraySize = 1;
+	resourceDesc.SampleDesc.Count = 1;
+	resourceDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+	// デバッグ用DepthBufferの生成
+	m_DepthManager->SetDebugDepthBufferIndex(m_ResourceManager->CreateDepthBuffer(resourceDesc, D3D12_RESOURCE_STATE_DEPTH_WRITE));
 }

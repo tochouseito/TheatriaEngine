@@ -99,6 +99,7 @@ public:
 
 
 	// RemakeBuffer
+	bool RemakeColorBuffer(std::optional<uint32_t>& index, D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES state);
 
 	// ReleaseBuffer
 

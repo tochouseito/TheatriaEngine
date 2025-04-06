@@ -276,6 +276,7 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\IndexBuffer\IndexBuffer.h" />
     <ClInclude Include="Cho\GameCore\GameCoreCommand\GameCoreCommand.h" />
     <ClInclude Include="Cho\Editor\DebugCamera\DebugCamera.h" />
+    <ClInclude Include="Cho\SDK\ImGui\ImGuiUtlity\ImGuiUtlity.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Cho\Externals\ChoMath\ChoMath.vcxproj">

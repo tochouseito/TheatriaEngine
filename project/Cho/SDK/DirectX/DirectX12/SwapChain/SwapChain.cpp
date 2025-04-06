@@ -14,16 +14,16 @@ void SwapChain::CreateSwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* 
 	HRESULT hr;
 
 	// スワップチェーンを生成する
-	m_Desc.Width = static_cast<UINT>(width);                     // 画面の幅。ウィンドウのクライアント領域を同じものにしておく
-	m_Desc.Height = height;                   // 画面の高さ。ウィンドウのクライアント領域を同じものにしておく
-	m_Desc.Format = PixelFormat;          // 色の形式
-	m_Desc.SampleDesc.Count = 1;                         // マルチサンプルしない
-	m_Desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;// 描画のターゲットとして利用する
-	m_Desc.BufferCount = bufferCount;                              // ダブルバッファ
-	m_Desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;   // モニタにうつしたら、中身を破棄
+	m_Desc.Width = static_cast<UINT>(width);			  // 画面の幅。ウィンドウのクライアント領域を同じものにしておく
+	m_Desc.Height = height;								  // 画面の高さ。ウィンドウのクライアント領域を同じものにしておく
+	m_Desc.Format = PixelFormat;						  // 色の形式
+	m_Desc.SampleDesc.Count = 1;                          // マルチサンプルしない
+	m_Desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT; // 描画のターゲットとして利用する
+	m_Desc.BufferCount = bufferCount;                     // ダブルバッファ
+	m_Desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;    // モニタにうつしたら、中身を破棄
 	m_Desc.Flags =
 		DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING |
-		DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT; // ティアリングサポート
+		DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;// ティアリングサポート
 
 	// コマンドキュー、ウィンドウハンドル、設定を渡して生成する
 	hr = dxgiFactory->CreateSwapChainForHwnd(
@@ -54,6 +54,10 @@ void SwapChain::CreateSwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* 
 
 void SwapChain::CreateResource(ID3D12Device8* device, ResourceManager* resourceManager)
 {
+	// RTVの設定
+	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
+	rtvDesc.Format = m_Desc.Format;
+	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;// 2dテクスチャとして書き込む
 	for (uint32_t i = 0; i < bufferCount; ++i)
 	{
 		m_BufferData[i] = std::make_unique<SwapChainBuffer>();
@@ -61,15 +65,10 @@ void SwapChain::CreateResource(ID3D12Device8* device, ResourceManager* resourceM
 		ID3D12Resource* pResource = nullptr;
 		HRESULT hr = m_SwapChain->GetBuffer(i, IID_PPV_ARGS(&pResource));
 		Log::Write(LogLevel::Assert, "SwapChain buffer created.", hr);
-
 		m_BufferData[i]->pResource.Attach(pResource);
 		m_BufferData[i]->backBufferIndex = i;
 		m_BufferData[i]->m_RTVHandleIndex = resourceManager->GetRTVDHeap()->Allocate();
 		m_BufferData[i]->m_RTVCpuHandle = resourceManager->GetRTVDHeap()->GetCPUDescriptorHandle(m_BufferData[i]->m_RTVHandleIndex.value());
-		// RTVの設定
-		D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
-		rtvDesc.Format = m_Desc.Format;
-		rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;// 2dテクスチャとして書き込む
 		// Viewの生成
 		device->CreateRenderTargetView(
 			m_BufferData[i]->pResource.Get(),
@@ -83,5 +82,34 @@ void SwapChain::Present()
 {
 	HRESULT hr = m_SwapChain->Present(1, 0);
 	Log::Write(LogLevel::Assert, "SwapChain presented.", hr);
+}
+
+void SwapChain::Resize(ID3D12Device8* device, const UINT64& width, const UINT& height)
+{
+	for (uint32_t i = 0; i < bufferCount; ++i)
+	{
+		m_BufferData[i]->pResource.Reset();
+		m_BufferData[i]->pResource = nullptr;
+	}
+	m_Desc.Width = static_cast<UINT>(width);  // 画面の幅。ウィンドウのクライアント領域を同じものにしておく
+	m_Desc.Height = height;                   // 画面の高さ。ウィンドウのクライアント領域を同じものにしておく
+	HRESULT hr = m_SwapChain->ResizeBuffers(bufferCount, static_cast<UINT>(width), height, PixelFormat,
+		DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING | DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT);
+	Log::Write(LogLevel::Assert, "SwapChain resized.", hr);
+	// RTVの設定
+	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
+	rtvDesc.Format = m_Desc.Format;
+	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;// 2dテクスチャとして書き込む
+	for (uint32_t i = 0; i < bufferCount; ++i)
+	{
+		hr = m_SwapChain->GetBuffer(i, IID_PPV_ARGS(&m_BufferData[i]->pResource));
+		Log::Write(LogLevel::Assert, "SwapChain buffer created.", hr);
+		// Viewの生成
+		device->CreateRenderTargetView(
+			m_BufferData[i]->pResource.Get(),
+			&rtvDesc,
+			m_BufferData[i]->m_RTVCpuHandle
+		);
+	}
 }
 

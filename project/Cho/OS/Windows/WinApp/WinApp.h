@@ -44,10 +44,11 @@ public:// メンバ関数
 	static HINSTANCE GetHInstance() { return m_WC.hInstance; }
 	static UINT64 GetWindowWidth() { return m_WindowWidth; }
 	static UINT GetWindowHeight() { return m_WindowHeight; }
+	static bool IsResizeWindow();
 private:
 
 	// ウィンドウサイズ変更時の処理
-	static void OnWindowResize(int width, int height);
+	static void OnWindowResize(UINT64 width, UINT height);
 
 private:// メンバ変数
 	static HWND m_HWND; // ウィンドウハンドル
@@ -55,5 +56,6 @@ private:// メンバ変数
 	static bool m_IsRun; // アプリケーションが動作中かを示すフラグ
 	static UINT64 m_WindowWidth; // ウィンドウの幅
 	static UINT m_WindowHeight; // ウィンドウの高さ
+	static bool m_IsResize; // ウィンドウサイズ変更フラグ
 };
 
