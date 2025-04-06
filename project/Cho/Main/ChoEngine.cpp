@@ -51,7 +51,7 @@ void ChoEngine::Initialize()
 	// EditorCommand初期化
 	editorCommand = std::make_unique<EditorCommand>(resourceManager.get(), graphicsEngine.get(), gameCore->GetGameCoreCommand());
 	// EditorManager初期化
-	editorManager = std::make_unique<EditorManager>(editorCommand.get());
+	editorManager = std::make_unique<EditorManager>(editorCommand.get(),platformLayer->GetInputManager());
 	editorManager->Initialize();
 }
 
@@ -118,9 +118,9 @@ void ChoEngine::Draw()
 	// 描画
 	graphicsEngine->Render(*resourceManager, *gameCore, RenderMode::Game);
 	// シーン描画
-	//graphicsEngine->Render(*resourceManager, *gameCore, RenderMode::Debug);
+	graphicsEngine->Render(*resourceManager, *gameCore, RenderMode::Debug);
 	// 描画後片付け
-	graphicsEngine->PostRender(imGuiManager.get());
+	graphicsEngine->PostRender(imGuiManager.get(), RenderMode::Game);
 	//graphicsEngine->PostRenderWithImGui(imGuiManager.get());
 }
 

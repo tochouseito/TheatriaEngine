@@ -122,6 +122,7 @@ public:
 	GameCoreCommand* GetGameCoreCommandPtr() { return m_GameCoreCommand; }
 
 	// レンダリングテクスチャのハンドルを取得
+	D3D12_GPU_DESCRIPTOR_HANDLE GetGameTextureHandle();
 	D3D12_GPU_DESCRIPTOR_HANDLE GetSceneTextureHandle();
 private:
 	std::vector<std::unique_ptr<ICommand>> m_Commands;

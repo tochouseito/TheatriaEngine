@@ -30,6 +30,7 @@ enum RenderMode
 {
 	Game=0,
 	Debug,
+	Release,
 	RenderModeCount,
 };
 
@@ -58,14 +59,17 @@ public:
 	// Destructor
 	~GraphicsEngine() = default;
 	void Init();
+	// SwapChainの生成
 	void CreateSwapChain(IDXGIFactory7* dxgiFactory);
 	void PreRender();
 	void Render(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode = RenderMode::Game);
-	void PostRender(ImGuiManager* imgui);
+	void PostRender(ImGuiManager* imgui, RenderMode mode);
 	void PostRenderWithImGui(ImGuiManager* imgui);
 
+	// GameTextureのBufferIDを取得
+	uint32_t GetGameTextureBufferID() { return m_RenderTextures[GameScreen].m_BufferIndex.value(); }
 	// SceneTextureのBufferIDを取得
-	uint32_t GetSceneTextureBufferID() { return m_RenderTextures[GameScreen].m_BufferIndex.value(); }
+	uint32_t GetSceneTextureBufferID() { return m_RenderTextures[SceneScreen].m_BufferIndex.value(); }
 private:
 	// コマンドコンテキストの取得
 	CommandContext* GetCommandContext() { return m_GraphicsCore->GetCommandManager()->GetCommandContext(); }
@@ -83,8 +87,14 @@ private:
 	void DrawLighting(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode);
 	void DrawForward(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode);
 	void DrawPostProcess(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode);
+	// 深度バッファの生成
 	void CreateDepthBuffer();
+	// オフスクリーンバッファの生成
 	void CreateOffscreenBuffer();
+	// デバッグ用オフスクリーンレンダリングテクスチャ
+	void CreateDebugOffscreenBuffer();
+	// デバッグ用深度バッファの生成
+	void CreateDebugDepthBuffer();
 
 	ID3D12Device8* m_Device = nullptr;
 	ResourceManager* m_ResourceManager = nullptr;

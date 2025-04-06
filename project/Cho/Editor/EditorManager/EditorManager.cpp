@@ -5,6 +5,8 @@ void EditorManager::Initialize()
 {
 	// MainMenu
 	m_MainMenu->Initialize();
+	// DebugCamera
+	m_DebugCamera->Initialize();
 	// SceneView
 	m_SceneView->Initialize();
 	// GameView

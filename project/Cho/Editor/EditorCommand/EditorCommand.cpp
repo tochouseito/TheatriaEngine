@@ -67,6 +67,14 @@ void AddRenderComponent::Undo(EditorCommand* edit)
 	edit;
 }
 
+D3D12_GPU_DESCRIPTOR_HANDLE EditorCommand::GetGameTextureHandle()
+{
+	// ゲームレンダリングテクスチャのバッファインデックスを取得
+	uint32_t bufferIndex = m_GraphicsEngine->GetGameTextureBufferID();
+	// ハンドルを取得
+	return m_ResourceManager->GetBuffer<ColorBuffer>(bufferIndex)->GetSRVGpuHandle();
+}
+
 // レンダリングテクスチャのハンドルを取得
 D3D12_GPU_DESCRIPTOR_HANDLE EditorCommand::GetSceneTextureHandle()
 {

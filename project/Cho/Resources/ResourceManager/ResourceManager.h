@@ -166,12 +166,21 @@ public:
 		}
 		return nullptr;
 	}
+	// DebugCameraBuffer
+	void SetDebugCameraBuffer(ConstantBuffer<BUFFER_DATA_VIEWPROJECTION>* buffer)
+	{
+		m_DebugCameraBuffer = buffer;
+	}
+	ConstantBuffer<BUFFER_DATA_VIEWPROJECTION>* GetDebugCameraBuffer() const
+	{
+		return m_DebugCameraBuffer;
+	}
 private:
 	// Heap生成
 	void CreateHeap(ID3D12Device8* device);
 	static const uint32_t kMaxSUVDescriptorHeapSize = 1024;
-	static const uint32_t kMaxRTVDescriptorHeapSize = 16;
-	static const uint32_t kMaxDSVDescriptorHeapSize = 1;
+	static const uint32_t kMaxRTVDescriptorHeapSize = 20;
+	static const uint32_t kMaxDSVDescriptorHeapSize = 2;
 
 	// Device
 	ID3D12Device8* m_Device = nullptr;
@@ -204,5 +213,7 @@ private:
 	FVector<std::unique_ptr<PixelBuffer>> m_TextureBuffers;
 	// 統合バッファ
 	std::array<std::unique_ptr<IIntegrationData>, IntegrationDataType::kCount> m_IntegrationData;
+	// デバッグカメラバッファ
+	ConstantBuffer<BUFFER_DATA_VIEWPROJECTION>* m_DebugCameraBuffer = nullptr;
 };
 

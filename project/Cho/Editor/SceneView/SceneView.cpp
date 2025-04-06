@@ -74,6 +74,12 @@ void SceneView::Window()
     //    excludeRightClickMenu = false;
     //}
 
+    // ウィンドウ上にカーソルがあるときにデバッグカメラを更新する
+    if (ImGui::IsWindowHovered())
+    {
+        m_DebugCamera->Update();
+    }
+
     ImGui::End();
 
     // スタイルを元に戻す
