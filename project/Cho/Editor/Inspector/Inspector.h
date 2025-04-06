@@ -1,5 +1,6 @@
 #pragma once
 #include "Editor/BaseEditor/BaseEditor.h"
+class GameObject;
 class Inspector : public BaseEditor
 {
 public:
@@ -13,5 +14,13 @@ public:
 	void Initialize() override;
 	void Update() override;
 	void Window() override;
+private:
+	void ComponentsView(GameObject* object);
+	void TransformComponentView(GameObject* object);
+	void MeshFilterComponentView(GameObject* object);
+	void MeshRendererComponentView(GameObject* object);
+	void CameraComponentView(GameObject* object);
+	// コンポーネントの追加
+	void AddComponent(GameObject* object);
 };
 

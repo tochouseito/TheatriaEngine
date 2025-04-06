@@ -4,35 +4,13 @@
 #include "Cho/Graphics/GraphicsEngine/GraphicsEngine.h"
 #include "Cho/GameCore/GameCore.h"
 
-void AddGameObjectCommand::Execute(EditorCommand* edit)
+void AddMeshFilterComponent::Execute(EditorCommand* edit)
 {
-	edit->GetGameCoreCommandPtr()->AddGameObject(m_Name,m_Type);
+	// MeshFilterComponentを追加
+	edit->GetGameCoreCommandPtr()->AddMeshFilterComponent(m_Entity,edit->GetResourceManagerPtr()->GetModelManager());
 }
 
-void AddGameObjectCommand::Undo(EditorCommand* edit)
-{
-	edit;
-}
-
-void AddTransformComponent::Execute(EditorCommand* edit)
-{
-	uint32_t mapID = edit->GetResourceManagerPtr()->GetIntegrationData(IntegrationDataType::Transform)->GetMapID();
-	edit->GetGameCoreCommandPtr()->AddTransformComponent(m_Entity,mapID);
-	m_MapID = mapID;
-}
-
-void AddTransformComponent::Undo(EditorCommand* edit)
-{
-	edit;
-}
-
-void AddMeshComponent::Execute(EditorCommand* edit)
-{
-	// MeshComponentを追加
-	edit->GetGameCoreCommandPtr()->AddMeshComponent(m_Entity,edit->GetResourceManagerPtr()->GetModelManager());
-}
-
-void AddMeshComponent::Undo(EditorCommand* edit)
+void AddMeshFilterComponent::Undo(EditorCommand* edit)
 {
 	edit;
 }
@@ -57,12 +35,13 @@ void SetMainCamera::Undo(EditorCommand* edit)
 	edit;
 }
 
-void AddRenderComponent::Execute(EditorCommand* edit)
+void AddMeshRendererComponent::Execute(EditorCommand* edit)
 {
-	edit->GetGameCoreCommandPtr()->AddRenderComponent(m_Entity);
+	// MeshRendererComponentを追加
+	edit->GetGameCoreCommandPtr()->AddMeshRendererComponent(m_Entity);
 }
 
-void AddRenderComponent::Undo(EditorCommand* edit)
+void AddMeshRendererComponent::Undo(EditorCommand* edit)
 {
 	edit;
 }
@@ -82,4 +61,30 @@ D3D12_GPU_DESCRIPTOR_HANDLE EditorCommand::GetSceneTextureHandle()
 	uint32_t bufferIndex = m_GraphicsEngine->GetSceneTextureBufferID();
 	// ハンドルを取得
 	return m_ResourceManager->GetBuffer<ColorBuffer>(bufferIndex)->GetSRVGpuHandle();
+}
+
+void Add3DObjectCommand::Execute(EditorCommand* edit)
+{
+	uint32_t mapID = edit->GetResourceManagerPtr()->GetIntegrationData(IntegrationDataType::Transform)->GetMapID();
+	GameObject* object = edit->GetGameCoreCommandPtr()->Add3DObject(mapID);
+	m_MapID = mapID;
+	edit->SetSelectedObject(object);
+}
+
+void Add3DObjectCommand::Undo(EditorCommand* edit)
+{
+	edit;
+}
+
+void AddCameraObjectCommand::Execute(EditorCommand* edit)
+{
+	uint32_t mapID = edit->GetResourceManagerPtr()->GetIntegrationData(IntegrationDataType::Transform)->GetMapID();
+	GameObject* object = edit->GetGameCoreCommandPtr()->AddCameraObject(mapID,edit->GetResourceManagerPtr());
+	m_MapID = mapID;
+	edit->SetSelectedObject(object);
+}
+
+void AddCameraObjectCommand::Undo(EditorCommand* edit)
+{
+	edit;
 }

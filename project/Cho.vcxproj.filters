@@ -367,6 +367,7 @@
     <ClInclude Include="Cho\GameCore\GameCoreCommand\GameCoreCommand.h" />
     <ClInclude Include="Cho\Editor\DebugCamera\DebugCamera.h" />
     <ClInclude Include="Cho\SDK\ImGui\ImGuiUtlity\ImGuiUtlity.h" />
+    <ClInclude Include="Cho\Core\Utility\GenerateUnique.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Cho\Resources\Shader\header\Demo.hlsli">

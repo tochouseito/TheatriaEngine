@@ -83,35 +83,19 @@ void MainMenu::FileMenu()
 
 void MainMenu::EditMenu()
 {
-    if (ImGui::BeginMenu("Edit"))
+    if (ImGui::BeginMenu("追加"))
     {
         // 編集アクションをここに追加
-
-        if (ImGui::MenuItem("Test AddGameObject"))
+        if (ImGui::MenuItem("3Dオブジェクト"))
         {
-            // テスト用
-            std::unique_ptr<AddGameObjectCommand> addGameObj = std::make_unique<AddGameObjectCommand>(std::wstring(L"テストキューブ"),static_cast<uint32_t>(ObjectType::MeshObject));
-            m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addGameObj));
-            std::unique_ptr<AddTransformComponent> addTFComp = std::make_unique<AddTransformComponent>(uint32_t(1));
-            m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addTFComp));
-			std::unique_ptr<AddMeshComponent> addMeshComp = std::make_unique<AddMeshComponent>(uint32_t(1));
-			m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addMeshComp));
-			std::unique_ptr<AddRenderComponent> addRenderComp = std::make_unique<AddRenderComponent>(uint32_t(1));
-			m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addRenderComp));
-			std::unique_ptr<AddGameObjectCommand> addGameObj2 = std::make_unique<AddGameObjectCommand>(std::wstring(L"テストカメラ"), static_cast<uint32_t>(ObjectType::Camera));
-			m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addGameObj2));
-			std::unique_ptr<AddTransformComponent> addTFComp2 = std::make_unique<AddTransformComponent>(uint32_t(2));
-			m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addTFComp2));
-			std::unique_ptr<AddCameraComponent> addCamComp = std::make_unique<AddCameraComponent>(uint32_t(2));
-			m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addCamComp));
-            std::unique_ptr<SetMainCamera> setCam = std::make_unique<SetMainCamera>(uint32_t(1));
-            m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(setCam));
+            std::unique_ptr<Add3DObjectCommand> add3DObject = std::make_unique<Add3DObjectCommand>();
+            m_EditorCommand->ExecuteCommand(std::move(add3DObject));
         }
-
-        if (ImGui::MenuItem("Test SetCamera"))
-        {
-			
-        }
+		if (ImGui::MenuItem("カメラオブジェクト"))
+		{
+			std::unique_ptr<AddCameraObjectCommand> addCameraObject = std::make_unique<AddCameraObjectCommand>();
+			m_EditorCommand->ExecuteCommand(std::move(addCameraObject));
+		}
 
         ImGui::EndMenu(); // 「Edit」メニューを終了
     }

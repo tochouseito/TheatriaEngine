@@ -39,13 +39,13 @@ struct CameraComponent final
 };
 
 // メッシュコンポーネント
-struct MeshComponent final
+struct MeshFilterComponent final
 {
 	std::optional<uint32_t> modelID = std::nullopt;// Model選択用ID
 };
 
 // 描画コンポーネント
-struct RenderComponent final
+struct MeshRendererComponent final
 {
 	bool visible = true;// 描画フラグ
 };

@@ -11,38 +11,35 @@ public:
 	virtual void Execute(EditorCommand* edit) = 0;
 	virtual void Undo(EditorCommand* edit) = 0;
 };
-// Test:GameObjectを追加する
-class AddGameObjectCommand :public ICommand
+// 3Dオブジェクトを追加するコマンド
+class Add3DObjectCommand :public ICommand
 {
 public:
-	AddGameObjectCommand(const std::wstring& name,const uint32_t& type)
-		:m_Name(name), m_Type(type)
+	Add3DObjectCommand()
 	{
 	}
 	void Execute(EditorCommand* edit)override;
 	void Undo(EditorCommand* edit)override;
 private:
-	std::wstring m_Name;
-	uint32_t m_Type;
-};
-class AddTransformComponent :public ICommand
-{
-public:
-	AddTransformComponent(const uint32_t& entity):
-		m_Entity(entity)
-	{
-
-	}
-	void Execute(EditorCommand* edit)override;
-	void Undo(EditorCommand* edit)override;
-private:
-	uint32_t m_Entity;
 	uint32_t m_MapID;
 };
-class AddMeshComponent :public ICommand
+// カメラオブジェクトを追加するコマンド
+class AddCameraObjectCommand :public ICommand
 {
 public:
-	AddMeshComponent(const uint32_t& entity) :
+	AddCameraObjectCommand()
+	{
+	}
+	void Execute(EditorCommand* edit)override;
+	void Undo(EditorCommand* edit)override;
+private:
+	uint32_t m_MapID;
+};
+// MeshFilterComponentを追加するコマンド
+class AddMeshFilterComponent :public ICommand
+{
+public:
+	AddMeshFilterComponent(const uint32_t& entity) :
 		m_Entity(entity)
 	{
 	}
@@ -51,10 +48,10 @@ public:
 private:
 	uint32_t m_Entity;
 };
-class AddRenderComponent :public ICommand
+class AddMeshRendererComponent :public ICommand
 {
 public:
-	AddRenderComponent(const uint32_t& entity) :
+	AddMeshRendererComponent(const uint32_t& entity) :
 		m_Entity(entity)
 	{
 	}

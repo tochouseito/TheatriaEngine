@@ -208,6 +208,7 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClCompile Include="Cho\Editor\PipelineEditor\PipelineEditor.cpp" />
     <ClCompile Include="Cho\Editor\PopupMenu\PopupMenu.cpp" />
     <ClInclude Include="Cho\Core\ChoLog\ChoLog.h" />
+    <ClInclude Include="Cho\Core\Utility\GenerateUnique.h" />
     <ClInclude Include="Cho\Resources\AssetManager\AssetManager.h" />
     <ClInclude Include="Cho\Editor\BaseEditor\BaseEditor.h" />
     <ClInclude Include="Cho\Editor\AnimationEditor\AnimationEditor.h" />
