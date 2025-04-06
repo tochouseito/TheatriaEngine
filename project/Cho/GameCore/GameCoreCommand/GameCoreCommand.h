@@ -27,6 +27,11 @@ public:
 	~GameCoreCommand()
 	{
 	}
+	// ポインタを取得
+	SceneManager* GetSceneManagerPtr() { return m_pSceneManager; }
+	ECSManager* GetECSManagerPtr() { return m_pECSManager; }
+	SystemManager* GetSystemManagerPtr() { return m_pSystemManager; }
+	ObjectContainer* GetObjectContainerPtr() { return m_pObjectContainer; }
 private:
 	// GameObjectを作成
 	void AddGameObject(const std::wstring& name,const uint32_t& type);

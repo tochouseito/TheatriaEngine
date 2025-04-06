@@ -16,7 +16,7 @@ void ImGuiManager::Initialize(ID3D12Device8* device, ResourceManager* resourceMa
 	io.Fonts->AddFontFromFileTTF(
 		//"C:\\Windows\\Fonts\\Arial.ttf",
 		"C:/Windows/Fonts/msgothic.ttc",
-		16.0f,// フォントファイルのパスとフォントサイズ
+		14.0f,// フォントファイルのパスとフォントサイズ
 		nullptr, io.Fonts->GetGlyphRangesJapanese()// フォントの範囲
 		);
 	unsigned char* texPixels = nullptr;

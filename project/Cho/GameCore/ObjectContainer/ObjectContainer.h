@@ -24,9 +24,9 @@ public:
 		return static_cast<PrefabID>(m_Prefabs.push_back(Prefab(entity, name, type)));
 	}
 	// ゲームオブジェクトを取得
-	GameObject* GetGameObject(const uint32_t& index) { return &m_GameObjects[index]; }
+	GameObject* GetGameObject(const ObjectID& index) { return &m_GameObjects[index]; }
 	// プレハブを取得
-	Prefab* GetPrefab(const uint32_t& index) { return &m_Prefabs[index]; }
+	Prefab* GetPrefab(const ObjectID& index) { return &m_Prefabs[index]; }
 	// ゲームオブジェクトコンテナを取得
 	FVector<GameObject>& GetGameObjects() { return m_GameObjects; }
 	// プレハブコンテナを取得

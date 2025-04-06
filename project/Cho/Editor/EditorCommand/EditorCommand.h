@@ -92,6 +92,7 @@ private:
 class ResourceManager;
 class GraphicsEngine;
 class GameCoreCommand;
+class GameObject;
 class EditorCommand
 {
 public:
@@ -124,10 +125,15 @@ public:
 	// レンダリングテクスチャのハンドルを取得
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGameTextureHandle();
 	D3D12_GPU_DESCRIPTOR_HANDLE GetSceneTextureHandle();
+	// エディタの選択中オブジェクトを取得
+	GameObject* GetSelectedObject() { return m_SelectedObject; }
+	// エディタの選択中オブジェクトをセット
+	void SetSelectedObject(GameObject* object) { m_SelectedObject = object; }
 private:
 	std::vector<std::unique_ptr<ICommand>> m_Commands;
 	ResourceManager* m_ResourceManager = nullptr;
 	GraphicsEngine* m_GraphicsEngine = nullptr;
 	GameCoreCommand* m_GameCoreCommand = nullptr;
+	GameObject* m_SelectedObject = nullptr;
 };
 

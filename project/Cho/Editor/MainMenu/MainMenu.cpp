@@ -90,7 +90,7 @@ void MainMenu::EditMenu()
         if (ImGui::MenuItem("Test AddGameObject"))
         {
             // テスト用
-            std::unique_ptr<AddGameObjectCommand> addGameObj = std::make_unique<AddGameObjectCommand>(std::wstring(L"GameObject1"),static_cast<uint32_t>(ObjectType::MeshObject));
+            std::unique_ptr<AddGameObjectCommand> addGameObj = std::make_unique<AddGameObjectCommand>(std::wstring(L"テストキューブ"),static_cast<uint32_t>(ObjectType::MeshObject));
             m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addGameObj));
             std::unique_ptr<AddTransformComponent> addTFComp = std::make_unique<AddTransformComponent>(uint32_t(1));
             m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addTFComp));
@@ -98,7 +98,7 @@ void MainMenu::EditMenu()
 			m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addMeshComp));
 			std::unique_ptr<AddRenderComponent> addRenderComp = std::make_unique<AddRenderComponent>(uint32_t(1));
 			m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addRenderComp));
-			std::unique_ptr<AddGameObjectCommand> addGameObj2 = std::make_unique<AddGameObjectCommand>(std::wstring(L"Camera"), static_cast<uint32_t>(ObjectType::Camera));
+			std::unique_ptr<AddGameObjectCommand> addGameObj2 = std::make_unique<AddGameObjectCommand>(std::wstring(L"テストカメラ"), static_cast<uint32_t>(ObjectType::Camera));
 			m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addGameObj2));
 			std::unique_ptr<AddTransformComponent> addTFComp2 = std::make_unique<AddTransformComponent>(uint32_t(2));
 			m_EditorManager->GetEditorCommand()->ExecuteCommand(std::move(addTFComp2));

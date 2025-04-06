@@ -34,7 +34,7 @@ void DebugCamera::Update()
 	Quaternion qz = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0.0f, 0.0f, 1.0f), diff.z);
 
 	// 同時回転を累積(順序は気にしなくていい)
-	Quaternion rotation = m_TransformComponent.rotation * qx * qy * qz;//*cameraComponent.rotation;
+	Quaternion rotation = m_TransformComponent.rotation * qx * qy * qz;
 
 	// 回転を考慮する
 	Matrix4 rotationMatrix = ChoMath::MakeRotateMatrix(rotation);

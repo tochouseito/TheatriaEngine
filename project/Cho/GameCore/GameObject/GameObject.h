@@ -12,6 +12,16 @@ enum class ObjectType
 	Count,// カウント
 };
 
+inline const char* ObjectTypeToWString(ObjectType type)
+{
+	switch (type)
+	{
+	case ObjectType::MeshObject: return "MeshObject";
+	case ObjectType::Camera:  return "Camera";
+	default:                  return "Unknown";
+	}
+}
+
 class Prefab 
 {
 public:
@@ -25,6 +35,8 @@ public:
 	{
 	}
 	Entity GetEntity() const noexcept { return m_Entity; }
+	std::wstring GetName() const noexcept { return m_Name; }
+	ObjectType GetType() const noexcept { return m_Type; }
 private:
 	Entity m_Entity;// エンティティ
 	std::wstring m_Name = L"";// プレハブ名
@@ -43,6 +55,8 @@ public:
 	{
 	}
 	Entity GetEntity() const noexcept { return m_Entity; }
+	std::wstring GetName() const noexcept { return m_Name; }
+	ObjectType GetType() const noexcept { return m_Type; }
 private:
 	Entity m_Entity;// エンティティ
 	std::wstring m_Name = L"";// ゲームオブジェクト名
