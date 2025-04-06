@@ -11,8 +11,9 @@
 
 enum RenderTextureType
 {
-	OffScreen = 0,// ゲーム画面用描画結果
-	TypeCount,// 種類数(使用禁止)
+	GameScreen = 0,// ゲーム画面用描画結果
+	SceneScreen,// シーン画面用描画結果
+	RenderTextureTypeCount,// 種類数(使用禁止)
 };
 
 enum DrawPass
@@ -23,6 +24,13 @@ enum DrawPass
 	PostProcess,// ポストプロセス、最終描画
 	SwapChainPass,// SwapChainのバックバッファへの描画
 	PassCount,
+};
+
+enum RenderMode
+{
+	Game=0,
+	Debug,
+	RenderModeCount,
 };
 
 struct RenderTexture
@@ -52,12 +60,12 @@ public:
 	void Init();
 	void CreateSwapChain(IDXGIFactory7* dxgiFactory);
 	void PreRender();
-	void Render(ResourceManager& resourceManager, GameCore& gameCore);
+	void Render(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode = RenderMode::Game);
 	void PostRender(ImGuiManager* imgui);
 	void PostRenderWithImGui(ImGuiManager* imgui);
 
 	// SceneTextureのBufferIDを取得
-	uint32_t GetSceneTextureBufferID() { return m_RenderTextures[OffScreen].m_BufferIndex.value(); }
+	uint32_t GetSceneTextureBufferID() { return m_RenderTextures[GameScreen].m_BufferIndex.value(); }
 private:
 	// コマンドコンテキストの取得
 	CommandContext* GetCommandContext() { return m_GraphicsCore->GetCommandManager()->GetCommandContext(); }
@@ -68,13 +76,13 @@ private:
 	// GPU待機
 	void WaitForGPU(const QueueType& queue);
 	// レンダーターゲットの設定
-	void SetRenderTargets(CommandContext* context,DrawPass pass);
+	void SetRenderTargets(CommandContext* context,DrawPass pass,RenderMode mode = RenderMode::Game);
 	// 描画設定コマンド
 	void SetRenderState(CommandContext* context);
-	void DrawGBuffers(ResourceManager& resourceManager, GameCore& gameCore);
-	void DrawLighting(ResourceManager& resourceManager, GameCore& gameCore);
-	void DrawForward(ResourceManager& resourceManager, GameCore& gameCore);
-	void DrawPostProcess(ResourceManager& resourceManager, GameCore& gameCore);
+	void DrawGBuffers(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode);
+	void DrawLighting(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode);
+	void DrawForward(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode);
+	void DrawPostProcess(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode);
 	void CreateDepthBuffer();
 	void CreateOffscreenBuffer();
 
@@ -85,6 +93,6 @@ private:
 	std::unique_ptr<DepthManager> m_DepthManager = nullptr;
 	std::unique_ptr<PipelineManager> m_PipelineManager = nullptr;
 
-	std::array<RenderTexture, TypeCount> m_RenderTextures;
+	std::array<RenderTexture, RenderTextureType::RenderTextureTypeCount> m_RenderTextures;
 };
 

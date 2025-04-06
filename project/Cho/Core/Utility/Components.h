@@ -1,5 +1,6 @@
 #pragma once
 #include "ChoMath.h"
+#include <optional>
 struct TransformComponent final
 {
 	Vector3 translation = { 0.0f, 0.0f, 0.0f };			// 位置

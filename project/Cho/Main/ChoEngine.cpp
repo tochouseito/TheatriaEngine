@@ -116,7 +116,9 @@ void ChoEngine::Draw()
 	//　描画準備
 	graphicsEngine->PreRender();
 	// 描画
-	graphicsEngine->Render(*resourceManager, *gameCore);
+	graphicsEngine->Render(*resourceManager, *gameCore, RenderMode::Game);
+	// シーン描画
+	//graphicsEngine->Render(*resourceManager, *gameCore, RenderMode::Debug);
 	// 描画後片付け
 	graphicsEngine->PostRender(imGuiManager.get());
 	//graphicsEngine->PostRenderWithImGui(imGuiManager.get());
