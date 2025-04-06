@@ -29,7 +29,9 @@ void Inspector::Window()
 		// オブジェクトのタイプを取得
 		ObjectType objectType = object->GetType();
 		// オブジェクト名とタイプを表示
-		ImGui::Text("%s (%s)", ConvertString(objectName).c_str(), ObjectTypeToWString(objectType));
+		ImGui::Text("Name: %s", ConvertString(objectName).c_str());
+		// タイプを表示
+		ImGui::Text("Type: %s", ObjectTypeToWString(objectType));
 		// コンポーネントの情報を表示
 		ComponentsView(object);
 		// コンポーネントの追加ボタンを表示

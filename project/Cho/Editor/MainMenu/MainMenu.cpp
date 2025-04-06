@@ -45,6 +45,8 @@ void MainMenu::Window()
 
     // メニューバー
     MenuBar();
+    // ツールバー
+    m_Toolbar->Update();
 
     // ウィンドウ内にドックスペースを作成
     ImGuiID dockspace_id = ImGui::GetID("MyDockspace");

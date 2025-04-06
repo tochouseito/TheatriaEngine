@@ -1,10 +1,11 @@
 #pragma once
 #include "Editor/BaseEditor/BaseEditor.h"
+class Toolbar;
 class MainMenu : public BaseEditor
 {
 public:
-	MainMenu(EditorManager* editorManager):
-		BaseEditor(editorManager)
+	MainMenu(EditorManager* editorManager,Toolbar* toolbar):
+		BaseEditor(editorManager), m_Toolbar(toolbar)
 	{
 
 	}
@@ -22,5 +23,7 @@ private:
 	void LayoutMenu();
 	void EngineInfoMenu();
 	void HelpMenu();
+
+	Toolbar* m_Toolbar = nullptr;
 };
 

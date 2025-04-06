@@ -3,6 +3,8 @@
 
 void EditorManager::Initialize()
 {
+	// Toolbar
+	m_Toolbar->Initialize();
 	// MainMenu
 	m_MainMenu->Initialize();
 	// DebugCamera

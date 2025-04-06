@@ -175,6 +175,7 @@
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\IndexBuffer\IndexBuffer.cpp" />
     <ClCompile Include="Cho\GameCore\GameCoreCommand\GameCoreCommand.cpp" />
     <ClCompile Include="Cho\Editor\DebugCamera\DebugCamera.cpp" />
+    <ClCompile Include="Cho\Editor\Toolbar\Toolbar.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cho\Editor\AnimationEditor\AnimationEditor.h">
@@ -368,6 +369,7 @@
     <ClInclude Include="Cho\Editor\DebugCamera\DebugCamera.h" />
     <ClInclude Include="Cho\SDK\ImGui\ImGuiUtlity\ImGuiUtlity.h" />
     <ClInclude Include="Cho\Core\Utility\GenerateUnique.h" />
+    <ClInclude Include="Cho\Editor\Toolbar\Toolbar.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Cho\Resources\Shader\header\Demo.hlsli">
