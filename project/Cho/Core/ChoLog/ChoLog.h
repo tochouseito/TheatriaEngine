@@ -12,6 +12,10 @@
 #include <optional>
 #include <source_location>
 
+#define ICON_FA_PLAY "\xef\x81\x8b"     // ▶
+#define ICON_FA_PAUSE "\xef\x81\x8c"    // ⏸
+#define ICON_FA_STEP_FORWARD "\xef\x81\x91" // ⏭
+
 std::wstring ConvertString(const std::string& str);
 std::string ConvertString(const std::wstring& str);
 

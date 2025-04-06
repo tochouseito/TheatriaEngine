@@ -1,0 +1,7 @@
+Font Awesome Free (https://fontawesome.com/)
+Copyright 2024 Fonticons, Inc.
+Licensed under:
+- CC BY 4.0 (Icons)
+- SIL OFL 1.1 (Fonts)
+- MIT (Code)
+See https://fontawesome.com/license/free for details.

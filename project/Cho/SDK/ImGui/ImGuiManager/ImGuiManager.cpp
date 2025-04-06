@@ -13,12 +13,22 @@ void ImGuiManager::Initialize(ID3D12Device8* device, ResourceManager* resourceMa
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Dockingを有効化
+	// 日本語フォント
+	ImFontConfig font_config;
+	font_config.MergeMode = false;
+	font_config.PixelSnapH = true;
+	io.Fonts->AddFontFromFileTTF(//"C:/Windows/Fonts/msgothic.ttc",
+		"Cho/Resources/Fonts/NotoSansJP-Regular.ttf",// フォントファイルのパス
+		16.0f,// フォントファイルのパスとフォントサイズ
+		&font_config, io.Fonts->GetGlyphRangesJapanese()// フォントの範囲
+	);
+	// アイコンフォントをマージ
+	font_config.MergeMode = true;
+	static const ImWchar icon_ranges[] = { 0xf000, 0xf3ff, 0 }; // FontAwesomeの範囲
 	io.Fonts->AddFontFromFileTTF(
-		//"C:\\Windows\\Fonts\\Arial.ttf",
-		"C:/Windows/Fonts/msgothic.ttc",
-		14.0f,// フォントファイルのパスとフォントサイズ
-		nullptr, io.Fonts->GetGlyphRangesJapanese()// フォントの範囲
-		);
+		"Cho/Resources/Fonts/Font Awesome 6 Free-Solid-900.otf",
+		14.0f,
+		&font_config, icon_ranges);
 	unsigned char* texPixels = nullptr;
 	int texWidth, texHeight;
 	io.Fonts->GetTexDataAsAlpha8(&texPixels, &texWidth, &texHeight);
