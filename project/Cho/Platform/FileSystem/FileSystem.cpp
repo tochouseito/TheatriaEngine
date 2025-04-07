@@ -4,6 +4,9 @@
 #include "Resources/ResourceManager/ResourceManager.h"
 
 std::wstring Cho::FileSystem::m_sProjectName = L"";
+// GUID 生成
+std::string Cho::FileSystem::ScriptProject::slnGUID = GenerateGUID();
+std::string Cho::FileSystem::ScriptProject::projGUID = GenerateGUID();
 
 // プロジェクトフォルダを探す
 std::optional<std::filesystem::path> Cho::FileSystem::FindOrCreateGameProjects()
@@ -568,4 +571,297 @@ bool Cho::FileSystem::LoadProjectFolder(const std::wstring& projectName, SceneMa
         }
     }
     return true;
+}
+
+std::string Cho::FileSystem::GenerateGUID()
+{
+    GUID guid;
+    HRESULT hr;
+    hr = CoCreateGuid(&guid);
+    if (FAILED(hr))
+    {
+        std::cerr << "Failed to generate GUID. Error code: " << hr << "\n";
+        return "";
+    }
+
+    std::ostringstream oss;
+    oss << std::hex << std::uppercase;
+    oss << "{"
+        << std::setw(8) << std::setfill('0') << guid.Data1 << "-"
+        << std::setw(4) << std::setfill('0') << guid.Data2 << "-"
+        << std::setw(4) << std::setfill('0') << guid.Data3 << "-";
+
+    for (int i = 0; i < 2; ++i)
+    {
+        oss << std::setw(2) << std::setfill('0') << static_cast<int>(guid.Data4[i]);
+    }
+    oss << "-";
+    for (int i = 2; i < 8; ++i)
+    {
+        oss << std::setw(2) << std::setfill('0') << static_cast<int>(guid.Data4[i]);
+    }
+    oss << "}";
+
+    return oss.str();
+}
+
+void Cho::FileSystem::ScriptProject::GenerateSolutionAndProject()
+{
+    std::string projectNameStr = ConvertString(m_sProjectName);
+    // 出力先
+    std::string outputPath = "GameProjects/" + projectNameStr;
+	// ソリューションファイルパス
+    std::string solutionName = outputPath + "/" + projectNameStr + ".sln";
+	// vcxprojファイルパス
+	std::string vcxprojName = outputPath + "/" + projectNameStr + ".vcxproj";
+	// フィルターファイルパス
+	std::string filterName = outputPath + "/" + projectNameStr + ".vcxproj.filters";
+	// ソリューションファイルの生成
+    // ソリューションファイルの生成
+    if (!fs::exists(solutionName))
+    {
+        std::ofstream slnFile(solutionName, std::ios::trunc);
+        slnFile << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
+        slnFile << "# Visual Studio Version 17\n";
+        slnFile << "VisualStudioVersion = 17.0.31903.59\n";
+        slnFile << "MinimumVisualStudioVersion = 10.0.40219.1\n";
+
+        slnFile << "Project(\"" << slnGUID << "\") = \"" << projectNameStr << "\", \"" << projectNameStr << ".vcxproj\", \"" << projGUID << "\"\n";
+        slnFile << "EndProject\n";
+
+        // ソリューション構成の追加
+        slnFile << "Global\n";
+        slnFile << "    GlobalSection(SolutionConfigurationPlatforms) = preSolution\n";
+        slnFile << "        Debug|x64 = Debug|x64\n";
+        slnFile << "        Release|x64 = Release|x64\n";
+        slnFile << "    EndGlobalSection\n";
+        slnFile << "    GlobalSection(ProjectConfigurationPlatforms) = postSolution\n";
+        slnFile << "        " << projGUID << ".Debug|x64.ActiveCfg = Debug|x64\n";
+        slnFile << "        " << projGUID << ".Debug|x64.Build.0 = Debug|x64\n";
+        slnFile << "        " << projGUID << ".Release|x64.ActiveCfg = Release|x64\n";
+        slnFile << "        " << projGUID << ".Release|x64.Build.0 = Release|x64\n";
+        slnFile << "    EndGlobalSection\n";
+        slnFile << "    GlobalSection(SolutionProperties) = preSolution\n";
+        slnFile << "        HideSolutionNode = FALSE\n";
+        slnFile << "    EndGlobalSection\n";
+        slnFile << "EndGlobal\n";
+
+        slnFile.close();
+        std::cout << "Generated solution file: " << solutionName << "\n";
+    } else
+    {
+        std::cout << "Solution file already exists: " << solutionName << "\n";
+    }
+	// プロジェクトファイルの生成
+	UpdateVcxproj(vcxprojName);
+	// フィルターファイルの生成
+	UpdateFilters(filterName);
+}
+
+void Cho::FileSystem::ScriptProject::UpdateVcxproj(const std::string& vcxprojPath)
+{
+    std::vector<std::string> scriptFiles;
+
+    fs::path exePath = fs::current_path(); // 実行ファイルがある場所
+    // プロジェクトディレクトリ全体を再帰的に探索
+    fs::path projectDir = exePath / "GameProjects" / m_sProjectName;
+
+    for (const auto& entry : fs::recursive_directory_iterator(projectDir))
+    {
+        if (!entry.is_regular_file()) continue;
+
+        const auto& path = entry.path();
+        std::string ext = path.extension().string();
+
+        if (ext == ".cpp" || ext == ".h")
+        {
+            scriptFiles.push_back(path.string());
+        }
+    }
+
+    // パス設定
+    fs::path currentPath = fs::current_path();
+
+    // インクルードディレクトリ
+    fs::path systemPath = currentPath / "Cho";
+    fs::path mathLibPath = currentPath / "Cho/Externals/ChoMath";
+
+    // ライブラリディレクトリ
+    fs::path libraryPath = currentPath / "../generated/outputs/$(Configuration)/";
+
+    // パスの正規化
+    systemPath.make_preferred();
+    mathLibPath.make_preferred();
+
+    libraryPath.make_preferred();
+
+    std::ofstream vcxFile(vcxprojPath, std::ios::trunc);
+    vcxFile << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+    vcxFile << "<Project DefaultTargets=\"Build\" ToolsVersion=\"17.0\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\n";
+
+    // プロジェクト構成の定義
+    vcxFile << "  <ItemGroup Label=\"ProjectConfigurations\">\n";
+    vcxFile << "    <ProjectConfiguration Include=\"Debug|x64\">\n";
+    vcxFile << "      <Configuration>Debug</Configuration>\n";
+    vcxFile << "      <Platform>x64</Platform>\n";
+    vcxFile << "    </ProjectConfiguration>\n";
+    vcxFile << "    <ProjectConfiguration Include=\"Release|x64\">\n";
+    vcxFile << "      <Configuration>Release</Configuration>\n";
+    vcxFile << "      <Platform>x64</Platform>\n";
+    vcxFile << "    </ProjectConfiguration>\n";
+    vcxFile << "  </ItemGroup>\n";
+
+    // グローバルプロパティ
+    vcxFile << "  <PropertyGroup Label=\"Globals\">\n";
+    vcxFile << "    <ProjectGuid>" << projGUID << "</ProjectGuid>\n";
+    vcxFile << "    <Keyword>Win32Proj</Keyword>\n";
+    vcxFile << "    <RootNamespace>" << ConvertString(m_sProjectName) << "</RootNamespace>\n";
+    vcxFile << "  </PropertyGroup>\n";
+
+    vcxFile << "  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.Default.props\" />\n";
+
+    // Debug 構成
+    vcxFile << "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Debug|x64'\" Label=\"Configuration\">\n";
+    vcxFile << "    <ConfigurationType>DynamicLibrary</ConfigurationType>\n";
+    vcxFile << "    <UseDebugLibraries>true</UseDebugLibraries>\n";
+    vcxFile << "    <PlatformToolset>v143</PlatformToolset>\n";
+    vcxFile << "    <CharacterSet>Unicode</CharacterSet>\n";
+    vcxFile << "  </PropertyGroup>\n";
+
+    // Release 構成
+    vcxFile << "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Release|x64'\" Label=\"Configuration\">\n";
+    vcxFile << "    <ConfigurationType>DynamicLibrary</ConfigurationType>\n";
+    vcxFile << "    <UseDebugLibraries>false</UseDebugLibraries>\n";
+    vcxFile << "    <PlatformToolset>v143</PlatformToolset>\n";
+    vcxFile << "    <WholeProgramOptimization>true</WholeProgramOptimization>\n";
+    vcxFile << "    <CharacterSet>Unicode</CharacterSet>\n";
+    vcxFile << "  </PropertyGroup>\n";
+
+    vcxFile << "  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.props\" />\n";
+
+    // 共通プロパティ
+    vcxFile << "  <PropertyGroup>\n";
+    vcxFile << "    <OutDir>$(SolutionDir)bin\\$(Configuration)\\</OutDir>\n";
+    vcxFile << "    <IntDir>$(SolutionDir)bin\\Intermediate\\$(Configuration)\\</IntDir>\n";
+    vcxFile << "    <TargetName>" << ConvertString(m_sProjectName) << "</TargetName>\n";
+    vcxFile << "  </PropertyGroup>\n";
+
+    // Debug 用設定
+    vcxFile << "  <ItemDefinitionGroup Condition=\"'$(Configuration)|$(Platform)'=='Debug|x64'\">\n";
+    vcxFile << "    <ClCompile>\n";
+    vcxFile << "      <WarningLevel>Level3</WarningLevel>\n";
+    vcxFile << "      <Optimization>Disabled</Optimization>\n";
+    vcxFile << "      <PreprocessorDefinitions>_DEBUG;EXPORT_SCRIPT_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>\n";
+    vcxFile << "      <AdditionalIncludeDirectories>" << mathLibPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
+    vcxFile << "      <LanguageStandard>stdcpp20</LanguageStandard>\n";
+    vcxFile << "      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>\n";
+    vcxFile << "      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>\n"; // MTd
+    vcxFile << "    </ClCompile>\n";
+    vcxFile << "    <Link>\n";
+    vcxFile << "      <SubSystem>Windows</SubSystem>\n";
+    vcxFile << "      <GenerateDebugInformation>false</GenerateDebugInformation>\n";
+    vcxFile << "      <AdditionalDependencies>ChoMath.lib;%(AdditionalDependencies)</AdditionalDependencies>\n";
+    vcxFile << "      <AdditionalLibraryDirectories>" << libraryPath.string() << ";%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>\n";
+    vcxFile << "    </Link>\n";
+    vcxFile << "  </ItemDefinitionGroup>\n";
+
+    // Release 用設定
+    vcxFile << "  <ItemDefinitionGroup Condition=\"'$(Configuration)|$(Platform)'=='Release|x64'\">\n";
+    vcxFile << "    <ClCompile>\n";
+    vcxFile << "      <WarningLevel>Level3</WarningLevel>\n";
+    vcxFile << "      <Optimization>MaxSpeed</Optimization>\n";
+    vcxFile << "      <PreprocessorDefinitions>NDEBUG;EXPORT_SCRIPT_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>\n";
+    vcxFile << "      <AdditionalIncludeDirectories>" << mathLibPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
+    vcxFile << "      <LanguageStandard>stdcpp20</LanguageStandard>\n";
+    vcxFile << "      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>\n";
+    vcxFile << "      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>\n"; // MT
+    vcxFile << "    </ClCompile>\n";
+    vcxFile << "    <Link>\n";
+    vcxFile << "      <SubSystem>Windows</SubSystem>\n";
+    vcxFile << "      <EnableCOMDATFolding>true</EnableCOMDATFolding>\n";
+    vcxFile << "      <OptimizeReferences>true</OptimizeReferences>\n";
+    vcxFile << "      <GenerateDebugInformation>false</GenerateDebugInformation>\n";
+    vcxFile << "      <AdditionalDependencies>ChoMath.lib;%(AdditionalDependencies)</AdditionalDependencies>\n";
+    vcxFile << "      <AdditionalLibraryDirectories>" << libraryPath.string() << ";%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>\n";
+    vcxFile << "    </Link>\n";
+    vcxFile << "  </ItemDefinitionGroup>\n";
+
+    // ソースファイルの登録
+    vcxFile << "  <ItemGroup>\n";
+    for (const auto& file : scriptFiles)
+    {
+        if (file.ends_with(".cpp"))
+        {
+            vcxFile << "    <ClCompile Include=\"" << file << "\" />\n";
+        }
+    }
+    vcxFile << "  </ItemGroup>\n";
+
+    // ヘッダーファイルの登録
+    vcxFile << "  <ItemGroup>\n";
+    for (const auto& file : scriptFiles)
+    {
+        if (file.ends_with(".h"))
+        {
+            vcxFile << "    <ClInclude Include=\"" << file << "\" />\n";
+        }
+    }
+    vcxFile << "  </ItemGroup>\n";
+
+    vcxFile << "  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />\n";
+    vcxFile << "</Project>\n";
+    vcxFile.close();
+}
+
+void Cho::FileSystem::ScriptProject::UpdateFilters(const std::string& filterPath)
+{
+    std::vector<std::string> scriptFiles;
+
+    fs::path exePath = fs::current_path(); // 実行ファイルがある場所
+    // プロジェクトディレクトリ全体を再帰的に探索
+    fs::path projectDir = exePath / "GameProjects" / m_sProjectName;
+    for (const auto& entry : fs::recursive_directory_iterator(projectDir))
+    {
+        if (!entry.is_regular_file()) continue;
+
+        const auto& path = entry.path();
+        std::string ext = path.extension().string();
+        if (ext == ".cpp" || ext == ".h")
+        {
+            scriptFiles.push_back(path.string());
+        }
+    }
+
+    std::ofstream filtersFile(filterPath, std::ios::trunc);
+    filtersFile << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+    filtersFile << "<Project ToolsVersion=\"4.0\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\n";
+    filtersFile << "  <ItemGroup>\n";
+
+    for (const auto& file : scriptFiles)
+    {
+        if (file.ends_with(".cpp"))
+        {
+            filtersFile << "    <ClCompile Include=\"" << file << "\">\n";
+            filtersFile << "      <Filter>Source Files</Filter>\n";
+            filtersFile << "    </ClCompile>\n";
+        } else if (file.ends_with(".h"))
+        {
+            filtersFile << "    <ClInclude Include=\"" << file << "\">\n";
+            filtersFile << "      <Filter>Header Files</Filter>\n";
+            filtersFile << "    </ClInclude>\n";
+        }
+    }
+
+    filtersFile << "  </ItemGroup>\n";
+    filtersFile << "  <ItemGroup>\n";
+    filtersFile << "    <Filter Include=\"Source Files\">\n";
+    filtersFile << "      <UniqueIdentifier>{E2E5D8EC-87BD-45C3-8B23-4E6F9D5E8DB9}</UniqueIdentifier>\n";
+    filtersFile << "    </Filter>\n";
+    filtersFile << "    <Filter Include=\"Header Files\">\n";
+    filtersFile << "      <UniqueIdentifier>{B6B78A4F-BEAF-40F2-927B-73A40EC5C5B4}</UniqueIdentifier>\n";
+    filtersFile << "    </Filter>\n";
+    filtersFile << "  </ItemGroup>\n";
+    filtersFile << "</Project>\n";
+
+    filtersFile.close();
 }

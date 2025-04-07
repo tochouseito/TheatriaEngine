@@ -122,8 +122,19 @@ namespace Cho
 			if (type == "ScriptFile") return FileType::ScriptFile;
             return FileType::Unknown;
         }
-
+        // GUID 生成
+        static std::string GenerateGUID();
         static std::wstring m_sProjectName;
+        class ScriptProject
+        {
+        public:
+            static void GenerateSolutionAndProject();
+			static void UpdateVcxproj(const std::string& vcxprojPath);
+            static void UpdateFilters(const std::string& filterPath);
+
+            static std::string slnGUID;
+			static std::string projGUID;
+        };
     };
 }
 
