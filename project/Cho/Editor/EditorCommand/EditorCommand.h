@@ -128,6 +128,8 @@ public:
 	void SetSelectedObject(GameObject* object) { m_SelectedObject = object; }
 	// プロジェクトの保存
 	void SaveProjectFile(const std::wstring& projectName);
+	// Test:スクリプト作成	
+	void GenerateScript(const std::string& scriptName);
 private:
 	std::vector<std::unique_ptr<ICommand>> m_Commands;
 	ResourceManager* m_ResourceManager = nullptr;

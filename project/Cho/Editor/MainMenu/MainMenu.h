@@ -23,7 +23,9 @@ private:
 	void LayoutMenu();
 	void EngineInfoMenu();
 	void HelpMenu();
+	void PopupScriptName();
 
 	Toolbar* m_Toolbar = nullptr;
+	bool m_OpenScriptPopup = false;
 };
 

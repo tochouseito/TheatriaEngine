@@ -16,6 +16,7 @@ void MainMenu::Update()
     if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
     {
         Window();
+        PopupScriptName();
     }
 }
 
@@ -60,7 +61,6 @@ void MainMenu::MenuBar()
     // メニューバー
     if (ImGui::BeginMenuBar())
     {
-
         // ファイルメニュー
         FileMenu();
 
@@ -113,6 +113,12 @@ void MainMenu::EditMenu()
 			std::unique_ptr<AddCameraObjectCommand> addCameraObject = std::make_unique<AddCameraObjectCommand>();
 			m_EditorCommand->ExecuteCommand(std::move(addCameraObject));
 		}
+
+        // メニュー選択でポップアップを開く
+        if (ImGui::MenuItem("スクリプト"))
+        {
+            m_OpenScriptPopup = true;
+        }
 
         ImGui::EndMenu(); // 「Edit」メニューを終了
     }
@@ -172,5 +178,45 @@ void MainMenu::HelpMenu()
         }
         
         ImGui::EndMenu();
+    }
+}
+
+void MainMenu::PopupScriptName()
+{
+    // スクリプト名バッファ
+    static char scriptNameBuffer[64] = "";
+    if (m_OpenScriptPopup)
+    {
+        std::memset(scriptNameBuffer, 0, sizeof(scriptNameBuffer)); // 初期化
+        ImGui::OpenPopup("ScriptNamePopup");
+        m_OpenScriptPopup = false; // 一度だけ開くように
+    }
+    if (ImGui::BeginPopupModal("ScriptNamePopup", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::Text("スクリプト名を入力してください（A-Z, a-z）:");
+        ImGui::InputText("##ScriptName", scriptNameBuffer, IM_ARRAYSIZE(scriptNameBuffer),
+            ImGuiInputTextFlags_CallbackCharFilter,
+            [](ImGuiInputTextCallbackData* data) -> int {
+                if ((data->EventChar >= 'a' && data->EventChar <= 'z') ||
+                    (data->EventChar >= 'A' && data->EventChar <= 'Z'))
+                {
+                    return 0;
+                }
+                return 1;
+            });
+
+        if (ImGui::Button("OK"))
+        {
+            std::string scriptName = scriptNameBuffer;
+            m_EditorCommand->GenerateScript(scriptName);
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("キャンセル"))
+        {
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::EndPopup();
     }
 }

@@ -78,6 +78,11 @@ void EditorCommand::SaveProjectFile(const std::wstring& projectName)
 	}
 }
 
+void EditorCommand::GenerateScript(const std::string& scriptName)
+{
+	FileSystem::ScriptProject::GenerateScriptFiles(scriptName);
+}
+
 void Add3DObjectCommand::Execute(EditorCommand* edit)
 {
 	uint32_t mapID = edit->GetResourceManagerPtr()->GetIntegrationData(IntegrationDataType::Transform)->GetMapID();
