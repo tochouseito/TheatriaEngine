@@ -617,7 +617,6 @@ void Cho::FileSystem::ScriptProject::GenerateSolutionAndProject()
 	// フィルターファイルパス
 	std::string filterName = outputPath + "/" + projectNameStr + ".vcxproj.filters";
 	// ソリューションファイルの生成
-    // ソリューションファイルの生成
     if (!fs::exists(solutionName))
     {
         std::ofstream slnFile(solutionName, std::ios::trunc);
@@ -685,6 +684,8 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj(const std::string& vcxprojPat
     // インクルードディレクトリ
     fs::path systemPath = currentPath / "Cho";
     fs::path mathLibPath = currentPath / "Cho/Externals/ChoMath";
+	// スクリプトファイルのパス
+	fs::path scriptPath = currentPath / "Cho/GameCore/IScript";
 
     // ライブラリディレクトリ
     fs::path libraryPath = currentPath / "../generated/outputs/$(Configuration)/";
@@ -752,7 +753,7 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj(const std::string& vcxprojPat
     vcxFile << "      <WarningLevel>Level3</WarningLevel>\n";
     vcxFile << "      <Optimization>Disabled</Optimization>\n";
     vcxFile << "      <PreprocessorDefinitions>_DEBUG;EXPORT_SCRIPT_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>\n";
-    vcxFile << "      <AdditionalIncludeDirectories>" << mathLibPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
+    vcxFile << "      <AdditionalIncludeDirectories>" << scriptPath.string() << ";" << mathLibPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
     vcxFile << "      <LanguageStandard>stdcpp20</LanguageStandard>\n";
     vcxFile << "      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>\n";
     vcxFile << "      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>\n"; // MTd
@@ -771,7 +772,7 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj(const std::string& vcxprojPat
     vcxFile << "      <WarningLevel>Level3</WarningLevel>\n";
     vcxFile << "      <Optimization>MaxSpeed</Optimization>\n";
     vcxFile << "      <PreprocessorDefinitions>NDEBUG;EXPORT_SCRIPT_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>\n";
-    vcxFile << "      <AdditionalIncludeDirectories>" << mathLibPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
+    vcxFile << "      <AdditionalIncludeDirectories>" << scriptPath.string() << ";" << mathLibPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
     vcxFile << "      <LanguageStandard>stdcpp20</LanguageStandard>\n";
     vcxFile << "      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>\n";
     vcxFile << "      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>\n"; // MT

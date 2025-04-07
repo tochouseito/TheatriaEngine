@@ -178,6 +178,7 @@
     <ClCompile Include="Cho\Editor\Toolbar\Toolbar.cpp" />
     <ClCompile Include="Cho\GameCore\ScriptSystem\ScriptSystem.cpp" />
     <ClCompile Include="Cho\Hub\HubManager.cpp" />
+    <ClCompile Include="Cho\GameCore\IScript\IScript.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cho\Editor\AnimationEditor\AnimationEditor.h">
@@ -374,6 +375,7 @@
     <ClInclude Include="Cho\Editor\Toolbar\Toolbar.h" />
     <ClInclude Include="Cho\GameCore\ScriptSystem\ScriptSystem.h" />
     <ClInclude Include="Cho\Hub\HubManager.h" />
+    <ClInclude Include="Cho\GameCore\IScript\IScript.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Cho\Resources\Shader\header\Demo.hlsli">
