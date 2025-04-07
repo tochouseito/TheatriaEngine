@@ -30,7 +30,8 @@
                     ]
                 },
                 "MeshFilter": {
-                    "modelID": 0
+                    "modelID": 0,
+                    "modelName": "Cube"
                 },
                 "MeshRenderer": {
                     "visible": true
@@ -72,6 +73,5 @@
                 }
             }
         }
-    ],
-    "mainCamera": "NewCamera"
+    ]
 }

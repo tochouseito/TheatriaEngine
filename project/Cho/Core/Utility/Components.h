@@ -41,6 +41,7 @@ struct CameraComponent final
 // メッシュコンポーネント
 struct MeshFilterComponent final
 {
+	std::wstring modelName = L"";// モデル名
 	std::optional<uint32_t> modelID = std::nullopt;// Model選択用ID
 };
 

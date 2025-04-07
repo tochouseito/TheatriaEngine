@@ -60,13 +60,18 @@ public:
 	SceneManager(ResourceManager* resourceManager):
 		m_pResourceManager(resourceManager)
 	{
-		//AddScene(L"MainScene");
-		//ChangeSceneRequest(m_SceneNameToID[L"MainScene"]);
 		CreateSystem();
 	}
 	// Destructor
 	~SceneManager()
 	{
+	}
+
+	// デフォルトのシーンを作成
+	void CreateDefaultScene()
+	{
+		AddScene(L"MainScene");
+		ChangeSceneRequest(m_SceneNameToID[L"MainScene"]);
 	}
 
 	// シーンを更新

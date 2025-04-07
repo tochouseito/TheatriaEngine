@@ -102,6 +102,11 @@ namespace Cho
 			ResourceManager* resourceManager
         );
 
+        static FileType GetJsonFileType(const std::filesystem::path& path);
+
+        // プロジェクトフォルダを読み込む
+        static bool LoadProjectFolder(const std::wstring& projectName, SceneManager* sceneManager, ObjectContainer* container, ECSManager* ecs, ResourceManager* resourceManager);
+
 
         static FileType DetectFileType(const nlohmann::json& j)
         {

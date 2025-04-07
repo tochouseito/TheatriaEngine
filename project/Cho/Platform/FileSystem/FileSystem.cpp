@@ -420,12 +420,19 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, SceneManager* 
                 if (comps.contains("MeshFilter"))
                 {
                     MeshFilterComponent m{};
+                    if (comps["MeshFilter"].contains("modelName"))
+                    {
+                        std::string modelNameStr = comps["MeshFilter"]["modelName"].get<std::string>();
+                        m.modelName = std::filesystem::path(modelNameStr).wstring(); // UTF-8 → wstring
+                    }
                     if (comps["MeshFilter"].contains("modelID"))
                     {
                         m.modelID = comps["MeshFilter"]["modelID"];
                     }
                     MeshFilterComponent* filter = ecs->AddComponent<MeshFilterComponent>(entity);
-					filter->modelID = m.modelID;
+					TransformComponent* transform = ecs->GetComponent<TransformComponent>(entity);
+                    filter->modelName = m.modelName;
+                    filter->modelID = resourceManager->GetModelManager()->GetModelDataIndex(filter->modelName,transform->mapID);
                 }
 
                 if (comps.contains("MeshRenderer"))
@@ -483,6 +490,7 @@ json Cho::Serialization::ToJson(const MeshFilterComponent& m)
     json j;
     if (m.modelID.has_value())
     {
+        j["modelName"] = std::filesystem::path(m.modelName).string();
         j["modelID"] = m.modelID.value();
     }
     return j;
@@ -493,4 +501,71 @@ json Cho::Serialization::ToJson(const MeshRendererComponent& r)
     json j;
     j["visible"] = r.visible;
     return j;
+}
+
+FileType Cho::FileSystem::GetJsonFileType(const std::filesystem::path& path)
+{
+    try
+    {
+        std::ifstream file(path);
+        if (!file.is_open()) return FileType::Unknown;
+
+        nlohmann::json j;
+        file >> j;
+
+        std::string type = j.value("fileType", "");
+        if (type == "ChoProject")   return FileType::ChoProject;
+        if (type == "EngineConfig") return FileType::EngineConfig;
+        if (type == "GameSettings") return FileType::GameSettings;
+        if (type == "SceneFile")    return FileType::SceneFile;
+        if (type == "ModelFile")    return FileType::ModelFile;
+        if (type == "ImageFile")    return FileType::ImageFile;
+        if (type == "SoundFile")    return FileType::SoundFile;
+        if (type == "EffectFile")   return FileType::EffectFile;
+        if (type == "ScriptFile")   return FileType::ScriptFile;
+
+        return FileType::Unknown;
+    }
+    catch (...)
+    {
+        return FileType::Unknown;
+    }
+}
+
+// プロジェクトフォルダを読み込む
+bool Cho::FileSystem::LoadProjectFolder(const std::wstring& projectName, SceneManager* sceneManager, ObjectContainer* container, ECSManager* ecs, ResourceManager* resourceManager)
+{
+    std::filesystem::path projectPath = std::filesystem::path(L"GameProjects") / projectName;
+
+    // プロジェクトファイル類を読み込み
+    std::optional<ProjectInfo> projectInfo = LoadProjectFile(projectPath);
+    std::optional<EngineConfigInfo> engineConfig = LoadEngineConfig(projectPath);
+    std::optional<GameSettingsInfo> gameSettings = LoadGameSettings(projectPath);
+
+    /*if (!projectInfo || !engineConfig || !gameSettings)
+    {
+    return false;
+    }*/
+
+    // 全ファイル走査（サブディレクトリ含む）
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(projectPath))
+    {
+        if (!entry.is_regular_file()) continue;
+        if (entry.path().extension() != ".json") continue;
+
+        FileType type = GetJsonFileType(entry.path());
+
+        switch (type)
+        {
+        case FileType::SceneFile:
+        {
+            LoadSceneFile(entry.path(), sceneManager, container, ecs, resourceManager);
+        }
+        break;
+        // ここに ModelFile, EffectFile, ScriptFile など追加
+        default:
+            break;
+        }
+    }
+    return true;
 }

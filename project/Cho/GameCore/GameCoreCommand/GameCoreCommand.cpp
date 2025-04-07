@@ -69,6 +69,7 @@ void GameCoreCommand::AddMeshFilterComponent(const uint32_t& entity, ModelManage
 	if (transform)
 	{
 		// ModelのUseListに登録
+		mesh->modelName = L"Cube";
 		mesh->modelID = modelManager->GetModelDataIndex(L"Cube", transform->mapID);
 	} else
 	{

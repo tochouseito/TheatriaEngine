@@ -92,7 +92,7 @@ void HubManager::ShowSidebar()
             bool created = FileSystem::CreateNewProjectFolder(name);
             if (created)
             {
-                std::wcout << L"プロジェクト作成成功: " << name << std::endl;
+                m_pGameCore->GetSceneManager()->CreateDefaultScene();
 				// プロジェクト名を保存
 				FileSystem::m_sProjectName = name;
 				m_IsRun = false; // プロジェクト作成後、Hubを終了
@@ -129,11 +129,10 @@ void HubManager::ShowSidebar()
             selectedIndex = i;
             std::wstring selectedProjectName = projects[i];
             // プロジェクトの読み込み
-			FileSystem::LoadSceneFile(L"GameProjects/" + selectedProjectName + L"/MainScene.json",
-                m_pGameCore->GetSceneManager(),
-                m_pGameCore->GetObjectContainer(),
-                m_pGameCore->GetECSManager(),
-                m_pResourceManager);
+			FileSystem::LoadProjectFolder(selectedProjectName, m_pGameCore->GetSceneManager(),m_pGameCore->GetObjectContainer(),m_pGameCore->GetECSManager(),m_pResourceManager);
+			// プロジェクト名を保存
+			FileSystem::m_sProjectName = selectedProjectName;
+			// プロジェクト選択後、Hubを終了
 			m_IsRun = false; // プロジェクト選択後、Hubを終了
         }
     }
