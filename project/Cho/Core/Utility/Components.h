@@ -1,6 +1,12 @@
 #pragma once
 #include "ChoMath.h"
+#include <bitset>
 #include <optional>
+
+using Entity = uint32_t;
+using CompID = size_t;
+using Archetype = std::bitset<256>;
+
 struct TransformComponent final
 {
 	Vector3 translation = { 0.0f, 0.0f, 0.0f };			// 位置

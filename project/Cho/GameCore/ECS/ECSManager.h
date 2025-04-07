@@ -5,12 +5,7 @@
 #include <unordered_map>
 #include <memory>
 #include <functional>
-#include <bitset>
 #include "Cho/Core/Utility/Components.h"
-
-using Entity = uint32_t;
-using CompID = size_t;
-using Archetype = std::bitset<256>;
 
 class ECSManager
 {
@@ -145,6 +140,16 @@ public:
 		m_EntityToActive[entity] = false;
 		m_ArchToEntities[m_EntityToArchetype[entity]].Remove(entity);
 		m_RecycleEntities.emplace_back(entity);
+	}
+
+	inline const Archetype& GetArchetype(Entity entity) const
+	{
+		static Archetype empty{};
+		if (entity < m_EntityToArchetype.size())
+		{
+			return m_EntityToArchetype[entity];
+		}
+		return empty;
 	}
 
 	// 処理を実行する

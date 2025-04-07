@@ -376,6 +376,7 @@
     <ClInclude Include="Cho\GameCore\ScriptSystem\ScriptSystem.h" />
     <ClInclude Include="Cho\Hub\HubManager.h" />
     <ClInclude Include="Cho\GameCore\IScript\IScript.h" />
+    <ClInclude Include="Cho\GameCore\ScriptSystem\ScriptContext.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Cho\Resources\Shader\header\Demo.hlsli">

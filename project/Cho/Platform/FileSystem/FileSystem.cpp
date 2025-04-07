@@ -866,3 +866,53 @@ void Cho::FileSystem::ScriptProject::UpdateFilters(const std::string& filterPath
 
     filtersFile.close();
 }
+
+void Cho::FileSystem::ScriptProject::GenerateScriptFiles(const std::string& scriptName)
+{
+    std::filesystem::path outputDir = "GameProjects/" + ConvertString(m_sProjectName);
+
+    // テンプレートファイルのパス
+    std::filesystem::path templateHeader = "Cho/GameCore/ScriptSystem/TemplateScript.h";
+    std::filesystem::path templateCpp = "Cho/GameCore/ScriptSystem/TemplateScript.cpp";
+
+    // 出力ファイル名
+    std::string headerFileName = scriptName + ".h";
+    std::string cppFileName = scriptName + ".cpp";
+
+    // ヘルパー関数：テンプレートの置換
+    auto ReplaceScriptName = [&](const std::string& content) -> std::string {
+        std::string result = content;
+        std::regex pattern("\\{\\s*SCRIPT_NAME\\s*\\}");
+        return std::regex_replace(result, pattern, scriptName);
+        };
+
+    // ヘッダーファイル生成
+    {
+        std::ifstream in(templateHeader);
+        if (!in)
+        {
+            throw std::runtime_error("TemplateScript.h not found");
+        }
+        std::stringstream buffer;
+        buffer << in.rdbuf();
+        std::string replaced = ReplaceScriptName(buffer.str());
+
+        std::ofstream out(outputDir / headerFileName);
+        out << replaced;
+    }
+
+    // CPPファイル生成
+    {
+        std::ifstream in(templateCpp);
+        if (!in)
+        {
+            throw std::runtime_error("TemplateScript.cpp not found");
+        }
+        std::stringstream buffer;
+        buffer << in.rdbuf();
+        std::string replaced = ReplaceScriptName(buffer.str());
+
+        std::ofstream out(outputDir / cppFileName);
+        out << replaced;
+    }
+}

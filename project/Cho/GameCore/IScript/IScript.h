@@ -1,19 +1,9 @@
 #pragma once
-
-#include<cstdint>
-class ComponentManager;
-
+#include "GameCore/ScriptSystem/ScriptContext.h"
 class IScript
 {
 public:
     virtual ~IScript() = default;
-
-    // スクリプトの初期化
-    virtual void Start() = 0;
-
-    // スクリプトの毎フレーム処理
-    virtual void Update() = 0;
-
-    // エンティティ情報の設定
-    virtual void SetEntityInfo(uint32_t id, uint32_t type, ComponentManager* ptr) = 0;
+    virtual void Start(const ScriptContext& ctx) = 0;
+    virtual void Update(const ScriptContext& ctx) = 0;
 };

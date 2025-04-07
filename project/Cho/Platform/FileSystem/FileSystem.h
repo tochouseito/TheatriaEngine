@@ -1,4 +1,6 @@
 #pragma once
+#include <sstream>
+#include <regex>
 #include <string>
 #include <optional>
 #include <fstream>
@@ -131,6 +133,7 @@ namespace Cho
             static void GenerateSolutionAndProject();
 			static void UpdateVcxproj(const std::string& vcxprojPath);
             static void UpdateFilters(const std::string& filterPath);
+            static void GenerateScriptFiles(const std::string& scriptName);
 
             static std::string slnGUID;
 			static std::string projGUID;
