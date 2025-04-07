@@ -3,6 +3,9 @@
 #include <imgui.h>
 #include "Platform/FileSystem/FileSystem.h"
 #include "Core/ChoLog/ChoLog.h"
+#include "Resources/ResourceManager/ResourceManager.h"
+#include "Graphics/GraphicsEngine/GraphicsEngine.h"
+#include "GameCore/GameCore.h"
 using namespace Cho;
 
 void HubManager::Initialize()
@@ -23,34 +26,6 @@ void HubManager::Window()
 	RenderFullScreenUI();
 	ShowSidebar();
 	ShowMainContent();
-
-    //// ビューポート全体をカバーするドックスペースを作成
-    //ImGuiViewport* viewport = ImGui::GetMainViewport();
-    //ImGui::SetNextWindowPos(viewport->Pos); // 次のウィンドウの位置をメインビューポートの位置に設定
-    //ImGui::SetNextWindowSize(viewport->Size); // 次のウィンドウのサイズをメインビューポートのサイズに設定
-    //ImGui::SetNextWindowViewport(viewport->ID); // ビューポートIDをメインビューポートに設定
-
-    //// タイトルバーを削除し、リサイズや移動を防止し、背景のみとするウィンドウフラグを設定
-    //ImGuiWindowFlags window_flags =
-    //    ImGuiWindowFlags_NoTitleBar |
-    //    ImGuiWindowFlags_NoCollapse |
-    //    ImGuiWindowFlags_NoResize |
-    //    ImGuiWindowFlags_NoMove |
-    //    ImGuiWindowFlags_NoBringToFrontOnFocus |
-    //    ImGuiWindowFlags_NoNavFocus |
-    //    ImGuiWindowFlags_MenuBar;
-
-    //// ウィンドウの丸みとボーダーをなくして、シームレスなドッキング外観にする
-    //ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-    //ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-
-    //ImGui::Begin("Hub DockSpace Window", nullptr, window_flags); // ドックスペースとして機能する新しいウィンドウを開始
-    //ImGui::PopStyleVar(2); // 先ほどプッシュしたスタイル変数を2つポップする
-
-    //// ウィンドウ内にドックスペースを作成
-    //ImGuiID dockspace_id = ImGui::GetID("HubDockspace");
-    //ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
-    //ImGui::End(); // ドックスペースウィンドウを終了
 }
 
 void HubManager::RenderFullScreenUI()
@@ -118,6 +93,8 @@ void HubManager::ShowSidebar()
             if (created)
             {
                 std::wcout << L"プロジェクト作成成功: " << name << std::endl;
+				// プロジェクト名を保存
+				FileSystem::m_sProjectName = name;
 				m_IsRun = false; // プロジェクト作成後、Hubを終了
             } else
             {
@@ -151,6 +128,13 @@ void HubManager::ShowSidebar()
         {
             selectedIndex = i;
             std::wstring selectedProjectName = projects[i];
+            // プロジェクトの読み込み
+			FileSystem::LoadSceneFile(L"GameProjects/" + selectedProjectName + L"/MainScene.json",
+                m_pGameCore->GetSceneManager(),
+                m_pGameCore->GetObjectContainer(),
+                m_pGameCore->GetECSManager(),
+                m_pResourceManager);
+			m_IsRun = false; // プロジェクト選択後、Hubを終了
         }
     }
 

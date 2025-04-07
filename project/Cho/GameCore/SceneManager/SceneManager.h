@@ -60,8 +60,8 @@ public:
 	SceneManager(ResourceManager* resourceManager):
 		m_pResourceManager(resourceManager)
 	{
-		AddScene(L"MainScene");
-		ChangeSceneRequest(m_SceneNameToID[L"MainScene"]);
+		//AddScene(L"MainScene");
+		//ChangeSceneRequest(m_SceneNameToID[L"MainScene"]);
 		CreateSystem();
 	}
 	// Destructor
@@ -79,7 +79,33 @@ public:
 	// System
 	void CreateSystem() noexcept;
 
+	ScenePrefab* GetScene(const SceneID& index) const noexcept
+	{
+		if (index >= m_pScenes.size())
+		{
+			return nullptr;
+		}
+		return m_pScenes[index].get();
+	}
 	FVector<std::unique_ptr<ScenePrefab>>& GetScenes() noexcept { return m_pScenes; }
+	// シーン名からシーンIDを取得
+	SceneID GetSceneID(const std::wstring& sceneName) const noexcept
+	{
+		if (m_SceneNameToID.contains(sceneName))
+		{
+			return m_SceneNameToID.at(sceneName);
+		}
+		return 0;
+	}
+	// シーン名からシーンを取得
+	ScenePrefab* GetSceneToName(const std::wstring& sceneName) const noexcept
+	{
+		if (m_SceneNameToID.contains(sceneName))
+		{
+			return m_pScenes[m_SceneNameToID.at(sceneName)].get();
+		}
+		return nullptr;
+	}
 	ScenePrefab* GetCurrentScene() const noexcept { return m_pCurrentScene; }
 private:
 	// シーンを変更

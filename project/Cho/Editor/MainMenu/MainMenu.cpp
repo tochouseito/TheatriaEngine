@@ -4,6 +4,7 @@
 #include "Cho/OS/Windows/WinApp/WinApp.h"
 #include "Cho/Editor/EditorManager/EditorManager.h"
 #include "GameCore/GameObject/GameObject.h"
+#include "Platform/FileSystem/FileSystem.h"
 
 void MainMenu::Initialize()
 {
@@ -81,6 +82,15 @@ void MainMenu::MenuBar()
 
 void MainMenu::FileMenu()
 {
+    if (ImGui::BeginMenu("ファイル"))
+    {
+        // プロジェクトの保存
+		if (ImGui::MenuItem("プロジェクトの保存"))
+		{
+			m_EditorCommand->SaveProjectFile(FileSystem::m_sProjectName);
+		}
+        ImGui::EndMenu();
+    }
 }
 
 void MainMenu::EditMenu()

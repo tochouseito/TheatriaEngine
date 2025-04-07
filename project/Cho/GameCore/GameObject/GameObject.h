@@ -22,6 +22,13 @@ inline const char* ObjectTypeToWString(ObjectType type)
 	}
 }
 
+inline ObjectType ObjectTypeFromString(const std::string& str)
+{
+	if (str == "MeshObject") return ObjectType::MeshObject;
+	if (str == "Camera") return ObjectType::Camera;
+	return ObjectType::Count; // または Unknown があればそちら
+}
+
 class Prefab 
 {
 public:

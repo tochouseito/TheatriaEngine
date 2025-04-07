@@ -338,6 +338,8 @@ void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& ga
 	// シーンに存在するメッシュを所持しているオブジェクトを全て描画
 	for (ModelData& modelData : resourceManager.GetModelManager()->GetModelDataContainer())
 	{
+		// シーンがないならスキップ
+		if (!gameCore.GetSceneManager()->GetCurrentScene()) { continue; }
 		IConstantBuffer* cameraBuffer = nullptr;
 		// メインカメラを取得
 		if (mode == RenderMode::Game)

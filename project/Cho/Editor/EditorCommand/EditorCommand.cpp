@@ -3,6 +3,7 @@
 #include "Cho/Resources/ResourceManager/ResourceManager.h"
 #include "Cho/Graphics/GraphicsEngine/GraphicsEngine.h"
 #include "Cho/GameCore/GameCore.h"
+#include "Platform/FileSystem/FileSystem.h"
 
 void AddMeshFilterComponent::Execute(EditorCommand* edit)
 {
@@ -61,6 +62,20 @@ D3D12_GPU_DESCRIPTOR_HANDLE EditorCommand::GetSceneTextureHandle()
 	uint32_t bufferIndex = m_GraphicsEngine->GetSceneTextureBufferID();
 	// ハンドルを取得
 	return m_ResourceManager->GetBuffer<ColorBuffer>(bufferIndex)->GetSRVGpuHandle();
+}
+
+void EditorCommand::SaveProjectFile(const std::wstring& projectName)
+{
+	for (auto& scene : m_GameCoreCommand->GetSceneManagerPtr()->GetScenes().GetVector())
+	{
+		// シーンファイルを保存
+		Cho::FileSystem::SaveSceneFile(
+			L"GameProjects/" + projectName,
+			scene.get(),
+			m_GameCoreCommand->GetObjectContainerPtr(),
+			m_GameCoreCommand->GetECSManagerPtr()
+			);
+	}
 }
 
 void Add3DObjectCommand::Execute(EditorCommand* edit)

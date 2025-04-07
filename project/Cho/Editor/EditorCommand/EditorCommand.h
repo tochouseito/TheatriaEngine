@@ -126,6 +126,8 @@ public:
 	GameObject* GetSelectedObject() { return m_SelectedObject; }
 	// エディタの選択中オブジェクトをセット
 	void SetSelectedObject(GameObject* object) { m_SelectedObject = object; }
+	// プロジェクトの保存
+	void SaveProjectFile(const std::wstring& projectName);
 private:
 	std::vector<std::unique_ptr<ICommand>> m_Commands;
 	ResourceManager* m_ResourceManager = nullptr;
