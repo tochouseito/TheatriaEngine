@@ -179,6 +179,7 @@
     <ClCompile Include="Cho\GameCore\ScriptSystem\ScriptSystem.cpp" />
     <ClCompile Include="Cho\Hub\HubManager.cpp" />
     <ClCompile Include="Cho\GameCore\IScript\IScript.cpp" />
+    <ClCompile Include="Cho\Resources\ScriptContainer\ScriptContainer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cho\Editor\AnimationEditor\AnimationEditor.h">
@@ -377,6 +378,7 @@
     <ClInclude Include="Cho\Hub\HubManager.h" />
     <ClInclude Include="Cho\GameCore\IScript\IScript.h" />
     <ClInclude Include="Cho\GameCore\ScriptSystem\ScriptContext.h" />
+    <ClInclude Include="Cho\Resources\ScriptContainer\ScriptContainer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Cho\Resources\Shader\header\Demo.hlsli">
