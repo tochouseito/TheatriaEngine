@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{0BAA1028-8357-4300-8D25-5DE942557E52}</ProjectGuid>
+    <ProjectGuid>{717C633F-1CC4-4E24-AA2D-AECE83075324}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Test</RootNamespace>
   </PropertyGroup>
@@ -72,10 +72,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="C:\Users\sinse\source\repos\ChoEngine\project\GameProjects\Test\TestCube.cpp" />
+    <ClCompile Include="C:\Users\sinse\source\repos\ChoEngine\project\GameProjects\Test\ttt.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="C:\Users\sinse\source\repos\ChoEngine\project\GameProjects\Test\TestCube.h" />
+    <ClInclude Include="C:\Users\sinse\source\repos\ChoEngine\project\GameProjects\Test\ttt.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

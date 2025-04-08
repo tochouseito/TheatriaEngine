@@ -48,6 +48,7 @@ public:
 		}
 		return ScriptData(); // 無効な名前の場合は空のデータを返す
 	}
+	size_t GetScriptCount() const { return m_ScriptContainer.size(); }
 private:
 	FVector<ScriptData> m_ScriptContainer; // スクリプトデータを格納するベクター
 	// 名前で検索する用のコンテナ

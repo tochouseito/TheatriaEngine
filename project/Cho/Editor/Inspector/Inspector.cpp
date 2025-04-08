@@ -3,6 +3,8 @@
 #include "Editor/EditorManager/EditorManager.h"
 #include "GameCore/GameCore.h"
 #include "Core/ChoLog/ChoLog.h"
+using namespace Cho;
+#include "Resources/ResourceManager/ResourceManager.h"
 
 void Inspector::Initialize()
 {
@@ -47,6 +49,7 @@ void Inspector::ComponentsView(GameObject* object)
 	MeshFilterComponentView(object);
 	MeshRendererComponentView(object);
 	CameraComponentView(object);
+	ScriptComponentView(object);
 }
 
 void Inspector::TransformComponentView(GameObject* object)
@@ -104,11 +107,65 @@ void Inspector::CameraComponentView(GameObject* object)
 	}
 }
 
+void Inspector::ScriptComponentView(GameObject* object)
+{
+	ECSManager* ecs = m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr();
+	ScriptComponent* script = ecs->GetComponent<ScriptComponent>(object->GetEntity());
+	if (!script) return;
+
+	ScriptContainer* scriptContainer = m_EditorCommand->GetResourceManagerPtr()->GetScriptContainer();
+	if (!scriptContainer) return;
+
+	ImGui::Text("Script Component");
+
+	// プルダウン用スクリプト名一覧作成
+	std::vector<std::string> scriptNames;
+	for (ScriptID id = 0; id < scriptContainer->GetScriptCount(); ++id)
+	{
+		auto data = scriptContainer->GetScriptDataByID(id);
+		if (data.scriptID.has_value())
+		{
+			scriptNames.push_back(data.scriptName);
+		}
+	}
+
+	// 現在の選択位置を求める
+	int currentIndex = 0;
+	for (int i = 0; i < scriptNames.size(); ++i)
+	{
+		if (script->scriptName == scriptNames[i])
+		{
+			currentIndex = i;
+			break;
+		}
+	}
+
+	// プルダウン表示
+	if (ImGui::BeginCombo("Script", scriptNames.empty() ? "None" : scriptNames[currentIndex].c_str()))
+	{
+		for (int i = 0; i < scriptNames.size(); ++i)
+		{
+			bool isSelected = (i == currentIndex);
+			if (ImGui::Selectable(scriptNames[i].c_str(), isSelected))
+			{
+				// 選択されたスクリプト名とIDを設定
+				script->scriptName = scriptNames[i];
+				script->scriptID = scriptContainer->GetScriptDataByName(script->scriptName).scriptID;
+				script->isActive = false; // 一旦停止 → 再生時にバインドする設計なら
+			}
+			if (isSelected)
+				ImGui::SetItemDefaultFocus();
+		}
+		ImGui::EndCombo();
+	}
+}
+
 void Inspector::AddComponent(GameObject* object)
 {
 	static bool isOpen = false;
 	MeshFilterComponent* mesh;
 	MeshRendererComponent* render;
+	ScriptComponent* script;
 	if (!isOpen)
 	{
 		// コンポーネントの追加
@@ -146,8 +203,32 @@ void Inspector::AddComponent(GameObject* object)
 					isOpen = false;
 				}
 			}
+			// ScriptComponentがあるか
+			script = m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr()->GetComponent<ScriptComponent>(object->GetEntity());
+			if (!script)
+			{
+				if (ImGui::Selectable("ScriptComponent"))
+				{
+					// ScriptComponentを追加
+					std::unique_ptr<AddScriptComponent> addScriptComp = std::make_unique<AddScriptComponent>(object->GetEntity());
+					m_EditorCommand->ExecuteCommand(std::move(addScriptComp));
+					isOpen = false;
+				}
+			}
 			break;
 		case ObjectType::Camera:
+			// ScriptComponentがあるか
+			script = m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr()->GetComponent<ScriptComponent>(object->GetEntity());
+			if (!script)
+			{
+				if (ImGui::Selectable("ScriptComponent"))
+				{
+					// ScriptComponentを追加
+					std::unique_ptr<AddScriptComponent> addScriptComp = std::make_unique<AddScriptComponent>(object->GetEntity());
+					m_EditorCommand->ExecuteCommand(std::move(addScriptComp));
+					isOpen = false;
+				}
+			}
 			break;
 		case ObjectType::Count:
 			break;
