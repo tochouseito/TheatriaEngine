@@ -139,6 +139,7 @@ namespace Cho
             static void LoadScriptDLL();
 			static void UnloadScriptDLL();
             static bool BuildScriptDLL();
+			static std::vector<std::string> GetScriptFiles();
 			static HMODULE GetScriptDLLHandle() { return dllHandle; }
 
             static std::string slnGUID;

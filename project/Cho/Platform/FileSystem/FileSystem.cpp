@@ -465,14 +465,14 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, SceneManager* 
                     ScriptComponent s{};
                     if (comps["Script"].contains("scriptName"))
                     {
-                        /*std::string scriptNameStr = comps["Script"]["scriptName"].get<std::string>();
+                        std::string scriptNameStr = comps["Script"]["scriptName"].get<std::string>();
                         s.scriptName = scriptNameStr;
-                        s.scriptID = resourceManager->GetScriptManager()->GetScriptDataIndex(s.scriptName);
+						s.scriptID = resourceManager->GetScriptContainer()->GetScriptDataByName(scriptNameStr).scriptID;
                         s.entity = entity;
                         ScriptComponent* script = ecs->AddComponent<ScriptComponent>(entity);
                         script->scriptName = s.scriptName;
                         script->scriptID = s.scriptID;
-                        script->entity = s.entity;*/
+                        script->entity = s.entity;
                     }
                 }
             }
@@ -596,6 +596,15 @@ bool Cho::FileSystem::LoadProjectFolder(const std::wstring& projectName, SceneMa
         if (entry.path().extension() != ".json") continue;
 
         FileType type = GetJsonFileType(entry.path());
+
+        // アセット読み込み
+        // スクリプト読み込み
+        std::vector<std::string> scriptFiles;
+        scriptFiles = ScriptProject::GetScriptFiles();
+        for (const auto& scriptFile : scriptFiles)
+        {
+            resourceManager->GetScriptContainer()->AddScriptData(scriptFile);
+        }
 
         switch (type)
         {
@@ -1037,4 +1046,33 @@ bool Cho::FileSystem::ScriptProject::BuildScriptDLL()
         Log::Write(LogLevel::Info, "Script project built successfully.");
         return true;
     }
+}
+
+std::vector<std::string> Cho::FileSystem::ScriptProject::GetScriptFiles()
+{
+    std::vector<std::string> scriptNames;
+    fs::path exePath = fs::current_path(); // 実行ファイルがある場所
+    // プロジェクトディレクトリ全体を再帰的に探索
+    fs::path projectDir = exePath / "GameProjects" / m_sProjectName;
+    for (const auto& entry : fs::recursive_directory_iterator(projectDir))
+    {
+        if (!entry.is_regular_file()) continue;
+
+        const fs::path& path = entry.path();
+        std::string ext = path.extension().string();
+
+        // .cpp または .h のみに絞る
+        if (ext == ".cpp" || ext == ".h")
+        {
+            // ファイル名（拡張子なし）
+            std::string name = path.stem().string(); // 例: PlayerController.cpp → "PlayerController"
+
+            // 重複チェック（同名 .cpp / .h がある場合）
+            if (std::find(scriptNames.begin(), scriptNames.end(), name) == scriptNames.end())
+            {
+                scriptNames.push_back(name);
+            }
+        }
+    }
+	return scriptNames;
 }
