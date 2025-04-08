@@ -93,8 +93,10 @@ void HubManager::ShowSidebar()
             if (created)
             {
                 m_pGameCore->GetSceneManager()->CreateDefaultScene();
-				// プロジェクト名を保存
-				FileSystem::m_sProjectName = name;
+                // プロジェクト名を保存
+                FileSystem::m_sProjectName = name;
+				// プロジェクトフォルダを作成
+                FileSystem::ScriptProject::GenerateSolutionAndProject();
 				m_IsRun = false; // プロジェクト作成後、Hubを終了
             } else
             {
@@ -132,6 +134,8 @@ void HubManager::ShowSidebar()
 			FileSystem::LoadProjectFolder(selectedProjectName, m_pGameCore->GetSceneManager(),m_pGameCore->GetObjectContainer(),m_pGameCore->GetECSManager(),m_pResourceManager);
 			// プロジェクト名を保存
 			FileSystem::m_sProjectName = selectedProjectName;
+			// プロジェクトのパスを保存
+			FileSystem::ScriptProject::LoadProjectPath(selectedProjectName);
 			// プロジェクト選択後、Hubを終了
 			m_IsRun = false; // プロジェクト選択後、Hubを終了
         }

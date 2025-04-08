@@ -13,6 +13,7 @@
 #include "Resources/IntegrationData/IntegrationData.h"
 #include "Resources/ModelManager/ModelManager.h"
 #include "Resources/TextureManager/TextureManager.h"
+#include "Resources/ScriptContainer/ScriptContainer.h"
 #include "Core/Utility/CompBufferData.h"
 
 enum IntegrationDataType
@@ -159,6 +160,7 @@ public:
 	DescriptorHeap* GetDSVDHeap() const { return m_DSVDescriptorHeap.get(); }
 	TextureManager* GetTextureManager() const { return m_TextureManager.get(); }
 	ModelManager* GetModelManager() const { return m_ModelManager.get(); }
+	ScriptContainer* GetScriptContainer() const { return m_ScriptContainer.get(); }
 	IIntegrationData* GetIntegrationData(const IntegrationDataType& type) const
 	{
 		if (type == IntegrationDataType::Transform)
@@ -195,6 +197,8 @@ private:
 	std::unique_ptr<TextureManager> m_TextureManager = nullptr;
 	// モデルマネージャ
 	std::unique_ptr<ModelManager> m_ModelManager = nullptr;
+	// スクリプトコンテナ
+	std::unique_ptr<ScriptContainer> m_ScriptContainer = nullptr;
 	//// GPUResourceUpdate用のマッピングデータ
 	//FVector<BUFFER_DATA_TF*> m_MappedTF;
 	//FVector<BUFFER_DATA_VIEWPROJECTION*> m_MappedViewProjection;

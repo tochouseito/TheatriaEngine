@@ -7,6 +7,7 @@ class ObjectContainer;
 class SceneManager;
 class ModelManager;
 class ResourceManager;
+class GameCore;
 class GameCoreCommand
 {
 	friend class Add3DObjectCommand;
@@ -15,13 +16,15 @@ class GameCoreCommand
 	friend class AddMeshRendererComponent;
 	friend class AddCameraComponent;
 	friend class SetMainCamera;
+	friend class AddScriptComponent;
 public:
 	// Constructor
-	GameCoreCommand(SceneManager* sceneManager, ECSManager* ecsManager, SystemManager* systemManager, ObjectContainer* objectContainer) :
+	GameCoreCommand(SceneManager* sceneManager, ECSManager* ecsManager, SystemManager* systemManager, ObjectContainer* objectContainer,GameCore* gameCore) :
 		m_pSceneManager(sceneManager),
 		m_pECSManager(ecsManager),
 		m_pSystemManager(systemManager),
-		m_pObjectContainer(objectContainer)
+		m_pObjectContainer(objectContainer),
+		m_pGameCore(gameCore)
 	{
 	}
 	// Destructor
@@ -33,6 +36,7 @@ public:
 	ECSManager* GetECSManagerPtr() { return m_pECSManager; }
 	SystemManager* GetSystemManagerPtr() { return m_pSystemManager; }
 	ObjectContainer* GetObjectContainerPtr() { return m_pObjectContainer; }
+	GameCore* GetGameCorePtr() { return m_pGameCore; }
 private:
 	// 3DObjectを追加
 	GameObject* Add3DObject(const uint32_t& mapID);
@@ -44,6 +48,8 @@ private:
 	void AddMeshRendererComponent(const uint32_t& entity);
 	// CameraComponentを追加
 	void AddCameraComponent(const uint32_t& entity,ResourceManager* resourceManager);
+	// スクリプトコンポーネントを追加
+	void AddScriptComponent(const uint32_t& entity, ResourceManager* resourceManager);
 
 	// SceneのMainCameraを設定
 	std::optional<uint32_t> SetMainCamera(const uint32_t& setCameraID);
@@ -52,5 +58,6 @@ private:
 	ECSManager* m_pECSManager = nullptr;
 	SystemManager* m_pSystemManager = nullptr;
 	ObjectContainer* m_pObjectContainer = nullptr;
+	GameCore* m_pGameCore = nullptr;
 };
 

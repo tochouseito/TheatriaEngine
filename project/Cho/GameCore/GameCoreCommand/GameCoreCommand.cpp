@@ -94,6 +94,13 @@ void GameCoreCommand::AddCameraComponent(const uint32_t& entity, ResourceManager
 	camera->bufferIndex = resourceManager->CreateConstantBuffer<BUFFER_DATA_VIEWPROJECTION>();
 }
 
+void GameCoreCommand::AddScriptComponent(const uint32_t& entity, ResourceManager* resourceManager)
+{
+	ScriptComponent* script = m_pECSManager->AddComponent<ScriptComponent>(entity);
+	script->entity = entity;
+	resourceManager;
+}
+
 std::optional<uint32_t> GameCoreCommand::SetMainCamera(const uint32_t& setCameraID)
 {
 	if (!m_pSceneManager->GetCurrentScene())

@@ -89,9 +89,17 @@ void Toolbar::Window()
     ImGui::SetCursorPosX(startX);
 
     // ボタンを描画（中央に並べる）
-    if (ImGui::Button(ICON_FA_PLAY, ImVec2(buttonSize, buttonSize))) { /* Play */ }
+    if (ImGui::Button(ICON_FA_PLAY, ImVec2(buttonSize, buttonSize))) 
+    { 
+        // Play
+        m_EditorCommand->GameRun();
+    }
     ImGui::SameLine(0, buttonSpacing);
-    if (ImGui::Button(ICON_FA_PAUSE, ImVec2(buttonSize, buttonSize))) { /* Pause */ }
+    if (ImGui::Button(ICON_FA_PAUSE, ImVec2(buttonSize, buttonSize))) 
+    { 
+        /* Pause */
+		m_EditorCommand->GameStop();
+    }
     ImGui::SameLine(0, buttonSpacing);
     if (ImGui::Button(ICON_FA_STEP_FORWARD, ImVec2(buttonSize, buttonSize))) { /* Step */ }
 

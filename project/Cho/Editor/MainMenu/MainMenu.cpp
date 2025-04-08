@@ -89,11 +89,6 @@ void MainMenu::FileMenu()
 		{
 			m_EditorCommand->SaveProjectFile(FileSystem::m_sProjectName);
 		}
-        // スクリプトプロジェクトの生成
-		if (ImGui::MenuItem("スクリプトプロジェクトの生成"))
-		{
-            FileSystem::ScriptProject::GenerateSolutionAndProject();
-		}
         ImGui::EndMenu();
     }
 }

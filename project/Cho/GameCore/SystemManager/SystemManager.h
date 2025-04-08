@@ -3,6 +3,7 @@
 #include "ChoMath.h"
 #include "SDK/DirectX/DirectX12/GpuBuffer/GpuBuffer.h"
 #include "Core/Utility/CompBufferData.h"
+#include "GameCore/ScriptContext/ScriptContext.h"
 #include <unordered_set>
 class ResourceManager;
 class SystemManager
@@ -35,23 +36,56 @@ class ObjectSystem : public ECSManager::System<TransformComponent>
 {
 public:
 	ObjectSystem(ECSManager* ecs,ResourceManager* resourceManager,IStructuredBuffer* integrationBuffer)
-		: ECSManager::System<TransformComponent>([this](TransformComponent&) {/* unused */})
+		: ECSManager::System<TransformComponent>([this,ecs](TransformComponent&) {Run(ecs);})
 		, m_pECS(ecs), m_pResourceManager(resourceManager)
 	{
 		m_pIntegrationBuffer = dynamic_cast<StructuredBuffer<BUFFER_DATA_TF>*>(integrationBuffer);
 	}
 
-	void Update(ECSManager* ecs) override;
 private:
 	ECSManager* m_pECS = nullptr;
 	ResourceManager* m_pResourceManager = nullptr;
 	StructuredBuffer<BUFFER_DATA_TF>* m_pIntegrationBuffer = nullptr;
 
+	void Run(ECSManager* ecs);
 	void UpdateMatrix(TransformComponent& transform, TransformComponent* parent = nullptr);
 	void TransferMatrix(TransformComponent& transform);
 	void UpdateRecursive(Entity entity, std::unordered_set<Entity>& updated);
 };
-
+// TransformStartSystem
+class TransformStartSystem : public ECSManager::System<TransformComponent>
+{
+public:
+	TransformStartSystem(ECSManager* ecs)
+		: ECSManager::System<TransformComponent>([this](TransformComponent& transform)
+			{
+				Start(transform);
+			}),
+		m_ECS(ecs)
+	{
+	}
+	~TransformStartSystem() = default;
+private:
+	void Start(TransformComponent& transform);
+	ECSManager* m_ECS = nullptr;
+};
+// TransformCleanupSystem
+class TransformCleanupSystem : public ECSManager::System<TransformComponent>
+{
+public:
+	TransformCleanupSystem(ECSManager* ecs)
+		: ECSManager::System<TransformComponent>([this](TransformComponent& transform)
+			{
+				Cleanup(transform);
+			}),
+		m_ECS(ecs)
+	{
+	}
+	~TransformCleanupSystem() = default;
+private:
+	void Cleanup(TransformComponent& transform);
+	ECSManager* m_ECS = nullptr;
+};
 // CameraSystem
 class CameraSystem : public ECSManager::System<TransformComponent,CameraComponent>
 {
@@ -71,6 +105,130 @@ private:
 	void TransferMatrix(TransformComponent& transform, CameraComponent& camera);
 
 	ECSManager* m_ECS = nullptr;
+	ResourceManager* m_pResourceManager = nullptr;
+	StructuredBuffer<BUFFER_DATA_TF>* m_pIntegrationBuffer = nullptr;
+};
+
+// ScriptUpdateSystem
+class ScriptUpdateSystem : public ECSManager::System<ScriptComponent>
+{
+public:
+	ScriptUpdateSystem(ECSManager* ecs)
+		: ECSManager::System<ScriptComponent>([this](ScriptComponent& script)
+			{
+				Update(script);
+			}),
+		m_ECS(ecs)
+	{
+	}
+	~ScriptUpdateSystem() = default;
+private:
+	void Update(ScriptComponent& script);
+	ScriptContext MakeScriptContext(Entity entity, ECSManager* ecs)
+	{
+		ScriptContext ctx;
+
+		ctx.transform = ecs->GetComponent<TransformComponent>(entity);
+		ctx.camera = ecs->GetComponent<CameraComponent>(entity);
+		ctx.meshFilter = ecs->GetComponent<MeshFilterComponent>(entity);
+		ctx.meshRenderer = ecs->GetComponent<MeshRendererComponent>(entity);
+		ctx.script = ecs->GetComponent<ScriptComponent>(entity);
+
+		return ctx;
+	}
+	ECSManager* m_ECS = nullptr;
+};
+// ScriptStartSystem
+class ScriptStartSystem : public ECSManager::System<ScriptComponent>
+{
+
+public:
+	ScriptStartSystem(ECSManager* ecs)
+		: ECSManager::System<ScriptComponent>([this](ScriptComponent& script)
+			{
+				Start(script);
+			}),
+		m_ECS(ecs)
+	{
+	}
+	~ScriptStartSystem() = default;
+private:
+	void Start(ScriptComponent& script);
+	void LoadScript(ScriptComponent& script);
+	void StartScript(ScriptComponent& script);
+	ScriptContext MakeScriptContext(Entity entity, ECSManager* ecs)
+	{
+		ScriptContext ctx;
+
+		ctx.transform = ecs->GetComponent<TransformComponent>(entity);
+		ctx.camera = ecs->GetComponent<CameraComponent>(entity);
+		ctx.meshFilter = ecs->GetComponent<MeshFilterComponent>(entity);
+		ctx.meshRenderer = ecs->GetComponent<MeshRendererComponent>(entity);
+		ctx.script = ecs->GetComponent<ScriptComponent>(entity);
+
+		return ctx;
+	}
+	ECSManager* m_ECS = nullptr;
+};
+// ScriptCleanupSystem
+class ScriptCleanupSystem : public ECSManager::System<ScriptComponent>
+{
+public:
+	ScriptCleanupSystem(ECSManager* ecs)
+		: ECSManager::System<ScriptComponent>([this](ScriptComponent& script)
+			{
+				Cleanup(script);
+			}),
+		m_ECS(ecs)
+	{
+	}
+	~ScriptCleanupSystem() = default;
+private:
+	void Cleanup(ScriptComponent& script);
+	ECSManager* m_ECS = nullptr;
+};
+// エディタの更新
+class EditorUpdateSystem : public ECSManager::System<TransformComponent>
+{
+public:
+	EditorUpdateSystem(ECSManager* ecs, ResourceManager* resourceManager, IStructuredBuffer* integrationBuffer)
+		: ECSManager::System<TransformComponent>([this,ecs](TransformComponent&)
+			{
+				Run(ecs);
+			}),
+		m_pECS(ecs), m_pResourceManager(resourceManager)
+	{
+		m_pIntegrationBuffer = dynamic_cast<StructuredBuffer<BUFFER_DATA_TF>*>(integrationBuffer);
+	}
+	~EditorUpdateSystem() = default;
+private:
+	void Run(ECSManager* ecs);
+	void UpdateMatrix(TransformComponent& transform, TransformComponent* parent = nullptr);
+	void TransferMatrix(TransformComponent& transform);
+	void UpdateRecursive(Entity entity, std::unordered_set<Entity>& updated);
+
+	ECSManager* m_pECS = nullptr;
+	ResourceManager* m_pResourceManager = nullptr;
+	StructuredBuffer<BUFFER_DATA_TF>* m_pIntegrationBuffer = nullptr;
+};
+// エディタのカメラの更新
+class EditorCameraSystem : public ECSManager::System<TransformComponent, CameraComponent>
+{
+public:
+	EditorCameraSystem(ECSManager* ecs, ResourceManager* resourceManager, IStructuredBuffer* integrationBuffer)
+		: ECSManager::System<TransformComponent, CameraComponent>([this](TransformComponent& transform, CameraComponent& camera)
+			{
+				UpdateMatrix(transform, camera);
+			}),
+		m_pECS(ecs), m_pResourceManager(resourceManager)
+	{
+		m_pIntegrationBuffer = dynamic_cast<StructuredBuffer<BUFFER_DATA_TF>*>(integrationBuffer);
+	}
+	~EditorCameraSystem() = default;
+private:
+	void UpdateMatrix(TransformComponent& transform, CameraComponent& camera);
+	void TransferMatrix(TransformComponent& transform, CameraComponent& camera);
+	ECSManager* m_pECS = nullptr;
 	ResourceManager* m_pResourceManager = nullptr;
 	StructuredBuffer<BUFFER_DATA_TF>* m_pIntegrationBuffer = nullptr;
 };

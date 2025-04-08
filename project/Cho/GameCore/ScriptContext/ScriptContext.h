@@ -6,4 +6,5 @@ struct ScriptContext
 	CameraComponent* camera = nullptr;		// Cameraコンポーネント
 	MeshFilterComponent* meshFilter = nullptr;	// MeshFilterコンポーネント
 	MeshRendererComponent* meshRenderer = nullptr;	// MeshRendererコンポーネント
+	ScriptComponent* script = nullptr;		// スクリプトコンポーネント
 };

@@ -2,11 +2,16 @@
 #include "FileSystem.h"
 #include "GameCore/GameCore.h"
 #include "Resources/ResourceManager/ResourceManager.h"
+#include "Core/ChoLog/ChoLog.h"
+using namespace Cho;
 
 std::wstring Cho::FileSystem::m_sProjectName = L"";
 // GUID 生成
 std::string Cho::FileSystem::ScriptProject::slnGUID = GenerateGUID();
 std::string Cho::FileSystem::ScriptProject::projGUID = GenerateGUID();
+std::string Cho::FileSystem::ScriptProject::slnPath = "";
+std::string Cho::FileSystem::ScriptProject::projPath = "";
+HMODULE Cho::FileSystem::ScriptProject::dllHandle = nullptr;
 
 // プロジェクトフォルダを探す
 std::optional<std::filesystem::path> Cho::FileSystem::FindOrCreateGameProjects()
@@ -611,15 +616,15 @@ void Cho::FileSystem::ScriptProject::GenerateSolutionAndProject()
     // 出力先
     std::string outputPath = "GameProjects/" + projectNameStr;
 	// ソリューションファイルパス
-    std::string solutionName = outputPath + "/" + projectNameStr + ".sln";
+    slnPath = outputPath + "/" + projectNameStr + ".sln";
 	// vcxprojファイルパス
-	std::string vcxprojName = outputPath + "/" + projectNameStr + ".vcxproj";
+	projPath = outputPath + "/" + projectNameStr + ".vcxproj";
 	// フィルターファイルパス
 	std::string filterName = outputPath + "/" + projectNameStr + ".vcxproj.filters";
 	// ソリューションファイルの生成
-    if (!fs::exists(solutionName))
+    if (!fs::exists(slnPath))
     {
-        std::ofstream slnFile(solutionName, std::ios::trunc);
+        std::ofstream slnFile(slnPath, std::ios::trunc);
         slnFile << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
         slnFile << "# Visual Studio Version 17\n";
         slnFile << "VisualStudioVersion = 17.0.31903.59\n";
@@ -646,18 +651,18 @@ void Cho::FileSystem::ScriptProject::GenerateSolutionAndProject()
         slnFile << "EndGlobal\n";
 
         slnFile.close();
-        std::cout << "Generated solution file: " << solutionName << "\n";
+        std::cout << "Generated solution file: " << slnPath << "\n";
     } else
     {
-        std::cout << "Solution file already exists: " << solutionName << "\n";
+        std::cout << "Solution file already exists: " << slnPath << "\n";
     }
 	// プロジェクトファイルの生成
-	UpdateVcxproj(vcxprojName);
+	UpdateVcxproj();
 	// フィルターファイルの生成
 	UpdateFilters(filterName);
 }
 
-void Cho::FileSystem::ScriptProject::UpdateVcxproj(const std::string& vcxprojPath)
+void Cho::FileSystem::ScriptProject::UpdateVcxproj()
 {
     std::vector<std::string> scriptFiles;
 
@@ -696,7 +701,7 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj(const std::string& vcxprojPat
 
     libraryPath.make_preferred();
 
-    std::ofstream vcxFile(vcxprojPath, std::ios::trunc);
+    std::ofstream vcxFile(projPath, std::ios::trunc);
     vcxFile << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
     vcxFile << "<Project DefaultTargets=\"Build\" ToolsVersion=\"17.0\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\n";
 
@@ -742,8 +747,8 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj(const std::string& vcxprojPat
 
     // 共通プロパティ
     vcxFile << "  <PropertyGroup>\n";
-    vcxFile << "    <OutDir>$(SolutionDir)bin\\$(Configuration)\\</OutDir>\n";
-    vcxFile << "    <IntDir>$(SolutionDir)bin\\Intermediate\\$(Configuration)\\</IntDir>\n";
+    vcxFile << "    <OutDir>$(SolutionDir)bin\\</OutDir>\n";
+    vcxFile << "    <IntDir>$(SolutionDir)obj\\</IntDir>\n";
     vcxFile << "    <TargetName>" << ConvertString(m_sProjectName) << "</TargetName>\n";
     vcxFile << "  </PropertyGroup>\n";
 
@@ -872,8 +877,8 @@ void Cho::FileSystem::ScriptProject::GenerateScriptFiles(const std::string& scri
     std::filesystem::path outputDir = "GameProjects/" + ConvertString(m_sProjectName);
 
     // テンプレートファイルのパス
-    std::filesystem::path templateHeader = "Cho/GameCore/ScriptSystem/TemplateScript.h";
-    std::filesystem::path templateCpp = "Cho/GameCore/ScriptSystem/TemplateScript.cpp";
+    std::filesystem::path templateHeader = "Cho/GameCore/TemplateScript/TemplateScript.h";
+    std::filesystem::path templateCpp = "Cho/GameCore/TemplateScript/TemplateScript.cpp";
 
     // 出力ファイル名
     std::string headerFileName = scriptName + ".h";
@@ -915,4 +920,34 @@ void Cho::FileSystem::ScriptProject::GenerateScriptFiles(const std::string& scri
         std::ofstream out(outputDir / cppFileName);
         out << replaced;
     }
+}
+
+void Cho::FileSystem::ScriptProject::LoadProjectPath(const std::wstring& projectName)
+{
+    std::string projectNameStr = ConvertString(projectName);
+    // 出力先
+    std::string outputPath = "GameProjects/" + projectNameStr;
+    // ソリューションファイルパス
+    slnPath = outputPath + "/" + projectNameStr + ".sln";
+    // vcxprojファイルパス
+    projPath = outputPath + "/" + projectNameStr + ".vcxproj";
+}
+
+void Cho::FileSystem::ScriptProject::LoadScriptDLL()
+{
+	// DLLのパス
+	std::string dllPath = "GameProjects/" + ConvertString(m_sProjectName) + "/bin/" + ConvertString(m_sProjectName) + ".dll";
+    // ロード
+	dllHandle = LoadLibraryA(dllPath.c_str());
+    if (!dllHandle)
+    {
+		Log::Write(LogLevel::Info, "Failed to load DLL: " + dllPath);
+        return;
+    }
+}
+
+void Cho::FileSystem::ScriptProject::UnloadScriptDLL()
+{
+	// DLLのアンロード
+	FreeLibrary(dllHandle);
 }

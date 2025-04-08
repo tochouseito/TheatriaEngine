@@ -131,12 +131,19 @@ namespace Cho
         {
         public:
             static void GenerateSolutionAndProject();
-			static void UpdateVcxproj(const std::string& vcxprojPath);
+			static void UpdateVcxproj();
             static void UpdateFilters(const std::string& filterPath);
             static void GenerateScriptFiles(const std::string& scriptName);
+            static void LoadProjectPath(const std::wstring& projectName);
+            static void LoadScriptDLL();
+			static void UnloadScriptDLL();
+			static HMODULE GetScriptDLLHandle() { return dllHandle; }
 
             static std::string slnGUID;
 			static std::string projGUID;
+			static std::string slnPath;
+			static std::string projPath;
+            static HMODULE dllHandle;
         };
     };
 }

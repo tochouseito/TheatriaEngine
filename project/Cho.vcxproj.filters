@@ -176,7 +176,6 @@
     <ClCompile Include="Cho\GameCore\GameCoreCommand\GameCoreCommand.cpp" />
     <ClCompile Include="Cho\Editor\DebugCamera\DebugCamera.cpp" />
     <ClCompile Include="Cho\Editor\Toolbar\Toolbar.cpp" />
-    <ClCompile Include="Cho\GameCore\ScriptSystem\ScriptSystem.cpp" />
     <ClCompile Include="Cho\Hub\HubManager.cpp" />
     <ClCompile Include="Cho\GameCore\IScript\IScript.cpp" />
     <ClCompile Include="Cho\Resources\ScriptContainer\ScriptContainer.cpp" />
@@ -374,10 +373,9 @@
     <ClInclude Include="Cho\SDK\ImGui\ImGuiUtlity\ImGuiUtlity.h" />
     <ClInclude Include="Cho\Core\Utility\GenerateUnique.h" />
     <ClInclude Include="Cho\Editor\Toolbar\Toolbar.h" />
-    <ClInclude Include="Cho\GameCore\ScriptSystem\ScriptSystem.h" />
     <ClInclude Include="Cho\Hub\HubManager.h" />
     <ClInclude Include="Cho\GameCore\IScript\IScript.h" />
-    <ClInclude Include="Cho\GameCore\ScriptSystem\ScriptContext.h" />
+    <ClInclude Include="Cho\GameCore\ScriptContext\ScriptContext.h" />
     <ClInclude Include="Cho\Resources\ScriptContainer\ScriptContainer.h" />
   </ItemGroup>
   <ItemGroup>

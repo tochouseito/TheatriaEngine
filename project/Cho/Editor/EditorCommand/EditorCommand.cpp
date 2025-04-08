@@ -81,6 +81,39 @@ void EditorCommand::SaveProjectFile(const std::wstring& projectName)
 void EditorCommand::GenerateScript(const std::string& scriptName)
 {
 	FileSystem::ScriptProject::GenerateScriptFiles(scriptName);
+	// プロジェクトファイルを更新
+	FileSystem::ScriptProject::UpdateVcxproj();
+	// スクリプトコンテナに追加
+	ScriptContainer* scriptContainer = m_ResourceManager->GetScriptContainer();
+	scriptContainer->AddScriptData(scriptName);
+}
+
+void EditorCommand::GameRun()
+{
+	m_GameCoreCommand->GetGameCorePtr()->GameRun();
+}
+
+void EditorCommand::GameStop()
+{
+	m_GameCoreCommand->GetGameCorePtr()->GameStop();
+}
+
+void EditorCommand::UpdateEditorScene()
+{
+	// ゲームが再生していたらスキップ
+	if (m_GameCoreCommand->GetGameCorePtr()->IsRunning())
+	{
+		return;
+	}
+	m_UpdateSystem->UpdateAll(m_GameCoreCommand->GetECSManagerPtr());
+}
+
+void EditorCommand::CreateSystem()
+{
+	std::unique_ptr<ECSManager::ISystem> transformSystem = std::make_unique<EditorUpdateSystem>(m_GameCoreCommand->GetECSManagerPtr(), m_ResourceManager, m_ResourceManager->GetIntegrationBuffer(IntegrationDataType::Transform));
+	m_UpdateSystem->RegisterSystem(std::move(transformSystem));
+	std::unique_ptr<ECSManager::ISystem> cameraSystem = std::make_unique<EditorCameraSystem>(m_GameCoreCommand->GetECSManagerPtr(), m_ResourceManager, m_ResourceManager->GetIntegrationBuffer(IntegrationDataType::Transform));
+	m_UpdateSystem->RegisterSystem(std::move(cameraSystem));
 }
 
 void Add3DObjectCommand::Execute(EditorCommand* edit)
@@ -105,6 +138,16 @@ void AddCameraObjectCommand::Execute(EditorCommand* edit)
 }
 
 void AddCameraObjectCommand::Undo(EditorCommand* edit)
+{
+	edit;
+}
+
+void AddScriptComponent::Execute(EditorCommand* edit)
+{
+	edit->GetGameCoreCommandPtr()->AddScriptComponent(m_Entity, edit->GetResourceManagerPtr());
+}
+
+void AddScriptComponent::Undo(EditorCommand* edit)
 {
 	edit;
 }

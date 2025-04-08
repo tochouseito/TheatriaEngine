@@ -1,9 +1,9 @@
 #pragma once
-#include "GameCore/ScriptSystem/ScriptContext.h"
+#include "GameCore/ScriptContext/ScriptContext.h"
 class IScript
 {
 public:
     virtual ~IScript() = default;
-    virtual void Start(const ScriptContext& ctx) = 0;
-    virtual void Update(const ScriptContext& ctx) = 0;
+    virtual void Start(ScriptContext& ctx) = 0;
+    virtual void Update(ScriptContext& ctx) = 0;
 };

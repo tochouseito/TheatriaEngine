@@ -39,4 +39,7 @@ void EditorManager::Update()
 	m_AssetBrowser->Update();
 	// Console
 	m_Console->Update();
+
+	// エディタシーンの更新
+	m_EditorCommand->UpdateEditorScene();
 }

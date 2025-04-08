@@ -11,6 +11,8 @@ ResourceManager::ResourceManager(ID3D12Device8* device)
 	CreateHeap(device);
 	// 統合データの作成
 	CreateIntegrationBuffers();
+	// スクリプトコンテナの作成
+	m_ScriptContainer = std::make_unique<ScriptContainer>();
 	// 初期化
 	Initialize();
 }

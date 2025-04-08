@@ -16,5 +16,3 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	return 0;
 }
-
-// Thank you for your patience! This is the end of the code snippet.

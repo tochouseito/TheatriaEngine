@@ -213,11 +213,10 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClCompile Include="Cho\Editor\PipelineEditor\PipelineEditor.cpp" />
     <ClCompile Include="Cho\Editor\PopupMenu\PopupMenu.cpp" />
     <ClCompile Include="Cho\Editor\Toolbar\Toolbar.cpp" />
-    <ClCompile Include="Cho\GameCore\ScriptSystem\ScriptSystem.cpp" />
     <ClCompile Include="Cho\Resources\ScriptContainer\ScriptContainer.cpp" />
     <ClInclude Include="Cho\Core\ChoLog\ChoLog.h" />
     <ClInclude Include="Cho\Core\Utility\GenerateUnique.h" />
-    <ClInclude Include="Cho\GameCore\ScriptSystem\ScriptContext.h" />
+    <ClInclude Include="Cho\GameCore\ScriptContext\ScriptContext.h" />
     <ClInclude Include="Cho\Resources\AssetManager\AssetManager.h" />
     <ClInclude Include="Cho\Editor\BaseEditor\BaseEditor.h" />
     <ClInclude Include="Cho\Editor\AnimationEditor\AnimationEditor.h" />
@@ -288,7 +287,6 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <ClInclude Include="Cho\Editor\DebugCamera\DebugCamera.h" />
     <ClInclude Include="Cho\SDK\ImGui\ImGuiUtlity\ImGuiUtlity.h" />
     <ClInclude Include="Cho\Editor\Toolbar\Toolbar.h" />
-    <ClInclude Include="Cho\GameCore\ScriptSystem\ScriptSystem.h" />
     <ClInclude Include="Cho\Hub\HubManager.h" />
     <ClInclude Include="Cho\GameCore\IScript\IScript.h" />
     <ClInclude Include="Cho\Resources\ScriptContainer\ScriptContainer.h" />

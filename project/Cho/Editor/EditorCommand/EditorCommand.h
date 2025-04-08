@@ -1,5 +1,6 @@
 #pragma once
 #include "SDK/DirectX/DirectX12/stdafx/stdafx.h"
+#include "GameCore/SystemManager/SystemManager.h"
 class EditorCommand;
 class ICommand
 {
@@ -85,6 +86,19 @@ private:
 	std::optional<uint32_t> m_PreCameraID = std::nullopt;
 	std::optional<uint32_t> m_SetCameraID = std::nullopt;
 };
+// スクリプトコンポーネントを追加するコマンド
+class AddScriptComponent :public ICommand
+{
+public:
+	AddScriptComponent(const uint32_t& entity) :
+		m_Entity(entity)
+	{
+	}
+	void Execute(EditorCommand* edit)override;
+	void Undo(EditorCommand* edit)override;
+private:
+	uint32_t m_Entity;
+};
 
 class ResourceManager;
 class GraphicsEngine;
@@ -97,6 +111,8 @@ public:
 	EditorCommand(ResourceManager* resourceManager,GraphicsEngine* graphicsEngine,GameCoreCommand* gameCoreCommand):
 		m_ResourceManager(resourceManager), m_GraphicsEngine(graphicsEngine), m_GameCoreCommand(gameCoreCommand)
 	{
+		m_UpdateSystem = std::make_unique<SystemManager>();
+		CreateSystem();
 	}
 	// Destructor
 	~EditorCommand()
@@ -130,11 +146,21 @@ public:
 	void SaveProjectFile(const std::wstring& projectName);
 	// Test:スクリプト作成	
 	void GenerateScript(const std::string& scriptName);
+	// ゲーム再生
+	void GameRun();
+	// ゲーム停止
+	void GameStop();
+	// シーンのエディタ更新
+	void UpdateEditorScene();
 private:
+	void CreateSystem();
+
 	std::vector<std::unique_ptr<ICommand>> m_Commands;
 	ResourceManager* m_ResourceManager = nullptr;
 	GraphicsEngine* m_GraphicsEngine = nullptr;
 	GameCoreCommand* m_GameCoreCommand = nullptr;
 	GameObject* m_SelectedObject = nullptr;
+	// エディタの更新システム
+	std::unique_ptr<SystemManager> m_UpdateSystem = nullptr;
 };
 

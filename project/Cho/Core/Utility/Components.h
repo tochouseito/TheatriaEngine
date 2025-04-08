@@ -2,10 +2,21 @@
 #include "ChoMath.h"
 #include <bitset>
 #include <optional>
+#include <functional>
 
 using Entity = uint32_t;
 using CompID = size_t;
 using Archetype = std::bitset<256>;
+struct ScriptContext;
+
+// 初期値を保存するための構造体
+struct TransformStartValue
+{
+	Vector3 translation = { 0.0f, 0.0f, 0.0f };
+	Quaternion rotation = { 0.0f, 0.0f, 0.0f,1.0f };
+	Scale scale = { 1.0f, 1.0f, 1.0f };
+	Vector3 degrees = { 0.0f, 0.0f, 0.0f };
+};;
 
 struct TransformComponent final
 {
@@ -21,6 +32,7 @@ struct TransformComponent final
 	std::optional<uint32_t> parentEntity = std::nullopt;// 親のEntity
 	//uint32_t bufferIndex = UINT32_MAX;				// バッファーインデックス
 	std::optional<uint32_t> mapID = std::nullopt;		// マップインデックス
+	TransformStartValue startValue;						// 初期値保存用
 };
 // Node用Transform構造体
 struct NodeTransform
@@ -55,4 +67,17 @@ struct MeshFilterComponent final
 struct MeshRendererComponent final
 {
 	bool visible = true;// 描画フラグ
+};
+
+// スクリプトコンポーネント
+struct ScriptComponent final
+{
+	std::string scriptName = ""; // スクリプト名
+	std::optional<uint32_t> scriptID = std::nullopt; // スクリプトID
+	std::optional<Entity> entity = std::nullopt; // スクリプトのエンティティ
+	using ScriptFunc = std::function<void(ScriptContext& ctx)>; // スクリプト関数型
+	ScriptFunc startFunc;  // Start関数
+	ScriptFunc updateFunc; // Update関数
+	std::function<void()> cleanupFunc; // 解放関数
+	bool isActive = false; // スクリプト有効フラグ
 };
