@@ -124,14 +124,14 @@ void PipelineManager::CreatePipelineDemo(ID3D12Device8* device)
 	// Compile shaders
 	ComPtr<IDxcBlob> pVSBlob =
 		m_pShaderCompiler->CompileShader(
-			L"Cho/Resources/Shader/Demo/Demo.VS.hlsl",
+			L"Cho/Resources/EngineAssets/Shader/Demo/Demo.VS.hlsl",
 			L"vs_6_5"
 			);
 	ComPtr<ID3D12ShaderReflection> pVSReflection = m_pShaderCompiler->ReflectShader(pVSBlob.Get());
 
 	ComPtr<IDxcBlob> pPSBlob =
 		m_pShaderCompiler->CompileShader(
-			L"Cho/Resources/Shader/Demo/Demo.PS.hlsl",
+			L"Cho/Resources/EngineAssets/Shader/Demo/Demo.PS.hlsl",
 			L"ps_6_5"
 		);
 	ComPtr<ID3D12ShaderReflection> pPSReflection = m_pShaderCompiler->ReflectShader(pPSBlob.Get());
@@ -265,14 +265,14 @@ void PipelineManager::CreatePipelineScreenCopy(ID3D12Device8* device)
 	// Compile shaders
 	ComPtr<IDxcBlob> pVSBlob =
 		m_pShaderCompiler->CompileShader(
-			L"Cho/Resources/Shader/ScreenCopy/ScreenCopy.VS.hlsl",
+			L"Cho/Resources/EngineAssets/Shader/ScreenCopy/ScreenCopy.VS.hlsl",
 			L"vs_6_5"
 		);
 	ComPtr<ID3D12ShaderReflection> pVSReflection = m_pShaderCompiler->ReflectShader(pVSBlob.Get());
 
 	ComPtr<IDxcBlob> pPSBlob =
 		m_pShaderCompiler->CompileShader(
-			L"Cho/Resources/Shader/ScreenCopy/ScreenCopy.PS.hlsl",
+			L"Cho/Resources/EngineAssets/Shader/ScreenCopy/ScreenCopy.PS.hlsl",
 			L"ps_6_5"
 		);
 	ComPtr<ID3D12ShaderReflection> pPSReflection = m_pShaderCompiler->ReflectShader(pPSBlob.Get());
@@ -402,14 +402,14 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 	// Compile shaders
 	ComPtr<IDxcBlob> pVSBlob =
 		m_pShaderCompiler->CompileShader(
-			L"Cho/Resources/Shader/IntegrationDraw/IntegrationDraw.VS.hlsl",
+			L"Cho/Resources/EngineAssets/Shader/IntegrationDraw/IntegrationDraw.VS.hlsl",
 			L"vs_6_5"
 		);
 	ComPtr<ID3D12ShaderReflection> pVSReflection = m_pShaderCompiler->ReflectShader(pVSBlob.Get());
 
 	ComPtr<IDxcBlob> pPSBlob =
 		m_pShaderCompiler->CompileShader(
-			L"Cho/Resources/Shader/IntegrationDraw/IntegrationDraw.PS.hlsl",
+			L"Cho/Resources/EngineAssets/Shader/IntegrationDraw/IntegrationDraw.PS.hlsl",
 			L"ps_6_5"
 		);
 	ComPtr<ID3D12ShaderReflection> pPSReflection = m_pShaderCompiler->ReflectShader(pPSBlob.Get());

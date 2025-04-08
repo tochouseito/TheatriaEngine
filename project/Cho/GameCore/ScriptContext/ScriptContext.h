@@ -1,5 +1,5 @@
 #pragma once
-#include "Core/Utility/Components.h"
+#include "Components.h"
 struct ScriptContext
 {
 	TransformComponent* transform = nullptr;	// Transformコンポーネント

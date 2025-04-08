@@ -379,30 +379,30 @@
     <ClInclude Include="Cho\Resources\ScriptContainer\ScriptContainer.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Cho\Resources\Shader\header\Demo.hlsli">
+    <None Include="Cho\Resources\EngineAssets\Shader\header\Demo.hlsli">
       <Filter>Shader Files</Filter>
     </None>
-    <None Include="Cho\Resources\Shader\header\ScreenCopy.hlsli">
+    <None Include="Cho\Resources\EngineAssets\Shader\header\ScreenCopy.hlsli">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Cho\Resources\Shader\Demo\Demo.VS.hlsl">
+    <FxCompile Include="Cho\Resources\EngineAssets\Shader\Demo\Demo.VS.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
-    <FxCompile Include="Cho\Resources\Shader\Demo\Demo.PS.hlsl">
+    <FxCompile Include="Cho\Resources\EngineAssets\Shader\Demo\Demo.PS.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
-    <FxCompile Include="Cho\Resources\Shader\IntegrationDraw\IntegrationDraw.PS.hlsl">
+    <FxCompile Include="Cho\Resources\EngineAssets\Shader\IntegrationDraw\IntegrationDraw.PS.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
-    <FxCompile Include="Cho\Resources\Shader\IntegrationDraw\IntegrationDraw.VS.hlsl">
+    <FxCompile Include="Cho\Resources\EngineAssets\Shader\IntegrationDraw\IntegrationDraw.VS.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
-    <FxCompile Include="Cho\Resources\Shader\ScreenCopy\ScreenCopy.PS.hlsl">
+    <FxCompile Include="Cho\Resources\EngineAssets\Shader\ScreenCopy\ScreenCopy.PS.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
-    <FxCompile Include="Cho\Resources\Shader\ScreenCopy\ScreenCopy.VS.hlsl">
+    <FxCompile Include="Cho\Resources\EngineAssets\Shader\ScreenCopy\ScreenCopy.VS.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
   </ItemGroup>

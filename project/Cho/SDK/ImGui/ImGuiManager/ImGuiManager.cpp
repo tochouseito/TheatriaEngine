@@ -18,7 +18,7 @@ void ImGuiManager::Initialize(ID3D12Device8* device, ResourceManager* resourceMa
 	font_config.MergeMode = false;
 	font_config.PixelSnapH = true;
 	io.Fonts->AddFontFromFileTTF(//"C:/Windows/Fonts/msgothic.ttc",
-		"Cho/Resources/Fonts/NotoSansJP-Regular.ttf",// フォントファイルのパス
+		"Cho/Resources/EngineAssets/Fonts/NotoSansJP-Regular.ttf",// フォントファイルのパス
 		16.0f,// フォントファイルのパスとフォントサイズ
 		&font_config, io.Fonts->GetGlyphRangesJapanese()// フォントの範囲
 	);
@@ -26,7 +26,7 @@ void ImGuiManager::Initialize(ID3D12Device8* device, ResourceManager* resourceMa
 	font_config.MergeMode = true;
 	static const ImWchar icon_ranges[] = { 0xf000, 0xf3ff, 0 }; // FontAwesomeの範囲
 	io.Fonts->AddFontFromFileTTF(
-		"Cho/Resources/Fonts/Font Awesome 6 Free-Solid-900.otf",
+		"Cho/Resources/EngineAssets/Fonts/Font Awesome 6 Free-Solid-900.otf",
 		14.0f,
 		&font_config, icon_ranges);
 	unsigned char* texPixels = nullptr;

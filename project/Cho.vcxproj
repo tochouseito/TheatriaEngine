@@ -62,7 +62,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Cho;$(ProjectDir)Cho\Externals\assimp\include;$(ProjectDir)Cho\Externals\DirectXTex;$(ProjectDir)Cho\Externals\imgui;$(ProjectDir)Cho\Externals\nlohmann;$(ProjectDir)Cho\Externals\ChoMath;$(ProjectDir)Cho\GameCore\IScript;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Cho;$(ProjectDir)Cho\Externals\assimp\include;$(ProjectDir)Cho\Externals\DirectXTex;$(ProjectDir)Cho\Externals\imgui;$(ProjectDir)Cho\Externals\nlohmann;$(ProjectDir)Cho\Externals\ChoMath;$(ProjectDir)Cho\GameCore\IScript;$(ProjectDir)Cho\GameCore\ScriptContext;$(ProjectDir)Cho\Core\Utility;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -77,8 +77,12 @@
     <PostBuildEvent>
       <Command>copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxcompiler.dll" "$(TargetDir)dxcompiler.dll"
 copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dxil.dll"
-xcopy "$(SolutionDir)Cho\Resources" "$(TargetDir)Cho\Resources" /E /I /Y
-copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
+xcopy "$(SolutionDir)Cho\Resources\EngineAssets" "$(TargetDir)Cho\Resources\EngineAssets" /E /I /Y
+copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"
+xcopy "$(SolutionDir)Cho\GameCore\IScript" "$(TargetDir)Cho\GameCore\IScript" /E /I /Y
+xcopy "$(SolutionDir)Cho\Externals\ChoMath" "$(TargetDir)Cho\Externals\ChoMath" /E /I /Y
+xcopy "$(SolutionDir)Cho\GameCore\ScriptContext" "$(TargetDir)Cho" /E /I /Y
+xcopy "$(SolutionDir)Cho\Core\Utility\Components.h" "$(TargetDir)Cho" /E /I /Y</Command>
     </PostBuildEvent>
     <Dxc>
       <AdditionalIncludeDirectories>$(ProjectDir)Resources\Shader\header;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -104,7 +108,7 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Cho;$(ProjectDir)Cho\Externals\assimp\include;$(ProjectDir)Cho\Externals\DirectXTex;$(ProjectDir)Cho\Externals\imgui;$(ProjectDir)Cho\Externals\nlohmann;$(ProjectDir)Cho\Externals\ChoMath;$(ProjectDir)Cho\GameCore\IScript;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Cho;$(ProjectDir)Cho\Externals\assimp\include;$(ProjectDir)Cho\Externals\DirectXTex;$(ProjectDir)Cho\Externals\imgui;$(ProjectDir)Cho\Externals\nlohmann;$(ProjectDir)Cho\Externals\ChoMath;$(ProjectDir)Cho\GameCore\IScript;$(ProjectDir)Cho\GameCore\ScriptContext;$(ProjectDir)Cho\Core\Utility;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -119,8 +123,12 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     <PostBuildEvent>
       <Command>copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxcompiler.dll" "$(TargetDir)dxcompiler.dll"
 copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dxil.dll"
-xcopy "$(SolutionDir)Cho\Resources" "$(TargetDir)Cho\Resources" /E /I /Y
-copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
+xcopy "$(SolutionDir)Cho\Resources\EngineAssets" "$(TargetDir)Cho\Resources\EngineAssets" /E /I /Y
+copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"
+xcopy "$(SolutionDir)Cho\GameCore\IScript" "$(TargetDir)Cho\GameCore\IScript" /E /I /Y
+xcopy "$(SolutionDir)Cho\Externals\ChoMath" "$(TargetDir)Cho\Externals\ChoMath" /E /I /Y
+xcopy "$(SolutionDir)Cho\GameCore\ScriptContext" "$(TargetDir)Cho" /E /I /Y
+xcopy "$(SolutionDir)Cho\Core\Utility\Components.h" "$(TargetDir)Cho" /E /I /Y</Command>
     </PostBuildEvent>
     <Dxc>
       <AdditionalIncludeDirectories>$(ProjectDir)Resources\Shader\header;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -303,41 +311,41 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"</Command>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Cho\Resources\Shader\header\Demo.hlsli" />
-    <None Include="Cho\Resources\Shader\header\ScreenCopy.hlsli" />
+    <None Include="Cho\Resources\EngineAssets\Shader\header\Demo.hlsli" />
+    <None Include="Cho\Resources\EngineAssets\Shader\header\ScreenCopy.hlsli" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Cho\Resources\Shader\Demo\Demo.PS.hlsl">
+    <FxCompile Include="Cho\Resources\EngineAssets\Shader\Demo\Demo.PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="Cho\Resources\Shader\Demo\Demo.VS.hlsl">
+    <FxCompile Include="Cho\Resources\EngineAssets\Shader\Demo\Demo.VS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="Cho\Resources\Shader\IntegrationDraw\IntegrationDraw.PS.hlsl">
+    <FxCompile Include="Cho\Resources\EngineAssets\Shader\IntegrationDraw\IntegrationDraw.PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="Cho\Resources\Shader\IntegrationDraw\IntegrationDraw.VS.hlsl">
+    <FxCompile Include="Cho\Resources\EngineAssets\Shader\IntegrationDraw\IntegrationDraw.VS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="Cho\Resources\Shader\ScreenCopy\ScreenCopy.PS.hlsl">
+    <FxCompile Include="Cho\Resources\EngineAssets\Shader\ScreenCopy\ScreenCopy.PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="Cho\Resources\Shader\ScreenCopy\ScreenCopy.VS.hlsl">
+    <FxCompile Include="Cho\Resources\EngineAssets\Shader\ScreenCopy\ScreenCopy.VS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>

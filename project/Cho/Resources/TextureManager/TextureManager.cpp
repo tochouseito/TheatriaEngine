@@ -8,7 +8,7 @@ using namespace Cho;
 void TextureManager::LoadEngineTexture()
 {
     // テクスチャデータの読み込み
-    std::string path = "Cho/Resources/Texture";
+    std::string path = "Cho/Resources/EngineAssets/Texture";
     // ファイルパスのリストを取得
     for (const auto& entry : fs::directory_iterator(path))
     {

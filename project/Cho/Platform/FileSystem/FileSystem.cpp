@@ -729,14 +729,19 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
     // パス設定
     fs::path currentPath = fs::current_path();
 
-    // インクルードディレクトリ
-    fs::path systemPath = currentPath / "Cho";
-    fs::path mathLibPath = currentPath / "Cho/Externals/ChoMath";
-	// スクリプトファイルのパス
-	fs::path scriptPath = currentPath / "Cho/GameCore/IScript";
+ //   // インクルードディレクトリ
+ //   fs::path systemPath = currentPath / "Cho";
+ //   fs::path mathLibPath = currentPath / "Cho/Externals/ChoMath";
+	//// スクリプトファイルのパス
+	//fs::path scriptPath = currentPath / "Cho/GameCore/IScript";
+    fs::path includeBase = fs::relative(currentPath, projectDir);
+    fs::path systemPath = includeBase / "Cho";
+    fs::path mathLibPath = includeBase / "Cho/Externals/ChoMath";
+    fs::path scriptPath = includeBase / "Cho/GameCore/IScript";
 
     // ライブラリディレクトリ
     fs::path libraryPath = currentPath / "../generated/outputs/$(Configuration)/";
+    fs::path libraryPath2 = currentPath;
 
     // パスの正規化
     systemPath.make_preferred();
@@ -810,7 +815,7 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
     vcxFile << "      <SubSystem>Windows</SubSystem>\n";
     vcxFile << "      <GenerateDebugInformation>false</GenerateDebugInformation>\n";
     vcxFile << "      <AdditionalDependencies>ChoMath.lib;%(AdditionalDependencies)</AdditionalDependencies>\n";
-    vcxFile << "      <AdditionalLibraryDirectories>" << libraryPath.string() << ";%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>\n";
+    vcxFile << "      <AdditionalLibraryDirectories>" << libraryPath.string() << ";" << libraryPath2.string() << ";%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>\n";
     vcxFile << "    </Link>\n";
     vcxFile << "  </ItemDefinitionGroup>\n";
 
@@ -920,8 +925,8 @@ void Cho::FileSystem::ScriptProject::GenerateScriptFiles(const std::string& scri
     std::filesystem::path outputDir = "GameProjects/" + ConvertString(m_sProjectName);
 
     // テンプレートファイルのパス
-    std::filesystem::path templateHeader = "Cho/GameCore/TemplateScript/TemplateScript.h";
-    std::filesystem::path templateCpp = "Cho/GameCore/TemplateScript/TemplateScript.cpp";
+    std::filesystem::path templateHeader = "Cho/Resources/EngineAssets/TemplateScript/TemplateScript.h";
+    std::filesystem::path templateCpp = "Cho/Resources/EngineAssets/TemplateScript/TemplateScript.cpp";
 
     // 出力ファイル名
     std::string headerFileName = scriptName + ".h";

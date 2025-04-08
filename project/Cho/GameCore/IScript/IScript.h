@@ -1,5 +1,5 @@
 #pragma once
-#include "GameCore/ScriptContext/ScriptContext.h"
+#include "ScriptContext.h"
 class IScript
 {
 public:
