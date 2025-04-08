@@ -43,21 +43,33 @@ void GameCore::Update(ResourceManager& resourceManager, GraphicsEngine& graphics
 
 void GameCore::GameRun()
 {
-	isRunning = true;
+	if (isRunning)
+	{
+		return;
+	}
 	// ゲームの初期化処理
 	// スクリプトDLLの読み込み
+	/*if (!FileSystem::ScriptProject::BuildScriptDLL())
+	{
+		return;
+	}*/
 	FileSystem::ScriptProject::LoadScriptDLL();
+	isRunning = true;
 	// StartSystemの実行
 	m_pStartSystem->UpdateAll(m_pECSManager.get());
 }
 
 void GameCore::GameStop()
 {
-	isRunning = false;
+	if (!isRunning)
+	{
+		return;
+	}
 	// スクリプトのインスタンスを解放
 	m_pCleanupSystem->UpdateAll(m_pECSManager.get());
 	// DLLのアンロード
 	FileSystem::ScriptProject::UnloadScriptDLL();
+	isRunning = false;
 }
 
 void GameCore::CreateSystems(ResourceManager* resourceManager)

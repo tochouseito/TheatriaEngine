@@ -81,7 +81,8 @@ void SwapChain::CreateResource(ID3D12Device8* device, ResourceManager* resourceM
 void SwapChain::Present()
 {
 	HRESULT hr = m_SwapChain->Present(1, 0);
-	Log::Write(LogLevel::Assert, "SwapChain presented.", hr);
+	hr;
+	//Log::Write(LogLevel::Assert, "SwapChain presented.", hr);
 }
 
 void SwapChain::Resize(ID3D12Device8* device, const UINT64& width, const UINT& height)

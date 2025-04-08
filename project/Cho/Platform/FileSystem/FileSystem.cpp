@@ -2,6 +2,7 @@
 #include "FileSystem.h"
 #include "GameCore/GameCore.h"
 #include "Resources/ResourceManager/ResourceManager.h"
+#include <cstdlib>
 #include "Core/ChoLog/ChoLog.h"
 using namespace Cho;
 
@@ -307,6 +308,10 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory,BaseScene* sce
             {
                 comps["MeshRenderer"] = Cho::Serialization::ToJson(*r);
             }
+			if (const auto* s = ecs->GetComponent<ScriptComponent>(entity))
+			{
+				comps["Script"] = Cho::Serialization::ToJson(*s);
+			}
             break;
 
         case ObjectType::Camera:
@@ -318,6 +323,10 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory,BaseScene* sce
             {
                 comps["Camera"] = Cho::Serialization::ToJson(*c);
             }
+			if (const auto* s = ecs->GetComponent<ScriptComponent>(entity))
+			{
+				comps["Script"] = Cho::Serialization::ToJson(*s);
+			}
             break;
 
         default:
@@ -450,6 +459,22 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, SceneManager* 
                     MeshRendererComponent* renderer = ecs->AddComponent<MeshRendererComponent>(entity);
 					renderer->visible = r.visible;
                 }
+
+                if (comps.contains("Script"))
+                {
+                    ScriptComponent s{};
+                    if (comps["Script"].contains("scriptName"))
+                    {
+                        /*std::string scriptNameStr = comps["Script"]["scriptName"].get<std::string>();
+                        s.scriptName = scriptNameStr;
+                        s.scriptID = resourceManager->GetScriptManager()->GetScriptDataIndex(s.scriptName);
+                        s.entity = entity;
+                        ScriptComponent* script = ecs->AddComponent<ScriptComponent>(entity);
+                        script->scriptName = s.scriptName;
+                        script->scriptID = s.scriptID;
+                        script->entity = s.entity;*/
+                    }
+                }
             }
         }
 
@@ -509,6 +534,15 @@ json Cho::Serialization::ToJson(const MeshRendererComponent& r)
     json j;
     j["visible"] = r.visible;
     return j;
+}
+
+json Cho::Serialization::ToJson(const ScriptComponent& s)
+{
+	json j;
+	j["scriptName"] = s.scriptName;
+	j["scriptID"] = s.scriptID.value();
+	j["entity"] = s.entity.value();
+	return j;
 }
 
 FileType Cho::FileSystem::GetJsonFileType(const std::filesystem::path& path)
@@ -950,4 +984,57 @@ void Cho::FileSystem::ScriptProject::UnloadScriptDLL()
 {
 	// DLLのアンロード
 	FreeLibrary(dllHandle);
+}
+
+//bool Cho::FileSystem::ScriptProject::BuildScriptDLL()
+//{
+//	std::string projectPath = "GameProjects/" + ConvertString(m_sProjectName) + "/" + ConvertString(m_sProjectName) + ".vcxproj";
+//    std::string command = "msbuild \"" + projectPath + "\" /p:Configuration=Debug /p:Platform=x64";
+//    int result = std::system(command.c_str());
+//
+//    if (result != 0)
+//    {
+//		Log::Write(LogLevel::Error, "Script project build failed with code " + std::to_string(result));
+//		return false;
+//    } else
+//    {
+//		Log::Write(LogLevel::Info, "Script project built successfully.");
+//		return true;
+//    }
+//}
+
+bool Cho::FileSystem::ScriptProject::BuildScriptDLL()
+{
+    std::string projectPath = "GameProjects/" + ConvertString(m_sProjectName) + "/" + ConvertString(m_sProjectName) + ".vcxproj";
+    std::string command = "msbuild \"" + projectPath + "\" /p:Configuration=Debug /p:Platform=x64";
+
+    std::ostringstream logStream;
+    logStream << "実行したコマンド: " << command << "\n";
+
+    // _popen を利用してコマンド出力を取得
+    FILE* pipe = _popen(command.c_str(), "r");
+    if (!pipe)
+    {
+        Log::Write(LogLevel::Error, "コマンド実行に失敗しました: " + command);
+        return false;
+    }
+
+    char buffer[128] = { 0 };
+    while (fgets(buffer, sizeof(buffer), pipe) != nullptr)
+    {
+        logStream << buffer;
+    }
+
+    int result = _pclose(pipe);
+    Log::Write(LogLevel::Info, logStream.str());
+
+    if (result != 0)
+    {
+        Log::Write(LogLevel::Error, "Script project build failed with code " + std::to_string(result));
+        return false;
+    } else
+    {
+        Log::Write(LogLevel::Info, "Script project built successfully.");
+        return true;
+    }
 }

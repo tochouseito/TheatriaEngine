@@ -65,6 +65,7 @@ namespace Cho
         json ToJson(const CameraComponent& c);
         json ToJson(const MeshFilterComponent& m);
         json ToJson(const MeshRendererComponent& r);
+		json ToJson(const ScriptComponent& s);
     }
 
     class FileSystem
@@ -137,6 +138,7 @@ namespace Cho
             static void LoadProjectPath(const std::wstring& projectName);
             static void LoadScriptDLL();
 			static void UnloadScriptDLL();
+            static bool BuildScriptDLL();
 			static HMODULE GetScriptDLLHandle() { return dllHandle; }
 
             static std::string slnGUID;

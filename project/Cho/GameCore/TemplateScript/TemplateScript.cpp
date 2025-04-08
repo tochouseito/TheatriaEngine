@@ -10,7 +10,7 @@ void { SCRIPT_NAME }::Update(ScriptContext& ctx)
     // 毎フレーム処理
 }
 
-extern "C" __declspec(dllexport) IScript* Create { SCRIPT_NAME } Script()
+extern "C" __declspec(dllexport) IScript* Create{ SCRIPT_NAME }Script()
 {
-    return new{ SCRIPT_NAME }();
+    return new { SCRIPT_NAME }();
 }

@@ -39,11 +39,11 @@ void CommandContext::Reset()
 	// コマンドアロケータをリセットする
 	hr = m_CommandAllocator->Reset();
 	// コマンドアロケータのリセットがうまくいかなかったので起動できない
-	Log::Write(LogLevel::Assert, "CommandAllocator reset.", hr);
+	//Log::Write(LogLevel::Assert, "CommandAllocator reset.", hr);
 	// コマンドリストをリセットする
 	hr = m_CommandList->Reset(m_CommandAllocator.Get(), nullptr);
 	// コマンドリストのリセットがうまくいかなかったので起動できない
-	Log::Write(LogLevel::Assert, "CommandList reset.", hr);
+	//Log::Write(LogLevel::Assert, "CommandList reset.", hr);
 }
 
 void CommandContext::Close()
@@ -52,7 +52,7 @@ void CommandContext::Close()
 	// コマンドリストを閉じる
 	hr = m_CommandList->Close();
 	// コマンドリストのクローズがうまくいかなかったので起動できない
-	Log::Write(LogLevel::Assert, "CommandList closed.", hr);
+	//Log::Write(LogLevel::Assert, "CommandList closed.", hr);
 }
 
 void CommandContext::Flush()

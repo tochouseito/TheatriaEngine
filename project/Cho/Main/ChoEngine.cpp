@@ -145,7 +145,7 @@ void ChoEngine::Start()
 		graphicsEngine->ScreenResize();
 	}
 	// GameCore開始
-	gameCore->Start(*resourceManager);
+	//gameCore->Start(*resourceManager);
 }
 
 void ChoEngine::End()

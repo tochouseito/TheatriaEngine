@@ -3,6 +3,8 @@
 #include "GameCore/IScript/IScript.h"
 #include "Platform/FileSystem/FileSystem.h"
 #include "Resources/ResourceManager/ResourceManager.h"
+#include "Core/ChoLog/ChoLog.h"
+using namespace Cho;
 
 void ObjectSystem::Run(ECSManager* ecs)
 {
@@ -187,8 +189,23 @@ void ScriptStartSystem::StartScript(ScriptComponent& script)
 	if (!script.isActive) return;
 	// スクリプトコンテキストを作成
 	ScriptContext ctx = MakeScriptContext(script.entity.value(), m_ECS);
-	// スクリプトのStart関数を呼び出す
-	script.startFunc(ctx);
+	try
+	{
+		// スクリプトのStart関数を呼び出す
+		script.startFunc(ctx);
+	}
+	catch (const std::exception& e)
+	{
+		// スクリプトのエラー処理
+		Log::Write(LogLevel::Debug, "Script error: " + std::string(e.what()));
+		script.isActive = false;
+	}
+	catch (...)
+	{
+		// その他のエラー処理
+		Log::Write(LogLevel::Debug, "Unknown script error");
+		script.isActive = false;
+	}
 }
 
 void ScriptUpdateSystem::Update(ScriptComponent& script)
@@ -196,15 +213,43 @@ void ScriptUpdateSystem::Update(ScriptComponent& script)
 	if (!script.isActive) return;
 	// スクリプトコンテキストを作成
 	ScriptContext ctx = MakeScriptContext(script.entity.value(), m_ECS);
-	// スクリプトのUpdate関数を呼び出す
-	script.updateFunc(ctx);
+	try
+	{
+		// スクリプトのUpdate関数を呼び出す
+		script.updateFunc(ctx);
+	}
+	catch (const std::exception& e)
+	{
+		// スクリプトのエラー処理
+		Log::Write(LogLevel::Debug, "Script error: " + std::string(e.what()));
+		script.isActive = false;
+	}
+	catch (...)
+	{
+		// その他のエラー処理
+		Log::Write(LogLevel::Debug, "Unknown script error");
+		script.isActive = false;
+	}
 }
 
 void ScriptCleanupSystem::Cleanup(ScriptComponent& script)
 {
 	if (!script.isActive) return;
-	// スクリプトの解放関数を呼び出す
-	script.cleanupFunc();
+	try
+	{
+		// スクリプトのCleanup関数を呼び出す
+		script.cleanupFunc();
+	}
+	catch (const std::exception& e)
+	{
+		// スクリプトのエラー処理
+		Log::Write(LogLevel::Debug, "Script error: " + std::string(e.what()));
+	}
+	catch (...)
+	{
+		// その他のエラー処理
+		Log::Write(LogLevel::Debug, "Unknown script error");
+	}
 	script.isActive = false;
 }
 
