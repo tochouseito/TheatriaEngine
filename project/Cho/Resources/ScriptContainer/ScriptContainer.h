@@ -23,7 +23,7 @@ public:
 	{
 		ScriptData scriptData;
 		scriptData.scriptName = scriptName;
-		ScriptID id = m_ScriptContainer.push_back(std::move(scriptData));
+		ScriptID id = static_cast<ScriptID>(m_ScriptContainer.push_back(std::move(scriptData)));
 		m_ScriptContainer[id].scriptID = id; // スクリプトIDを設定
 		m_ScriptNameToID[scriptName] = id; // スクリプト名とIDをマップに追加
 	}
