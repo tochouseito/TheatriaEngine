@@ -146,6 +146,7 @@ xcopy "$(SolutionDir)Cho\Core\Utility\Components.h" "$(TargetDir)Cho" /E /I /Y</
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Cho\Core\Utility\ImGuiEx.cpp" />
     <ClCompile Include="Cho\Resources\AssetManager\AssetManager.cpp" />
     <ClCompile Include="Cho\Editor\BaseEditor\BaseEditor.cpp" />
     <ClCompile Include="Cho\Editor\AnimationEditor\AnimationEditor.cpp" />
@@ -224,6 +225,7 @@ xcopy "$(SolutionDir)Cho\Core\Utility\Components.h" "$(TargetDir)Cho" /E /I /Y</
     <ClCompile Include="Cho\Resources\ScriptContainer\ScriptContainer.cpp" />
     <ClInclude Include="Cho\Core\ChoLog\ChoLog.h" />
     <ClInclude Include="Cho\Core\Utility\GenerateUnique.h" />
+    <ClInclude Include="Cho\Core\Utility\ImGuiEx.h" />
     <ClInclude Include="Cho\GameCore\ScriptContext\ScriptContext.h" />
     <ClInclude Include="Cho\Resources\AssetManager\AssetManager.h" />
     <ClInclude Include="Cho\Editor\BaseEditor\BaseEditor.h" />

@@ -548,8 +548,14 @@ json Cho::Serialization::ToJson(const ScriptComponent& s)
 {
 	json j;
 	j["scriptName"] = s.scriptName;
-	j["scriptID"] = s.scriptID.value();
-	j["entity"] = s.entity.value();
+	if (s.scriptID.has_value())
+	{
+		j["scriptID"] = s.scriptID.value();
+	}
+	if (s.entity.has_value())
+	{
+		j["entity"] = s.entity.value();
+	}
 	return j;
 }
 
@@ -580,6 +586,22 @@ FileType Cho::FileSystem::GetJsonFileType(const std::filesystem::path& path)
     {
         return FileType::Unknown;
     }
+}
+
+void Cho::FileSystem::SaveProject(SceneManager* sceneManager, ObjectContainer* container, ECSManager* ecs, ResourceManager* resourceManager)
+{
+    // セーブ
+    for (auto& scene : sceneManager->GetScenes().GetVector())
+    {
+        // シーンファイルを保存
+        Cho::FileSystem::SaveSceneFile(
+            L"GameProjects/" + m_sProjectName,
+            scene.get(),
+            container,
+            ecs
+        );
+    }
+    resourceManager;
 }
 
 // プロジェクトフォルダを読み込む

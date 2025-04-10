@@ -58,7 +58,17 @@ void Inspector::TransformComponentView(GameObject* object)
 	TransformComponent* transform = m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr()->GetComponent<TransformComponent>(object->GetEntity());
 	if (transform)
 	{
-		ImGui::Text("Transform Component");
+		// Transformを表示
+		ImGui::SeparatorText("Transform"); // ラインとテキスト表示
+
+		// 平行移動の操作
+		ImGuiEx::ColoredDragFloat3("Translation", &transform->translation.x, 0.01f, 0.0f, 0.0f, "%.1f");
+
+		// 回転の操作
+		ImGuiEx::ColoredDragFloat3("Rotation", &transform->degrees.x, 0.1f, 0.0f, 0.0f, "%.1f°");
+
+		// スケールの操作
+		ImGuiEx::ColoredDragFloat3("Scale", &transform->scale.x, 0.01f, 0.0f, 0.0f, "%.1f");
 	} 
 }
 
@@ -151,10 +161,12 @@ void Inspector::ScriptComponentView(GameObject* object)
 				// 選択されたスクリプト名とIDを設定
 				script->scriptName = scriptNames[i];
 				script->scriptID = scriptContainer->GetScriptDataByName(script->scriptName).scriptID;
-				script->isActive = false; // 一旦停止 → 再生時にバインドする設計なら
+				script->isActive = false;
 			}
 			if (isSelected)
+			{
 				ImGui::SetItemDefaultFocus();
+			}
 		}
 		ImGui::EndCombo();
 	}

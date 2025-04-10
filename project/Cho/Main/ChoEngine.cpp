@@ -65,6 +65,8 @@ void ChoEngine::Finalize()
 	graphicsEngine->Finalize();
 	// GameCore終了処理
 	
+	// ファイルの保存
+	FileSystem::SaveProject(gameCore->GetGameCoreCommand()->GetSceneManagerPtr(), gameCore->GetGameCoreCommand()->GetObjectContainerPtr(), gameCore->GetGameCoreCommand()->GetECSManagerPtr(), resourceManager.get());
 	// ImGuiManager終了処理
 	imGuiManager->Finalize();
 	// PlatformLayer終了処理

@@ -1,4 +1,5 @@
 #pragma once
+#include "Core/Utility/ImGuiEx.h"
 class EditorCommand;
 class EditorManager;
 class BaseEditor

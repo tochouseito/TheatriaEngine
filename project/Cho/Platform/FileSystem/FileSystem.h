@@ -107,6 +107,8 @@ namespace Cho
 
         static FileType GetJsonFileType(const std::filesystem::path& path);
 
+        // プロジェクトを保存
+		static void SaveProject(SceneManager* sceneManager, ObjectContainer* container, ECSManager* ecs, ResourceManager* resourceManager);
         // プロジェクトフォルダを読み込む
         static bool LoadProjectFolder(const std::wstring& projectName, SceneManager* sceneManager, ObjectContainer* container, ECSManager* ecs, ResourceManager* resourceManager);
 

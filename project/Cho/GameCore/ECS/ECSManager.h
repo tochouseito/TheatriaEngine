@@ -89,6 +89,12 @@ public:
 	{
 		CompID type = ComponentPool<T>::GetID();
 
+		//エンティティがそのコンポーネントを所有しているか確認
+		if (entity >= m_EntityToArchetype.size() || !m_EntityToArchetype[entity].test(type))
+		{
+			return nullptr;
+		}
+
 		// コンポーネントのマップに存在するかチェック
 		auto it = m_TypeToComponents.find(type);
 		if (it != m_TypeToComponents.end())
