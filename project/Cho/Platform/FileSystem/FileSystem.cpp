@@ -4,15 +4,23 @@
 #include "Resources/ResourceManager/ResourceManager.h"
 #include <cstdlib>
 #include "Core/ChoLog/ChoLog.h"
+#include <windows.h>
+#include <winsock.h>
+#include <wingdi.h>
+#include <shellapi.h>
+#include <ole2.h>
+#include <DbgHelp.h>
+#pragma comment(lib, "Dbghelp.lib")
 using namespace Cho;
 
 std::wstring Cho::FileSystem::m_sProjectName = L"";
 // GUID 生成
-std::string Cho::FileSystem::ScriptProject::slnGUID = GenerateGUID();
-std::string Cho::FileSystem::ScriptProject::projGUID = GenerateGUID();
-std::string Cho::FileSystem::ScriptProject::slnPath = "";
-std::string Cho::FileSystem::ScriptProject::projPath = "";
-HMODULE Cho::FileSystem::ScriptProject::dllHandle = nullptr;
+std::string Cho::FileSystem::ScriptProject::m_SlnGUID = GenerateGUID();
+std::string Cho::FileSystem::ScriptProject::m_ProjGUID = GenerateGUID();
+std::string Cho::FileSystem::ScriptProject::m_SlnPath = "";
+std::string Cho::FileSystem::ScriptProject::m_ProjPath = "";
+HMODULE Cho::FileSystem::ScriptProject::m_DllHandle = nullptr;
+DWORD64 Cho::FileSystem::ScriptProject::m_PDBBaseAddress = 0;
 
 // プロジェクトフォルダを探す
 std::optional<std::filesystem::path> Cho::FileSystem::FindOrCreateGameProjects()
@@ -659,21 +667,25 @@ void Cho::FileSystem::ScriptProject::GenerateSolutionAndProject()
     // 出力先
     std::string outputPath = "GameProjects/" + projectNameStr;
 	// ソリューションファイルパス
-    slnPath = outputPath + "/" + projectNameStr + ".sln";
+    m_SlnPath = outputPath + "/" + projectNameStr + ".sln";
 	// vcxprojファイルパス
-	projPath = outputPath + "/" + projectNameStr + ".vcxproj";
+	m_ProjPath = outputPath + "/" + projectNameStr + ".vcxproj";
 	// フィルターファイルパス
 	std::string filterName = outputPath + "/" + projectNameStr + ".vcxproj.filters";
+    // プロジェクトファイルの生成
+    UpdateVcxproj();
+    // フィルターファイルの生成
+    UpdateFilters(filterName);
 	// ソリューションファイルの生成
-    if (!fs::exists(slnPath))
+    if (!fs::exists(m_SlnPath))
     {
-        std::ofstream slnFile(slnPath, std::ios::trunc);
+        std::ofstream slnFile(m_SlnPath, std::ios::trunc);
         slnFile << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
         slnFile << "# Visual Studio Version 17\n";
         slnFile << "VisualStudioVersion = 17.0.31903.59\n";
         slnFile << "MinimumVisualStudioVersion = 10.0.40219.1\n";
 
-        slnFile << "Project(\"" << slnGUID << "\") = \"" << projectNameStr << "\", \"" << projectNameStr << ".vcxproj\", \"" << projGUID << "\"\n";
+        slnFile << "Project(\"" << m_SlnGUID << "\") = \"" << projectNameStr << "\", \"" << projectNameStr << ".vcxproj\", \"" << m_ProjGUID << "\"\n";
         slnFile << "EndProject\n";
 
         // ソリューション構成の追加
@@ -683,10 +695,10 @@ void Cho::FileSystem::ScriptProject::GenerateSolutionAndProject()
         slnFile << "        Release|x64 = Release|x64\n";
         slnFile << "    EndGlobalSection\n";
         slnFile << "    GlobalSection(ProjectConfigurationPlatforms) = postSolution\n";
-        slnFile << "        " << projGUID << ".Debug|x64.ActiveCfg = Debug|x64\n";
-        slnFile << "        " << projGUID << ".Debug|x64.Build.0 = Debug|x64\n";
-        slnFile << "        " << projGUID << ".Release|x64.ActiveCfg = Release|x64\n";
-        slnFile << "        " << projGUID << ".Release|x64.Build.0 = Release|x64\n";
+        slnFile << "        " << m_ProjGUID << ".Debug|x64.ActiveCfg = Debug|x64\n";
+        slnFile << "        " << m_ProjGUID << ".Debug|x64.Build.0 = Debug|x64\n";
+        slnFile << "        " << m_ProjGUID << ".Release|x64.ActiveCfg = Release|x64\n";
+        slnFile << "        " << m_ProjGUID << ".Release|x64.Build.0 = Release|x64\n";
         slnFile << "    EndGlobalSection\n";
         slnFile << "    GlobalSection(SolutionProperties) = preSolution\n";
         slnFile << "        HideSolutionNode = FALSE\n";
@@ -694,15 +706,11 @@ void Cho::FileSystem::ScriptProject::GenerateSolutionAndProject()
         slnFile << "EndGlobal\n";
 
         slnFile.close();
-        std::cout << "Generated solution file: " << slnPath << "\n";
+        std::cout << "Generated solution file: " << m_SlnPath << "\n";
     } else
     {
-        std::cout << "Solution file already exists: " << slnPath << "\n";
+        std::cout << "Solution file already exists: " << m_SlnPath << "\n";
     }
-	// プロジェクトファイルの生成
-	UpdateVcxproj();
-	// フィルターファイルの生成
-	UpdateFilters(filterName);
 }
 
 void Cho::FileSystem::ScriptProject::UpdateVcxproj()
@@ -729,11 +737,8 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
     // パス設定
     fs::path currentPath = fs::current_path();
 
- //   // インクルードディレクトリ
- //   fs::path systemPath = currentPath / "Cho";
- //   fs::path mathLibPath = currentPath / "Cho/Externals/ChoMath";
-	//// スクリプトファイルのパス
-	//fs::path scriptPath = currentPath / "Cho/GameCore/IScript";
+    // インクルードディレクトリ
+	// スクリプトファイルのパス
     fs::path includeBase = fs::relative(currentPath, projectDir);
     fs::path systemPath = includeBase / "Cho";
     fs::path mathLibPath = includeBase / "Cho/Externals/ChoMath";
@@ -746,10 +751,12 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
     // パスの正規化
     systemPath.make_preferred();
     mathLibPath.make_preferred();
+	scriptPath.make_preferred();
 
     libraryPath.make_preferred();
+	libraryPath2.make_preferred();
 
-    std::ofstream vcxFile(projPath, std::ios::trunc);
+    std::ofstream vcxFile(m_ProjPath, std::ios::trunc);
     vcxFile << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
     vcxFile << "<Project DefaultTargets=\"Build\" ToolsVersion=\"17.0\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\n";
 
@@ -767,7 +774,7 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
 
     // グローバルプロパティ
     vcxFile << "  <PropertyGroup Label=\"Globals\">\n";
-    vcxFile << "    <ProjectGuid>" << projGUID << "</ProjectGuid>\n";
+    vcxFile << "    <ProjectGuid>" << m_ProjGUID << "</ProjectGuid>\n";
     vcxFile << "    <Keyword>Win32Proj</Keyword>\n";
     vcxFile << "    <RootNamespace>" << ConvertString(m_sProjectName) << "</RootNamespace>\n";
     vcxFile << "  </PropertyGroup>\n";
@@ -813,7 +820,7 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
     vcxFile << "    </ClCompile>\n";
     vcxFile << "    <Link>\n";
     vcxFile << "      <SubSystem>Windows</SubSystem>\n";
-    vcxFile << "      <GenerateDebugInformation>false</GenerateDebugInformation>\n";
+    vcxFile << "      <GenerateDebugInformation>true</GenerateDebugInformation>\n";
     vcxFile << "      <AdditionalDependencies>ChoMath.lib;%(AdditionalDependencies)</AdditionalDependencies>\n";
     vcxFile << "      <AdditionalLibraryDirectories>" << libraryPath.string() << ";" << libraryPath2.string() << ";%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>\n";
     vcxFile << "    </Link>\n";
@@ -836,7 +843,7 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
     vcxFile << "      <OptimizeReferences>true</OptimizeReferences>\n";
     vcxFile << "      <GenerateDebugInformation>false</GenerateDebugInformation>\n";
     vcxFile << "      <AdditionalDependencies>ChoMath.lib;%(AdditionalDependencies)</AdditionalDependencies>\n";
-    vcxFile << "      <AdditionalLibraryDirectories>" << libraryPath.string() << ";%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>\n";
+    vcxFile << "      <AdditionalLibraryDirectories>" << libraryPath.string() << ";" << libraryPath2.string() << ";%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>\n";
     vcxFile << "    </Link>\n";
     vcxFile << "  </ItemDefinitionGroup>\n";
 
@@ -874,15 +881,20 @@ void Cho::FileSystem::ScriptProject::UpdateFilters(const std::string& filterPath
     fs::path exePath = fs::current_path(); // 実行ファイルがある場所
     // プロジェクトディレクトリ全体を再帰的に探索
     fs::path projectDir = exePath / "GameProjects" / m_sProjectName;
+
+    // scriptFiles には相対パスを格納するように修正
     for (const auto& entry : fs::recursive_directory_iterator(projectDir))
     {
         if (!entry.is_regular_file()) continue;
 
         const auto& path = entry.path();
         std::string ext = path.extension().string();
+
         if (ext == ".cpp" || ext == ".h")
         {
-            scriptFiles.push_back(path.string());
+            // .vcxproj があるディレクトリからの相対パスを取得
+            std::string relativePath = fs::relative(path, projectDir).make_preferred().string();
+            scriptFiles.push_back(relativePath);
         }
     }
 
@@ -976,18 +988,20 @@ void Cho::FileSystem::ScriptProject::LoadProjectPath(const std::wstring& project
     // 出力先
     std::string outputPath = "GameProjects/" + projectNameStr;
     // ソリューションファイルパス
-    slnPath = outputPath + "/" + projectNameStr + ".sln";
+    m_SlnPath = outputPath + "/" + projectNameStr + ".sln";
     // vcxprojファイルパス
-    projPath = outputPath + "/" + projectNameStr + ".vcxproj";
+    m_ProjPath = outputPath + "/" + projectNameStr + ".vcxproj";
 }
 
 void Cho::FileSystem::ScriptProject::LoadScriptDLL()
 {
 	// DLLのパス
 	std::string dllPath = "GameProjects/" + ConvertString(m_sProjectName) + "/bin/" + ConvertString(m_sProjectName) + ".dll";
+	// PDBのロード
+	LoadPDB(dllPath);
     // ロード
-	dllHandle = LoadLibraryA(dllPath.c_str());
-    if (!dllHandle)
+	m_DllHandle = LoadLibraryA(dllPath.c_str());
+    if (!m_DllHandle)
     {
 		Log::Write(LogLevel::Info, "Failed to load DLL: " + dllPath);
         return;
@@ -996,8 +1010,10 @@ void Cho::FileSystem::ScriptProject::LoadScriptDLL()
 
 void Cho::FileSystem::ScriptProject::UnloadScriptDLL()
 {
+	// PDBのアンロード
+    UnloadPDB();
 	// DLLのアンロード
-	FreeLibrary(dllHandle);
+	FreeLibrary(m_DllHandle);
 }
 
 //bool Cho::FileSystem::ScriptProject::BuildScriptDLL()
@@ -1080,4 +1096,53 @@ std::vector<std::string> Cho::FileSystem::ScriptProject::GetScriptFiles()
         }
     }
 	return scriptNames;
+}
+
+bool Cho::FileSystem::ScriptProject::LoadPDB(const std::string& dllPath)
+{
+    HANDLE process = GetCurrentProcess();
+
+    // 初期化
+    static bool initialized = false;
+    if (!initialized)
+    {
+        if (!SymInitialize(process, nullptr, TRUE))
+        {
+            DWORD error = GetLastError();
+            std::cerr << "SymInitialize failed (Error Code: " << error << ")\n";
+            return false;
+        }
+        initialized = true;
+    }
+
+    // DLLを読み込んで、PDBも自動で探してロード
+    DWORD64 baseAddress = SymLoadModuleEx(
+        process,
+        nullptr,
+        dllPath.c_str(),
+        nullptr,
+        0,  // 0 = 自動計算
+        0,
+        nullptr,
+        0
+    );
+
+    if (baseAddress == 0)
+    {
+        DWORD error = GetLastError();
+        std::cerr << "SymLoadModuleEx failed (Error Code: " << error << ")\n";
+        return false;
+    }
+
+    std::cout << "DLL and PDB loaded successfully.\n";
+
+    // 後でUnloadに使う
+    m_PDBBaseAddress = baseAddress;
+
+    return true;
+}
+
+void Cho::FileSystem::ScriptProject::UnloadPDB()
+{
+    SymUnloadModule64(GetCurrentProcess(), m_PDBBaseAddress);
 }

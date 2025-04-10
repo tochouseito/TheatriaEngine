@@ -140,13 +140,16 @@ namespace Cho
 			static void UnloadScriptDLL();
             static bool BuildScriptDLL();
 			static std::vector<std::string> GetScriptFiles();
-			static HMODULE GetScriptDLLHandle() { return dllHandle; }
+			static HMODULE GetScriptDLLHandle() { return m_DllHandle; }
+			static bool LoadPDB(const std::string& dllPath);
+			static void UnloadPDB();
 
-            static std::string slnGUID;
-			static std::string projGUID;
-			static std::string slnPath;
-			static std::string projPath;
-            static HMODULE dllHandle;
+            static std::string m_SlnGUID;
+			static std::string m_ProjGUID;
+			static std::string m_SlnPath;
+			static std::string m_ProjPath;
+            static HMODULE m_DllHandle;
+			static DWORD64 m_PDBBaseAddress;
         };
     };
 }
