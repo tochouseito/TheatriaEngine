@@ -314,7 +314,9 @@ xcopy "$(SolutionDir)Cho\Core\Utility\Components.h" "$(TargetDir)Cho" /E /I /Y</
   </ItemGroup>
   <ItemGroup>
     <None Include="Cho\Resources\EngineAssets\Shader\header\Demo.hlsli" />
+    <None Include="Cho\Resources\EngineAssets\Shader\header\LineDraw.hlsli" />
     <None Include="Cho\Resources\EngineAssets\Shader\header\ScreenCopy.hlsli" />
+    <None Include="Cho\Resources\EngineAssets\Shader\header\ViewProjection.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Cho\Resources\EngineAssets\Shader\Demo\Demo.PS.hlsl">
@@ -324,6 +326,16 @@ xcopy "$(SolutionDir)Cho\Core\Utility\Components.h" "$(TargetDir)Cho" /E /I /Y</
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Cho\Resources\EngineAssets\Shader\Demo\Demo.VS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Cho\Resources\EngineAssets\Shader\GameLine\Line.PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Cho\Resources\EngineAssets\Shader\GameLine\Line.VS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>

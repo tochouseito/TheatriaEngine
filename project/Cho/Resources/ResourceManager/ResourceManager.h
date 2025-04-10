@@ -108,9 +108,13 @@ public:
 	void CreateIntegrationBuffers();
 	IStructuredBuffer* GetIntegrationBuffer(const IntegrationDataType & type) const
 	{
-		if (type == IntegrationDataType::Transform)
+		switch (type)
 		{
+		case IntegrationDataType::Transform:
 			return GetBuffer<IStructuredBuffer>(m_IntegrationData[IntegrationDataType::Transform]->GetBufferIndex());
+			break;
+		default:
+			break;
 		}
 		return nullptr;
 	}
@@ -220,5 +224,9 @@ private:
 	std::array<std::unique_ptr<IIntegrationData>, IntegrationDataType::kCount> m_IntegrationData;
 	// デバッグカメラバッファ
 	ConstantBuffer<BUFFER_DATA_VIEWPROJECTION>* m_DebugCameraBuffer = nullptr;
+
+	// static member
+	static const uint32_t kIntegrationTFBufferSize = 1024;// Transformの統合バッファのサイズ
+	//static const uint32_t kIntegrationLineBufferSize = 1024;// Lineの統合バッファのサイズ
 };
 

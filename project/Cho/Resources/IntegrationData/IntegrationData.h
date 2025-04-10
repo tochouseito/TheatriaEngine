@@ -9,10 +9,10 @@ class IIntegrationData
 {
 public:
 	// Constructor
-	IIntegrationData(std::optional<uint32_t>& index)
-		: m_StructuredBufferIndex(index)
+	IIntegrationData(std::optional<uint32_t>& index,const size_t& size)
+		: m_BufferIndex(index), m_Size(size)// 初期サイズ
 	{
-		m_Size = 100;// 初期サイズ
+		
 	}
 	// Destructor
 	virtual ~IIntegrationData() = default;
@@ -24,7 +24,7 @@ public:
 	// バッファのインデックスを取得
 	virtual std::optional<uint32_t> GetBufferIndex() const
 	{
-		return m_StructuredBufferIndex;
+		return m_BufferIndex;
 	}
 	// MapIDを取得
 	virtual uint32_t GetMapID()
@@ -46,7 +46,7 @@ protected:
 	// リソースマネージャーのポインタ
 	ResourceManager* m_ResourceManager = nullptr;
 	// 構造化バッファのインデックス
-	std::optional<uint32_t> m_StructuredBufferIndex = std::nullopt;
+	std::optional<uint32_t> m_BufferIndex = std::nullopt;
 	// 統合データのサイズ
 	size_t m_Size = 0;
 	// 統合データの次のID
@@ -55,7 +55,7 @@ protected:
 	std::vector<uint32_t> m_RemoveMapID = {};
 
 	// 統合データのサイズオフセット
-	static const uint32_t kSizeOffset = 50;
+	uint32_t m_SizeOffset = 64;
 };
 
 class ResourceManager;
@@ -64,8 +64,8 @@ class IntegrationData : public IIntegrationData
 {
 public:
 	// Constructor
-	IntegrationData(std::optional<uint32_t>& index)
-		: IIntegrationData(index)
+	IntegrationData(std::optional<uint32_t>& index,const size_t& size)
+		: IIntegrationData(index,size)
 	{
 		
 	}

@@ -72,12 +72,25 @@ struct MeshRendererComponent final
 // スクリプトコンポーネント
 struct ScriptComponent final
 {
-	std::string scriptName = ""; // スクリプト名
-	std::optional<uint32_t> scriptID = std::nullopt; // スクリプトID
-	std::optional<Entity> entity = std::nullopt; // スクリプトのエンティティ
+	std::string scriptName = "";								// スクリプト名
+	std::optional<uint32_t> scriptID = std::nullopt;			// スクリプトID
+	std::optional<Entity> entity = std::nullopt;				// スクリプトのエンティティ
 	using ScriptFunc = std::function<void(ScriptContext& ctx)>; // スクリプト関数型
-	ScriptFunc startFunc;  // Start関数
-	ScriptFunc updateFunc; // Update関数
-	std::function<void()> cleanupFunc; // 解放関数
-	bool isActive = false; // スクリプト有効フラグ
+	ScriptFunc startFunc;										// Start関数
+	ScriptFunc updateFunc;										// Update関数
+	std::function<void()> cleanupFunc;							// 解放関数
+	bool isActive = false;										// スクリプト有効フラグ
+};
+
+// ライン描画コンポーネント
+struct LineData
+{
+	Vector3 start;	// 始点
+	Vector3 end;	// 終点
+	Vector4 color;	// 色
+	std::optional<uint32_t> lineID = std::nullopt;// ラインID
+};
+struct LineRendererComponent final
+{
+	std::vector<LineData> lines;// ラインデータ
 };

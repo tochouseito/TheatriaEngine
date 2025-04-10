@@ -208,6 +208,19 @@ void ScriptStartSystem::StartScript(ScriptComponent& script)
 	}
 }
 
+ScriptContext ScriptStartSystem::MakeScriptContext(Entity entity, ECSManager* ecs)
+{
+	ScriptContext ctx;
+
+	ctx.transform = ecs->GetComponent<TransformComponent>(entity);
+	ctx.camera = ecs->GetComponent<CameraComponent>(entity);
+	ctx.meshFilter = ecs->GetComponent<MeshFilterComponent>(entity);
+	ctx.meshRenderer = ecs->GetComponent<MeshRendererComponent>(entity);
+	ctx.script = ecs->GetComponent<ScriptComponent>(entity);
+
+	return ctx;
+}
+
 void ScriptUpdateSystem::Update(ScriptComponent& script)
 {
 	if (!script.isActive) return;
@@ -380,4 +393,14 @@ void EditorCameraSystem::TransferMatrix(TransformComponent& transform, CameraCom
 	data.cameraPosition = transform.translation;
 	ConstantBuffer<BUFFER_DATA_VIEWPROJECTION>* buffer = dynamic_cast<ConstantBuffer<BUFFER_DATA_VIEWPROJECTION>*>(m_pResourceManager->GetBuffer<IConstantBuffer>(camera.bufferIndex));
 	buffer->UpdateData(data);
+}
+
+void LineRendererSystem::Update(LineRendererComponent& line)
+{
+	// バッファの更新
+	BUFFER_DATA_LINE data = {};
+	data.start = line.start;
+	data.end = line.end;
+	data.color = line.color;
+	m_pLineBuffer->UpdateData(data, line.mapID.value());
 }

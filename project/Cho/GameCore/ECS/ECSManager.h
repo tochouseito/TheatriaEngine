@@ -195,7 +195,7 @@ public:
 		// エンティティを削除
 		inline void Remove(const Entity& entity)
 		{
-			if (m_EntityToIndex.size() < entity)
+			if (m_EntityToIndex.size() <= entity)
 			{
 				return;
 			}
@@ -241,7 +241,7 @@ public:
 		// コンポーネントを追加
 		inline T* AddComponent(const Entity& entity)
 		{
-			if (m_Components.size() < entity)
+			if (m_Components.size() <= entity)
 			{
 				m_Components.resize(entity, T());
 			}

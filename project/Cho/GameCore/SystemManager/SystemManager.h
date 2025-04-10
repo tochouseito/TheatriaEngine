@@ -156,18 +156,7 @@ private:
 	void Start(ScriptComponent& script);
 	void LoadScript(ScriptComponent& script);
 	void StartScript(ScriptComponent& script);
-	ScriptContext MakeScriptContext(Entity entity, ECSManager* ecs)
-	{
-		ScriptContext ctx;
-
-		ctx.transform = ecs->GetComponent<TransformComponent>(entity);
-		ctx.camera = ecs->GetComponent<CameraComponent>(entity);
-		ctx.meshFilter = ecs->GetComponent<MeshFilterComponent>(entity);
-		ctx.meshRenderer = ecs->GetComponent<MeshRendererComponent>(entity);
-		ctx.script = ecs->GetComponent<ScriptComponent>(entity);
-
-		return ctx;
-	}
+	ScriptContext MakeScriptContext(Entity entity, ECSManager* ecs);
 	ECSManager* m_ECS = nullptr;
 };
 // ScriptCleanupSystem
@@ -231,4 +220,29 @@ private:
 	ECSManager* m_pECS = nullptr;
 	ResourceManager* m_pResourceManager = nullptr;
 	StructuredBuffer<BUFFER_DATA_TF>* m_pIntegrationBuffer = nullptr;
+};
+// ライン描画
+class LineRendererSystem : public ECSManager::System<LineRendererComponent>
+{
+public:
+	LineRendererSystem(ECSManager* ecs, ResourceManager* resourceManager)
+		: ECSManager::System<LineRendererComponent>([this](LineRendererComponent& line)
+			{
+				Update(line);
+			}),
+		m_pECS(ecs), m_pResourceManager(resourceManager)
+	{
+		// バッファの作成
+		uint32_t index = m_pResourceManager->CreateVertexBuffer<BUFFER_DATA_LINE>(kMaxLineCount * 2);
+		m_pLineBuffer = dynamic_cast<VertexBuffer<BUFFER_DATA_LINE>*>(m_pResourceManager->GetBuffer<IVertexBuffer>(index));
+	}
+	~LineRendererSystem() = default;
+private:
+	void Update(LineRendererComponent& line);
+	ECSManager* m_pECS = nullptr;
+	ResourceManager* m_pResourceManager = nullptr;
+	// ラインのバッファ
+	VertexBuffer<BUFFER_DATA_LINE>* m_pLineBuffer = nullptr;
+	// 最大ライン数
+	static const uint32_t kMaxLineCount = 1000;
 };
