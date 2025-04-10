@@ -156,7 +156,7 @@ void ScriptStartSystem::LoadScript(ScriptComponent& script)
 	std::string funcName = "Create" + script.scriptName + "Script";
 	// CreateScript関数を取得
 	typedef IScript* (*CreateScriptFunc)();
-	CreateScriptFunc createScript = (CreateScriptFunc)GetProcAddress(FileSystem::ScriptProject::dllHandle, funcName.c_str());
+	CreateScriptFunc createScript = (CreateScriptFunc)GetProcAddress(FileSystem::ScriptProject::m_DllHandle, funcName.c_str());
 	if (!createScript)
 	{
 		script.isActive = false;
