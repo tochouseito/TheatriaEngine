@@ -129,7 +129,7 @@ void Inspector::ScriptComponentView(GameObject* object)
 	ImGui::Text("Script Component");
 
 	// プルダウン用スクリプト名一覧作成
-	std::vector<std::string> scriptNames;
+	std::vector<std::string> scriptNames = { "None" };
 	for (ScriptID id = 0; id < scriptContainer->GetScriptCount(); ++id)
 	{
 		auto data = scriptContainer->GetScriptDataByID(id);
@@ -140,8 +140,8 @@ void Inspector::ScriptComponentView(GameObject* object)
 	}
 
 	// 現在の選択位置を求める
-	int currentIndex = 0;
-	for (int i = 0; i < scriptNames.size(); ++i)
+	int currentIndex = 0;// 0番目は"None"
+	for (int i = 1; i < scriptNames.size(); ++i)// 1番目から開始
 	{
 		if (script->scriptName == scriptNames[i])
 		{
@@ -158,10 +158,20 @@ void Inspector::ScriptComponentView(GameObject* object)
 			bool isSelected = (i == currentIndex);
 			if (ImGui::Selectable(scriptNames[i].c_str(), isSelected))
 			{
-				// 選択されたスクリプト名とIDを設定
-				script->scriptName = scriptNames[i];
-				script->scriptID = scriptContainer->GetScriptDataByName(script->scriptName).scriptID;
-				script->isActive = false;
+				currentIndex = i;
+				if (!i)
+				{
+					// "None"が選択されたらスクリプト無効化
+					script->scriptName.clear();
+					script->scriptID.reset();
+					script->isActive = false;
+				} else
+				{
+					// 選択されたスクリプト名とIDを設定
+					script->scriptName = scriptNames[i];
+					script->scriptID = scriptContainer->GetScriptDataByName(script->scriptName).scriptID;
+					script->isActive = false;
+				}
 			}
 			if (isSelected)
 			{

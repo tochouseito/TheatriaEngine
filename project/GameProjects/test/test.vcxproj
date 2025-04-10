@@ -11,9 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{9FFCE213-9B39-46A1-BE31-5F0A1787F53F}</ProjectGuid>
+    <ProjectGuid>{31530157-5B12-453A-A0CD-06CB31E44A64}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>teset</RootNamespace>
+    <RootNamespace>test</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -33,7 +33,7 @@
   <PropertyGroup>
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\</IntDir>
-    <TargetName>teset</TargetName>
+    <TargetName>test</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>

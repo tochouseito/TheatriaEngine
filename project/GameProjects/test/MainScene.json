@@ -43,8 +43,8 @@
             }
         },
         {
-            "name": "NewMeshObject (1)",
-            "type": "MeshObject",
+            "name": "NewCamera",
+            "type": "Camera",
             "components": {
                 "Transform": {
                     "degrees": [
@@ -64,23 +64,19 @@
                         1.0
                     ],
                     "translation": [
-                        -4.199999809265137,
                         0.0,
-                        0.0
+                        0.0,
+                        -30.0
                     ]
                 },
-                "MeshFilter": {
-                    "modelID": 0,
-                    "modelName": "Cube"
-                },
-                "MeshRenderer": {
-                    "visible": true
-                },
-                "Script": {
-                    "entity": 2,
-                    "scriptName": ""
+                "Camera": {
+                    "aspectRatio": 1.7777777910232544,
+                    "farZ": 1000.0,
+                    "fovAngleY": 0.7853981852531433,
+                    "nearZ": 0.10000000149011612
                 }
             }
         }
-    ]
+    ],
+    "mainCamera": "NewCamera"
 }
