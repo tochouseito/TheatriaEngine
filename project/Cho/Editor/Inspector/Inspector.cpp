@@ -51,6 +51,8 @@ void Inspector::ComponentsView(GameObject* object)
 	CameraComponentView(object);
 	ScriptComponentView(object);
 	LineRendererComponentView(object);
+	Rigidbody2DComponentView(object);
+	BoxCollider2DComponentView(object);
 }
 
 void Inspector::TransformComponentView(GameObject* object)
@@ -227,6 +229,67 @@ void Inspector::LineRendererComponentView(GameObject* object)
 ImGui::EndChild();
 }
 
+void Inspector::Rigidbody2DComponentView(GameObject* object)
+{
+	Rigidbody2DComponent* rigidbody = m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr()->GetComponent<Rigidbody2DComponent>(object->GetEntity());
+	if (rigidbody)
+	{
+		if (ImGui::TreeNode("Rigidbody2D"))
+		{
+			// Body Type Combo
+			const char* bodyTypeItems[] = { "Static", "Kinematic", "Dynamic" };
+			int currentType = static_cast<int>(rigidbody->bodyType);
+			if (ImGui::Combo("Body Type", &currentType, bodyTypeItems, IM_ARRAYSIZE(bodyTypeItems)))
+			{
+				rigidbody->bodyType = static_cast<b2BodyType>(currentType);
+			}
+
+			// Gravity Scale
+			ImGui::DragFloat("Gravity Scale", &rigidbody->gravityScale, 0.1f, 0.0f, 100.0f);
+
+			// Fixed Rotation
+			ImGui::Checkbox("Fixed Rotation", &rigidbody->fixedRotation);
+
+			// Is Kinematic（参考用）
+			ImGui::Checkbox("Is Kinematic", &rigidbody->isKinematic);
+
+			ImGui::TreePop();
+		}
+		// 実行中の変更を反映させるためのボタン
+		//if (ImGui::Button("Apply Rigidbody Changes"))
+		//{
+		//	if (rigidbody->runtimeBody)
+		//	{
+		//		b2World* world = GetPhysicsWorld(); // あなたのエンジンで取得
+		//		world->DestroyBody(rigidbody->runtimeBody);
+		//		rigidbody->runtimeBody = nullptr;
+		//	}
+		//}
+	}
+}
+
+void Inspector::BoxCollider2DComponentView(GameObject* object)
+{
+	BoxCollider2DComponent* collider =
+		m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr()->GetComponent<BoxCollider2DComponent>(object->GetEntity());
+
+	if (collider)
+	{
+		if (ImGui::TreeNode("BoxCollider2D"))
+		{
+			ImGui::DragFloat2("Offset", reinterpret_cast<float*>(&collider->offsetX), 0.1f);
+			ImGui::DragFloat2("Size", reinterpret_cast<float*>(&collider->width), 0.1f, 0.01f, 100.0f);
+
+			ImGui::DragFloat("Density", &collider->density, 0.05f, 0.0f, 100.0f);
+			ImGui::DragFloat("Friction", &collider->friction, 0.05f, 0.0f, 1.0f);
+			ImGui::DragFloat("Restitution", &collider->restitution, 0.05f, 0.0f, 1.0f);
+
+			ImGui::TreePop();
+		}
+	}
+}
+
+
 void Inspector::AddComponent(GameObject* object)
 {
 	static bool isOpen = false;
@@ -234,6 +297,8 @@ void Inspector::AddComponent(GameObject* object)
 	MeshRendererComponent* render;
 	ScriptComponent* script;
 	std::vector<LineRendererComponent>* lines;
+	Rigidbody2DComponent* rigidbody;
+	BoxCollider2DComponent* boxCollider2d;
 	if (!isOpen)
 	{
 		// コンポーネントの追加
@@ -292,6 +357,30 @@ void Inspector::AddComponent(GameObject* object)
 					// LineRendererComponentを追加
 					std::unique_ptr<AddLineRendererComponent> addLineComp = std::make_unique<AddLineRendererComponent>(object->GetEntity());
 					m_EditorCommand->ExecuteCommand(std::move(addLineComp));
+					isOpen = false;
+				}
+			}
+			// Rigidbody2DComponentがあるか
+			rigidbody = m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr()->GetComponent<Rigidbody2DComponent>(object->GetEntity());
+			if (!rigidbody)
+			{
+				if (ImGui::Selectable("Rigidbody2DComponent"))
+				{
+					// Rigidbody2DComponentを追加
+					std::unique_ptr<AddRigidbody2DComponent> addRigidBodyComp = std::make_unique<AddRigidbody2DComponent>(object->GetEntity());
+					m_EditorCommand->ExecuteCommand(std::move(addRigidBodyComp));
+					isOpen = false;
+				}
+			}
+			// BoxCollider2DComponentがあるか
+			boxCollider2d = m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr()->GetComponent<BoxCollider2DComponent>(object->GetEntity());
+			if (!boxCollider2d)
+			{
+				if (ImGui::Selectable("BoxCollider2DComponent"))
+				{
+					// BoxCollider2DComponentを追加
+					std::unique_ptr<AddBoxCollider2DComponent> addBoxColliderComp = std::make_unique<AddBoxCollider2DComponent>(object->GetEntity());
+					m_EditorCommand->ExecuteCommand(std::move(addBoxColliderComp));
 					isOpen = false;
 				}
 			}

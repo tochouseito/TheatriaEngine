@@ -171,3 +171,25 @@ void AddLineRendererComponent::Undo(EditorCommand* edit)
 {
 	edit;
 }
+
+void AddRigidbody2DComponent::Execute(EditorCommand* edit)
+{
+	// Rigidbody2DComponentを追加
+	edit->GetGameCoreCommandPtr()->AddRigidbody2DComponent(m_Entity, edit->GetResourceManagerPtr());
+}
+
+void AddRigidbody2DComponent::Undo(EditorCommand* edit)
+{
+	edit;
+}
+
+void AddBoxCollider2DComponent::Execute(EditorCommand* edit)
+{
+	// BoxCollider2DComponentを追加
+	edit->GetGameCoreCommandPtr()->AddBoxCollider2DComponent(m_Entity, edit->GetResourceManagerPtr());
+}
+
+void AddBoxCollider2DComponent::Undo(EditorCommand* edit)
+{
+	edit;
+}

@@ -45,5 +45,8 @@ private:
 	std::unique_ptr<GameCoreCommand> m_pGameCoreCommand = nullptr;
 	// ゲーム実行フラグ
 	bool isRunning = false;
+
+	// box2d
+	std::unique_ptr<b2World> m_pPhysicsWorld = nullptr;
 };
 

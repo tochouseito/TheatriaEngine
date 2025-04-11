@@ -112,6 +112,26 @@ void GameCoreCommand::AddLineRendererComponent(const uint32_t& entity, ResourceM
 	line->mapID = mapID;
 }
 
+void GameCoreCommand::AddRigidbody2DComponent(const uint32_t& entity, ResourceManager* resourceManager)
+{
+	resourceManager;
+	Rigidbody2DComponent* rb = m_pECSManager->AddComponent<Rigidbody2DComponent>(entity);
+	if (!rb)
+	{
+		Log::Write(LogLevel::Assert, "Rigidbody2DComponent is nullptr");
+	}
+}
+
+void GameCoreCommand::AddBoxCollider2DComponent(const uint32_t& entity, ResourceManager* resourceManager)
+{
+	resourceManager;
+	BoxCollider2DComponent* box = m_pECSManager->AddComponent<BoxCollider2DComponent>(entity);
+	if (!box)
+	{
+		Log::Write(LogLevel::Assert, "BoxCollider2DComponent is nullptr");
+	}
+}
+
 std::optional<uint32_t> GameCoreCommand::SetMainCamera(const uint32_t& setCameraID)
 {
 	if (!m_pSceneManager->GetCurrentScene())

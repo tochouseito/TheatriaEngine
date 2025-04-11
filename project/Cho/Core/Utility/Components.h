@@ -1,5 +1,6 @@
 #pragma once
-#include "ChoMath.h"
+#include "ChoMath.h"// ChoEngine数学ライブラリ
+#include <box2d/box2d.h>
 #include "Core/Utility/Color.h"
 #include <vector>         // C++98
 #include <array>          // C++11
@@ -13,6 +14,7 @@
 #include <optional>       // C++17
 #include <concepts>       // C++20
 #include <ranges>         // C++20
+#include <numbers>        // C++20
 
 using Entity = uint32_t;
 using CompID = size_t;
@@ -112,6 +114,53 @@ struct LineRendererComponent : public IComponentTag
 	LineData line;// ラインデータ
 	std::optional<uint32_t> mapID = std::nullopt;		// マップインデックス
 };
+
+// 2D物理コンポーネント
+// 物理エンジンに統合予定
+// 2D物理挙動コンポーネント
+struct Rigidbody2DComponent : public IComponentTag
+{
+	float mass = 1.0f;
+	float gravityScale = 1.0f;
+	bool isKinematic = false;
+	bool fixedRotation = false;
+	b2BodyType bodyType = b2_dynamicBody;
+	b2Body* runtimeBody = nullptr; // Box2D Bodyへのポインタ
+};
+// 2D矩形コライダー
+struct BoxCollider2DComponent : public IComponentTag
+{
+	float offsetX = 0.0f;
+	float offsetY = 0.0f;
+	float width = 1.0f;
+	float height = 1.0f;
+	float density = 1.0f;
+	float friction = 0.3f;
+	float restitution = 0.0f;
+	b2Fixture* runtimeFixture = nullptr;
+};
+// 2D円形コライダー
+struct CircleCollider2DComponent : public IComponentTag
+{
+	float offsetX = 0.0f;
+	float offsetY = 0.0f;
+	float radius = 0.5f;
+	float density = 1.0f;
+	float friction = 0.3f;
+	float restitution = 0.0f;
+	b2Fixture* runtimeFixture = nullptr;
+};
+// 2D任意形状コライダー
+struct PolygonCollider2DComponent : public IComponentTag
+{
+	std::vector<b2Vec2> points;
+	float density = 1.0f;
+	float friction = 0.3f;
+	float restitution = 0.0f;
+	b2Fixture* runtimeFixture = nullptr;
+};
+
+
 
 // マルチコンポーネントを許可
 template<>

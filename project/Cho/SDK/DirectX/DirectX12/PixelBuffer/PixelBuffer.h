@@ -9,7 +9,14 @@ public:
 	PixelBuffer() : 
 		m_Width(0), 
 		m_Height(0), 
-		m_Format(DXGI_FORMAT_UNKNOWN) 
+		m_MipLevels(0),
+		m_ArraySize(0),
+		m_Format(DXGI_FORMAT_UNKNOWN),
+		m_Dimension(D3D12_RESOURCE_DIMENSION_UNKNOWN),
+		m_SRVCpuHandle({}),
+		m_SRVGpuHandle({}),
+		m_SRVHandleIndex(std::nullopt),
+		GpuResource()
 	{
 	}
 	// Constructor
