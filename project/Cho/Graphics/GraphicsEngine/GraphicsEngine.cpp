@@ -391,6 +391,12 @@ void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& ga
 	// ラインの描画
 	for (uint32_t i = 0;i < 1;i++)
 	{
+		// プリミティブトポロジの設定
+		context->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
+		// パイプラインセット
+		context->SetGraphicsPipelineState(m_PipelineManager->GetLinePSO().pso.Get());
+		// ルートシグネチャセット
+		context->SetGraphicsRootSignature(m_PipelineManager->GetLinePSO().rootSignature.Get());
 		// シーンがないならスキップ
 		if (!gameCore.GetSceneManager()->GetCurrentScene()) { continue; }
 		IConstantBuffer* cameraBuffer = nullptr;

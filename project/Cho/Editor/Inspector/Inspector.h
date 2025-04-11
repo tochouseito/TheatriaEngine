@@ -21,6 +21,7 @@ private:
 	void MeshRendererComponentView(GameObject* object);
 	void CameraComponentView(GameObject* object);
 	void ScriptComponentView(GameObject* object);
+	void LineRendererComponentView(GameObject* object);
 	// コンポーネントの追加
 	void AddComponent(GameObject* object);
 };
