@@ -19,10 +19,9 @@ class GameCoreCommand
 	friend class AddScriptComponent;
 public:
 	// Constructor
-	GameCoreCommand(SceneManager* sceneManager, ECSManager* ecsManager, SystemManager* systemManager, ObjectContainer* objectContainer,GameCore* gameCore) :
+	GameCoreCommand(SceneManager* sceneManager, ECSManager* ecsManager, ObjectContainer* objectContainer,GameCore* gameCore) :
 		m_pSceneManager(sceneManager),
 		m_pECSManager(ecsManager),
-		m_pSystemManager(systemManager),
 		m_pObjectContainer(objectContainer),
 		m_pGameCore(gameCore)
 	{
@@ -34,7 +33,6 @@ public:
 	// ポインタを取得
 	SceneManager* GetSceneManagerPtr() { return m_pSceneManager; }
 	ECSManager* GetECSManagerPtr() { return m_pECSManager; }
-	SystemManager* GetSystemManagerPtr() { return m_pSystemManager; }
 	ObjectContainer* GetObjectContainerPtr() { return m_pObjectContainer; }
 	GameCore* GetGameCorePtr() { return m_pGameCore; }
 private:
@@ -56,7 +54,6 @@ private:
 
 	SceneManager* m_pSceneManager = nullptr;
 	ECSManager* m_pECSManager = nullptr;
-	SystemManager* m_pSystemManager = nullptr;
 	ObjectContainer* m_pObjectContainer = nullptr;
 	GameCore* m_pGameCore = nullptr;
 };

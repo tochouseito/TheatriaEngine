@@ -49,4 +49,10 @@ struct Color final {
     inline Color SetAlpha(float alpha) const {
         return { r, g, b, alpha };
     }
+
+    // From255
+	inline static Color From255(int r, int g, int b, int a = 255)
+	{
+		return { r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f };
+	}
 };

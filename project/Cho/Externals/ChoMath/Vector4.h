@@ -5,12 +5,10 @@
 /// 4次元ベクトル構造体
 /// </summary>
 struct Vector4 final {
-    union
-    {
-        struct { float x, y, z, w; };
-        struct { float r, g, b, a; };
-        float v[4]; // 配列アクセスも可能
-    };
+	float x; ///< x成分
+	float y; ///< y成分
+	float z; ///< z成分
+	float w; ///< w成分
 
     // コンストラクタ
     constexpr Vector4(float x = 0.0f, float y = 0.0f, float z = 0.0f, float w = 1.0f)

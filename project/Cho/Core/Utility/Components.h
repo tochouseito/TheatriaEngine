@@ -1,13 +1,29 @@
 #pragma once
 #include "ChoMath.h"
-#include <bitset>
-#include <optional>
-#include <functional>
+#include "Core/Utility/Color.h"
+#include <vector>         // C++98
+#include <array>          // C++11
+#include <functional>     // C++98
+#include <bitset>         // C++98
+#include <memory>         // C++98
+#include <algorithm>      // C++98
+#include <unordered_map>  // C++11
+#include <unordered_set>  // C++11
+#include <typeindex>      // C++11
+#include <optional>       // C++17
+#include <concepts>       // C++20
+#include <ranges>         // C++20
 
 using Entity = uint32_t;
 using CompID = size_t;
 using Archetype = std::bitset<256>;
 struct ScriptContext;
+
+// コンポーネントだと判別するためのタグ
+struct IComponentTag {};
+// コンポーネントが複数持てるか(デフォルトは持てない)
+template<typename T>
+struct IsMultiComponent : std::false_type {};
 
 // 初期値を保存するための構造体
 struct TransformStartValue
@@ -18,7 +34,7 @@ struct TransformStartValue
 	Vector3 degrees = { 0.0f, 0.0f, 0.0f };
 };;
 
-struct TransformComponent final
+struct TransformComponent : public IComponentTag
 {
 	Vector3 translation = { 0.0f, 0.0f, 0.0f };			// 位置
 	Quaternion rotation = { 0.0f, 0.0f, 0.0f,1.0f };	// 回転
@@ -29,7 +45,8 @@ struct TransformComponent final
 	Vector3 prePos = { 0.0f,0.0f,0.0f };				// 位置差分計算用
 	Vector3 preRot = { 0.0f,0.0f,0.0f };				// 回転差分計算用
 	Scale preScale = { 1.0f,1.0f,1.0f };				// スケール差分計算用
-	std::optional<uint32_t> parentEntity = std::nullopt;// 親のEntity
+	std::optional<uint32_t> parent = std::nullopt;// 親のEntity
+	int tickPriority = 0;								// Tick優先度
 	//uint32_t bufferIndex = UINT32_MAX;				// バッファーインデックス
 	std::optional<uint32_t> mapID = std::nullopt;		// マップインデックス
 	TransformStartValue startValue;						// 初期値保存用
@@ -42,7 +59,7 @@ struct NodeTransform
     Scale scale = { 1.0f, 1.0f, 1.0f };
 };
 
-struct CameraComponent final
+struct CameraComponent : public IComponentTag
 {
     // 垂直方向視野角
     float fovAngleY = 45.0f * std::numbers::pi_v<float> / 180.0f;
@@ -57,20 +74,20 @@ struct CameraComponent final
 };
 
 // メッシュコンポーネント
-struct MeshFilterComponent final
+struct MeshFilterComponent : public IComponentTag
 {
 	std::wstring modelName = L"";// モデル名
 	std::optional<uint32_t> modelID = std::nullopt;// Model選択用ID
 };
 
 // 描画コンポーネント
-struct MeshRendererComponent final
+struct MeshRendererComponent : public IComponentTag
 {
 	bool visible = true;// 描画フラグ
 };
 
 // スクリプトコンポーネント
-struct ScriptComponent final
+struct ScriptComponent : public IComponentTag
 {
 	std::string scriptName = "";								// スクリプト名
 	std::optional<uint32_t> scriptID = std::nullopt;			// スクリプトID
@@ -87,10 +104,14 @@ struct LineData
 {
 	Vector3 start;	// 始点
 	Vector3 end;	// 終点
-	Vector4 color;	// 色
+	Color color;	// 色
 	std::optional<uint32_t> lineID = std::nullopt;// ラインID
 };
-struct LineRendererComponent final
+struct LineRendererComponent : public IComponentTag
 {
 	std::vector<LineData> lines;// ラインデータ
 };
+
+// マルチコンポーネントを許可
+template<>
+struct IsMultiComponent<LineRendererComponent> : std::true_type {};

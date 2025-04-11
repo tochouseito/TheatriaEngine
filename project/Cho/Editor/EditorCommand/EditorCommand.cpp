@@ -4,6 +4,8 @@
 #include "Cho/Graphics/GraphicsEngine/GraphicsEngine.h"
 #include "Cho/GameCore/GameCore.h"
 #include "Platform/FileSystem/FileSystem.h"
+#include "GameCore/SingleSystemManager/SingleSystemManager.h"
+#include "GameCore/Systems/EditorSystems.h"
 
 void AddMeshFilterComponent::Execute(EditorCommand* edit)
 {
@@ -110,10 +112,10 @@ void EditorCommand::UpdateEditorScene()
 
 void EditorCommand::CreateSystem()
 {
-	std::unique_ptr<ECSManager::ISystem> transformSystem = std::make_unique<EditorUpdateSystem>(m_GameCoreCommand->GetECSManagerPtr(), m_ResourceManager, m_ResourceManager->GetIntegrationBuffer(IntegrationDataType::Transform));
-	m_UpdateSystem->RegisterSystem(std::move(transformSystem));
-	std::unique_ptr<ECSManager::ISystem> cameraSystem = std::make_unique<EditorCameraSystem>(m_GameCoreCommand->GetECSManagerPtr(), m_ResourceManager, m_ResourceManager->GetIntegrationBuffer(IntegrationDataType::Transform));
-	m_UpdateSystem->RegisterSystem(std::move(cameraSystem));
+	std::unique_ptr<ECSManager::ISystem> transformSystem = std::make_unique<TransformEditorSystem>(m_GameCoreCommand->GetECSManagerPtr(), m_ResourceManager, m_ResourceManager->GetIntegrationBuffer(IntegrationDataType::Transform));
+	m_UpdateSystem->RegisterSystem(std::move(transformSystem),SystemState::Update);
+	std::unique_ptr<ECSManager::ISystem> cameraSystem = std::make_unique<CameraEditorSystem>(m_GameCoreCommand->GetECSManagerPtr(), m_ResourceManager, m_ResourceManager->GetIntegrationBuffer(IntegrationDataType::Transform));
+	m_UpdateSystem->RegisterSystem(std::move(cameraSystem), SystemState::Update);
 }
 
 void Add3DObjectCommand::Execute(EditorCommand* edit)

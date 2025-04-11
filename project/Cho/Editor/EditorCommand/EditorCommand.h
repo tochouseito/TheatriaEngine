@@ -1,6 +1,7 @@
 #pragma once
 #include "SDK/DirectX/DirectX12/stdafx/stdafx.h"
-#include "GameCore/SystemManager/SystemManager.h"
+#include "GameCore/SingleSystemManager/SingleSystemManager.h"
+#include "GameCore/MultiSystemManager/MultiSystemManager.h"
 class EditorCommand;
 class ICommand
 {
@@ -111,7 +112,7 @@ public:
 	EditorCommand(ResourceManager* resourceManager,GraphicsEngine* graphicsEngine,GameCoreCommand* gameCoreCommand):
 		m_ResourceManager(resourceManager), m_GraphicsEngine(graphicsEngine), m_GameCoreCommand(gameCoreCommand)
 	{
-		m_UpdateSystem = std::make_unique<SystemManager>();
+		m_UpdateSystem = std::make_unique<SingleSystemManager>();
 		CreateSystem();
 	}
 	// Destructor
@@ -161,6 +162,6 @@ private:
 	GameCoreCommand* m_GameCoreCommand = nullptr;
 	GameObject* m_SelectedObject = nullptr;
 	// エディタの更新システム
-	std::unique_ptr<SystemManager> m_UpdateSystem = nullptr;
+	std::unique_ptr<SingleSystemManager> m_UpdateSystem = nullptr;
 };
 

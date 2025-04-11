@@ -1,24 +1,29 @@
 #pragma once
-#include <vector>
-#include <array>
-#include <typeindex>
-#include <unordered_map>
-#include <memory>
-#include <functional>
-#include "Cho/Core/Utility/Components.h"
+#include "Core/Utility/Components.h"
+
+// コンポーネント型のみ許可する
+template<typename T>
+concept ComponentType = std::derived_from<T, IComponentTag>;
+
+enum SystemState
+{
+	Initialize = 0,
+	Update,
+	Finalize,
+};
 
 class ECSManager
 {
 public:
 	// Constructor
 	ECSManager()
-		: m_NextEntityID(0)
+		: m_NextEntityID(static_cast<Entity>(-1))
 	{
 	}
 	// Destructor
 	~ECSManager()
 	{
-		
+
 	}
 
 	// エンティティを新規作成
@@ -47,7 +52,7 @@ public:
 	}
 
 	// コンポーネントを追加する
-	template<typename T>
+	template<ComponentType T>
 	T* AddComponent(const Entity& entity)
 	{
 		// コンポーネントの型のIDを取得
@@ -62,29 +67,31 @@ public:
 		std::shared_ptr<ComponentPool<T>> spCompPool = std::static_pointer_cast<ComponentPool<T>>(m_TypeToComponents[type]);
 		// コンポーネントを追加し取得
 		T* pResultComp = spCompPool->AddComponent(entity);
-
-		// コンポーネントを追加する前のアーキタイプを取得
-		Archetype arch;
-		if (m_EntityToArchetype.size() > entity)
+		if constexpr (!IsMultiComponent<T>::value)
 		{
-			arch = m_EntityToArchetype[entity];
-		} else
-		{
-			m_EntityToArchetype.resize(entity + 1, Archetype());
+			// コンポーネントを追加する前のアーキタイプを取得
+			Archetype arch;
+			if (m_EntityToArchetype.size() > entity)
+			{
+				arch = m_EntityToArchetype[entity];
+			} else
+			{
+				m_EntityToArchetype.resize(entity + 1, Archetype());
+			}
+			// 前アーキタイプのエンティティリストからエンティティを削除
+			m_ArchToEntities[arch].Remove(entity);
+			// アーキタイプを編集
+			arch.set(type);
+			// 新しいアーキタイプをセット
+			m_ArchToEntities[arch].Add(entity);
+			m_EntityToArchetype[entity] = arch;
 		}
-		// 前アーキタイプのエンティティリストからエンティティを削除
-		m_ArchToEntities[arch].Remove(entity);
-		// アーキタイプを編集
-		arch.set(type);
-		// 新しいアーキタイプをセット
-		m_ArchToEntities[arch].Add(entity);
-		m_EntityToArchetype[entity] = arch;
 		// 追加したコンポーネントを返す
 		return pResultComp;
 	}
 
 	// コンポーネントを取得する
-	template<typename T>
+	template<ComponentType T>
 	T* GetComponent(const Entity& entity)
 	{
 		CompID type = ComponentPool<T>::GetID();
@@ -110,34 +117,69 @@ public:
 		return nullptr;
 	}
 
+	// コンポーネントを取得する（マルチコンポーネント用）
+	template<ComponentType T>
+	std::vector<T>* GetAllComponents(const Entity& entity)
+		requires IsMultiComponent<T>::value
+	{
+		auto it = m_TypeToComponents.find(ComponentPool<T>::GetID());
+		if (it == m_TypeToComponents.end())
+		{
+			return nullptr;
+		}
+		auto pool = std::static_pointer_cast<ComponentPool<T>>(it->second);
+		return pool->GetAllComponents(entity);
+	}
+
 	// コンポーネントを削除する
-	template<typename T>
+	template<ComponentType T>
 	void RemoveComponent(const Entity& entity)
 	{
-		// コンポーネントの型のIDを取得
-		CompID type = ComponentPool<T>::GetID();
-
-		Archetype arch;
-		// コンポーネントを削除する前のアーキタイプを取得
-		if (m_EntityToArchetype.size() > entity)
+		if constexpr (IsMultiComponent<T>::value)
 		{
-			arch = m_EntityToArchetype[entity];
+			// 単一コンポーネントは許可しない
+			static_assert(!IsMultiComponent<T>::value, "Use RemoveAllComponents() for multi-instance components.");
 		} else
 		{
-			return;
+			// コンポーネントの型のIDを取得
+			CompID type = ComponentPool<T>::GetID();
+
+			Archetype arch;
+			// コンポーネントを削除する前のアーキタイプを取得
+			if (m_EntityToArchetype.size() > entity)
+			{
+				arch = m_EntityToArchetype[entity];
+			} else
+			{
+				return;
+			}
+			// エンティティが削除するコンポーネントを持ってなかったらreturn
+			if (!arch.test(type))
+			{
+				return;
+			}
+			// 前アーキタイプのエンティティリストからエンティティを削除
+			m_ArchToEntities[arch].Remove(entity);
+			// アーキタイプを編集
+			arch.reset(type);
+			// 新しいアーキタイプをセット
+			m_ArchToEntities[arch].Add(entity);
+			m_EntityToArchetype[entity] = arch;
 		}
-		// エンティティが削除するコンポーネントを持ってなかったらreturn
-		if (!arch.test(type))
-		{
-			return;
-		}
-		// 前アーキタイプのエンティティリストからエンティティを削除
-		m_ArchToEntities[arch].Remove(entity);
-		// アーキタイプを編集
-		arch.reset(type);
-		// 新しいアーキタイプをセット
-		m_ArchToEntities[arch].Add(entity);
-		m_EntityToArchetype[entity] = arch;
+	}
+
+	// コンポーネントをすべて削除する(マルチコンポーネント用)
+	template<ComponentType T>
+	void RemoveAllComponents(const Entity& entity)
+		requires IsMultiComponent<T>::value
+	{
+		// 単一コンポーネントは許可しない
+		static_assert(IsMultiComponent<T>::value, "RemoveAllComponents is only for multi-instance components.");
+		auto it = m_TypeToComponents.find(ComponentPool<T>::GetID());
+		if (it == m_TypeToComponents.end()) { return; }
+
+		auto pool = std::static_pointer_cast<ComponentPool<T>>(it->second);
+		pool->RemoveAll(entity);
 	}
 
 	// エンティティを無効にする
@@ -156,26 +198,6 @@ public:
 			return m_EntityToArchetype[entity];
 		}
 		return empty;
-	}
-
-	// 処理を実行する
-	template<typename ...T>
-	void RunFunction(std::function<void(T&...)> func)
-	{
-		// 処理に必要なコンポーネントのアーキタイプを取得
-		Archetype arch;
-		(arch.set(ComponentPool<T>::GetID()), ...);
-		// 処理に必要なアーキタイプを含むアーキタイプを持つエンティティのリストを検索
-		for (auto&& entities : m_ArchToEntities)
-		{
-			if ((entities.first & arch) == arch)
-			{
-				for (auto&& entity : entities.second.GetEntities())
-				{
-					func(std::static_pointer_cast<ComponentPool<T>>(m_TypeToComponents[ComponentPool<T>::GetID()])->m_Components[entity]...);
-				}
-			}
-		}
 	}
 
 	// エンティティを管理するためのコンテナクラス
@@ -229,53 +251,101 @@ public:
 	};
 
 	// コンポーネントを管理するコンテナクラス
-	template<typename T>
+	template<ComponentType T>
 	class ComponentPool :public IComponentPool
 	{
 	public:
 		// コンテナのメモリを確保
 		ComponentPool(const size_t size)
-			:m_Components(size)
+
 		{
+			if constexpr (!IsMultiComponent<T>::value)
+			{
+				m_Single.resize(size);
+			}
 		}
 		// コンポーネントを追加
-		inline T* AddComponent(const Entity& entity)
+		T* AddComponent(const Entity& entity)
 		{
-			if (m_Components.size() <= entity)
+			if constexpr (IsMultiComponent<T>::value)
 			{
-				m_Components.resize(entity, T());
+				//return &m_Multi[entity].emplace_back(T{});
+				auto& vec = m_Multi[entity];
+				vec.reserve(8); // ← ここで再配置の回避も促す（任意）
+				vec.emplace_back(T{});
+				return &vec.back(); // ← 常に現在のアドレスを返す
+			} else
+			{
+				if (m_Single.size() <= entity)
+				{
+					m_Single.resize(entity + 1);
+				}
+				m_Single[entity] = T();
+				return &m_Single[entity];
 			}
-			m_Components[entity] = T();
-			return &m_Components[entity];
 		}
 
 		// コンポーネントを取得する
-		inline T* GetComponent(const Entity& entity)noexcept
+		T* GetComponent(const Entity& entity)
 		{
-			// エンティティが有効なら
-			if (m_Components.size() >= entity)
+			if constexpr (IsMultiComponent<T>::value)
 			{
-				return &m_Components[entity];
+				auto it = m_Multi.find(entity);
+				if (it != m_Multi.end() && !it->second.empty())
+				{
+					return &it->second.front(); // 最初のやつを返す
+				}
+				return nullptr;
+			} else
+			{
+				if (m_Single.size() > entity)
+					return &m_Single[entity];
+				return nullptr;
+			}
+		}
+
+		// すべて取得する（マルチコンポーネント用）
+		std::vector<T>* GetAllComponents(const Entity& entity)
+			requires IsMultiComponent<T>::value// 単一コンポーネントの場合は使用できない
+		{
+			auto it = m_Multi.find(entity);
+			if (it != m_Multi.end())
+			{
+				return &it->second;
 			}
 			return nullptr;
 		}
-	private:
-		friend class ECSManager;
-		// コンポーネントのインスタンスを管理するコンテナ
-		std::vector<T> m_Components;
-		// このコンテナクラスが管理するコンポーネントが持つ一意なID
-		static CompID m_CompTypeID;
-	public:
+
+		// コンポーネントを削除する（マルチコンポーネント用）
+		void RemoveAll(const Entity& entity)
+			requires IsMultiComponent<T>::value
+		{
+			m_Multi.erase(entity); // そのEntityに属するすべてのTを削除
+		}
+
+
 		// CompTypeIDを取得する関数
-		static inline const CompID GetID()
+		static CompID GetID()
 		{
 			// この関数を初めて読んだ時にIDを発行
-			if (!ComponentPool<T>::m_CompTypeID)
+			if (!m_CompTypeID)
 			{
-				ComponentPool<T>::m_CompTypeID = ++ECSManager::m_NextCompTypeID;
+				m_CompTypeID = ++ECSManager::m_NextCompTypeID;
 			}
-			return ComponentPool<T>::m_CompTypeID;
+			return m_CompTypeID;
 		}
+
+	private:
+		friend class ECSManager;
+		//// コンポーネントのインスタンスを管理するコンテナ
+		//std::vector<T> m_Components;
+		//// このコンテナクラスが管理するコンポーネントが持つ一意なID
+		//static CompID m_CompTypeID;
+		// 単一コンポーネント
+		std::vector<T> m_Single;
+		// マルチコンポーネント
+		std::unordered_map<Entity, std::vector<T>> m_Multi;
+		inline static CompID m_CompTypeID = 0;
 	};
 
 	class ISystem
@@ -284,28 +354,89 @@ public:
 		ISystem() = default;
 		virtual void Update(ECSManager* ecs) = 0;
 		virtual ~ISystem() = default;
+		virtual int GetPriority() const { return priority; }
+		virtual void SetPriority(int p) { priority = p; }
+		virtual bool IsEnabled() const { return enabled; }
+		virtual void SetEnabled(bool e) { enabled = e; }
+	protected:
+		uint32_t priority = 0;// 優先度
+		bool enabled = true;// 有効フラグ
 	};
 
-	template<typename... T>
+	template<ComponentType... T>
 	class System : public ISystem
 	{
 	public:
-		using FuncType = std::function<void(T&...)>;
+		using FuncType = std::function<void(Entity, T&...)>;
 
-		System(FuncType func) : m_Func(func) {}
+		// マルチコンポーネントは対象外
+		static_assert((!IsMultiComponent<T>::value && ...),
+			"System cannot be used with multi-instance components like LineRendererComponent");
+
+		System(FuncType func)
+			: m_Func(func)
+		{
+			// m_Required をここでセット
+			(m_Required.set(ECSManager::ComponentPool<T>::GetID()), ...);
+		}
 
 		void Update(ECSManager* ecs) override
 		{
-			Archetype required;
-			(required.set(ECSManager::ComponentPool<T>::GetID()), ...);
-
-			for (const auto& [arch, container] : ecs->m_ArchToEntities)
+			for (const auto& [arch, container] : ecs->GetArchToEntities())
 			{
-				if ((arch & required) == required)
+				if ((arch & m_Required) == m_Required)
 				{
 					for (Entity e : container.GetEntities())
 					{
-						m_Func(*ecs->GetComponent<T>(e)...);
+						m_Func(e, *ecs->GetComponent<T>(e)...);
+					}
+				}
+			}
+		}
+
+		const Archetype& GetRequired() const { return m_Required; }
+
+	protected:
+		Archetype m_Required;
+	private:
+		FuncType m_Func;
+	};
+
+	// マルチコンポーネントシステムの基底クラス
+	class IMultiSystem
+	{
+	public:
+		virtual ~IMultiSystem() = default;
+		virtual void Update(ECSManager* ecs) = 0;
+		virtual int GetPriority() const { return priority; }
+		virtual void SetPriority(int p) { priority = p; }
+		virtual bool IsEnabled() const { return enabled; }
+		virtual void SetEnabled(bool e) { enabled = e; }
+	protected:
+		int priority = 0;
+		bool enabled = true;
+	};
+
+	// マルチコンポーネント専用システム
+	template<ComponentType T>
+		requires IsMultiComponent<T>::value// マルチコンポーネントのみ
+	class MultiComponentSystem : public IMultiSystem
+	{
+	public:
+		using FuncType = std::function<void(Entity, std::vector<T>&)>;
+
+		MultiComponentSystem(FuncType func) : m_Func(func) {}
+
+		void Update(ECSManager* ecs) override
+		{
+			for (const auto& [arch, container] : ecs->GetArchToEntities())
+			{
+				for (Entity e : container.GetEntities())
+				{
+					auto* comps = ecs->GetAllComponents<T>(e);
+					if (comps && !comps->empty())
+					{
+						m_Func(e, *comps);
 					}
 				}
 			}
@@ -314,6 +445,8 @@ public:
 	private:
 		FuncType m_Func;
 	};
+
+
 
 	std::unordered_map<Archetype, EntityContainer>& GetArchToEntities()
 	{
@@ -338,6 +471,6 @@ public:
 
 };
 
-// Initialize static member
-template<typename CompType>
-size_t ECSManager::ComponentPool<CompType>::m_CompTypeID = 0;
+//// Initialize static member
+//template<ComponentType T>
+//size_t ECSManager::ComponentPool<T>::m_CompTypeID = 0;
