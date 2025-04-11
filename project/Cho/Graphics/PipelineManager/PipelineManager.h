@@ -39,6 +39,7 @@ public:
 	PSO GetDemoPSO() { return m_DemoPSO; }
 	PSO GetScreenCopyPSO() { return m_ScreenCopyPSO; }
 	PSO GetIntegratePSO() { return m_IntegratePSO; }
+	PSO GetLinePSO() { return m_LinePSO; }
 private:
 	std::vector<std::pair<uint32_t, std::string>> CreateRootParameters(
 		ID3D12ShaderReflection* pReflector,

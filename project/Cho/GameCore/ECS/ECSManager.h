@@ -466,7 +466,7 @@ private:
 	// 再利用待ちのEntityのリスト
 	std::vector<Entity> m_RecycleEntities;
 	// 次に発行するCompTypeID
-	static CompID m_NextCompTypeID;
+	static inline CompID m_NextCompTypeID;
 public:
 
 };

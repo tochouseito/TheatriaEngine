@@ -105,12 +105,11 @@ struct LineData
 	Vector3 start;	// 始点
 	Vector3 end;	// 終点
 	Color color;	// 色
-	std::optional<uint32_t> lineID = std::nullopt;// ラインID
 };
 
 struct LineRendererComponent : public IComponentTag
 {
-	std::vector<LineData> lines;// ラインデータ
+	LineData line;// ラインデータ
 	std::optional<uint32_t> mapID = std::nullopt;		// マップインデックス
 };
 

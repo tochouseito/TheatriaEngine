@@ -1,7 +1,7 @@
 #pragma once
 #include "ChoMath.h"
-#include "Cho/Core/Utility/FVector.h"
-#include "Cho/SDK/DirectX/DirectX12/stdafx/stdafx.h"
+#include "Core/Utility/FVector.h"
+#include "SDK/DirectX/DirectX12/stdafx/stdafx.h"
 #include <unordered_map>
 #include <list>
 // 頂点データ構造体

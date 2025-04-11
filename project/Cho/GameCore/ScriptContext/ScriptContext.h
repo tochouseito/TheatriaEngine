@@ -1,12 +1,23 @@
 #pragma once
-#include "Components.h"
+#include "GameCore/ECS/ECSManager.h"
 struct ScriptContext
 {
+	// Constructor
+	ScriptContext(Entity entity, ECSManager* ecs) :
+		entity(entity), ecs(ecs)
+	{
+	}
+
 	TransformComponent* transform = nullptr;		// Transformコンポーネント
 	CameraComponent* camera = nullptr;				// Cameraコンポーネント
 	MeshFilterComponent* meshFilter = nullptr;		// MeshFilterコンポーネント
 	MeshRendererComponent* meshRenderer = nullptr;	// MeshRendererコンポーネント
 	ScriptComponent* script = nullptr;				// スクリプトコンポーネント
+
+	// Componentの追加
+private:
+	std::optional<Entity> entity = std::nullopt;	// スクリプトのエンティティ
+	ECSManager* ecs = nullptr;						// ECSマネージャ
 };
 
 //struct ScriptContext

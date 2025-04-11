@@ -126,7 +126,8 @@ public:
 	EditorCommand(ResourceManager* resourceManager,GraphicsEngine* graphicsEngine,GameCoreCommand* gameCoreCommand):
 		m_ResourceManager(resourceManager), m_GraphicsEngine(graphicsEngine), m_GameCoreCommand(gameCoreCommand)
 	{
-		m_UpdateSystem = std::make_unique<SingleSystemManager>();
+		m_pSingleSystem = std::make_unique<SingleSystemManager>();
+		m_pMultiSystem = std::make_unique<MultiSystemManager>();
 		CreateSystem();
 	}
 	// Destructor
@@ -176,6 +177,7 @@ private:
 	GameCoreCommand* m_GameCoreCommand = nullptr;
 	GameObject* m_SelectedObject = nullptr;
 	// エディタの更新システム
-	std::unique_ptr<SingleSystemManager> m_UpdateSystem = nullptr;
+	std::unique_ptr<SingleSystemManager> m_pSingleSystem = nullptr;
+	std::unique_ptr<MultiSystemManager> m_pMultiSystem = nullptr;
 };
 

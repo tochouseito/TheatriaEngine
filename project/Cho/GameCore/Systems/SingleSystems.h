@@ -5,6 +5,7 @@
 #include "GameCore/ScriptContext/ScriptContext.h"
 
 class ResourceManager;
+class GameCoreCommand;
 struct ScriptContext;
 
 enum SystemPriority
@@ -69,14 +70,14 @@ public:
 		: ECSManager::System<TransformComponent>([this](Entity e, TransformComponent& transform)
 			{
 				e;
-				Finalize(transform);
+				Finalize(e,transform);
 			}),
 		m_ECS(ecs)
 	{
 	}
 	~TransformFinalizeSystem() = default;
 private:
-	void Finalize(TransformComponent& transform);
+	void Finalize(Entity entity,TransformComponent& transform);
 	ECSManager* m_ECS = nullptr;
 };
 // Camera更新System

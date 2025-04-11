@@ -6,6 +6,7 @@
 #include "Platform/FileSystem/FileSystem.h"
 #include "GameCore/SingleSystemManager/SingleSystemManager.h"
 #include "GameCore/Systems/EditorSystems.h"
+#include "GameCore/Systems/MultiSystems.h"
 
 void AddMeshFilterComponent::Execute(EditorCommand* edit)
 {
@@ -107,15 +108,20 @@ void EditorCommand::UpdateEditorScene()
 	{
 		return;
 	}
-	m_UpdateSystem->UpdateAll(m_GameCoreCommand->GetECSManagerPtr());
+	m_pSingleSystem->UpdateAll(m_GameCoreCommand->GetECSManagerPtr());
+	m_pMultiSystem->UpdateAll(m_GameCoreCommand->GetECSManagerPtr());
 }
 
 void EditorCommand::CreateSystem()
 {
+	// シングルシステムの生成
 	std::unique_ptr<ECSManager::ISystem> transformSystem = std::make_unique<TransformEditorSystem>(m_GameCoreCommand->GetECSManagerPtr(), m_ResourceManager, m_ResourceManager->GetIntegrationBuffer(IntegrationDataType::Transform));
-	m_UpdateSystem->RegisterSystem(std::move(transformSystem),SystemState::Update);
+	m_pSingleSystem->RegisterSystem(std::move(transformSystem),SystemState::Update);
 	std::unique_ptr<ECSManager::ISystem> cameraSystem = std::make_unique<CameraEditorSystem>(m_GameCoreCommand->GetECSManagerPtr(), m_ResourceManager, m_ResourceManager->GetIntegrationBuffer(IntegrationDataType::Transform));
-	m_UpdateSystem->RegisterSystem(std::move(cameraSystem), SystemState::Update);
+	m_pSingleSystem->RegisterSystem(std::move(cameraSystem), SystemState::Update);
+	// マルチシステムの生成
+	std::unique_ptr<ECSManager::IMultiSystem> lineRendererSystem = std::make_unique<LineRendererSystem>(m_GameCoreCommand->GetECSManagerPtr(), m_ResourceManager);
+	m_pMultiSystem->RegisterSystem(std::move(lineRendererSystem), SystemState::Update);
 }
 
 void Add3DObjectCommand::Execute(EditorCommand* edit)

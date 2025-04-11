@@ -103,6 +103,7 @@ void GameCoreCommand::AddScriptComponent(const uint32_t& entity, ResourceManager
 
 void GameCoreCommand::AddLineRendererComponent(const uint32_t& entity, ResourceManager* resourceManager, const uint32_t& mapID)
 {
+	resourceManager;
 	LineRendererComponent* line = m_pECSManager->AddComponent<LineRendererComponent>(entity);
 	if (!line)
 	{

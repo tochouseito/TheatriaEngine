@@ -126,7 +126,7 @@ void ResourceManager::CreateIntegrationBuffers()
 	std::optional<uint32_t> transformIndex = CreateStructuredBuffer<BUFFER_DATA_TF>(kIntegrationTFBufferSize);
 	m_IntegrationData[IntegrationDataType::Transform] = std::make_unique<IntegrationData<BUFFER_DATA_TF>>(transformIndex, kIntegrationTFBufferSize);
 	// Line統合バッファ
-	std::optional<uint32_t> lineIndex = CreateStructuredBuffer<BUFFER_DATA_LINE>(kIntegrationLineBufferSize);
+	std::optional<uint32_t> lineIndex = CreateVertexBuffer<BUFFER_DATA_LINE>(kIntegrationLineBufferSize);
 	m_IntegrationData[IntegrationDataType::Line] = std::make_unique<IntegrationData<BUFFER_DATA_LINE>>(lineIndex, kIntegrationLineBufferSize);
 }
 

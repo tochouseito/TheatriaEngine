@@ -97,7 +97,7 @@ public:
 	}
 	void UpdateData(const T& data,const uint32_t& index)
 	{
-		if (!m_MappedData.size()<=index)
+		if (index < m_MappedData.size())
 		{
 			m_MappedData[index] = data;
 		} else

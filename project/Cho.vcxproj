@@ -147,6 +147,7 @@ xcopy "$(SolutionDir)Cho\Core\Utility\Components.h" "$(TargetDir)Cho" /E /I /Y</
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Cho\Core\Utility\ImGuiEx.cpp" />
+    <ClCompile Include="Cho\GameCore\ScriptContext\ScriptContext.cpp" />
     <ClCompile Include="Cho\Resources\AssetManager\AssetManager.cpp" />
     <ClCompile Include="Cho\Editor\BaseEditor\BaseEditor.cpp" />
     <ClCompile Include="Cho\Editor\AnimationEditor\AnimationEditor.cpp" />

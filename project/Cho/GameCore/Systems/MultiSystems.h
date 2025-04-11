@@ -3,6 +3,7 @@
 #include "SDK/DirectX/DirectX12/GpuBuffer/GpuBuffer.h"
 #include "Core/Utility/CompBufferData.h"
 #include "GameCore/ScriptContext/ScriptContext.h"
+#include "Resources/ResourceManager/ResourceManager.h"
 
 class ResourceManager;
 
@@ -10,7 +11,7 @@ class ResourceManager;
 class LineRendererSystem : public ECSManager::MultiComponentSystem<LineRendererComponent>
 {
 public:
-	LineRendererSystem(ECSManager* ecs, ResourceManager* resourceManager, IStructuredBuffer* integrationBuffer)
+	LineRendererSystem(ECSManager* ecs, ResourceManager* resourceManager)
 		: ECSManager::MultiComponentSystem<LineRendererComponent>([this](Entity e, std::vector<LineRendererComponent>& lines)
 			{
 				for (LineRendererComponent& line : lines)

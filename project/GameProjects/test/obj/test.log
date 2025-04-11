@@ -1,0 +1,4 @@
+﻿  test.cpp
+C:\Users\sinse\source\repos\ChoEngine\project\Cho\Resources\TextureManager\TextureManager.h(3,10): error C1083: include ファイルを開けません。'DirectXTex.h':No such file or directory
+  (ソース ファイル 'test.cpp' をコンパイルしています)
+  
