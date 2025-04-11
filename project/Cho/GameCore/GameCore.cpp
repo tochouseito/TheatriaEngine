@@ -3,6 +3,8 @@
 #include "Graphics/GraphicsEngine/GraphicsEngine.h"
 #include "Resources/ResourceManager/ResourceManager.h"
 #include "Platform/FileSystem/FileSystem.h"
+#include "GameCore/Systems/SingleSystems.h"
+#include "GameCore/Systems/MultiSystems.h"
 
 void GameCore::Initialize(ResourceManager* resourceManager)
 {
@@ -11,20 +13,19 @@ void GameCore::Initialize(ResourceManager* resourceManager)
 	// ECSマネージャの生成
 	m_pECSManager = std::make_unique<ECSManager>();
 	// Systemマネージャの生成
-	m_pUpdateSystem = std::make_unique<SystemManager>();
-	m_pStartSystem = std::make_unique<SystemManager>();
-	m_pCleanupSystem = std::make_unique<SystemManager>();
+	m_pSingleSystemManager = std::make_unique<SingleSystemManager>();
+	m_pMultiSystemManager = std::make_unique<MultiSystemManager>();
 	// システムの生成
 	CreateSystems(resourceManager);
 	// オブジェクトコンテナの生成
 	m_pObjectContainer = std::make_unique<ObjectContainer>();
 	// コマンドの生成
-	m_pGameCoreCommand = std::make_unique<GameCoreCommand>(m_pSceneManager.get(), m_pECSManager.get(), m_pUpdateSystem.get(), m_pObjectContainer.get(),this);
+	m_pGameCoreCommand = std::make_unique<GameCoreCommand>(m_pSceneManager.get(), m_pECSManager.get(), m_pObjectContainer.get(),this);
 }
 
 void GameCore::Start(ResourceManager& resourceManager)
 {
-	m_pStartSystem->UpdateAll(m_pECSManager.get());
+	m_pSingleSystemManager->StartAll(m_pECSManager.get());
 	resourceManager;
 }
 
@@ -36,7 +37,7 @@ void GameCore::Update(ResourceManager& resourceManager, GraphicsEngine& graphics
 	{
 		return;
 	}
-	m_pUpdateSystem->UpdateAll(m_pECSManager.get());
+	m_pSingleSystemManager->UpdateAll(m_pECSManager.get());
 	resourceManager;
 	graphicsEngine;
 }
@@ -56,7 +57,7 @@ void GameCore::GameRun()
 	FileSystem::ScriptProject::LoadScriptDLL();
 	isRunning = true;
 	// StartSystemの実行
-	m_pStartSystem->UpdateAll(m_pECSManager.get());
+	m_pSingleSystemManager->StartAll(m_pECSManager.get());
 }
 
 void GameCore::GameStop()
@@ -66,7 +67,7 @@ void GameCore::GameStop()
 		return;
 	}
 	// スクリプトのインスタンスを解放
-	m_pCleanupSystem->UpdateAll(m_pECSManager.get());
+	m_pSingleSystemManager->EndAll(m_pECSManager.get());
 	// DLLのアンロード
 	FileSystem::ScriptProject::UnloadScriptDLL();
 	isRunning = false;
@@ -74,22 +75,28 @@ void GameCore::GameStop()
 
 void GameCore::CreateSystems(ResourceManager* resourceManager)
 {
-	// UpdateSystem
-	std::unique_ptr<ECSManager::ISystem> transformSystem = std::make_unique<ObjectSystem>(m_pECSManager.get(),resourceManager, resourceManager->GetIntegrationBuffer(IntegrationDataType::Transform));
-	m_pUpdateSystem->RegisterSystem(std::move(transformSystem));
-	std::unique_ptr<ECSManager::ISystem> cameraSystem = std::make_unique<CameraSystem>(m_pECSManager.get(),resourceManager, resourceManager->GetIntegrationBuffer(IntegrationDataType::Transform));
-	m_pUpdateSystem->RegisterSystem(std::move(cameraSystem));
-	std::unique_ptr<ECSManager::ISystem> updateSystem = std::make_unique<ScriptUpdateSystem>(m_pECSManager.get());
-	m_pUpdateSystem->RegisterSystem(std::move(updateSystem));
-	// StartSystem
-	std::unique_ptr<ECSManager::ISystem> transformStartSystem = std::make_unique<TransformStartSystem>(m_pECSManager.get());
-	m_pStartSystem->RegisterSystem(std::move(transformStartSystem));
-	std::unique_ptr<ECSManager::ISystem> startSystem = std::make_unique<ScriptStartSystem>(m_pECSManager.get());
-	m_pStartSystem->RegisterSystem(std::move(startSystem));
-	// CleanupSystem
-	std::unique_ptr<ECSManager::ISystem> transformCleanupSystem = std::make_unique<TransformCleanupSystem>(m_pECSManager.get());
-	m_pCleanupSystem->RegisterSystem(std::move(transformCleanupSystem));
-	std::unique_ptr<ECSManager::ISystem> cleanupSystem = std::make_unique<ScriptCleanupSystem>(m_pECSManager.get());
-	m_pCleanupSystem->RegisterSystem(std::move(cleanupSystem));
+	// シングルシステム
+	// 初期化システムの登録
+	std::unique_ptr<ECSManager::ISystem> tfStateSystem = std::make_unique<TransformInitializeSystem>(m_pECSManager.get());
+	m_pSingleSystemManager->RegisterSystem(std::move(tfStateSystem), SystemState::Initialize);
+	std::unique_ptr<ECSManager::ISystem> scriptInitializeSystem = std::make_unique<ScriptInitializeSystem>(m_pECSManager.get());
+	m_pSingleSystemManager->RegisterSystem(std::move(scriptInitializeSystem), SystemState::Initialize);
+	// 更新システムの登録
+	std::unique_ptr<ECSManager::ISystem> tfUpdateSystem = std::make_unique<TransformUpdateSystem>(m_pECSManager.get(), resourceManager, resourceManager->GetIntegrationBuffer(IntegrationDataType::Transform));
+	m_pSingleSystemManager->RegisterSystem(std::move(tfUpdateSystem), SystemState::Update);
+	std::unique_ptr<ECSManager::ISystem> cameraSystem = std::make_unique<CameraUpdateSystem>(m_pECSManager.get(), resourceManager, resourceManager->GetIntegrationBuffer(IntegrationDataType::Transform));
+	m_pSingleSystemManager->RegisterSystem(std::move(cameraSystem), SystemState::Update);
+	std::unique_ptr<ECSManager::ISystem> scriptUpdateSystem = std::make_unique<ScriptUpdateSystem>(m_pECSManager.get());
+	m_pSingleSystemManager->RegisterSystem(std::move(scriptUpdateSystem), SystemState::Update);
+	// クリーンアップシステムの登録
+	std::unique_ptr<ECSManager::ISystem> tfFinalizeSystem = std::make_unique<TransformFinalizeSystem>(m_pECSManager.get());
+	m_pSingleSystemManager->RegisterSystem(std::move(tfFinalizeSystem), SystemState::Finalize);
+	std::unique_ptr<ECSManager::ISystem> scriptFinalizeSystem = std::make_unique<ScriptFinalizeSystem>(m_pECSManager.get());
+	m_pSingleSystemManager->RegisterSystem(std::move(scriptFinalizeSystem), SystemState::Finalize);
+	// マルチシステム
+	// 初期化システムの登録
+	// 更新システムの登録
+	// クリーンアップシステムの登録
+
 }
 

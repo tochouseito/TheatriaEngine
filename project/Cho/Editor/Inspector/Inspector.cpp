@@ -58,7 +58,17 @@ void Inspector::TransformComponentView(GameObject* object)
 	TransformComponent* transform = m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr()->GetComponent<TransformComponent>(object->GetEntity());
 	if (transform)
 	{
-		ImGui::Text("Transform Component");
+		// Transformを表示
+		ImGui::SeparatorText("Transform"); // ラインとテキスト表示
+
+		// 平行移動の操作
+		ImGuiEx::ColoredDragFloat3("Translation", &transform->translation.x, 0.01f, 0.0f, 0.0f, "%.1f");
+
+		// 回転の操作
+		ImGuiEx::ColoredDragFloat3("Rotation", &transform->degrees.x, 0.1f, 0.0f, 0.0f, "%.1f°");
+
+		// スケールの操作
+		ImGuiEx::ColoredDragFloat3("Scale", &transform->scale.x, 0.01f, 0.0f, 0.0f, "%.1f");
 	} 
 }
 
@@ -119,7 +129,7 @@ void Inspector::ScriptComponentView(GameObject* object)
 	ImGui::Text("Script Component");
 
 	// プルダウン用スクリプト名一覧作成
-	std::vector<std::string> scriptNames;
+	std::vector<std::string> scriptNames = { "None" };
 	for (ScriptID id = 0; id < scriptContainer->GetScriptCount(); ++id)
 	{
 		auto data = scriptContainer->GetScriptDataByID(id);
@@ -130,8 +140,8 @@ void Inspector::ScriptComponentView(GameObject* object)
 	}
 
 	// 現在の選択位置を求める
-	int currentIndex = 0;
-	for (int i = 0; i < scriptNames.size(); ++i)
+	int currentIndex = 0;// 0番目は"None"
+	for (int i = 1; i < scriptNames.size(); ++i)// 1番目から開始
 	{
 		if (script->scriptName == scriptNames[i])
 		{
@@ -148,13 +158,25 @@ void Inspector::ScriptComponentView(GameObject* object)
 			bool isSelected = (i == currentIndex);
 			if (ImGui::Selectable(scriptNames[i].c_str(), isSelected))
 			{
-				// 選択されたスクリプト名とIDを設定
-				script->scriptName = scriptNames[i];
-				script->scriptID = scriptContainer->GetScriptDataByName(script->scriptName).scriptID;
-				script->isActive = false; // 一旦停止 → 再生時にバインドする設計なら
+				currentIndex = i;
+				if (!i)
+				{
+					// "None"が選択されたらスクリプト無効化
+					script->scriptName.clear();
+					script->scriptID.reset();
+					script->isActive = false;
+				} else
+				{
+					// 選択されたスクリプト名とIDを設定
+					script->scriptName = scriptNames[i];
+					script->scriptID = scriptContainer->GetScriptDataByName(script->scriptName).scriptID;
+					script->isActive = false;
+				}
 			}
 			if (isSelected)
+			{
 				ImGui::SetItemDefaultFocus();
+			}
 		}
 		ImGui::EndCombo();
 	}

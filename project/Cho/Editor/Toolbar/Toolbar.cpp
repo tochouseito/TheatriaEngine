@@ -39,11 +39,17 @@ void Toolbar::Window()
     static ObjectID currentTool = 0;
     //const char* toolItems[] = { "Hand", "Move", "Rotate", "Scale" };
 	GameObject* currentToolObject = m_EditorCommand->GetGameCoreCommandPtr()->GetObjectContainerPtr()->GetGameObject(currentTool);
-	std::string name = "None";
-    if(currentToolObject)
-    name = ConvertString(currentToolObject->GetName());
+	std::wstring name = L"カメラがありません！";
+    if (currentToolObject)
+    {
+		if (currentToolObject->GetType() == ObjectType::Camera)
+		{
+            // オブジェクトの名前を取得
+            name = currentToolObject->GetName();
+		}
+    }
     ImGui::SetNextItemWidth(100); // プルダウンの横幅指定
-    if (ImGui::BeginCombo("##ToolSelector", name.c_str()))
+    if (ImGui::BeginCombo("##ToolSelector", ConvertString(name).c_str()))
     {
         ObjectID n = 0;
         for (GameObject& object : m_EditorCommand->GetGameCoreCommandPtr()->GetObjectContainerPtr()->GetGameObjects().GetVector())
@@ -65,15 +71,6 @@ void Toolbar::Window()
 			n++;
         }
         ImGui::EndCombo();
-       /*for (int n = 0; n < IM_ARRAYSIZE(toolItems); n++)
-        {
-            bool is_selected = (currentTool == n);
-            if (ImGui::Selectable(toolItems[n], is_selected))
-                currentTool = n;
-            if (is_selected)
-                ImGui::SetItemDefaultFocus();
-        }
-        ImGui::EndCombo();*/
     }
     ImGui::SameLine();
     // 中央に配置するための計算

@@ -7,6 +7,18 @@ struct PSO
 	ComPtr<ID3D12RootSignature> rootSignature;
 	std::vector<std::pair<uint32_t, std::string>> rootParameters;
 };
+struct PipelineStateObject
+{
+	ComPtr<ID3D12PipelineState> pipelineState;// パイプラインステートオブジェクト
+	ComPtr<ID3D12RootSignature> rootSignature;// ルートシグネチャ
+	std::string vsPath;// VertexShader
+	std::string psPath;// PixelShader
+	std::string gsPath;// GeometryShader
+	std::string csPath;// ComputeShader
+	std::string hsPath;// HullShader
+	std::string dsPath;// DomainShader
+	// メッシュシェーダー、増幅シェーダー追加予定
+};
 class PipelineManager
 {
 public:
@@ -37,10 +49,12 @@ private:
 	void CreatePipelineDemo(ID3D12Device8* device);
 	void CreatePipelineScreenCopy(ID3D12Device8* device);
 	void CreatePipelineIntegrate(ID3D12Device8* device);
+	void CreatePipelineLine(ID3D12Device8* device);
 
 	std::unique_ptr<DXShaderCompiler> m_pShaderCompiler = nullptr;
 	PSO m_DemoPSO;
 	PSO m_ScreenCopyPSO;
 	PSO m_IntegratePSO;
+	PSO m_LinePSO;
 };
 

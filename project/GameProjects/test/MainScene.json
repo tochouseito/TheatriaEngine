@@ -1,0 +1,46 @@
+{
+    "fileType": "SceneFile",
+    "sceneName": "MainScene",
+    "objects": [
+        {
+            "name": "NewMeshObject",
+            "type": "MeshObject",
+            "components": {
+                "Transform": {
+                    "degrees": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "translation": [
+                        -1.0,
+                        0.0,
+                        0.0
+                    ]
+                },
+                "MeshFilter": {
+                    "modelID": 0,
+                    "modelName": "Cube"
+                },
+                "MeshRenderer": {
+                    "visible": true
+                },
+                "Script": {
+                    "entity": 0,
+                    "scriptName": ""
+                }
+            }
+        }
+    ]
+}

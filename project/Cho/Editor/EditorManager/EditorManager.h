@@ -37,6 +37,7 @@ public:
 	void Initialize();
 	void Update();
 
+
 	EditorCommand* GetEditorCommand() { return m_EditorCommand; }
 	InputManager* GetInputManager() { return m_InputManager; }
 private:

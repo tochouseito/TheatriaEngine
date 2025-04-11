@@ -142,9 +142,6 @@
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\SwapChain\SwapChain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Cho\GameCore\SystemManager\SystemManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Cho\Resources\TextureManager\TextureManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -179,6 +176,12 @@
     <ClCompile Include="Cho\Hub\HubManager.cpp" />
     <ClCompile Include="Cho\GameCore\IScript\IScript.cpp" />
     <ClCompile Include="Cho\Resources\ScriptContainer\ScriptContainer.cpp" />
+    <ClCompile Include="Cho\Core\Utility\ImGuiEx.cpp" />
+    <ClCompile Include="Cho\GameCore\MultiSystemManager\MultiSystemManager.cpp" />
+    <ClCompile Include="Cho\GameCore\SingleSystemManager\SingleSystemManager.cpp" />
+    <ClCompile Include="Cho\GameCore\Systems\SingleSystems.cpp" />
+    <ClCompile Include="Cho\GameCore\Systems\MultiSystems.cpp" />
+    <ClCompile Include="Cho\GameCore\Systems\EditorSystems.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cho\Editor\AnimationEditor\AnimationEditor.h">
@@ -337,9 +340,6 @@
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\SwapChain\SwapChain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Cho\GameCore\SystemManager\SystemManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Cho\Resources\TextureManager\TextureManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -377,6 +377,12 @@
     <ClInclude Include="Cho\GameCore\IScript\IScript.h" />
     <ClInclude Include="Cho\GameCore\ScriptContext\ScriptContext.h" />
     <ClInclude Include="Cho\Resources\ScriptContainer\ScriptContainer.h" />
+    <ClInclude Include="Cho\Core\Utility\ImGuiEx.h" />
+    <ClInclude Include="Cho\GameCore\MultiSystemManager\MultiSystemManager.h" />
+    <ClInclude Include="Cho\GameCore\SingleSystemManager\SingleSystemManager.h" />
+    <ClInclude Include="Cho\GameCore\Systems\SingleSystems.h" />
+    <ClInclude Include="Cho\GameCore\Systems\MultiSystems.h" />
+    <ClInclude Include="Cho\GameCore\Systems\EditorSystems.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Cho\Resources\EngineAssets\Shader\header\Demo.hlsli">
@@ -385,6 +391,8 @@
     <None Include="Cho\Resources\EngineAssets\Shader\header\ScreenCopy.hlsli">
       <Filter>Shader Files</Filter>
     </None>
+    <None Include="Cho\Resources\EngineAssets\Shader\header\ViewProjection.hlsli" />
+    <None Include="Cho\Resources\EngineAssets\Shader\header\LineDraw.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Cho\Resources\EngineAssets\Shader\Demo\Demo.VS.hlsl">
@@ -405,6 +413,8 @@
     <FxCompile Include="Cho\Resources\EngineAssets\Shader\ScreenCopy\ScreenCopy.VS.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
+    <FxCompile Include="Cho\Resources\EngineAssets\Shader\GameLine\Line.VS.hlsl" />
+    <FxCompile Include="Cho\Resources\EngineAssets\Shader\GameLine\Line.PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

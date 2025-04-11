@@ -1,5 +1,4 @@
 #pragma once
-#include "GameCore/SystemManager/SystemManager.h"
 #include "Cho/GameCore/ObjectContainer/ObjectContainer.h"
 #include <string>
 using SceneID = uint32_t;

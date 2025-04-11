@@ -146,6 +146,7 @@ xcopy "$(SolutionDir)Cho\Core\Utility\Components.h" "$(TargetDir)Cho" /E /I /Y</
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Cho\Core\Utility\ImGuiEx.cpp" />
     <ClCompile Include="Cho\Resources\AssetManager\AssetManager.cpp" />
     <ClCompile Include="Cho\Editor\BaseEditor\BaseEditor.cpp" />
     <ClCompile Include="Cho\Editor\AnimationEditor\AnimationEditor.cpp" />
@@ -187,6 +188,7 @@ xcopy "$(SolutionDir)Cho\Core\Utility\Components.h" "$(TargetDir)Cho" /E /I /Y</
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Cho\GameCore\Systems\EditorSystems.cpp" />
     <ClCompile Include="main.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
@@ -211,7 +213,6 @@ xcopy "$(SolutionDir)Cho\Core\Utility\Components.h" "$(TargetDir)Cho" /E /I /Y</
     <ClCompile Include="Cho\Resources\ModelManager\ModelManager.cpp" />
     <ClCompile Include="Cho\Resources\TextureManager\TextureManager.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\VertexBuffer\VertexBuffer.cpp" />
-    <ClCompile Include="Cho\GameCore\SystemManager\SystemManager.cpp" />
     <ClCompile Include="Cho\Editor\SceneView\SceneView.cpp" />
     <ClCompile Include="Cho\Editor\MaterialEditor\MaterialEditor.cpp" />
     <ClCompile Include="Cho\Editor\Profiler\Profiler.cpp" />
@@ -222,8 +223,13 @@ xcopy "$(SolutionDir)Cho\Core\Utility\Components.h" "$(TargetDir)Cho" /E /I /Y</
     <ClCompile Include="Cho\Editor\PopupMenu\PopupMenu.cpp" />
     <ClCompile Include="Cho\Editor\Toolbar\Toolbar.cpp" />
     <ClCompile Include="Cho\Resources\ScriptContainer\ScriptContainer.cpp" />
+    <ClCompile Include="Cho\GameCore\MultiSystemManager\MultiSystemManager.cpp" />
+    <ClCompile Include="Cho\GameCore\SingleSystemManager\SingleSystemManager.cpp" />
+    <ClCompile Include="Cho\GameCore\Systems\SingleSystems.cpp" />
+    <ClCompile Include="Cho\GameCore\Systems\MultiSystems.cpp" />
     <ClInclude Include="Cho\Core\ChoLog\ChoLog.h" />
     <ClInclude Include="Cho\Core\Utility\GenerateUnique.h" />
+    <ClInclude Include="Cho\Core\Utility\ImGuiEx.h" />
     <ClInclude Include="Cho\GameCore\ScriptContext\ScriptContext.h" />
     <ClInclude Include="Cho\Resources\AssetManager\AssetManager.h" />
     <ClInclude Include="Cho\Editor\BaseEditor\BaseEditor.h" />
@@ -276,7 +282,6 @@ xcopy "$(SolutionDir)Cho\Core\Utility\Components.h" "$(TargetDir)Cho" /E /I /Y</
     <ClInclude Include="Cho\Resources\TextureManager\TextureManager.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\VertexBuffer\VertexBuffer.h" />
     <ClInclude Include="Cho\Resources\IntegrationData\IntegrationData.h" />
-    <ClInclude Include="Cho\GameCore\SystemManager\SystemManager.h" />
     <ClInclude Include="Cho\Editor\SceneView\SceneView.h" />
     <ClInclude Include="Cho\Editor\GameView\GameView.h" />
     <ClInclude Include="Cho\Editor\Hierarchy\Hierarchy.h" />
@@ -298,6 +303,11 @@ xcopy "$(SolutionDir)Cho\Core\Utility\Components.h" "$(TargetDir)Cho" /E /I /Y</
     <ClInclude Include="Cho\Hub\HubManager.h" />
     <ClInclude Include="Cho\GameCore\IScript\IScript.h" />
     <ClInclude Include="Cho\Resources\ScriptContainer\ScriptContainer.h" />
+    <ClInclude Include="Cho\GameCore\MultiSystemManager\MultiSystemManager.h" />
+    <ClInclude Include="Cho\GameCore\SingleSystemManager\SingleSystemManager.h" />
+    <ClInclude Include="Cho\GameCore\Systems\SingleSystems.h" />
+    <ClInclude Include="Cho\GameCore\Systems\MultiSystems.h" />
+    <ClInclude Include="Cho\GameCore\Systems\EditorSystems.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Cho\Externals\ChoMath\ChoMath.vcxproj">
@@ -312,7 +322,9 @@ xcopy "$(SolutionDir)Cho\Core\Utility\Components.h" "$(TargetDir)Cho" /E /I /Y</
   </ItemGroup>
   <ItemGroup>
     <None Include="Cho\Resources\EngineAssets\Shader\header\Demo.hlsli" />
+    <None Include="Cho\Resources\EngineAssets\Shader\header\LineDraw.hlsli" />
     <None Include="Cho\Resources\EngineAssets\Shader\header\ScreenCopy.hlsli" />
+    <None Include="Cho\Resources\EngineAssets\Shader\header\ViewProjection.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Cho\Resources\EngineAssets\Shader\Demo\Demo.PS.hlsl">
@@ -322,6 +334,16 @@ xcopy "$(SolutionDir)Cho\Core\Utility\Components.h" "$(TargetDir)Cho" /E /I /Y</
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Cho\Resources\EngineAssets\Shader\Demo\Demo.VS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Cho\Resources\EngineAssets\Shader\GameLine\Line.PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Cho\Resources\EngineAssets\Shader\GameLine\Line.VS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>

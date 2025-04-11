@@ -18,3 +18,9 @@ struct BUFFER_DATA_VIEWPROJECTION final
     Matrix4 matBillboard;
     Vector3 cameraPosition;
 };
+// Line
+struct BUFFER_DATA_LINE final
+{
+	Vector3 position;
+	Vector4 color;
+};
