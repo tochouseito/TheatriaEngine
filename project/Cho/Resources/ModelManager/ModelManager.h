@@ -65,6 +65,6 @@ private:
 	std::unordered_map<std::wstring, uint32_t> m_ModelNameContainer;
 
 	// モデルの使用可能なTransformの数のオフセット
-	static const uint32_t kUseTransformOffset = 10;
+	static const uint32_t kUseTransformOffset = 50;
 };
 

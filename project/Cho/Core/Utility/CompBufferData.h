@@ -1,5 +1,6 @@
 #pragma once
 #include "ChoMath.h"
+#include "Core/Utility/Color.h"
 // 定数バッファ用データ構造体
 // Transform
 struct BUFFER_DATA_TF final
@@ -22,5 +23,5 @@ struct BUFFER_DATA_VIEWPROJECTION final
 struct BUFFER_DATA_LINE final
 {
 	Vector3 position;
-	Vector4 color;
+	Color color;
 };

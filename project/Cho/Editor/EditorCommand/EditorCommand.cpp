@@ -153,3 +153,15 @@ void AddScriptComponent::Undo(EditorCommand* edit)
 {
 	edit;
 }
+
+void AddLineRendererComponent::Execute(EditorCommand* edit)
+{
+	uint32_t mapID = edit->GetResourceManagerPtr()->GetIntegrationData(IntegrationDataType::Line)->GetMapID();
+	// LineRendererComponentを追加
+	edit->GetGameCoreCommandPtr()->AddLineRendererComponent(m_Entity, edit->GetResourceManagerPtr(),mapID);
+}
+
+void AddLineRendererComponent::Undo(EditorCommand* edit)
+{
+	edit;
+}

@@ -101,6 +101,16 @@ void GameCoreCommand::AddScriptComponent(const uint32_t& entity, ResourceManager
 	resourceManager;
 }
 
+void GameCoreCommand::AddLineRendererComponent(const uint32_t& entity, ResourceManager* resourceManager, const uint32_t& mapID)
+{
+	LineRendererComponent* line = m_pECSManager->AddComponent<LineRendererComponent>(entity);
+	if (!line)
+	{
+		Log::Write(LogLevel::Assert, "LineRendererComponent is nullptr");
+	}
+	line->mapID = mapID;
+}
+
 std::optional<uint32_t> GameCoreCommand::SetMainCamera(const uint32_t& setCameraID)
 {
 	if (!m_pSceneManager->GetCurrentScene())

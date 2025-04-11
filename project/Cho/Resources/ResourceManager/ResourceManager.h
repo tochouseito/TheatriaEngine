@@ -19,6 +19,7 @@
 enum IntegrationDataType
 {
 	Transform=0,
+	Line,
 	kCount,
 };
 
@@ -118,6 +119,10 @@ public:
 		}
 		return nullptr;
 	}
+	VertexBuffer<BUFFER_DATA_LINE>* GetLineIntegrationBuffer()const
+	{
+		return dynamic_cast<VertexBuffer<BUFFER_DATA_LINE>*>(GetBuffer<IVertexBuffer>(m_IntegrationData[IntegrationDataType::Line]->GetBufferIndex()));
+	}
 
 	// GetBuffer
 	template<typename T>
@@ -167,9 +172,16 @@ public:
 	ScriptContainer* GetScriptContainer() const { return m_ScriptContainer.get(); }
 	IIntegrationData* GetIntegrationData(const IntegrationDataType& type) const
 	{
-		if (type == IntegrationDataType::Transform)
+		switch (type)
 		{
+		case IntegrationDataType::Transform:
 			return m_IntegrationData[IntegrationDataType::Transform].get();
+			break;
+		case IntegrationDataType::Line:
+			return m_IntegrationData[IntegrationDataType::Line].get();
+			break;
+		default:
+			break;
 		}
 		return nullptr;
 	}
@@ -227,6 +239,6 @@ private:
 
 	// static member
 	static const uint32_t kIntegrationTFBufferSize = 1024;// Transformの統合バッファのサイズ
-	//static const uint32_t kIntegrationLineBufferSize = 1024;// Lineの統合バッファのサイズ
+	static const uint32_t kIntegrationLineBufferSize = 1024;// Lineの統合バッファのサイズ
 };
 

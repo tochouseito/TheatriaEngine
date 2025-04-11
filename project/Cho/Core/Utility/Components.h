@@ -107,9 +107,11 @@ struct LineData
 	Color color;	// 色
 	std::optional<uint32_t> lineID = std::nullopt;// ラインID
 };
+
 struct LineRendererComponent : public IComponentTag
 {
 	std::vector<LineData> lines;// ラインデータ
+	std::optional<uint32_t> mapID = std::nullopt;		// マップインデックス
 };
 
 // マルチコンポーネントを許可

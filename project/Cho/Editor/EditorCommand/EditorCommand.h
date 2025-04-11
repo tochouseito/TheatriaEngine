@@ -100,6 +100,20 @@ public:
 private:
 	uint32_t m_Entity;
 };
+// ラインレンダラーコンポーネントを追加するコマンド
+class AddLineRendererComponent :public ICommand
+{
+public:
+	AddLineRendererComponent(const uint32_t& entity) :
+		m_Entity(entity)
+	{
+	}
+	void Execute(EditorCommand* edit)override;
+	void Undo(EditorCommand* edit)override;
+private:
+	uint32_t m_Entity;
+	uint32_t m_MapID;
+};
 
 class ResourceManager;
 class GraphicsEngine;
