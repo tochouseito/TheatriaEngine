@@ -182,6 +182,7 @@
     <ClCompile Include="Cho\GameCore\Systems\SingleSystems.cpp" />
     <ClCompile Include="Cho\GameCore\Systems\MultiSystems.cpp" />
     <ClCompile Include="Cho\GameCore\Systems\EditorSystems.cpp" />
+    <ClCompile Include="Cho\GameCore\ScriptContext\ScriptContext.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cho\Editor\AnimationEditor\AnimationEditor.h">

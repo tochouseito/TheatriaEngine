@@ -122,13 +122,15 @@ void TransformInitializeSystem::Start(TransformComponent& transform)
 	transform.startValue.degrees = transform.degrees;
 }
 
-void TransformFinalizeSystem::Finalize(TransformComponent& transform)
+void TransformFinalizeSystem::Finalize(Entity entity,TransformComponent& transform)
 {
 	// 初期値に戻す
 	transform.translation = transform.startValue.translation;
 	transform.rotation = transform.startValue.rotation;
 	transform.scale = transform.startValue.scale;
 	transform.degrees = transform.startValue.degrees;
+	// マルチコンポーネントを全削除
+	m_ECS->RemoveAllComponents<LineRendererComponent>(entity);
 }
 
 void CameraUpdateSystem::UpdateMatrix(TransformComponent& transform, CameraComponent& camera)
@@ -221,7 +223,7 @@ void ScriptInitializeSystem::StartScript(ScriptComponent& script)
 
 ScriptContext ScriptInitializeSystem::MakeScriptContext(Entity entity, ECSManager* ecs)
 {
-	ScriptContext ctx;
+	ScriptContext ctx(entity,ecs);
 
 	ctx.transform = ecs->GetComponent<TransformComponent>(entity);
 	ctx.camera = ecs->GetComponent<CameraComponent>(entity);
@@ -258,7 +260,7 @@ void ScriptUpdateSystem::UpdateScript(ScriptComponent& script)
 
 ScriptContext ScriptUpdateSystem::MakeScriptContext(Entity entity, ECSManager* ecs)
 {
-	ScriptContext ctx;
+	ScriptContext ctx(entity, ecs);
 
 	ctx.transform = ecs->GetComponent<TransformComponent>(entity);
 	ctx.camera = ecs->GetComponent<CameraComponent>(entity);

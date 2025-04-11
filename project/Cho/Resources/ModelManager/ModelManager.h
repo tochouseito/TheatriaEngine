@@ -1,7 +1,7 @@
 #pragma once
 #include "ChoMath.h"
-#include "Cho/Core/Utility/FVector.h"
-#include "Cho/SDK/DirectX/DirectX12/stdafx/stdafx.h"
+#include "Core/Utility/FVector.h"
+#include "SDK/DirectX/DirectX12/stdafx/stdafx.h"
 #include <unordered_map>
 #include <list>
 // 頂点データ構造体
@@ -65,6 +65,6 @@ private:
 	std::unordered_map<std::wstring, uint32_t> m_ModelNameContainer;
 
 	// モデルの使用可能なTransformの数のオフセット
-	static const uint32_t kUseTransformOffset = 10;
+	static const uint32_t kUseTransformOffset = 50;
 };
 

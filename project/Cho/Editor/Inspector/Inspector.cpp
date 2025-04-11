@@ -50,6 +50,7 @@ void Inspector::ComponentsView(GameObject* object)
 	MeshRendererComponentView(object);
 	CameraComponentView(object);
 	ScriptComponentView(object);
+	LineRendererComponentView(object);
 }
 
 void Inspector::TransformComponentView(GameObject* object)
@@ -182,12 +183,57 @@ void Inspector::ScriptComponentView(GameObject* object)
 	}
 }
 
+void Inspector::LineRendererComponentView(GameObject* object)
+{
+	auto ecs = m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr();
+	auto lines = ecs->GetAllComponents<LineRendererComponent>(object->GetEntity());
+
+	if (!lines || lines->empty()) return;
+
+	ImGui::Text("Line Renderer Components");
+
+	// スクロール可能な子ウィンドウ
+	ImGui::BeginChild("LineRendererList", ImVec2(0, 200), true, ImGuiWindowFlags_AlwaysVerticalScrollbar);
+
+	int index = 0;
+	for (LineRendererComponent& line : *lines)
+	{
+		ImGui::PushID(index); // 各項目に一意IDをつける
+
+		// 折りたたみヘッダーで表示をまとめる
+		if (ImGui::CollapsingHeader(("Line " + std::to_string(index)).c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			ImGui::Indent();
+
+			ImGui::InputFloat3("Start", &line.line.start.x);
+			ImGui::InputFloat3("End", &line.line.end.x);
+			ImGui::ColorEdit4("Color", &line.line.color.r);
+
+			if (line.mapID.has_value())
+			{
+				ImGui::Text("MapID: %d", line.mapID.value());
+			} 		else
+ {
+			ImGui::Text("MapID: None");
+		}
+
+		ImGui::Unindent();
+	}
+
+	ImGui::PopID();
+	++index;
+}
+
+ImGui::EndChild();
+}
+
 void Inspector::AddComponent(GameObject* object)
 {
 	static bool isOpen = false;
 	MeshFilterComponent* mesh;
 	MeshRendererComponent* render;
 	ScriptComponent* script;
+	std::vector<LineRendererComponent>* lines;
 	if (!isOpen)
 	{
 		// コンポーネントの追加
@@ -237,6 +283,18 @@ void Inspector::AddComponent(GameObject* object)
 					isOpen = false;
 				}
 			}
+			// LineRendererComponentがあるか
+			lines = m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr()->GetAllComponents<LineRendererComponent>(object->GetEntity());
+			if (!lines || lines->empty())
+			{
+				if (ImGui::Selectable("LineRendererComponent"))
+				{
+					// LineRendererComponentを追加
+					std::unique_ptr<AddLineRendererComponent> addLineComp = std::make_unique<AddLineRendererComponent>(object->GetEntity());
+					m_EditorCommand->ExecuteCommand(std::move(addLineComp));
+					isOpen = false;
+				}
+			}
 			break;
 		case ObjectType::Camera:
 			// ScriptComponentがあるか
@@ -248,6 +306,18 @@ void Inspector::AddComponent(GameObject* object)
 					// ScriptComponentを追加
 					std::unique_ptr<AddScriptComponent> addScriptComp = std::make_unique<AddScriptComponent>(object->GetEntity());
 					m_EditorCommand->ExecuteCommand(std::move(addScriptComp));
+					isOpen = false;
+				}
+			}
+			// LineRendererComponentがあるか
+			lines = m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr()->GetAllComponents<LineRendererComponent>(object->GetEntity());
+			if (!lines || lines->empty())
+			{
+				if (ImGui::Selectable("LineRendererComponent"))
+				{
+					// LineRendererComponentを追加
+					std::unique_ptr<AddLineRendererComponent> addLineComp = std::make_unique<AddLineRendererComponent>(object->GetEntity());
+					m_EditorCommand->ExecuteCommand(std::move(addLineComp));
 					isOpen = false;
 				}
 			}

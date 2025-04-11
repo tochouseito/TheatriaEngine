@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Cho/SDK/DirectX/DirectX12/GpuResource/GpuResource.h"
+#include "SDK/DirectX/DirectX12/GpuResource/GpuResource.h"
 
 class GpuBuffer : public GpuResource
 {

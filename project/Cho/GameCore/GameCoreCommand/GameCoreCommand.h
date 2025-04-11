@@ -17,6 +17,7 @@ class GameCoreCommand
 	friend class AddCameraComponent;
 	friend class SetMainCamera;
 	friend class AddScriptComponent;
+	friend class AddLineRendererComponent;
 public:
 	// Constructor
 	GameCoreCommand(SceneManager* sceneManager, ECSManager* ecsManager, ObjectContainer* objectContainer,GameCore* gameCore) :
@@ -48,6 +49,8 @@ private:
 	void AddCameraComponent(const uint32_t& entity,ResourceManager* resourceManager);
 	// スクリプトコンポーネントを追加
 	void AddScriptComponent(const uint32_t& entity, ResourceManager* resourceManager);
+	// ラインレンダラーコンポーネントを追加
+	void AddLineRendererComponent(const uint32_t& entity, ResourceManager* resourceManager,const uint32_t& mapID);
 
 	// SceneのMainCameraを設定
 	std::optional<uint32_t> SetMainCamera(const uint32_t& setCameraID);

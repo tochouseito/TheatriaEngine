@@ -7,6 +7,7 @@ void PipelineManager::Initialize(ID3D12Device8* device)
 	CreatePipelineDemo(device);
 	CreatePipelineScreenCopy(device);
 	CreatePipelineIntegrate(device);
+	CreatePipelineLine(device);
 }
 
 std::vector<std::pair<uint32_t, std::string>> PipelineManager::CreateRootParameters(ID3D12ShaderReflection* pReflector, std::vector<D3D12_ROOT_PARAMETER>& rootParameters, std::vector<D3D12_DESCRIPTOR_RANGE>& descriptorRanges, D3D12_SHADER_VISIBILITY VISIBILITY)
@@ -543,14 +544,14 @@ void PipelineManager::CreatePipelineLine(ID3D12Device8* device)
 	// Compile shaders
 	ComPtr<IDxcBlob> pVSBlob =
 		m_pShaderCompiler->CompileShader(
-			L"Cho/Resources/EngineAssets/Shader/Demo/Demo.VS.hlsl",
+			L"Cho/Resources/EngineAssets/Shader/GameLine/Line.VS.hlsl",
 			L"vs_6_5"
 		);
 	ComPtr<ID3D12ShaderReflection> pVSReflection = m_pShaderCompiler->ReflectShader(pVSBlob.Get());
 
 	ComPtr<IDxcBlob> pPSBlob =
 		m_pShaderCompiler->CompileShader(
-			L"Cho/Resources/EngineAssets/Shader/Demo/Demo.PS.hlsl",
+			L"Cho/Resources/EngineAssets/Shader/GameLine/Line.PS.hlsl",
 			L"ps_6_5"
 		);
 	ComPtr<ID3D12ShaderReflection> pPSReflection = m_pShaderCompiler->ReflectShader(pPSBlob.Get());
@@ -582,18 +583,7 @@ void PipelineManager::CreatePipelineLine(ID3D12Device8* device)
 	}
 	rootSignatureDesc.pParameters = rootParameters.data();
 	rootSignatureDesc.NumParameters = static_cast<UINT>(rootParameters.size());
-	// Static Sampler
-	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
-	staticSamplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;// バイリニアフィルタ
-	staticSamplers[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;// 0~1の範囲外をリピート
-	staticSamplers[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	staticSamplers[0].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	staticSamplers[0].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;// 比較しない
-	staticSamplers[0].MaxLOD = D3D12_FLOAT32_MAX;// ありったけのMipmapを使う
-	staticSamplers[0].ShaderRegister = 0;// レジスタ番号を使う
-	staticSamplers[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;// PixelShaderで使う
-	rootSignatureDesc.pStaticSamplers = staticSamplers;
-	rootSignatureDesc.NumStaticSamplers = _countof(staticSamplers);
+	
 	// Serialize RootSignature
 	ComPtr<ID3DBlob> pSignature;
 	ComPtr<ID3DBlob> pError;
@@ -616,19 +606,15 @@ void PipelineManager::CreatePipelineLine(ID3D12Device8* device)
 	);
 	Log::Write(LogLevel::Assert, "Root signature created.", hr);
 	// InputLayout
-	D3D12_INPUT_ELEMENT_DESC inputElementDesc[3] = {};
+	D3D12_INPUT_ELEMENT_DESC inputElementDesc[2] = {};
 	inputElementDesc[0].SemanticName = "POSITION";
 	inputElementDesc[0].SemanticIndex = 0;
-	inputElementDesc[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	inputElementDesc[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
 	inputElementDesc[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-	inputElementDesc[1].SemanticName = "TEXCOORD";
+	inputElementDesc[1].SemanticName = "COLOR";
 	inputElementDesc[1].SemanticIndex = 0;
-	inputElementDesc[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+	inputElementDesc[1].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	inputElementDesc[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-	inputElementDesc[2].SemanticName = "NORMAL";
-	inputElementDesc[2].SemanticIndex = 0;
-	inputElementDesc[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
-	inputElementDesc[2].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
 	inputLayoutDesc.pInputElementDescs = inputElementDesc;
 	inputLayoutDesc.NumElements = _countof(inputElementDesc);
@@ -642,7 +628,7 @@ void PipelineManager::CreatePipelineLine(ID3D12Device8* device)
 	// RasterizerState
 	D3D12_RASTERIZER_DESC rasterizerDesc{};
 	// 裏面（時計回り）を表示しな
-	rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
 	// 三角形の中を塗りつぶす
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 
@@ -667,7 +653,7 @@ void PipelineManager::CreatePipelineLine(ID3D12Device8* device)
 	psoDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	psoDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
 	psoDesc.SampleDesc.Count = 1;
-	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
 	psoDesc.NumRenderTargets = 1;
 	psoDesc.RTVFormats[0] = PixelFormat;
 	// Create PSO

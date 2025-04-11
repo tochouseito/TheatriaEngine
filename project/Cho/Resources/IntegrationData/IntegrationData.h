@@ -1,6 +1,6 @@
 #pragma once
-#include "Cho/Core/Utility/FVector.h"
-#include "Cho/Core/Utility/CompBufferData.h"
+#include "Core/Utility/FVector.h"
+#include "Core/Utility/CompBufferData.h"
 #include <list>
 #include <optional>
 class ResourceManager;
@@ -41,6 +41,11 @@ public:
 		// 一つ進める
 		m_NextMapID++;
 		return id;
+	}
+	// 現在のIDを取得
+	virtual uint32_t GetCurrentMapID()
+	{
+		return m_NextMapID;
 	}
 protected:
 	// リソースマネージャーのポインタ

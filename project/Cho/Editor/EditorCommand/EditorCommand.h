@@ -100,6 +100,20 @@ public:
 private:
 	uint32_t m_Entity;
 };
+// ラインレンダラーコンポーネントを追加するコマンド
+class AddLineRendererComponent :public ICommand
+{
+public:
+	AddLineRendererComponent(const uint32_t& entity) :
+		m_Entity(entity)
+	{
+	}
+	void Execute(EditorCommand* edit)override;
+	void Undo(EditorCommand* edit)override;
+private:
+	uint32_t m_Entity;
+	uint32_t m_MapID;
+};
 
 class ResourceManager;
 class GraphicsEngine;
@@ -112,7 +126,8 @@ public:
 	EditorCommand(ResourceManager* resourceManager,GraphicsEngine* graphicsEngine,GameCoreCommand* gameCoreCommand):
 		m_ResourceManager(resourceManager), m_GraphicsEngine(graphicsEngine), m_GameCoreCommand(gameCoreCommand)
 	{
-		m_UpdateSystem = std::make_unique<SingleSystemManager>();
+		m_pSingleSystem = std::make_unique<SingleSystemManager>();
+		m_pMultiSystem = std::make_unique<MultiSystemManager>();
 		CreateSystem();
 	}
 	// Destructor
@@ -162,6 +177,7 @@ private:
 	GameCoreCommand* m_GameCoreCommand = nullptr;
 	GameObject* m_SelectedObject = nullptr;
 	// エディタの更新システム
-	std::unique_ptr<SingleSystemManager> m_UpdateSystem = nullptr;
+	std::unique_ptr<SingleSystemManager> m_pSingleSystem = nullptr;
+	std::unique_ptr<MultiSystemManager> m_pMultiSystem = nullptr;
 };
 

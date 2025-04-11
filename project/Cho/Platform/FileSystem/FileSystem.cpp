@@ -765,6 +765,7 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
     fs::path systemPath = includeBase / "Cho";
     fs::path mathLibPath = includeBase / "Cho/Externals/ChoMath";
     fs::path scriptPath = includeBase / "Cho/GameCore/IScript";
+	fs::path contextPath = includeBase / "Cho/GameCore/ScriptContext";
 
     // ライブラリディレクトリ
     fs::path libraryPath = currentPath / "../generated/outputs/$(Configuration)/";
@@ -774,6 +775,7 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
     systemPath.make_preferred();
     mathLibPath.make_preferred();
 	scriptPath.make_preferred();
+	contextPath.make_preferred();
 
     libraryPath.make_preferred();
 	libraryPath2.make_preferred();
@@ -835,7 +837,7 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
     vcxFile << "      <WarningLevel>Level3</WarningLevel>\n";
     vcxFile << "      <Optimization>Disabled</Optimization>\n";
     vcxFile << "      <PreprocessorDefinitions>_DEBUG;EXPORT_SCRIPT_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>\n";
-    vcxFile << "      <AdditionalIncludeDirectories>" << scriptPath.string() << ";" << mathLibPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
+    vcxFile << "      <AdditionalIncludeDirectories>" << contextPath.string() << ";" << scriptPath.string() << ";" << mathLibPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
     vcxFile << "      <LanguageStandard>stdcpp20</LanguageStandard>\n";
     vcxFile << "      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>\n";
     vcxFile << "      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>\n"; // MTd
@@ -854,7 +856,7 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
     vcxFile << "      <WarningLevel>Level3</WarningLevel>\n";
     vcxFile << "      <Optimization>MaxSpeed</Optimization>\n";
     vcxFile << "      <PreprocessorDefinitions>NDEBUG;EXPORT_SCRIPT_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>\n";
-    vcxFile << "      <AdditionalIncludeDirectories>" << scriptPath.string() << ";" << mathLibPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
+    vcxFile << "      <AdditionalIncludeDirectories>" << contextPath.string() << ";" << scriptPath.string() << ";" << mathLibPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
     vcxFile << "      <LanguageStandard>stdcpp20</LanguageStandard>\n";
     vcxFile << "      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>\n";
     vcxFile << "      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>\n"; // MT

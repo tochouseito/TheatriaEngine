@@ -388,6 +388,51 @@ void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& ga
 		// DrawCall
 		context->DrawIndexedInstanced(static_cast<UINT>(modelData.meshes[0].indices.size()), numInstance, 0, 0, 0);
 	}
+	// ラインの描画
+	for (uint32_t i = 0;i < 1;i++)
+	{
+		// プリミティブトポロジの設定
+		context->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
+		// パイプラインセット
+		context->SetGraphicsPipelineState(m_PipelineManager->GetLinePSO().pso.Get());
+		// ルートシグネチャセット
+		context->SetGraphicsRootSignature(m_PipelineManager->GetLinePSO().rootSignature.Get());
+		// シーンがないならスキップ
+		if (!gameCore.GetSceneManager()->GetCurrentScene()) { continue; }
+		IConstantBuffer* cameraBuffer = nullptr;
+		// メインカメラを取得
+		if (mode == RenderMode::Game)
+		{
+			// カメラオブジェクトのIDを取得
+			std::optional<uint32_t> cameraID = gameCore.GetSceneManager()->GetCurrentScene()->GetMainCameraID();
+			if (!cameraID) { continue; }
+			// カメラオブジェクトを取得
+			GameObject* cameraObject = gameCore.GetObjectContainer()->GetGameObject(cameraID.value());
+			if (!cameraObject) { continue; }
+			// カメラのバッファインデックスを取得
+			CameraComponent* cameraComponent = gameCore.GetECSManager()->GetComponent<CameraComponent>(cameraObject->GetEntity());
+			if (!cameraComponent) { continue; }
+			// カメラのバッファを取得
+			cameraBuffer = resourceManager.GetBuffer<IConstantBuffer>(cameraComponent->bufferIndex);
+			// カメラがないならスキップ
+			if (!cameraBuffer) { continue; }
+		} else// デバッグカメラ
+		{
+			// カメラのバッファを取得
+			cameraBuffer = resourceManager.GetDebugCameraBuffer();
+			// カメラがないならスキップ
+			if (!cameraBuffer) { continue; }
+		}
+		// MapIDが0（使われていない）ならスキップ
+		if (!resourceManager.GetIntegrationData(IntegrationDataType::Line)->GetCurrentMapID()) { continue; }
+		// 頂点バッファビューをセット
+		D3D12_VERTEX_BUFFER_VIEW* vbv = resourceManager.GetLineIntegrationBuffer()->GetVertexBufferView();
+		context->SetVertexBuffers(0, 1, vbv);
+		// カメラバッファをセット
+		context->SetGraphicsRootConstantBufferView(0, cameraBuffer->GetResource()->GetGPUVirtualAddress());
+		// DrawCall
+		context->DrawInstanced(static_cast<UINT>(resourceManager.GetIntegrationData(IntegrationDataType::Line)->GetCurrentMapID()) * 2, 1, 0, 0);
+	}
 	// コマンドリスト終了
 	EndCommandContext(context,Graphics);
 	// GPUの完了待ち

@@ -26,6 +26,7 @@ void GameCore::Initialize(ResourceManager* resourceManager)
 void GameCore::Start(ResourceManager& resourceManager)
 {
 	m_pSingleSystemManager->StartAll(m_pECSManager.get());
+	m_pMultiSystemManager->StartAll(m_pECSManager.get());
 	resourceManager;
 }
 
@@ -38,6 +39,7 @@ void GameCore::Update(ResourceManager& resourceManager, GraphicsEngine& graphics
 		return;
 	}
 	m_pSingleSystemManager->UpdateAll(m_pECSManager.get());
+	m_pMultiSystemManager->UpdateAll(m_pECSManager.get());
 	resourceManager;
 	graphicsEngine;
 }
@@ -58,6 +60,7 @@ void GameCore::GameRun()
 	isRunning = true;
 	// StartSystemの実行
 	m_pSingleSystemManager->StartAll(m_pECSManager.get());
+	m_pMultiSystemManager->StartAll(m_pECSManager.get());
 }
 
 void GameCore::GameStop()
@@ -68,6 +71,7 @@ void GameCore::GameStop()
 	}
 	// スクリプトのインスタンスを解放
 	m_pSingleSystemManager->EndAll(m_pECSManager.get());
+	m_pMultiSystemManager->EndAll(m_pECSManager.get());
 	// DLLのアンロード
 	FileSystem::ScriptProject::UnloadScriptDLL();
 	isRunning = false;
@@ -96,6 +100,8 @@ void GameCore::CreateSystems(ResourceManager* resourceManager)
 	// マルチシステム
 	// 初期化システムの登録
 	// 更新システムの登録
+	std::unique_ptr<ECSManager::IMultiSystem> lineRendererSystem = std::make_unique<LineRendererSystem>(m_pECSManager.get(), resourceManager);
+	m_pMultiSystemManager->RegisterSystem(std::move(lineRendererSystem), SystemState::Update);
 	// クリーンアップシステムの登録
 
 }
