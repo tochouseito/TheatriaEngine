@@ -15,6 +15,9 @@ void GameCore::Initialize(ResourceManager* resourceManager)
 	// Systemマネージャの生成
 	m_pSingleSystemManager = std::make_unique<SingleSystemManager>();
 	m_pMultiSystemManager = std::make_unique<MultiSystemManager>();
+	// box2dの生成
+	b2Vec2 gravity(0.0f, 0.0f);
+	m_pPhysicsWorld = std::make_unique<b2World>(gravity);
 	// システムの生成
 	CreateSystems(resourceManager);
 	// オブジェクトコンテナの生成
@@ -38,6 +41,7 @@ void GameCore::Update(ResourceManager& resourceManager, GraphicsEngine& graphics
 	{
 		return;
 	}
+	//static_cast<Rigidbody2DUpdateSystem*>(rbUpdateSystemRawPtr)->StepSimulation();
 	m_pSingleSystemManager->UpdateAll(m_pECSManager.get());
 	m_pMultiSystemManager->UpdateAll(m_pECSManager.get());
 	resourceManager;
@@ -85,6 +89,8 @@ void GameCore::CreateSystems(ResourceManager* resourceManager)
 	m_pSingleSystemManager->RegisterSystem(std::move(tfStateSystem), SystemState::Initialize);
 	std::unique_ptr<ECSManager::ISystem> scriptInitializeSystem = std::make_unique<ScriptInitializeSystem>(m_pECSManager.get());
 	m_pSingleSystemManager->RegisterSystem(std::move(scriptInitializeSystem), SystemState::Initialize);
+	std::unique_ptr<ECSManager::ISystem> physicsSystem = std::make_unique<Rigidbody2DInitSystem>(m_pECSManager.get(), m_pPhysicsWorld.get());
+	m_pSingleSystemManager->RegisterSystem(std::move(physicsSystem), SystemState::Initialize);
 	// 更新システムの登録
 	std::unique_ptr<ECSManager::ISystem> tfUpdateSystem = std::make_unique<TransformUpdateSystem>(m_pECSManager.get(), resourceManager, resourceManager->GetIntegrationBuffer(IntegrationDataType::Transform));
 	m_pSingleSystemManager->RegisterSystem(std::move(tfUpdateSystem), SystemState::Update);
@@ -92,6 +98,8 @@ void GameCore::CreateSystems(ResourceManager* resourceManager)
 	m_pSingleSystemManager->RegisterSystem(std::move(cameraSystem), SystemState::Update);
 	std::unique_ptr<ECSManager::ISystem> scriptUpdateSystem = std::make_unique<ScriptUpdateSystem>(m_pECSManager.get());
 	m_pSingleSystemManager->RegisterSystem(std::move(scriptUpdateSystem), SystemState::Update);
+	std::unique_ptr<ECSManager::ISystem> rbUpdateSystem = std::make_unique<Rigidbody2DUpdateSystem>(m_pECSManager.get(), m_pPhysicsWorld.get());
+	m_pSingleSystemManager->RegisterSystem(std::move(rbUpdateSystem), SystemState::Update);
 	// クリーンアップシステムの登録
 	std::unique_ptr<ECSManager::ISystem> tfFinalizeSystem = std::make_unique<TransformFinalizeSystem>(m_pECSManager.get());
 	m_pSingleSystemManager->RegisterSystem(std::move(tfFinalizeSystem), SystemState::Finalize);

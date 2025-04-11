@@ -161,3 +161,81 @@ private:
 	void FinalizeScript(ScriptComponent& script);
 	ECSManager* m_ECS = nullptr;
 };
+
+class Rigidbody2DInitSystem : public ECSManager::System<TransformComponent, Rigidbody2DComponent>
+{
+public:
+	Rigidbody2DInitSystem(ECSManager* ecs, b2World* world)
+		: ECSManager::System<TransformComponent, Rigidbody2DComponent>(
+			[this](Entity e, TransformComponent& transform, Rigidbody2DComponent& rb)
+			{
+				e;
+				CreateBody(transform, rb);
+			}),
+		m_ECS(ecs), m_World(world)
+	{
+	}
+
+	~Rigidbody2DInitSystem() = default;
+
+private:
+	void CreateBody(TransformComponent& transform, Rigidbody2DComponent& rb)
+	{
+		if (rb.runtimeBody != nullptr) return;
+
+		b2BodyDef bodyDef;
+		bodyDef.type = rb.bodyType;
+		bodyDef.gravityScale = rb.gravityScale;
+		bodyDef.fixedRotation = rb.fixedRotation;
+		bodyDef.position = b2Vec2(transform.translation.x, transform.translation.y);
+		rb.runtimeBody = m_World->CreateBody(&bodyDef);
+
+		// Transformと同期（optional）
+		transform.translation.x = rb.runtimeBody->GetPosition().x;
+		transform.translation.y = rb.runtimeBody->GetPosition().y;
+	}
+
+	ECSManager* m_ECS = nullptr;
+	b2World* m_World = nullptr;
+};
+
+class Rigidbody2DUpdateSystem : public ECSManager::System<TransformComponent, Rigidbody2DComponent>
+{
+public:
+	Rigidbody2DUpdateSystem(ECSManager* ecs, b2World* world)
+		: ECSManager::System<TransformComponent, Rigidbody2DComponent>(
+			[this](Entity e, TransformComponent& transform, Rigidbody2DComponent& rb)
+			{
+				e;
+				SyncFromPhysics(transform, rb);
+			}),
+		m_ECS(ecs), m_World(world)
+	{
+	}
+
+	~Rigidbody2DUpdateSystem() = default;
+
+	void StepSimulation()
+	{
+		constexpr float timeStep = 1.0f / 60.0f;
+		constexpr int velocityIterations = 6;
+		constexpr int positionIterations = 2;
+		m_World->Step(timeStep, velocityIterations, positionIterations);
+	}
+
+private:
+	void SyncFromPhysics(TransformComponent& transform, Rigidbody2DComponent& rb)
+	{
+		if (rb.runtimeBody == nullptr) return;
+
+		const b2Vec2& pos = rb.runtimeBody->GetPosition();
+		transform.translation.x = pos.x;
+		transform.translation.y = pos.y;
+
+		float angle = rb.runtimeBody->GetAngle(); // radians
+		transform.rotation = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0, 0, 1), angle);
+	}
+
+	ECSManager* m_ECS = nullptr;
+	b2World* m_World = nullptr;
+};
