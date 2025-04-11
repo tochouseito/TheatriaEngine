@@ -18,6 +18,8 @@ class GameCoreCommand
 	friend class SetMainCamera;
 	friend class AddScriptComponent;
 	friend class AddLineRendererComponent;
+	friend class AddRigidbody2DComponent;
+	friend class AddBoxCollider2DComponent;
 public:
 	// Constructor
 	GameCoreCommand(SceneManager* sceneManager, ECSManager* ecsManager, ObjectContainer* objectContainer,GameCore* gameCore) :
@@ -51,6 +53,10 @@ private:
 	void AddScriptComponent(const uint32_t& entity, ResourceManager* resourceManager);
 	// ラインレンダラーコンポーネントを追加
 	void AddLineRendererComponent(const uint32_t& entity, ResourceManager* resourceManager,const uint32_t& mapID);
+	// 2DRigidbodyコンポーネントを追加
+	void AddRigidbody2DComponent(const uint32_t& entity, ResourceManager* resourceManager);
+	// BoxCollider2Dコンポーネントを追加
+	void AddBoxCollider2DComponent(const uint32_t& entity, ResourceManager* resourceManager);
 
 	// SceneのMainCameraを設定
 	std::optional<uint32_t> SetMainCamera(const uint32_t& setCameraID);

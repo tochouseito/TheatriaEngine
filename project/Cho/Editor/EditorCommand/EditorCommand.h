@@ -114,6 +114,32 @@ private:
 	uint32_t m_Entity;
 	uint32_t m_MapID;
 };
+// 2DRigidbodyコンポーネントを追加するコマンド
+class AddRigidbody2DComponent :public ICommand
+{
+public:
+	AddRigidbody2DComponent(const uint32_t& entity) :
+		m_Entity(entity)
+	{
+	}
+	void Execute(EditorCommand* edit)override;
+	void Undo(EditorCommand* edit)override;
+private:
+	uint32_t m_Entity;
+};
+// BoxCollider2Dコンポーネントを追加するコマンド
+class AddBoxCollider2DComponent :public ICommand
+{
+public:
+	AddBoxCollider2DComponent(const uint32_t& entity) :
+		m_Entity(entity)
+	{
+	}
+	void Execute(EditorCommand* edit)override;
+	void Undo(EditorCommand* edit)override;
+private:
+	uint32_t m_Entity;
+};
 
 class ResourceManager;
 class GraphicsEngine;

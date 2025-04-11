@@ -16,7 +16,7 @@ void GameCore::Initialize(ResourceManager* resourceManager)
 	m_pSingleSystemManager = std::make_unique<SingleSystemManager>();
 	m_pMultiSystemManager = std::make_unique<MultiSystemManager>();
 	// box2dの生成
-	b2Vec2 gravity(0.0f, 0.0f);
+	b2Vec2 gravity(0.0f, -9.8f);
 	m_pPhysicsWorld = std::make_unique<b2World>(gravity);
 	// システムの生成
 	CreateSystems(resourceManager);
@@ -91,6 +91,8 @@ void GameCore::CreateSystems(ResourceManager* resourceManager)
 	m_pSingleSystemManager->RegisterSystem(std::move(scriptInitializeSystem), SystemState::Initialize);
 	std::unique_ptr<ECSManager::ISystem> physicsSystem = std::make_unique<Rigidbody2DInitSystem>(m_pECSManager.get(), m_pPhysicsWorld.get());
 	m_pSingleSystemManager->RegisterSystem(std::move(physicsSystem), SystemState::Initialize);
+	std::unique_ptr<ECSManager::ISystem> boxInitSystem = std::make_unique<BoxCollider2DInitSystem>(m_pECSManager.get(), m_pPhysicsWorld.get());
+	m_pSingleSystemManager->RegisterSystem(std::move(boxInitSystem), SystemState::Initialize);
 	// 更新システムの登録
 	std::unique_ptr<ECSManager::ISystem> tfUpdateSystem = std::make_unique<TransformUpdateSystem>(m_pECSManager.get(), resourceManager, resourceManager->GetIntegrationBuffer(IntegrationDataType::Transform));
 	m_pSingleSystemManager->RegisterSystem(std::move(tfUpdateSystem), SystemState::Update);
@@ -105,6 +107,8 @@ void GameCore::CreateSystems(ResourceManager* resourceManager)
 	m_pSingleSystemManager->RegisterSystem(std::move(tfFinalizeSystem), SystemState::Finalize);
 	std::unique_ptr<ECSManager::ISystem> scriptFinalizeSystem = std::make_unique<ScriptFinalizeSystem>(m_pECSManager.get());
 	m_pSingleSystemManager->RegisterSystem(std::move(scriptFinalizeSystem), SystemState::Finalize);
+	std::unique_ptr<ECSManager::ISystem> physicsResetSystem = std::make_unique<Rigidbody2DResetSystem>(m_pECSManager.get(), m_pPhysicsWorld.get());
+	m_pSingleSystemManager->RegisterSystem(std::move(physicsResetSystem), SystemState::Finalize);
 	// マルチシステム
 	// 初期化システムの登録
 	// 更新システムの登録

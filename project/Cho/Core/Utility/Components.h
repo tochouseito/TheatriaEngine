@@ -137,7 +137,7 @@ struct BoxCollider2DComponent : public IComponentTag
 	float density = 1.0f;
 	float friction = 0.3f;
 	float restitution = 0.0f;
-	std::optional<b2Fixture*> fixture = std::nullopt; // Fixture参照
+	b2Fixture* runtimeFixture = nullptr;
 };
 // 2D円形コライダー
 struct CircleCollider2DComponent : public IComponentTag
@@ -148,16 +148,16 @@ struct CircleCollider2DComponent : public IComponentTag
 	float density = 1.0f;
 	float friction = 0.3f;
 	float restitution = 0.0f;
-	std::optional<b2Fixture*> fixture = std::nullopt;
+	b2Fixture* runtimeFixture = nullptr;
 };
 // 2D任意形状コライダー
 struct PolygonCollider2DComponent : public IComponentTag
 {
-	std::vector<b2Vec2> points; // ワールド or ローカル空間で定義
+	std::vector<b2Vec2> points;
 	float density = 1.0f;
 	float friction = 0.3f;
 	float restitution = 0.0f;
-	std::optional<b2Fixture*> fixture = std::nullopt;
+	b2Fixture* runtimeFixture = nullptr;
 };
 
 
