@@ -20,6 +20,7 @@ mono_crash.*
 generated/
 project/ChoEngineLog.txt
 project/Cho/Externals/DirectXTex/Shaders/Compiled/
+GameProjects/
 .cache/
 .nuget/
 .dotnet/
