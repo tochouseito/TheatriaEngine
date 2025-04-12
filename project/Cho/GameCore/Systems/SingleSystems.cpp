@@ -161,6 +161,7 @@ void ScriptInitializeSystem::LoadScript(ScriptComponent& script)
 		return;
 	}
 	std::string funcName = "Create" + script.scriptName + "Script";
+	funcName.erase(std::remove_if(funcName.begin(), funcName.end(), ::isspace), funcName.end());
 	// CreateScript関数を取得
 	typedef IScript* (*CreateScriptFunc)();
 	CreateScriptFunc createScript = (CreateScriptFunc)GetProcAddress(FileSystem::ScriptProject::m_DllHandle, funcName.c_str());
@@ -223,14 +224,8 @@ void ScriptInitializeSystem::StartScript(ScriptComponent& script)
 
 ScriptContext ScriptInitializeSystem::MakeScriptContext(Entity entity, ECSManager* ecs)
 {
-	ScriptContext ctx(entity,ecs);
-
-	ctx.transform = ecs->GetComponent<TransformComponent>(entity);
-	ctx.camera = ecs->GetComponent<CameraComponent>(entity);
-	ctx.meshFilter = ecs->GetComponent<MeshFilterComponent>(entity);
-	ctx.meshRenderer = ecs->GetComponent<MeshRendererComponent>(entity);
-	ctx.script = ecs->GetComponent<ScriptComponent>(entity);
-
+	ScriptContext ctx(ecs, entity);
+	ctx.InitializeTransformAPI();
 	return ctx;
 }
 
@@ -239,6 +234,8 @@ void ScriptUpdateSystem::UpdateScript(ScriptComponent& script)
 	if (!script.isActive) return;
 	// スクリプトコンテキストを作成
 	ScriptContext ctx = MakeScriptContext(script.entity.value(), m_ECS);
+	TransformComponent* tf = m_ECS->GetComponent<TransformComponent>(script.entity.value());
+	tf;
 	try
 	{
 		// スクリプトのUpdate関数を呼び出す
@@ -260,14 +257,8 @@ void ScriptUpdateSystem::UpdateScript(ScriptComponent& script)
 
 ScriptContext ScriptUpdateSystem::MakeScriptContext(Entity entity, ECSManager* ecs)
 {
-	ScriptContext ctx(entity, ecs);
-
-	ctx.transform = ecs->GetComponent<TransformComponent>(entity);
-	ctx.camera = ecs->GetComponent<CameraComponent>(entity);
-	ctx.meshFilter = ecs->GetComponent<MeshFilterComponent>(entity);
-	ctx.meshRenderer = ecs->GetComponent<MeshRendererComponent>(entity);
-	ctx.script = ecs->GetComponent<ScriptComponent>(entity);
-
+	ScriptContext ctx(ecs, entity);
+	ctx.InitializeTransformAPI();
 	return ctx;
 }
 

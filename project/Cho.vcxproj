@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -329,7 +329,7 @@ xcopy "$(SolutionDir)Cho\Core\Utility\Components.h" "$(TargetDir)Cho" /E /I /Y</
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Cho\GameCore\ScriptContext\ScriptContext.cpp" />
+    <ClCompile Include="Cho\GameCore\ScriptAPI\ScriptAPI.cpp" />
     <ClCompile Include="Cho\Resources\AssetManager\AssetManager.cpp" />
     <ClCompile Include="Cho\Editor\BaseEditor\BaseEditor.cpp" />
     <ClCompile Include="Cho\Editor\AnimationEditor\AnimationEditor.cpp" />
@@ -462,7 +462,7 @@ xcopy "$(SolutionDir)Cho\Core\Utility\Components.h" "$(TargetDir)Cho" /E /I /Y</
     <ClInclude Include="Cho\Externals\box2d\src\dynamics\b2_island.h" />
     <ClInclude Include="Cho\Externals\box2d\src\dynamics\b2_polygon_circle_contact.h" />
     <ClInclude Include="Cho\Externals\box2d\src\dynamics\b2_polygon_contact.h" />
-    <ClInclude Include="Cho\GameCore\ScriptContext\ScriptContext.h" />
+    <ClInclude Include="Cho\GameCore\ScriptAPI\ScriptAPI.h" />
     <ClInclude Include="Cho\Resources\AssetManager\AssetManager.h" />
     <ClInclude Include="Cho\Editor\BaseEditor\BaseEditor.h" />
     <ClInclude Include="Cho\Editor\AnimationEditor\AnimationEditor.h" />

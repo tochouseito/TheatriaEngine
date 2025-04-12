@@ -1,6 +1,6 @@
 #pragma once
 #include "ChoMath.h"// ChoEngine数学ライブラリ
-#include <box2d/box2d.h>
+#include <Externals/box2d/include/box2d/box2d.h>
 #include "Core/Utility/Color.h"
 #include <vector>         // C++98
 #include <array>          // C++11
@@ -159,8 +159,6 @@ struct PolygonCollider2DComponent : public IComponentTag
 	float restitution = 0.0f;
 	b2Fixture* runtimeFixture = nullptr;
 };
-
-
 
 // マルチコンポーネントを許可
 template<>

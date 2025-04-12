@@ -3,8 +3,12 @@
 #include <cstdint>
 #include <optional>
 #include <unordered_map>
+#include <memory>
+#include <functional>
 #include "Core/Utility/FVector.h"
+#include "GameCore/IScript/IScript.h"
 using ScriptID = uint32_t; // スクリプトID
+using ScriptFactoryFunc = std::function<std::unique_ptr<IScript>()>;
 struct ScriptData
 {
 	std::string scriptName; // スクリプト名
@@ -49,9 +53,15 @@ public:
 		return ScriptData(); // 無効な名前の場合は空のデータを返す
 	}
 	size_t GetScriptCount() const { return m_ScriptContainer.size(); }
+
+	void RegisterScript(const std::string& scriptName, ScriptFactoryFunc func);
+	std::unique_ptr<IScript> CreateScript(const std::string& scriptName);
 private:
 	FVector<ScriptData> m_ScriptContainer; // スクリプトデータを格納するベクター
 	// 名前で検索する用のコンテナ
 	std::unordered_map<std::string, ScriptID> m_ScriptNameToID; // スクリプト名からスクリプトIDを取得するためのマップ
+
+	// 登録されたスクリプト名と生成関数のマップ
+	std::unordered_map<std::string, ScriptFactoryFunc> m_ScriptRegistry;
 };
 
