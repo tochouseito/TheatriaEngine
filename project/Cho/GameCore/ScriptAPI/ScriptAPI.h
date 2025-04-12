@@ -19,14 +19,39 @@ private:
 	TransformComponent* data = nullptr;
 };
 
+struct CameraAPI
+{
+	// 関数
+	float& fovAngleY() { return data->fovAngleY; }
+	float& aspectRatio() { return data->aspectRatio; }
+	float& nearZ() { return data->nearZ; }
+	float& farZ() { return data->farZ; }
+private:
+	friend struct ScriptContext;
+	CameraComponent* data = nullptr;
+};
+
+struct LineRendererAPI
+{
+	
+private:
+	friend struct ScriptContext;
+	std::vector<LineRendererComponent>* data = nullptr;
+};
+
 // スクリプトコンテキスト
 class ECSManager;
+class ResourceManager;
 struct ScriptContext
 {
+public:
 	TransformAPI transform;	// TransformAPI
+	CameraAPI camera;	// CameraAPI
+
 private:
-	std::optional<Entity> m_entity = std::nullopt;	// スクリプトのエンティティ
+	std::optional<Entity> m_Entity = std::nullopt;	// スクリプトのエンティティ
 	ECSManager* m_ECS = nullptr;	// ECSManager
+	ResourceManager* m_ResourceManager = nullptr;	// ResourceManager
 
 	friend class ScriptInitializeSystem;
 	friend class ScriptUpdateSystem;
@@ -35,7 +60,7 @@ private:
 	void InitializeTransformAPI();
 public:
 	// デフォルトコンストラクタ
-	ScriptContext(ECSManager* ecs,std::optional<Entity> entity) :m_ECS(ecs),m_entity(entity) {}
+	ScriptContext(ResourceManager* resourceManager,ECSManager* ecs,std::optional<Entity> entity) :m_ResourceManager(resourceManager), m_ECS(ecs), m_Entity(entity) {}
 	// コピー、代入禁止
 	ScriptContext(const ScriptContext&) = delete;
 	ScriptContext& operator=(const ScriptContext&) = delete;

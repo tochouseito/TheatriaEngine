@@ -202,7 +202,7 @@ void ScriptInitializeSystem::StartScript(ScriptComponent& script)
 {
 	if (!script.isActive) return;
 	// スクリプトコンテキストを作成
-	ScriptContext ctx = MakeScriptContext(script.entity.value(), m_ECS);
+	ScriptContext ctx = MakeScriptContext(script.entity.value());
 	try
 	{
 		// スクリプトのStart関数を呼び出す
@@ -222,9 +222,9 @@ void ScriptInitializeSystem::StartScript(ScriptComponent& script)
 	}
 }
 
-ScriptContext ScriptInitializeSystem::MakeScriptContext(Entity entity, ECSManager* ecs)
+ScriptContext ScriptInitializeSystem::MakeScriptContext(Entity entity)
 {
-	ScriptContext ctx(ecs, entity);
+	ScriptContext ctx(m_pResourceManager, m_ECS, entity);
 	ctx.InitializeTransformAPI();
 	return ctx;
 }
@@ -233,7 +233,7 @@ void ScriptUpdateSystem::UpdateScript(ScriptComponent& script)
 {
 	if (!script.isActive) return;
 	// スクリプトコンテキストを作成
-	ScriptContext ctx = MakeScriptContext(script.entity.value(), m_ECS);
+	ScriptContext ctx = MakeScriptContext(script.entity.value());
 	TransformComponent* tf = m_ECS->GetComponent<TransformComponent>(script.entity.value());
 	tf;
 	try
@@ -255,9 +255,9 @@ void ScriptUpdateSystem::UpdateScript(ScriptComponent& script)
 	}
 }
 
-ScriptContext ScriptUpdateSystem::MakeScriptContext(Entity entity, ECSManager* ecs)
+ScriptContext ScriptUpdateSystem::MakeScriptContext(Entity entity)
 {
-	ScriptContext ctx(ecs, entity);
+	ScriptContext ctx(m_pResourceManager, m_ECS, entity);
 	ctx.InitializeTransformAPI();
 	return ctx;
 }

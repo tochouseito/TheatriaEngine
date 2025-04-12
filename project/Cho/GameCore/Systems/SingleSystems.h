@@ -107,13 +107,13 @@ private:
 class ScriptInitializeSystem : public ECSManager::System<ScriptComponent>
 {
 public:
-	ScriptInitializeSystem(ECSManager* ecs,ScriptContainer* scriptContainer)
+	ScriptInitializeSystem(ECSManager* ecs,ResourceManager* resourceManager)
 		: ECSManager::System<ScriptComponent>([this](Entity e, ScriptComponent& script)
 			{
 				e;
 				Start(script);
 			}),
-		m_ECS(ecs), m_ScriptContainer(scriptContainer)
+		m_ECS(ecs), m_pResourceManager(resourceManager)
 	{
 	}
 	~ScriptInitializeSystem() = default;
@@ -121,28 +121,29 @@ private:
 	void LoadScript(ScriptComponent& script);
 	void Start(ScriptComponent& script);
 	void StartScript(ScriptComponent& script);
-	ScriptContext MakeScriptContext(Entity entity, ECSManager* ecs);
+	ScriptContext MakeScriptContext(Entity entity);
 	ECSManager* m_ECS = nullptr;
-	ScriptContainer* m_ScriptContainer = nullptr;
+	ResourceManager* m_pResourceManager = nullptr;
 };
 // スクリプト更新システム
 class ScriptUpdateSystem : public ECSManager::System<ScriptComponent>
 {
 public:
-	ScriptUpdateSystem(ECSManager* ecs)
+	ScriptUpdateSystem(ECSManager* ecs,ResourceManager* resourceManager)
 		: ECSManager::System<ScriptComponent>([this](Entity e, ScriptComponent& script)
 			{
 				e;
 				UpdateScript(script);
 			}),
-		m_ECS(ecs)
+		m_ECS(ecs), m_pResourceManager(resourceManager)
 	{
 	}
 	~ScriptUpdateSystem() = default;
 private:
 	void UpdateScript(ScriptComponent& script);
-	ScriptContext MakeScriptContext(Entity entity, ECSManager* ecs);
+	ScriptContext MakeScriptContext(Entity entity);
 	ECSManager* m_ECS = nullptr;
+	ResourceManager* m_pResourceManager = nullptr;
 };
 // スクリプト終了システム
 class ScriptFinalizeSystem : public ECSManager::System<ScriptComponent>

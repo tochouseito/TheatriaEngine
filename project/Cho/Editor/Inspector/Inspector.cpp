@@ -214,19 +214,19 @@ void Inspector::LineRendererComponentView(GameObject* object)
 			if (line.mapID.has_value())
 			{
 				ImGui::Text("MapID: %d", line.mapID.value());
-			} 		else
- {
-			ImGui::Text("MapID: None");
+			} else
+			{
+				ImGui::Text("MapID: None");
+			}
+
+			ImGui::Unindent();
 		}
 
-		ImGui::Unindent();
+		ImGui::PopID();
+		++index;
 	}
 
-	ImGui::PopID();
-	++index;
-}
-
-ImGui::EndChild();
+	ImGui::EndChild();
 }
 
 void Inspector::Rigidbody2DComponentView(GameObject* object)

@@ -4,7 +4,7 @@
 
 void ScriptContext::InitializeTransformAPI()
 {
-	if (!m_entity || !m_ECS)
+	if (!m_Entity || !m_ECS || !m_ResourceManager)
 	{
 		transform.data = nullptr;
 		transform.SetPosition = [](Entity, const Vector3&) {};
@@ -13,7 +13,7 @@ void ScriptContext::InitializeTransformAPI()
 	}
 
 	// TransformComponent を取得
-	TransformComponent* tf = m_ECS->GetComponent<TransformComponent>(*m_entity);
+	TransformComponent* tf = m_ECS->GetComponent<TransformComponent>(*m_Entity);
 	transform.data = tf;
 
 	// 関数でのアクセスも一応用意（なくても良い場合は省略OK）
