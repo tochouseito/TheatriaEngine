@@ -20,6 +20,10 @@ mono_crash.*
 generated/
 project/ChoEngineLog.txt
 project/Cho/Externals/DirectXTex/Shaders/Compiled/
+.cache/
+.nuget/
+.dotnet/
+.insomniac/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
