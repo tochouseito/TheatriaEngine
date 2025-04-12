@@ -1,45 +1,10 @@
 #pragma once
 #include "Core/Utility/Components.h"
 
-// 不正アクセスを防ぐためのラッパー
-template<typename T>
-class SafeRef
-{
-public:
-	SafeRef() : ptr_(nullptr), valid_(false) {}
-
-	SafeRef(T& ref) : ptr_(&ref), valid_(true) {}
-
-	// 明示的に無効な参照を作るとき
-	static SafeRef Invalid()
-	{
-		return SafeRef(nullptr, false);
-	}
-
-	// アクセス
-	T& get()
-	{
-		if (!valid_ || ptr_ == nullptr)
-		{
-			//Cho::Log::Write(Cho::LogLevel::Assert, "Tried to access invalid SafeRef!");
-			assert(false);
-		}
-		return *ptr_;
-	}
-
-	T& operator*() { return get(); }
-	T* operator->() { return &get(); }
-
-	// 有効チェック用
-	bool isValid() const { return valid_ && ptr_ != nullptr; }
-
-private:
-	SafeRef(T* ptr, bool valid) : ptr_(ptr), valid_(valid) {}
-
-	T* ptr_;
-	bool valid_;
-};
-
+#define REGISTER_SCRIPT_FACTORY(SCRIPTNAME) \
+    extern "C" __declspec(dllexport) IScript* Create##SCRIPTNAME##Script() { \
+        return new SCRIPTNAME(); \
+    }
 
 struct TransformAPI
 {

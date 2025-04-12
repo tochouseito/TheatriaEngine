@@ -15,7 +15,4 @@ public:
     }
 };
 
-extern "C" __declspec(dllexport) IScript* Create{ SCRIPT_NAME }Script()
-{
-    return new { SCRIPT_NAME }();
-}
+REGISTER_SCRIPT_FACTORY({ SCRIPT_NAME });
