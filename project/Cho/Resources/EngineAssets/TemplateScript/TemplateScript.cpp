@@ -1,16 +1,18 @@
-#include "{SCRIPT_NAME}.h"
+#include "IScript.h"
 
-void { SCRIPT_NAME }::Start(ScriptContext& ctx)
+class { SCRIPT_NAME } : public IScript
 {
-    // 初期化処理
-}
+public:
 
-void { SCRIPT_NAME }::Update(ScriptContext& ctx)
-{
-    // 毎フレーム処理
-}
+    void Start(ScriptContext & ctx) override
+    {
+        // 初期化処理
+    }
 
-extern "C" __declspec(dllexport) IScript* Create{ SCRIPT_NAME }Script()
-{
-    return new { SCRIPT_NAME }();
-}
+    void Update(ScriptContext & ctx) override
+    {
+        // 毎フレーム処理
+    }
+};
+
+REGISTER_SCRIPT_FACTORY({ SCRIPT_NAME });
