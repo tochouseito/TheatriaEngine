@@ -182,7 +182,6 @@
     <ClCompile Include="Cho\GameCore\Systems\SingleSystems.cpp" />
     <ClCompile Include="Cho\GameCore\Systems\MultiSystems.cpp" />
     <ClCompile Include="Cho\GameCore\Systems\EditorSystems.cpp" />
-    <ClCompile Include="Cho\GameCore\ScriptContext\ScriptContext.cpp" />
     <ClCompile Include="Cho\Externals\box2d\src\collision\b2_broad_phase.cpp" />
     <ClCompile Include="Cho\Externals\box2d\src\collision\b2_chain_shape.cpp" />
     <ClCompile Include="Cho\Externals\box2d\src\collision\b2_circle_shape.cpp" />
@@ -228,6 +227,7 @@
     <ClCompile Include="Cho\Externals\box2d\src\dynamics\b2_world.cpp" />
     <ClCompile Include="Cho\Externals\box2d\src\dynamics\b2_world_callbacks.cpp" />
     <ClCompile Include="Cho\Externals\box2d\src\rope\b2_rope.cpp" />
+    <ClCompile Include="Cho\GameCore\ScriptAPI\ScriptAPI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cho\Editor\AnimationEditor\AnimationEditor.h">
@@ -421,7 +421,6 @@
     <ClInclude Include="Cho\Editor\Toolbar\Toolbar.h" />
     <ClInclude Include="Cho\Hub\HubManager.h" />
     <ClInclude Include="Cho\GameCore\IScript\IScript.h" />
-    <ClInclude Include="Cho\GameCore\ScriptContext\ScriptContext.h" />
     <ClInclude Include="Cho\Resources\ScriptContainer\ScriptContainer.h" />
     <ClInclude Include="Cho\Core\Utility\ImGuiEx.h" />
     <ClInclude Include="Cho\GameCore\MultiSystemManager\MultiSystemManager.h" />
@@ -478,6 +477,7 @@
     <ClInclude Include="Cho\Externals\box2d\src\dynamics\b2_island.h" />
     <ClInclude Include="Cho\Externals\box2d\src\dynamics\b2_polygon_circle_contact.h" />
     <ClInclude Include="Cho\Externals\box2d\src\dynamics\b2_polygon_contact.h" />
+    <ClInclude Include="Cho\GameCore\ScriptAPI\ScriptAPI.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Cho\Resources\EngineAssets\Shader\header\Demo.hlsli">

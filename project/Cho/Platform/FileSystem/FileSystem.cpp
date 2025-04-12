@@ -765,7 +765,7 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
     fs::path systemPath = includeBase / "Cho";
     fs::path mathLibPath = includeBase / "Cho/Externals/ChoMath";
     fs::path scriptPath = includeBase / "Cho/GameCore/IScript";
-	fs::path contextPath = includeBase / "Cho/GameCore/ScriptContext";
+	fs::path contextPath = includeBase / "Cho/GameCore/ScriptAPI";
 
     // ライブラリディレクトリ
     fs::path libraryPath = currentPath / "../generated/outputs/$(Configuration)/";
@@ -1038,6 +1038,7 @@ void Cho::FileSystem::ScriptProject::UnloadScriptDLL()
     UnloadPDB();
 	// DLLのアンロード
 	FreeLibrary(m_DllHandle);
+    m_DllHandle = nullptr;
 }
 
 //bool Cho::FileSystem::ScriptProject::BuildScriptDLL()
@@ -1169,4 +1170,5 @@ bool Cho::FileSystem::ScriptProject::LoadPDB(const std::string& dllPath)
 void Cho::FileSystem::ScriptProject::UnloadPDB()
 {
     SymUnloadModule64(GetCurrentProcess(), m_PDBBaseAddress);
+	SymCleanup(GetCurrentProcess());
 }

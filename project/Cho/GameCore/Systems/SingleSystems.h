@@ -2,11 +2,11 @@
 #include "GameCore/ECS/ECSManager.h"
 #include "SDK/DirectX/DirectX12/GpuBuffer/GpuBuffer.h"
 #include "Core/Utility/CompBufferData.h"
-#include "GameCore/ScriptContext/ScriptContext.h"
+#include "GameCore/ScriptAPI/ScriptAPI.h"
 
 class ResourceManager;
 class GameCoreCommand;
-struct ScriptContext;
+class ScriptContainer;
 
 enum SystemPriority
 {
@@ -107,13 +107,13 @@ private:
 class ScriptInitializeSystem : public ECSManager::System<ScriptComponent>
 {
 public:
-	ScriptInitializeSystem(ECSManager* ecs)
+	ScriptInitializeSystem(ECSManager* ecs,ScriptContainer* scriptContainer)
 		: ECSManager::System<ScriptComponent>([this](Entity e, ScriptComponent& script)
 			{
 				e;
 				Start(script);
 			}),
-		m_ECS(ecs)
+		m_ECS(ecs), m_ScriptContainer(scriptContainer)
 	{
 	}
 	~ScriptInitializeSystem() = default;
@@ -123,6 +123,7 @@ private:
 	void StartScript(ScriptComponent& script);
 	ScriptContext MakeScriptContext(Entity entity, ECSManager* ecs);
 	ECSManager* m_ECS = nullptr;
+	ScriptContainer* m_ScriptContainer = nullptr;
 };
 // スクリプト更新システム
 class ScriptUpdateSystem : public ECSManager::System<ScriptComponent>
