@@ -883,7 +883,7 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
     vcxFile << "  </ItemGroup>\n";
 
     // ヘッダーファイルの登録
-    vcxFile << "  <ItemGroup>\n";
+    /*vcxFile << "  <ItemGroup>\n";
     for (const auto& file : scriptFiles)
     {
         if (file.ends_with(".h"))
@@ -891,7 +891,7 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
             vcxFile << "    <ClInclude Include=\"" << file << "\" />\n";
         }
     }
-    vcxFile << "  </ItemGroup>\n";
+    vcxFile << "  </ItemGroup>\n";*/
 
     vcxFile << "  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />\n";
     vcxFile << "</Project>\n";
@@ -961,11 +961,11 @@ void Cho::FileSystem::ScriptProject::GenerateScriptFiles(const std::string& scri
     std::filesystem::path outputDir = "GameProjects/" + ConvertString(m_sProjectName);
 
     // テンプレートファイルのパス
-    std::filesystem::path templateHeader = "Cho/Resources/EngineAssets/TemplateScript/TemplateScript.h";
+    //std::filesystem::path templateHeader = "Cho/Resources/EngineAssets/TemplateScript/TemplateScript.h";
     std::filesystem::path templateCpp = "Cho/Resources/EngineAssets/TemplateScript/TemplateScript.cpp";
 
     // 出力ファイル名
-    std::string headerFileName = scriptName + ".h";
+    //std::string headerFileName = scriptName + ".h";
     std::string cppFileName = scriptName + ".cpp";
 
     // ヘルパー関数：テンプレートの置換
@@ -976,7 +976,7 @@ void Cho::FileSystem::ScriptProject::GenerateScriptFiles(const std::string& scri
         };
 
     // ヘッダーファイル生成
-    {
+    /*{
         std::ifstream in(templateHeader);
         if (!in)
         {
@@ -988,7 +988,7 @@ void Cho::FileSystem::ScriptProject::GenerateScriptFiles(const std::string& scri
 
         std::ofstream out(outputDir / headerFileName);
         out << replaced;
-    }
+    }*/
 
     // CPPファイル生成
     {
