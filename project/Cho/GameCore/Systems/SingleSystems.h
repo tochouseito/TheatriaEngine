@@ -190,8 +190,11 @@ private:
 		bodyDef.gravityScale = rb.gravityScale;
 		bodyDef.fixedRotation = rb.fixedRotation;
 		bodyDef.position = b2Vec2(transform.translation.x, transform.translation.y);
+		float angleZ = ChoMath::DegreesToRadians(transform.degrees).z;
+		bodyDef.angle = angleZ;
 		rb.runtimeBody = m_World->CreateBody(&bodyDef);
 		rb.runtimeBody->SetAwake(true);
+		rb.world = m_World;
 
 		// Transformと同期（optional）
 		transform.translation.x = rb.runtimeBody->GetPosition().x;
