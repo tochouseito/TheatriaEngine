@@ -7,6 +7,7 @@
 class ResourceManager;
 class GameCoreCommand;
 class ScriptContainer;
+class InputManager;
 
 enum SystemPriority
 {
@@ -107,13 +108,13 @@ private:
 class ScriptInitializeSystem : public ECSManager::System<ScriptComponent>
 {
 public:
-	ScriptInitializeSystem(ECSManager* ecs,ResourceManager* resourceManager)
+	ScriptInitializeSystem(InputManager* input,ECSManager* ecs,ResourceManager* resourceManager)
 		: ECSManager::System<ScriptComponent>([this](Entity e, ScriptComponent& script)
 			{
 				e;
 				Start(script);
 			}),
-		m_ECS(ecs), m_pResourceManager(resourceManager)
+		m_ECS(ecs), m_pResourceManager(resourceManager), m_pInputManager(input)
 	{
 	}
 	~ScriptInitializeSystem() = default;
@@ -124,18 +125,19 @@ private:
 	ScriptContext MakeScriptContext(Entity entity);
 	ECSManager* m_ECS = nullptr;
 	ResourceManager* m_pResourceManager = nullptr;
+	InputManager* m_pInputManager = nullptr;
 };
 // スクリプト更新システム
 class ScriptUpdateSystem : public ECSManager::System<ScriptComponent>
 {
 public:
-	ScriptUpdateSystem(ECSManager* ecs,ResourceManager* resourceManager)
+	ScriptUpdateSystem(InputManager* input,ECSManager* ecs,ResourceManager* resourceManager)
 		: ECSManager::System<ScriptComponent>([this](Entity e, ScriptComponent& script)
 			{
 				e;
 				UpdateScript(script);
 			}),
-		m_ECS(ecs), m_pResourceManager(resourceManager)
+		m_ECS(ecs), m_pResourceManager(resourceManager), m_pInputManager(input)
 	{
 	}
 	~ScriptUpdateSystem() = default;
@@ -144,6 +146,7 @@ private:
 	ScriptContext MakeScriptContext(Entity entity);
 	ECSManager* m_ECS = nullptr;
 	ResourceManager* m_pResourceManager = nullptr;
+	InputManager* m_pInputManager = nullptr;
 };
 // スクリプト終了システム
 class ScriptFinalizeSystem : public ECSManager::System<ScriptComponent>

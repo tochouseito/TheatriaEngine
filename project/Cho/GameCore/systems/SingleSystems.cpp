@@ -223,7 +223,7 @@ void ScriptInitializeSystem::StartScript(ScriptComponent& script)
 
 ScriptContext ScriptInitializeSystem::MakeScriptContext(Entity entity)
 {
-	ScriptContext ctx(m_pResourceManager, m_ECS, entity);
+	ScriptContext ctx(m_pInputManager,m_pResourceManager, m_ECS, entity);
 	ctx.Initialize();
 	return ctx;
 }
@@ -255,7 +255,7 @@ void ScriptUpdateSystem::UpdateScript(ScriptComponent& script)
 
 ScriptContext ScriptUpdateSystem::MakeScriptContext(Entity entity)
 {
-	ScriptContext ctx(m_pResourceManager, m_ECS, entity);
+	ScriptContext ctx(m_pInputManager,m_pResourceManager, m_ECS, entity);
 	ctx.Initialize();
 	return ctx;
 }

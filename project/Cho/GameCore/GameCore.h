@@ -5,6 +5,7 @@
 #include "GameCore/MultiSystemManager/MultiSystemManager.h"
 #include "GameCore/ObjectContainer/ObjectContainer.h"
 #include "GameCore/GameCoreCommand/GameCoreCommand.h"
+class InputManager;
 class ResourceManager;
 class GraphicsEngine;
 
@@ -17,7 +18,7 @@ public:
 	~GameCore() 
 	{
 	}
-	void Initialize(ResourceManager* resourceManager);
+	void Initialize(InputManager* input,ResourceManager* resourceManager);
 	void Start(ResourceManager& resourceManager);
 	void Update(ResourceManager& resourceManager, GraphicsEngine& graphicsEngine);
 	SceneManager* GetSceneManager() { return m_pSceneManager.get(); }
@@ -28,7 +29,7 @@ public:
 	void GameRun();
 	void GameStop();
 private:
-	void CreateSystems(ResourceManager* resourceManager);
+	void CreateSystems(InputManager* input, ResourceManager* resourceManager);
 
 	// シーンマネージャー
 	std::unique_ptr<SceneManager> m_pSceneManager = nullptr;

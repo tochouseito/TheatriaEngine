@@ -179,7 +179,7 @@ bool InputManager::IsTriggerMouse(const int32_t& buttonNumber) const
 	return (m_Mouse.rgbButtons[buttonNumber] & 0x80) && !(m_MousePre.rgbButtons[buttonNumber] & 0x80);
 }
 
-InputManager::MouseMove InputManager::GetMouseMove()
+MouseMove InputManager::GetMouseMove()
 {
 	MouseMove move = { m_Mouse.lX, m_Mouse.lY, m_Mouse.lZ };
 	return move;
