@@ -19,5 +19,6 @@ jobs:
         run: |
           curl -H "Content-Type: application/json" \
                -X POST \
-               -d "{\"content\": \"✅ **${COMMITTER}** has merged into **master**: ${COMMIT_MESSAGE}\n🔗 ${COMMIT_URL}\"}" \
+               -d "{\"content\": \"✅ **${COMMITTER}** has merged into **master**:\n${COMMIT_MESSAGE}\n🔗 ${COMMIT_URL}\"}" \
                $DISCORD_WEBHOOK
+
