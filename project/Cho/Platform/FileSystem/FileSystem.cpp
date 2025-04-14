@@ -876,7 +876,9 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
 
         if (ext == ".cpp" || ext == ".h")
         {
-            scriptFiles.push_back(path.string());
+            fs::path relativePath = fs::relative(path, projectDir); // 相対パス化
+            relativePath.make_preferred(); // Windowsの \ 区切りに変換
+            scriptFiles.push_back(relativePath.string()); // 相対パスを保存
         }
     }
 
