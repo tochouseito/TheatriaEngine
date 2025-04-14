@@ -68,6 +68,7 @@ struct Rigidbody2DAPI
 	// 反射方向を計算
 	std::function<b2Vec2(const b2Vec2&, const b2Vec2&)> Reflect;
 	std::function<void(std::vector<b2Vec2>&, const b2Vec2&, const b2Vec2&, float)> RaycastWithReflections;
+	std::function<b2Vec2(const b2Vec2&, const b2Vec2&,const int, const float)> RaycastWithReflectionsOnce;
 	// Raycast 一回分を行う（ヒットした点を out に代入）
 	std::function<bool(const b2Vec2&, const b2Vec2&, float, b2Vec2&)> RaycastOnce;
 	//bool RaycastOnce(const b2Vec2& start, const b2Vec2& dir, float maxLength, b2Vec2& outHitPoint)

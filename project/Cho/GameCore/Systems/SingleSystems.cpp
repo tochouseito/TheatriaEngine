@@ -170,40 +170,40 @@ void ScriptInitializeSystem::LoadScript(ScriptComponent& script)
 		script.isActive = false;
 		return;
 	}
-	//// スクリプトを生成
-	//IScript* scriptInstance = createScript();
-	//if (!scriptInstance)
-	//{
-	//	script.isActive = false;
-	//	return;
-	//}
-	//// スクリプトのStart関数とUpdate関数をラップ
-	//script.startFunc = [scriptInstance](ScriptContext& ctx) {
-	//	scriptInstance->Start(ctx);
-	//	};
-	//script.updateFunc = [scriptInstance](ScriptContext& ctx) {
-	//	scriptInstance->Update(ctx);
-	//	};
-
-	//// インスタンスの解放用のクロージャを設定
-	//script.cleanupFunc = [scriptInstance, this]() {
-	//	delete scriptInstance;
-	//	};
-	// 安全な所有をするために shared_ptr にする
-	std::shared_ptr<IScript> scriptInstance(createScript());
-
-	// ラムダに安全に共有して渡す
-	script.startFunc = [instance = scriptInstance](ScriptContext& ctx) {
-		instance->Start(ctx);
+	// スクリプトを生成
+	IScript* scriptInstance = createScript();
+	if (!scriptInstance)
+	{
+		script.isActive = false;
+		return;
+	}
+	// スクリプトのStart関数とUpdate関数をラップ
+	script.startFunc = [scriptInstance](ScriptContext& ctx) {
+		scriptInstance->Start(ctx);
 		};
-	script.updateFunc = [instance = scriptInstance](ScriptContext& ctx) {
-		instance->Update(ctx);
+	script.updateFunc = [scriptInstance](ScriptContext& ctx) {
+		scriptInstance->Update(ctx);
 		};
 
-	// 明示的な cleanup は不要（shared_ptr の寿命に任せる）
-	script.cleanupFunc = [instance = std::move(scriptInstance)]() mutable {
-		instance.reset(); // 明示的にリセットする場合（なくてもOK）
+	// インスタンスの解放用のクロージャを設定
+	script.cleanupFunc = [scriptInstance, this]() {
+		delete scriptInstance;
 		};
+	//// 安全な所有をするために shared_ptr にする
+	//std::shared_ptr<IScript> scriptInstance(createScript());
+
+	//// ラムダに安全に共有して渡す
+	//script.startFunc = [instance = scriptInstance](ScriptContext& ctx) {
+	//	instance->Start(ctx);
+	//	};
+	//script.updateFunc = [instance = scriptInstance](ScriptContext& ctx) {
+	//	instance->Update(ctx);
+	//	};
+
+	//// 明示的な cleanup は不要（shared_ptr の寿命に任せる）
+	//script.cleanupFunc = [instance = std::move(scriptInstance)]() mutable {
+	//	instance.reset(); // 明示的にリセットする場合（なくてもOK）
+	//	};
 	script.isActive = true;
 }
 
