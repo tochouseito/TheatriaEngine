@@ -7,7 +7,7 @@ on:
 
 jobs:
   notify-discord:
-    if: github.event.head_commit.message != 'Auto-generated build notification' && !contains(github.event.head_commit.message, '[CI]')
+    if: github.event.head_commit != null && !contains(github.event.head_commit.message, '[CI]')
     runs-on: ubuntu-latest
     steps:
       - name: Send Discord Notification
