@@ -301,6 +301,8 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory,BaseScene* sce
         nlohmann::ordered_json comps;
 
         Entity entity = obj->GetEntity();
+        // マルチコンポーネント存在確認用
+		std::vector<LineRendererComponent>* lineRenderers;
         switch (obj->GetType())
         {
         case ObjectType::MeshObject:
@@ -320,6 +322,19 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory,BaseScene* sce
 			{
 				comps["Script"] = Cho::Serialization::ToJson(*s);
 			}
+			lineRenderers = ecs->GetAllComponents<LineRendererComponent>(entity);
+            if (!lineRenderers->empty())
+            {
+				comps["LineRenderer"] = Cho::Serialization::ToJson(*lineRenderers);
+            }
+			if (const auto* rb = ecs->GetComponent<Rigidbody2DComponent>(entity))
+			{
+				comps["Rigidbody2D"] = Cho::Serialization::ToJson(*rb);
+			}
+			if (const auto* bc = ecs->GetComponent<BoxCollider2DComponent>(entity))
+			{
+				comps["BoxCollider2D"] = Cho::Serialization::ToJson(*bc);
+			}
             break;
 
         case ObjectType::Camera:
@@ -334,6 +349,11 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory,BaseScene* sce
 			if (const auto* s = ecs->GetComponent<ScriptComponent>(entity))
 			{
 				comps["Script"] = Cho::Serialization::ToJson(*s);
+			}
+            lineRenderers = ecs->GetAllComponents<LineRendererComponent>(entity);
+			if (!lineRenderers->empty())
+			{
+				comps["LineRenderer"] = Cho::Serialization::ToJson(*lineRenderers);
 			}
             break;
 
@@ -483,6 +503,72 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, SceneManager* 
                         script->entity = s.entity;
                     }
                 }
+
+                // LineRenderer（マルチコンポーネント）
+                if (comps.contains("LineRenderer"))
+                {
+                    for (const auto& lineJson : comps["LineRenderer"])
+                    {
+                        LineRendererComponent l{};
+                        auto& start = lineJson["start"];
+                        auto& end = lineJson["end"];
+                        auto& color = lineJson["color"];
+
+                        l.line.start = Vector3{ start[0], start[1], start[2] };
+                        l.line.end = Vector3{ end[0], end[1], end[2] };
+                        l.line.color = Color{ color[0], color[1], color[2], color[3] };
+
+						// LineRendererComponentを追加
+						uint32 mapID = resourceManager->GetIntegrationData(IntegrationDataType::Line)->GetMapID();
+                        LineRendererComponent* comp = ecs->AddComponent<LineRendererComponent>(entity);
+						comp->line.start = l.line.start;
+						comp->line.end = l.line.end;
+						comp->line.color = l.line.color;
+						comp->mapID = mapID;
+                    }
+                }
+
+                // Rigidbody2D
+                if (comps.contains("Rigidbody2D"))
+                {
+                    Rigidbody2DComponent r{};
+                    auto& jr = comps["Rigidbody2D"];
+                    r.isKinematic = jr.value("isKinematic", false);
+                    r.gravityScale = jr.value("gravityScale", 1.0f);
+                    r.mass = jr.value("mass", 1.0f);
+                    r.bodyType = static_cast<b2BodyType>(jr.value("bodyType", 2)); // default: b2_dynamicBody
+                    r.fixedRotation = jr.value("fixedRotation", false);
+
+                    Rigidbody2DComponent* rb = ecs->AddComponent<Rigidbody2DComponent>(entity);
+					rb->isKinematic = r.isKinematic;
+					rb->gravityScale = r.gravityScale;
+					rb->mass = r.mass;
+					rb->bodyType = r.bodyType;
+					rb->fixedRotation = r.fixedRotation;
+                }
+
+                // BoxCollider2D
+                if (comps.contains("BoxCollider2D"))
+                {
+                    BoxCollider2DComponent b{};
+                    auto& jb = comps["BoxCollider2D"];
+                    b.offsetX = jb.value("offsetX", 0.0f);
+                    b.offsetY = jb.value("offsetY", 0.0f);
+                    b.width = jb.value("width", 1.0f);
+                    b.height = jb.value("height", 1.0f);
+                    b.density = jb.value("density", 1.0f);
+                    b.friction = jb.value("friction", 0.5f);
+                    b.restitution = jb.value("restitution", 0.0f);
+
+                    BoxCollider2DComponent* box = ecs->AddComponent<BoxCollider2DComponent>(entity);
+					box->offsetX = b.offsetX;
+					box->offsetY = b.offsetY;
+					box->width = b.width;
+					box->height = b.height;
+					box->density = b.density;
+					box->friction = b.friction;
+					box->restitution = b.restitution;
+                }
             }
         }
 
@@ -556,6 +642,44 @@ json Cho::Serialization::ToJson(const ScriptComponent& s)
 	{
 		j["entity"] = s.entity.value();
 	}
+	return j;
+}
+
+json Cho::Serialization::ToJson(const std::vector<LineRendererComponent>& ls)
+{
+    json jArray = json::array();
+    for (const auto& l : ls)
+    {
+        json j;
+        j["start"] = { l.line.start.x, l.line.start.y, l.line.start.z };
+        j["end"] = { l.line.end.x, l.line.end.y, l.line.end.z };
+        j["color"] = { l.line.color.r, l.line.color.g, l.line.color.b, l.line.color.a };
+        jArray.push_back(j);
+    }
+    return jArray;
+}
+
+json Cho::Serialization::ToJson(const Rigidbody2DComponent& rb)
+{
+	json j;
+	j["isKinematic"] = rb.isKinematic;
+	j["gravityScale"] = rb.gravityScale;
+	j["mass"] = rb.mass;
+	j["bodyType"] = static_cast<int>(rb.bodyType);
+	j["fixedRotation"] = rb.fixedRotation;
+	return j;
+}
+
+json Cho::Serialization::ToJson(const BoxCollider2DComponent& bc)
+{
+	json j;
+	j["offsetX"] = bc.offsetX;
+	j["offsetY"] = bc.offsetY;
+	j["width"] = bc.width;
+	j["height"] = bc.height;
+	j["density"] = bc.density;
+	j["friction"] = bc.friction;   
+	j["restitution"] = bc.restitution;
 	return j;
 }
 

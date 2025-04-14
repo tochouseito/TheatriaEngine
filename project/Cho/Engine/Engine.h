@@ -16,5 +16,6 @@ public:// method
 	virtual void Initialize() {}
 	virtual void Finalize() {}
 	virtual void Operation() {}
+	virtual void CrashHandlerEntry() {}
 };
 

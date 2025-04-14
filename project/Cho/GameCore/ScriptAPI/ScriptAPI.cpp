@@ -91,61 +91,6 @@ void ScriptContext::InitializeRigidbody2DAPI()
 			}
 			return {};
 			};
-		rigidbody2D.RaycastWithReflections = [this](std::vector<b2Vec2>& outHits, const b2Vec2& start, const b2Vec2& dir, float maxLength) {
-				if (auto* t = m_ECS->GetComponent<Rigidbody2DComponent>(*m_Entity))
-				{
-					outHits.clear(); // 必ず初期化してから使う
-
-					b2Vec2 currentStart = start;
-					b2Vec2 currentDir = dir;
-					float remainingLength = maxLength;
-
-					for (int i = 0; i < 2; ++i) // 2回反射まで
-					{
-						Rigidbody2DAPI::RayCastCallback callback;
-						b2Vec2 end = currentStart + remainingLength * currentDir;
-						rigidbody2D.data->world->RayCast(&callback, currentStart, end);
-
-						if (callback.hit)
-						{
-							outHits.push_back(callback.point);
-
-							float hitDistance = remainingLength * callback.fraction;
-							remainingLength -= hitDistance;
-							currentStart = callback.point;
-							currentDir = rigidbody2D.Reflect(currentDir, callback.normal);
-						} else
-						{
-							currentDir *= remainingLength;
-							// 反射しない最終点を追加
-							outHits.push_back(currentStart + currentDir);
-							break;
-						}
-					}
-				}
-			};
-		rigidbody2D.RaycastOnce = [this](const b2Vec2& start, const b2Vec2& dir, float maxLength, b2Vec2& outHitPoint) {
-			if (auto* t = m_ECS->GetComponent<Rigidbody2DComponent>(*m_Entity))
-			{
-				if (!rigidbody2D.data || !rigidbody2D.data->world) return false;
-				b2Vec2 end = start + (maxLength * dir);
-				Rigidbody2DAPI::RayCastCallback callback;
-				rigidbody2D.data->world->RayCast(&callback, start, end);
-
-				if (callback.hit)
-				{
-					outHitPoint = callback.point;
-					rigidbody2D.m_LastHitNormal = callback.normal;
-					return true;
-				}
-
-				// ヒットしなかった場合、直進の終点を返す
-				outHitPoint = end;
-				rigidbody2D.m_LastHitNormal = b2Vec2(0.0f, 1.0f); // デフォルト上向き
-				return false;
-			}
-			return false;
-			};
 		rigidbody2D.RaycastWithReflectionsOnce = [this](const b2Vec2& start, const b2Vec2& dir, const int ReflectionCount, const float maxLength) -> b2Vec2 {
 			b2Vec2 resultPoint = {};
 			if (auto* t = m_ECS->GetComponent<Rigidbody2DComponent>(*m_Entity))
