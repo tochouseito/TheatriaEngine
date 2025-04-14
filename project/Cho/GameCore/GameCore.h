@@ -13,7 +13,6 @@ class GameCore
 public:
 	GameCore()
 	{
-		
 	}
 	~GameCore() 
 	{
