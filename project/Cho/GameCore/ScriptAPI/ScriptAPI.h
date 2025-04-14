@@ -67,29 +67,7 @@ struct Rigidbody2DAPI
 	};
 	// 反射方向を計算
 	std::function<b2Vec2(const b2Vec2&, const b2Vec2&)> Reflect;
-	std::function<void(std::vector<b2Vec2>&, const b2Vec2&, const b2Vec2&, float)> RaycastWithReflections;
 	std::function<b2Vec2(const b2Vec2&, const b2Vec2&,const int, const float)> RaycastWithReflectionsOnce;
-	// Raycast 一回分を行う（ヒットした点を out に代入）
-	std::function<bool(const b2Vec2&, const b2Vec2&, float, b2Vec2&)> RaycastOnce;
-	//bool RaycastOnce(const b2Vec2& start, const b2Vec2& dir, float maxLength, b2Vec2& outHitPoint)
-	//{
-	//	if (!data || !data->world) return false;
-	//	b2Vec2 end = start + (maxLength * dir);
-	//	RayCastCallback callback;
-	//	data->world->RayCast(&callback, start, end);
-
-	//	if (callback.hit)
-	//	{
-	//		outHitPoint = callback.point;
-	//		m_LastHitNormal = callback.normal;
-	//		return true;
-	//	}
-
-	//	// ヒットしなかった場合、直進の終点を返す
-	//	outHitPoint = end;
-	//	m_LastHitNormal = b2Vec2(0.0f, 1.0f); // デフォルト上向き
-	//	return false;
-	//}
 	// 法線取得（RaycastOnce の直後のみ有効）
 	b2Vec2 GetLastHitNormal() const { return m_LastHitNormal; }
 private:
