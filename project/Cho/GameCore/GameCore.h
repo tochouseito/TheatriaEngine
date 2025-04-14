@@ -25,9 +25,7 @@ public:
 	ObjectContainer* GetObjectContainer() { return m_pObjectContainer.get(); }
 	GameCoreCommand* GetGameCoreCommand() { return m_pGameCoreCommand.get(); }
 	bool IsRunning() const { return isRunning; }
-	// ゲームの実行
 	void GameRun();
-	// ゲームの停止
 	void GameStop();
 private:
 	void CreateSystems(ResourceManager* resourceManager);
