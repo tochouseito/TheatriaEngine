@@ -1,0 +1,23 @@
+name: Notify Discord on Merge to Master
+
+on:
+  push:
+    branches:
+      - master  # または main
+
+jobs:
+  notify-discord:
+    if: github.event.head_commit.message != 'Auto-generated build notification'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord Notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          COMMIT_URL: ${{ github.event.head_commit.url }}
+          COMMITTER: ${{ github.event.head_commit.committer.name }}
+        run: |
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"content\": \"✅ **${COMMITTER}** has merged into **master**: ${COMMIT_MESSAGE}\n🔗 ${COMMIT_URL}\"}" \
+               $DISCORD_WEBHOOK
