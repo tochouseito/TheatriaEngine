@@ -323,7 +323,7 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory,BaseScene* sce
 				comps["Script"] = Cho::Serialization::ToJson(*s);
 			}
 			lineRenderers = ecs->GetAllComponents<LineRendererComponent>(entity);
-            if (!lineRenderers->empty())
+            if (lineRenderers)
             {
 				comps["LineRenderer"] = Cho::Serialization::ToJson(*lineRenderers);
             }
@@ -351,7 +351,7 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory,BaseScene* sce
 				comps["Script"] = Cho::Serialization::ToJson(*s);
 			}
             lineRenderers = ecs->GetAllComponents<LineRendererComponent>(entity);
-			if (!lineRenderers->empty())
+			if (lineRenderers)
 			{
 				comps["LineRenderer"] = Cho::Serialization::ToJson(*lineRenderers);
 			}
