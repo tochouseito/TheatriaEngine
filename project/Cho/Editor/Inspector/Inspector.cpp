@@ -214,19 +214,19 @@ void Inspector::LineRendererComponentView(GameObject* object)
 			if (line.mapID.has_value())
 			{
 				ImGui::Text("MapID: %d", line.mapID.value());
-			} 		else
- {
-			ImGui::Text("MapID: None");
+			} else
+			{
+				ImGui::Text("MapID: None");
+			}
+
+			ImGui::Unindent();
 		}
 
-		ImGui::Unindent();
+		ImGui::PopID();
+		++index;
 	}
 
-	ImGui::PopID();
-	++index;
-}
-
-ImGui::EndChild();
+	ImGui::EndChild();
 }
 
 void Inspector::Rigidbody2DComponentView(GameObject* object)
@@ -297,6 +297,7 @@ void Inspector::AddComponent(GameObject* object)
 	MeshRendererComponent* render;
 	ScriptComponent* script;
 	std::vector<LineRendererComponent>* lines;
+	lines;
 	Rigidbody2DComponent* rigidbody;
 	BoxCollider2DComponent* boxCollider2d;
 	if (!isOpen)
@@ -349,9 +350,9 @@ void Inspector::AddComponent(GameObject* object)
 				}
 			}
 			// LineRendererComponentがあるか
-			lines = m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr()->GetAllComponents<LineRendererComponent>(object->GetEntity());
-			if (!lines || lines->empty())
-			{
+			//lines = m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr()->GetAllComponents<LineRendererComponent>(object->GetEntity());
+			//if (!lines || lines->empty())
+			//{
 				if (ImGui::Selectable("LineRendererComponent"))
 				{
 					// LineRendererComponentを追加
@@ -359,7 +360,7 @@ void Inspector::AddComponent(GameObject* object)
 					m_EditorCommand->ExecuteCommand(std::move(addLineComp));
 					isOpen = false;
 				}
-			}
+			//}
 			// Rigidbody2DComponentがあるか
 			rigidbody = m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr()->GetComponent<Rigidbody2DComponent>(object->GetEntity());
 			if (!rigidbody)
@@ -399,9 +400,9 @@ void Inspector::AddComponent(GameObject* object)
 				}
 			}
 			// LineRendererComponentがあるか
-			lines = m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr()->GetAllComponents<LineRendererComponent>(object->GetEntity());
-			if (!lines || lines->empty())
-			{
+			//lines = m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr()->GetAllComponents<LineRendererComponent>(object->GetEntity());
+			//if (!lines || lines->empty())
+			//{
 				if (ImGui::Selectable("LineRendererComponent"))
 				{
 					// LineRendererComponentを追加
@@ -409,7 +410,7 @@ void Inspector::AddComponent(GameObject* object)
 					m_EditorCommand->ExecuteCommand(std::move(addLineComp));
 					isOpen = false;
 				}
-			}
+			//}
 			break;
 		case ObjectType::Count:
 			break;

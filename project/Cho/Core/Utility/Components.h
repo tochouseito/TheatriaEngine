@@ -126,6 +126,7 @@ struct Rigidbody2DComponent : public IComponentTag
 	bool fixedRotation = false;
 	b2BodyType bodyType = b2_dynamicBody;
 	b2Body* runtimeBody = nullptr; // Box2D Bodyへのポインタ
+	b2World* world = nullptr; // Box2D Worldへのポインタ
 };
 // 2D矩形コライダー
 struct BoxCollider2DComponent : public IComponentTag

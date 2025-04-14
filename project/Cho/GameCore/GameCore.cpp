@@ -87,7 +87,7 @@ void GameCore::CreateSystems(ResourceManager* resourceManager)
 	// 初期化システムの登録
 	std::unique_ptr<ECSManager::ISystem> tfStateSystem = std::make_unique<TransformInitializeSystem>(m_pECSManager.get());
 	m_pSingleSystemManager->RegisterSystem(std::move(tfStateSystem), SystemState::Initialize);
-	std::unique_ptr<ECSManager::ISystem> scriptInitializeSystem = std::make_unique<ScriptInitializeSystem>(m_pECSManager.get(),resourceManager->GetScriptContainer());
+	std::unique_ptr<ECSManager::ISystem> scriptInitializeSystem = std::make_unique<ScriptInitializeSystem>(m_pECSManager.get(),resourceManager);
 	m_pSingleSystemManager->RegisterSystem(std::move(scriptInitializeSystem), SystemState::Initialize);
 	std::unique_ptr<ECSManager::ISystem> physicsSystem = std::make_unique<Rigidbody2DInitSystem>(m_pECSManager.get(), m_pPhysicsWorld.get());
 	m_pSingleSystemManager->RegisterSystem(std::move(physicsSystem), SystemState::Initialize);
@@ -98,7 +98,7 @@ void GameCore::CreateSystems(ResourceManager* resourceManager)
 	m_pSingleSystemManager->RegisterSystem(std::move(tfUpdateSystem), SystemState::Update);
 	std::unique_ptr<ECSManager::ISystem> cameraSystem = std::make_unique<CameraUpdateSystem>(m_pECSManager.get(), resourceManager, resourceManager->GetIntegrationBuffer(IntegrationDataType::Transform));
 	m_pSingleSystemManager->RegisterSystem(std::move(cameraSystem), SystemState::Update);
-	std::unique_ptr<ECSManager::ISystem> scriptUpdateSystem = std::make_unique<ScriptUpdateSystem>(m_pECSManager.get());
+	std::unique_ptr<ECSManager::ISystem> scriptUpdateSystem = std::make_unique<ScriptUpdateSystem>(m_pECSManager.get(),resourceManager);
 	m_pSingleSystemManager->RegisterSystem(std::move(scriptUpdateSystem), SystemState::Update);
 	std::unique_ptr<ECSManager::ISystem> rbUpdateSystem = std::make_unique<Rigidbody2DUpdateSystem>(m_pECSManager.get(), m_pPhysicsWorld.get());
 	m_pSingleSystemManager->RegisterSystem(std::move(rbUpdateSystem), SystemState::Update);

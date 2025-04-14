@@ -189,6 +189,21 @@ void ScriptInitializeSystem::LoadScript(ScriptComponent& script)
 	script.cleanupFunc = [scriptInstance, this]() {
 		delete scriptInstance;
 		};
+	//// 安全な所有をするために shared_ptr にする
+	//std::shared_ptr<IScript> scriptInstance(createScript());
+
+	//// ラムダに安全に共有して渡す
+	//script.startFunc = [instance = scriptInstance](ScriptContext& ctx) {
+	//	instance->Start(ctx);
+	//	};
+	//script.updateFunc = [instance = scriptInstance](ScriptContext& ctx) {
+	//	instance->Update(ctx);
+	//	};
+
+	//// 明示的な cleanup は不要（shared_ptr の寿命に任せる）
+	//script.cleanupFunc = [instance = std::move(scriptInstance)]() mutable {
+	//	instance.reset(); // 明示的にリセットする場合（なくてもOK）
+	//	};
 	script.isActive = true;
 }
 
@@ -202,7 +217,7 @@ void ScriptInitializeSystem::StartScript(ScriptComponent& script)
 {
 	if (!script.isActive) return;
 	// スクリプトコンテキストを作成
-	ScriptContext ctx = MakeScriptContext(script.entity.value(), m_ECS);
+	ScriptContext ctx = MakeScriptContext(script.entity.value());
 	try
 	{
 		// スクリプトのStart関数を呼び出す
@@ -222,10 +237,10 @@ void ScriptInitializeSystem::StartScript(ScriptComponent& script)
 	}
 }
 
-ScriptContext ScriptInitializeSystem::MakeScriptContext(Entity entity, ECSManager* ecs)
+ScriptContext ScriptInitializeSystem::MakeScriptContext(Entity entity)
 {
-	ScriptContext ctx(ecs, entity);
-	ctx.InitializeTransformAPI();
+	ScriptContext ctx(m_pResourceManager, m_ECS, entity);
+	ctx.Initialize();
 	return ctx;
 }
 
@@ -233,9 +248,8 @@ void ScriptUpdateSystem::UpdateScript(ScriptComponent& script)
 {
 	if (!script.isActive) return;
 	// スクリプトコンテキストを作成
-	ScriptContext ctx = MakeScriptContext(script.entity.value(), m_ECS);
-	TransformComponent* tf = m_ECS->GetComponent<TransformComponent>(script.entity.value());
-	tf;
+	ScriptContext ctx = MakeScriptContext(script.entity.value());
+	
 	try
 	{
 		// スクリプトのUpdate関数を呼び出す
@@ -255,10 +269,10 @@ void ScriptUpdateSystem::UpdateScript(ScriptComponent& script)
 	}
 }
 
-ScriptContext ScriptUpdateSystem::MakeScriptContext(Entity entity, ECSManager* ecs)
+ScriptContext ScriptUpdateSystem::MakeScriptContext(Entity entity)
 {
-	ScriptContext ctx(ecs, entity);
-	ctx.InitializeTransformAPI();
+	ScriptContext ctx(m_pResourceManager, m_ECS, entity);
+	ctx.Initialize();
 	return ctx;
 }
 
