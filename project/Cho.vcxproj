@@ -82,7 +82,9 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"
 xcopy "$(SolutionDir)Cho\GameCore\IScript" "$(TargetDir)Cho\GameCore\IScript" /E /I /Y
 xcopy "$(SolutionDir)Cho\Externals\ChoMath" "$(TargetDir)Cho\Externals\ChoMath" /E /I /Y
 xcopy "$(SolutionDir)Cho\GameCore\ScriptAPI" "$(TargetDir)Cho\GameCore\ScriptAPI" /E /I /Y
-xcopy "$(SolutionDir)Cho\Core\Utility\Components.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y</Command>
+xcopy "$(SolutionDir)Cho\Core\Utility\Components.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
+xcopy "$(SolutionDir)Cho\Core\Utility\Color.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
+xcopy "$(SolutionDir)Cho\Externals\box2d" "$(TargetDir)Cho\Externals\box2d" /E /I /Y</Command>
     </PostBuildEvent>
     <Dxc>
       <AdditionalIncludeDirectories>$(ProjectDir)Resources\Shader\header;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -128,7 +130,9 @@ copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"
 xcopy "$(SolutionDir)Cho\GameCore\IScript" "$(TargetDir)Cho\GameCore\IScript" /E /I /Y
 xcopy "$(SolutionDir)Cho\Externals\ChoMath" "$(TargetDir)Cho\Externals\ChoMath" /E /I /Y
 xcopy "$(SolutionDir)Cho\GameCore\ScriptAPI" "$(TargetDir)Cho\GameCore\ScriptAPI" /E /I /Y
-xcopy "$(SolutionDir)Cho\Core\Utility\Components.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y</Command>
+xcopy "$(SolutionDir)Cho\Core\Utility\Components.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
+xcopy "$(SolutionDir)Cho\Core\Utility\Color.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
+xcopy "$(SolutionDir)Cho\Externals\box2d" "$(TargetDir)Cho\Externals\box2d" /E /I /Y</Command>
     </PostBuildEvent>
     <Dxc>
       <AdditionalIncludeDirectories>$(ProjectDir)Resources\Shader\header;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
