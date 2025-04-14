@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "ScriptAPI.h"
 #include "GameCore/ECS/ECSManager.h"
+#include "Platform/InputManager/InputManager.h"
 
 void ScriptContext::InitializeTransformAPI()
 {
@@ -126,43 +127,60 @@ void ScriptContext::InitializeRigidbody2DAPI()
 			};
 	}
 }
-//
-//b2Vec2 Rigidbody2DAPI::Reflect(const b2Vec2& incident, const b2Vec2& normal)
-//{
-//	return incident - 2.0f * b2Dot(incident, normal) * normal;
-//}
-//
-//std::vector<b2Vec2> Rigidbody2DAPI::RaycastWithReflections(const b2Vec2& start, const b2Vec2& dir, float maxLength)
-//{
-//	std::vector<b2Vec2> hitPoints;
-//	b2Vec2 currentStart = start;
-//	b2Vec2 currentDir = dir;
-//	float remainingLength = maxLength;
-//
-//	for (int i = 0; i < 2; ++i) // 2回反射まで
-//	{
-//		RayCastCallback callback;
-//		b2Vec2 end = currentStart + remainingLength * currentDir;
-//
-//		data->world->RayCast(&callback, currentStart, end);
-//
-//		if (callback.hit)
-//		{
-//			hitPoints.push_back(callback.point);
-//
-//			float hitDistance = remainingLength * callback.fraction;
-//			remainingLength -= hitDistance;
-//
-//			currentStart = callback.point;
-//			currentDir = Reflect(currentDir, callback.normal);
-//		} else
-//		{
-//			currentDir *= remainingLength;
-//			// 当たらなければ直進で終了
-//			hitPoints.push_back(currentStart + currentDir);
-//			break;
-//		}
-//	}
-//
-//	return hitPoints;
-//}
+void ScriptContext::InitializeInputAPI()
+{
+	if (!m_InputManager)
+	{
+		input.data = nullptr;
+		return;
+	}
+	input.data = m_InputManager;
+	input.PushKey = [this](const uint8_t& keyNumber) -> bool {
+		return m_InputManager->PushKey(keyNumber);
+		};
+	input.TriggerKey = [this](const uint8_t& keyNumber) -> bool {
+		return m_InputManager->TriggerKey(keyNumber);
+		};
+	input.GetAllMouse = [this]() -> const DIMOUSESTATE2& {
+		return m_InputManager->GetAllMouse();
+		};
+	input.IsPressMouse = [this](const int32_t& mouseNumber) -> bool {
+		return m_InputManager->IsPressMouse(mouseNumber);
+		};
+	input.IsTriggerMouse = [this](const int32_t& buttonNumber) -> bool {
+		return m_InputManager->IsTriggerMouse(buttonNumber);
+		};
+	input.GetMouseMove = [this]() -> MouseMove {
+		return m_InputManager->GetMouseMove();
+		};
+	input.GetMouseWindowPosition = [this]() -> const Vector2& {
+		return m_InputManager->GetMouseWindowPosition();
+		};
+	input.GetMouseScreenPosition = [this]() -> Vector2 {
+		return m_InputManager->GetMouseScreenPosition();
+		};
+	input.GetJoystickState = [this](const int32_t& stickNo, XINPUT_STATE& out) -> bool {
+		return m_InputManager->GetJoystickState(stickNo, out);
+		};
+	input.GetJoystickStatePrevious = [this](const int32_t& stickNo, XINPUT_STATE& out) -> bool {
+		return m_InputManager->GetJoystickStatePrevious(stickNo, out);
+		};
+	input.SetJoystickDeadZone = [this](const int32_t& stickNo, const int32_t& deadZoneL, const int32_t& deadZoneR) {
+		m_InputManager->SetJoystickDeadZone(stickNo, deadZoneL, deadZoneR);
+		};
+	input.GetNumberOfJoysticks = [this]() -> size_t {
+		return m_InputManager->GetNumberOfJoysticks();
+		};
+	input.IsTriggerPadButton = [this](const PadButton& button, int32_t stickNo) -> bool {
+		return m_InputManager->IsTriggerPadButton(button, stickNo);
+		};
+	input.IsPressPadButton = [this](const PadButton& button, int32_t stickNo) -> bool {
+		return m_InputManager->IsPressPadButton(button, stickNo);
+		};
+	input.GetStickValue = [this](const LR& padStick, int32_t stickNo) -> Vector2 {
+		return m_InputManager->GetStickValue(padStick, stickNo);
+		};
+	input.GetLRTrigger = [this](const LR& LorR, int32_t stickNo) -> float {
+		return m_InputManager->GetLRTrigger(LorR, stickNo);
+		};
+}

@@ -44,7 +44,7 @@ void ChoEngine::Initialize()
 
 	// GameCore初期化
 	gameCore = std::make_unique<GameCore>();
-	gameCore->Initialize(resourceManager.get());
+	gameCore->Initialize(platformLayer->GetInputManager(), resourceManager.get());
 
 	// Model,TextureManager初期化
 	resourceManager->GenerateManager(graphicsEngine.get());

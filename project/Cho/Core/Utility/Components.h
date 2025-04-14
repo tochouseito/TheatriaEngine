@@ -15,6 +15,7 @@
 #include <concepts>       // C++20
 #include <ranges>         // C++20
 #include <numbers>        // C++20
+#include <cstdint>
 
 using Entity = uint32_t;
 using CompID = size_t;

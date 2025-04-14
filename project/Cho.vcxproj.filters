@@ -478,6 +478,7 @@
     <ClInclude Include="Cho\Externals\box2d\src\dynamics\b2_polygon_circle_contact.h" />
     <ClInclude Include="Cho\Externals\box2d\src\dynamics\b2_polygon_contact.h" />
     <ClInclude Include="Cho\GameCore\ScriptAPI\ScriptAPI.h" />
+    <ClInclude Include="Cho\Core\Utility\InputStruct.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Cho\Resources\EngineAssets\Shader\header\Demo.hlsli">
