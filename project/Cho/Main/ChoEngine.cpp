@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "ChoEngine.h"
+#include <exception>
 
 // Windowアプリケーション
 #include "Cho/OS/Windows/WinApp/WinApp.h"
@@ -154,4 +155,14 @@ void ChoEngine::End()
 {
 	// PlatformLayer記録終了
 	platformLayer->EndFrame();
+}
+
+void ChoEngine::OnCrashHandler()
+{
+	// クラッシュ時の処理
+}
+
+void ChoEngine::CrashHandlerEntry()
+{
+	std::set_terminate(OnCrashHandler);
 }

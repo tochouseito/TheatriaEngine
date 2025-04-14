@@ -124,13 +124,12 @@ void TransformInitializeSystem::Start(TransformComponent& transform)
 
 void TransformFinalizeSystem::Finalize(Entity entity,TransformComponent& transform)
 {
+	entity;
 	// 初期値に戻す
 	transform.translation = transform.startValue.translation;
 	transform.rotation = transform.startValue.rotation;
 	transform.scale = transform.startValue.scale;
 	transform.degrees = transform.startValue.degrees;
-	// マルチコンポーネントを全削除
-	m_ECS->RemoveAllComponents<LineRendererComponent>(entity);
 }
 
 void CameraUpdateSystem::UpdateMatrix(TransformComponent& transform, CameraComponent& camera)

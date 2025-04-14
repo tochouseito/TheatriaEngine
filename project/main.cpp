@@ -12,6 +12,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma warning(pop)
 
 	std::unique_ptr<Engine> engine = std::make_unique<ChoEngine>();
+	engine->CrashHandlerEntry();
 	engine->Operation();
 
 	return 0;

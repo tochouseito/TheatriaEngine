@@ -66,6 +66,9 @@ namespace Cho
         json ToJson(const MeshFilterComponent& m);
         json ToJson(const MeshRendererComponent& r);
 		json ToJson(const ScriptComponent& s);
+		json ToJson(const std::vector<LineRendererComponent>& ls);
+		json ToJson(const Rigidbody2DComponent& rb);
+		json ToJson(const BoxCollider2DComponent& bc);
     }
 
     class FileSystem

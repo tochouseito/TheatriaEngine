@@ -39,61 +39,46 @@ ChoEngineクラス
 class ChoEngine : public Engine
 {
 public:// method
-
 	// コンストラクタ
 	ChoEngine();
-
 	// デストラクタ
 	~ChoEngine();
-
 	// 初期化
 	void Initialize() override;
-
 	// 終了処理
 	void Finalize() override;
-
 	// 稼働
 	void Operation() override;
-
 	// 更新
 	void Update();
-
 	// 描画
 	void Draw();
-
 	// 開始
 	void Start();
-
 	// 終了
 	void End();
+	// クラッシュ時の処理
+	static void OnCrashHandler();
+	void CrashHandlerEntry() override;
 private:// member
-
 	// DirectX12
 	std::unique_ptr<ResourceLeakChecker> resourceLeakChecker = nullptr;// ResourceLeakChecker
 	std::unique_ptr<DirectX12Common> dx12 = nullptr;// DirectX12Common
-
 	// PlatformLayer
 	std::unique_ptr<PlatformLayer> platformLayer = nullptr;// PlatformLayer
-
 	// CoreSystem
 	std::unique_ptr<CoreSystem> coreSystem = nullptr;// CoreSystem
-
 	// ResourceManager
 	std::unique_ptr<ResourceManager> resourceManager = nullptr;// ResourceManager
-
 	// GraphicsEngine
 	std::unique_ptr<GraphicsEngine> graphicsEngine = nullptr;// GraphicsEngine
-
 	// ImGuiManager
 	std::unique_ptr<ImGuiManager> imGuiManager = nullptr;// ImGuiManager
-
 	// GameCore
 	std::unique_ptr<GameCore> gameCore = nullptr;// GameCore
-
 	// EditorManager
 	std::unique_ptr<EditorManager> editorManager = nullptr;// EditorManager
 	std::unique_ptr<EditorCommand> editorCommand = nullptr;// EditorCommand
-
 	// HubManager
 	std::unique_ptr<HubManager> hubManager = nullptr;// HubManager
 };
