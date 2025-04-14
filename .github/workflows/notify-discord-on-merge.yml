@@ -3,7 +3,7 @@ name: Notify Discord on Merge to Master
 on:
   push:
     branches:
-      - master  # または main
+      - master
 
 jobs:
   notify-discord:
@@ -17,8 +17,12 @@ jobs:
           COMMIT_URL: ${{ github.event.head_commit.url }}
           COMMITTER: ${{ github.event.head_commit.committer.name }}
         run: |
+          JSON_PAYLOAD=$(jq -n \
+            --arg content "✅ **${COMMITTER}** has merged into **master**:\n${COMMIT_MESSAGE}\n🔗 ${COMMIT_URL}" \
+            '{content: $content}')
+          
           curl -H "Content-Type: application/json" \
                -X POST \
-               -d "{\"content\": \"✅ **${COMMITTER}** has merged into **master**:\n${COMMIT_MESSAGE}\n🔗 ${COMMIT_URL}\"}" \
+               -d "$JSON_PAYLOAD" \
                $DISCORD_WEBHOOK
 
