@@ -378,6 +378,8 @@ xcopy "$(SolutionDir)Cho\Core\Utility\InputStruct.h" "$(TargetDir)Cho\Core\Utili
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Cho\GameCore\Systems\EditorSystems.cpp" />
+    <ClCompile Include="Cho\EngineCommand\EngineCommand.cpp" />
+    <ClCompile Include="Cho\EngineCommand\EngineCommands.cpp" />
     <ClCompile Include="main.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
@@ -547,6 +549,8 @@ xcopy "$(SolutionDir)Cho\Core\Utility\InputStruct.h" "$(TargetDir)Cho\Core\Utili
     <ClInclude Include="Cho\GameCore\Systems\SingleSystems.h" />
     <ClInclude Include="Cho\GameCore\Systems\MultiSystems.h" />
     <ClInclude Include="Cho\GameCore\Systems\EditorSystems.h" />
+    <ClInclude Include="Cho\EngineCommand\EngineCommand.h" />
+    <ClInclude Include="Cho\EngineCommand\EngineCommands.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Cho\Externals\ChoMath\ChoMath.vcxproj">

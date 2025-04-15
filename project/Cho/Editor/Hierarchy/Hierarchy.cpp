@@ -46,12 +46,41 @@ void Hierarchy::Window()
 		}
 		bool isTreeOpen = ImGui::TreeNodeEx(ConvertString(objectName).c_str(), flags);
 		
-		// 親ノードがクリックされた場合の処理
-		if (ImGui::IsItemClicked())
+		// 親ノードが左クリックされた場合の処理
+		if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
 		{
 			// 選択中のオブジェクトを更新
 			m_EditorCommand->SetSelectedObject(object);
 		}
+		// 右クリックされた場合の処理
+		if (ImGui::IsItemClicked(ImGuiMouseButton_Right))
+		{
+			// 選択中のオブジェクトを更新
+			m_EditorCommand->SetSelectedObject(object);
+			ImGui::OpenPopup("HierarchyPopupMenu");
+		}
+
+		// ポップアップメニュー
+		if (ImGui::BeginPopup("HierarchyPopupMenu"))
+		{
+			if (ImGui::MenuItem("削除"))
+			{
+				// 選択中のオブジェクトを削除
+				//m_EditorCommand->GetGameCoreCommandPtr()->GetObjectContainerPtr()->DeleteGameObject(object);
+				// ポップアップメニューを閉じる
+				ImGui::CloseCurrentPopup();
+			}
+			if (ImGui::MenuItem("名前変更"))
+			{
+				// 名前変更処理
+
+				// ポップアップメニューを閉じる
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+
+
 		// ツリーノード展開処理
 		if (isTreeOpen)
 		{

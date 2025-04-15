@@ -49,6 +49,9 @@ void ChoEngine::Initialize()
 	// Model,TextureManager初期化
 	resourceManager->GenerateManager(graphicsEngine.get());
 
+	// EngineCommand初期化
+	engineCommand = std::make_unique<EngineCommand>(gameCore.get(), resourceManager.get(), graphicsEngine.get());
+
 	// EditorCommand初期化
 	editorCommand = std::make_unique<EditorCommand>(resourceManager.get(), graphicsEngine.get(), gameCore->GetGameCoreCommand());
 	// EditorManager初期化
