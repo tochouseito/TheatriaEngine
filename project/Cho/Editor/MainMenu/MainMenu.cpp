@@ -1,8 +1,9 @@
 #include "pch.h"
 #include "MainMenu.h"
 #include <imgui.h>
-#include "Cho/OS/Windows/WinApp/WinApp.h"
-#include "Cho/Editor/EditorManager/EditorManager.h"
+#include "OS/Windows/WinApp/WinApp.h"
+#include "Editor/EditorManager/EditorManager.h"
+#include "EngineCommand/EngineCommands.h"
 #include "GameCore/GameObject/GameObject.h"
 #include "Platform/FileSystem/FileSystem.h"
 
@@ -87,7 +88,7 @@ void MainMenu::FileMenu()
         // プロジェクトの保存
 		if (ImGui::MenuItem("プロジェクトの保存"))
 		{
-			m_EditorCommand->SaveProjectFile(FileSystem::m_sProjectName);
+			m_EngineCommand->SaveProjectFile(FileSystem::m_sProjectName);
 		}
         ImGui::EndMenu();
     }
@@ -101,12 +102,12 @@ void MainMenu::EditMenu()
         if (ImGui::MenuItem("3Dオブジェクト"))
         {
             std::unique_ptr<Add3DObjectCommand> add3DObject = std::make_unique<Add3DObjectCommand>();
-            m_EditorCommand->ExecuteCommand(std::move(add3DObject));
+            m_EngineCommand->ExecuteCommand(std::move(add3DObject));
         }
 		if (ImGui::MenuItem("カメラオブジェクト"))
 		{
 			std::unique_ptr<AddCameraObjectCommand> addCameraObject = std::make_unique<AddCameraObjectCommand>();
-			m_EditorCommand->ExecuteCommand(std::move(addCameraObject));
+            m_EngineCommand->ExecuteCommand(std::move(addCameraObject));
 		}
 
         // メニュー選択でポップアップを開く
@@ -203,7 +204,7 @@ void MainMenu::PopupScriptName()
         if (ImGui::Button("OK"))
         {
             std::string scriptName = scriptNameBuffer;
-            m_EditorCommand->GenerateScript(scriptName);
+            m_EngineCommand->GenerateScript(scriptName);
             ImGui::CloseCurrentPopup();
         }
         ImGui::SameLine();

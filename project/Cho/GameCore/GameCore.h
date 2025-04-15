@@ -4,7 +4,6 @@
 #include "GameCore/SingleSystemManager/SingleSystemManager.h"
 #include "GameCore/MultiSystemManager/MultiSystemManager.h"
 #include "GameCore/ObjectContainer/ObjectContainer.h"
-#include "GameCore/GameCoreCommand/GameCoreCommand.h"
 class InputManager;
 class ResourceManager;
 class GraphicsEngine;
@@ -24,7 +23,6 @@ public:
 	SceneManager* GetSceneManager() { return m_pSceneManager.get(); }
 	ECSManager* GetECSManager() { return m_pECSManager.get(); }
 	ObjectContainer* GetObjectContainer() { return m_pObjectContainer.get(); }
-	GameCoreCommand* GetGameCoreCommand() { return m_pGameCoreCommand.get(); }
 	bool IsRunning() const { return isRunning; }
 	void GameRun();
 	void GameStop();
@@ -39,10 +37,11 @@ private:
 	std::unique_ptr<SingleSystemManager> m_pSingleSystemManager = nullptr;
 	// マルチシステムマネージャ
 	std::unique_ptr<MultiSystemManager> m_pMultiSystemManager = nullptr;
+	// エディタの更新システム
+	std::unique_ptr<SingleSystemManager> m_pEditorSingleSystem = nullptr;
+	std::unique_ptr<MultiSystemManager> m_pEditorMultiSystem = nullptr;
 	// オブジェクトコンテナ
 	std::unique_ptr<ObjectContainer> m_pObjectContainer = nullptr;
-	// コマンド
-	std::unique_ptr<GameCoreCommand> m_pGameCoreCommand = nullptr;
 	// ゲーム実行フラグ
 	bool isRunning = false;
 

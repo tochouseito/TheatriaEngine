@@ -362,7 +362,6 @@ xcopy "$(SolutionDir)Cho\Core\Utility\InputStruct.h" "$(TargetDir)Cho\Core\Utili
     <ClCompile Include="Cho\GameCore\GameObject\GameObject.cpp" />
     <ClCompile Include="Cho\GameCore\ECS\ECSManager.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DXC\DXShaderCompiler.cpp" />
-    <ClCompile Include="Cho\Editor\EditorCommand\EditorCommand.cpp" />
     <ClCompile Include="Cho\Resources\IntegrationData\IntegrationData.cpp" />
     <ClCompile Include="Cho\Editor\GameView\GameView.cpp" />
     <ClCompile Include="Cho\Editor\Hierarchy\Hierarchy.cpp" />
@@ -370,7 +369,6 @@ xcopy "$(SolutionDir)Cho\Core\Utility\InputStruct.h" "$(TargetDir)Cho\Core\Utili
     <ClCompile Include="Cho\Editor\Console\Console.cpp" />
     <ClCompile Include="Cho\Platform\InputManager\InputManager.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\IndexBuffer\IndexBuffer.cpp" />
-    <ClCompile Include="Cho\GameCore\GameCoreCommand\GameCoreCommand.cpp" />
     <ClCompile Include="Cho\Editor\DebugCamera\DebugCamera.cpp" />
     <ClCompile Include="Cho\Hub\HubManager.cpp" />
     <ClCompile Include="Cho\GameCore\IScript\IScript.cpp">
@@ -378,6 +376,8 @@ xcopy "$(SolutionDir)Cho\Core\Utility\InputStruct.h" "$(TargetDir)Cho\Core\Utili
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Cho\GameCore\Systems\EditorSystems.cpp" />
+    <ClCompile Include="Cho\EngineCommand\EngineCommand.cpp" />
+    <ClCompile Include="Cho\EngineCommand\EngineCommands.cpp" />
     <ClCompile Include="main.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
@@ -516,7 +516,6 @@ xcopy "$(SolutionDir)Cho\Core\Utility\InputStruct.h" "$(TargetDir)Cho\Core\Utili
     <ClInclude Include="Cho\Graphics\PipelineManager\PipelineManager.h" />
     <ClInclude Include="Cho\SDK\DirectX\DXC\DXShaderCompiler.h" />
     <ClInclude Include="Cho\Editor\MainMenu\MainMenu.h" />
-    <ClInclude Include="Cho\Editor\EditorCommand\EditorCommand.h" />
     <ClInclude Include="Cho\Resources\ModelManager\ModelManager.h" />
     <ClInclude Include="Cho\Resources\TextureManager\TextureManager.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\VertexBuffer\VertexBuffer.h" />
@@ -535,7 +534,6 @@ xcopy "$(SolutionDir)Cho\Core\Utility\InputStruct.h" "$(TargetDir)Cho\Core\Utili
     <ClInclude Include="Cho\Editor\PopupMenu\PopupMenu.h" />
     <ClInclude Include="Cho\Platform\InputManager\InputManager.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\IndexBuffer\IndexBuffer.h" />
-    <ClInclude Include="Cho\GameCore\GameCoreCommand\GameCoreCommand.h" />
     <ClInclude Include="Cho\Editor\DebugCamera\DebugCamera.h" />
     <ClInclude Include="Cho\SDK\ImGui\ImGuiUtlity\ImGuiUtlity.h" />
     <ClInclude Include="Cho\Editor\Toolbar\Toolbar.h" />
@@ -547,6 +545,8 @@ xcopy "$(SolutionDir)Cho\Core\Utility\InputStruct.h" "$(TargetDir)Cho\Core\Utili
     <ClInclude Include="Cho\GameCore\Systems\SingleSystems.h" />
     <ClInclude Include="Cho\GameCore\Systems\MultiSystems.h" />
     <ClInclude Include="Cho\GameCore\Systems\EditorSystems.h" />
+    <ClInclude Include="Cho\EngineCommand\EngineCommand.h" />
+    <ClInclude Include="Cho\EngineCommand\EngineCommands.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Cho\Externals\ChoMath\ChoMath.vcxproj">

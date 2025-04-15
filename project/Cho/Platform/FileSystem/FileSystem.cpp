@@ -477,7 +477,10 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, SceneManager* 
                     MeshFilterComponent* filter = ecs->AddComponent<MeshFilterComponent>(entity);
 					TransformComponent* transform = ecs->GetComponent<TransformComponent>(entity);
                     filter->modelName = m.modelName;
-                    filter->modelID = resourceManager->GetModelManager()->GetModelDataIndex(filter->modelName,transform->mapID);
+					// モデル名からIDを取得
+                    filter->modelID = resourceManager->GetModelManager()->GetModelDataIndex(filter->modelName);
+					// モデルのUseListに登録
+                    resourceManager->GetModelManager()->RegisterModelUseList(filter->modelID.value(), transform->mapID.value());
                 }
 
                 if (comps.contains("MeshRenderer"))

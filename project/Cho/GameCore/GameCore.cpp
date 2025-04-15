@@ -5,6 +5,7 @@
 #include "Platform/FileSystem/FileSystem.h"
 #include "GameCore/Systems/SingleSystems.h"
 #include "GameCore/Systems/MultiSystems.h"
+#include "GameCore/Systems/EditorSystems.h"
 
 void GameCore::Initialize(InputManager* input, ResourceManager* resourceManager)
 {
@@ -15,6 +16,9 @@ void GameCore::Initialize(InputManager* input, ResourceManager* resourceManager)
 	// Systemマネージャの生成
 	m_pSingleSystemManager = std::make_unique<SingleSystemManager>();
 	m_pMultiSystemManager = std::make_unique<MultiSystemManager>();
+	// エディタのシステムマネージャの生成
+	m_pEditorSingleSystem = std::make_unique<SingleSystemManager>();
+	m_pEditorMultiSystem = std::make_unique<MultiSystemManager>();
 	// box2dの生成
 	b2Vec2 gravity(0.0f, -9.8f);
 	m_pPhysicsWorld = std::make_unique<b2World>(gravity);
@@ -22,8 +26,6 @@ void GameCore::Initialize(InputManager* input, ResourceManager* resourceManager)
 	CreateSystems(input,resourceManager);
 	// オブジェクトコンテナの生成
 	m_pObjectContainer = std::make_unique<ObjectContainer>();
-	// コマンドの生成
-	m_pGameCoreCommand = std::make_unique<GameCoreCommand>(m_pSceneManager.get(), m_pECSManager.get(), m_pObjectContainer.get(),this);
 }
 
 void GameCore::Start(ResourceManager& resourceManager)
@@ -37,13 +39,15 @@ void GameCore::Update(ResourceManager& resourceManager, GraphicsEngine& graphics
 {
 	m_pSceneManager->Update();
 	// ゲームが実行中でなければreturn
-	if (!isRunning)
+	if (isRunning)
 	{
-		return;
+		m_pSingleSystemManager->UpdateAll(m_pECSManager.get());
+		m_pMultiSystemManager->UpdateAll(m_pECSManager.get());
+	} else
+	{
+		m_pEditorSingleSystem->UpdateAll(m_pECSManager.get());
+		m_pEditorMultiSystem->UpdateAll(m_pECSManager.get());
 	}
-	//static_cast<Rigidbody2DUpdateSystem*>(rbUpdateSystemRawPtr)->StepSimulation();
-	m_pSingleSystemManager->UpdateAll(m_pECSManager.get());
-	m_pMultiSystemManager->UpdateAll(m_pECSManager.get());
 	resourceManager;
 	graphicsEngine;
 }
@@ -116,5 +120,14 @@ void GameCore::CreateSystems(InputManager* input, ResourceManager* resourceManag
 	m_pMultiSystemManager->RegisterSystem(std::move(lineRendererSystem), SystemState::Update);
 	// クリーンアップシステムの登録
 
+	// エディタシステム
+	// シングルシステムの生成
+	std::unique_ptr<ECSManager::ISystem> transformEditorSystem = std::make_unique<TransformEditorSystem>(m_pECSManager.get(), resourceManager, resourceManager->GetIntegrationBuffer(IntegrationDataType::Transform));
+	m_pEditorSingleSystem->RegisterSystem(std::move(transformEditorSystem), SystemState::Update);
+	std::unique_ptr<ECSManager::ISystem> cameraEditorSystem = std::make_unique<CameraEditorSystem>(m_pECSManager.get(), resourceManager, resourceManager->GetIntegrationBuffer(IntegrationDataType::Transform));
+	m_pEditorSingleSystem->RegisterSystem(std::move(cameraEditorSystem), SystemState::Update);
+	// マルチシステムの生成
+	std::unique_ptr<ECSManager::IMultiSystem> lineRendererEditorSystem = std::make_unique<LineRendererSystem>(m_pECSManager.get(), resourceManager);
+	m_pEditorMultiSystem->RegisterSystem(std::move(lineRendererEditorSystem), SystemState::Update);
 }
 

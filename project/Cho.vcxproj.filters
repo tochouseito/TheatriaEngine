@@ -43,9 +43,6 @@
     <ClCompile Include="Cho\GameCore\ECS\ECSManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Cho\Editor\EditorCommand\EditorCommand.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Cho\Editor\EditorManager\EditorManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -170,7 +167,6 @@
     <ClCompile Include="Cho\Resources\AssetManager\AssetManager.cpp" />
     <ClCompile Include="Cho\Core\ChoLog\ChoLog.cpp" />
     <ClCompile Include="Cho\SDK\DirectX\DirectX12\IndexBuffer\IndexBuffer.cpp" />
-    <ClCompile Include="Cho\GameCore\GameCoreCommand\GameCoreCommand.cpp" />
     <ClCompile Include="Cho\Editor\DebugCamera\DebugCamera.cpp" />
     <ClCompile Include="Cho\Editor\Toolbar\Toolbar.cpp" />
     <ClCompile Include="Cho\Hub\HubManager.cpp" />
@@ -228,6 +224,8 @@
     <ClCompile Include="Cho\Externals\box2d\src\dynamics\b2_world_callbacks.cpp" />
     <ClCompile Include="Cho\Externals\box2d\src\rope\b2_rope.cpp" />
     <ClCompile Include="Cho\GameCore\ScriptAPI\ScriptAPI.cpp" />
+    <ClCompile Include="Cho\EngineCommand\EngineCommand.cpp" />
+    <ClCompile Include="Cho\EngineCommand\EngineCommands.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cho\Editor\AnimationEditor\AnimationEditor.h">
@@ -282,9 +280,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Cho\GameCore\ECS\ECSManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Cho\Editor\EditorCommand\EditorCommand.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Cho\Editor\EditorManager\EditorManager.h">
@@ -414,7 +409,6 @@
     <ClInclude Include="Cho\Resources\AssetManager\AssetManager.h" />
     <ClInclude Include="Cho\Core\ChoLog\ChoLog.h" />
     <ClInclude Include="Cho\SDK\DirectX\DirectX12\IndexBuffer\IndexBuffer.h" />
-    <ClInclude Include="Cho\GameCore\GameCoreCommand\GameCoreCommand.h" />
     <ClInclude Include="Cho\Editor\DebugCamera\DebugCamera.h" />
     <ClInclude Include="Cho\SDK\ImGui\ImGuiUtlity\ImGuiUtlity.h" />
     <ClInclude Include="Cho\Core\Utility\GenerateUnique.h" />
@@ -479,6 +473,8 @@
     <ClInclude Include="Cho\Externals\box2d\src\dynamics\b2_polygon_contact.h" />
     <ClInclude Include="Cho\GameCore\ScriptAPI\ScriptAPI.h" />
     <ClInclude Include="Cho\Core\Utility\InputStruct.h" />
+    <ClInclude Include="Cho\EngineCommand\EngineCommand.h" />
+    <ClInclude Include="Cho\EngineCommand\EngineCommands.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Cho\Resources\EngineAssets\Shader\header\Demo.hlsli">

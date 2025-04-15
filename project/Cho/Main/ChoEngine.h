@@ -5,34 +5,26 @@ ChoEngineクラス
 --------------------------------------------*/
 
 #include "Cho/Engine/Engine.h"
-
 // Windows
 #include "Cho/OS/Windows/WinApp/WinApp.h"
-
 // DirectX12
 #include "Cho/SDK/DirectX/DirectX12/DirectX12Common/DirectX12Common.h"
-
 // PlatformLayer
 #include "Cho/Platform/PlatformLayer/PlatformLayer.h"
-
 // CoreSystem
 #include "Cho/Core/CoreSystem/CoreSystem.h"
-
 // Resource
 #include "Cho/Resources/ResourceManager/ResourceManager.h"
-
 // GraphicsEngine
 #include "Cho/Graphics/GraphicsEngine/GraphicsEngine.h"
-
 // ImGuiManager
 #include "Cho/SDK/ImGui/ImGuiManager/ImGuiManager.h"
-
 // GameCore
 #include "Cho/GameCore/GameCore.h"
-
+// EngineCommand
+#include "EngineCommand/EngineCommand.h"
 // EditorManager
 #include "Cho/Editor/EditorManager/EditorManager.h"
-
 // HubManager
 #include "Hub/HubManager.h"
 
@@ -76,9 +68,10 @@ private:// member
 	std::unique_ptr<ImGuiManager> imGuiManager = nullptr;// ImGuiManager
 	// GameCore
 	std::unique_ptr<GameCore> gameCore = nullptr;// GameCore
+	// EngineCommand
+	std::unique_ptr<EngineCommand> engineCommand = nullptr;// EngineCommand
 	// EditorManager
 	std::unique_ptr<EditorManager> editorManager = nullptr;// EditorManager
-	std::unique_ptr<EditorCommand> editorCommand = nullptr;// EditorCommand
 	// HubManager
 	std::unique_ptr<HubManager> hubManager = nullptr;// HubManager
 };

@@ -38,7 +38,7 @@ void SceneView::Window()
 	m_DebugCamera->SetAspect(newAspect);
 
     // テクスチャを描画
-    D3D12_GPU_DESCRIPTOR_HANDLE srvHandle = m_EditorManager->GetEditorCommand()->GetSceneTextureHandle();
+    D3D12_GPU_DESCRIPTOR_HANDLE srvHandle = m_EngineCommand->GetSceneTextureHandle();
     ImTextureID textureID = (ImTextureID)srvHandle.ptr;
 
     ImVec4 tintColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);  // アルファ値を無視

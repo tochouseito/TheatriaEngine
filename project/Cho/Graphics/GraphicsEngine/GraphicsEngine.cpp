@@ -365,7 +365,7 @@ void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& ga
 			if (!cameraBuffer) { continue; }
 		}
 		// 登録されているTransformがないならスキップ
-		if (modelData.useTransformIndex.empty()) { continue; }
+		if (modelData.useTransformList.empty()) { continue; }
 		// 頂点バッファビューをセット
 		D3D12_VERTEX_BUFFER_VIEW* vbv = resourceManager.GetBuffer<IVertexBuffer>(modelData.meshes[0].vertexBufferIndex)->GetVertexBufferView();
 		context->SetVertexBuffers(0, 1, vbv);
@@ -384,7 +384,7 @@ void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& ga
 		PixelBuffer* dummyTexture = resourceManager.GetTextureManager()->GetDummyTextureBuffer();
 		context->SetGraphicsRootDescriptorTable(3, dummyTexture->GetSRVGpuHandle());
 		// インスタンス数を取得
-		UINT numInstance = static_cast<UINT>(modelData.useTransformIndex.size());
+		UINT numInstance = static_cast<UINT>(modelData.useTransformList.size());
 		// DrawCall
 		context->DrawIndexedInstanced(static_cast<UINT>(modelData.meshes[0].indices.size()), numInstance, 0, 0, 0);
 	}

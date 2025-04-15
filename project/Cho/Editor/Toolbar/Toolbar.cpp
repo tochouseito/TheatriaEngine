@@ -38,7 +38,7 @@ void Toolbar::Window()
     ImGui::SetCursorPosX(8); // 左端に寄せる
     static ObjectID currentTool = 0;
     //const char* toolItems[] = { "Hand", "Move", "Rotate", "Scale" };
-	GameObject* currentToolObject = m_EditorCommand->GetGameCoreCommandPtr()->GetObjectContainerPtr()->GetGameObject(currentTool);
+	GameObject* currentToolObject = m_EngineCommand->GetGameCore()->GetObjectContainer()->GetGameObject(currentTool);
 	std::wstring name = L"カメラがありません！";
     if (currentToolObject)
     {
@@ -52,7 +52,7 @@ void Toolbar::Window()
     if (ImGui::BeginCombo("##ToolSelector", ConvertString(name).c_str()))
     {
         ObjectID n = 0;
-        for (GameObject& object : m_EditorCommand->GetGameCoreCommandPtr()->GetObjectContainerPtr()->GetGameObjects().GetVector())
+        for (GameObject& object : m_EngineCommand->GetGameCore()->GetObjectContainer()->GetGameObjects().GetVector())
         {
 			if (object.GetType() != ObjectType::Camera) {
 				n++;
@@ -62,7 +62,7 @@ void Toolbar::Window()
             if (ImGui::Selectable(ConvertString(object.GetName()).c_str(), is_selected))
             {
                 currentTool = n;
-				m_EditorCommand->GetGameCoreCommandPtr()->GetSceneManagerPtr()->GetCurrentScene()->SetMainCameraID(n);
+				m_EngineCommand->GetGameCore()->GetSceneManager()->GetCurrentScene()->SetMainCameraID(n);
             }
             if (is_selected)
             {
@@ -85,17 +85,23 @@ void Toolbar::Window()
     float startX = (availableWidth - toolbarWidth) * 0.5f;
     ImGui::SetCursorPosX(startX);
 
-    // ボタンを描画（中央に並べる）
-    if (ImGui::Button(ICON_FA_PLAY, ImVec2(buttonSize, buttonSize))) 
-    { 
-        // Play
-        m_EditorCommand->GameRun();
-    }
-    ImGui::SameLine(0, buttonSpacing);
-    if (ImGui::Button(ICON_FA_PAUSE, ImVec2(buttonSize, buttonSize))) 
-    { 
-        /* Pause */
-		m_EditorCommand->GameStop();
+    // ゲーム実行中なら
+    if (m_EngineCommand->IsGameRunning())
+    {
+        // ボタンを描画（中央に並べる）
+        if (ImGui::Button(ICON_FA_PAUSE, ImVec2(buttonSize, buttonSize)))
+        {
+            /* Pause */
+            m_EngineCommand->GameStop();
+        }
+    } else // 実行中じゃないなら
+    {
+        // ボタンを描画（中央に並べる）
+        if (ImGui::Button(ICON_FA_PLAY, ImVec2(buttonSize, buttonSize)))
+        {
+            // Play
+            m_EngineCommand->GameRun();
+        }
     }
     ImGui::SameLine(0, buttonSpacing);
     if (ImGui::Button(ICON_FA_STEP_FORWARD, ImVec2(buttonSize, buttonSize))) { /* Step */ }

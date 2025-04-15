@@ -42,6 +42,12 @@ public:
 		m_NextMapID++;
 		return id;
 	}
+	// MapIDを返却
+	virtual void RemoveMapID(const uint32_t& id)
+	{
+		// 返却されたIDを保存
+		m_RemoveMapID.push_back(id);
+	}
 	// 現在のIDを取得
 	virtual uint32_t GetCurrentMapID()
 	{
