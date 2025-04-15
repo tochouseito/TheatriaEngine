@@ -52,10 +52,8 @@ void ChoEngine::Initialize()
 	// EngineCommand初期化
 	engineCommand = std::make_unique<EngineCommand>(gameCore.get(), resourceManager.get(), graphicsEngine.get());
 
-	// EditorCommand初期化
-	editorCommand = std::make_unique<EditorCommand>(resourceManager.get(), graphicsEngine.get(), gameCore->GetGameCoreCommand());
 	// EditorManager初期化
-	editorManager = std::make_unique<EditorManager>(editorCommand.get(),platformLayer->GetInputManager());
+	editorManager = std::make_unique<EditorManager>(engineCommand.get(), platformLayer->GetInputManager());
 	editorManager->Initialize();
 
 	// HubManager初期化
@@ -70,7 +68,7 @@ void ChoEngine::Finalize()
 	// GameCore終了処理
 	
 	// ファイルの保存
-	FileSystem::SaveProject(gameCore->GetGameCoreCommand()->GetSceneManagerPtr(), gameCore->GetGameCoreCommand()->GetObjectContainerPtr(), gameCore->GetGameCoreCommand()->GetECSManagerPtr(), resourceManager.get());
+	FileSystem::SaveProject(gameCore->GetSceneManager(), gameCore->GetObjectContainer(), gameCore->GetECSManager(), resourceManager.get());
 	// ImGuiManager終了処理
 	imGuiManager->Finalize();
 	// PlatformLayer終了処理

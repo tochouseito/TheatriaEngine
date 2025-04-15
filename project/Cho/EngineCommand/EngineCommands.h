@@ -9,10 +9,10 @@ public:
 	Add3DObjectCommand()
 	{
 	}
-	void Execute(EngineCommand* edit)override;
-	void Undo(EngineCommand* edit)override;
+	bool Execute(EngineCommand* edit)override;
+	bool Undo(EngineCommand* edit)override;
 private:
-	uint32_t objectID;
+	uint32_t m_ObjectID;
 };
 // カメラオブジェクトを追加するコマンド
 class AddCameraObjectCommand :public IEngineCommand
@@ -21,10 +21,10 @@ public:
 	AddCameraObjectCommand()
 	{
 	}
-	void Execute(EngineCommand* edit)override;
-	void Undo(EngineCommand* edit)override;
+	bool Execute(EngineCommand* edit)override;
+	bool Undo(EngineCommand* edit)override;
 private:
-	uint32_t objectID;
+	uint32_t m_ObjectID;
 };
 // MeshFilterComponentを追加するコマンド
 class AddMeshFilterComponent :public IEngineCommand
@@ -34,8 +34,8 @@ public:
 		m_Entity(entity)
 	{
 	}
-	void Execute(EngineCommand* edit)override;
-	void Undo(EngineCommand* edit)override;
+	bool Execute(EngineCommand* edit)override;
+	bool Undo(EngineCommand* edit)override;
 private:
 	uint32_t m_Entity;
 };
@@ -47,8 +47,8 @@ public:
 		m_Entity(entity)
 	{
 	}
-	void Execute(EngineCommand* edit)override;
-	void Undo(EngineCommand* edit)override;
+	bool Execute(EngineCommand* edit)override;
+	bool Undo(EngineCommand* edit)override;
 private:
 	uint32_t m_Entity;
 };
@@ -56,13 +56,15 @@ private:
 class SetMainCamera :public IEngineCommand
 {
 public:
-	SetMainCamera()
+	SetMainCamera(const uint32_t& setCameraID):
+		m_SetCameraID(setCameraID)
 	{
 	}
-	void Execute(EngineCommand* edit)override;
-	void Undo(EngineCommand* edit)override;
+	bool Execute(EngineCommand* edit)override;
+	bool Undo(EngineCommand* edit)override;
 private:
 	std::optional<uint32_t> m_PreCameraID = std::nullopt;
+	std::optional<uint32_t> m_SetCameraID = std::nullopt;
 };
 // スクリプトコンポーネントを追加するコマンド
 class AddScriptComponent :public IEngineCommand
@@ -72,8 +74,8 @@ public:
 		m_Entity(entity)
 	{
 	}
-	void Execute(EngineCommand* edit)override;
-	void Undo(EngineCommand* edit)override;
+	bool Execute(EngineCommand* edit)override;
+	bool Undo(EngineCommand* edit)override;
 private:
 	uint32_t m_Entity;
 };
@@ -85,8 +87,8 @@ public:
 		m_Entity(entity)
 	{
 	}
-	void Execute(EngineCommand* edit)override;
-	void Undo(EngineCommand* edit)override;
+	bool Execute(EngineCommand* edit)override;
+	bool Undo(EngineCommand* edit)override;
 private:
 	uint32_t m_Entity;
 	uint32_t m_MapID;
@@ -99,8 +101,8 @@ public:
 		m_Entity(entity)
 	{
 	}
-	void Execute(EngineCommand* edit)override;
-	void Undo(EngineCommand* edit)override;
+	bool Execute(EngineCommand* edit)override;
+	bool Undo(EngineCommand* edit)override;
 private:
 	uint32_t m_Entity;
 };
@@ -112,8 +114,8 @@ public:
 		m_Entity(entity)
 	{
 	}
-	void Execute(EngineCommand* edit)override;
-	void Undo(EngineCommand* edit)override;
+	bool Execute(EngineCommand* edit)override;
+	bool Undo(EngineCommand* edit)override;
 private:
 	uint32_t m_Entity;
 };

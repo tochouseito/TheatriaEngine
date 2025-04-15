@@ -5,5 +5,5 @@
 BaseEditor::BaseEditor(EditorManager* editorManager) :
 	m_EditorManager(editorManager)
 {
-	m_EditorCommand = m_EditorManager->GetEditorCommand();
+	m_EngineCommand=m_EditorManager->GetEngineCommand();
 }

@@ -7,58 +7,131 @@
 using namespace Cho;
 
 // 名前で検索してインデックスを取得する
-std::optional<uint32_t> ModelManager::GetModelDataIndex(const std::wstring& name, std::optional<uint32_t>& transformIndex)
+std::optional<uint32_t> ModelManager::GetModelDataIndex(const std::wstring& name)
 {
+	//if (m_ModelNameContainer.contains(name))
+	//{
+	//	// 既にUseListに登録されている場合は、インデックスを取得
+	//	if (m_Models[m_ModelNameContainer[name]].useTransformList.size() > 0)
+	//	{
+	//		for (auto& index : m_Models[m_ModelNameContainer[name]].useTransformList)
+	//		{
+	//			if (index == transformIndex.value())
+	//			{
+	//				return m_ModelNameContainer[name];
+	//			}
+	//		}
+	//		// ほかのモデルに登録されていたら、削除して追加
+	//		for (auto& model : m_Models.GetVector())
+	//		{
+	//			if (model.useTransformList.size() > 0)
+	//			{
+	//				for (auto& index : model.useTransformList)
+	//				{
+	//					if (index == transformIndex.value())
+	//					{
+	//						model.useTransformList.remove(index);
+	//						break;
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
+	//	// モデルの使用Transformインデックスにない場合は、追加
+	//	m_Models[m_ModelNameContainer[name]].useTransformList.push_back(transformIndex.value());
+	//	// バッファも更新
+	//	StructuredBuffer<uint32_t>* buffer = dynamic_cast<StructuredBuffer<uint32_t>*>(m_pResourceManager->GetBuffer<IStructuredBuffer>(m_Models[m_ModelNameContainer[name]].useTransformBufferIndex));
+	//	if (buffer)
+	//	{
+	//		uint32_t i = 0;
+	//		for (uint32_t& useIndex : m_Models[m_ModelNameContainer[name]].useTransformList)
+	//		{
+	//			buffer->UpdateData(useIndex, i);
+	//			i++;
+	//		}
+	//	} else
+	//	{
+	//		Log::Write(LogLevel::Assert, "Buffer is nullptr");
+	//	}
+	//	return m_ModelNameContainer[name];
+	//}
+	//std::string modelName = ConvertString(name);
+	//std::string msg = "Model name not found: " + modelName;
+	//Log::Write(LogLevel::Assert, msg);
+	//return std::nullopt;
 	if (m_ModelNameContainer.contains(name))
 	{
-		// 既にUseListに登録されている場合は、インデックスを取得
-		if (m_Models[m_ModelNameContainer[name]].useTransformIndex.size() > 0)
+		return m_ModelNameContainer[name];
+	} else
+	{
+		std::string modelName = ConvertString(name);
+		std::string msg = "Model name not found: " + modelName;
+		Log::Write(LogLevel::Assert, msg);
+	}
+	return std::nullopt;
+}
+
+void ModelManager::RegisterModelUseList(const std::variant<uint32_t, std::wstring>& key, const uint32_t& transformMapID)
+{
+	// コンテナのキー
+	uint32_t keyIndex = 0;
+	if (std::holds_alternative<uint32_t>(key))
+	{
+		keyIndex = std::get<uint32_t>(key);
+	} else if (std::holds_alternative<std::wstring>(key))
+	{
+		std::wstring name = std::get<std::wstring>(key);
+		if (!m_ModelNameContainer.contains(name))
 		{
-			for (auto& index : m_Models[m_ModelNameContainer[name]].useTransformIndex)
+			Log::Write(LogLevel::Assert, "Model name not found: " + ConvertString(name));
+			return;
+		}
+		keyIndex = m_ModelNameContainer[name];
+	}
+	// 既にUseListに登録されている場合は登録しない
+	if (!m_Models[keyIndex].useTransformList.empty())
+	{
+		// 指定されたモデルに登録されているか確認
+		for (auto& index : m_Models[keyIndex].useTransformList)
+		{
+			if (index == transformMapID)
 			{
-				if (index == transformIndex.value())
-				{
-					return m_ModelNameContainer[name];
-				}
+				return;
 			}
-			// ほかのモデルに登録されていたら、削除して追加
-			for (auto& model : m_Models.GetVector())
+		}
+		// ほかのモデルに登録されていたら、削除
+		for (auto& model : m_Models.GetVector())
+		{
+			if (model.useTransformList.size() > 0)
 			{
-				if (model.useTransformIndex.size() > 0)
+				for (auto& index : model.useTransformList)
 				{
-					for (auto& index : model.useTransformIndex)
+					if (index == transformMapID)
 					{
-						if (index == transformIndex.value())
-						{
-							model.useTransformIndex.remove(index);
-							break;
-						}
+						model.useTransformList.remove(index);
+						break;
 					}
 				}
 			}
 		}
-		// モデルの使用Transformインデックスにない場合は、追加
-		m_Models[m_ModelNameContainer[name]].useTransformIndex.push_back(transformIndex.value());
-		// バッファも更新
-		StructuredBuffer<uint32_t>* buffer = dynamic_cast<StructuredBuffer<uint32_t>*>(m_pResourceManager->GetBuffer<IStructuredBuffer>(m_Models[m_ModelNameContainer[name]].useTransformBufferIndex));
-		if (buffer)
-		{
-			uint32_t i = 0;
-			for (uint32_t& useIndex : m_Models[m_ModelNameContainer[name]].useTransformIndex)
-			{
-				buffer->UpdateData(useIndex, i);
-				i++;
-			}
-		} else
-		{
-			Log::Write(LogLevel::Assert, "Buffer is nullptr");
-		}
-		return m_ModelNameContainer[name];
 	}
-	std::string modelName = ConvertString(name);
-	std::string msg = "Model name not found: " + modelName;
-	Log::Write(LogLevel::Assert, msg);
-	return std::nullopt;
+	// どのモデルのUseListにない場合は、追加
+	m_Models[keyIndex].useTransformList.push_back(transformMapID);
+	// UseListのバッファ更新
+	StructuredBuffer<uint32_t>* buffer = dynamic_cast<StructuredBuffer<uint32_t>*>(m_pResourceManager->GetBuffer<IStructuredBuffer>(m_Models[keyIndex].useTransformBufferIndex));
+	if (buffer)
+	{
+		// UseListの全てをバッファに転送
+		uint32_t i = 0;
+		for (uint32_t& useIndex : m_Models[keyIndex].useTransformList)
+		{
+			buffer->UpdateData(useIndex, i);
+			i++;
+		}
+	} else
+	{
+		Log::Write(LogLevel::Assert, "Buffer is nullptr");
+	}
 }
 
 void ModelManager::CreateDefaultMesh()

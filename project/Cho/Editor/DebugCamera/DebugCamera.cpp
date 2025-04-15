@@ -8,7 +8,7 @@
 void DebugCamera::Initialize()
 {
 	// バッファの作成
-	ResourceManager* resourceManager = m_pEditorManager->GetEditorCommand()->GetResourceManagerPtr();
+	ResourceManager* resourceManager = m_pEditorManager->GetEngineCommand()->GetResourceManager();
 	m_TransformComponent.mapID = resourceManager->CreateConstantBuffer<BUFFER_DATA_TF>();
 	m_CameraComponent.bufferIndex = resourceManager->CreateConstantBuffer<BUFFER_DATA_VIEWPROJECTION>();
 	//m_pTransformBuffer = dynamic_cast<ConstantBuffer<BUFFER_DATA_TF>*>(resourceManager->GetBuffer<IConstantBuffer>(m_TransformComponent.mapID));

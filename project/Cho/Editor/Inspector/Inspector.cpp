@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Inspector.h"
 #include "Editor/EditorManager/EditorManager.h"
+#include "EngineCommand/EngineCommands.h"
 #include "GameCore/GameCore.h"
 #include "Core/ChoLog/ChoLog.h"
 using namespace Cho;
@@ -22,10 +23,10 @@ void Inspector::Window()
 	ImGui::Begin("Inspector", nullptr, windowFlags);
 
 	// 選択中のオブジェクトがある場合に情報を表示
-	if (m_EditorCommand->GetSelectedObject())
+	if (m_EngineCommand->GetSelectedObject())
 	{
 		// 選択中のオブジェクトを取得
-		GameObject* object = m_EditorCommand->GetSelectedObject();
+		GameObject* object = m_EngineCommand->GetSelectedObject();
 		// オブジェクトの名前を取得
 		std::wstring objectName = object->GetName();
 		// オブジェクトのタイプを取得
@@ -58,7 +59,7 @@ void Inspector::ComponentsView(GameObject* object)
 void Inspector::TransformComponentView(GameObject* object)
 {
 	// TransformComponentを取得
-	TransformComponent* transform = m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr()->GetComponent<TransformComponent>(object->GetEntity());
+	TransformComponent* transform = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<TransformComponent>(object->GetEntity());
 	if (transform)
 	{
 		// Transformを表示
@@ -83,7 +84,7 @@ void Inspector::MeshFilterComponentView(GameObject* object)
 		return;
 	}
 	// MeshFilterComponentを取得
-	MeshFilterComponent* mesh = m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr()->GetComponent<MeshFilterComponent>(object->GetEntity());
+	MeshFilterComponent* mesh = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshFilterComponent>(object->GetEntity());
 	if (mesh)
 	{
 		ImGui::Text("Mesh Component");
@@ -98,7 +99,7 @@ void Inspector::MeshRendererComponentView(GameObject* object)
 		return;
 	}
 	// MeshRendererComponentを取得
-	MeshRendererComponent* render = m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr()->GetComponent<MeshRendererComponent>(object->GetEntity());
+	MeshRendererComponent* render = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshRendererComponent>(object->GetEntity());
 	if (render)
 	{
 		ImGui::Text("Render Component");
@@ -113,7 +114,7 @@ void Inspector::CameraComponentView(GameObject* object)
 		return;
 	}
 	// CameraComponentを取得
-	CameraComponent* camera = m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr()->GetComponent<CameraComponent>(object->GetEntity());
+	CameraComponent* camera = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<CameraComponent>(object->GetEntity());
 	if (camera)
 	{
 		ImGui::Text("Camera Component");
@@ -122,11 +123,11 @@ void Inspector::CameraComponentView(GameObject* object)
 
 void Inspector::ScriptComponentView(GameObject* object)
 {
-	ECSManager* ecs = m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr();
+	ECSManager* ecs = m_EngineCommand->GetGameCore()->GetECSManager();
 	ScriptComponent* script = ecs->GetComponent<ScriptComponent>(object->GetEntity());
 	if (!script) return;
 
-	ScriptContainer* scriptContainer = m_EditorCommand->GetResourceManagerPtr()->GetScriptContainer();
+	ScriptContainer* scriptContainer = m_EngineCommand->GetResourceManager()->GetScriptContainer();
 	if (!scriptContainer) return;
 
 	ImGui::Text("Script Component");
@@ -187,7 +188,7 @@ void Inspector::ScriptComponentView(GameObject* object)
 
 void Inspector::LineRendererComponentView(GameObject* object)
 {
-	auto ecs = m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr();
+	auto ecs = m_EngineCommand->GetGameCore()->GetECSManager();
 	auto lines = ecs->GetAllComponents<LineRendererComponent>(object->GetEntity());
 
 	if (!lines || lines->empty()) return;
@@ -231,7 +232,7 @@ void Inspector::LineRendererComponentView(GameObject* object)
 
 void Inspector::Rigidbody2DComponentView(GameObject* object)
 {
-	Rigidbody2DComponent* rigidbody = m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr()->GetComponent<Rigidbody2DComponent>(object->GetEntity());
+	Rigidbody2DComponent* rigidbody = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<Rigidbody2DComponent>(object->GetEntity());
 	if (rigidbody)
 	{
 		if (ImGui::TreeNode("Rigidbody2D"))
@@ -271,7 +272,7 @@ void Inspector::Rigidbody2DComponentView(GameObject* object)
 void Inspector::BoxCollider2DComponentView(GameObject* object)
 {
 	BoxCollider2DComponent* collider =
-		m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr()->GetComponent<BoxCollider2DComponent>(object->GetEntity());
+		m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<BoxCollider2DComponent>(object->GetEntity());
 
 	if (collider)
 	{
@@ -314,38 +315,38 @@ void Inspector::AddComponent(GameObject* object)
 		{
 		case ObjectType::MeshObject:
 			// MeshFilterComponentがあるか
-			mesh = m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr()->GetComponent<MeshFilterComponent>(object->GetEntity());
+			mesh = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshFilterComponent>(object->GetEntity());
 			if (!mesh)
 			{
 				if (ImGui::Selectable("MeshFilterComponent"))
 				{
 					// MeshFilterComponentを追加
 					std::unique_ptr<AddMeshFilterComponent> addMeshComp = std::make_unique<AddMeshFilterComponent>(object->GetEntity());
-					m_EditorCommand->ExecuteCommand(std::move(addMeshComp));
+					m_EngineCommand->ExecuteCommand(std::move(addMeshComp));
 					isOpen = false;
 				}
 			}
 			// MeshRendererComponentがあるか
-			render = m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr()->GetComponent<MeshRendererComponent>(object->GetEntity());
+			render = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshRendererComponent>(object->GetEntity());
 			if (!render)
 			{
 				if (ImGui::Selectable("MeshRendererComponent"))
 				{
 					// MeshRendererComponentを追加
 					std::unique_ptr<AddMeshRendererComponent> addRenderComp = std::make_unique<AddMeshRendererComponent>(object->GetEntity());
-					m_EditorCommand->ExecuteCommand(std::move(addRenderComp));
+					m_EngineCommand->ExecuteCommand(std::move(addRenderComp));
 					isOpen = false;
 				}
 			}
 			// ScriptComponentがあるか
-			script = m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr()->GetComponent<ScriptComponent>(object->GetEntity());
+			script = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<ScriptComponent>(object->GetEntity());
 			if (!script)
 			{
 				if (ImGui::Selectable("ScriptComponent"))
 				{
 					// ScriptComponentを追加
 					std::unique_ptr<AddScriptComponent> addScriptComp = std::make_unique<AddScriptComponent>(object->GetEntity());
-					m_EditorCommand->ExecuteCommand(std::move(addScriptComp));
+					m_EngineCommand->ExecuteCommand(std::move(addScriptComp));
 					isOpen = false;
 				}
 			}
@@ -357,45 +358,45 @@ void Inspector::AddComponent(GameObject* object)
 				{
 					// LineRendererComponentを追加
 					std::unique_ptr<AddLineRendererComponent> addLineComp = std::make_unique<AddLineRendererComponent>(object->GetEntity());
-					m_EditorCommand->ExecuteCommand(std::move(addLineComp));
+					m_EngineCommand->ExecuteCommand(std::move(addLineComp));
 					isOpen = false;
 				}
 			//}
 			// Rigidbody2DComponentがあるか
-			rigidbody = m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr()->GetComponent<Rigidbody2DComponent>(object->GetEntity());
+			rigidbody = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<Rigidbody2DComponent>(object->GetEntity());
 			if (!rigidbody)
 			{
 				if (ImGui::Selectable("Rigidbody2DComponent"))
 				{
 					// Rigidbody2DComponentを追加
 					std::unique_ptr<AddRigidbody2DComponent> addRigidBodyComp = std::make_unique<AddRigidbody2DComponent>(object->GetEntity());
-					m_EditorCommand->ExecuteCommand(std::move(addRigidBodyComp));
+					m_EngineCommand->ExecuteCommand(std::move(addRigidBodyComp));
 					isOpen = false;
 				}
 			}
 			// BoxCollider2DComponentがあるか
-			boxCollider2d = m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr()->GetComponent<BoxCollider2DComponent>(object->GetEntity());
+			boxCollider2d = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<BoxCollider2DComponent>(object->GetEntity());
 			if (!boxCollider2d)
 			{
 				if (ImGui::Selectable("BoxCollider2DComponent"))
 				{
 					// BoxCollider2DComponentを追加
 					std::unique_ptr<AddBoxCollider2DComponent> addBoxColliderComp = std::make_unique<AddBoxCollider2DComponent>(object->GetEntity());
-					m_EditorCommand->ExecuteCommand(std::move(addBoxColliderComp));
+					m_EngineCommand->ExecuteCommand(std::move(addBoxColliderComp));
 					isOpen = false;
 				}
 			}
 			break;
 		case ObjectType::Camera:
 			// ScriptComponentがあるか
-			script = m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr()->GetComponent<ScriptComponent>(object->GetEntity());
+			script = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<ScriptComponent>(object->GetEntity());
 			if (!script)
 			{
 				if (ImGui::Selectable("ScriptComponent"))
 				{
 					// ScriptComponentを追加
 					std::unique_ptr<AddScriptComponent> addScriptComp = std::make_unique<AddScriptComponent>(object->GetEntity());
-					m_EditorCommand->ExecuteCommand(std::move(addScriptComp));
+					m_EngineCommand->ExecuteCommand(std::move(addScriptComp));
 					isOpen = false;
 				}
 			}
@@ -407,7 +408,7 @@ void Inspector::AddComponent(GameObject* object)
 				{
 					// LineRendererComponentを追加
 					std::unique_ptr<AddLineRendererComponent> addLineComp = std::make_unique<AddLineRendererComponent>(object->GetEntity());
-					m_EditorCommand->ExecuteCommand(std::move(addLineComp));
+					m_EngineCommand->ExecuteCommand(std::move(addLineComp));
 					isOpen = false;
 				}
 			//}

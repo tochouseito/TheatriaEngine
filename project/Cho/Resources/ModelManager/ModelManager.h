@@ -24,7 +24,7 @@ struct ModelData
 	std::wstring name;
 	std::vector<MeshData> meshes;
 	// このモデルを使用しているTransformのインデックス
-	std::list<uint32_t> useTransformIndex;
+	std::list<uint32_t> useTransformList;
 	// このモデルを使用しているTFリストのバッファインデックス
 	std::optional<uint32_t> useTransformBufferIndex = std::nullopt;
 };
@@ -47,14 +47,16 @@ public:
 	// モデルデータコンテナを取得する
 	std::vector<ModelData>& GetModelDataContainer() { return m_Models.GetVector(); }
 	// 名前で検索してインデックスを取得する
-	std::optional<uint32_t> GetModelDataIndex(const std::wstring& name,std::optional<uint32_t>& transformIndex);
+	std::optional<uint32_t> GetModelDataIndex(const std::wstring& name);
+	// モデルデータを取得する
+	ModelData* GetModelData(const uint32_t& index) { return &m_Models[index]; }
+	// モデルのUseListに登録する
+	void RegisterModelUseList(const std::variant<uint32_t,std::wstring>& key, const uint32_t& transformMapID);
 private:
 	// デフォルトメッシュの生成
 	void CreateDefaultMesh();
 	// モデルコンテナの要素数を取得する
 	uint32_t GetModelDataSize() { return static_cast<uint32_t>(m_Models.size()); }
-	// モデルデータを取得する
-	ModelData* GetModelData(const uint32_t& index) { return &m_Models[index]; }
 	// ModelDataの追加
 	void AddModelData(ModelData& modelData);
 

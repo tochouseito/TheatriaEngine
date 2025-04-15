@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Hierarchy.h"
 #include "Editor/EditorManager/EditorManager.h"
+#include "EngineCommand/EngineCommand.h"
 #include "GameCore/GameCore.h"
 #include "Core/ChoLog/ChoLog.h"
 
@@ -21,7 +22,7 @@ void Hierarchy::Window()
 
 	// 現在のシーンのオブジェクトリストを取得
 	// シーンを取得
-	ScenePrefab* currentScene = m_EditorCommand->GetGameCoreCommandPtr()->GetSceneManagerPtr()->GetCurrentScene();
+	ScenePrefab* currentScene = m_EngineCommand->GetGameCore()->GetSceneManager()->GetCurrentScene();
 	// シーンが存在しない場合は終了
 	if (!currentScene)
 	{
@@ -34,13 +35,13 @@ void Hierarchy::Window()
 	for (const ObjectID& objectID : currentSceneObjects)
 	{
 		// オブジェクトを取得
-		GameObject* object = m_EditorCommand->GetGameCoreCommandPtr()->GetObjectContainerPtr()->GetGameObject(objectID);
+		GameObject* object = m_EngineCommand->GetGameCore()->GetObjectContainer()->GetGameObject(objectID);
 		// オブジェクトの名前を取得
 		std::wstring objectName = object->GetName();
 
 		// ツリーノードとして表示
 		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanFullWidth;
-		if (m_EditorCommand->GetSelectedObject()==object)
+		if (m_EngineCommand->GetSelectedObject()==object)
 		{
 			flags |= ImGuiTreeNodeFlags_Selected; // 選択中のオブジェクトをハイライト
 		}
@@ -50,13 +51,13 @@ void Hierarchy::Window()
 		if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
 		{
 			// 選択中のオブジェクトを更新
-			m_EditorCommand->SetSelectedObject(object);
+			m_EngineCommand->SetSelectedObject(object);
 		}
 		// 右クリックされた場合の処理
 		if (ImGui::IsItemClicked(ImGuiMouseButton_Right))
 		{
 			// 選択中のオブジェクトを更新
-			m_EditorCommand->SetSelectedObject(object);
+			m_EngineCommand->SetSelectedObject(object);
 			ImGui::OpenPopup("HierarchyPopupMenu");
 		}
 

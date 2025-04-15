@@ -49,7 +49,7 @@ void GameView::Window()
     ImGui::SetCursorScreenPos(ImVec2(offsetX, offsetY));
 
     // テクスチャの描画
-	D3D12_GPU_DESCRIPTOR_HANDLE srvHandle = m_EditorCommand->GetGameTextureHandle();
+	D3D12_GPU_DESCRIPTOR_HANDLE srvHandle = m_EngineCommand->GetGameTextureHandle();
     ImTextureID textureID = (ImTextureID)srvHandle.ptr;
 
     ImVec4 tintColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);  // アルファ値を無視

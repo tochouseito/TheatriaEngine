@@ -1,6 +1,6 @@
 #pragma once
 #include "Core/Utility/ImGuiEx.h"
-class EditorCommand;
+class EngineCommand;
 class EditorManager;
 class BaseEditor
 {
@@ -14,6 +14,6 @@ public:
 	virtual void Window() = 0;
 protected:
 	EditorManager* m_EditorManager = nullptr;
-	EditorCommand* m_EditorCommand = nullptr;
+	EngineCommand* m_EngineCommand = nullptr;
 };
 

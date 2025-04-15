@@ -1,8 +1,7 @@
 #pragma once
 #include <memory>
 #include <imgui.h>
-
-#include "Editor/EditorCommand/EditorCommand.h"
+#include "EngineCommand/EngineCommand.h"
 #include "Editor/MainMenu/MainMenu.h"
 #include "Editor/Toolbar/Toolbar.h"
 #include "Editor/DebugCamera/DebugCamera.h"
@@ -13,12 +12,13 @@
 #include "Editor/AssetBrowser/AssetBrowser.h"
 #include "Editor/Console/Console.h"
 
+class EngineCommand;
 class InputManager;
 class EditorManager
 {
 public:
-	EditorManager(EditorCommand* editorCommand,InputManager* inputManager) :
-		m_EditorCommand(editorCommand), m_InputManager(inputManager)
+	EditorManager(EngineCommand* engineCommand,InputManager* inputManager) :
+		m_EngineCommand(engineCommand), m_InputManager(inputManager)
 	{
 		m_Toolbar = std::make_unique<Toolbar>(this);
 		m_MainMenu = std::make_unique<MainMenu>(this,m_Toolbar.get());
@@ -32,16 +32,13 @@ public:
 	}
 	~EditorManager()
 	{
-
 	}
 	void Initialize();
 	void Update();
-
-
-	EditorCommand* GetEditorCommand() { return m_EditorCommand; }
+	EngineCommand* GetEngineCommand() { return m_EngineCommand; }
 	InputManager* GetInputManager() { return m_InputManager; }
 private:
-	EditorCommand* m_EditorCommand = nullptr;
+	EngineCommand* m_EngineCommand = nullptr;
 	InputManager* m_InputManager = nullptr;
 	std::unique_ptr<Toolbar> m_Toolbar = nullptr;
 	std::unique_ptr<MainMenu> m_MainMenu = nullptr;
