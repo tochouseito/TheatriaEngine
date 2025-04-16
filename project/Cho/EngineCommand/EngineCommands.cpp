@@ -197,3 +197,22 @@ bool AddBoxCollider2DComponent::Undo(EngineCommand* edit)
 	edit;
 	return false;
 }
+
+bool DeleteObjectCommand::Execute(EngineCommand* edit)
+{
+	GameObject* object = edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID);
+	m_Name = object->GetName();
+	m_Type = object->GetType();
+	// モデルのUseListから削除
+	// MapIDを返却
+	// Componentの削除
+	// Entityの削除
+	// GameObjectの削除
+	return false;
+}
+
+bool DeleteObjectCommand::Undo(EngineCommand* edit)
+{
+	edit;
+	return false;
+}
