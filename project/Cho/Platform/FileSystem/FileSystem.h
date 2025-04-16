@@ -70,6 +70,19 @@ namespace Cho
 		json ToJson(const Rigidbody2DComponent& rb);
 		json ToJson(const BoxCollider2DComponent& bc);
     }
+	// ComponentsDeserializer
+	namespace Deserialization
+	{
+		// コンポーネントを読み込み
+		void FromJson(const json& j, TransformComponent& t);
+		void FromJson(const json& j, CameraComponent& c);
+		void FromJson(const json& j, MeshFilterComponent& m);
+		void FromJson(const json& j, MeshRendererComponent& r);
+		void FromJson(const json& j, ScriptComponent& s);
+		void FromJson(const json& j, std::vector<LineRendererComponent>& ls);
+		void FromJson(const json& j, Rigidbody2DComponent& rb);
+		void FromJson(const json& j, BoxCollider2DComponent& bc);
+	}
 
     class FileSystem
     {
