@@ -434,15 +434,18 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, SceneManager* 
                 {
                     TransformComponent t{};
                     auto& jt = comps["Transform"];
-                    t.translation = Vector3{ jt["translation"][0], jt["translation"][1], jt["translation"][2] };
+					// TransformComponentの読み込み
+					Deserialization::FromJson(jt,t);
+                    /*t.translation = Vector3{ jt["translation"][0], jt["translation"][1], jt["translation"][2] };
                     t.rotation = Quaternion{ jt["rotation"][0], jt["rotation"][1], jt["rotation"][2], jt["rotation"][3] };
                     t.scale = Scale{ jt["scale"][0], jt["scale"][1], jt["scale"][2] };
-					t.degrees = Vector3{ jt["degrees"][0], jt["degrees"][1], jt["degrees"][2] };
+					t.degrees = Vector3{ jt["degrees"][0], jt["degrees"][1], jt["degrees"][2] };*/
                     TransformComponent* transform = ecs->AddComponent<TransformComponent>(entity);
-					transform->translation = t.translation;
+					/*transform->translation = t.translation;
 					transform->rotation = t.rotation;
 					transform->scale = t.scale;
-					transform->degrees = t.degrees;
+					transform->degrees = t.degrees;*/
+                    *transform = t;
                     transform->mapID = resourceManager->GetIntegrationData(IntegrationDataType::Transform)->GetMapID();
                 }
 
@@ -450,15 +453,18 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, SceneManager* 
                 {
                     CameraComponent c{};
                     auto& jc = comps["Camera"];
-                    c.fovAngleY = jc["fovAngleY"];
+					// CameraComponentの読み込み
+					Deserialization::FromJson(jc, c);
+                    /*c.fovAngleY = jc["fovAngleY"];
                     c.aspectRatio = jc["aspectRatio"];
                     c.nearZ = jc["nearZ"];
-                    c.farZ = jc["farZ"];
+                    c.farZ = jc["farZ"];*/
                     CameraComponent* camera = ecs->AddComponent<CameraComponent>(entity);
-					camera->fovAngleY = c.fovAngleY;
+					/*camera->fovAngleY = c.fovAngleY;
 					camera->aspectRatio = c.aspectRatio;
 					camera->nearZ = c.nearZ;
-					camera->farZ = c.farZ;
+					camera->farZ = c.farZ;*/
+					*camera = c;
 					camera->bufferIndex = resourceManager->CreateConstantBuffer<BUFFER_DATA_VIEWPROJECTION>();
                 }
 
@@ -1300,4 +1306,96 @@ void Cho::FileSystem::ScriptProject::UnloadPDB()
 {
     SymUnloadModule64(GetCurrentProcess(), m_PDBBaseAddress);
 	SymCleanup(GetCurrentProcess());
+}
+
+void Cho::Deserialization::FromJson(const json& j, TransformComponent& t)
+{
+	t.translation = { j["translation"][0], j["translation"][1], j["translation"][2] };
+	t.rotation = { j["rotation"][0], j["rotation"][1], j["rotation"][2], j["rotation"][3] };
+	t.scale = { j["scale"][0], j["scale"][1], j["scale"][2] };
+	t.degrees = { j["degrees"][0], j["degrees"][1], j["degrees"][2] };
+}
+
+void Cho::Deserialization::FromJson(const json& j, CameraComponent& c)
+{
+	c.fovAngleY = j.value("fovAngleY", 45.0f);
+	c.aspectRatio = j.value("aspectRatio", 1.777f);
+	c.nearZ = j.value("nearZ", 0.1f);
+	c.farZ = j.value("farZ", 1000.0f);
+}
+
+void Cho::Deserialization::FromJson(const json& j, MeshFilterComponent& m)
+{
+    j;m;
+	/*if (j.contains("modelName"))
+	{
+		m.modelName = j["modelName"].get<std::string>();
+		m.modelID = j["modelID"].get<std::string>();
+	} else
+	{
+		m.modelName = "";
+		m.modelID.reset();
+	}*/
+}
+
+void Cho::Deserialization::FromJson(const json& j, MeshRendererComponent& r)
+{
+	r.visible = j.value("visible", true);
+}
+
+void Cho::Deserialization::FromJson(const json& j, ScriptComponent& s)
+{
+    j;s;
+	/*s.scriptName = j.value("scriptName", "");
+	if (j.contains("scriptID"))
+	{
+		s.scriptID = j["scriptID"].get<std::string>();
+	} else
+	{
+		s.scriptID.reset();
+	}
+	if (j.contains("entity"))
+	{
+		s.entity = j["entity"].get<std::string>();
+	} else
+	{
+		s.entity.reset();
+	}*/
+}
+
+void Cho::Deserialization::FromJson(const json& j, std::vector<LineRendererComponent>& ls)
+{
+    j;ls;
+	/*if (j.is_array())
+	{
+		for (const auto& item : j)
+		{
+			LineRendererComponent l;
+			l.line.start = { item["start"][0], item["start"][1], item["start"][2] };
+			l.line.end = { item["end"][0], item["end"][1], item["end"][2] };
+			l.line.color = { item["color"][0], item["color"][1], item["color"][2], item["color"][3] };
+			ls.push_back(l);
+		}
+	}*/
+}
+
+void Cho::Deserialization::FromJson(const json& j, Rigidbody2DComponent& rb)
+{
+    j;rb;
+	/*rb.isKinematic = j.value("isKinematic", false);
+	rb.gravityScale = j.value("gravityScale", 1.0f);
+	rb.mass = j.value("mass", 1.0f);
+	rb.bodyType = static_cast<Rigidbody2DComponent::BodyType>(j.value("bodyType", 0));
+	rb.fixedRotation = j.value("fixedRotation", false);*/
+}
+
+void Cho::Deserialization::FromJson(const json& j, BoxCollider2DComponent& bc)
+{
+	bc.offsetX = j.value("offsetX", 0.0f);
+	bc.offsetY = j.value("offsetY", 0.0f);
+	bc.width = j.value("width", 1.0f);
+	bc.height = j.value("height", 1.0f);
+	bc.density = j.value("density", 1.0f);
+	bc.friction = j.value("friction", 0.5f);
+	bc.restitution = j.value("restitution", 0.0f);
 }

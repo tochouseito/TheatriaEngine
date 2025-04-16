@@ -34,6 +34,12 @@ enum RenderMode
 	RenderModeCount,
 };
 
+enum ViewportType
+{
+	ViewportGame = 0,
+	ViewportSwapChain,
+};
+
 struct RenderTexture
 {
 	std::optional<uint32_t> m_BufferIndex = std::nullopt;
@@ -47,6 +53,7 @@ class GameCore;
 class GraphicsEngine : public Engine
 {
 	friend class TextureManager;
+	friend class EngineCommand;
 public:
 	// Constructor
 	GraphicsEngine(ID3D12Device8* device,ResourceManager* resourceManager) : 
@@ -84,7 +91,7 @@ private:
 	// レンダーターゲットの設定
 	void SetRenderTargets(CommandContext* context,DrawPass pass,RenderMode mode = RenderMode::Game);
 	// 描画設定コマンド
-	void SetRenderState(CommandContext* context);
+	void SetRenderState(CommandContext* context,ViewportType type);
 	void DrawGBuffers(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode);
 	void DrawLighting(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode);
 	void DrawForward(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode);
@@ -106,5 +113,8 @@ private:
 	std::unique_ptr<PipelineManager> m_PipelineManager = nullptr;
 
 	std::array<RenderTexture, RenderTextureType::RenderTextureTypeCount> m_RenderTextures;
+
+	UINT64 m_ResolutionWidth = 1920;
+	UINT m_ResolutionHeight = 1080;
 };
 

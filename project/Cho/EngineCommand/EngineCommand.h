@@ -94,7 +94,11 @@ public:
 	void GameRun();
 	// ゲーム停止
 	void GameStop();
+	// ゲーム実行中か
 	bool IsGameRunning();
+	// ゲームの解像度を取得
+	UINT64 GetGameResolutionX() const;
+	UINT GetGameResolutionY() const;
 private:
 	// 選択中のオブジェクト
 	GameObject* m_SelectedObject = nullptr;

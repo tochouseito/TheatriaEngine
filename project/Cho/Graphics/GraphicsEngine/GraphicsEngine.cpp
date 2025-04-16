@@ -118,7 +118,7 @@ void GraphicsEngine::PostRenderWithImGui(ImGuiManager* imgui)
 	);
 	// RTVの設定
 	SetRenderTargets(context, DrawPass::SwapChainPass);
-	SetRenderState(context);
+	SetRenderState(context,ViewportSwapChain);
 	// ImGuiの描画
 	imgui->Draw(context->GetCommandList());
 	// SwapChainResourceの状態遷移
@@ -145,12 +145,12 @@ void GraphicsEngine::ScreenResize()
 	// SwapChainのリサイズ
 	m_SwapChain->Resize(m_Device, WinApp::GetWindowWidth(), WinApp::GetWindowHeight());
 	// DepthBufferのリサイズ
-	m_DepthManager->ResizeDepthBuffer(m_Device, m_ResourceManager, WinApp::GetWindowWidth(), WinApp::GetWindowHeight());
+	m_DepthManager->ResizeDepthBuffer(m_Device, m_ResourceManager, m_ResolutionWidth, m_ResolutionHeight);
 	// オフスクリーンレンダリング用のリソースをリサイズ
 	// オフスクリーンレンダリング用のリソースを作成
 	D3D12_RESOURCE_DESC resourceDesc = {};
-	resourceDesc.Width = WinApp::GetWindowWidth();
-	resourceDesc.Height = WinApp::GetWindowHeight();
+	resourceDesc.Width = m_ResolutionWidth;
+	resourceDesc.Height = m_ResolutionHeight;
 	resourceDesc.MipLevels = 1;
 	resourceDesc.DepthOrArraySize = 1;
 	resourceDesc.SampleDesc.Count = 1;
@@ -172,14 +172,14 @@ void GraphicsEngine::ScreenResize()
 		case GameScreen:
 			// リサイズ
 			m_ResourceManager->RemakeColorBuffer(m_RenderTextures[renderTexType].m_BufferIndex, resourceDesc, &clearValue, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-			m_RenderTextures[renderTexType].m_Width = WinApp::GetWindowWidth();
-			m_RenderTextures[renderTexType].m_Height = WinApp::GetWindowHeight();
+			m_RenderTextures[renderTexType].m_Width = m_ResolutionWidth;
+			m_RenderTextures[renderTexType].m_Height = m_ResolutionHeight;
 			break;
 		case SceneScreen:
 			// リサイズ
 			m_ResourceManager->RemakeColorBuffer(m_RenderTextures[renderTexType].m_BufferIndex, resourceDesc, &clearValue, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-			m_RenderTextures[renderTexType].m_Width = WinApp::GetWindowWidth();
-			m_RenderTextures[renderTexType].m_Height = WinApp::GetWindowHeight();
+			m_RenderTextures[renderTexType].m_Width = m_ResolutionWidth;
+			m_RenderTextures[renderTexType].m_Height = m_ResolutionHeight;
 			break;
 		case RenderTextureTypeCount:
 			break;
@@ -273,7 +273,7 @@ void GraphicsEngine::SetRenderTargets(CommandContext* context, DrawPass pass, Re
 		rtvHandle = m_SwapChain->GetBuffer(m_SwapChain->GetCurrentBackBufferIndex())->m_RTVCpuHandle;
 		context->SetRenderTarget(&rtvHandle);
 		context->ClearRenderTarget(rtvHandle);
-		SetRenderState(context);
+		SetRenderState(context,ViewportSwapChain);
 		// リリースモードでスワップチェーンに描画
 		if (mode == RenderMode::Release)
 		{
@@ -299,23 +299,42 @@ void GraphicsEngine::SetRenderTargets(CommandContext* context, DrawPass pass, Re
 	}
 }
 
-void GraphicsEngine::SetRenderState(CommandContext* context)
+void GraphicsEngine::SetRenderState(CommandContext* context, ViewportType type)
 {
-	// ビューポートの設定
-	D3D12_VIEWPORT viewport =
-		D3D12_VIEWPORT(
+	D3D12_VIEWPORT viewport;
+	D3D12_RECT rect;
+	switch (type)
+	{
+	case ViewportGame:
+		// ビューポートの設定
+		viewport = D3D12_VIEWPORT(
 			0.0f, 0.0f,
-			static_cast<float>(WinApp::GetWindowWidth()),
-			static_cast<float>(WinApp::GetWindowHeight()),
-			0.0f, 1.0f
-		);
+			static_cast<float>(m_ResolutionWidth),
+			static_cast<float>(m_ResolutionHeight),
+			0.0f, 1.0f);
+		// シザーレクトの設定
+		rect = D3D12_RECT(
+			0, 0,
+			static_cast<LONG>(m_ResolutionWidth),
+			static_cast<LONG>(m_ResolutionHeight));
+		break;
+	case ViewportSwapChain:
+		// ビューポートの設定
+		viewport = D3D12_VIEWPORT(
+				0.0f, 0.0f,
+				static_cast<float>(WinApp::GetWindowWidth()),
+				static_cast<float>(WinApp::GetWindowHeight()),
+				0.0f, 1.0f);
+		// シザーレクトの設定
+		rect = D3D12_RECT(
+			0, 0,
+			static_cast<LONG>(WinApp::GetWindowWidth()),
+			static_cast<LONG>(WinApp::GetWindowHeight()));
+		break;
+	default:
+		break;
+	}
 	context->SetViewport(viewport);
-	// シザーレクトの設定
-	D3D12_RECT rect = D3D12_RECT(
-		0, 0,
-		static_cast<LONG>(WinApp::GetWindowWidth()),
-		static_cast<LONG>(WinApp::GetWindowHeight())
-	);
 	context->SetScissorRect(rect);
 	// プリミティブトポロジの設定
 	context->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -330,7 +349,7 @@ void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& ga
 	// レンダーターゲットの設定
 	SetRenderTargets(context, DrawPass::GBuffers,mode);
 	// 描画設定
-	SetRenderState(context);
+	SetRenderState(context,ViewportGame);
 	// パイプラインセット
 	context->SetGraphicsPipelineState(m_PipelineManager->GetIntegratePSO().pso.Get());
 	// ルートシグネチャセット
@@ -451,7 +470,7 @@ void GraphicsEngine::DrawLighting(ResourceManager& resourceManager, GameCore& ga
 	// レンダーターゲットの設定
 	SetRenderTargets(context, DrawPass::Lighting,mode);
 	// 描画設定
-	SetRenderState(context);
+	SetRenderState(context,ViewportGame);
 	// コマンドリスト終了
 	EndCommandContext(context, Graphics);
 	// GPUの完了待ち
@@ -476,8 +495,8 @@ void GraphicsEngine::CreateDepthBuffer()
 {
 	// DepthBufferの生成
 	D3D12_RESOURCE_DESC resourceDesc = {};
-	resourceDesc.Width = WinApp::GetWindowWidth();
-	resourceDesc.Height = WinApp::GetWindowHeight();
+	resourceDesc.Width = m_ResolutionWidth;
+	resourceDesc.Height = m_ResolutionHeight;
 	resourceDesc.MipLevels = 1;
 	resourceDesc.DepthOrArraySize = 1;
 	resourceDesc.SampleDesc.Count = 1;
@@ -491,8 +510,8 @@ void GraphicsEngine::CreateOffscreenBuffer()
 {
 	// オフスクリーンレンダリング用のリソースを作成
 	D3D12_RESOURCE_DESC resourceDesc = {};
-	resourceDesc.Width = WinApp::GetWindowWidth();
-	resourceDesc.Height = WinApp::GetWindowHeight();
+	resourceDesc.Width = m_ResolutionWidth;
+	resourceDesc.Height = m_ResolutionHeight;
 	resourceDesc.MipLevels = 1;
 	resourceDesc.DepthOrArraySize = 1;
 	resourceDesc.SampleDesc.Count = 1;
@@ -515,8 +534,8 @@ void GraphicsEngine::CreateDebugOffscreenBuffer()
 {
 	// デバッグ用オフスクリーンレンダリング用のリソースを作成
 	D3D12_RESOURCE_DESC resourceDesc = {};
-	resourceDesc.Width = WinApp::GetWindowWidth();
-	resourceDesc.Height = WinApp::GetWindowHeight();
+	resourceDesc.Width = m_ResolutionWidth;
+	resourceDesc.Height = m_ResolutionHeight;
 	resourceDesc.MipLevels = 1;
 	resourceDesc.DepthOrArraySize = 1;
 	resourceDesc.SampleDesc.Count = 1;
@@ -539,8 +558,8 @@ void GraphicsEngine::CreateDebugDepthBuffer()
 {
 	// DepthBufferの生成
 	D3D12_RESOURCE_DESC resourceDesc = {};
-	resourceDesc.Width = WinApp::GetWindowWidth();
-	resourceDesc.Height = WinApp::GetWindowHeight();
+	resourceDesc.Width = m_ResolutionWidth;
+	resourceDesc.Height = m_ResolutionHeight;
 	resourceDesc.MipLevels = 1;
 	resourceDesc.DepthOrArraySize = 1;
 	resourceDesc.SampleDesc.Count = 1;
