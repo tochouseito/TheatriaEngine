@@ -55,3 +55,13 @@ void EngineCommand::GameStop()
 }
 
 bool EngineCommand::IsGameRunning() { return m_GameCore->IsRunning(); }
+
+UINT64 EngineCommand::GetGameResolutionX() const
+{
+	return m_GraphicsEngine->m_ResolutionWidth;
+}
+
+UINT EngineCommand::GetGameResolutionY() const
+{
+	return m_GraphicsEngine->m_ResolutionHeight;
+}

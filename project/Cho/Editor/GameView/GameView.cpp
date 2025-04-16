@@ -2,6 +2,7 @@
 #include "GameView.h"
 #include "OS/Windows/WinApp/WinApp.h"
 #include "Editor/EditorManager/EditorManager.h"
+#include "EngineCommand/EngineCommand.h"
 
 void GameView::Initialize()
 {
@@ -28,10 +29,9 @@ void GameView::Window()
 
     // 固定解像度のテクスチャサイズ
     ImVec2 textureResolution = {
-        static_cast<float>(WinApp::GetWindowWidth()),
-        static_cast<float>(WinApp::GetWindowHeight())
+        static_cast<float>(m_EngineCommand->GetGameResolutionX()),
+        static_cast<float>(m_EngineCommand->GetGameResolutionY())
     };
-
     // アスペクト比を維持しつつ、ウィンドウ内の描画可能領域に収まるようにスケーリング係数を計算
     float scaleX = contentRegion.x / textureResolution.x;
     float scaleY = contentRegion.y / textureResolution.y;

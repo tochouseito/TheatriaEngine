@@ -98,7 +98,7 @@ void WinApp::CreateGameWindow() {
 	timeBeginPeriod(1);
 
 	// ウィンドウを表示する
-	ShowWindow(m_HWND, SW_MAXIMIZE);// 最大化表示
+	ShowWindow(m_HWND, SW_MAXIMIZE);// 最大化表示SW_MAXIMIZE
 
 	// Log出力
 	Log::Write(LogLevel::Info, "CreateGameWindow End");
