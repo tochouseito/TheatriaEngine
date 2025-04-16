@@ -2,6 +2,7 @@
 #include "Hierarchy.h"
 #include "Editor/EditorManager/EditorManager.h"
 #include "EngineCommand/EngineCommand.h"
+#include "EngineCommand/EngineCommands.h"
 #include "GameCore/GameCore.h"
 #include "Core/ChoLog/ChoLog.h"
 
@@ -36,6 +37,7 @@ void Hierarchy::Window()
 	{
 		// オブジェクトを取得
 		GameObject* object = m_EngineCommand->GetGameCore()->GetObjectContainer()->GetGameObject(objectID);
+		if (!object) { continue; }// オブジェクトが存在しない場合はスキップ
 		// オブジェクトの名前を取得
 		std::wstring objectName = object->GetName();
 
@@ -60,34 +62,34 @@ void Hierarchy::Window()
 			m_EngineCommand->SetSelectedObject(object);
 			ImGui::OpenPopup("HierarchyPopupMenu");
 		}
-
-		// ポップアップメニュー
-		if (ImGui::BeginPopup("HierarchyPopupMenu"))
-		{
-			if (ImGui::MenuItem("削除"))
-			{
-				// 選択中のオブジェクトを削除
-				//m_EditorCommand->GetGameCoreCommandPtr()->GetObjectContainerPtr()->DeleteGameObject(object);
-				// ポップアップメニューを閉じる
-				ImGui::CloseCurrentPopup();
-			}
-			if (ImGui::MenuItem("名前変更"))
-			{
-				// 名前変更処理
-
-				// ポップアップメニューを閉じる
-				ImGui::CloseCurrentPopup();
-			}
-			ImGui::EndPopup();
-		}
-
-
 		// ツリーノード展開処理
 		if (isTreeOpen)
 		{
 			// 子ノードを表示する場合の処理
 			ImGui::TreePop();
 		}
+	}
+	// ポップアップメニュー
+	if (ImGui::BeginPopup("HierarchyPopupMenu"))
+	{
+		if (ImGui::MenuItem("削除"))
+		{
+			// 選択中のオブジェクトを削除
+			std::unique_ptr<DeleteObjectCommand> deleteCommand = std::make_unique<DeleteObjectCommand>(m_EngineCommand->GetSelectedObject()->GetID());
+			m_EngineCommand->ExecuteCommand(std::move(deleteCommand));
+			// 選択中オブジェクトをクリア
+			m_EngineCommand->SetSelectedObject(nullptr);
+			// ポップアップメニューを閉じる
+			ImGui::CloseCurrentPopup();
+		}
+		if (ImGui::MenuItem("名前変更"))
+		{
+			// 名前変更処理
+
+			// ポップアップメニューを閉じる
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndPopup();
 	}
 
 	ImGui::End();

@@ -1,7 +1,7 @@
 #pragma once
 #include <optional>
 #include "EngineCommand/EngineCommand.h"
-#include "Core/Utility/IDType.h"
+#include "Core/Utility/Components.h"
 
 // 3Dオブジェクトを追加するコマンド
 class Add3DObjectCommand :public IEngineCommand
@@ -135,4 +135,12 @@ private:
 	uint32_t m_ObjectID;
 	std::wstring m_Name;
 	ObjectType m_Type;
+	TransformComponent m_Transform;
+	std::optional<CameraComponent> m_Camera;
+	std::optional<MeshFilterComponent> m_MeshFilter;
+	std::optional<MeshRendererComponent> m_MeshRenderer;
+	std::optional<ScriptComponent> m_Script;
+	std::optional<std::vector<LineRendererComponent>> m_LineRenderer;
+	std::optional<Rigidbody2DComponent> m_Rigidbody2D;
+	std::optional<BoxCollider2DComponent> m_BoxCollider2D;
 };

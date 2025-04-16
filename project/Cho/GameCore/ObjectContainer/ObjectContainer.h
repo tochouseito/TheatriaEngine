@@ -22,6 +22,16 @@ public:
 		m_GameObjects[id].SetID(id);
 		return id;
 	}
+	// ゲームオブジェクトを削除
+	void DeleteGameObject(const ObjectID& id)
+	{
+		if (!m_GameObjects.isValid(id))
+		{
+			return;
+		}
+		m_NameToObjectID.erase(m_GameObjects[id].GetName());
+		m_GameObjects.erase(id);
+	}
 	// プレハブを追加
 	PrefabID AddPrefab(const Entity& entity, const std::wstring& name, const ObjectType& type)
 	{ 
@@ -30,9 +40,19 @@ public:
 		m_Prefabs[id].SetID(id);
 		return id;
 	}
+	// プレハブを削除
+	void DeletePrefab(const PrefabID& id)
+	{
+		if (!m_Prefabs.isValid(id))
+		{
+			return;
+		}
+		m_NameToPrefabID.erase(m_Prefabs[id].GetName());
+		m_Prefabs.erase(id);
+	}
 	// ゲームオブジェクトを取得
 	GameObject* GetGameObject(const ObjectID& index) {
-		if (index >= m_GameObjects.size())
+		if (!m_GameObjects.isValid(index))
 		{
 			return nullptr;
 		}
@@ -40,7 +60,7 @@ public:
 	}
 	// プレハブを取得
 	Prefab* GetPrefab(const ObjectID& index) {
-		if (index >= m_Prefabs.size())
+		if (!m_Prefabs.isValid(index))
 		{
 			return nullptr;
 		}

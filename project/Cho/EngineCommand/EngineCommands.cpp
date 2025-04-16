@@ -32,6 +32,8 @@ bool Add3DObjectCommand::Execute(EngineCommand* edit)
 	m_ObjectID = objectID;
 	// シーンに追加
 	edit->m_GameCore->GetSceneManager()->GetCurrentScene()->AddUseObject(objectID);
+	// SelectedObjectを設定
+	edit->SetSelectedObject(edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID));
 	return true;
 }
 
@@ -53,7 +55,7 @@ bool AddCameraObjectCommand::Execute(EngineCommand* edit)
 	// Entity
 	Entity entity = edit->m_GameCore->GetECSManager()->GenerateEntity();
 	// デフォルトの名前
-	std::wstring name = L"NewMeshObject";
+	std::wstring name = L"NewCameraObject";
 	// 重複回避
 	name = GenerateUniqueName(name, edit->m_GameCore->GetObjectContainer()->GetNameToObjectID());
 	// Transform統合バッファからmapIDを取得
@@ -66,10 +68,12 @@ bool AddCameraObjectCommand::Execute(EngineCommand* edit)
 	// Resourceの生成
 	camera->bufferIndex = edit->m_ResourceManager->CreateConstantBuffer<BUFFER_DATA_VIEWPROJECTION>();
 	// GameObjectを追加
-	ObjectID objectID = edit->m_GameCore->GetObjectContainer()->AddGameObject(entity, name, ObjectType::MeshObject);
+	ObjectID objectID = edit->m_GameCore->GetObjectContainer()->AddGameObject(entity, name, ObjectType::Camera);
 	m_ObjectID = objectID;
 	// シーンに追加
 	edit->m_GameCore->GetSceneManager()->GetCurrentScene()->AddUseObject(objectID);
+	// SelectedObjectを設定
+	edit->SetSelectedObject(edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID));
 	return true;
 }
 
@@ -204,11 +208,43 @@ bool DeleteObjectCommand::Execute(EngineCommand* edit)
 	m_Name = object->GetName();
 	m_Type = object->GetType();
 	// モデルのUseListから削除
-	// MapIDを返却
+	TransformComponent* transform = edit->m_GameCore->GetECSManager()->GetComponent<TransformComponent>(object->GetEntity());
+	if (!transform) { Log::Write(LogLevel::Assert, "TransfomrComponent nullptr"); }
+	MeshFilterComponent* meshFilter = edit->m_GameCore->GetECSManager()->GetComponent<MeshFilterComponent>(object->GetEntity());
+	if (meshFilter)
+	{
+		edit->m_ResourceManager->GetModelManager()->RemoveModelUseList(meshFilter->modelID.value(), transform->mapID.value());
+	}
+	// TransformMapIDを返却
+	edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::Transform)->RemoveMapID(transform->mapID.value());
+	// 削除前にComponentを記録する
+	m_Transform = *transform;
+	if (meshFilter) { m_MeshFilter = *meshFilter; }
+	MeshRendererComponent* meshRenderer = edit->m_GameCore->GetECSManager()->GetComponent<MeshRendererComponent>(object->GetEntity());
+	if (meshRenderer) { m_MeshRenderer = *meshRenderer; }
+	ScriptComponent* script = edit->m_GameCore->GetECSManager()->GetComponent<ScriptComponent>(object->GetEntity());
+	if (script) { m_Script = *script; }
+	std::vector<LineRendererComponent>* lineRenderer = edit->m_GameCore->GetECSManager()->GetAllComponents<LineRendererComponent>(object->GetEntity());
+	if (lineRenderer) { m_LineRenderer = *lineRenderer; }
+	Rigidbody2DComponent* rb = edit->m_GameCore->GetECSManager()->GetComponent<Rigidbody2DComponent>(object->GetEntity());
+	if (rb) { m_Rigidbody2D = *rb; }
+	BoxCollider2DComponent* box = edit->m_GameCore->GetECSManager()->GetComponent<BoxCollider2DComponent>(object->GetEntity());
+	if (box) { m_BoxCollider2D = *box; }
 	// Componentの削除
+	edit->m_GameCore->GetECSManager()->RemoveComponent<TransformComponent>(object->GetEntity());
+	if (meshFilter) { edit->m_GameCore->GetECSManager()->RemoveComponent<MeshFilterComponent>(object->GetEntity()); }
+	if (meshRenderer) { edit->m_GameCore->GetECSManager()->RemoveComponent<MeshRendererComponent>(object->GetEntity()); }
+	if (script) { edit->m_GameCore->GetECSManager()->RemoveComponent<ScriptComponent>(object->GetEntity()); }
+	if (lineRenderer) { edit->m_GameCore->GetECSManager()->RemoveAllComponents<LineRendererComponent>(object->GetEntity()); }
+	if (rb) { edit->m_GameCore->GetECSManager()->RemoveComponent<Rigidbody2DComponent>(object->GetEntity()); }
+	if (box) { edit->m_GameCore->GetECSManager()->RemoveComponent<BoxCollider2DComponent>(object->GetEntity()); }
 	// Entityの削除
+	edit->m_GameCore->GetECSManager()->RemoveEntity(object->GetEntity());
+	// CurrentSceneから削除
+	edit->m_GameCore->GetSceneManager()->GetCurrentScene()->RemoveUseObject(m_ObjectID);
 	// GameObjectの削除
-	return false;
+	edit->m_GameCore->GetObjectContainer()->DeleteGameObject(object->GetID());
+	return true;
 }
 
 bool DeleteObjectCommand::Undo(EngineCommand* edit)

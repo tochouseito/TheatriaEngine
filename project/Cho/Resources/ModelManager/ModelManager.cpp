@@ -134,6 +134,70 @@ void ModelManager::RegisterModelUseList(const std::variant<uint32_t, std::wstrin
 	}
 }
 
+void ModelManager::RemoveModelUseList(const std::variant<uint32_t, std::wstring>& key, const uint32_t& transformMapID)
+{
+	// コンテナのキー
+	uint32_t keyIndex = 0;
+	if (std::holds_alternative<uint32_t>(key))
+	{
+		keyIndex = std::get<uint32_t>(key);
+	} else if (std::holds_alternative<std::wstring>(key))
+	{
+		std::wstring name = std::get<std::wstring>(key);
+		if (!m_ModelNameContainer.contains(name))
+		{
+			Log::Write(LogLevel::Assert, "Model name not found: " + ConvertString(name));
+			return;
+		}
+		keyIndex = m_ModelNameContainer[name];
+	}
+	// 既にUseListに登録されている場合は登録しない
+	if (!m_Models[keyIndex].useTransformList.empty())
+	{
+		// 指定されたモデルに登録されているか確認、削除する
+		for (auto& index : m_Models[keyIndex].useTransformList)
+		{
+			if (index == transformMapID)
+			{
+				// 見つかったら削除
+				m_Models[keyIndex].useTransformList.remove(transformMapID);
+				break;
+			}
+		}
+		// ほかのモデルに登録されていたら、削除
+		for (auto& model : m_Models.GetVector())
+		{
+			if (model.useTransformList.size() > 0)
+			{
+				for (auto& index : model.useTransformList)
+				{
+					if (index == transformMapID)
+					{
+						model.useTransformList.remove(transformMapID);
+						break;
+					}
+				}
+			}
+		}
+	}
+	// どのモデルのUseListにない場合は終わり
+	// UseListのバッファ更新
+	StructuredBuffer<uint32_t>* buffer = dynamic_cast<StructuredBuffer<uint32_t>*>(m_pResourceManager->GetBuffer<IStructuredBuffer>(m_Models[keyIndex].useTransformBufferIndex));
+	if (buffer)
+	{
+		// UseListの全てをバッファに転送
+		uint32_t i = 0;
+		for (uint32_t& useIndex : m_Models[keyIndex].useTransformList)
+		{
+			buffer->UpdateData(useIndex, i);
+			i++;
+		}
+	} else
+	{
+		Log::Write(LogLevel::Assert, "Buffer is nullptr");
+	}
+}
+
 void ModelManager::CreateDefaultMesh()
 {
 	// Cube

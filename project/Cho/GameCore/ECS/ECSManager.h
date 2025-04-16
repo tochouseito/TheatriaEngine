@@ -217,20 +217,22 @@ public:
 		// エンティティを削除
 		inline void Remove(const Entity& entity)
 		{
-			if (m_EntityToIndex.size() <= entity)
+			// 削除対象が空 or 登録されていなければ return
+			if (m_Entities.empty() || entity >= m_EntityToIndex.size())
 			{
 				return;
 			}
-			size_t backIndex = m_Entities.size() - 1;
-			Entity backEntity = m_Entities.back();
+
 			uint32_t removeIndex = m_EntityToIndex[entity];
-			// 削除する要素が最後の要素でなければ
-			if (entity != m_Entities.back())
+			uint32_t backIndex = static_cast<uint32_t>(m_Entities.size() - 1);
+			Entity backEntity = m_Entities[backIndex];
+
+			if (entity != backEntity)
 			{
 				m_Entities[removeIndex] = backEntity;
-				m_EntityToIndex[backIndex] = removeIndex;
+				m_EntityToIndex[backEntity] = removeIndex;
 			}
-			// 最後尾のEntityを削除
+
 			m_Entities.pop_back();
 		}
 	private:

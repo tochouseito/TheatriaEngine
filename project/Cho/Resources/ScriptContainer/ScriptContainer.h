@@ -34,7 +34,7 @@ public:
 	// スクリプトデータをIDで取得する関数
 	ScriptData GetScriptDataByID(ScriptID id)
 	{
-		if (id < m_ScriptContainer.size())
+		if (m_ScriptContainer.isValid(id))
 		{
 			return m_ScriptContainer[id];
 		} else
