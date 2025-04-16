@@ -354,13 +354,13 @@ void Inspector::AddComponent(GameObject* object)
 			//lines = m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr()->GetAllComponents<LineRendererComponent>(object->GetEntity());
 			//if (!lines || lines->empty())
 			//{
-				if (ImGui::Selectable("LineRendererComponent"))
-				{
-					// LineRendererComponentを追加
-					std::unique_ptr<AddLineRendererComponent> addLineComp = std::make_unique<AddLineRendererComponent>(object->GetEntity());
-					m_EngineCommand->ExecuteCommand(std::move(addLineComp));
-					isOpen = false;
-				}
+			if (ImGui::Selectable("LineRendererComponent"))
+			{
+				// LineRendererComponentを追加
+				std::unique_ptr<AddLineRendererComponent> addLineComp = std::make_unique<AddLineRendererComponent>(object->GetEntity());
+				m_EngineCommand->ExecuteCommand(std::move(addLineComp));
+				isOpen = false;
+			}
 			//}
 			// Rigidbody2DComponentがあるか
 			rigidbody = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<Rigidbody2DComponent>(object->GetEntity());
@@ -404,13 +404,13 @@ void Inspector::AddComponent(GameObject* object)
 			//lines = m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr()->GetAllComponents<LineRendererComponent>(object->GetEntity());
 			//if (!lines || lines->empty())
 			//{
-				if (ImGui::Selectable("LineRendererComponent"))
-				{
-					// LineRendererComponentを追加
-					std::unique_ptr<AddLineRendererComponent> addLineComp = std::make_unique<AddLineRendererComponent>(object->GetEntity());
-					m_EngineCommand->ExecuteCommand(std::move(addLineComp));
-					isOpen = false;
-				}
+			if (ImGui::Selectable("LineRendererComponent"))
+			{
+				// LineRendererComponentを追加
+				std::unique_ptr<AddLineRendererComponent> addLineComp = std::make_unique<AddLineRendererComponent>(object->GetEntity());
+				m_EngineCommand->ExecuteCommand(std::move(addLineComp));
+				isOpen = false;
+			}
 			//}
 			break;
 		case ObjectType::Count:

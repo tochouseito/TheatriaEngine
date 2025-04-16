@@ -475,6 +475,7 @@
     <ClInclude Include="Cho\Core\Utility\InputStruct.h" />
     <ClInclude Include="Cho\EngineCommand\EngineCommand.h" />
     <ClInclude Include="Cho\EngineCommand\EngineCommands.h" />
+    <ClInclude Include="Cho\Core\Utility\IDType.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Cho\Resources\EngineAssets\Shader\header\Demo.hlsli">

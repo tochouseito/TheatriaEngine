@@ -52,11 +52,13 @@ public:
 	ModelData* GetModelData(const uint32_t& index) { return &m_Models[index]; }
 	// モデルのUseListに登録する
 	void RegisterModelUseList(const std::variant<uint32_t,std::wstring>& key, const uint32_t& transformMapID);
+	// モデルのUseListから削除する
+	void RemoveModelUseList(const std::variant<uint32_t, std::wstring>& key, const uint32_t& transformMapID);
 private:
 	// デフォルトメッシュの生成
 	void CreateDefaultMesh();
 	// モデルコンテナの要素数を取得する
-	uint32_t GetModelDataSize() { return static_cast<uint32_t>(m_Models.size()); }
+	//uint32_t GetModelDataSize() { return static_cast<uint32_t>(m_Models.size()); }
 	// ModelDataの追加
 	void AddModelData(ModelData& modelData);
 

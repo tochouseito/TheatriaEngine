@@ -418,6 +418,7 @@ xcopy "$(SolutionDir)Cho\Core\Utility\InputStruct.h" "$(TargetDir)Cho\Core\Utili
     <ClCompile Include="Cho\GameCore\Systems\MultiSystems.cpp" />
     <ClInclude Include="Cho\Core\ChoLog\ChoLog.h" />
     <ClInclude Include="Cho\Core\Utility\GenerateUnique.h" />
+    <ClInclude Include="Cho\Core\Utility\IDType.h" />
     <ClInclude Include="Cho\Core\Utility\ImGuiEx.h" />
     <ClInclude Include="Cho\Core\Utility\InputStruct.h" />
     <ClInclude Include="Cho\Externals\box2d\include\box2d\b2_api.h" />

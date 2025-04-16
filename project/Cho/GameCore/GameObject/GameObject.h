@@ -1,16 +1,6 @@
 #pragma once
 #include <string>
-using Entity = uint32_t;
-using ObjectID = uint32_t;
-using PrefabID = uint32_t;
-
-// オブジェクトのタイプ
-enum class ObjectType 
-{
-	MeshObject = 0,// メッシュオブジェクト
-	Camera,// カメラオブジェクト
-	Count,// カウント
-};
+#include "Core/Utility/IDType.h"
 
 inline const char* ObjectTypeToWString(ObjectType type)
 {
@@ -37,6 +27,8 @@ public:
 		m_Entity(entity),  m_Name(name), m_Type(type)
 	{
 	}
+	// Constructor
+	Prefab() {}
 	// Destructor
 	~Prefab()
 	{
@@ -60,6 +52,8 @@ public:
 		m_Entity(entity), m_Name(name), m_Type(type)
 	{
 	}
+	// Constructor
+	GameObject(){}
 	// Destructor
 	~GameObject()
 	{

@@ -53,6 +53,21 @@ public:
         return nextIndex - freeList.size();
     }
 
+	// 要素が有効かどうか
+	bool isValid(size_t index) const
+	{
+        // フリーリストにあったら無効な要素
+		for (const auto& freeIndex : freeList)
+		{
+			if (index == freeIndex)
+			{
+				return false;
+			}
+		}
+		// 有効な要素
+		return index < nextIndex;
+	}
+
     // 予約容量
     size_t capacity() const {
         return data.capacity();

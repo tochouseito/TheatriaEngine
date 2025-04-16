@@ -2,6 +2,7 @@
 #include "ChoMath.h"// ChoEngine数学ライブラリ
 #include <Externals/box2d/include/box2d/box2d.h>
 #include "Core/Utility/Color.h"
+#include "Core/Utility/IDType.h"
 #include <vector>         // C++98
 #include <array>          // C++11
 #include <functional>     // C++98
@@ -17,9 +18,6 @@
 #include <numbers>        // C++20
 #include <cstdint>
 
-using Entity = uint32_t;
-using CompID = size_t;
-using Archetype = std::bitset<256>;
 struct ScriptContext;
 
 // コンポーネントだと判別するためのタグ

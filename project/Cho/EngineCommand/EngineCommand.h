@@ -28,6 +28,7 @@ class EngineCommand
 	friend class AddLineRendererComponent;
 	friend class AddRigidbody2DComponent;
 	friend class AddBoxCollider2DComponent;
+	friend class DeleteObjectCommand;
 	// Editor
 
 public:

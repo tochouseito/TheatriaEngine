@@ -21,6 +21,7 @@ public:
 	virtual inline void SetSceneName(const std::wstring& sceneName) { m_SceneName = sceneName; }
 	virtual inline std::vector<ObjectID>& GetUseObjects() noexcept { return useObjects; }
 	virtual inline void AddUseObject(const ObjectID& objectID) { useObjects.push_back(objectID); }
+	virtual inline void RemoveUseObject(const ObjectID& objectID) { useObjects.erase(std::remove(useObjects.begin(), useObjects.end(), objectID), useObjects.end()); }
 	virtual inline void SetMainCameraID(const ObjectID& cameraID) { m_MainCameraID = cameraID; }
 	virtual inline std::optional<ObjectID> GetMainCameraID() const noexcept { return m_MainCameraID; }
 	virtual void Start() = 0;
