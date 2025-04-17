@@ -903,8 +903,10 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
 	fs::path contextPath = includeBase / "Cho/GameCore/ScriptAPI";
 
     // ライブラリディレクトリ
-    fs::path libraryPath = currentPath / "../generated/outputs/$(Configuration)/";
-    fs::path libraryPath2 = includeBase / "../..";
+    //fs::path libraryPath = currentPath / "../generated/outputs/$(Configuration)/";
+    //fs::path libraryPath2 = includeBase / "../../";
+    fs::path libraryPath = "$(ProjectDir)../../../../generated/outputs/$(Configuration)/";
+    fs::path libraryPath2 = "$(ProjectDir)../../";
 
     // パスの正規化
     systemPath.make_preferred();
