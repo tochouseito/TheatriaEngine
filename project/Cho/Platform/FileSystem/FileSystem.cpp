@@ -278,7 +278,7 @@ std::optional<Cho::GameSettingsInfo> Cho::FileSystem::LoadGameSettings(const std
     }
 }
 
-bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory,BaseScene* scene, ObjectContainer* container, ECSManager* ecs)
+bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory,BaseScene* scene, ObjectContainer* container, ECSManager* ecs, ResourceManager* resourceManager)
 {
     std::filesystem::path path = std::filesystem::path(directory) / (scene->GetSceneName() + L".json");
 
@@ -600,6 +600,16 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, SceneManager* 
     }
 }
 
+bool Cho::FileSystem::SaveScriptFile(const std::wstring& directory, ResourceManager* resourceManager)
+{
+    return false;
+}
+
+bool Cho::FileSystem::LoadScriptFile(const std::wstring& filePath, ResourceManager* resourceManager)
+{
+    return false;
+}
+
 // コンポーネントを保存
 json Cho::Serialization::ToJson(const TransformComponent& t)
 {
@@ -731,7 +741,8 @@ void Cho::FileSystem::SaveProject(SceneManager* sceneManager, ObjectContainer* c
             L"GameProjects/" + m_sProjectName,
             scene.get(),
             container,
-            ecs
+            ecs,
+			resourceManager
         );
     }
     resourceManager;
@@ -1020,7 +1031,7 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
     vcxFile << "  </ItemGroup>\n";
 
     // ヘッダーファイルの登録
-    /*vcxFile << "  <ItemGroup>\n";
+    vcxFile << "  <ItemGroup>\n";
     for (const auto& file : scriptFiles)
     {
         if (file.ends_with(".h"))
@@ -1028,7 +1039,7 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
             vcxFile << "    <ClInclude Include=\"" << file << "\" />\n";
         }
     }
-    vcxFile << "  </ItemGroup>\n";*/
+    vcxFile << "  </ItemGroup>\n";
 
     vcxFile << "  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />\n";
     vcxFile << "</Project>\n";
