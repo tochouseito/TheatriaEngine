@@ -175,7 +175,7 @@ public:
 			[this](Entity e, TransformComponent& transform, Rigidbody2DComponent& rb)
 			{
 				e;
-				CreateBody(transform, rb);
+				CreateBody(e,transform, rb);
 			}),
 		m_ECS(ecs), m_World(world)
 	{
@@ -184,11 +184,12 @@ public:
 	~Rigidbody2DInitSystem() = default;
 
 private:
-	void CreateBody(TransformComponent& transform, Rigidbody2DComponent& rb)
+	void CreateBody(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb)
 	{
 		if (rb.runtimeBody != nullptr) return;
 
 		b2BodyDef bodyDef;
+		bodyDef.userData.pointer = static_cast<uintptr_t>(e);
 		bodyDef.type = rb.bodyType;
 		bodyDef.gravityScale = rb.gravityScale;
 		bodyDef.fixedRotation = rb.fixedRotation;
