@@ -904,7 +904,7 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
 
     // ライブラリディレクトリ
     fs::path libraryPath = currentPath / "../generated/outputs/$(Configuration)/";
-    fs::path libraryPath2 = currentPath;
+    fs::path libraryPath2 = includeBase / "../..";
 
     // パスの正規化
     systemPath.make_preferred();
