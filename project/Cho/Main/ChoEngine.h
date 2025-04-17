@@ -4,27 +4,27 @@
 ChoEngineクラス
 --------------------------------------------*/
 
-#include "Cho/Engine/Engine.h"
+#include "Engine/Engine.h"
 // Windows
-#include "Cho/OS/Windows/WinApp/WinApp.h"
+#include "OS/Windows/WinApp/WinApp.h"
 // DirectX12
-#include "Cho/SDK/DirectX/DirectX12/DirectX12Common/DirectX12Common.h"
+#include "SDK/DirectX/DirectX12/DirectX12Common/DirectX12Common.h"
 // PlatformLayer
-#include "Cho/Platform/PlatformLayer/PlatformLayer.h"
+#include "Platform/PlatformLayer/PlatformLayer.h"
 // CoreSystem
-#include "Cho/Core/CoreSystem/CoreSystem.h"
+#include "Core/CoreSystem/CoreSystem.h"
 // Resource
-#include "Cho/Resources/ResourceManager/ResourceManager.h"
+#include "Resources/ResourceManager/ResourceManager.h"
 // GraphicsEngine
-#include "Cho/Graphics/GraphicsEngine/GraphicsEngine.h"
+#include "Graphics/GraphicsEngine/GraphicsEngine.h"
 // ImGuiManager
-#include "Cho/SDK/ImGui/ImGuiManager/ImGuiManager.h"
+#include "SDK/ImGui/ImGuiManager/ImGuiManager.h"
 // GameCore
-#include "Cho/GameCore/GameCore.h"
+#include "GameCore/GameCore.h"
 // EngineCommand
 #include "EngineCommand/EngineCommand.h"
 // EditorManager
-#include "Cho/Editor/EditorManager/EditorManager.h"
+#include "Editor/EditorManager/EditorManager.h"
 // HubManager
 #include "Hub/HubManager.h"
 
@@ -32,7 +32,7 @@ class ChoEngine : public Engine
 {
 public:// method
 	// コンストラクタ
-	ChoEngine();
+	ChoEngine(RuntimeMode mode);
 	// デストラクタ
 	~ChoEngine();
 	// 初期化

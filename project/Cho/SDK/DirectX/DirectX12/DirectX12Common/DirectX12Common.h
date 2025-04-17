@@ -4,7 +4,7 @@
 DirectX12共通クラス
 --------------------------------------------*/
 
-#include "Cho/SDK/DirectX/DirectX12/stdafx/stdafx.h"
+#include "SDK/DirectX/DirectX12/stdafx/stdafx.h"
 
 #include<dxgidebug.h>
 

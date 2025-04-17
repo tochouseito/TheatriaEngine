@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "CommandManager.h"
-#include "Cho/Core/ThreadManager/ThreadManager.h"
+#include "Core/ThreadManager/ThreadManager.h"
 
 CommandManager::CommandManager(ID3D12Device8* device)
 {

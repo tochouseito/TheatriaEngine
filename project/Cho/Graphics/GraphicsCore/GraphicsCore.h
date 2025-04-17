@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Cho/SDK/DirectX/DirectX12/CommandManager/CommandManager.h"
+#include "SDK/DirectX/DirectX12/CommandManager/CommandManager.h"
 
 class GraphicsCore
 {

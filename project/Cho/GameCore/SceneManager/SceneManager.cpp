@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "SceneManager.h"
-#include "Cho/Resources/ResourceManager/ResourceManager.h"
+#include "Resources/ResourceManager/ResourceManager.h"
 
 void ScenePrefab::Start()
 {
