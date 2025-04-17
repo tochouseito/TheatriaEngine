@@ -1,0 +1,576 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ChoEngineAPI.cpp" />
+    <ClCompile Include="Core\ChoLog\ChoLog.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Core\CoreSystem\CoreSystem.cpp" />
+    <ClCompile Include="Core\MathLibrary\MathLibrary.cpp" />
+    <ClCompile Include="Core\ThreadManager\ThreadManager.cpp" />
+    <ClCompile Include="Core\Utility\ImGuiEx.cpp" />
+    <ClCompile Include="Editor\AnimationEditor\AnimationEditor.cpp" />
+    <ClCompile Include="Editor\AssetBrowser\AssetBrowser.cpp" />
+    <ClCompile Include="Editor\BaseEditor\BaseEditor.cpp" />
+    <ClCompile Include="Editor\Console\Console.cpp" />
+    <ClCompile Include="Editor\DebugCamera\DebugCamera.cpp" />
+    <ClCompile Include="Editor\EditorManager\EditorManager.cpp" />
+    <ClCompile Include="Editor\GameView\GameView.cpp" />
+    <ClCompile Include="Editor\Hierarchy\Hierarchy.cpp" />
+    <ClCompile Include="Editor\Inspector\Inspector.cpp" />
+    <ClCompile Include="Editor\MainMenu\MainMenu.cpp" />
+    <ClCompile Include="Editor\MaterialEditor\MaterialEditor.cpp" />
+    <ClCompile Include="Editor\PipelineEditor\PipelineEditor.cpp" />
+    <ClCompile Include="Editor\PopupMenu\PopupMenu.cpp" />
+    <ClCompile Include="Editor\Profiler\Profiler.cpp" />
+    <ClCompile Include="Editor\SceneView\SceneView.cpp" />
+    <ClCompile Include="Editor\Setting\Setting.cpp" />
+    <ClCompile Include="Editor\ShaderEditor\ShaderEditor.cpp" />
+    <ClCompile Include="Editor\Timeline\Timeline.cpp" />
+    <ClCompile Include="Editor\Toolbar\Toolbar.cpp" />
+    <ClCompile Include="EngineCommand\EngineCommand.cpp" />
+    <ClCompile Include="EngineCommand\EngineCommands.cpp" />
+    <ClCompile Include="Engine\Engine.cpp" />
+    <ClCompile Include="Externals\box2d\src\collision\b2_broad_phase.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\collision\b2_chain_shape.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\collision\b2_circle_shape.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\collision\b2_collide_circle.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\collision\b2_collide_edge.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\collision\b2_collide_polygon.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\collision\b2_collision.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/wd4456 /wd4701 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/wd4456 /wd4701 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\collision\b2_distance.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\collision\b2_dynamic_tree.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\collision\b2_edge_shape.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\collision\b2_polygon_shape.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\collision\b2_time_of_impact.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\common\b2_block_allocator.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\common\b2_draw.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\common\b2_math.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\common\b2_settings.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\common\b2_stack_allocator.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\common\b2_timer.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\dynamics\b2_body.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\dynamics\b2_chain_circle_contact.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\dynamics\b2_chain_polygon_contact.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\dynamics\b2_circle_contact.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\dynamics\b2_contact.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\dynamics\b2_contact_manager.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\dynamics\b2_contact_solver.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\dynamics\b2_distance_joint.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\dynamics\b2_edge_circle_contact.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\dynamics\b2_edge_polygon_contact.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\dynamics\b2_fixture.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\dynamics\b2_friction_joint.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\dynamics\b2_gear_joint.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\dynamics\b2_island.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\dynamics\b2_joint.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\dynamics\b2_motor_joint.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\dynamics\b2_mouse_joint.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\dynamics\b2_polygon_circle_contact.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\dynamics\b2_polygon_contact.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\dynamics\b2_prismatic_joint.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\dynamics\b2_pulley_joint.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\dynamics\b2_revolute_joint.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\dynamics\b2_weld_joint.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\dynamics\b2_wheel_joint.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\dynamics\b2_world.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\dynamics\b2_world_callbacks.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Externals\box2d\src\rope\b2_rope.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="GameCore\ECS\ECSManager.cpp" />
+    <ClCompile Include="GameCore\GameCore.cpp" />
+    <ClCompile Include="GameCore\GameObject\GameObject.cpp" />
+    <ClCompile Include="GameCore\IScript\IScript.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="GameCore\MultiSystemManager\MultiSystemManager.cpp" />
+    <ClCompile Include="GameCore\ObjectContainer\ObjectContainer.cpp" />
+    <ClCompile Include="GameCore\SceneManager\SceneManager.cpp" />
+    <ClCompile Include="GameCore\ScriptAPI\ScriptAPI.cpp" />
+    <ClCompile Include="GameCore\SingleSystemManager\SingleSystemManager.cpp" />
+    <ClCompile Include="GameCore\Systems\EditorSystems.cpp" />
+    <ClCompile Include="GameCore\Systems\MultiSystems.cpp" />
+    <ClCompile Include="GameCore\Systems\SingleSystems.cpp" />
+    <ClCompile Include="Graphics\DepthManager\DepthManager.cpp" />
+    <ClCompile Include="Graphics\GraphicsCore\GraphicsCore.cpp" />
+    <ClCompile Include="Graphics\GraphicsEngine\GraphicsEngine.cpp" />
+    <ClCompile Include="Graphics\PipelineManager\PipelineManager.cpp" />
+    <ClCompile Include="Graphics\VisualEffect\VFXManager.cpp" />
+    <ClCompile Include="Hub\HubManager.cpp" />
+    <ClCompile Include="Main\ChoEngine.cpp" />
+    <ClCompile Include="OS\Windows\WinApp\WinApp.cpp" />
+    <ClCompile Include="pch\pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Platform\FileSystem\FileSystem.cpp" />
+    <ClCompile Include="Platform\InputManager\InputManager.cpp" />
+    <ClCompile Include="Platform\PlatformLayer\PlatformLayer.cpp" />
+    <ClCompile Include="Platform\Timer\Timer.cpp" />
+    <ClCompile Include="Resources\AssetManager\AssetManager.cpp" />
+    <ClCompile Include="Resources\IntegrationData\IntegrationData.cpp" />
+    <ClCompile Include="Resources\ModelManager\ModelManager.cpp" />
+    <ClCompile Include="Resources\ResourceManager\ResourceManager.cpp" />
+    <ClCompile Include="Resources\ScriptContainer\ScriptContainer.cpp" />
+    <ClCompile Include="Resources\TextureManager\TextureManager.cpp" />
+    <ClCompile Include="SDK\DirectX\DirectX12\ColorBuffer\ColorBuffer.cpp" />
+    <ClCompile Include="SDK\DirectX\DirectX12\CommandContext\CommandContext.cpp" />
+    <ClCompile Include="SDK\DirectX\DirectX12\CommandManager\CommandManager.cpp" />
+    <ClCompile Include="SDK\DirectX\DirectX12\DepthBuffer\DepthBuffer.cpp" />
+    <ClCompile Include="SDK\DirectX\DirectX12\DescriptorHeap\DescriptorHeap.cpp" />
+    <ClCompile Include="SDK\DirectX\DirectX12\DirectX12Common\DirectX12Common.cpp" />
+    <ClCompile Include="SDK\DirectX\DirectX12\GpuBuffer\GpuBuffer.cpp" />
+    <ClCompile Include="SDK\DirectX\DirectX12\GpuResource\GpuResource.cpp" />
+    <ClCompile Include="SDK\DirectX\DirectX12\IndexBuffer\IndexBuffer.cpp" />
+    <ClCompile Include="SDK\DirectX\DirectX12\PixelBuffer\PixelBuffer.cpp" />
+    <ClCompile Include="SDK\DirectX\DirectX12\stdafx\stdafx.cpp" />
+    <ClCompile Include="SDK\DirectX\DirectX12\SwapChain\SwapChain.cpp" />
+    <ClCompile Include="SDK\DirectX\DirectX12\VertexBuffer\VertexBuffer.cpp" />
+    <ClCompile Include="SDK\DirectX\DXC\DXShaderCompiler.cpp" />
+    <ClCompile Include="SDK\ImGui\ImGuiManager\ImGuiManager.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ChoEngineAPI.h" />
+    <ClInclude Include="Core\ChoLog\ChoLog.h" />
+    <ClInclude Include="Core\CoreSystem\CoreSystem.h" />
+    <ClInclude Include="Core\MathLibrary\MathLibrary.h" />
+    <ClInclude Include="Core\ThreadManager\ThreadManager.h" />
+    <ClInclude Include="Core\Utility\BufferID.h" />
+    <ClInclude Include="Core\Utility\Color.h" />
+    <ClInclude Include="Core\Utility\CompBufferData.h" />
+    <ClInclude Include="Core\Utility\Components.h" />
+    <ClInclude Include="Core\Utility\FArray.h" />
+    <ClInclude Include="Core\Utility\FVector.h" />
+    <ClInclude Include="Core\Utility\GenerateUnique.h" />
+    <ClInclude Include="Core\Utility\IDType.h" />
+    <ClInclude Include="Core\Utility\ImGuiEx.h" />
+    <ClInclude Include="Core\Utility\InputStruct.h" />
+    <ClInclude Include="Editor\AnimationEditor\AnimationEditor.h" />
+    <ClInclude Include="Editor\AssetBrowser\AssetBrowser.h" />
+    <ClInclude Include="Editor\BaseEditor\BaseEditor.h" />
+    <ClInclude Include="Editor\Console\Console.h" />
+    <ClInclude Include="Editor\DebugCamera\DebugCamera.h" />
+    <ClInclude Include="Editor\EditorManager\EditorManager.h" />
+    <ClInclude Include="Editor\GameView\GameView.h" />
+    <ClInclude Include="Editor\Hierarchy\Hierarchy.h" />
+    <ClInclude Include="Editor\Inspector\Inspector.h" />
+    <ClInclude Include="Editor\MainMenu\MainMenu.h" />
+    <ClInclude Include="Editor\MaterialEditor\MaterialEditor.h" />
+    <ClInclude Include="Editor\PipelineEditor\PipelineEditor.h" />
+    <ClInclude Include="Editor\PopupMenu\PopupMenu.h" />
+    <ClInclude Include="Editor\Profiler\Profiler.h" />
+    <ClInclude Include="Editor\SceneView\SceneView.h" />
+    <ClInclude Include="Editor\Setting\Setting.h" />
+    <ClInclude Include="Editor\ShaderEditor\ShaderEditor.h" />
+    <ClInclude Include="Editor\Timeline\Timeline.h" />
+    <ClInclude Include="Editor\Toolbar\Toolbar.h" />
+    <ClInclude Include="EngineCommand\EngineCommand.h" />
+    <ClInclude Include="EngineCommand\EngineCommands.h" />
+    <ClInclude Include="Engine\Engine.h" />
+    <ClInclude Include="Externals\box2d\src\dynamics\b2_chain_circle_contact.h" />
+    <ClInclude Include="Externals\box2d\src\dynamics\b2_chain_polygon_contact.h" />
+    <ClInclude Include="Externals\box2d\src\dynamics\b2_circle_contact.h" />
+    <ClInclude Include="Externals\box2d\src\dynamics\b2_contact_solver.h" />
+    <ClInclude Include="Externals\box2d\src\dynamics\b2_edge_circle_contact.h" />
+    <ClInclude Include="Externals\box2d\src\dynamics\b2_edge_polygon_contact.h" />
+    <ClInclude Include="Externals\box2d\src\dynamics\b2_island.h" />
+    <ClInclude Include="Externals\box2d\src\dynamics\b2_polygon_circle_contact.h" />
+    <ClInclude Include="Externals\box2d\src\dynamics\b2_polygon_contact.h" />
+    <ClInclude Include="GameCore\ECS\ECSManager.h" />
+    <ClInclude Include="GameCore\GameCore.h" />
+    <ClInclude Include="GameCore\GameObject\GameObject.h" />
+    <ClInclude Include="GameCore\IScript\IScript.h" />
+    <ClInclude Include="GameCore\MultiSystemManager\MultiSystemManager.h" />
+    <ClInclude Include="GameCore\ObjectContainer\ObjectContainer.h" />
+    <ClInclude Include="GameCore\SceneManager\SceneManager.h" />
+    <ClInclude Include="GameCore\ScriptAPI\ScriptAPI.h" />
+    <ClInclude Include="GameCore\SingleSystemManager\SingleSystemManager.h" />
+    <ClInclude Include="GameCore\Systems\EditorSystems.h" />
+    <ClInclude Include="GameCore\Systems\MultiSystems.h" />
+    <ClInclude Include="GameCore\Systems\SingleSystems.h" />
+    <ClInclude Include="Graphics\DepthManager\DepthManager.h" />
+    <ClInclude Include="Graphics\GraphicsCore\GraphicsCore.h" />
+    <ClInclude Include="Graphics\GraphicsEngine\GraphicsEngine.h" />
+    <ClInclude Include="Graphics\PipelineManager\PipelineManager.h" />
+    <ClInclude Include="Graphics\VisualEffect\VFXManager.h" />
+    <ClInclude Include="Hub\HubManager.h" />
+    <ClInclude Include="Main\ChoEngine.h" />
+    <ClInclude Include="OS\Windows\WinApp\WinApp.h" />
+    <ClInclude Include="pch\pch.h" />
+    <ClInclude Include="Platform\FileSystem\FileSystem.h" />
+    <ClInclude Include="Platform\InputManager\InputManager.h" />
+    <ClInclude Include="Platform\PlatformLayer\PlatformLayer.h" />
+    <ClInclude Include="Platform\Timer\Timer.h" />
+    <ClInclude Include="Resources\AssetManager\AssetManager.h" />
+    <ClInclude Include="Resources\IntegrationData\IntegrationData.h" />
+    <ClInclude Include="Resources\ModelManager\ModelManager.h" />
+    <ClInclude Include="Resources\ResourceManager\ResourceManager.h" />
+    <ClInclude Include="Resources\ScriptContainer\ScriptContainer.h" />
+    <ClInclude Include="Resources\TextureManager\TextureManager.h" />
+    <ClInclude Include="SDK\DirectX\DirectX12\ColorBuffer\ColorBuffer.h" />
+    <ClInclude Include="SDK\DirectX\DirectX12\CommandContext\CommandContext.h" />
+    <ClInclude Include="SDK\DirectX\DirectX12\CommandManager\CommandManager.h" />
+    <ClInclude Include="SDK\DirectX\DirectX12\DepthBuffer\DepthBuffer.h" />
+    <ClInclude Include="SDK\DirectX\DirectX12\DescriptorHeap\DescriptorHeap.h" />
+    <ClInclude Include="SDK\DirectX\DirectX12\DirectX12Common\DirectX12Common.h" />
+    <ClInclude Include="SDK\DirectX\DirectX12\GpuBuffer\GpuBuffer.h" />
+    <ClInclude Include="SDK\DirectX\DirectX12\GpuResource\GpuResource.h" />
+    <ClInclude Include="SDK\DirectX\DirectX12\IndexBuffer\IndexBuffer.h" />
+    <ClInclude Include="SDK\DirectX\DirectX12\PixelBuffer\PixelBuffer.h" />
+    <ClInclude Include="SDK\DirectX\DirectX12\stdafx\stdafx.h" />
+    <ClInclude Include="SDK\DirectX\DirectX12\SwapChain\SwapChain.h" />
+    <ClInclude Include="SDK\DirectX\DirectX12\VertexBuffer\VertexBuffer.h" />
+    <ClInclude Include="SDK\DirectX\DXC\DXShaderCompiler.h" />
+    <ClInclude Include="SDK\ImGui\ImGuiManager\ImGuiManager.h" />
+    <ClInclude Include="SDK\ImGui\ImGuiUtlity\ImGuiUtlity.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\EngineAssets\Shader\header\Demo.hlsli" />
+    <None Include="Resources\EngineAssets\Shader\header\LineDraw.hlsli" />
+    <None Include="Resources\EngineAssets\Shader\header\ScreenCopy.hlsli" />
+    <None Include="Resources\EngineAssets\Shader\header\ViewProjection.hlsli" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="Externals\ChoMath\ChoMath.vcxproj">
+      <Project>{3cf8afa4-25ac-4b52-92f3-3af6824d3643}</Project>
+    </ProjectReference>
+    <ProjectReference Include="Externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">
+      <Project>{371b9fa9-4c90-4ac6-a123-aced756d6c77}</Project>
+    </ProjectReference>
+    <ProjectReference Include="Externals\imgui\imgui.vcxproj">
+      <Project>{b4e3cfd6-cd84-4565-84e7-03feb4c6881e}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{fb856f70-9f85-4bbd-91a4-9e378674ff92}</ProjectGuid>
+    <RootNamespace>ChoEngine</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)..\generated\outputs\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)..\generated\obj\$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)..\generated\outputs\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)..\generated\obj\$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;CHOENGINE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableUAC>false</EnableUAC>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;CHOENGINE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableUAC>false</EnableUAC>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;CHOENGINE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\Externals\assimp\include;$(ProjectDir)\Externals\DirectXTex;$(ProjectDir)\Externals\\imgui;$(ProjectDir)\Externals\nlohmann;$(ProjectDir)\Externals\ChoMath;$(ProjectDir)\GameCore\IScript;$(ProjectDir)\GameCore\ScriptContext;$(ProjectDir)\Core\Utility;$(ProjectDir)\Externals\box2d\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableUAC>false</EnableUAC>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\generated\outputs\$(Configuration)\;$(ProjectDir)Externals\assimp\lib\Debug</AdditionalLibraryDirectories>
+      <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
+      <AdditionalDependencies>dxcompiler.lib;dxguid.lib;d3d12.lib;dxgi.lib;d3dcompiler.lib;ChoMath.lib;dinput8.lib;xinput.lib;xaudio2.lib;assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4049 /ignore:4048 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxcompiler.dll" "$(TargetDir)dxcompiler.dll"
+copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dxil.dll"
+xcopy "$(SolutionDir)Cho\Resources\EngineAssets" "$(TargetDir)Cho\Resources\EngineAssets" /E /I /Y
+copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"
+xcopy "$(SolutionDir)Cho\GameCore\IScript" "$(TargetDir)Cho\GameCore\IScript" /E /I /Y
+xcopy "$(SolutionDir)Cho\Externals\ChoMath" "$(TargetDir)Cho\Externals\ChoMath" /E /I /Y
+xcopy "$(SolutionDir)Cho\GameCore\ScriptAPI" "$(TargetDir)Cho\GameCore\ScriptAPI" /E /I /Y
+xcopy "$(SolutionDir)Cho\Core\Utility\Components.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
+xcopy "$(SolutionDir)Cho\Core\Utility\Color.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
+xcopy "$(SolutionDir)Cho\Externals\box2d" "$(TargetDir)Cho\Externals\box2d" /E /I /Y
+xcopy "$(SolutionDir)Cho\Core\Utility\InputStruct.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
+xcopy "$(SolutionDir)Cho\Core\Utility\IDType.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;CHOENGINE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\Externals\assimp\include;$(ProjectDir)\Externals\DirectXTex;$(ProjectDir)\Externals\\imgui;$(ProjectDir)\Externals\nlohmann;$(ProjectDir)\Externals\ChoMath;$(ProjectDir)\GameCore\IScript;$(ProjectDir)\GameCore\ScriptContext;$(ProjectDir)\Core\Utility;$(ProjectDir)\Externals\box2d\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableUAC>false</EnableUAC>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\generated\outputs\$(Configuration)\;$(ProjectDir)Externals\assimp\lib\Release</AdditionalLibraryDirectories>
+      <AdditionalDependencies>dxcompiler.lib;dxguid.lib;d3d12.lib;dxgi.lib;d3dcompiler.lib;ChoMath.lib;dinput8.lib;xinput.lib;xaudio2.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4049 /ignore:4048 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxcompiler.dll" "$(TargetDir)dxcompiler.dll"
+copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dxil.dll"
+xcopy "$(SolutionDir)Cho\Resources\EngineAssets" "$(TargetDir)Cho\Resources\EngineAssets" /E /I /Y
+copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"
+xcopy "$(SolutionDir)Cho\GameCore\IScript" "$(TargetDir)Cho\GameCore\IScript" /E /I /Y
+xcopy "$(SolutionDir)Cho\Externals\ChoMath" "$(TargetDir)Cho\Externals\ChoMath" /E /I /Y
+xcopy "$(SolutionDir)Cho\GameCore\ScriptAPI" "$(TargetDir)Cho\GameCore\ScriptAPI" /E /I /Y
+xcopy "$(SolutionDir)Cho\Core\Utility\Components.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
+xcopy "$(SolutionDir)Cho\Core\Utility\Color.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
+xcopy "$(SolutionDir)Cho\Externals\box2d" "$(TargetDir)Cho\Externals\box2d" /E /I /Y
+xcopy "$(SolutionDir)Cho\Core\Utility\InputStruct.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
+xcopy "$(SolutionDir)Cho\Core\Utility\IDType.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

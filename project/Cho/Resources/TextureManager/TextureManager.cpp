@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "TextureManager.h"
-#include "Cho/Resources/ResourceManager/ResourceManager.h"
-#include "Cho/Graphics/GraphicsEngine/GraphicsEngine.h"
+#include "Resources/ResourceManager/ResourceManager.h"
+#include "Graphics/GraphicsEngine/GraphicsEngine.h"
 #include "Core/ChoLog/ChoLog.h"
 using namespace Cho;
 

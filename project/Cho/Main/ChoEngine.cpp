@@ -3,9 +3,10 @@
 #include <exception>
 
 // Windowアプリケーション
-#include "Cho/OS/Windows/WinApp/WinApp.h"
+#include "OS/Windows/WinApp/WinApp.h"
 
-ChoEngine::ChoEngine()
+ChoEngine::ChoEngine(RuntimeMode mode):
+	Engine(mode)
 {
 }
 
@@ -34,7 +35,7 @@ void ChoEngine::Initialize()
 	resourceManager = std::make_unique<ResourceManager>(dx12->GetDevice());
 
 	// GraphicsEngine初期化
-	graphicsEngine = std::make_unique<GraphicsEngine>(dx12->GetDevice(),resourceManager.get());
+	graphicsEngine = std::make_unique<GraphicsEngine>(dx12->GetDevice(),resourceManager.get(),GetRuntimeMode());
 	graphicsEngine->CreateSwapChain(dx12->GetDXGIFactory());
 	graphicsEngine->Init();
 

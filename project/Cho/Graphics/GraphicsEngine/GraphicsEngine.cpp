@@ -2,8 +2,8 @@
 #include "GraphicsEngine.h"
 #include "OS/Windows/WinApp/WinApp.h"
 #include "Resources/ResourceManager/ResourceManager.h"
-#include "Cho/SDK/ImGui/ImGuiManager/ImGuiManager.h"
-#include "Cho/GameCore/GameCore.h"
+#include "SDK/ImGui/ImGuiManager/ImGuiManager.h"
+#include "GameCore/GameCore.h"
 #include "Core/ChoLog/ChoLog.h"
 #include "SDK/ImGui/ImGuiUtlity/ImGuiUtlity.h"
 using namespace Cho;

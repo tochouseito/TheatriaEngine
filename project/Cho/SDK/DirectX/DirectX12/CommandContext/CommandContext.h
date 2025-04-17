@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Cho/SDK/DirectX/DirectX12/stdafx/stdafx.h"
+#include "SDK/DirectX/DirectX12/stdafx/stdafx.h"
 #include <vector>
 #include <array>
 #include <queue>

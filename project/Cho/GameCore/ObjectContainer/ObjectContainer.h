@@ -1,6 +1,6 @@
 #pragma once
-#include "Cho/GameCore/GameObject/GameObject.h"
-#include "Cho/Core/Utility/FVector.h"
+#include "GameCore/GameObject/GameObject.h"
+#include "Core/Utility/FVector.h"
 #include <unordered_map>
 class ObjectContainer
 {
