@@ -56,8 +56,8 @@ class GraphicsEngine : public Engine
 	friend class EngineCommand;
 public:
 	// Constructor
-	GraphicsEngine(ID3D12Device8* device,ResourceManager* resourceManager) : 
-		m_Device(device), m_ResourceManager(resourceManager)
+	GraphicsEngine(ID3D12Device8* device,ResourceManager* resourceManager,RuntimeMode mode) : 
+		m_Device(device), m_ResourceManager(resourceManager), Engine(mode)
 	{
 		m_GraphicsCore = std::make_unique<GraphicsCore>(device);
 		m_DepthManager = std::make_unique<DepthManager>();

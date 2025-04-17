@@ -6,9 +6,19 @@
 // C++
 #include <memory>
 
+enum class RuntimeMode
+{
+	Game,
+	Editor,
+};
+
 class Engine
 {
 public:// method
+	// コンストラクタ
+	Engine(RuntimeMode mode) : runtimeMode(mode)
+	{
+	}
 
 	// デストラクタ
 	virtual ~Engine() = default;
@@ -17,5 +27,11 @@ public:// method
 	virtual void Finalize() {}
 	virtual void Operation() {}
 	virtual void CrashHandlerEntry() {}
+	virtual RuntimeMode GetRuntimeMode() const
+	{
+		return runtimeMode;
+	}
+protected:
+	RuntimeMode runtimeMode;
 };
 

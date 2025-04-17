@@ -3,7 +3,7 @@
 /*--------------------------------------------
 プラットフォーム独立層
 --------------------------------------------*/
-#include "Cho/Platform/Timer/Timer.h"
+#include "Platform/Timer/Timer.h"
 #include "Platform/InputManager/InputManager.h"
 #include "Platform/FileSystem/FileSystem.h"
 
