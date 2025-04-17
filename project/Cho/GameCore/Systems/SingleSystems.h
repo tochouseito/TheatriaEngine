@@ -249,8 +249,19 @@ private:
 		transform.translation.x = pos.x;
 		transform.translation.y = pos.y;
 
-		float angle = rb.runtimeBody->GetAngle(); // radians
-		transform.rotation = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0, 0, 1), angle);
+		Vector3 radians = {};
+		radians.z = rb.runtimeBody->GetAngle(); // radians
+		Vector3 degrees = ChoMath::RadiansToDegrees(radians);
+		transform.degrees.z = degrees.z;
+		
+		//Vector3 radians = ChoMath::DegreesToRadians(transform.degrees);
+		//radians.z = rb.runtimeBody->GetAngle(); // radians
+		//Vector3 diff = radians - transform.preRot;
+		//Quaternion qx = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(1.0f, 0.0f, 0.0f), diff.x);
+		//Quaternion qy = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0.0f, 1.0f, 0.0f), diff.y);
+		//Quaternion qz = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0.0f, 0.0f, 1.0f), diff.z);
+		//transform.rotation = transform.rotation * qx * qy * qz;//;
+		//transform.rotation = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0, 0, 1), angle);
 	}
 
 	ECSManager* m_ECS = nullptr;
