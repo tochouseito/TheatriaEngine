@@ -4,6 +4,7 @@
 #include "GameCore/SingleSystemManager/SingleSystemManager.h"
 #include "GameCore/MultiSystemManager/MultiSystemManager.h"
 #include "GameCore/ObjectContainer/ObjectContainer.h"
+#include "GameCore/PhysicsEngine/PhysicsEngine.h"
 class InputManager;
 class ResourceManager;
 class GraphicsEngine;
@@ -47,5 +48,6 @@ private:
 
 	// box2d
 	std::unique_ptr<b2World> m_pPhysicsWorld = nullptr;
+	std::unique_ptr<ContactListener2D> m_pContactListener = nullptr;
 };
 

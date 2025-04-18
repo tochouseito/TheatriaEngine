@@ -120,6 +120,7 @@ private:
 // スクリプトコンテキスト
 class ECSManager;
 class ResourceManager;
+class ObjectContainer;
 struct ScriptContext
 {
 public:
@@ -135,10 +136,12 @@ private:
 	ECSManager* m_ECS = nullptr;	// ECSManager
 	ResourceManager* m_ResourceManager = nullptr;	// ResourceManager
 	InputManager* m_InputManager = nullptr;	// InputManager
+	ObjectContainer* m_ObjectContainer = nullptr;	// ObjectContainer
 
 	friend class ScriptInitializeSystem;
 	friend class ScriptUpdateSystem;
 	friend class ScirptFinalizeSystem;
+	friend class ContactListener2D;
 
 	void Initialize()
 	{
@@ -156,7 +159,7 @@ private:
 	void InitializeInputAPI();
 public:
 	// デフォルトコンストラクタ
-	ScriptContext(InputManager* input,ResourceManager* resourceManager, ECSManager* ecs, std::optional<Entity> entity) :m_InputManager(input), m_ResourceManager(resourceManager), m_ECS(ecs), m_Entity(entity) {}
+	ScriptContext(ObjectContainer* objectContainer,InputManager* input,ResourceManager* resourceManager, ECSManager* ecs, std::optional<Entity> entity) :m_ObjectContainer(objectContainer), m_InputManager(input), m_ResourceManager(resourceManager), m_ECS(ecs), m_Entity(entity) {}
 	// コピー、代入禁止
 	ScriptContext(const ScriptContext&) = delete;
 	ScriptContext& operator=(const ScriptContext&) = delete;

@@ -104,9 +104,15 @@ struct ScriptComponent : public IComponentTag
 	std::string scriptName = "";								// スクリプト名
 	std::optional<Entity> entity = std::nullopt;				// スクリプトのエンティティ
 	using ScriptFunc = std::function<void(ScriptContext& ctx)>; // スクリプト関数型
+
 	ScriptFunc startFunc;										// Start関数
 	ScriptFunc updateFunc;										// Update関数
 	std::function<void()> cleanupFunc;							// 解放関数
+
+	std::function<void(ScriptContext& ctx,ScriptContext& other)> onCollisionEnterFunc;	// 衝突開始関数
+	std::function<void(ScriptContext& ctx, ScriptContext& other)> onCollisionStayFunc;	// 衝突中関数
+	std::function<void(ScriptContext& ctx, ScriptContext& other)> onCollisionExitFunc;	// 衝突終了関数
+
 	bool isActive = false;										// スクリプト有効フラグ
 };
 

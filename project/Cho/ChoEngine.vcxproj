@@ -259,6 +259,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="GameCore\PhysicsEngine\PhysicsEngine.cpp" />
     <ClCompile Include="Platform\FileSystem\FileSystem.cpp" />
     <ClCompile Include="Platform\InputManager\InputManager.cpp" />
     <ClCompile Include="Platform\PlatformLayer\PlatformLayer.cpp" />
@@ -353,6 +354,7 @@
     <ClInclude Include="Main\ChoEngine.h" />
     <ClInclude Include="OS\Windows\WinApp\WinApp.h" />
     <ClInclude Include="pch\pch.h" />
+    <ClInclude Include="GameCore\PhysicsEngine\PhysicsEngine.h" />
     <ClInclude Include="Platform\FileSystem\FileSystem.h" />
     <ClInclude Include="Platform\InputManager\InputManager.h" />
     <ClInclude Include="Platform\PlatformLayer\PlatformLayer.h" />

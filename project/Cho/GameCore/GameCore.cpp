@@ -22,6 +22,8 @@ void GameCore::Initialize(InputManager* input, ResourceManager* resourceManager)
 	// box2dの生成
 	b2Vec2 gravity(0.0f, -9.8f);
 	m_pPhysicsWorld = std::make_unique<b2World>(gravity);
+	m_pContactListener = std::make_unique<ContactListener2D>(m_pECSManager.get(), resourceManager, input, m_pObjectContainer.get());
+	m_pPhysicsWorld->SetContactListener(m_pContactListener.get());
 	// システムの生成
 	CreateSystems(input,resourceManager);
 	// オブジェクトコンテナの生成
@@ -91,7 +93,7 @@ void GameCore::CreateSystems(InputManager* input, ResourceManager* resourceManag
 	// 初期化システムの登録
 	std::unique_ptr<ECSManager::ISystem> tfStateSystem = std::make_unique<TransformInitializeSystem>(m_pECSManager.get());
 	m_pSingleSystemManager->RegisterSystem(std::move(tfStateSystem), SystemState::Initialize);
-	std::unique_ptr<ECSManager::ISystem> scriptInitializeSystem = std::make_unique<ScriptInitializeSystem>(input,m_pECSManager.get(),resourceManager);
+	std::unique_ptr<ECSManager::ISystem> scriptInitializeSystem = std::make_unique<ScriptInitializeSystem>(m_pObjectContainer.get(), input, m_pECSManager.get(), resourceManager);
 	m_pSingleSystemManager->RegisterSystem(std::move(scriptInitializeSystem), SystemState::Initialize);
 	std::unique_ptr<ECSManager::ISystem> physicsSystem = std::make_unique<Rigidbody2DInitSystem>(m_pECSManager.get(), m_pPhysicsWorld.get());
 	m_pSingleSystemManager->RegisterSystem(std::move(physicsSystem), SystemState::Initialize);
@@ -102,7 +104,7 @@ void GameCore::CreateSystems(InputManager* input, ResourceManager* resourceManag
 	m_pSingleSystemManager->RegisterSystem(std::move(tfUpdateSystem), SystemState::Update);
 	std::unique_ptr<ECSManager::ISystem> cameraSystem = std::make_unique<CameraUpdateSystem>(m_pECSManager.get(), resourceManager, resourceManager->GetIntegrationBuffer(IntegrationDataType::Transform));
 	m_pSingleSystemManager->RegisterSystem(std::move(cameraSystem), SystemState::Update);
-	std::unique_ptr<ECSManager::ISystem> scriptUpdateSystem = std::make_unique<ScriptUpdateSystem>(input,m_pECSManager.get(),resourceManager);
+	std::unique_ptr<ECSManager::ISystem> scriptUpdateSystem = std::make_unique<ScriptUpdateSystem>(m_pObjectContainer.get(), input, m_pECSManager.get(), resourceManager);
 	m_pSingleSystemManager->RegisterSystem(std::move(scriptUpdateSystem), SystemState::Update);
 	std::unique_ptr<ECSManager::ISystem> rbUpdateSystem = std::make_unique<Rigidbody2DUpdateSystem>(m_pECSManager.get(), m_pPhysicsWorld.get());
 	m_pSingleSystemManager->RegisterSystem(std::move(rbUpdateSystem), SystemState::Update);

@@ -19,6 +19,7 @@ public:
 	{ 
 		ObjectID id = static_cast<ObjectID>(m_GameObjects.push_back(GameObject(entity, name, type)));
 		m_NameToObjectID[name] = id;
+		m_TypeToObjectIDs[type].push_back(id);
 		m_GameObjects[id].SetID(id);
 		return id;
 	}
@@ -30,6 +31,11 @@ public:
 			return;
 		}
 		m_NameToObjectID.erase(m_GameObjects[id].GetName());
+		ObjectType type = m_GameObjects[id].GetType();
+		if (m_TypeToObjectIDs.contains(type))
+		{
+			m_TypeToObjectIDs[type].erase(std::remove(m_TypeToObjectIDs[type].begin(), m_TypeToObjectIDs[type].end(), id), m_TypeToObjectIDs[type].end());
+		}
 		m_GameObjects.erase(id);
 	}
 	// プレハブを追加
@@ -37,6 +43,7 @@ public:
 	{ 
 		PrefabID id = static_cast<PrefabID>(m_Prefabs.push_back(Prefab(entity, name, type)));
 		m_NameToPrefabID[name] = id;
+		m_TypeToPrefabIDs[type].push_back(id);
 		m_Prefabs[id].SetID(id);
 		return id;
 	}
@@ -48,6 +55,11 @@ public:
 			return;
 		}
 		m_NameToPrefabID.erase(m_Prefabs[id].GetName());
+		ObjectType type = m_Prefabs[id].GetType();
+		if (m_TypeToPrefabIDs.contains(type))
+		{
+			m_TypeToPrefabIDs[type].erase(std::remove(m_TypeToPrefabIDs[type].begin(), m_TypeToPrefabIDs[type].end(), id), m_TypeToPrefabIDs[type].end());
+		}
 		m_Prefabs.erase(id);
 	}
 	// ゲームオブジェクトを取得
@@ -99,5 +111,8 @@ private:
 	// 名前検索用補助コンテナ
 	std::unordered_map<std::wstring, ObjectID> m_NameToObjectID;
 	std::unordered_map<std::wstring, PrefabID> m_NameToPrefabID;
+	// タイプ検索用補助コンテナ
+	std::unordered_map<ObjectType, std::vector<ObjectID>> m_TypeToObjectIDs;
+	std::unordered_map<ObjectType, std::vector<PrefabID>> m_TypeToPrefabIDs;
 };
 
