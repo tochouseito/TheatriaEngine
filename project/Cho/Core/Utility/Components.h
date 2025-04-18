@@ -142,6 +142,8 @@ struct Rigidbody2DComponent : public IComponentTag
 	b2BodyType bodyType = b2_dynamicBody;
 	b2Body* runtimeBody = nullptr; // Box2D Bodyへのポインタ
 	b2World* world = nullptr; // Box2D Worldへのポインタ
+	bool isCollisionStay = false; // 衝突中フラグ
+	std::optional<Entity> otherEntity = std::nullopt; // 衝突したエンティティ
 };
 // 2D矩形コライダー
 struct BoxCollider2DComponent : public IComponentTag

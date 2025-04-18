@@ -141,6 +141,7 @@ private:
 	friend class ScriptInitializeSystem;
 	friend class ScriptUpdateSystem;
 	friend class ScirptFinalizeSystem;
+	friend class CollisionSystem;
 	friend class ContactListener2D;
 
 	void Initialize()

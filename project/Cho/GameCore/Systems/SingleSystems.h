@@ -296,6 +296,8 @@ private:
 			m_World->DestroyBody(rb.runtimeBody);
 			rb.runtimeBody = nullptr;
 		}
+		rb.isCollisionStay = false;
+		rb.otherEntity.reset();
 	}
 	template<typename ColliderT>
 	void ResetCollider(Entity e)
@@ -310,6 +312,29 @@ private:
 	ECSManager* m_ECS = nullptr;
 	b2World* m_World = nullptr;
 };
+class CollisionSystem : public ECSManager::System<ScriptComponent,Rigidbody2DComponent>
+{
+public:
+	CollisionSystem(ECSManager* ecs, ResourceManager* resourceManager, InputManager* inputManager,ObjectContainer* objectContainer)
+		: ECSManager::System<ScriptComponent, Rigidbody2DComponent>(
+			[this](Entity e, ScriptComponent& script, Rigidbody2DComponent& rb)
+			{
+				e;
+				//CollisionEnter(script, rb);
+				CollisionStay(script, rb);
+			}),
+		m_ECS(ecs), m_pResourceManager(resourceManager), m_pInputManager(inputManager), m_pObjectContainer(objectContainer)
+	{
+	}
+	~CollisionSystem() = default;
+private:
+	void CollisionStay(ScriptComponent& script, Rigidbody2DComponent& rb);
+	ECSManager* m_ECS = nullptr;
+	ResourceManager* m_pResourceManager = nullptr;
+	InputManager* m_pInputManager = nullptr;
+	ObjectContainer* m_pObjectContainer = nullptr;
+};
+
 class BoxCollider2DInitSystem : public ECSManager::System<TransformComponent, Rigidbody2DComponent, BoxCollider2DComponent>
 {
 public:

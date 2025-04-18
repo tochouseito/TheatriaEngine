@@ -290,3 +290,14 @@ void ScriptFinalizeSystem::FinalizeScript(ScriptComponent& script)
 	script.isActive = false;
 }
 
+void CollisionSystem::CollisionStay(ScriptComponent& script, Rigidbody2DComponent& rb)
+{
+	if (script.isActive&&rb.isCollisionStay&&rb.otherEntity)
+	{
+		// スクリプトコンテキストを作成
+		ScriptContext selfContext(m_pObjectContainer, m_pInputManager, m_pResourceManager, m_ECS, script.entity.value());
+		selfContext.Initialize();
+		ScriptContext otherContext(m_pObjectContainer, m_pInputManager, m_pResourceManager, m_ECS, rb.otherEntity.value());
+		script.onCollisionStayFunc(selfContext,otherContext);
+	}
+}
