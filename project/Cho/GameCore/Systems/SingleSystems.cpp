@@ -154,7 +154,7 @@ void CameraUpdateSystem::TransferMatrix(TransformComponent& transform, CameraCom
 
 void ScriptInitializeSystem::LoadScript(ScriptComponent& script)
 {
-	if (!script.scriptID || script.scriptName == "")
+	if (script.scriptName.empty())
 	{
 		script.isActive = false;
 		return;

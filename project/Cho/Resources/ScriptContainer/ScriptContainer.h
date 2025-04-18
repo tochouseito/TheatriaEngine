@@ -7,13 +7,8 @@
 #include <functional>
 #include "Core/Utility/FVector.h"
 #include "GameCore/IScript/IScript.h"
-using ScriptID = uint32_t; // スクリプトID
 using ScriptFactoryFunc = std::function<std::unique_ptr<IScript>()>;
-struct ScriptData
-{
-	std::string scriptName; // スクリプト名
-	std::optional<ScriptID> scriptID; // スクリプトID
-};
+
 // スクリプトを格納するコンテナクラス
 class ScriptContainer
 {
@@ -25,41 +20,40 @@ public:
 	// スクリプトデータを追加する関数
 	void AddScriptData(const std::string& scriptName)
 	{
-		ScriptData scriptData;
-		scriptData.scriptName = scriptName;
-		ScriptID id = static_cast<ScriptID>(m_ScriptContainer.push_back(std::move(scriptData)));
-		m_ScriptContainer[id].scriptID = id; // スクリプトIDを設定
-		m_ScriptNameToID[scriptName] = id; // スクリプト名とIDをマップに追加
+		std::string name = scriptName;
+		uint32_t index = static_cast<uint32_t>(m_ScriptNameContainer.push_back(std::move(name))); // スクリプト名をコンテナに追加
+		m_ScriptNameToIndex[scriptName] = index; // スクリプト名とインデックスをマップに追加
 	}
 	// スクリプトデータをIDで取得する関数
-	ScriptData GetScriptDataByID(ScriptID id)
+	std::optional<std::string> GetScriptDataByID(const uint32_t & index)
 	{
-		if (m_ScriptContainer.isValid(id))
+		if (m_ScriptNameContainer.isValid(index))
 		{
-			return m_ScriptContainer[id];
+			return m_ScriptNameContainer[index];
 		} else
 		{
-			return ScriptData(); // 無効なIDの場合は空のデータを返す
+			return std::nullopt; // 無効なIDの場合は空のデータを返す
 		}
 	}
 	// スクリプトデータを名前で取得する関数
-	ScriptData GetScriptDataByName(const std::string& scriptName)
+	std::string GetScriptDataByName(const std::string & scriptName)
 	{
-		if (m_ScriptNameToID.contains(scriptName))
+		if (m_ScriptNameToIndex.contains(scriptName))
 		{
-			ScriptID id = m_ScriptNameToID[scriptName];
-			return GetScriptDataByID(id);
+			uint32_t id = m_ScriptNameToIndex[scriptName];
+			return GetScriptDataByID(id).value();
 		}
-		return ScriptData(); // 無効な名前の場合は空のデータを返す
+		return std::string(); // 無効な名前の場合は空のデータを返す
 	}
-	size_t GetScriptCount() const { return m_ScriptContainer.size(); }
+	size_t GetScriptCount() { return m_ScriptNameContainer.GetVector().size(); }
+	FVector<std::string>& GetScriptNameContainer() { return m_ScriptNameContainer; } // スクリプト名コンテナを取得
 
 	void RegisterScript(const std::string& scriptName, ScriptFactoryFunc func);
 	std::unique_ptr<IScript> CreateScript(const std::string& scriptName);
 private:
-	FVector<ScriptData> m_ScriptContainer; // スクリプトデータを格納するベクター
+	FVector<std::string> m_ScriptNameContainer; // スクリプトデータを格納するベクター
 	// 名前で検索する用のコンテナ
-	std::unordered_map<std::string, ScriptID> m_ScriptNameToID; // スクリプト名からスクリプトIDを取得するためのマップ
+	std::unordered_map<std::string, uint32_t> m_ScriptNameToIndex; // スクリプト名からスクリプトIDを取得するためのマップ
 
 	// 登録されたスクリプト名と生成関数のマップ
 	std::unordered_map<std::string, ScriptFactoryFunc> m_ScriptRegistry;

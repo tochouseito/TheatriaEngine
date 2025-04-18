@@ -110,8 +110,7 @@ namespace Cho
             const std::wstring& directory,
             BaseScene* scene,
             ObjectContainer* container,
-            ECSManager* ecs,
-			ResourceManager* resourceManager
+            ECSManager* ecs
         );
 		// シーンファイルを読み込む
         static bool LoadSceneFile(

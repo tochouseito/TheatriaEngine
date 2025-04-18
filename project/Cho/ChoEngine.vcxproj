@@ -504,6 +504,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\Externals\assimp\include;$(ProjectDir)\Externals\DirectXTex;$(ProjectDir)\Externals\\imgui;$(ProjectDir)\Externals\nlohmann;$(ProjectDir)\Externals\ChoMath;$(ProjectDir)\GameCore\IScript;$(ProjectDir)\GameCore\ScriptContext;$(ProjectDir)\Core\Utility;$(ProjectDir)\Externals\box2d\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -544,6 +545,7 @@ xcopy "$(SolutionDir)Cho\Core\Utility\IDType.h" "$(TargetDir)Cho\Core\Utility\" 
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\Externals\assimp\include;$(ProjectDir)\Externals\DirectXTex;$(ProjectDir)\Externals\\imgui;$(ProjectDir)\Externals\nlohmann;$(ProjectDir)\Externals\ChoMath;$(ProjectDir)\GameCore\IScript;$(ProjectDir)\GameCore\ScriptContext;$(ProjectDir)\Core\Utility;$(ProjectDir)\Externals\box2d\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

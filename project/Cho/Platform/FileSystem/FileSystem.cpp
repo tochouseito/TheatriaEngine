@@ -278,7 +278,7 @@ std::optional<Cho::GameSettingsInfo> Cho::FileSystem::LoadGameSettings(const std
     }
 }
 
-bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory,BaseScene* scene, ObjectContainer* container, ECSManager* ecs, ResourceManager* resourceManager)
+bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory,BaseScene* scene, ObjectContainer* container, ECSManager* ecs)
 {
     std::filesystem::path path = std::filesystem::path(directory) / (scene->GetSceneName() + L".json");
 
@@ -504,11 +504,9 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, SceneManager* 
                     {
                         std::string scriptNameStr = comps["Script"]["scriptName"].get<std::string>();
                         s.scriptName = scriptNameStr;
-						s.scriptID = resourceManager->GetScriptContainer()->GetScriptDataByName(scriptNameStr).scriptID;
                         s.entity = entity;
                         ScriptComponent* script = ecs->AddComponent<ScriptComponent>(entity);
                         script->scriptName = s.scriptName;
-                        script->scriptID = s.scriptID;
                         script->entity = s.entity;
                     }
                 }
@@ -602,12 +600,83 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, SceneManager* 
 
 bool Cho::FileSystem::SaveScriptFile(const std::wstring& directory, ResourceManager* resourceManager)
 {
-    return false;
+    ScriptContainer* scriptContainer = resourceManager->GetScriptContainer();
+    if (!scriptContainer) return false;
+
+    nlohmann::ordered_json j;
+    j["fileType"] = "ScriptFile";
+
+    std::vector<std::string> scriptList;
+    for (size_t i = 0; i < scriptContainer->GetScriptCount(); ++i)
+    {
+        std::optional<std::string> data = scriptContainer->GetScriptDataByID(static_cast<uint32_t>(i));
+        if (data)
+        {
+            scriptList.push_back(data.value());
+        }
+    }
+    j["scripts"] = scriptList;
+
+    std::filesystem::path path = std::filesystem::path(directory) / "ScriptData.json";
+    try
+    {
+        std::ofstream file(path);
+        if (!file.is_open()) return false;
+        file << j.dump(4);
+        file.close();
+        return true;
+    }
+    catch (...)
+    {
+        return false;
+    }
 }
 
 bool Cho::FileSystem::LoadScriptFile(const std::wstring& filePath, ResourceManager* resourceManager)
 {
-    return false;
+    ScriptContainer* scriptContainer = resourceManager->GetScriptContainer();
+    if (!scriptContainer) return false;
+
+    try
+    {
+        std::ifstream file(filePath);
+        if (!file.is_open()) return false;
+
+        nlohmann::json j;
+        file >> j;
+
+        if (j.contains("fileType") && j["fileType"] != "ScriptFile")
+        {
+            return false;
+        }
+
+        std::vector<std::string> availableScriptFiles = ScriptProject::GetScriptFiles();
+
+        if (j.contains("scripts"))
+        {
+            for (const auto& scriptNameJson : j["scripts"])
+            {
+                std::string scriptName = scriptNameJson.get<std::string>();
+
+                // スクリプトファイル群の中に存在しているかをチェック
+                auto found = std::find_if(availableScriptFiles.begin(), availableScriptFiles.end(),
+                    [&](const std::string& file) {
+                        return std::filesystem::path(file).stem().string() == scriptName;
+                    });
+
+                if (found != availableScriptFiles.end())
+                {
+                    scriptContainer->AddScriptData(scriptName);
+                }
+            }
+        }
+
+        return true;
+    }
+    catch (...)
+    {
+        return false;
+    }
 }
 
 // コンポーネントを保存
@@ -653,10 +722,6 @@ json Cho::Serialization::ToJson(const ScriptComponent& s)
 {
 	json j;
 	j["scriptName"] = s.scriptName;
-	if (s.scriptID.has_value())
-	{
-		j["scriptID"] = s.scriptID.value();
-	}
 	if (s.entity.has_value())
 	{
 		j["entity"] = s.entity.value();
@@ -741,11 +806,13 @@ void Cho::FileSystem::SaveProject(SceneManager* sceneManager, ObjectContainer* c
             L"GameProjects/" + m_sProjectName,
             scene.get(),
             container,
-            ecs,
-			resourceManager
+            ecs
         );
     }
-    resourceManager;
+	Cho::FileSystem::SaveScriptFile(
+		L"GameProjects/" + m_sProjectName,
+		resourceManager
+	);
 }
 
 // プロジェクトフォルダを読み込む
@@ -772,21 +839,14 @@ bool Cho::FileSystem::LoadProjectFolder(const std::wstring& projectName, SceneMa
         FileType type = GetJsonFileType(entry.path());
 
         // アセット読み込み
-        // スクリプト読み込み
-        std::vector<std::string> scriptFiles;
-        scriptFiles = ScriptProject::GetScriptFiles();
-        for (const auto& scriptFile : scriptFiles)
-        {
-            resourceManager->GetScriptContainer()->AddScriptData(scriptFile);
-        }
-
         switch (type)
         {
         case FileType::SceneFile:
-        {
             LoadSceneFile(entry.path(), sceneManager, container, ecs, resourceManager);
-        }
-        break;
+            break;
+        case FileType::ScriptFile:
+			LoadScriptFile(entry.path(), resourceManager);
+            break;
         // ここに ModelFile, EffectFile, ScriptFile など追加
         default:
             break;

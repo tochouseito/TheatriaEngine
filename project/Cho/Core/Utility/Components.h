@@ -91,7 +91,6 @@ struct MeshRendererComponent : public IComponentTag
 struct ScriptComponent : public IComponentTag
 {
 	std::string scriptName = "";								// スクリプト名
-	std::optional<uint32_t> scriptID = std::nullopt;			// スクリプトID
 	std::optional<Entity> entity = std::nullopt;				// スクリプトのエンティティ
 	using ScriptFunc = std::function<void(ScriptContext& ctx)>; // スクリプト関数型
 	ScriptFunc startFunc;										// Start関数

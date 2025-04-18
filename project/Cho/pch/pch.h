@@ -6,7 +6,9 @@
 #include <cassert>
 #endif // NDEBUG
 
-
+#ifndef DIRECTINPUT_VERSION
+#define DIRECTINPUT_VERSION 0x0800
+#endif
 #include "ChoMath.h"
 using namespace ChoMath;
 #include "Core/ChoLog/ChoLog.h"
