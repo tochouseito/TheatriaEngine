@@ -86,11 +86,11 @@ public:
 
 	ScenePrefab* GetScene(const SceneID& index) const noexcept
 	{
-		if (index >= m_pScenes.size())
+		if (m_pScenes.isValid(index))
 		{
-			return nullptr;
+			return m_pScenes[index].get();
 		}
-		return m_pScenes[index].get();
+		return nullptr;
 	}
 	FVector<std::unique_ptr<ScenePrefab>>& GetScenes() noexcept { return m_pScenes; }
 	// シーン名からシーンIDを取得

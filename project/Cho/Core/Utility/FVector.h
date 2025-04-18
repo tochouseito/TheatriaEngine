@@ -49,9 +49,9 @@ public:
     }
 
     // 現在の有効な要素数
-    size_t size() const {
+    /*size_t size() const {
         return nextIndex - freeList.size();
-    }
+    }*/
 
 	// 要素が有効かどうか
 	bool isValid(size_t index) const

@@ -134,12 +134,12 @@ void Inspector::ScriptComponentView(GameObject* object)
 
 	// プルダウン用スクリプト名一覧作成
 	std::vector<std::string> scriptNames = { "None" };
-	for (ScriptID id = 0; id < scriptContainer->GetScriptCount(); ++id)
+	for (size_t i = 0; i<scriptContainer->GetScriptCount();i++)
 	{
-		auto data = scriptContainer->GetScriptDataByID(id);
-		if (data.scriptID.has_value())
+		std::optional<std::string> data = scriptContainer->GetScriptDataByID(static_cast<uint32_t>(i));
+		if (data)
 		{
-			scriptNames.push_back(data.scriptName);
+			scriptNames.push_back(data.value());
 		}
 	}
 
@@ -167,13 +167,11 @@ void Inspector::ScriptComponentView(GameObject* object)
 				{
 					// "None"が選択されたらスクリプト無効化
 					script->scriptName.clear();
-					script->scriptID.reset();
 					script->isActive = false;
 				} else
 				{
 					// 選択されたスクリプト名とIDを設定
 					script->scriptName = scriptNames[i];
-					script->scriptID = scriptContainer->GetScriptDataByName(script->scriptName).scriptID;
 					script->isActive = false;
 				}
 			}

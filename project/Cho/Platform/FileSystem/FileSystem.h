@@ -120,6 +120,10 @@ namespace Cho
             ECSManager* ecs,
 			ResourceManager* resourceManager
         );
+        // スクリプトのファイルを保存
+		static bool SaveScriptFile(const std::wstring& directory,ResourceManager* resourceManager);
+		// スクリプトのファイルを読み込む
+		static bool LoadScriptFile(const std::wstring& filePath, ResourceManager* resourceManager);
 
         static FileType GetJsonFileType(const std::filesystem::path& path);
 
