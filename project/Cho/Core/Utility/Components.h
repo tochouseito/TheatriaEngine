@@ -26,6 +26,17 @@ struct IComponentTag {};
 template<typename T>
 struct IsMultiComponent : std::false_type {};
 
+// オブジェクトのBaseComponent
+struct BaseComponent : public IComponentTag
+{
+	// コンポーネントのエンティティ
+	std::optional<Entity> entity = std::nullopt;
+	// 名前
+	std::optional<std::wstring> name = std::nullopt;
+	// タイプ
+	std::optional<ObjectType> type = std::nullopt;
+};
+
 // 初期値を保存するための構造体
 struct TransformStartValue
 {
