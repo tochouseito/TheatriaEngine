@@ -63,6 +63,7 @@ public:
 	std::wstring GetName() const noexcept { return m_Name; }
 	ObjectType GetType() const noexcept { return m_Type; }
 	void SetID(const ObjectID& id) noexcept { m_ID = id; }
+	void SetName(const std::wstring& name) noexcept { m_Name = name; }
 private:
 	ObjectID m_ID;// オブジェクトID
 	Entity m_Entity;// エンティティ

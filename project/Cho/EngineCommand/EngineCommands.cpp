@@ -22,6 +22,11 @@ bool Add3DObjectCommand::Execute(EngineCommand* edit)
 	std::wstring name = L"NewMeshObject";
 	// 重複回避
 	name = GenerateUniqueName(name, edit->m_GameCore->GetObjectContainer()->GetNameToObjectID());
+	// BaseComponentを追加
+	BaseComponent* base = edit->m_GameCore->GetECSManager()->AddComponent<BaseComponent>(entity);
+	base->type = ObjectType::MeshObject;
+	base->entity = entity;
+	base->name = name;
 	// Transform統合バッファからmapIDを取得
 	uint32_t mapID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::Transform)->GetMapID();
 	// TransformComponentを追加
@@ -58,6 +63,11 @@ bool AddCameraObjectCommand::Execute(EngineCommand* edit)
 	std::wstring name = L"NewCameraObject";
 	// 重複回避
 	name = GenerateUniqueName(name, edit->m_GameCore->GetObjectContainer()->GetNameToObjectID());
+	// BaseComponentを追加
+	BaseComponent* base = edit->m_GameCore->GetECSManager()->AddComponent<BaseComponent>(entity);
+	base->type = ObjectType::Camera;
+	base->entity = entity;
+	base->name = name;
 	// Transform統合バッファからmapIDを取得
 	uint32_t mapID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::Transform)->GetMapID();
 	// TransformComponentを追加
@@ -248,6 +258,28 @@ bool DeleteObjectCommand::Execute(EngineCommand* edit)
 }
 
 bool DeleteObjectCommand::Undo(EngineCommand* edit)
+{
+	edit;
+	return false;
+}
+
+bool RenameObjectCommand::Execute(EngineCommand* edit)
+{
+	GameObject* object = edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID);
+	if (!object) { return false; }
+	BaseComponent* base = edit->m_GameCore->GetECSManager()->GetComponent<BaseComponent>(object->GetEntity());
+	if (!base) { return false; }
+	// 名前の重複を確認
+	m_Name = GenerateUniqueName(m_Name, edit->m_GameCore->GetObjectContainer()->GetNameToObjectID());
+	// 変更前の名前を保存
+	m_PreName = object->GetName();
+	// 名前を変更
+	object->SetName(m_Name);
+	base->name = m_Name;
+	return true;
+}
+
+bool RenameObjectCommand::Undo(EngineCommand* edit)
 {
 	edit;
 	return false;
