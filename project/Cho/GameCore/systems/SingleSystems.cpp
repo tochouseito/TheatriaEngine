@@ -183,10 +183,19 @@ void ScriptInitializeSystem::LoadScript(ScriptComponent& script)
 	script.updateFunc = [scriptInstance](ScriptContext& ctx) {
 		scriptInstance->Update(ctx);
 		};
-
 	// インスタンスの解放用のクロージャを設定
 	script.cleanupFunc = [scriptInstance, this]() {
 		delete scriptInstance;
+		};
+	// 衝突関数をラップ
+	script.onCollisionEnterFunc = [scriptInstance](ScriptContext& ctx,ScriptContext& other) {
+		scriptInstance->OnCollisionEnter(ctx,other);
+		};
+	script.onCollisionStayFunc = [scriptInstance](ScriptContext& ctx, ScriptContext& other) {
+		scriptInstance->OnCollisionStay(ctx, other);
+		};
+	script.onCollisionExitFunc = [scriptInstance](ScriptContext& ctx, ScriptContext& other) {
+		scriptInstance->OnCollisionExit(ctx, other);
 		};
 	script.isActive = true;
 }
@@ -223,7 +232,7 @@ void ScriptInitializeSystem::StartScript(ScriptComponent& script)
 
 ScriptContext ScriptInitializeSystem::MakeScriptContext(Entity entity)
 {
-	ScriptContext ctx(m_pInputManager,m_pResourceManager, m_ECS, entity);
+	ScriptContext ctx(m_pObjectContainer,m_pInputManager,m_pResourceManager, m_ECS, entity);
 	ctx.Initialize();
 	return ctx;
 }
@@ -255,7 +264,7 @@ void ScriptUpdateSystem::UpdateScript(ScriptComponent& script)
 
 ScriptContext ScriptUpdateSystem::MakeScriptContext(Entity entity)
 {
-	ScriptContext ctx(m_pInputManager,m_pResourceManager, m_ECS, entity);
+	ScriptContext ctx(m_pObjectContainer,m_pInputManager,m_pResourceManager, m_ECS, entity);
 	ctx.Initialize();
 	return ctx;
 }
