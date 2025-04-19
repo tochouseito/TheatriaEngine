@@ -1,4 +1,5 @@
 #include "IScript.h"
+using namespace ChoSystem;
 
 class { SCRIPT_NAME } : public IScript
 {

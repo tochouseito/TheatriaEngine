@@ -108,13 +108,13 @@ private:
 class ScriptInitializeSystem : public ECSManager::System<ScriptComponent>
 {
 public:
-	ScriptInitializeSystem(InputManager* input,ECSManager* ecs,ResourceManager* resourceManager)
+	ScriptInitializeSystem(ObjectContainer* objectContainer,InputManager* input,ECSManager* ecs,ResourceManager* resourceManager)
 		: ECSManager::System<ScriptComponent>([this](Entity e, ScriptComponent& script)
 			{
 				e;
 				Start(script);
 			}),
-		m_ECS(ecs), m_pResourceManager(resourceManager), m_pInputManager(input)
+		m_ECS(ecs), m_pResourceManager(resourceManager), m_pInputManager(input), m_pObjectContainer(objectContainer)
 	{
 	}
 	~ScriptInitializeSystem() = default;
@@ -126,18 +126,19 @@ private:
 	ECSManager* m_ECS = nullptr;
 	ResourceManager* m_pResourceManager = nullptr;
 	InputManager* m_pInputManager = nullptr;
+	ObjectContainer* m_pObjectContainer = nullptr;
 };
 // スクリプト更新システム
 class ScriptUpdateSystem : public ECSManager::System<ScriptComponent>
 {
 public:
-	ScriptUpdateSystem(InputManager* input,ECSManager* ecs,ResourceManager* resourceManager)
+	ScriptUpdateSystem(ObjectContainer* objectContainer, InputManager* input,ECSManager* ecs,ResourceManager* resourceManager)
 		: ECSManager::System<ScriptComponent>([this](Entity e, ScriptComponent& script)
 			{
 				e;
 				UpdateScript(script);
 			}),
-		m_ECS(ecs), m_pResourceManager(resourceManager), m_pInputManager(input)
+		m_ECS(ecs), m_pResourceManager(resourceManager), m_pInputManager(input), m_pObjectContainer(objectContainer)
 	{
 	}
 	~ScriptUpdateSystem() = default;
@@ -147,6 +148,7 @@ private:
 	ECSManager* m_ECS = nullptr;
 	ResourceManager* m_pResourceManager = nullptr;
 	InputManager* m_pInputManager = nullptr;
+	ObjectContainer* m_pObjectContainer = nullptr;
 };
 // スクリプト終了システム
 class ScriptFinalizeSystem : public ECSManager::System<ScriptComponent>
@@ -182,7 +184,6 @@ public:
 	}
 
 	~Rigidbody2DInitSystem() = default;
-
 private:
 	void CreateBody(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb)
 	{
@@ -204,7 +205,6 @@ private:
 		transform.translation.x = rb.runtimeBody->GetPosition().x;
 		transform.translation.y = rb.runtimeBody->GetPosition().y;
 	}
-
 	ECSManager* m_ECS = nullptr;
 	b2World* m_World = nullptr;
 };
@@ -296,6 +296,8 @@ private:
 			m_World->DestroyBody(rb.runtimeBody);
 			rb.runtimeBody = nullptr;
 		}
+		rb.isCollisionStay = false;
+		rb.otherEntity.reset();
 	}
 	template<typename ColliderT>
 	void ResetCollider(Entity e)
@@ -310,6 +312,29 @@ private:
 	ECSManager* m_ECS = nullptr;
 	b2World* m_World = nullptr;
 };
+class CollisionSystem : public ECSManager::System<ScriptComponent,Rigidbody2DComponent>
+{
+public:
+	CollisionSystem(ECSManager* ecs, ResourceManager* resourceManager, InputManager* inputManager,ObjectContainer* objectContainer)
+		: ECSManager::System<ScriptComponent, Rigidbody2DComponent>(
+			[this](Entity e, ScriptComponent& script, Rigidbody2DComponent& rb)
+			{
+				e;
+				//CollisionEnter(script, rb);
+				CollisionStay(script, rb);
+			}),
+		m_ECS(ecs), m_pResourceManager(resourceManager), m_pInputManager(inputManager), m_pObjectContainer(objectContainer)
+	{
+	}
+	~CollisionSystem() = default;
+private:
+	void CollisionStay(ScriptComponent& script, Rigidbody2DComponent& rb);
+	ECSManager* m_ECS = nullptr;
+	ResourceManager* m_pResourceManager = nullptr;
+	InputManager* m_pInputManager = nullptr;
+	ObjectContainer* m_pObjectContainer = nullptr;
+};
+
 class BoxCollider2DInitSystem : public ECSManager::System<TransformComponent, Rigidbody2DComponent, BoxCollider2DComponent>
 {
 public:

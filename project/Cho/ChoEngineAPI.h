@@ -1,15 +1,35 @@
 #pragma once
 #include "Engine/Engine.h"
-#ifdef CHOENGINE_EXPORTS
-#define CHO_API __declspec(dllexport)
-#else
-#define CHO_API __declspec(dllimport)
-#endif
+#include "APIExportsMacro.h"
+#include "Externals/ChoMath/ChoMath.h"
+#include <variant>
+using GameParameterVariant = std::variant<int, float, bool, Vector3>;
 
 namespace Cho
 {
-    // Engineの生成
+	// エディタとゲーム実行ファイルしか許可しない
+#ifdef ENGINECREATE_FUNCTION
+	// Engineの生成
 	CHO_API Engine* CreateEngine(RuntimeMode mode);
 	// Engineの破棄
 	CHO_API void DestroyEngine(Engine* engine);
+#endif
+}
+namespace ChoSystem
+{
+	// スクリプト用
+#ifdef USE_CHOENGINE_SCRIPT
+	// Json保存
+	CHO_API bool SaveGameParameter(const std::wstring& filePath,
+		const std::string& group,
+		const std::string& item,
+		const std::string& dataName,
+		const GameParameterVariant& value);
+	// Json読み込み
+	CHO_API bool LoadGameParameter(const std::wstring& filePath,
+		const std::string& group,
+		const std::string& item,
+		const std::string& dataName,
+		GameParameterVariant& outValue);
+#endif
 }

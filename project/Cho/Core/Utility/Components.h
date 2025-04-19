@@ -17,6 +17,7 @@
 #include <ranges>         // C++20
 #include <numbers>        // C++20
 #include <cstdint>
+#include <variant>
 
 struct ScriptContext;
 
@@ -104,9 +105,15 @@ struct ScriptComponent : public IComponentTag
 	std::string scriptName = "";								// スクリプト名
 	std::optional<Entity> entity = std::nullopt;				// スクリプトのエンティティ
 	using ScriptFunc = std::function<void(ScriptContext& ctx)>; // スクリプト関数型
+
 	ScriptFunc startFunc;										// Start関数
 	ScriptFunc updateFunc;										// Update関数
 	std::function<void()> cleanupFunc;							// 解放関数
+
+	std::function<void(ScriptContext& ctx,ScriptContext& other)> onCollisionEnterFunc;	// 衝突開始関数
+	std::function<void(ScriptContext& ctx, ScriptContext& other)> onCollisionStayFunc;	// 衝突中関数
+	std::function<void(ScriptContext& ctx, ScriptContext& other)> onCollisionExitFunc;	// 衝突終了関数
+
 	bool isActive = false;										// スクリプト有効フラグ
 };
 
@@ -136,6 +143,8 @@ struct Rigidbody2DComponent : public IComponentTag
 	b2BodyType bodyType = b2_dynamicBody;
 	b2Body* runtimeBody = nullptr; // Box2D Bodyへのポインタ
 	b2World* world = nullptr; // Box2D Worldへのポインタ
+	bool isCollisionStay = false; // 衝突中フラグ
+	std::optional<Entity> otherEntity = std::nullopt; // 衝突したエンティティ
 };
 // 2D矩形コライダー
 struct BoxCollider2DComponent : public IComponentTag

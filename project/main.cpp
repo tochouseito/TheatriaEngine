@@ -1,5 +1,7 @@
 #pragma warning(push)
 #pragma warning(disable:28251)
+// エンジン起動関数を使う
+#define ENGINECREATE_FUNCTION
 // Engine
 #include "Cho/ChoEngineAPI.h"
 // Windows

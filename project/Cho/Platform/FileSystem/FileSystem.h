@@ -9,6 +9,7 @@
 #include "Core/Utility/Components.h"
 using namespace std::filesystem;
 using json = nlohmann::json;
+using GameParameterVariant = std::variant<int, float, bool, Vector3>;
 class BaseScene;
 class SceneManager;
 class ECSManager;
@@ -27,6 +28,7 @@ namespace Cho
 		SoundFile,      // 音声ファイル
 		EffectFile,     // エフェクトファイル
 		ScriptFile,     // スクリプトファイル
+		GameParameter,  // ゲームパラメータファイル
 		Unknown,        // 不明なファイル
     };
 
@@ -124,6 +126,18 @@ namespace Cho
 		static bool SaveScriptFile(const std::wstring& directory,ResourceManager* resourceManager);
 		// スクリプトのファイルを読み込む
 		static bool LoadScriptFile(const std::wstring& filePath, ResourceManager* resourceManager);
+		// ゲームパラメーターファイルを保存
+        static bool SaveGameParameter(const std::wstring& filePath,
+            const std::string& group,
+            const std::string& item,
+            const std::string& dataName,
+            const GameParameterVariant& value);
+		// ゲームパラメーターファイルを読み込む
+        static bool LoadGameParameter(const std::wstring& filePath,
+            const std::string& group,
+            const std::string& item,
+            const std::string& dataName,
+            GameParameterVariant& outValue);
 
         static FileType GetJsonFileType(const std::filesystem::path& path);
 
@@ -145,6 +159,7 @@ namespace Cho
 			if (type == "SoundFile") return FileType::SoundFile;
 			if (type == "EffectFile") return FileType::EffectFile;
 			if (type == "ScriptFile") return FileType::ScriptFile;
+			if (type == "GameParameter") return FileType::GameParameter;
             return FileType::Unknown;
         }
         // GUID 生成
