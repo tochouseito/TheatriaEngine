@@ -172,6 +172,7 @@ void ScriptInitializeSystem::LoadScript(ScriptComponent& script)
 		return;
 	}
 	// スクリプトを生成
+	object.Initialize();// 初期化
 	IScript* scriptInstance = createScript(object);
 	if (!scriptInstance)
 	{
@@ -303,6 +304,7 @@ void CollisionSystem::CollisionStay(ScriptComponent& script, Rigidbody2DComponen
 		// 相手のゲームオブジェクトを取得
 		GameObject& otherObject = m_pObjectContainer->GetGameObject(rb.otherObjectID.value());
 		if (!otherObject.IsActive()) { return; }
+		otherObject.Initialize();
 		script.onCollisionStayFunc(otherObject);
 	}
 }
