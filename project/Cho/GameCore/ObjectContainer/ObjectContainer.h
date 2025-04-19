@@ -22,7 +22,7 @@ public:
 	ObjectID AddGameObject(const Entity& entity,const std::wstring& name,const ObjectType& type)
 	{ 
 		ObjectID id = static_cast<ObjectID>(m_GameObjects.push_back(GameObject(this, m_InputManager, m_ResourceManager, m_ECS, entity, name, type)));
-		m_GameObjects[id].Initialize();
+		//m_GameObjects[id].Initialize();
 		m_NameToObjectID[name] = id;
 		m_TypeToObjectIDs[type].push_back(id);
 		m_GameObjects[id].SetID(id);

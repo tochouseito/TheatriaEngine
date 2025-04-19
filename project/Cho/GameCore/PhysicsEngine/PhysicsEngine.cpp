@@ -41,6 +41,7 @@ void ContactListener2D::CollisionEnter(ObjectID self, ObjectID other)
 		// 相手のゲームオブジェクトを取得
 		GameObject& otherObject = m_pObjectContainer->GetGameObject(other);
 		if (!otherObject.IsActive()) { return; }
+		otherObject.Initialize();// 初期化
 		Rigidbody2DComponent* otherRb = m_pECS->GetComponent<Rigidbody2DComponent>(otherObject.GetEntity());
 		otherRb->isCollisionStay = true;// 衝突中フラグオン
 		//script->onCollisionEnterFunc(selfContext, otherContext);
@@ -67,6 +68,7 @@ void ContactListener2D::CollisionExit(ObjectID self, ObjectID other)
 		// 相手のゲームオブジェクトを取得
 		GameObject& otherObject = m_pObjectContainer->GetGameObject(other);
 		if (!otherObject.IsActive()) return;
+		otherObject.Initialize();// 初期化
 		Rigidbody2DComponent* otherRb = m_pECS->GetComponent<Rigidbody2DComponent>(other);
 		otherRb->isCollisionStay = false;// 衝突中フラグオフ
 		//script->onCollisionExitFunc(selfContext, otherContext);
