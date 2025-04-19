@@ -343,7 +343,7 @@ void Inspector::AddComponent(GameObject* object)
 				if (ImGui::Selectable("ScriptComponent"))
 				{
 					// ScriptComponentを追加
-					std::unique_ptr<AddScriptComponent> addScriptComp = std::make_unique<AddScriptComponent>(object->GetEntity());
+					std::unique_ptr<AddScriptComponent> addScriptComp = std::make_unique<AddScriptComponent>(object->GetEntity(),object->GetID().value());
 					m_EngineCommand->ExecuteCommand(std::move(addScriptComp));
 					isOpen = false;
 				}
@@ -367,7 +367,7 @@ void Inspector::AddComponent(GameObject* object)
 				if (ImGui::Selectable("Rigidbody2DComponent"))
 				{
 					// Rigidbody2DComponentを追加
-					std::unique_ptr<AddRigidbody2DComponent> addRigidBodyComp = std::make_unique<AddRigidbody2DComponent>(object->GetEntity());
+					std::unique_ptr<AddRigidbody2DComponent> addRigidBodyComp = std::make_unique<AddRigidbody2DComponent>(object->GetEntity(),object->GetID().value());
 					m_EngineCommand->ExecuteCommand(std::move(addRigidBodyComp));
 					isOpen = false;
 				}
@@ -393,7 +393,7 @@ void Inspector::AddComponent(GameObject* object)
 				if (ImGui::Selectable("ScriptComponent"))
 				{
 					// ScriptComponentを追加
-					std::unique_ptr<AddScriptComponent> addScriptComp = std::make_unique<AddScriptComponent>(object->GetEntity());
+					std::unique_ptr<AddScriptComponent> addScriptComp = std::make_unique<AddScriptComponent>(object->GetEntity(),object->GetID().value());
 					m_EngineCommand->ExecuteCommand(std::move(addScriptComp));
 					isOpen = false;
 				}

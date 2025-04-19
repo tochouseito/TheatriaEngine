@@ -290,20 +290,20 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory,BaseScene* sce
     nlohmann::ordered_json objArray = nlohmann::json::array();
     for (ObjectID& id : scene->GetUseObjects())
     {
-        const GameObject* obj = container->GetGameObject(id);
-        if (!obj) continue;
+        const GameObject& obj = container->GetGameObject(id);
+        if (!obj.IsActive()) continue;
 
         nlohmann::ordered_json objJson;
-        objJson["name"] = std::filesystem::path(obj->GetName()).string();
-        objJson["type"] = ObjectTypeToWString(obj->GetType());
+        objJson["name"] = std::filesystem::path(obj.GetName()).string();
+        objJson["type"] = ObjectTypeToWString(obj.GetType());
 
         // components
         nlohmann::ordered_json comps;
 
-        Entity entity = obj->GetEntity();
+        Entity entity = obj.GetEntity();
         // マルチコンポーネント存在確認用
 		std::vector<LineRendererComponent>* lineRenderers;
-        switch (obj->GetType())
+        switch (obj.GetType())
         {
         case ObjectType::MeshObject:
             if (const auto* t = ecs->GetComponent<TransformComponent>(entity))
@@ -369,9 +369,10 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory,BaseScene* sce
     // メインカメラ
     if (auto camID = scene->GetMainCameraID())
     {
-        if (const GameObject* cam = container->GetGameObject(*camID))
+        const GameObject& cam = container->GetGameObject(*camID);
+        if (cam.IsActive())
         {
-            j["mainCamera"] = std::filesystem::path(cam->GetName()).string();
+            j["mainCamera"] = std::filesystem::path(cam.GetName()).string();
         }
     }
 
@@ -422,10 +423,10 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, SceneManager* 
                 ObjectType type = ObjectTypeFromString(obj["type"].get<std::string>());
                 Entity entity = ecs->GenerateEntity();
                 container->AddGameObject(entity, name, type);
-                GameObject* gameObj = container->GetGameObjectByName(name);
-                if (!gameObj) continue;
+                GameObject& gameObj = container->GetGameObjectByName(name);
+                if (!gameObj.IsActive()) continue;
 
-                scene->AddUseObject(gameObj->GetID());
+                scene->AddUseObject(gameObj.GetID().value());
 
                 if (!obj.contains("components")) continue;
                 const auto& comps = obj["components"];
@@ -504,10 +505,12 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, SceneManager* 
                     {
                         std::string scriptNameStr = comps["Script"]["scriptName"].get<std::string>();
                         s.scriptName = scriptNameStr;
-                        s.entity = entity;
+						s.objectID = comps["Script"]["objectID"];
+                        //s.entity = entity;
                         ScriptComponent* script = ecs->AddComponent<ScriptComponent>(entity);
                         script->scriptName = s.scriptName;
-                        script->entity = s.entity;
+						script->objectID = s.objectID;
+                        //script->entity = s.entity;
                     }
                 }
 
@@ -545,6 +548,11 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, SceneManager* 
                     r.mass = jr.value("mass", 1.0f);
                     r.bodyType = static_cast<b2BodyType>(jr.value("bodyType", 2)); // default: b2_dynamicBody
                     r.fixedRotation = jr.value("fixedRotation", false);
+					r.isCollisionStay = false;
+					r.runtimeBody = nullptr;
+					r.world = nullptr;
+					r.otherObjectID = std::nullopt;
+                    r.selfObjectID = jr["selfObjectID"];
 
                     Rigidbody2DComponent* rb = ecs->AddComponent<Rigidbody2DComponent>(entity);
 					rb->isKinematic = r.isKinematic;
@@ -552,6 +560,11 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, SceneManager* 
 					rb->mass = r.mass;
 					rb->bodyType = r.bodyType;
 					rb->fixedRotation = r.fixedRotation;
+					rb->isCollisionStay = r.isCollisionStay;
+					rb->runtimeBody = r.runtimeBody;
+					rb->world = r.world;
+					rb->otherObjectID = r.otherObjectID;
+					rb->selfObjectID = r.selfObjectID;
                 }
 
                 // BoxCollider2D
@@ -583,10 +596,10 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, SceneManager* 
         if (j.contains("mainCamera"))
         {
             std::wstring camName = std::filesystem::path(j["mainCamera"].get<std::string>()).wstring();
-            GameObject* camObj = container->GetGameObjectByName(camName);
-            if (camObj)
+            GameObject& camObj = container->GetGameObjectByName(camName);
+            if (camObj.IsActive())
             {
-                scene->SetMainCameraID(camObj->GetID());
+                scene->SetMainCameraID(camObj.GetID().value());
             }
         }
 
@@ -805,9 +818,13 @@ json Cho::Serialization::ToJson(const ScriptComponent& s)
 {
 	json j;
 	j["scriptName"] = s.scriptName;
-	if (s.entity.has_value())
+	/*if (s.entity.has_value())
 	{
 		j["entity"] = s.entity.value();
+	}*/
+	if (s.objectID.has_value())
+	{
+		j["objectID"] = s.objectID.value();
 	}
 	return j;
 }
@@ -834,6 +851,10 @@ json Cho::Serialization::ToJson(const Rigidbody2DComponent& rb)
 	j["mass"] = rb.mass;
 	j["bodyType"] = static_cast<int>(rb.bodyType);
 	j["fixedRotation"] = rb.fixedRotation;
+    if (rb.selfObjectID.has_value())
+    {
+        j["selfObjectID"] = rb.selfObjectID.value();
+    }
 	return j;
 }
 

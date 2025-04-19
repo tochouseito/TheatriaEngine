@@ -4,7 +4,8 @@
 #include "Externals/ChoMath/ChoMath.h"
 #include <variant>
 using GameParameterVariant = std::variant<int, float, bool, Vector3>;
-
+//struct ScriptContext;
+class GameObject;
 namespace Cho
 {
 	// エディタとゲーム実行ファイルしか許可しない

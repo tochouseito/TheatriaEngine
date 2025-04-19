@@ -19,7 +19,8 @@
 #include <cstdint>
 #include <variant>
 
-struct ScriptContext;
+//struct ScriptContext;
+class GameObject;
 
 // コンポーネントだと判別するためのタグ
 struct IComponentTag {};
@@ -36,6 +37,8 @@ struct BaseComponent : public IComponentTag
 	std::optional<std::wstring> name = std::nullopt;
 	// タイプ
 	std::optional<ObjectType> type = std::nullopt;
+	// タグ
+	std::optional<std::string> tag = "Default";
 };
 
 // 初期値を保存するための構造体
@@ -103,16 +106,17 @@ struct MeshRendererComponent : public IComponentTag
 struct ScriptComponent : public IComponentTag
 {
 	std::string scriptName = "";								// スクリプト名
-	std::optional<Entity> entity = std::nullopt;				// スクリプトのエンティティ
-	using ScriptFunc = std::function<void(ScriptContext& ctx)>; // スクリプト関数型
+	std::optional<ObjectID> objectID = std::nullopt;	// スクリプトのオブジェクトID
+	//std::optional<Entity> entity = std::nullopt;				// スクリプトのエンティティ
+	using ScriptFunc = std::function<void()>; // スクリプト関数型
 
 	ScriptFunc startFunc;										// Start関数
 	ScriptFunc updateFunc;										// Update関数
 	std::function<void()> cleanupFunc;							// 解放関数
 
-	std::function<void(ScriptContext& ctx,ScriptContext& other)> onCollisionEnterFunc;	// 衝突開始関数
-	std::function<void(ScriptContext& ctx, ScriptContext& other)> onCollisionStayFunc;	// 衝突中関数
-	std::function<void(ScriptContext& ctx, ScriptContext& other)> onCollisionExitFunc;	// 衝突終了関数
+	std::function<void(GameObject& other)> onCollisionEnterFunc;	// 衝突開始関数
+	std::function<void(GameObject& other)> onCollisionStayFunc;	// 衝突中関数
+	std::function<void(GameObject& other)> onCollisionExitFunc;	// 衝突終了関数
 
 	bool isActive = false;										// スクリプト有効フラグ
 };
@@ -144,7 +148,9 @@ struct Rigidbody2DComponent : public IComponentTag
 	b2Body* runtimeBody = nullptr; // Box2D Bodyへのポインタ
 	b2World* world = nullptr; // Box2D Worldへのポインタ
 	bool isCollisionStay = false; // 衝突中フラグ
-	std::optional<Entity> otherEntity = std::nullopt; // 衝突したエンティティ
+	//std::optional<Entity> otherEntity = std::nullopt; // 衝突したエンティティ
+	std::optional<ObjectID> otherObjectID = std::nullopt; // 衝突したオブジェクトID
+	std::optional<ObjectID> selfObjectID = std::nullopt; // 自分のオブジェクトID
 };
 // 2D矩形コライダー
 struct BoxCollider2DComponent : public IComponentTag
