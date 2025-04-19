@@ -261,6 +261,10 @@ private:
 		transform.translation.x = pos.x;
 		transform.translation.y = pos.y;
 
+		b2Vec2 velocity = rb.runtimeBody->GetLinearVelocity();
+		rb.velocity.x = velocity.x;
+		rb.velocity.y = velocity.y;
+
 		Vector3 radians = {};
 		radians.z = rb.runtimeBody->GetAngle(); // radians
 		Vector3 degrees = ChoMath::RadiansToDegrees(radians);

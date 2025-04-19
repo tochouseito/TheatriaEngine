@@ -69,6 +69,8 @@ struct Rigidbody2DAPI
 		}
 	private:
 	};
+	Vector2& velocity() { return data->velocity; }
+
 	// 反射方向を計算
 	std::function<b2Vec2(const b2Vec2& incident, const b2Vec2& normal)> Reflect;
 	std::function<b2Vec2(const b2Vec2& start, const b2Vec2& dir,const int ReflectionCount, const float maxLength)> RaycastWithReflectionsOnce;

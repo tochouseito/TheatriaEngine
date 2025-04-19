@@ -103,8 +103,7 @@ void TransformUpdateSystem::UpdateComponent(Entity e, TransformComponent& transf
 	Rigidbody2DComponent* rb = m_pECS->GetComponent<Rigidbody2DComponent>(e);
 	if (rb && rb->runtimeBody)
 	{
-		b2Vec2 pos = { transform.translation.x, transform.translation.y };
-		rb->runtimeBody->SetTransform(pos, rb->runtimeBody->GetAngle());
+		rb->runtimeBody->SetLinearVelocity(b2Vec2(rb->velocity.x, rb->velocity.y));
 	}
 
 	// 行列の転送

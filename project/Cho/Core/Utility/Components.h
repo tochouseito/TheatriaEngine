@@ -135,10 +135,11 @@ struct Rigidbody2DComponent : public IComponentTag
 	b2Body* runtimeBody = nullptr; // Box2D Bodyへのポインタ
 	b2World* world = nullptr; // Box2D Worldへのポインタ
 	bool isCollisionStay = false; // 衝突中フラグ
-	//std::optional<Entity> otherEntity = std::nullopt; // 衝突したエンティティ
 	std::optional<ObjectID> otherObjectID = std::nullopt; // 衝突したオブジェクトID
 	std::optional<ObjectID> selfObjectID = std::nullopt; // 自分のオブジェクトID
 	std::optional<b2Vec2> requestedPosition = std::nullopt; // 位置リクエスト
+	//std::optional<b2Vec2> requestedVelocity = std::nullopt; // 速度リクエスト
+	Vector2 velocity = { 0.0f, 0.0f }; // 速度
 };
 // 2D矩形コライダー
 struct BoxCollider2DComponent : public IComponentTag
