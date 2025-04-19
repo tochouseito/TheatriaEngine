@@ -287,6 +287,7 @@
     <ClCompile Include="SDK\ImGui\ImGuiManager\ImGuiManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="APIExportsMacro.h" />
     <ClInclude Include="ChoEngineAPI.h" />
     <ClInclude Include="Core\ChoLog\ChoLog.h" />
     <ClInclude Include="Core\CoreSystem\CoreSystem.h" />
@@ -529,7 +530,10 @@ xcopy "$(SolutionDir)Cho\Core\Utility\Components.h" "$(TargetDir)Cho\Core\Utilit
 xcopy "$(SolutionDir)Cho\Core\Utility\Color.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Externals\box2d" "$(TargetDir)Cho\Externals\box2d" /E /I /Y
 xcopy "$(SolutionDir)Cho\Core\Utility\InputStruct.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
-xcopy "$(SolutionDir)Cho\Core\Utility\IDType.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y</Command>
+xcopy "$(SolutionDir)Cho\Core\Utility\IDType.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
+xcopy "$(SolutionDir)Cho\ChoEngineAPI.h" "$(TargetDir)Cho\" /E /I /Y
+xcopy "$(SolutionDir)Cho\APIExportsMacro.h" "$(TargetDir)Cho\" /E /I /Y
+xcopy "$(SolutionDir)Cho\Engine\Engine.h" "$(TargetDir)Cho\Engine\" /E /I /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -571,7 +575,10 @@ xcopy "$(SolutionDir)Cho\Core\Utility\Components.h" "$(TargetDir)Cho\Core\Utilit
 xcopy "$(SolutionDir)Cho\Core\Utility\Color.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Externals\box2d" "$(TargetDir)Cho\Externals\box2d" /E /I /Y
 xcopy "$(SolutionDir)Cho\Core\Utility\InputStruct.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
-xcopy "$(SolutionDir)Cho\Core\Utility\IDType.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y</Command>
+xcopy "$(SolutionDir)Cho\Core\Utility\IDType.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
+xcopy "$(SolutionDir)Cho\ChoEngineAPI.h" "$(TargetDir)Cho\" /E /I /Y
+xcopy "$(SolutionDir)Cho\APIExportsMacro.h" "$(TargetDir)Cho\" /E /I /Y
+xcopy "$(SolutionDir)Cho\Engine\Engine.h" "$(TargetDir)Cho\Engine\" /E /I /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

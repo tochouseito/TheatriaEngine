@@ -635,12 +635,12 @@ bool Cho::FileSystem::SaveScriptFile(const std::wstring& directory, ResourceMana
 bool Cho::FileSystem::LoadScriptFile(const std::wstring& filePath, ResourceManager* resourceManager)
 {
     ScriptContainer* scriptContainer = resourceManager->GetScriptContainer();
-    if (!scriptContainer) return false;
+    if (!scriptContainer) { return false; }
 
     try
     {
         std::ifstream file(filePath);
-        if (!file.is_open()) return false;
+        if (!file.is_open()) { return false; }
 
         nlohmann::json j;
         file >> j;
@@ -677,6 +677,89 @@ bool Cho::FileSystem::LoadScriptFile(const std::wstring& filePath, ResourceManag
     {
         return false;
     }
+}
+
+bool Cho::FileSystem::SaveGameParameter(const std::wstring& filePath, const std::string& group, const std::string& item, const std::string& dataName, const GameParameterVariant& value)
+{
+    json root;
+
+    // 既存のファイルを開く（存在しなければ新規）
+    std::wstring path = L"GameProjects/" + m_sProjectName + L"/" + filePath + L".json";
+    std::ifstream ifs(path);
+    if (ifs.is_open())
+    {
+        try
+        {
+            ifs >> root;
+        }
+        catch (...)
+        {
+            return false;
+        }
+        ifs.close();
+    }
+    // ファイルタイプの確認 or 設定
+    root["fileType"] = "GameParameter";
+    // グループ → アイテム → データ名 に設定
+    json& target = root[group][item][dataName];
+    if (std::holds_alternative<int>(value))
+    {
+        target = std::get<int>(value);
+    } else if (std::holds_alternative<float>(value))
+    {
+        target = std::get<float>(value);
+    } else if (std::holds_alternative<bool>(value))
+    {
+        target = std::get<bool>(value);
+    } else if (std::holds_alternative<Vector3>(value))
+    {
+        const Vector3& v = std::get<Vector3>(value);
+        target = { v.x, v.y, v.z };
+    }
+    // 書き込み
+    std::ofstream ofs(path);
+    if (!ofs.is_open()) return false;
+    ofs << std::setw(4) << root << std::endl;
+    return true;
+}
+
+bool Cho::FileSystem::LoadGameParameter(const std::wstring& filePath, const std::string& group, const std::string& item, const std::string& dataName, GameParameterVariant& outValue)
+{
+    json root;
+	// ファイルを開く
+    std::wstring path = L"GameProjects/" + m_sProjectName + L"/" + filePath + L".json";
+    std::ifstream ifs(path);
+    if (!ifs.is_open()) { return false; }
+    try
+    {
+        ifs >> root;
+    }
+    catch (...)
+    {
+        return false;
+    }
+    if (root.value("fileType", "") != "GameParameter") { return false; }
+    if (!root.contains(group) || !root[group].contains(item) || !root[group][item].contains(dataName))
+    {
+        return false;
+    }
+    const json& val = root[group][item][dataName];
+    if (val.is_number_integer())
+    {
+        outValue = val.get<int>();
+    } else if (val.is_number_float())
+    {
+        outValue = val.get<float>();
+    } else if (val.is_boolean())
+    {
+        outValue = val.get<bool>();
+    } else if (val.is_array() && val.size() == 3 && val[0].is_number()) 
+    {
+        outValue = Vector3{ val[0].get<float>(), val[1].get<float>(), val[2].get<float>() };
+    } else{
+        return false;
+    }
+    return true;
 }
 
 // コンポーネントを保存
@@ -1053,7 +1136,7 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
     vcxFile << "    <Link>\n";
     vcxFile << "      <SubSystem>Windows</SubSystem>\n";
     vcxFile << "      <GenerateDebugInformation>true</GenerateDebugInformation>\n";
-    vcxFile << "      <AdditionalDependencies>ChoMath.lib;%(AdditionalDependencies)</AdditionalDependencies>\n";
+    vcxFile << "      <AdditionalDependencies>"<<"ChoMath.lib"<<";"<< "ChoEngine.lib" << ";" << "%(AdditionalDependencies)</AdditionalDependencies>\n";
     vcxFile << "      <AdditionalLibraryDirectories>" << libraryPath.string() << ";" << libraryPath2.string() << ";%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>\n";
     vcxFile << "    </Link>\n";
     vcxFile << "  </ItemDefinitionGroup>\n";
@@ -1074,7 +1157,7 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
     vcxFile << "      <EnableCOMDATFolding>true</EnableCOMDATFolding>\n";
     vcxFile << "      <OptimizeReferences>true</OptimizeReferences>\n";
     vcxFile << "      <GenerateDebugInformation>false</GenerateDebugInformation>\n";
-    vcxFile << "      <AdditionalDependencies>ChoMath.lib;%(AdditionalDependencies)</AdditionalDependencies>\n";
+    vcxFile << "      <AdditionalDependencies>" << "ChoMath.lib" << ";" << "ChoEngine.lib" << ";" << "%(AdditionalDependencies)</AdditionalDependencies>\n";
     vcxFile << "      <AdditionalLibraryDirectories>" << libraryPath.string() << ";" << libraryPath2.string() << ";%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>\n";
     vcxFile << "    </Link>\n";
     vcxFile << "  </ItemDefinitionGroup>\n";

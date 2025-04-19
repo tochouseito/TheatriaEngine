@@ -1,5 +1,7 @@
 #pragma once
 #include "GameCore/ScriptAPI/ScriptAPI.h"
+#define USE_CHOENGINE_SCRIPT
+#include "ChoEngineAPI.h"
 class IScript
 {
 public:

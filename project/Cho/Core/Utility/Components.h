@@ -17,6 +17,7 @@
 #include <ranges>         // C++20
 #include <numbers>        // C++20
 #include <cstdint>
+#include <variant>
 
 struct ScriptContext;
 
