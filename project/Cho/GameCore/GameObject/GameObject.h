@@ -38,6 +38,7 @@ class GameObject
 	friend class Add3DObjectCommand;
 	friend class AddCameraObjectCommand;
 	friend class RenameObjectCommand;
+	friend class IScript;
 public:
 	std::optional<ObjectID> GetID() const noexcept { return m_ID; }
 	Entity GetEntity() const noexcept { return m_Entity; }

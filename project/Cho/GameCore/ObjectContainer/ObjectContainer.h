@@ -125,6 +125,8 @@ public:
 		}
 		return nullptr;
 	}
+	// ダミーGameObjectを取得
+	GameObject& GetDummyGameObject() { return m_DummyGameObject; }
 private:
 	ECSManager* m_ECS = nullptr;	// ECSManager
 	ResourceManager* m_ResourceManager = nullptr;	// ResourceManager

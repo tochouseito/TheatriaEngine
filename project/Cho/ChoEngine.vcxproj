@@ -534,7 +534,8 @@ xcopy "$(SolutionDir)Cho\Core\Utility\IDType.h" "$(TargetDir)Cho\Core\Utility\" 
 xcopy "$(SolutionDir)Cho\ChoEngineAPI.h" "$(TargetDir)Cho\" /E /I /Y
 xcopy "$(SolutionDir)Cho\APIExportsMacro.h" "$(TargetDir)Cho\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Engine\Engine.h" "$(TargetDir)Cho\Engine\" /E /I /Y
-xcopy "$(SolutionDir)Cho\GameCore\GameObject" "$(TargetDir)Cho\GameCore\GameObject" /E /I /Y</Command>
+xcopy "$(SolutionDir)Cho\GameCore\GameObject" "$(TargetDir)Cho\GameCore\GameObject" /E /I /Y
+xcopy "$(SolutionDir)Cho\GameCore\ObjectContainer" "$(TargetDir)Cho\GameCore\ObjectContainer" /E /I /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -580,7 +581,8 @@ xcopy "$(SolutionDir)Cho\Core\Utility\IDType.h" "$(TargetDir)Cho\Core\Utility\" 
 xcopy "$(SolutionDir)Cho\ChoEngineAPI.h" "$(TargetDir)Cho\" /E /I /Y
 xcopy "$(SolutionDir)Cho\APIExportsMacro.h" "$(TargetDir)Cho\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Engine\Engine.h" "$(TargetDir)Cho\Engine\" /E /I /Y
-xcopy "$(SolutionDir)Cho\GameCore\GameObject" "$(TargetDir)Cho\GameCore\GameObject" /E /I /Y</Command>
+xcopy "$(SolutionDir)Cho\GameCore\GameObject" "$(TargetDir)Cho\GameCore\GameObject" /E /I /Y
+xcopy "$(SolutionDir)Cho\GameCore\ObjectContainer" "$(TargetDir)Cho\GameCore\ObjectContainer" /E /I /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

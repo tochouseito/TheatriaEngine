@@ -22,11 +22,6 @@ bool Add3DObjectCommand::Execute(EngineCommand* edit)
 	std::wstring name = L"NewMeshObject";
 	// 重複回避
 	name = GenerateUniqueName(name, edit->m_GameCore->GetObjectContainer()->GetNameToObjectID());
-	// BaseComponentを追加
-	BaseComponent* base = edit->m_GameCore->GetECSManager()->AddComponent<BaseComponent>(entity);
-	base->type = ObjectType::MeshObject;
-	base->entity = entity;
-	base->name = name;
 	// Transform統合バッファからmapIDを取得
 	uint32_t mapID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::Transform)->GetMapID();
 	// TransformComponentを追加
@@ -63,11 +58,6 @@ bool AddCameraObjectCommand::Execute(EngineCommand* edit)
 	std::wstring name = L"NewCameraObject";
 	// 重複回避
 	name = GenerateUniqueName(name, edit->m_GameCore->GetObjectContainer()->GetNameToObjectID());
-	// BaseComponentを追加
-	BaseComponent* base = edit->m_GameCore->GetECSManager()->AddComponent<BaseComponent>(entity);
-	base->type = ObjectType::Camera;
-	base->entity = entity;
-	base->name = name;
 	// Transform統合バッファからmapIDを取得
 	uint32_t mapID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::Transform)->GetMapID();
 	// TransformComponentを追加
@@ -269,15 +259,22 @@ bool RenameObjectCommand::Execute(EngineCommand* edit)
 {
 	GameObject& object = edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID);
 	if (!object.IsActive()) { return false; }
-	BaseComponent* base = edit->m_GameCore->GetECSManager()->GetComponent<BaseComponent>(object.GetEntity());
-	if (!base) { return false; }
-	// 名前の重複を確認
-	m_Name = GenerateUniqueName(m_Name, edit->m_GameCore->GetObjectContainer()->GetNameToObjectID());
 	// 変更前の名前を保存
 	m_PreName = object.GetName();
+	// 名前があるかどうかを確認
+	std::unordered_map<std::wstring, ObjectID>& nameToObjectID = edit->m_GameCore->GetObjectContainer()->GetNameToObjectID();
+	auto it = nameToObjectID.find(m_PreName);
+	if (!nameToObjectID.contains(m_PreName))
+	{
+		return false;
+	}
+	// 名前の重複を確認
+	m_NewName = GenerateUniqueName(m_NewName, edit->m_GameCore->GetObjectContainer()->GetNameToObjectID());
+	// 名前コンテナから削除
+	nameToObjectID.erase(it);
 	// 名前を変更
-	object.SetName(m_Name);
-	base->name = m_Name;
+	nameToObjectID[m_NewName] = object.GetID().value();
+	object.SetName(m_NewName);
 	return true;
 }
 
