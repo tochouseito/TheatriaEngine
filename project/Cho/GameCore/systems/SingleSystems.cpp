@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "SingleSystems.h"
 #include "Resources/ResourceManager/ResourceManager.h"
+#include "GameCore/ObjectContainer/ObjectContainer.h"
 #include "GameCore/IScript/IScript.h"
 #include "Platform/FileSystem/FileSystem.h"
 #include "Core/ChoLog/ChoLog.h"
@@ -154,7 +155,8 @@ void CameraUpdateSystem::TransferMatrix(TransformComponent& transform, CameraCom
 
 void ScriptInitializeSystem::LoadScript(ScriptComponent& script)
 {
-	if (script.scriptName.empty())
+	GameObject& object = m_pObjectContainer->GetGameObject(script.objectID.value());
+	if (script.scriptName.empty()||!object.IsActive())
 	{
 		script.isActive = false;
 		return;
@@ -162,7 +164,7 @@ void ScriptInitializeSystem::LoadScript(ScriptComponent& script)
 	std::string funcName = "Create" + script.scriptName + "Script";
 	funcName.erase(std::remove_if(funcName.begin(), funcName.end(), ::isspace), funcName.end());
 	// CreateScript関数を取得
-	typedef IScript* (*CreateScriptFunc)();
+	typedef IScript* (*CreateScriptFunc)(GameObject&);
 	CreateScriptFunc createScript = (CreateScriptFunc)GetProcAddress(FileSystem::ScriptProject::m_DllHandle, funcName.c_str());
 	if (!createScript)
 	{
@@ -170,32 +172,33 @@ void ScriptInitializeSystem::LoadScript(ScriptComponent& script)
 		return;
 	}
 	// スクリプトを生成
-	IScript* scriptInstance = createScript();
+	object.Initialize();// 初期化
+	IScript* scriptInstance = createScript(object);
 	if (!scriptInstance)
 	{
 		script.isActive = false;
 		return;
 	}
 	// スクリプトのStart関数とUpdate関数をラップ
-	script.startFunc = [scriptInstance](ScriptContext& ctx) {
-		scriptInstance->Start(ctx);
+	script.startFunc = [scriptInstance]() {
+		scriptInstance->Start();
 		};
-	script.updateFunc = [scriptInstance](ScriptContext& ctx) {
-		scriptInstance->Update(ctx);
+	script.updateFunc = [scriptInstance]() {
+		scriptInstance->Update();
 		};
 	// インスタンスの解放用のクロージャを設定
 	script.cleanupFunc = [scriptInstance, this]() {
 		delete scriptInstance;
 		};
 	// 衝突関数をラップ
-	script.onCollisionEnterFunc = [scriptInstance](ScriptContext& ctx,ScriptContext& other) {
-		scriptInstance->OnCollisionEnter(ctx,other);
+	script.onCollisionEnterFunc = [scriptInstance](GameObject& other) {
+		scriptInstance->OnCollisionEnter(other);
 		};
-	script.onCollisionStayFunc = [scriptInstance](ScriptContext& ctx, ScriptContext& other) {
-		scriptInstance->OnCollisionStay(ctx, other);
+	script.onCollisionStayFunc = [scriptInstance](GameObject& other) {
+		scriptInstance->OnCollisionStay(other);
 		};
-	script.onCollisionExitFunc = [scriptInstance](ScriptContext& ctx, ScriptContext& other) {
-		scriptInstance->OnCollisionExit(ctx, other);
+	script.onCollisionExitFunc = [scriptInstance](GameObject& other) {
+		scriptInstance->OnCollisionExit(other);
 		};
 	script.isActive = true;
 }
@@ -210,11 +213,11 @@ void ScriptInitializeSystem::StartScript(ScriptComponent& script)
 {
 	if (!script.isActive) return;
 	// スクリプトコンテキストを作成
-	ScriptContext ctx = MakeScriptContext(script.entity.value());
+	//ScriptContext ctx = MakeScriptContext(script.entity.value());
 	try
 	{
 		// スクリプトのStart関数を呼び出す
-		script.startFunc(ctx);
+		script.startFunc();
 	}
 	catch (const std::exception& e)
 	{
@@ -230,23 +233,23 @@ void ScriptInitializeSystem::StartScript(ScriptComponent& script)
 	}
 }
 
-ScriptContext ScriptInitializeSystem::MakeScriptContext(Entity entity)
-{
-	ScriptContext ctx(m_pObjectContainer,m_pInputManager,m_pResourceManager, m_ECS, entity);
-	ctx.Initialize();
-	return ctx;
-}
+//ScriptContext ScriptInitializeSystem::MakeScriptContext(Entity entity)
+//{
+//	ScriptContext ctx(m_pObjectContainer,m_pInputManager,m_pResourceManager, m_ECS, entity);
+//	ctx.Initialize();
+//	return ctx;
+//}
 
 void ScriptUpdateSystem::UpdateScript(ScriptComponent& script)
 {
 	if (!script.isActive) return;
 	// スクリプトコンテキストを作成
-	ScriptContext ctx = MakeScriptContext(script.entity.value());
+	//ScriptContext ctx = MakeScriptContext(script.entity.value());
 	
 	try
 	{
 		// スクリプトのUpdate関数を呼び出す
-		script.updateFunc(ctx);
+		script.updateFunc();
 	}
 	catch (const std::exception& e)
 	{
@@ -262,12 +265,12 @@ void ScriptUpdateSystem::UpdateScript(ScriptComponent& script)
 	}
 }
 
-ScriptContext ScriptUpdateSystem::MakeScriptContext(Entity entity)
-{
-	ScriptContext ctx(m_pObjectContainer,m_pInputManager,m_pResourceManager, m_ECS, entity);
-	ctx.Initialize();
-	return ctx;
-}
+//ScriptContext ScriptUpdateSystem::MakeScriptContext(Entity entity)
+//{
+//	ScriptContext ctx(m_pObjectContainer,m_pInputManager,m_pResourceManager, m_ECS, entity);
+//	ctx.Initialize();
+//	return ctx;
+//}
 
 void ScriptFinalizeSystem::FinalizeScript(ScriptComponent& script)
 {
@@ -292,12 +295,16 @@ void ScriptFinalizeSystem::FinalizeScript(ScriptComponent& script)
 
 void CollisionSystem::CollisionStay(ScriptComponent& script, Rigidbody2DComponent& rb)
 {
-	if (script.isActive&&rb.isCollisionStay&&rb.otherEntity)
+	if (script.isActive&&rb.isCollisionStay&&rb.otherObjectID)
 	{
 		// スクリプトコンテキストを作成
-		ScriptContext selfContext(m_pObjectContainer, m_pInputManager, m_pResourceManager, m_ECS, script.entity.value());
-		selfContext.Initialize();
-		ScriptContext otherContext(m_pObjectContainer, m_pInputManager, m_pResourceManager, m_ECS, rb.otherEntity.value());
-		script.onCollisionStayFunc(selfContext,otherContext);
+		//ScriptContext selfContext(m_pObjectContainer, m_pInputManager, m_pResourceManager, m_ECS, script.entity.value());
+		//selfContext.Initialize();
+		//ScriptContext otherContext(m_pObjectContainer, m_pInputManager, m_pResourceManager, m_ECS, rb.otherEntity.value());
+		// 相手のゲームオブジェクトを取得
+		GameObject& otherObject = m_pObjectContainer->GetGameObject(rb.otherObjectID.value());
+		if (!otherObject.IsActive()) { return; }
+		otherObject.Initialize();
+		script.onCollisionStayFunc(otherObject);
 	}
 }

@@ -3,8 +3,8 @@
 #include "Core/Utility/InputStruct.h"
 
 #define REGISTER_SCRIPT_FACTORY(SCRIPTNAME) \
-    extern "C" __declspec(dllexport) IScript* Create##SCRIPTNAME##Script() { \
-        return new SCRIPTNAME(); \
+    extern "C" __declspec(dllexport) IScript* Create##SCRIPTNAME##Script(GameObject& object) { \
+        return new SCRIPTNAME(object); \
     }
 
 struct TransformAPI
@@ -16,7 +16,8 @@ struct TransformAPI
 	std::function<void(Entity, const Vector3&)> SetPosition;
 	std::function<Vector3(Entity)> GetPosition;
 private:
-	friend struct ScriptContext;
+	//friend struct ScriptContext;
+	friend class GameObject;
 	TransformComponent* data = nullptr;
 };
 
@@ -28,7 +29,8 @@ struct CameraAPI
 	float& nearZ() { return data->nearZ; }
 	float& farZ() { return data->farZ; }
 private:
-	friend struct ScriptContext;
+	//friend struct ScriptContext;
+	friend class GameObject;
 	CameraComponent* data = nullptr;
 };
 
@@ -39,7 +41,8 @@ struct LineRendererAPI
 	Vector3& end(uint32_t index) { return (*data)[index].line.end; }
 	Color& color(uint32_t index) { return (*data)[index].line.color; }
 private:
-	friend struct ScriptContext;
+	//friend struct ScriptContext;
+	friend class GameObject;
 	std::vector<LineRendererComponent>* data = nullptr;
 };
 
@@ -72,7 +75,8 @@ struct Rigidbody2DAPI
 	// 法線取得（RaycastOnce の直後のみ有効）
 	b2Vec2 GetLastHitNormal() const { return m_LastHitNormal; }
 private:
-	friend struct ScriptContext;
+	//friend struct ScriptContext;
+	friend class GameObject;
 	Rigidbody2DComponent* data = nullptr;
 	// 最後の法線（内部的に保持、ただし状態は保持しないなら静的でもよい）
 	b2Vec2 m_LastHitNormal = b2Vec2(0.0f, 1.0f); // 一時的な用途
@@ -114,57 +118,58 @@ struct InputAPI
 	std::function<float(const LR& LorR, int32_t stickNo)> GetLRTrigger;
 	
 private:
-	friend struct ScriptContext;
+	//friend struct ScriptContext;
+	friend class GameObject;
 	InputManager* data = nullptr;
 };
-// スクリプトコンテキスト
-class ECSManager;
-class ResourceManager;
-class ObjectContainer;
-struct ScriptContext
-{
-public:
-	TransformAPI transform;	// TransformAPI
-	CameraAPI camera;	// CameraAPI
-	LineRendererAPI lineRenderer;	// LineRendererAPI
-	Rigidbody2DAPI rigidbody2D;	// Rigidbody2DAPI
-
-	// Input
-	InputAPI input;	// InputAPI
-private:
-	std::optional<Entity> m_Entity = std::nullopt;	// スクリプトのエンティティ
-	ECSManager* m_ECS = nullptr;	// ECSManager
-	ResourceManager* m_ResourceManager = nullptr;	// ResourceManager
-	InputManager* m_InputManager = nullptr;	// InputManager
-	ObjectContainer* m_ObjectContainer = nullptr;	// ObjectContainer
-
-	friend class ScriptInitializeSystem;
-	friend class ScriptUpdateSystem;
-	friend class ScirptFinalizeSystem;
-	friend class CollisionSystem;
-	friend class ContactListener2D;
-
-	void Initialize()
-	{
-		InitializeTransformAPI();
-		InitializeCameraAPI();
-		InitializeLineRendererAPI();
-		InitializeRigidbody2DAPI();
-		InitializeInputAPI();
-	}
-
-	void InitializeTransformAPI();
-	void InitializeCameraAPI();
-	void InitializeLineRendererAPI();
-	void InitializeRigidbody2DAPI();
-	void InitializeInputAPI();
-public:
-	// デフォルトコンストラクタ
-	ScriptContext(ObjectContainer* objectContainer,InputManager* input,ResourceManager* resourceManager, ECSManager* ecs, std::optional<Entity> entity) :m_ObjectContainer(objectContainer), m_InputManager(input), m_ResourceManager(resourceManager), m_ECS(ecs), m_Entity(entity) {}
-	// コピー、代入禁止
-	ScriptContext(const ScriptContext&) = delete;
-	ScriptContext& operator=(const ScriptContext&) = delete;
-	// ムーブは許可する
-	ScriptContext(ScriptContext&&) noexcept = default;
-	ScriptContext& operator=(ScriptContext&&) noexcept = default;
-};
+//// スクリプトコンテキスト
+//class ECSManager;
+//class ResourceManager;
+//class ObjectContainer;
+//struct ScriptContext
+//{
+//public:
+//	TransformAPI transform;	// TransformAPI
+//	CameraAPI camera;	// CameraAPI
+//	LineRendererAPI lineRenderer;	// LineRendererAPI
+//	Rigidbody2DAPI rigidbody2D;	// Rigidbody2DAPI
+//
+//	// Input
+//	InputAPI input;	// InputAPI
+//private:
+//	std::optional<Entity> m_Entity = std::nullopt;	// スクリプトのエンティティ
+//	ECSManager* m_ECS = nullptr;	// ECSManager
+//	ResourceManager* m_ResourceManager = nullptr;	// ResourceManager
+//	InputManager* m_InputManager = nullptr;	// InputManager
+//	ObjectContainer* m_ObjectContainer = nullptr;	// ObjectContainer
+//
+//	friend class ScriptInitializeSystem;
+//	friend class ScriptUpdateSystem;
+//	friend class ScirptFinalizeSystem;
+//	friend class CollisionSystem;
+//	friend class ContactListener2D;
+//
+//	void Initialize()
+//	{
+//		InitializeTransformAPI();
+//		InitializeCameraAPI();
+//		InitializeLineRendererAPI();
+//		InitializeRigidbody2DAPI();
+//		InitializeInputAPI();
+//	}
+//
+//	void InitializeTransformAPI();
+//	void InitializeCameraAPI();
+//	void InitializeLineRendererAPI();
+//	void InitializeRigidbody2DAPI();
+//	void InitializeInputAPI();
+//public:
+//	// デフォルトコンストラクタ
+//	ScriptContext(ObjectContainer* objectContainer,InputManager* input,ResourceManager* resourceManager, ECSManager* ecs, std::optional<Entity> entity) :m_ObjectContainer(objectContainer), m_InputManager(input), m_ResourceManager(resourceManager), m_ECS(ecs), m_Entity(entity) {}
+//	// コピー、代入禁止
+//	ScriptContext(const ScriptContext&) = delete;
+//	ScriptContext& operator=(const ScriptContext&) = delete;
+//	// ムーブは許可する
+//	ScriptContext(ScriptContext&&) noexcept = default;
+//	ScriptContext& operator=(ScriptContext&&) noexcept = default;
+//};

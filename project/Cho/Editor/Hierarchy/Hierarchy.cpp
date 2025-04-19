@@ -40,9 +40,9 @@ void Hierarchy::Window()
 	for (const ObjectID& objectID : currentSceneObjects)
 	{
 		// オブジェクトを取得
-		GameObject* object = m_EngineCommand->GetGameCore()->GetObjectContainer()->GetGameObject(objectID);
-		if (!object) { continue; }// オブジェクトが存在しない場合はスキップ
-		if (editing && editingName == object->GetName())
+		GameObject& object = m_EngineCommand->GetGameCore()->GetObjectContainer()->GetGameObject(objectID);
+		if (!object.IsActive()) { continue; }// オブジェクトが存在しない場合はスキップ
+		if (editing && editingName == object.GetName())
 		{
 			// 編集モード: InputTextを表示
 			std::string inputName = ConvertString(inputBuffer);
@@ -57,7 +57,7 @@ void Hierarchy::Window()
 				if (!wNewName.empty())
 				{
 					// オブジェクトの名前を更新
-					std::unique_ptr<RenameObjectCommand> renameCommand = std::make_unique<RenameObjectCommand>(object->GetID(), wNewName);
+					std::unique_ptr<RenameObjectCommand> renameCommand = std::make_unique<RenameObjectCommand>(object.GetID().value(), wNewName);
 					m_EngineCommand->ExecuteCommand(std::move(renameCommand));
 
 					editing = false;  // 編集終了
@@ -71,10 +71,10 @@ void Hierarchy::Window()
 		} else
 		{
 			// オブジェクトの名前を取得
-			std::wstring objectName = object->GetName();
+			std::wstring objectName = object.GetName();
 			// ツリーノードとして表示
 			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanFullWidth;
-			if (m_EngineCommand->GetSelectedObject() == object)
+			if (m_EngineCommand->GetSelectedObject() && m_EngineCommand->GetSelectedObject()->GetID() == object.GetID())
 			{
 				flags |= ImGuiTreeNodeFlags_Selected; // 選択中のオブジェクトをハイライト
 			}
@@ -84,13 +84,13 @@ void Hierarchy::Window()
 			if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
 			{
 				// 選択中のオブジェクトを更新
-				m_EngineCommand->SetSelectedObject(object);
+				m_EngineCommand->SetSelectedObject(&object);
 			}
 			// 右クリックされた場合の処理
 			if (ImGui::IsItemClicked(ImGuiMouseButton_Right))
 			{
 				// 選択中のオブジェクトを更新
-				m_EngineCommand->SetSelectedObject(object);
+				m_EngineCommand->SetSelectedObject(&object);
 				ImGui::OpenPopup("HierarchyPopupMenu");
 			}
 			// ダブルクリックで編集モードに切り替え
@@ -114,7 +114,7 @@ void Hierarchy::Window()
 		if (ImGui::MenuItem("削除"))
 		{
 			// 選択中のオブジェクトを削除
-			std::unique_ptr<DeleteObjectCommand> deleteCommand = std::make_unique<DeleteObjectCommand>(m_EngineCommand->GetSelectedObject()->GetID());
+			std::unique_ptr<DeleteObjectCommand> deleteCommand = std::make_unique<DeleteObjectCommand>(m_EngineCommand->GetSelectedObject()->GetID().value());
 			m_EngineCommand->ExecuteCommand(std::move(deleteCommand));
 			// 選択中オブジェクトをクリア
 			m_EngineCommand->SetSelectedObject(nullptr);

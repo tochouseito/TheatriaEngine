@@ -38,7 +38,7 @@ bool Add3DObjectCommand::Execute(EngineCommand* edit)
 	// シーンに追加
 	edit->m_GameCore->GetSceneManager()->GetCurrentScene()->AddUseObject(objectID);
 	// SelectedObjectを設定
-	edit->SetSelectedObject(edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID));
+	edit->SetSelectedObject(&edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID));
 	return true;
 }
 
@@ -83,7 +83,7 @@ bool AddCameraObjectCommand::Execute(EngineCommand* edit)
 	// シーンに追加
 	edit->m_GameCore->GetSceneManager()->GetCurrentScene()->AddUseObject(objectID);
 	// SelectedObjectを設定
-	edit->SetSelectedObject(edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID));
+	edit->SetSelectedObject(&edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID));
 	return true;
 }
 
@@ -157,7 +157,8 @@ bool AddScriptComponent::Execute(EngineCommand* edit)
 	// ScriptComponentを追加
 	ScriptComponent* script = edit->m_GameCore->GetECSManager()->AddComponent<ScriptComponent>(m_Entity);
 	// Entityを設定
-	script->entity = m_Entity;
+	//script->entity = m_Entity;
+	script->objectID = m_ObjectID;
 	return true;
 }
 
@@ -188,7 +189,7 @@ bool AddRigidbody2DComponent::Execute(EngineCommand* edit)
 {
 	// Rigidbody2DComponentを追加
 	Rigidbody2DComponent* rb = edit->m_GameCore->GetECSManager()->AddComponent<Rigidbody2DComponent>(m_Entity);
-	rb;
+	rb->selfObjectID = m_ObjectID;
 	return true;
 }
 
@@ -214,13 +215,14 @@ bool AddBoxCollider2DComponent::Undo(EngineCommand* edit)
 
 bool DeleteObjectCommand::Execute(EngineCommand* edit)
 {
-	GameObject* object = edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID);
-	m_Name = object->GetName();
-	m_Type = object->GetType();
+	GameObject& object = edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID);
+	if (!object.IsActive()) { return false; }
+	m_Name = object.GetName();
+	m_Type = object.GetType();
 	// モデルのUseListから削除
-	TransformComponent* transform = edit->m_GameCore->GetECSManager()->GetComponent<TransformComponent>(object->GetEntity());
+	TransformComponent* transform = edit->m_GameCore->GetECSManager()->GetComponent<TransformComponent>(object.GetEntity());
 	if (!transform) { Log::Write(LogLevel::Assert, "TransfomrComponent nullptr"); }
-	MeshFilterComponent* meshFilter = edit->m_GameCore->GetECSManager()->GetComponent<MeshFilterComponent>(object->GetEntity());
+	MeshFilterComponent* meshFilter = edit->m_GameCore->GetECSManager()->GetComponent<MeshFilterComponent>(object.GetEntity());
 	if (meshFilter)
 	{
 		edit->m_ResourceManager->GetModelManager()->RemoveModelUseList(meshFilter->modelID.value(), transform->mapID.value());
@@ -230,30 +232,30 @@ bool DeleteObjectCommand::Execute(EngineCommand* edit)
 	// 削除前にComponentを記録する
 	m_Transform = *transform;
 	if (meshFilter) { m_MeshFilter = *meshFilter; }
-	MeshRendererComponent* meshRenderer = edit->m_GameCore->GetECSManager()->GetComponent<MeshRendererComponent>(object->GetEntity());
+	MeshRendererComponent* meshRenderer = edit->m_GameCore->GetECSManager()->GetComponent<MeshRendererComponent>(object.GetEntity());
 	if (meshRenderer) { m_MeshRenderer = *meshRenderer; }
-	ScriptComponent* script = edit->m_GameCore->GetECSManager()->GetComponent<ScriptComponent>(object->GetEntity());
+	ScriptComponent* script = edit->m_GameCore->GetECSManager()->GetComponent<ScriptComponent>(object.GetEntity());
 	if (script) { m_Script = *script; }
-	std::vector<LineRendererComponent>* lineRenderer = edit->m_GameCore->GetECSManager()->GetAllComponents<LineRendererComponent>(object->GetEntity());
+	std::vector<LineRendererComponent>* lineRenderer = edit->m_GameCore->GetECSManager()->GetAllComponents<LineRendererComponent>(object.GetEntity());
 	if (lineRenderer) { m_LineRenderer = *lineRenderer; }
-	Rigidbody2DComponent* rb = edit->m_GameCore->GetECSManager()->GetComponent<Rigidbody2DComponent>(object->GetEntity());
+	Rigidbody2DComponent* rb = edit->m_GameCore->GetECSManager()->GetComponent<Rigidbody2DComponent>(object.GetEntity());
 	if (rb) { m_Rigidbody2D = *rb; }
-	BoxCollider2DComponent* box = edit->m_GameCore->GetECSManager()->GetComponent<BoxCollider2DComponent>(object->GetEntity());
+	BoxCollider2DComponent* box = edit->m_GameCore->GetECSManager()->GetComponent<BoxCollider2DComponent>(object.GetEntity());
 	if (box) { m_BoxCollider2D = *box; }
 	// Componentの削除
-	edit->m_GameCore->GetECSManager()->RemoveComponent<TransformComponent>(object->GetEntity());
-	if (meshFilter) { edit->m_GameCore->GetECSManager()->RemoveComponent<MeshFilterComponent>(object->GetEntity()); }
-	if (meshRenderer) { edit->m_GameCore->GetECSManager()->RemoveComponent<MeshRendererComponent>(object->GetEntity()); }
-	if (script) { edit->m_GameCore->GetECSManager()->RemoveComponent<ScriptComponent>(object->GetEntity()); }
-	if (lineRenderer) { edit->m_GameCore->GetECSManager()->RemoveAllComponents<LineRendererComponent>(object->GetEntity()); }
-	if (rb) { edit->m_GameCore->GetECSManager()->RemoveComponent<Rigidbody2DComponent>(object->GetEntity()); }
-	if (box) { edit->m_GameCore->GetECSManager()->RemoveComponent<BoxCollider2DComponent>(object->GetEntity()); }
+	edit->m_GameCore->GetECSManager()->RemoveComponent<TransformComponent>(object.GetEntity());
+	if (meshFilter) { edit->m_GameCore->GetECSManager()->RemoveComponent<MeshFilterComponent>(object.GetEntity()); }
+	if (meshRenderer) { edit->m_GameCore->GetECSManager()->RemoveComponent<MeshRendererComponent>(object.GetEntity()); }
+	if (script) { edit->m_GameCore->GetECSManager()->RemoveComponent<ScriptComponent>(object.GetEntity()); }
+	if (lineRenderer) { edit->m_GameCore->GetECSManager()->RemoveAllComponents<LineRendererComponent>(object.GetEntity()); }
+	if (rb) { edit->m_GameCore->GetECSManager()->RemoveComponent<Rigidbody2DComponent>(object.GetEntity()); }
+	if (box) { edit->m_GameCore->GetECSManager()->RemoveComponent<BoxCollider2DComponent>(object.GetEntity()); }
 	// Entityの削除
-	edit->m_GameCore->GetECSManager()->RemoveEntity(object->GetEntity());
+	edit->m_GameCore->GetECSManager()->RemoveEntity(object.GetEntity());
 	// CurrentSceneから削除
 	edit->m_GameCore->GetSceneManager()->GetCurrentScene()->RemoveUseObject(m_ObjectID);
 	// GameObjectの削除
-	edit->m_GameCore->GetObjectContainer()->DeleteGameObject(object->GetID());
+	edit->m_GameCore->GetObjectContainer()->DeleteGameObject(object.GetID().value());
 	return true;
 }
 
@@ -265,16 +267,16 @@ bool DeleteObjectCommand::Undo(EngineCommand* edit)
 
 bool RenameObjectCommand::Execute(EngineCommand* edit)
 {
-	GameObject* object = edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID);
-	if (!object) { return false; }
-	BaseComponent* base = edit->m_GameCore->GetECSManager()->GetComponent<BaseComponent>(object->GetEntity());
+	GameObject& object = edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID);
+	if (!object.IsActive()) { return false; }
+	BaseComponent* base = edit->m_GameCore->GetECSManager()->GetComponent<BaseComponent>(object.GetEntity());
 	if (!base) { return false; }
 	// 名前の重複を確認
 	m_Name = GenerateUniqueName(m_Name, edit->m_GameCore->GetObjectContainer()->GetNameToObjectID());
 	// 変更前の名前を保存
-	m_PreName = object->GetName();
+	m_PreName = object.GetName();
 	// 名前を変更
-	object->SetName(m_Name);
+	object.SetName(m_Name);
 	base->name = m_Name;
 	return true;
 }

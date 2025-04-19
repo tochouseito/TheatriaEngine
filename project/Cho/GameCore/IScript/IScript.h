@@ -1,14 +1,17 @@
 #pragma once
-#include "GameCore/ScriptAPI/ScriptAPI.h"
+#include "GameCore/GameObject/GameObject.h"
 #define USE_CHOENGINE_SCRIPT
 #include "ChoEngineAPI.h"
 class IScript
 {
 public:
+	IScript(GameObject& object) : gameObject(object) {}
     virtual ~IScript() = default;
-    virtual void Start(ScriptContext& ctx) = 0;
-    virtual void Update(ScriptContext& ctx) = 0;
-    virtual void OnCollisionEnter(ScriptContext& ctx, ScriptContext& other) { ctx;other; }
-    virtual void OnCollisionStay(ScriptContext& ctx, ScriptContext& other) { ctx;other; }
-    virtual void OnCollisionExit(ScriptContext& ctx, ScriptContext& other) { ctx;other; }
+    virtual void Start() = 0;
+    virtual void Update() = 0;
+    virtual void OnCollisionEnter(GameObject& other) { other; }
+    virtual void OnCollisionStay(GameObject& other) { other; }
+    virtual void OnCollisionExit( GameObject& other) { other; }
+protected:
+	GameObject& gameObject;
 };

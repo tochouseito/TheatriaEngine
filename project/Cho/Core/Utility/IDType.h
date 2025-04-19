@@ -14,3 +14,20 @@ enum class ObjectType
 	Camera,// カメラオブジェクト
 	Count,// カウント
 };
+
+inline const char* ObjectTypeToWString(ObjectType type)
+{
+	switch (type)
+	{
+	case ObjectType::MeshObject: return "MeshObject";
+	case ObjectType::Camera:  return "Camera";
+	default:                  return "Unknown";
+	}
+}
+
+inline ObjectType ObjectTypeFromString(const std::string& str)
+{
+	if (str == "MeshObject") return ObjectType::MeshObject;
+	if (str == "Camera") return ObjectType::Camera;
+	return ObjectType::Count; // または Unknown があればそちら
+}

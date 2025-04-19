@@ -1,23 +1,11 @@
 #pragma once
 #include <string>
 #include "Core/Utility/IDType.h"
+#include "GameCore/ScriptAPI/ScriptAPI.h"
 
-inline const char* ObjectTypeToWString(ObjectType type)
-{
-	switch (type)
-	{
-	case ObjectType::MeshObject: return "MeshObject";
-	case ObjectType::Camera:  return "Camera";
-	default:                  return "Unknown";
-	}
-}
-
-inline ObjectType ObjectTypeFromString(const std::string& str)
-{
-	if (str == "MeshObject") return ObjectType::MeshObject;
-	if (str == "Camera") return ObjectType::Camera;
-	return ObjectType::Count; // または Unknown があればそちら
-}
+class ECSManager;
+class ResourceManager;
+class ObjectContainer;
 
 class Prefab 
 {
@@ -46,28 +34,98 @@ private:
 };
 class GameObject
 {
+	friend class ObjectContainer;
+	friend class Add3DObjectCommand;
+	friend class AddCameraObjectCommand;
+	friend class RenameObjectCommand;
 public:
-	// Constructor
-	GameObject(const Entity& entity, const std::wstring& name, const ObjectType& type) :
-		m_Entity(entity), m_Name(name), m_Type(type)
-	{
-	}
-	// Constructor
-	GameObject(){}
-	// Destructor
-	~GameObject()
-	{
-	}
-	ObjectID GetID() const noexcept { return m_ID; }
+	std::optional<ObjectID> GetID() const noexcept { return m_ID; }
 	Entity GetEntity() const noexcept { return m_Entity; }
 	std::wstring GetName() const noexcept { return m_Name; }
 	ObjectType GetType() const noexcept { return m_Type; }
+	// オブジェクトが有効かどうか
+	bool IsActive() const noexcept
+	{
+		if (!m_ID) { return false; }
+		return m_Active;
+	}
+	// オブジェクトを有効にする
+	void SetActive(bool active) noexcept
+	{
+		if (!m_ID) { return; }
+		m_Active = active;
+	}
+	// オブジェクトを無効にする
+	void SetInactive() noexcept
+	{
+		if (!m_ID) { return; }
+		m_Active = false;
+	}
+
+	TransformAPI transform;	// TransformAPI
+	CameraAPI camera;	// CameraAPI
+	LineRendererAPI lineRenderer;	// LineRendererAPI
+	Rigidbody2DAPI rigidbody2D;	// Rigidbody2DAPI
+
+	// Input
+	InputAPI input;	// InputAPI
+private:
+	friend class ScriptInitializeSystem;
+	friend class ScriptUpdateSystem;
+	friend class ScirptFinalizeSystem;
+	friend class CollisionSystem;
+	friend class ContactListener2D;
+
 	void SetID(const ObjectID& id) noexcept { m_ID = id; }
 	void SetName(const std::wstring& name) noexcept { m_Name = name; }
-private:
-	ObjectID m_ID;// オブジェクトID
+
+	std::optional<ObjectID> m_ID = std::nullopt;// オブジェクトID
 	Entity m_Entity;// エンティティ
 	std::wstring m_Name = L"";// ゲームオブジェクト名
 	ObjectType m_Type;// ゲームオブジェクトのタイプ
+	bool m_Active = false;// アクティブフラグ
+
+	//std::optional<Entity> m_Entity = std::nullopt;	// スクリプトのエンティティ
+	ECSManager* m_ECS = nullptr;	// ECSManager
+	ResourceManager* m_ResourceManager = nullptr;	// ResourceManager
+	InputManager* m_InputManager = nullptr;	// InputManager
+	ObjectContainer* m_ObjectContainer = nullptr;	// ObjectContainer
+
+	void Initialize()
+	{
+		InitializeTransformAPI();
+		InitializeCameraAPI();
+		InitializeLineRendererAPI();
+		InitializeRigidbody2DAPI();
+		InitializeInputAPI();
+	}
+
+	void InitializeTransformAPI();
+	void InitializeCameraAPI();
+	void InitializeLineRendererAPI();
+	void InitializeRigidbody2DAPI();
+	void InitializeInputAPI();
+public:
+	// コンストラクタ
+	GameObject(ObjectContainer* objectContainer, InputManager* input, ResourceManager* resourceManager, ECSManager* ecs, const Entity& entity, const std::wstring& name, const ObjectType& type) :
+		m_ObjectContainer(objectContainer), m_InputManager(input), m_ResourceManager(resourceManager), m_ECS(ecs), m_Entity(entity), m_Name(name), m_Type(type)
+	{
+		m_Active = true;
+	}
+	// デフォルトコンストラクタ
+	GameObject()
+	{
+		m_Active = false;
+	}
+	// デストラクタ
+	~GameObject()
+	{
+	}
+	// コピー、代入禁止
+	GameObject(const GameObject&) = delete;
+	GameObject& operator=(const GameObject&) = delete;
+	// ムーブは許可する
+	GameObject(GameObject&&) noexcept = default;
+	GameObject& operator=(GameObject&&) noexcept = default;
 };
 

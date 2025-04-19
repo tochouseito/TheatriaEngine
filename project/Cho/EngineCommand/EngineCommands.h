@@ -71,14 +71,15 @@ private:
 class AddScriptComponent :public IEngineCommand
 {
 public:
-	AddScriptComponent(const uint32_t& entity) :
-		m_Entity(entity)
+	AddScriptComponent(const uint32_t& entity,const uint32_t& objectID) :
+		m_Entity(entity), m_ObjectID(objectID)
 	{
 	}
 	bool Execute(EngineCommand* edit)override;
 	bool Undo(EngineCommand* edit)override;
 private:
 	uint32_t m_Entity;
+	uint32_t m_ObjectID;
 };
 // ラインレンダラーコンポーネントを追加するコマンド
 class AddLineRendererComponent :public IEngineCommand
@@ -98,14 +99,15 @@ private:
 class AddRigidbody2DComponent :public IEngineCommand
 {
 public:
-	AddRigidbody2DComponent(const uint32_t& entity) :
-		m_Entity(entity)
+	AddRigidbody2DComponent(const uint32_t& entity,const uint32_t& objectID) :
+		m_Entity(entity), m_ObjectID(objectID)
 	{
 	}
 	bool Execute(EngineCommand* edit)override;
 	bool Undo(EngineCommand* edit)override;
 private:
 	uint32_t m_Entity;
+	uint32_t m_ObjectID;
 };
 // BoxCollider2Dコンポーネントを追加するコマンド
 class AddBoxCollider2DComponent :public IEngineCommand

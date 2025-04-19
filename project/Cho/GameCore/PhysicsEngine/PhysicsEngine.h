@@ -25,8 +25,8 @@ public:
 	void BeginContact(b2Contact* contact) override;
 	void EndContact(b2Contact* contact) override;
 private:
-	void CollisionEnter(Entity self, Entity other);
-	void CollisionExit(Entity self, Entity other);
+	void CollisionEnter(ObjectID self, ObjectID other);
+	void CollisionExit(ObjectID self, ObjectID other);
 
 	ECSManager* m_pECS = nullptr; // 外部から渡す or シングルトンで取得
 	ResourceManager* m_pResourceManager = nullptr;

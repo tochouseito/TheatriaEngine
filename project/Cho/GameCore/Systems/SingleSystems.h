@@ -7,6 +7,7 @@
 class ResourceManager;
 class GameCoreCommand;
 class ScriptContainer;
+class ObjectContainer;
 class InputManager;
 
 enum SystemPriority
@@ -122,7 +123,7 @@ private:
 	void LoadScript(ScriptComponent& script);
 	void Start(ScriptComponent& script);
 	void StartScript(ScriptComponent& script);
-	ScriptContext MakeScriptContext(Entity entity);
+	//ScriptContext MakeScriptContext(Entity entity);
 	ECSManager* m_ECS = nullptr;
 	ResourceManager* m_pResourceManager = nullptr;
 	InputManager* m_pInputManager = nullptr;
@@ -144,7 +145,7 @@ public:
 	~ScriptUpdateSystem() = default;
 private:
 	void UpdateScript(ScriptComponent& script);
-	ScriptContext MakeScriptContext(Entity entity);
+	//ScriptContext MakeScriptContext(Entity entity);
 	ECSManager* m_ECS = nullptr;
 	ResourceManager* m_pResourceManager = nullptr;
 	InputManager* m_pInputManager = nullptr;
@@ -188,9 +189,9 @@ private:
 	void CreateBody(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb)
 	{
 		if (rb.runtimeBody != nullptr) return;
-
+		e;
 		b2BodyDef bodyDef;
-		bodyDef.userData.pointer = static_cast<uintptr_t>(e);
+		bodyDef.userData.pointer = static_cast<uintptr_t>(rb.selfObjectID.value());
 		bodyDef.type = rb.bodyType;
 		bodyDef.gravityScale = rb.gravityScale;
 		bodyDef.fixedRotation = rb.fixedRotation;
@@ -297,7 +298,8 @@ private:
 			rb.runtimeBody = nullptr;
 		}
 		rb.isCollisionStay = false;
-		rb.otherEntity.reset();
+		//rb.otherEntity.reset();
+		rb.otherObjectID.reset();
 	}
 	template<typename ColliderT>
 	void ResetCollider(Entity e)
