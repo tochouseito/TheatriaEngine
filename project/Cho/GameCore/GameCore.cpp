@@ -13,6 +13,8 @@ void GameCore::Initialize(InputManager* input, ResourceManager* resourceManager)
 	m_pSceneManager = std::make_unique<SceneManager>(resourceManager);
 	// ECSマネージャの生成
 	m_pECSManager = std::make_unique<ECSManager>();
+	// オブジェクトコンテナの生成
+	m_pObjectContainer = std::make_unique<ObjectContainer>(m_pECSManager.get(), resourceManager, input);
 	// Systemマネージャの生成
 	m_pSingleSystemManager = std::make_unique<SingleSystemManager>();
 	m_pMultiSystemManager = std::make_unique<MultiSystemManager>();
@@ -20,13 +22,11 @@ void GameCore::Initialize(InputManager* input, ResourceManager* resourceManager)
 	m_pEditorSingleSystem = std::make_unique<SingleSystemManager>();
 	m_pEditorMultiSystem = std::make_unique<MultiSystemManager>();
 	// box2dの生成
-	//b2Vec2 gravity(0.0f, -9.8f);
-	b2Vec2 gravity(0.0f, 0.0f);
+	b2Vec2 gravity(0.0f, -9.8f);
+	//b2Vec2 gravity(0.0f, 0.0f);
 	m_pPhysicsWorld = std::make_unique<b2World>(gravity);
 	m_pContactListener = std::make_unique<ContactListener2D>(m_pECSManager.get(), resourceManager, input, m_pObjectContainer.get());
 	m_pPhysicsWorld->SetContactListener(m_pContactListener.get());
-	// オブジェクトコンテナの生成
-	m_pObjectContainer = std::make_unique<ObjectContainer>(m_pECSManager.get(), resourceManager, input);
 	// システムの生成
 	CreateSystems(input,resourceManager);
 }

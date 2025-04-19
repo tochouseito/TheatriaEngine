@@ -74,7 +74,7 @@ void Hierarchy::Window()
 			std::wstring objectName = object.GetName();
 			// ツリーノードとして表示
 			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanFullWidth;
-			if (m_EngineCommand->GetSelectedObject()->GetID() == object.GetID())
+			if (m_EngineCommand->GetSelectedObject() && m_EngineCommand->GetSelectedObject()->GetID() == object.GetID())
 			{
 				flags |= ImGuiTreeNodeFlags_Selected; // 選択中のオブジェクトをハイライト
 			}
