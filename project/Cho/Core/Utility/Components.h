@@ -138,6 +138,7 @@ struct Rigidbody2DComponent : public IComponentTag
 	//std::optional<Entity> otherEntity = std::nullopt; // 衝突したエンティティ
 	std::optional<ObjectID> otherObjectID = std::nullopt; // 衝突したオブジェクトID
 	std::optional<ObjectID> selfObjectID = std::nullopt; // 自分のオブジェクトID
+	std::optional<b2Vec2> requestedPosition = std::nullopt; // 位置リクエスト
 };
 // 2D矩形コライダー
 struct BoxCollider2DComponent : public IComponentTag

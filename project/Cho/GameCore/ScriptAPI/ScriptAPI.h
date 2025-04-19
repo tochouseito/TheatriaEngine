@@ -74,6 +74,8 @@ struct Rigidbody2DAPI
 	std::function<b2Vec2(const b2Vec2& start, const b2Vec2& dir,const int ReflectionCount, const float maxLength)> RaycastWithReflectionsOnce;
 	// 法線取得（RaycastOnce の直後のみ有効）
 	b2Vec2 GetLastHitNormal() const { return m_LastHitNormal; }
+	// 瞬間移動
+	std::function<void(const Vector2& position)> MovePosition;
 private:
 	//friend struct ScriptContext;
 	friend class GameObject;
@@ -122,54 +124,3 @@ private:
 	friend class GameObject;
 	InputManager* data = nullptr;
 };
-//// スクリプトコンテキスト
-//class ECSManager;
-//class ResourceManager;
-//class ObjectContainer;
-//struct ScriptContext
-//{
-//public:
-//	TransformAPI transform;	// TransformAPI
-//	CameraAPI camera;	// CameraAPI
-//	LineRendererAPI lineRenderer;	// LineRendererAPI
-//	Rigidbody2DAPI rigidbody2D;	// Rigidbody2DAPI
-//
-//	// Input
-//	InputAPI input;	// InputAPI
-//private:
-//	std::optional<Entity> m_Entity = std::nullopt;	// スクリプトのエンティティ
-//	ECSManager* m_ECS = nullptr;	// ECSManager
-//	ResourceManager* m_ResourceManager = nullptr;	// ResourceManager
-//	InputManager* m_InputManager = nullptr;	// InputManager
-//	ObjectContainer* m_ObjectContainer = nullptr;	// ObjectContainer
-//
-//	friend class ScriptInitializeSystem;
-//	friend class ScriptUpdateSystem;
-//	friend class ScirptFinalizeSystem;
-//	friend class CollisionSystem;
-//	friend class ContactListener2D;
-//
-//	void Initialize()
-//	{
-//		InitializeTransformAPI();
-//		InitializeCameraAPI();
-//		InitializeLineRendererAPI();
-//		InitializeRigidbody2DAPI();
-//		InitializeInputAPI();
-//	}
-//
-//	void InitializeTransformAPI();
-//	void InitializeCameraAPI();
-//	void InitializeLineRendererAPI();
-//	void InitializeRigidbody2DAPI();
-//	void InitializeInputAPI();
-//public:
-//	// デフォルトコンストラクタ
-//	ScriptContext(ObjectContainer* objectContainer,InputManager* input,ResourceManager* resourceManager, ECSManager* ecs, std::optional<Entity> entity) :m_ObjectContainer(objectContainer), m_InputManager(input), m_ResourceManager(resourceManager), m_ECS(ecs), m_Entity(entity) {}
-//	// コピー、代入禁止
-//	ScriptContext(const ScriptContext&) = delete;
-//	ScriptContext& operator=(const ScriptContext&) = delete;
-//	// ムーブは許可する
-//	ScriptContext(ScriptContext&&) noexcept = default;
-//	ScriptContext& operator=(ScriptContext&&) noexcept = default;
-//};

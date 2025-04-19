@@ -53,7 +53,6 @@ void TransformUpdateSystem::priorityUpdate(ECSManager* ecs)
 
 void TransformUpdateSystem::UpdateComponent(Entity e, TransformComponent& transform)
 {
-	e;
 	// 度数からラジアンに変換
 	Vector3 radians = ChoMath::DegreesToRadians(transform.degrees);
 
@@ -98,6 +97,14 @@ void TransformUpdateSystem::UpdateComponent(Entity e, TransformComponent& transf
 	if (transform.parent)
 	{
 		transform.matWorld = ChoMath::Multiply(transform.matWorld, m_pECS->GetComponent<TransformComponent>(transform.parent.value())->matWorld);
+	}
+
+	// 物理コンポーネントがあれば、物理ボディの位置を更新
+	Rigidbody2DComponent* rb = m_pECS->GetComponent<Rigidbody2DComponent>(e);
+	if (rb && rb->runtimeBody)
+	{
+		b2Vec2 pos = { transform.translation.x, transform.translation.y };
+		rb->runtimeBody->SetTransform(pos, rb->runtimeBody->GetAngle());
 	}
 
 	// 行列の転送

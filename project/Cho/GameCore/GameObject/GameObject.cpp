@@ -125,6 +125,15 @@ void GameObject::InitializeRigidbody2DAPI()
 			}
 			return resultPoint;
 			};
+		rigidbody2D.MovePosition = [this](const Vector2& position) {
+			if (auto* t = m_ECS->GetComponent<Rigidbody2DComponent>(m_Entity))
+			{
+				if (t->runtimeBody)
+				{
+					t->requestedPosition = b2Vec2(position.x, position.y);
+				}
+			}
+			};
 	}
 }
 
