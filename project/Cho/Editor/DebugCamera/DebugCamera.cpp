@@ -14,6 +14,8 @@ void DebugCamera::Initialize()
 	//m_pTransformBuffer = dynamic_cast<ConstantBuffer<BUFFER_DATA_TF>*>(resourceManager->GetBuffer<IConstantBuffer>(m_TransformComponent.mapID));
 	m_pCameraBuffer = dynamic_cast<ConstantBuffer<BUFFER_DATA_VIEWPROJECTION>*>(resourceManager->GetBuffer<IConstantBuffer>(m_CameraComponent.bufferIndex));
 	resourceManager->SetDebugCameraBuffer(m_pCameraBuffer);
+	// 初期値
+	m_TransformComponent.translation = Vector3(0.0f, 0.0f, -30.0f);
 }
 
 void DebugCamera::Update()

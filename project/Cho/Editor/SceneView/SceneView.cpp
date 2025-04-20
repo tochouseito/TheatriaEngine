@@ -78,6 +78,9 @@ void SceneView::Window()
     if (ImGui::IsWindowHovered())
     {
         m_DebugCamera->Update();
+    } else
+    {
+        m_DebugCamera->UpdateMatrix();
     }
 
     ImGui::End();
