@@ -13,6 +13,7 @@ public:
 	ObjectContainer(ECSManager* ecs, ResourceManager* resourceManager, InputManager* input) :
 		m_ECS(ecs), m_ResourceManager(resourceManager), m_InputManager(input)
 	{
+		m_DummyGameObject.SetInactive();
 	}
 	// Destructor
 	~ObjectContainer()
