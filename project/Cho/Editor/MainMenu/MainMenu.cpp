@@ -162,6 +162,20 @@ void MainMenu::LayoutMenu()
 
 void MainMenu::EngineInfoMenu()
 {
+	if (ImGui::BeginMenu("Engine Info"))
+	{
+		//// ChoEngineのバージョンを表示
+		//ImGui::Text("ChoEngine Version: %s", Cho::GetVersion().c_str());
+		//ImGui::Separator();
+		//// ChoEngineのビルド日を表示
+		//ImGui::Text("Build Date: %s", __DATE__);
+		//ImGui::EndMenu();
+        // フレームレートを表示
+        ImGuiIO& io = ImGui::GetIO();
+        ImGui::Text("FPS: %.1f", io.Framerate);
+
+		ImGui::EndMenu();
+	}
 }
 
 void MainMenu::HelpMenu()
