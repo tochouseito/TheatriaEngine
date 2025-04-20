@@ -44,14 +44,19 @@ public:
 			{
 				e;
 				transform;
-				priorityUpdate(m_pECS);
+				//priorityUpdate(m_pECS);
 			}),
 		m_pECS(ecs), m_pResourceManager(resourceManager)
 	{
 		m_pIntegrationBuffer = dynamic_cast<StructuredBuffer<BUFFER_DATA_TF>*>(integrationBuffer);
 	}
 	~TransformUpdateSystem() = default;
-
+	void Update(ECSManager* ecs) override
+	{
+		// 一度だけ通る処理
+		// 優先度順に更新
+		priorityUpdate(ecs);
+	}
 private:
 	// 優先度順に更新する
 	void priorityUpdate(ECSManager* ecs);
@@ -230,7 +235,7 @@ public:
 	{
 		// Step は一回だけ呼ぶ（エンティティループより前）
 		StepSimulation();
-
+		
 		// いつもの処理（b2Body -> Transform同期）
 		ECSManager::System<TransformComponent, Rigidbody2DComponent>::Update(ecs);
 	}
@@ -247,9 +252,18 @@ private:
 	{
 		if (rb.runtimeBody == nullptr) return;
 
+		if (rb.requestedPosition)
+		{
+			rb.runtimeBody->SetTransform(*rb.requestedPosition, rb.runtimeBody->GetAngle());
+			rb.requestedPosition.reset();
+		}
 		const b2Vec2& pos = rb.runtimeBody->GetPosition();
 		transform.translation.x = pos.x;
 		transform.translation.y = pos.y;
+
+		b2Vec2 velocity = rb.runtimeBody->GetLinearVelocity();
+		rb.velocity.x = velocity.x;
+		rb.velocity.y = velocity.y;
 
 		Vector3 radians = {};
 		radians.z = rb.runtimeBody->GetAngle(); // radians

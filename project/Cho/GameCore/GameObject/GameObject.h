@@ -27,10 +27,10 @@ public:
 	ObjectType GetType() const noexcept { return m_Type; }
 	void SetID(const ObjectID& id) noexcept { m_ID = id; }
 private:
-	PrefabID m_ID;// プレハブID
-	Entity m_Entity;// エンティティ
-	std::wstring m_Name = L"";// プレハブ名
-	ObjectType m_Type;// プレハブのタイプ
+	PrefabID m_ID;				// プレハブID
+	Entity m_Entity;			// エンティティ
+	std::wstring m_Name = L"";	// プレハブ名
+	ObjectType m_Type;			// プレハブのタイプ
 };
 class GameObject
 {
@@ -38,11 +38,14 @@ class GameObject
 	friend class Add3DObjectCommand;
 	friend class AddCameraObjectCommand;
 	friend class RenameObjectCommand;
+	friend class IScript;
 public:
 	std::optional<ObjectID> GetID() const noexcept { return m_ID; }
 	Entity GetEntity() const noexcept { return m_Entity; }
 	std::wstring GetName() const noexcept { return m_Name; }
 	ObjectType GetType() const noexcept { return m_Type; }
+	std::string GetTag() const noexcept { return m_Tag; }
+	void SetTag(const std::string& tag) noexcept { m_Tag = tag; }// この関数はEditorに移す予定
 	// オブジェクトが有効かどうか
 	bool IsActive() const noexcept
 	{
@@ -62,13 +65,12 @@ public:
 		m_Active = false;
 	}
 
-	TransformAPI transform;	// TransformAPI
-	CameraAPI camera;	// CameraAPI
+	TransformAPI transform;			// TransformAPI
+	CameraAPI camera;				// CameraAPI
 	LineRendererAPI lineRenderer;	// LineRendererAPI
-	Rigidbody2DAPI rigidbody2D;	// Rigidbody2DAPI
+	Rigidbody2DAPI rigidbody2D;		// Rigidbody2DAPI
 
-	// Input
-	InputAPI input;	// InputAPI
+	InputAPI input;					// InputAPI
 private:
 	friend class ScriptInitializeSystem;
 	friend class ScriptUpdateSystem;
@@ -79,16 +81,15 @@ private:
 	void SetID(const ObjectID& id) noexcept { m_ID = id; }
 	void SetName(const std::wstring& name) noexcept { m_Name = name; }
 
-	std::optional<ObjectID> m_ID = std::nullopt;// オブジェクトID
-	Entity m_Entity;// エンティティ
-	std::wstring m_Name = L"";// ゲームオブジェクト名
-	ObjectType m_Type;// ゲームオブジェクトのタイプ
-	bool m_Active = false;// アクティブフラグ
-
-	//std::optional<Entity> m_Entity = std::nullopt;	// スクリプトのエンティティ
-	ECSManager* m_ECS = nullptr;	// ECSManager
+	std::optional<ObjectID> m_ID = std::nullopt;	// オブジェクトID
+	Entity m_Entity;								// エンティティ
+	std::wstring m_Name = L"";						// ゲームオブジェクト名
+	ObjectType m_Type;								// ゲームオブジェクトのタイプ
+	bool m_Active = false;							// アクティブフラグ
+	std::string m_Tag = "Default";					// タグ
+	ECSManager* m_ECS = nullptr;					// ECSManager
 	ResourceManager* m_ResourceManager = nullptr;	// ResourceManager
-	InputManager* m_InputManager = nullptr;	// InputManager
+	InputManager* m_InputManager = nullptr;			// InputManager
 	ObjectContainer* m_ObjectContainer = nullptr;	// ObjectContainer
 
 	void Initialize()

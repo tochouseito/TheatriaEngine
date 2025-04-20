@@ -2,7 +2,7 @@
 #include "GameCore/GameObject/GameObject.h"
 #define USE_CHOENGINE_SCRIPT
 #include "ChoEngineAPI.h"
-class IScript
+class CHO_API IScript
 {
 public:
 	IScript(GameObject& object) : gameObject(object) {}
@@ -12,6 +12,7 @@ public:
     virtual void OnCollisionEnter(GameObject& other) { other; }
     virtual void OnCollisionStay(GameObject& other) { other; }
     virtual void OnCollisionExit( GameObject& other) { other; }
+    GameObject& FindGameObjectByName(const std::wstring & name);
 protected:
 	GameObject& gameObject;
 };

@@ -15,6 +15,7 @@ bool WinApp::m_IsRun=true; // アプリケーションが動作中かを示す�
 UINT64 WinApp::m_WindowWidth = 1280; // ウィンドウの幅
 UINT WinApp::m_WindowHeight = 720; // ウィンドウの高さ
 bool WinApp::m_IsResize = false; // ウィンドウのリサイズフラグ
+bool WinApp::m_IsKillfocus = false; // ウィンドウのフォーカスが外れたかどうか
 
 // ウィンドウプロシージャ
 LRESULT CALLBACK WinApp::WindowProc(HWND hWnd, UINT msg,
@@ -26,7 +27,8 @@ LRESULT CALLBACK WinApp::WindowProc(HWND hWnd, UINT msg,
 //#endif
 	// メッセージに応じてゲーム固有の処理を行う
 	switch (msg) {
-	case WM_GETMINMAXINFO: {
+	case WM_GETMINMAXINFO:
+	{
 		MINMAXINFO* pMinMaxInfo = reinterpret_cast<MINMAXINFO*>(lparam);
 		pMinMaxInfo->ptMinTrackSize.x = 800; // 最小幅を設定（例：800）
 		pMinMaxInfo->ptMinTrackSize.y = 600; // 最小高さを設定（例：600）
@@ -39,6 +41,10 @@ LRESULT CALLBACK WinApp::WindowProc(HWND hWnd, UINT msg,
 			int height = HIWORD(lparam);
 			OnWindowResize(static_cast<UINT64>(width), static_cast<UINT>(height));
 		}
+		break;
+
+	case WM_KILLFOCUS:
+		m_IsKillfocus = true;
 		break;
 
 	case WM_DESTROY:
@@ -168,6 +174,18 @@ bool WinApp::IsResizeWindow()
 	if (m_IsResize)
 	{
 		m_IsResize = false;
+		return true;
+	} else
+	{
+		return false;
+	}
+}
+
+bool WinApp::IsKillfocusWindow()
+{
+	if (m_IsKillfocus)
+	{
+		m_IsKillfocus = false;
 		return true;
 	} else
 	{

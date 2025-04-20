@@ -28,19 +28,6 @@ struct IComponentTag {};
 template<typename T>
 struct IsMultiComponent : std::false_type {};
 
-// オブジェクトのBaseComponent
-struct BaseComponent : public IComponentTag
-{
-	// コンポーネントのエンティティ
-	std::optional<Entity> entity = std::nullopt;
-	// 名前
-	std::optional<std::wstring> name = std::nullopt;
-	// タイプ
-	std::optional<ObjectType> type = std::nullopt;
-	// タグ
-	std::optional<std::string> tag = "Default";
-};
-
 // 初期値を保存するための構造体
 struct TransformStartValue
 {
@@ -61,7 +48,7 @@ struct TransformComponent : public IComponentTag
 	Vector3 prePos = { 0.0f,0.0f,0.0f };				// 位置差分計算用
 	Vector3 preRot = { 0.0f,0.0f,0.0f };				// 回転差分計算用
 	Scale preScale = { 1.0f,1.0f,1.0f };				// スケール差分計算用
-	std::optional<uint32_t> parent = std::nullopt;// 親のEntity
+	std::optional<uint32_t> parent = std::nullopt;		// 親のEntity
 	int tickPriority = 0;								// Tick優先度
 	//uint32_t bufferIndex = UINT32_MAX;				// バッファーインデックス
 	std::optional<uint32_t> mapID = std::nullopt;		// マップインデックス
@@ -148,9 +135,11 @@ struct Rigidbody2DComponent : public IComponentTag
 	b2Body* runtimeBody = nullptr; // Box2D Bodyへのポインタ
 	b2World* world = nullptr; // Box2D Worldへのポインタ
 	bool isCollisionStay = false; // 衝突中フラグ
-	//std::optional<Entity> otherEntity = std::nullopt; // 衝突したエンティティ
 	std::optional<ObjectID> otherObjectID = std::nullopt; // 衝突したオブジェクトID
 	std::optional<ObjectID> selfObjectID = std::nullopt; // 自分のオブジェクトID
+	std::optional<b2Vec2> requestedPosition = std::nullopt; // 位置リクエスト
+	//std::optional<b2Vec2> requestedVelocity = std::nullopt; // 速度リクエスト
+	Vector2 velocity = { 0.0f, 0.0f }; // 速度
 };
 // 2D矩形コライダー
 struct BoxCollider2DComponent : public IComponentTag

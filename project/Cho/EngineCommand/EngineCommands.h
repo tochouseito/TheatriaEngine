@@ -151,13 +151,13 @@ class RenameObjectCommand : public IEngineCommand
 {
 public:
 	RenameObjectCommand(const uint32_t& objectID, const std::wstring& name) :
-		m_ObjectID(objectID), m_Name(name)
+		m_ObjectID(objectID), m_NewName(name)
 	{
 	}
 	bool Execute(EngineCommand* edit)override;
 	bool Undo(EngineCommand* edit)override;
 private:
 	uint32_t m_ObjectID;
-	std::wstring m_Name;
+	std::wstring m_NewName;
 	std::wstring m_PreName;
 };

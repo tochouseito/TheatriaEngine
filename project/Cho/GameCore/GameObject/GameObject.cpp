@@ -2,6 +2,7 @@
 #include "GameObject.h"
 #include "GameCore/ECS/ECSManager.h"
 #include "Platform/InputManager/InputManager.h"
+#include "GameCore/ObjectContainer/ObjectContainer.h"
 
 void GameObject::InitializeTransformAPI()
 {
@@ -124,6 +125,28 @@ void GameObject::InitializeRigidbody2DAPI()
 				}
 			}
 			return resultPoint;
+			};
+		rigidbody2D.MovePosition = [this](const Vector2& position) {
+			if (auto* t = m_ECS->GetComponent<Rigidbody2DComponent>(m_Entity))
+			{
+				if (t->runtimeBody)
+				{
+					t->requestedPosition = b2Vec2(position.x, position.y);
+				}
+			}
+			};
+		rigidbody2D.Linecast = [this](const Vector2& start, const Vector2& end) -> GameObject& {
+			if (auto* t = m_ECS->GetComponent<Rigidbody2DComponent>(m_Entity))
+			{
+				Rigidbody2DAPI::RayCastCallback callback;
+				t->world->RayCast(&callback, b2Vec2(start.x, start.y), b2Vec2(end.x, end.y));
+				if (callback.hit)
+				{
+					ObjectID id = static_cast<ObjectID>(callback.fixture->GetBody()->GetUserData().pointer);
+					return m_ObjectContainer->GetGameObject(id);
+				}
+			}
+			return m_ObjectContainer->GetDummyGameObject();
 			};
 	}
 }
