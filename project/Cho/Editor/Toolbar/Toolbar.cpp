@@ -3,6 +3,7 @@
 #include "Editor/EditorManager/EditorManager.h"
 #include "GameCore/GameCore.h"
 #include "Core/ChoLog/ChoLog.h"
+#include "Core/Utility/FontCode.h"
 
 void Toolbar::Initialize()
 {

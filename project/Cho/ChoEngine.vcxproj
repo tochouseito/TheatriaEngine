@@ -298,6 +298,7 @@
     <ClInclude Include="Core\Utility\CompBufferData.h" />
     <ClInclude Include="Core\Utility\Components.h" />
     <ClInclude Include="Core\Utility\FArray.h" />
+    <ClInclude Include="Core\Utility\FontCode.h" />
     <ClInclude Include="Core\Utility\FVector.h" />
     <ClInclude Include="Core\Utility\GenerateUnique.h" />
     <ClInclude Include="Core\Utility\IDType.h" />
