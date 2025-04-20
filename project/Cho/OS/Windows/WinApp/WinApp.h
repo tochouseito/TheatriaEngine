@@ -45,6 +45,7 @@ public:// メンバ関数
 	static UINT64 GetWindowWidth() { return m_WindowWidth; }
 	static UINT GetWindowHeight() { return m_WindowHeight; }
 	static bool IsResizeWindow();
+	static bool IsKillfocusWindow();
 private:
 
 	// ウィンドウサイズ変更時の処理
@@ -57,5 +58,6 @@ private:// メンバ変数
 	static UINT64 m_WindowWidth; // ウィンドウの幅
 	static UINT m_WindowHeight; // ウィンドウの高さ
 	static bool m_IsResize; // ウィンドウサイズ変更フラグ
+	static bool m_IsKillfocus; // ウィンドウがフォーカスを失ったかどうか
 };
 

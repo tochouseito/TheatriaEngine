@@ -149,6 +149,11 @@ void ChoEngine::Start()
 	{
 		graphicsEngine->ScreenResize();
 	}
+	// ウィンドウのフォーカスが外れたらプロジェクト保存
+	if (WinApp::IsKillfocusWindow()&&!hubManager->IsRun())
+	{
+		FileSystem::SaveProject(gameCore->GetSceneManager(), gameCore->GetObjectContainer(), gameCore->GetECSManager(), resourceManager.get());
+	}
 	// GameCore開始
 	//gameCore->Start(*resourceManager);
 }
