@@ -47,6 +47,8 @@
     <ClCompile Include="Editor\ShaderEditor\ShaderEditor.cpp" />
     <ClCompile Include="Editor\Timeline\Timeline.cpp" />
     <ClCompile Include="Editor\Toolbar\Toolbar.cpp" />
+    <ClCompile Include="Editor\EffectEditor\EffectEditor.cpp" />
+    <ClCompile Include="Editor\EffectView\EffectView.cpp" />
     <ClCompile Include="EngineCommand\EngineCommand.cpp" />
     <ClCompile Include="EngineCommand\EngineCommands.cpp" />
     <ClCompile Include="Engine\Engine.cpp" />
@@ -323,6 +325,8 @@
     <ClInclude Include="Editor\ShaderEditor\ShaderEditor.h" />
     <ClInclude Include="Editor\Timeline\Timeline.h" />
     <ClInclude Include="Editor\Toolbar\Toolbar.h" />
+    <ClInclude Include="Editor\EffectEditor\EffectEditor.h" />
+    <ClInclude Include="Editor\EffectView\EffectView.h" />
     <ClInclude Include="EngineCommand\EngineCommand.h" />
     <ClInclude Include="EngineCommand\EngineCommands.h" />
     <ClInclude Include="Engine\Engine.h" />

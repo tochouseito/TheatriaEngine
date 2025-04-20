@@ -11,6 +11,14 @@
 #include "Editor/Inspector/Inspector.h"
 #include "Editor/AssetBrowser/AssetBrowser.h"
 #include "Editor/Console/Console.h"
+#include "Editor/EffectEditor/EffectEditor.h"
+#include "Editor/EffectView/EffectView.h"
+
+enum WorkSpaceType
+{
+	SceneEdit = 0,
+	EffectEdit,
+};
 
 class EngineCommand;
 class InputManager;
@@ -29,6 +37,8 @@ public:
 		m_Inspector = std::make_unique<Inspector>(this);
 		m_AssetBrowser = std::make_unique<AssetBrowser>(this);
 		m_Console = std::make_unique<Console>(this);
+		m_EffectEditor = std::make_unique<EffectEditor>(this);
+		m_EffectView = std::make_unique<EffectView>(this);
 	}
 	~EditorManager()
 	{
@@ -37,6 +47,7 @@ public:
 	void Update();
 	EngineCommand* GetEngineCommand() { return m_EngineCommand; }
 	InputManager* GetInputManager() { return m_InputManager; }
+	void SetWorkSpaceType(const std::string& typeName);
 private:
 	EngineCommand* m_EngineCommand = nullptr;
 	InputManager* m_InputManager = nullptr;
@@ -49,5 +60,10 @@ private:
 	std::unique_ptr<Inspector> m_Inspector = nullptr;
 	std::unique_ptr<AssetBrowser> m_AssetBrowser = nullptr;
 	std::unique_ptr<Console> m_Console = nullptr;
+	std::unique_ptr<EffectEditor> m_EffectEditor = nullptr;
+	std::unique_ptr<EffectView> m_EffectView = nullptr;
+
+	// ワークスペース
+	WorkSpaceType m_WorkSpaceType = WorkSpaceType::SceneEdit;
 };
 
