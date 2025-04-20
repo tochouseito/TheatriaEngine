@@ -65,6 +65,13 @@ public:
 	}
 	// Destructor
 	~GraphicsEngine() = default;
+	void Finalize() override
+	{
+		// GPUの完了待ち
+		WaitForGPU(Graphics);
+		WaitForGPU(Compute);
+		WaitForGPU(Copy);
+	}
 	void Init();
 	// SwapChainの生成
 	void CreateSwapChain(IDXGIFactory7* dxgiFactory);

@@ -159,11 +159,11 @@ void CameraUpdateSystem::TransferMatrix(TransformComponent& transform, CameraCom
 	buffer->UpdateData(data);
 }
 
-void ScriptInitializeSystem::LoadScript(ScriptComponent& script)
+void ScriptGenerateInstanceSystem::InstanceGenerate(ScriptComponent& script)
 {
 	Log::Write(LogLevel::Info, "Loading script: " + script.scriptName);
 	GameObject& object = m_pObjectContainer->GetGameObject(script.objectID.value());
-	if (script.scriptName.empty()||!object.IsActive())
+	if (script.scriptName.empty() || !object.IsActive())
 	{
 		script.isActive = false;
 		return;
@@ -209,12 +209,6 @@ void ScriptInitializeSystem::LoadScript(ScriptComponent& script)
 		};
 	script.isActive = true;
 	Log::Write(LogLevel::Info, "Script loaded: " + script.scriptName);
-}
-
-void ScriptInitializeSystem::Start(ScriptComponent& script)
-{
-	LoadScript(script);
-	StartScript(script);
 }
 
 void ScriptInitializeSystem::StartScript(ScriptComponent& script)

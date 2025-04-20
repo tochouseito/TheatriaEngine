@@ -154,6 +154,46 @@ void ChoEngine::Start()
 	{
 		FileSystem::SaveProject(gameCore->GetSceneManager(), gameCore->GetObjectContainer(), gameCore->GetECSManager(), resourceManager.get());
 	}
+	// ブランチが変更されたかどうか
+	if (hubManager->CheckBranchChanged())
+	{
+		// ブランチが変更されたらプロジェクト再読み込み
+		// システム、エンジンをリセット、初期化
+		graphicsEngine->Finalize();
+		imGuiManager->Finalize();
+		hubManager.reset();
+		editorManager.reset();
+		engineCommand.reset();
+		gameCore.reset();
+		imGuiManager.reset();
+		graphicsEngine.reset();
+		resourceManager.reset();
+		// 再生成
+		// ResourceManager初期化
+		resourceManager = std::make_unique<ResourceManager>(dx12->GetDevice());
+		// GraphicsEngine初期化
+		graphicsEngine = std::make_unique<GraphicsEngine>(dx12->GetDevice(), resourceManager.get(), GetRuntimeMode());
+		graphicsEngine->CreateSwapChain(dx12->GetDXGIFactory());
+		graphicsEngine->Init();
+		// ImGuiManager初期化
+		imGuiManager = std::make_unique<ImGuiManager>();
+		imGuiManager->Initialize(dx12->GetDevice(), resourceManager.get());
+		// GameCore初期化
+		gameCore = std::make_unique<GameCore>();
+		gameCore->Initialize(platformLayer->GetInputManager(), resourceManager.get());
+		// Model,TextureManager初期化
+		resourceManager->GenerateManager(graphicsEngine.get());
+		// EngineCommand初期化
+		engineCommand = std::make_unique<EngineCommand>(gameCore.get(), resourceManager.get(), graphicsEngine.get());
+		// EditorManager初期化
+		editorManager = std::make_unique<EditorManager>(engineCommand.get(), platformLayer->GetInputManager());
+		editorManager->Initialize();
+		// HubManager初期化
+		hubManager = std::make_unique<HubManager>(platformLayer.get(), coreSystem.get(), resourceManager.get(), graphicsEngine.get(), gameCore.get());
+		hubManager->Initialize();
+		// プロジェクト読み込み
+		hubManager->ReloadProject();
+	}
 	// GameCore開始
 	//gameCore->Start(*resourceManager);
 }
