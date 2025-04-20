@@ -33,8 +33,10 @@ void GameCore::Initialize(InputManager* input, ResourceManager* resourceManager)
 
 void GameCore::Start(ResourceManager& resourceManager)
 {
+	Log::Write(LogLevel::Info, "GameCore Start");
 	m_pSingleSystemManager->StartAll(m_pECSManager.get());
 	m_pMultiSystemManager->StartAll(m_pECSManager.get());
+	Log::Write(LogLevel::Info, "GameCore Start End");
 	resourceManager;
 }
 
@@ -44,8 +46,10 @@ void GameCore::Update(ResourceManager& resourceManager, GraphicsEngine& graphics
 	// ゲームが実行中でなければreturn
 	if (isRunning)
 	{
+		Log::Write(LogLevel::Info, "GameCore Update");
 		m_pSingleSystemManager->UpdateAll(m_pECSManager.get());
 		m_pMultiSystemManager->UpdateAll(m_pECSManager.get());
+		Log::Write(LogLevel::Info, "GameCore Update End");
 	} else
 	{
 		m_pEditorSingleSystem->UpdateAll(m_pECSManager.get());
