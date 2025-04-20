@@ -57,6 +57,12 @@ public:
 private:
 	// デフォルトメッシュの生成
 	void CreateDefaultMesh();
+	// Cubeの生成
+	void CreateCube();
+	// Sphereの生成
+	void CreateSphere();
+	// Planeの生成
+	void CreatePlane();
 	// モデルコンテナの要素数を取得する
 	//uint32_t GetModelDataSize() { return static_cast<uint32_t>(m_Models.size()); }
 	// ModelDataの追加

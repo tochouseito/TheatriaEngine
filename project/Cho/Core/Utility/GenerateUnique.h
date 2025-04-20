@@ -6,7 +6,7 @@ using ObjectID = uint32_t;
 
 namespace Cho
 {
-    std::wstring GenerateUniqueName(
+    inline std::wstring GenerateUniqueName(
         const std::wstring& baseName,
         const std::unordered_map<std::wstring, ObjectID>& nameList)
     {
