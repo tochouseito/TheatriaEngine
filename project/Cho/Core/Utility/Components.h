@@ -48,7 +48,7 @@ struct TransformComponent : public IComponentTag
 	Vector3 prePos = { 0.0f,0.0f,0.0f };				// 位置差分計算用
 	Vector3 preRot = { 0.0f,0.0f,0.0f };				// 回転差分計算用
 	Scale preScale = { 1.0f,1.0f,1.0f };				// スケール差分計算用
-	std::optional<uint32_t> parent = std::nullopt;// 親のEntity
+	std::optional<uint32_t> parent = std::nullopt;		// 親のEntity
 	int tickPriority = 0;								// Tick優先度
 	//uint32_t bufferIndex = UINT32_MAX;				// バッファーインデックス
 	std::optional<uint32_t> mapID = std::nullopt;		// マップインデックス

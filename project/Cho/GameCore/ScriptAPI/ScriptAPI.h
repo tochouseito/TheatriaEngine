@@ -15,6 +15,7 @@ struct TransformAPI
 	Scale& scale() { return data->scale; }
 	std::function<void(Entity, const Vector3&)> SetPosition;
 	std::function<Vector3(Entity)> GetPosition;
+	void SetParent(Entity parent) { data->parent = parent; }
 private:
 	//friend struct ScriptContext;
 	friend class GameObject;
