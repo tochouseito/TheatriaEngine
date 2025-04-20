@@ -45,7 +45,7 @@ public:
 	std::wstring GetName() const noexcept { return m_Name; }
 	ObjectType GetType() const noexcept { return m_Type; }
 	std::string GetTag() const noexcept { return m_Tag; }
-	void SetTag(const std::string& tag) noexcept { m_Tag = tag; }// この関数はEditorに移す予定
+	void SetTag(std::string_view tag) noexcept { m_Tag = tag.data(); }// この関数はEditorに移す予定
 	// オブジェクトが有効かどうか
 	bool IsActive() const noexcept
 	{

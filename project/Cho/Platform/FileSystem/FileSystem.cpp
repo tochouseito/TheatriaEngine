@@ -1177,7 +1177,7 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
     vcxFile << "      <SubSystem>Windows</SubSystem>\n";
     vcxFile << "      <EnableCOMDATFolding>true</EnableCOMDATFolding>\n";
     vcxFile << "      <OptimizeReferences>true</OptimizeReferences>\n";
-    vcxFile << "      <GenerateDebugInformation>false</GenerateDebugInformation>\n";
+    vcxFile << "      <GenerateDebugInformation>true</GenerateDebugInformation>\n";
     vcxFile << "      <AdditionalDependencies>" << "ChoMath.lib" << ";" << "ChoEngine.lib" << ";" << "%(AdditionalDependencies)</AdditionalDependencies>\n";
     vcxFile << "      <AdditionalLibraryDirectories>" << libraryPath.string() << ";" << libraryPath2.string() << ";%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>\n";
     vcxFile << "    </Link>\n";

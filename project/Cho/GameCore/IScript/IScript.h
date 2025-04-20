@@ -12,7 +12,7 @@ public:
     virtual void OnCollisionEnter(GameObject& other) { other; }
     virtual void OnCollisionStay(GameObject& other) { other; }
     virtual void OnCollisionExit( GameObject& other) { other; }
-    GameObject& FindGameObjectByName(const std::wstring & name);
+    GameObject& FindGameObjectByName(std::wstring_view name);
 protected:
 	GameObject& gameObject;
 };
