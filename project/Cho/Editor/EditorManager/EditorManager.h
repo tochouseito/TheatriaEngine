@@ -38,7 +38,7 @@ public:
 		m_AssetBrowser = std::make_unique<AssetBrowser>(this);
 		m_Console = std::make_unique<Console>(this);
 		m_EffectEditor = std::make_unique<EffectEditor>(this);
-		m_EffectView = std::make_unique<EffectView>(this);
+		m_EffectView = std::make_unique<EffectView>(this,m_DebugCamera.get());
 	}
 	~EditorManager()
 	{

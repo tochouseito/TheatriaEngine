@@ -135,6 +135,8 @@ void ChoEngine::Draw()
 	graphicsEngine->Render(*resourceManager, *gameCore, RenderMode::Game);
 	// シーン描画
 	graphicsEngine->Render(*resourceManager, *gameCore, RenderMode::Debug);
+	// EffectEditView描画
+	graphicsEngine->Render(*resourceManager, *gameCore, RenderMode::Editor);
 	// 描画後片付け
 	graphicsEngine->PostRender(imGuiManager.get(), RenderMode::Game);
 	//graphicsEngine->PostRenderWithImGui(imGuiManager.get());
