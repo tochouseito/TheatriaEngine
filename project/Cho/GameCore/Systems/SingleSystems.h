@@ -25,6 +25,7 @@ public:
 		: ECSManager::System<TransformComponent>([this](Entity e, TransformComponent& transform)
 			{
 				e;
+				Log::Write(LogLevel::Info, "TransformInitializeSystem");
 				Start(transform);
 			}),
 		m_ECS(ecs)

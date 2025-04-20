@@ -161,6 +161,7 @@ void CameraUpdateSystem::TransferMatrix(TransformComponent& transform, CameraCom
 
 void ScriptInitializeSystem::LoadScript(ScriptComponent& script)
 {
+	Log::Write(LogLevel::Info, "Loading script: " + script.scriptName);
 	GameObject& object = m_pObjectContainer->GetGameObject(script.objectID.value());
 	if (script.scriptName.empty()||!object.IsActive())
 	{
@@ -207,6 +208,7 @@ void ScriptInitializeSystem::LoadScript(ScriptComponent& script)
 		scriptInstance->OnCollisionExit(other);
 		};
 	script.isActive = true;
+	Log::Write(LogLevel::Info, "Script loaded: " + script.scriptName);
 }
 
 void ScriptInitializeSystem::Start(ScriptComponent& script)
@@ -217,9 +219,9 @@ void ScriptInitializeSystem::Start(ScriptComponent& script)
 
 void ScriptInitializeSystem::StartScript(ScriptComponent& script)
 {
+	Log::Write(LogLevel::Info, "Starting script: " + script.scriptName);
 	if (!script.isActive) return;
-	// スクリプトコンテキストを作成
-	//ScriptContext ctx = MakeScriptContext(script.entity.value());
+	Log::Write(LogLevel::Info, "scriptIsActive");
 	try
 	{
 		// スクリプトのStart関数を呼び出す
@@ -237,21 +239,12 @@ void ScriptInitializeSystem::StartScript(ScriptComponent& script)
 		Log::Write(LogLevel::Debug, "Unknown script error");
 		script.isActive = false;
 	}
+	Log::Write(LogLevel::Info, "Script started: " + script.scriptName);
 }
-
-//ScriptContext ScriptInitializeSystem::MakeScriptContext(Entity entity)
-//{
-//	ScriptContext ctx(m_pObjectContainer,m_pInputManager,m_pResourceManager, m_ECS, entity);
-//	ctx.Initialize();
-//	return ctx;
-//}
-
 void ScriptUpdateSystem::UpdateScript(ScriptComponent& script)
 {
+	Log::Write(LogLevel::Info, "Updating script: " + script.scriptName);
 	if (!script.isActive) return;
-	// スクリプトコンテキストを作成
-	//ScriptContext ctx = MakeScriptContext(script.entity.value());
-	
 	try
 	{
 		// スクリプトのUpdate関数を呼び出す
@@ -269,14 +262,8 @@ void ScriptUpdateSystem::UpdateScript(ScriptComponent& script)
 		Log::Write(LogLevel::Debug, "Unknown script error");
 		script.isActive = false;
 	}
+	Log::Write(LogLevel::Info, "Script updated: " + script.scriptName);
 }
-
-//ScriptContext ScriptUpdateSystem::MakeScriptContext(Entity entity)
-//{
-//	ScriptContext ctx(m_pObjectContainer,m_pInputManager,m_pResourceManager, m_ECS, entity);
-//	ctx.Initialize();
-//	return ctx;
-//}
 
 void ScriptFinalizeSystem::FinalizeScript(ScriptComponent& script)
 {
@@ -303,10 +290,6 @@ void CollisionSystem::CollisionStay(ScriptComponent& script, Rigidbody2DComponen
 {
 	if (script.isActive&&rb.isCollisionStay&&rb.otherObjectID)
 	{
-		// スクリプトコンテキストを作成
-		//ScriptContext selfContext(m_pObjectContainer, m_pInputManager, m_pResourceManager, m_ECS, script.entity.value());
-		//selfContext.Initialize();
-		//ScriptContext otherContext(m_pObjectContainer, m_pInputManager, m_pResourceManager, m_ECS, rb.otherEntity.value());
 		// 相手のゲームオブジェクトを取得
 		GameObject& otherObject = m_pObjectContainer->GetGameObject(rb.otherObjectID.value());
 		if (!otherObject.IsActive()) { return; }
