@@ -20,6 +20,7 @@ enum SystemPriority
 // Transform初期化
 class TransformInitializeSystem : public ECSManager::System<TransformComponent>
 {
+	friend class GameCore;
 public:
 	TransformInitializeSystem(ECSManager* ecs)
 		: ECSManager::System<TransformComponent>([this](Entity e, TransformComponent& transform)
@@ -111,25 +112,46 @@ private:
 	ResourceManager* m_pResourceManager = nullptr;
 	StructuredBuffer<BUFFER_DATA_TF>* m_pIntegrationBuffer = nullptr;
 };
+// スクリプトインスタンス生成システム
+class ScriptGenerateInstanceSystem : public ECSManager::System<ScriptComponent>
+{
+	friend class GameCore;
+public:
+	ScriptGenerateInstanceSystem(ObjectContainer* objectContainer, InputManager* input, ECSManager* ecs, ResourceManager* resourceManager)
+		: ECSManager::System<ScriptComponent>([this](Entity e, ScriptComponent& script)
+			{
+				e;
+				InstanceGenerate(script);
+			}),
+		m_ECS(ecs), m_pResourceManager(resourceManager), m_pInputManager(input), m_pObjectContainer(objectContainer)
+	{
+	}
+	~ScriptGenerateInstanceSystem() = default;
+private:
+	void InstanceGenerate(ScriptComponent& script);
+	ECSManager* m_ECS = nullptr;
+	ResourceManager* m_pResourceManager = nullptr;
+	InputManager* m_pInputManager = nullptr;
+	ObjectContainer* m_pObjectContainer = nullptr;
+};
+
 // スクリプト初期化システム
 class ScriptInitializeSystem : public ECSManager::System<ScriptComponent>
 {
+	friend class GameCore;
 public:
 	ScriptInitializeSystem(ObjectContainer* objectContainer,InputManager* input,ECSManager* ecs,ResourceManager* resourceManager)
 		: ECSManager::System<ScriptComponent>([this](Entity e, ScriptComponent& script)
 			{
 				e;
-				Start(script);
+				StartScript(script);
 			}),
 		m_ECS(ecs), m_pResourceManager(resourceManager), m_pInputManager(input), m_pObjectContainer(objectContainer)
 	{
 	}
 	~ScriptInitializeSystem() = default;
 private:
-	void LoadScript(ScriptComponent& script);
-	void Start(ScriptComponent& script);
 	void StartScript(ScriptComponent& script);
-	//ScriptContext MakeScriptContext(Entity entity);
 	ECSManager* m_ECS = nullptr;
 	ResourceManager* m_pResourceManager = nullptr;
 	InputManager* m_pInputManager = nullptr;
@@ -151,7 +173,6 @@ public:
 	~ScriptUpdateSystem() = default;
 private:
 	void UpdateScript(ScriptComponent& script);
-	//ScriptContext MakeScriptContext(Entity entity);
 	ECSManager* m_ECS = nullptr;
 	ResourceManager* m_pResourceManager = nullptr;
 	InputManager* m_pInputManager = nullptr;
@@ -178,6 +199,7 @@ private:
 
 class Rigidbody2DInitSystem : public ECSManager::System<TransformComponent, Rigidbody2DComponent>
 {
+	friend class GameCore;
 public:
 	Rigidbody2DInitSystem(ECSManager* ecs, b2World* world)
 		: ECSManager::System<TransformComponent, Rigidbody2DComponent>(
@@ -354,6 +376,7 @@ private:
 
 class BoxCollider2DInitSystem : public ECSManager::System<TransformComponent, Rigidbody2DComponent, BoxCollider2DComponent>
 {
+	friend class GameCore;
 public:
 	BoxCollider2DInitSystem(ECSManager* ecs, b2World* world)
 		: ECSManager::System<TransformComponent, Rigidbody2DComponent, BoxCollider2DComponent>(

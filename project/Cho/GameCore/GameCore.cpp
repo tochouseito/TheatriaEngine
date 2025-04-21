@@ -6,6 +6,7 @@
 #include "GameCore/Systems/SingleSystems.h"
 #include "GameCore/Systems/MultiSystems.h"
 #include "GameCore/Systems/EditorSystems.h"
+#include "EngineCommand/EngineCommands.h"
 
 void GameCore::Initialize(InputManager* input, ResourceManager* resourceManager)
 {
@@ -47,6 +48,7 @@ void GameCore::Update(ResourceManager& resourceManager, GraphicsEngine& graphics
 	if (isRunning)
 	{
 		Log::Write(LogLevel::Info, "GameCore Update");
+		InitializeGenerateObject();
 		m_pSingleSystemManager->UpdateAll(m_pECSManager.get());
 		m_pMultiSystemManager->UpdateAll(m_pECSManager.get());
 		Log::Write(LogLevel::Info, "GameCore Update End");
@@ -74,6 +76,7 @@ void GameCore::GameRun()
 	FileSystem::ScriptProject::LoadScriptDLL();
 	isRunning = true;
 	// StartSystemの実行
+	
 	m_pSingleSystemManager->StartAll(m_pECSManager.get());
 	m_pMultiSystemManager->StartAll(m_pECSManager.get());
 }
@@ -87,9 +90,65 @@ void GameCore::GameStop()
 	// スクリプトのインスタンスを解放
 	m_pSingleSystemManager->EndAll(m_pECSManager.get());
 	m_pMultiSystemManager->EndAll(m_pECSManager.get());
+	// 生成されたオブジェクトを削除
+	void ClearGenerateObject();
+	m_GameGenerateID.clear();
 	// DLLのアンロード
 	FileSystem::ScriptProject::UnloadScriptDLL();
 	isRunning = false;
+}
+
+void GameCore::InitializeGenerateObject()
+{
+	for (const ObjectID& id : m_GameGenerateID)
+	{
+		GameObject& object = m_pObjectContainer->GetGameObject(id);
+		if (!object.IsActive()) { continue; }
+		// オブジェクトの初期化
+		Entity entity = object.GetEntity();
+		// TransformComponentを取得
+		TransformComponent* transform = m_pECSManager->GetComponent<TransformComponent>(entity);
+		if (!transform) { continue; }
+		// TransformComponentの初期化
+		tfOnceSystem->Start(*transform);
+		// スクリプトの取得
+		ScriptComponent* script = m_pECSManager->GetComponent<ScriptComponent>(entity);
+		if (script)
+		{
+			// スクリプトの初期化
+			scriptGenerateOnceSystem->InstanceGenerate(*script);
+			scriptInitializeOnceSystem->StartScript(*script);
+		}
+		// Rigidbody2DComponentの取得
+		Rigidbody2DComponent* rb = m_pECSManager->GetComponent<Rigidbody2DComponent>(entity);
+		if (rb)
+		{
+			// Rigidbody2DComponentの初期化
+			physicsOnceSystem->CreateBody(entity, *transform, *rb);
+		}
+		// BoxCollider2DComponentの取得
+		BoxCollider2DComponent* box = m_pECSManager->GetComponent<BoxCollider2DComponent>(entity);
+		if (box)
+		{
+			// BoxCollider2DComponentの初期化
+			boxInitOnceSystem->CreateFixture(*transform, *rb, *box);
+		}
+		// 初期化済みのIDを追加
+		m_GameInitializedID.push_back(id);
+	}
+	// 初期化済みのIDをクリア
+	m_GameGenerateID.clear();
+}
+
+void GameCore::ClearGenerateObject()
+{
+	for (const ObjectID& id : m_GameInitializedID)
+	{
+		GameObject& object = m_pObjectContainer->GetGameObject(id);
+		std::unique_ptr<DeleteObjectCommand> command = std::make_unique<DeleteObjectCommand>(object.GetID().value());
+		command->Execute(m_EngineCommand);
+	}
+	m_GameInitializedID.clear();
 }
 
 void GameCore::CreateSystems(InputManager* input, ResourceManager* resourceManager)
@@ -98,6 +157,8 @@ void GameCore::CreateSystems(InputManager* input, ResourceManager* resourceManag
 	// 初期化システムの登録
 	std::unique_ptr<ECSManager::ISystem> tfStateSystem = std::make_unique<TransformInitializeSystem>(m_pECSManager.get());
 	m_pSingleSystemManager->RegisterSystem(std::move(tfStateSystem), SystemState::Initialize);
+	std::unique_ptr<ECSManager::ISystem> scriptGenerateSystem = std::make_unique<ScriptGenerateInstanceSystem>(m_pObjectContainer.get(), input, m_pECSManager.get(), resourceManager);
+	m_pSingleSystemManager->RegisterSystem(std::move(scriptGenerateSystem), SystemState::Initialize);
 	std::unique_ptr<ECSManager::ISystem> scriptInitializeSystem = std::make_unique<ScriptInitializeSystem>(m_pObjectContainer.get(), input, m_pECSManager.get(), resourceManager);
 	m_pSingleSystemManager->RegisterSystem(std::move(scriptInitializeSystem), SystemState::Initialize);
 	std::unique_ptr<ECSManager::ISystem> physicsSystem = std::make_unique<Rigidbody2DInitSystem>(m_pECSManager.get(), m_pPhysicsWorld.get());
@@ -138,5 +199,12 @@ void GameCore::CreateSystems(InputManager* input, ResourceManager* resourceManag
 	// マルチシステムの生成
 	std::unique_ptr<ECSManager::IMultiSystem> lineRendererEditorSystem = std::make_unique<LineRendererSystem>(m_pECSManager.get(), resourceManager);
 	m_pEditorMultiSystem->RegisterSystem(std::move(lineRendererEditorSystem), SystemState::Update);
+
+	// 更新中に生成されたオブジェクトの初期化システム
+	tfOnceSystem = std::make_unique<TransformInitializeSystem>(m_pECSManager.get());
+	scriptGenerateOnceSystem = std::make_unique<ScriptGenerateInstanceSystem>(m_pObjectContainer.get(), input, m_pECSManager.get(), resourceManager);
+	scriptInitializeOnceSystem = std::make_unique<ScriptInitializeSystem>(m_pObjectContainer.get(), input, m_pECSManager.get(), resourceManager);
+	physicsOnceSystem = std::make_unique<Rigidbody2DInitSystem>(m_pECSManager.get(), m_pPhysicsWorld.get());
+	boxInitOnceSystem = std::make_unique<BoxCollider2DInitSystem>(m_pECSManager.get(), m_pPhysicsWorld.get());
 }
 

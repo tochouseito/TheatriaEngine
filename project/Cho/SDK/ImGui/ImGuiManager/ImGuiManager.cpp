@@ -29,6 +29,15 @@ void ImGuiManager::Initialize(ID3D12Device8* device, ResourceManager* resourceMa
 		"Cho/Resources/EngineAssets/Fonts/Font Awesome 6 Free-Solid-900.otf",
 		14.0f,
 		&font_config, icon_ranges);
+	// Material Symbols Rounded をマージ
+	static const ImWchar materialSymbolRanges[] = { 0xe000, 0xf8ff, 0 }; // Private Use Area
+	io.Fonts->AddFontFromFileTTF(
+		"Cho/Resources/EngineAssets/Fonts/MaterialSymbolsRounded-VariableFont_FILL,GRAD,opsz,wght.ttf",
+		30.0f,
+		&font_config,
+		materialSymbolRanges
+	);
+
 	unsigned char* texPixels = nullptr;
 	int texWidth, texHeight;
 	io.Fonts->GetTexDataAsAlpha8(&texPixels, &texWidth, &texHeight);

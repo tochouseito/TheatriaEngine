@@ -136,6 +136,8 @@ void HubManager::ShowSidebar()
 			FileSystem::m_sProjectName = selectedProjectName;
 			// プロジェクトのパスを保存
 			FileSystem::ScriptProject::LoadProjectPath(selectedProjectName);
+			// ブランチを取得
+            GetCurrentBranch();
 			// プロジェクト選択後、Hubを終了
 			m_IsRun = false; // プロジェクト選択後、Hubを終了
         }
@@ -151,4 +153,40 @@ void HubManager::ShowMainContent()
     ImGui::Text("Welcome to ChoHub!");
     // 中央の画面など
     ImGui::End();
+}
+
+void HubManager::GetCurrentBranch()
+{
+	std::string gitFolder = "GameProjects/" + ConvertString(FileSystem::m_sProjectName) + "/.git";
+	std::filesystem::path gitPath(gitFolder);
+	m_GitHeadPath = gitPath / "HEAD";
+    m_LastBranch = ReadCurrentBranch();
+}
+
+bool HubManager::CheckBranchChanged()
+{
+	// ブランチが変更されたかどうかを確認
+	// .gitが存在しない場合は常に探して見つかったらそれをlastBranchにする
+    if (m_LastBranch.empty())
+    {
+		m_LastBranch = ReadCurrentBranch();
+        return false;
+    }
+    std::string currentBranch = ReadCurrentBranch();
+    if (currentBranch != m_LastBranch)
+    {
+        m_LastBranch = currentBranch;
+        return true;
+    }
+    return false;
+}
+
+void HubManager::ReloadProject()
+{
+    // プロジェクトの読み込み
+    FileSystem::LoadProjectFolder(FileSystem::m_sProjectName, m_pGameCore->GetSceneManager(), m_pGameCore->GetObjectContainer(), m_pGameCore->GetECSManager(), m_pResourceManager);
+    // ブランチを取得
+    GetCurrentBranch();
+    // プロジェクト選択後、Hubを終了
+    m_IsRun = false; // プロジェクト選択後、Hubを終了
 }

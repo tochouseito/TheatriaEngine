@@ -21,6 +21,14 @@ D3D12_GPU_DESCRIPTOR_HANDLE EngineCommand::GetSceneTextureHandle()
 	return m_ResourceManager->GetBuffer<ColorBuffer>(bufferIndex)->GetSRVGpuHandle();
 }
 
+D3D12_GPU_DESCRIPTOR_HANDLE EngineCommand::GetEffectEditTextureHandle()
+{
+	// シーンレンダリングテクスチャのバッファインデックスを取得
+	uint32_t bufferIndex = m_GraphicsEngine->GetEffectEditTextureBufferID();
+	// ハンドルを取得
+	return m_ResourceManager->GetBuffer<ColorBuffer>(bufferIndex)->GetSRVGpuHandle();
+}
+
 void EngineCommand::SaveProjectFile(const std::wstring& projectName)
 {
 	for (auto& scene : m_GameCore->GetSceneManager()->GetScenes().GetVector())

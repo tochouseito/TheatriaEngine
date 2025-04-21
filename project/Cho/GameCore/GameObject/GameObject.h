@@ -72,6 +72,7 @@ public:
 
 	InputAPI input;					// InputAPI
 private:
+	friend class ScriptGenerateInstanceSystem;
 	friend class ScriptInitializeSystem;
 	friend class ScriptUpdateSystem;
 	friend class ScirptFinalizeSystem;

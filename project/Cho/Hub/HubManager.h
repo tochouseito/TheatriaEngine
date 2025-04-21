@@ -1,4 +1,5 @@
 #pragma once
+#include <filesystem>
 class PlatformLayer;
 class CoreSystem;
 class ResourceManager;
@@ -40,12 +41,42 @@ public:
 
 	void ShowMainContent();
 
+	void GetCurrentBranch();
+
+	bool CheckBranchChanged();
+
+	void ReloadProject();
+
 private:
+	std::string ReadCurrentBranch()
+	{
+		std::ifstream headFile(m_GitHeadPath);
+		if (!headFile.is_open())
+		{
+			return std::string();
+		}
+
+		std::string line;
+		std::getline(headFile, line);
+		const std::string prefix = "ref: refs/heads/";
+		if (line.find(prefix) == 0)
+		{
+			return line.substr(prefix.length());
+		}
+
+		// detached HEAD などの場合は SHA をそのまま返す
+		return line;
+	}
+
 	PlatformLayer* m_pPlatformLayer = nullptr;
 	CoreSystem* m_pCoreSystem = nullptr;
 	ResourceManager* m_pResourceManager = nullptr;
 	GraphicsEngine* m_pGraphicsEngine = nullptr;
 	GameCore* m_pGameCore = nullptr;
 	bool m_IsRun = true;
+
+	// 現在のブランチ
+	std::string m_LastBranch = "";
+	std::filesystem::path m_GitHeadPath = "";
 };
 

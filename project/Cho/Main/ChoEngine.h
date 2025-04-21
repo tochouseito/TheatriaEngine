@@ -52,6 +52,8 @@ public:// method
 	// クラッシュ時の処理
 	static void OnCrashHandler();
 	void CrashHandlerEntry() override;
+
+	EngineCommand* GetEngineCommand() { return engineCommand.get(); }
 private:// member
 	// DirectX12
 	std::unique_ptr<ResourceLeakChecker> resourceLeakChecker = nullptr;// ResourceLeakChecker

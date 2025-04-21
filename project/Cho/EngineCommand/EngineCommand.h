@@ -87,6 +87,7 @@ public:
 	// レンダリングテクスチャのハンドルを取得
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGameTextureHandle();
 	D3D12_GPU_DESCRIPTOR_HANDLE GetSceneTextureHandle();
+	D3D12_GPU_DESCRIPTOR_HANDLE GetEffectEditTextureHandle();
 	// プロジェクトの保存
 	void SaveProjectFile(const std::wstring& projectName);
 	// Test:スクリプト作成	

@@ -13,6 +13,7 @@ enum RenderTextureType
 {
 	GameScreen = 0,// ゲーム画面用描画結果
 	SceneScreen,// シーン画面用描画結果
+	EffectEditScreen,// エフェクトエディタ用描画結果
 	RenderTextureTypeCount,// 種類数(使用禁止)
 };
 
@@ -31,6 +32,7 @@ enum RenderMode
 	Game=0,
 	Debug,
 	Release,
+	Editor,
 	RenderModeCount,
 };
 
@@ -65,6 +67,13 @@ public:
 	}
 	// Destructor
 	~GraphicsEngine() = default;
+	void Finalize() override
+	{
+		// GPUの完了待ち
+		WaitForGPU(Graphics);
+		WaitForGPU(Compute);
+		WaitForGPU(Copy);
+	}
 	void Init();
 	// SwapChainの生成
 	void CreateSwapChain(IDXGIFactory7* dxgiFactory);
@@ -79,6 +88,8 @@ public:
 	uint32_t GetGameTextureBufferID() { return m_RenderTextures[GameScreen].m_BufferIndex.value(); }
 	// SceneTextureのBufferIDを取得
 	uint32_t GetSceneTextureBufferID() { return m_RenderTextures[SceneScreen].m_BufferIndex.value(); }
+	// EffectEditTextureのBufferIDを取得
+	uint32_t GetEffectEditTextureBufferID() { return m_RenderTextures[EffectEditScreen].m_BufferIndex.value(); }
 private:
 	// コマンドコンテキストの取得
 	CommandContext* GetCommandContext() { return m_GraphicsCore->GetCommandManager()->GetCommandContext(); }
@@ -100,8 +111,6 @@ private:
 	void CreateDepthBuffer();
 	// オフスクリーンバッファの生成
 	void CreateOffscreenBuffer();
-	// デバッグ用オフスクリーンレンダリングテクスチャ
-	void CreateDebugOffscreenBuffer();
 	// デバッグ用深度バッファの生成
 	void CreateDebugDepthBuffer();
 

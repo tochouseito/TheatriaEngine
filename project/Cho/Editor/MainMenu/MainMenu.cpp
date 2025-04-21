@@ -77,6 +77,33 @@ void MainMenu::MenuBar()
 		// Helpメニュー
 		HelpMenu();
 
+        // ワークスペース一覧
+        //static const char* workspaces[] = { "Layout", "Scripting", "Modeling", "Animation", "Rendering" };
+        static const char* workspaces[] = { "SceneEdit","EffectEdit"};
+        static int currentWorkspace = 0;
+
+        ImGui::SameLine(ImGui::GetWindowContentRegionMax().x * 0.3f); // メニューの横に配置（位置調整）
+
+        for (int i = 0; i < IM_ARRAYSIZE(workspaces); ++i)
+        {
+            ImGui::PushID(i);
+
+            // タブ風ボタン
+            ImGui::PushStyleColor(ImGuiCol_Button, i == currentWorkspace ? ImVec4(0.3f, 0.4f, 0.8f, 1.0f) : ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.4f, 0.5f, 0.9f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.2f, 0.3f, 0.7f, 1.0f));
+            if (ImGui::Button(workspaces[i]))
+            {
+                currentWorkspace = i;
+                m_EditorManager->SetWorkSpaceType(workspaces[i]);
+            }
+            ImGui::PopStyleColor(3);
+
+            ImGui::PopID();
+            ImGui::SameLine(); // 横並びにする
+        }
+
+
         ImGui::EndMenuBar(); // メニューバーを終了
     }
 }
