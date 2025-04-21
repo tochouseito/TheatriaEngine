@@ -76,6 +76,7 @@ void GameCore::GameRun()
 	FileSystem::ScriptProject::LoadScriptDLL();
 	isRunning = true;
 	// StartSystemの実行
+	
 	m_pSingleSystemManager->StartAll(m_pECSManager.get());
 	m_pMultiSystemManager->StartAll(m_pECSManager.get());
 }

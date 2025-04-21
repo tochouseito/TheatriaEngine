@@ -30,13 +30,17 @@ CHO_API bool ChoSystem::LoadGameParameter(const std::wstring& filePath, const st
 	return Cho::FileSystem::LoadGameParameter(filePath, group, item, dataName, outValue);
 }
 
-CHO_API void ChoSystem::CloneGameObject(GameObject& object, Vector3 generatePosition)
+CHO_API void ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vector3 generatePosition)
 {
 	EngineCommand* engineCommand = g_Engine->GetEngineCommand();
 	if (!engineCommand) { return; }
 	std::unique_ptr<Add3DObjectCommand> command = std::make_unique<Add3DObjectCommand>();
 	command->Execute(engineCommand);
+	GameObject& object = engineCommand->GetGameCore()->GetObjectContainer()->GetGameObject(id.value());
 	GameObject& newObject = engineCommand->GetGameCore()->GetObjectContainer()->GetGameObject(command->GetObjectID());
+	// nameを変更
+	std::unique_ptr<RenameObjectCommand> renameCommand = std::make_unique<RenameObjectCommand>(newObject.GetID().value(), object.GetName());
+	renameCommand->Execute(engineCommand);
 	// Transform以外のComponentを取得
 	MeshFilterComponent* meshFilter = engineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshFilterComponent>(object.GetEntity());
 	MeshRendererComponent* meshRenderer = engineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshRendererComponent>(object.GetEntity());
@@ -45,19 +49,54 @@ CHO_API void ChoSystem::CloneGameObject(GameObject& object, Vector3 generatePosi
 	Rigidbody2DComponent* rb = engineCommand->GetGameCore()->GetECSManager()->GetComponent<Rigidbody2DComponent>(object.GetEntity());
 	BoxCollider2DComponent* box = engineCommand->GetGameCore()->GetECSManager()->GetComponent<BoxCollider2DComponent>(object.GetEntity());
 	// あるやつをnewObjectに追加
-	if (meshFilter) { engineCommand->GetGameCore()->GetECSManager()->AddComponent<MeshFilterComponent>(newObject.GetEntity()); }
-	if (meshRenderer) { engineCommand->GetGameCore()->GetECSManager()->AddComponent<MeshRendererComponent>(newObject.GetEntity()); }
-	if (script) { engineCommand->GetGameCore()->GetECSManager()->AddComponent<ScriptComponent>(newObject.GetEntity()); }
+	if (meshFilter)
+	{
+		std::unique_ptr<AddMeshFilterComponent> addMeshFilterCommand = std::make_unique<AddMeshFilterComponent>(newObject.GetEntity());
+		addMeshFilterCommand->Execute(engineCommand);
+		// MeshFilterComponentのMeshを設定
+		MeshFilterComponent* newMeshFilter = engineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshFilterComponent>(newObject.GetEntity());
+		if (newMeshFilter)
+		{
+			newMeshFilter->modelID = meshFilter->modelID;
+			newMeshFilter->modelName = meshFilter->modelName;
+		}
+	}
+	if (meshRenderer)
+	{
+		std::unique_ptr<AddMeshRendererComponent> addMeshRendererCommand = std::make_unique<AddMeshRendererComponent>(newObject.GetEntity());
+		addMeshRendererCommand->Execute(engineCommand);
+	}
+	if (script)
+	{
+		std::unique_ptr<AddScriptComponent> addScriptCommand = std::make_unique<AddScriptComponent>(newObject.GetEntity(),newObject.GetID().value());
+		addScriptCommand->Execute(engineCommand);
+		// ScriptComponentのスクリプト名を設定
+		ScriptComponent* newScript = engineCommand->GetGameCore()->GetECSManager()->GetComponent<ScriptComponent>(newObject.GetEntity());
+		if (newScript)
+		{
+			newScript->scriptName = script->scriptName;
+			newScript->objectID = newObject.GetID().value();
+		}
+	}
 	if (lineRenderer)
 	{
 		for (auto& line : *lineRenderer)
 		{
 			line;
-			engineCommand->GetGameCore()->GetECSManager()->AddComponent<LineRendererComponent>(newObject.GetEntity());
+			std::unique_ptr<AddLineRendererComponent> addLineCommand = std::make_unique<AddLineRendererComponent>(newObject.GetEntity());
+			addLineCommand->Execute(engineCommand);
 		}
 	}
-	if (rb) { engineCommand->GetGameCore()->GetECSManager()->AddComponent<Rigidbody2DComponent>(newObject.GetEntity()); }
-	if (box) { engineCommand->GetGameCore()->GetECSManager()->AddComponent<BoxCollider2DComponent>(newObject.GetEntity()); }
+	if (rb)
+	{
+		std::unique_ptr<AddRigidbody2DComponent> addRigidbodyCommand = std::make_unique<AddRigidbody2DComponent>(newObject.GetEntity(), newObject.GetID().value());
+		addRigidbodyCommand->Execute(engineCommand);
+	}
+	if (box)
+	{
+		std::unique_ptr<AddBoxCollider2DComponent> addBoxCommand = std::make_unique<AddBoxCollider2DComponent>(newObject.GetEntity());
+		addBoxCommand->Execute(engineCommand);
+	}
 	// TransformComponentを取得
 	TransformComponent* transform = engineCommand->GetGameCore()->GetECSManager()->GetComponent<TransformComponent>(newObject.GetEntity());
 	// 初期位置を設定

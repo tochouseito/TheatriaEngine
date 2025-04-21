@@ -38,6 +38,6 @@ namespace ChoSystem
 		const std::string& dataName,
 		GameParameterVariant& outValue);
 	// ゲームオブジェクト複製
-	CHO_API void CloneGameObject(GameObject& object,Vector3 generatePosition);
+	CHO_API void CloneGameObject(std::optional<uint32_t> id, Vector3 generatePosition);
 #endif
 }
