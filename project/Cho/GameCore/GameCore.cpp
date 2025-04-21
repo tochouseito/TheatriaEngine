@@ -91,7 +91,7 @@ void GameCore::GameStop()
 	m_pSingleSystemManager->EndAll(m_pECSManager.get());
 	m_pMultiSystemManager->EndAll(m_pECSManager.get());
 	// 生成されたオブジェクトを削除
-	void ClearGenerateObject();
+	ClearGenerateObject();
 	m_GameGenerateID.clear();
 	// DLLのアンロード
 	FileSystem::ScriptProject::UnloadScriptDLL();
