@@ -1166,7 +1166,8 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
     vcxFile << "  <ItemDefinitionGroup Condition=\"'$(Configuration)|$(Platform)'=='Release|x64'\">\n";
     vcxFile << "    <ClCompile>\n";
     vcxFile << "      <WarningLevel>Level3</WarningLevel>\n";
-    vcxFile << "      <Optimization>MaxSpeed</Optimization>\n";
+    //vcxFile << "      <Optimization>MaxSpeed</Optimization>\n";
+    vcxFile << "      <Optimization>Disabled</Optimization>\n";
     vcxFile << "      <PreprocessorDefinitions>NDEBUG;EXPORT_SCRIPT_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>\n";
     vcxFile << "      <AdditionalIncludeDirectories>" << contextPath.string() << ";" << scriptPath.string() << ";" << mathLibPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
     vcxFile << "      <LanguageStandard>stdcpp20</LanguageStandard>\n";

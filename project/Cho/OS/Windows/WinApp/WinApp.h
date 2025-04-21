@@ -46,6 +46,9 @@ public:// メンバ関数
 	static UINT GetWindowHeight() { return m_WindowHeight; }
 	static bool IsResizeWindow();
 	static bool IsKillfocusWindow();
+	static std::vector<std::wstring>& GetDropFiles() { return m_DropFiles; }
+	static void ClearDropFiles() { m_DropFiles.clear(); }
+	static bool IsDropFiles();
 private:
 
 	// ウィンドウサイズ変更時の処理
@@ -59,5 +62,7 @@ private:// メンバ変数
 	static UINT m_WindowHeight; // ウィンドウの高さ
 	static bool m_IsResize; // ウィンドウサイズ変更フラグ
 	static bool m_IsKillfocus; // ウィンドウがフォーカスを失ったかどうか
+	static bool m_IsDropFiles; // ドロップされたファイルがあるかどうか
+	static std::vector<std::wstring> m_DropFiles; // ドロップされたファイルのパス
 };
 

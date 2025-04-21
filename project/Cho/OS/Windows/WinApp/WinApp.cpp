@@ -16,6 +16,8 @@ UINT64 WinApp::m_WindowWidth = 1280; // ウィンドウの幅
 UINT WinApp::m_WindowHeight = 720; // ウィンドウの高さ
 bool WinApp::m_IsResize = false; // ウィンドウのリサイズフラグ
 bool WinApp::m_IsKillfocus = false; // ウィンドウのフォーカスが外れたかどうか
+bool WinApp::m_IsDropFiles = false; // ドロップされたファイルがあるかどうか
+std::vector<std::wstring> WinApp::m_DropFiles; // ドロップされたファイルのパスを保存するベクター
 
 // ウィンドウプロシージャ
 LRESULT CALLBACK WinApp::WindowProc(HWND hWnd, UINT msg,
@@ -33,6 +35,27 @@ LRESULT CALLBACK WinApp::WindowProc(HWND hWnd, UINT msg,
 		pMinMaxInfo->ptMinTrackSize.x = 800; // 最小幅を設定（例：800）
 		pMinMaxInfo->ptMinTrackSize.y = 600; // 最小高さを設定（例：600）
 		break;
+	}
+
+	case WM_DROPFILES:
+	{
+		// ドロップされたファイルの処理
+		HDROP hDrop = (HDROP)wparam;
+		UINT fileCount = DragQueryFileW(hDrop, 0xFFFFFFFF, NULL, 0);
+
+		m_DropFiles.clear();
+
+		for (UINT i = 0; i < fileCount; ++i)
+		{
+			WCHAR filePathW[MAX_PATH];
+			DragQueryFile(hDrop, i, filePathW, MAX_PATH);
+			
+			std::wstring filePath(filePathW);
+			// ドロップされたファイルのパスを保存
+			m_DropFiles.push_back(filePath);
+		}
+		DragFinish(hDrop);
+		m_IsDropFiles = true;
 	}
 
 	case WM_SIZE:
@@ -186,6 +209,18 @@ bool WinApp::IsKillfocusWindow()
 	if (m_IsKillfocus)
 	{
 		m_IsKillfocus = false;
+		return true;
+	} else
+	{
+		return false;
+	}
+}
+
+bool WinApp::IsDropFiles()
+{
+	if (m_IsDropFiles)
+	{
+		m_IsDropFiles = false;
 		return true;
 	} else
 	{
