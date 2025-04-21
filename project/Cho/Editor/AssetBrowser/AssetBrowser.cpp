@@ -3,6 +3,7 @@
 #include "Editor/EditorManager/EditorManager.h"
 #include "Core/Utility/FontCode.h"
 #include "OS/Windows/WinApp/WinApp.h"
+#include "Platform/FileSystem/FileSystem.h"
 
 void AssetBrowser::Initialize()
 {
@@ -23,10 +24,13 @@ void AssetBrowser::Window()
 	ImGui::Text("%s %s", ICON_MATERIAL_FOLDER, currentPath.filename().string().c_str());
     ImGui::Separator();
     ImGui::Columns(2);
-
-    DrawDirectoryTree("Assets");
+    std::wstring projectPath = L"GameProjects/" + FileSystem::m_sProjectName;
+    DrawDirectoryTree(ConvertString(projectPath));
     ImGui::NextColumn();
-    DrawAssetGrid(currentPath);
+    if (!currentPath.empty())
+    {
+        DrawAssetGrid(currentPath);
+    }
 
     ImGui::Columns(1);
 
@@ -90,7 +94,9 @@ const char* AssetBrowser::GetIconForEntry(const std::filesystem::directory_entry
     if (entry.is_directory()) return ICON_MATERIAL_FOLDER;
 
     std::string ext = entry.path().extension().string();
-    std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+    std::transform(ext.begin(), ext.end(), ext.begin(),
+        [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+
 
     if (ext == ".obj" || ext == ".gltf" || ext == ".glb") return ICON_MATERIAL_MODEL;
     if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".bmp") return ICON_MATERIAL_IMAGE;
