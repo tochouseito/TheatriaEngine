@@ -12,6 +12,8 @@ public:
 	}
 	bool Execute(EngineCommand* edit)override;
 	bool Undo(EngineCommand* edit)override;
+	// オブジェクトのIDを取得
+	uint32_t GetObjectID() const { return m_ObjectID; }
 private:
 	uint32_t m_ObjectID;
 };

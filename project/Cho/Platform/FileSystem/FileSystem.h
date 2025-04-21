@@ -29,6 +29,7 @@ namespace Cho
 		EffectFile,     // エフェクトファイル
 		ScriptFile,     // スクリプトファイル
 		GameParameter,  // ゲームパラメータファイル
+		PrefabFile,     // プレハブファイル
 		Unknown,        // 不明なファイル
     };
 
@@ -160,6 +161,7 @@ namespace Cho
 			if (type == "EffectFile") return FileType::EffectFile;
 			if (type == "ScriptFile") return FileType::ScriptFile;
 			if (type == "GameParameter") return FileType::GameParameter;
+			if (type == "PrefabFile") return FileType::PrefabFile;
             return FileType::Unknown;
         }
         // GUID 生成

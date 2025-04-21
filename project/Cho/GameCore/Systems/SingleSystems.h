@@ -20,6 +20,7 @@ enum SystemPriority
 // Transform初期化
 class TransformInitializeSystem : public ECSManager::System<TransformComponent>
 {
+	friend class GameCore;
 public:
 	TransformInitializeSystem(ECSManager* ecs)
 		: ECSManager::System<TransformComponent>([this](Entity e, TransformComponent& transform)
@@ -114,6 +115,7 @@ private:
 // スクリプトインスタンス生成システム
 class ScriptGenerateInstanceSystem : public ECSManager::System<ScriptComponent>
 {
+	friend class GameCore;
 public:
 	ScriptGenerateInstanceSystem(ObjectContainer* objectContainer, InputManager* input, ECSManager* ecs, ResourceManager* resourceManager)
 		: ECSManager::System<ScriptComponent>([this](Entity e, ScriptComponent& script)
@@ -136,6 +138,7 @@ private:
 // スクリプト初期化システム
 class ScriptInitializeSystem : public ECSManager::System<ScriptComponent>
 {
+	friend class GameCore;
 public:
 	ScriptInitializeSystem(ObjectContainer* objectContainer,InputManager* input,ECSManager* ecs,ResourceManager* resourceManager)
 		: ECSManager::System<ScriptComponent>([this](Entity e, ScriptComponent& script)
@@ -196,6 +199,7 @@ private:
 
 class Rigidbody2DInitSystem : public ECSManager::System<TransformComponent, Rigidbody2DComponent>
 {
+	friend class GameCore;
 public:
 	Rigidbody2DInitSystem(ECSManager* ecs, b2World* world)
 		: ECSManager::System<TransformComponent, Rigidbody2DComponent>(
@@ -372,6 +376,7 @@ private:
 
 class BoxCollider2DInitSystem : public ECSManager::System<TransformComponent, Rigidbody2DComponent, BoxCollider2DComponent>
 {
+	friend class GameCore;
 public:
 	BoxCollider2DInitSystem(ECSManager* ecs, b2World* world)
 		: ECSManager::System<TransformComponent, Rigidbody2DComponent, BoxCollider2DComponent>(

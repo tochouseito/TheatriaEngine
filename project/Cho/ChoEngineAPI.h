@@ -6,6 +6,7 @@
 using GameParameterVariant = std::variant<int, float, bool, Vector3>;
 //struct ScriptContext;
 class GameObject;
+class ChoEngine;
 namespace Cho
 {
 	// エディタとゲーム実行ファイルしか許可しない
@@ -14,6 +15,10 @@ namespace Cho
 	CHO_API Engine* CreateEngine(RuntimeMode mode);
 	// Engineの破棄
 	CHO_API void DestroyEngine(Engine* engine);
+	// ポインタを受け取る
+	CHO_API void SetEngine(Engine* engine);
+	// Engineのポインタ
+	static ChoEngine* g_Engine = nullptr;
 #endif
 }
 namespace ChoSystem
@@ -32,5 +37,7 @@ namespace ChoSystem
 		const std::string& item,
 		const std::string& dataName,
 		GameParameterVariant& outValue);
+	// ゲームオブジェクト複製
+	CHO_API void CloneGameObject(GameObject& object,Vector3 generatePosition);
 #endif
 }
