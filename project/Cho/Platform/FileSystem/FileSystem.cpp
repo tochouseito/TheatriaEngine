@@ -1619,7 +1619,8 @@ bool Cho::FileSystem::ProcessFile(const path& filePath, EngineCommand* engineCom
     if (wFileName.ends_with(L".dds")|| wFileName.ends_with(L".png") || wFileName.ends_with(L".jpg"))
     {
 		// テクスチャの処理
-        return false;
+        engineCommand->GetResourceManager()->GetTextureManager()->LoadTextureFile(filePath);
+        return true;
     }
 	// モデルファイル
     if (wFileName.ends_with(L".fbx") || wFileName.ends_with(L".gltf") || wFileName.ends_with(L".obj"))
