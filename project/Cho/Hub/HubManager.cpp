@@ -6,6 +6,7 @@
 #include "Resources/ResourceManager/ResourceManager.h"
 #include "Graphics/GraphicsEngine/GraphicsEngine.h"
 #include "GameCore/GameCore.h"
+#include "EngineCommand/EngineCommand.h"
 using namespace Cho;
 
 void HubManager::Initialize()
@@ -92,7 +93,7 @@ void HubManager::ShowSidebar()
             bool created = FileSystem::CreateNewProjectFolder(name);
             if (created)
             {
-                m_pGameCore->GetSceneManager()->CreateDefaultScene();
+                m_pEngineCommand->GetGameCore()->GetSceneManager()->CreateDefaultScene();
                 // プロジェクト名を保存
                 FileSystem::m_sProjectName = name;
 				// プロジェクトフォルダを作成
@@ -131,9 +132,7 @@ void HubManager::ShowSidebar()
             selectedIndex = i;
             std::wstring selectedProjectName = projects[i];
             // プロジェクトの読み込み
-			FileSystem::LoadProjectFolder(selectedProjectName, m_pGameCore->GetSceneManager(),m_pGameCore->GetObjectContainer(),m_pGameCore->GetECSManager(),m_pResourceManager);
-			// プロジェクト名を保存
-			FileSystem::m_sProjectName = selectedProjectName;
+			FileSystem::LoadProjectFolder(selectedProjectName, m_pEngineCommand);
 			// プロジェクトのパスを保存
 			FileSystem::ScriptProject::LoadProjectPath(selectedProjectName);
 			// ブランチを取得
@@ -184,7 +183,7 @@ bool HubManager::CheckBranchChanged()
 void HubManager::ReloadProject()
 {
     // プロジェクトの読み込み
-    FileSystem::LoadProjectFolder(FileSystem::m_sProjectName, m_pGameCore->GetSceneManager(), m_pGameCore->GetObjectContainer(), m_pGameCore->GetECSManager(), m_pResourceManager);
+    FileSystem::LoadProjectFolder(FileSystem::m_sProjectName, m_pEngineCommand);
     // ブランチを取得
     GetCurrentBranch();
     // プロジェクト選択後、Hubを終了

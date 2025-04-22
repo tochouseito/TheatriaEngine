@@ -2,6 +2,7 @@
 #include "FileSystem.h"
 #include "GameCore/GameCore.h"
 #include "Resources/ResourceManager/ResourceManager.h"
+#include "EngineCommand/EngineCommand.h"
 #include <cstdlib>
 #include "Core/ChoLog/ChoLog.h"
 #include <windows.h>
@@ -390,8 +391,13 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory,BaseScene* sce
     }
 }
 
-bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, SceneManager* sceneManager, ObjectContainer* container, ECSManager* ecs, ResourceManager* resourceManager)
+bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand* engineCommand)
 {
+    if (!engineCommand) { Log::Write(LogLevel::Assert, "EngineCommand is nullptr"); }
+	SceneManager* sceneManager = engineCommand->GetGameCore()->GetSceneManager();
+    ObjectContainer* container = engineCommand->GetGameCore()->GetObjectContainer();
+	ECSManager* ecs = engineCommand->GetGameCore()->GetECSManager();
+	ResourceManager* resourceManager = engineCommand->GetResourceManager();
     try
     {
         std::ifstream file(filePath);
@@ -645,9 +651,10 @@ bool Cho::FileSystem::SaveScriptFile(const std::wstring& directory, ResourceMana
     }
 }
 
-bool Cho::FileSystem::LoadScriptFile(const std::wstring& filePath, ResourceManager* resourceManager)
+bool Cho::FileSystem::LoadScriptFile(const std::wstring& filePath, EngineCommand* engineCommand)
 {
-    ScriptContainer* scriptContainer = resourceManager->GetScriptContainer();
+    if (!engineCommand) { Log::Write(LogLevel::Assert, "EngineCommand is nullptr"); }
+	ScriptContainer* scriptContainer = engineCommand->GetResourceManager()->GetScriptContainer();
     if (!scriptContainer) { return false; }
 
     try
@@ -902,6 +909,7 @@ FileType Cho::FileSystem::GetJsonFileType(const std::filesystem::path& path)
 
 void Cho::FileSystem::SaveProject(SceneManager* sceneManager, ObjectContainer* container, ECSManager* ecs, ResourceManager* resourceManager)
 {
+    if (!m_sProjectName.empty()) { return; }
     // セーブ
     for (auto& scene : sceneManager->GetScenes().GetVector())
     {
@@ -920,8 +928,9 @@ void Cho::FileSystem::SaveProject(SceneManager* sceneManager, ObjectContainer* c
 }
 
 // プロジェクトフォルダを読み込む
-bool Cho::FileSystem::LoadProjectFolder(const std::wstring& projectName, SceneManager* sceneManager, ObjectContainer* container, ECSManager* ecs, ResourceManager* resourceManager)
+bool Cho::FileSystem::LoadProjectFolder(const std::wstring& projectName, EngineCommand* engineCommand)
 {
+	m_sProjectName = projectName;
     std::filesystem::path projectPath = std::filesystem::path(L"GameProjects") / projectName;
 
     // プロジェクトファイル類を読み込み
@@ -935,27 +944,7 @@ bool Cho::FileSystem::LoadProjectFolder(const std::wstring& projectName, SceneMa
     }*/
 
     // 全ファイル走査（サブディレクトリ含む）
-    for (const auto& entry : std::filesystem::recursive_directory_iterator(projectPath))
-    {
-        if (!entry.is_regular_file()) continue;
-        if (entry.path().extension() != ".json") continue;
-
-        FileType type = GetJsonFileType(entry.path());
-
-        // アセット読み込み
-        switch (type)
-        {
-        case FileType::SceneFile:
-            LoadSceneFile(entry.path(), sceneManager, container, ecs, resourceManager);
-            break;
-        case FileType::ScriptFile:
-			LoadScriptFile(entry.path(), resourceManager);
-            break;
-        // ここに ModelFile, EffectFile, ScriptFile など追加
-        default:
-            break;
-        }
-    }
+    ScanFolder(projectPath,engineCommand);
     return true;
 }
 
@@ -1166,7 +1155,8 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
     vcxFile << "  <ItemDefinitionGroup Condition=\"'$(Configuration)|$(Platform)'=='Release|x64'\">\n";
     vcxFile << "    <ClCompile>\n";
     vcxFile << "      <WarningLevel>Level3</WarningLevel>\n";
-    vcxFile << "      <Optimization>MaxSpeed</Optimization>\n";
+    //vcxFile << "      <Optimization>MaxSpeed</Optimization>\n";
+    vcxFile << "      <Optimization>Disabled</Optimization>\n";
     vcxFile << "      <PreprocessorDefinitions>NDEBUG;EXPORT_SCRIPT_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>\n";
     vcxFile << "      <AdditionalIncludeDirectories>" << contextPath.string() << ";" << scriptPath.string() << ";" << mathLibPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
     vcxFile << "      <LanguageStandard>stdcpp20</LanguageStandard>\n";
@@ -1575,4 +1565,184 @@ void Cho::Deserialization::FromJson(const json& j, BoxCollider2DComponent& bc)
 	bc.density = j.value("density", 1.0f);
 	bc.friction = j.value("friction", 0.5f);
 	bc.restitution = j.value("restitution", 0.0f);
+}
+
+void Cho::FileSystem::ScanFolder(const path& rootPath, EngineCommand* engineCommand)
+{
+    g_ProjectFiles = ScanRecursive(rootPath,engineCommand);
+}
+
+FolderNode Cho::FileSystem::ScanRecursive(const path& path, EngineCommand* engineCommand)
+{
+    FolderNode node;        // 一番上のノード
+	node.folderPath = path; // フォルダパス
+
+    // フォルダの中を走査
+    for (const auto& entry : directory_iterator(path))
+    {
+		// フォルダなら再帰処理
+        if (entry.is_directory())
+        {
+			node.children.push_back(ScanRecursive(entry.path(),engineCommand));
+        }
+		// ファイルなら処理
+		else if (entry.is_regular_file())
+		{
+            if (ProcessFile(entry.path(),engineCommand))// 処理に成功したらノードに追加
+            {
+                node.files.push_back(entry.path());
+            }
+		}
+    }
+    return node;
+}
+
+// フォルダノードをパスで検索
+FolderNode* Cho::FileSystem::FindFolderNodeByPath(FolderNode& node, const std::filesystem::path& target)
+{
+    if (node.folderPath == target)
+        return &node;
+
+    for (auto& child : node.children)
+    {
+        if (FolderNode* found = FindFolderNodeByPath(child, target))
+            return found;
+    }
+    return nullptr;
+}
+
+bool Cho::FileSystem::ProcessFile(const path& filePath, EngineCommand* engineCommand)
+{
+	std::wstring wFileName = filePath.filename().wstring();
+
+    // テクスチャファイル
+    if (wFileName.ends_with(L".dds")|| wFileName.ends_with(L".png") || wFileName.ends_with(L".jpg"))
+    {
+		// テクスチャの処理
+        return false;
+    }
+	// モデルファイル
+    if (wFileName.ends_with(L".fbx") || wFileName.ends_with(L".gltf") || wFileName.ends_with(L".obj"))
+    {
+		// モデルの処理
+        return false;
+    }
+	// 音声ファイル
+	if (wFileName.ends_with(L".wav") || wFileName.ends_with(L".mp3"))
+	{
+		// 音声の処理
+        return false;
+	}
+	// スクリプトファイル
+	if (wFileName.ends_with(L".cpp") || wFileName.ends_with(L".h"))
+	{
+		// スクリプトの処理
+        return false;
+	}
+	// jsonファイル
+	if (wFileName.ends_with(L".json"))
+	{
+		// jsonの処理
+		FileType type = FileSystem::GetJsonFileType(filePath);
+
+        switch (type)
+        {
+        case Cho::ChoProject:
+            break;
+        case Cho::EngineConfig:
+            break;
+        case Cho::GameSettings:
+            break;
+        case Cho::SceneFile:// シーンファイル
+        {
+			return LoadSceneFile(filePath,engineCommand);
+        }
+            break;
+        case Cho::ModelFile:
+            break;
+        case Cho::ImageFile:
+            break;
+        case Cho::SoundFile:
+            break;
+        case Cho::EffectFile:
+            break;
+		case Cho::ScriptFile:// スクリプトファイル
+        {
+			return LoadScriptFile(filePath, engineCommand);
+        }
+            break;
+        case Cho::GameParameter:
+            break;
+        case Cho::PrefabFile:
+            break;
+        case Cho::Unknown:
+            break;
+        default:
+            break;
+        }
+	}
+	// その他のファイルは無視
+	return false;
+}
+
+bool Cho::FileSystem::AddFile(const path& filePath, FolderNode& folderNode, EngineCommand* engineCommand)
+{
+    namespace fs = std::filesystem;
+    if (filePath.empty() || !fs::exists(filePath)) return false;
+
+    try
+    {
+        if (fs::is_regular_file(filePath))
+        {
+            path dstPath = folderNode.folderPath / filePath.filename();
+
+            // コピー（上書き許可）
+            fs::copy_file(filePath, dstPath, fs::copy_options::overwrite_existing);
+
+            // コピー後のパスで処理
+            if (ProcessFile(dstPath, engineCommand))
+            {
+                folderNode.files.push_back(dstPath);
+                return true;
+            } else
+            {
+                fs::remove(dstPath); // 処理失敗なら削除
+            }
+        } else if (fs::is_directory(filePath))
+        {
+            path dstDir = folderNode.folderPath / filePath.filename();
+
+            // ディレクトリ作成
+            fs::create_directories(dstDir);
+
+            FolderNode childNode;
+            childNode.folderPath = dstDir;
+
+            bool hasValid = false;
+
+            for (const auto& entry : fs::directory_iterator(filePath))
+            {
+                if (AddFile(entry.path(), childNode, engineCommand))
+                {
+                    hasValid = true;
+                }
+            }
+
+            if (hasValid)
+            {
+                folderNode.children.push_back(std::move(childNode));
+                return true;
+            } else
+            {
+                fs::remove_all(dstDir); // 有効なファイルがなければ削除
+            }
+        }
+    }
+    catch (const fs::filesystem_error& e)
+    {
+        // ログ出力などがあれば追加
+        Cho::Log::Write(LogLevel::Assert,"AddFile failed: " + filePath.string() + " (" + e.what() + ")");
+    }
+
+    return false;
 }

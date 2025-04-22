@@ -2,9 +2,7 @@
 #include <filesystem>
 class PlatformLayer;
 class CoreSystem;
-class ResourceManager;
-class GraphicsEngine;
-class GameCore;
+class EngineCommand;
 class HubManager
 {
 public:
@@ -12,15 +10,11 @@ public:
 	HubManager(
 		PlatformLayer* platformLayer,
 		CoreSystem* coreSystem,
-		ResourceManager* resourceManager,
-		GraphicsEngine* graphicsEngine,
-		GameCore* gameCore
+		EngineCommand* engineCommand
 	) :
 		m_pPlatformLayer(platformLayer),
 		m_pCoreSystem(coreSystem),
-		m_pResourceManager(resourceManager),
-		m_pGraphicsEngine(graphicsEngine),
-		m_pGameCore(gameCore)
+		m_pEngineCommand(engineCommand)
 	{
 	}
 	// Destructor
@@ -70,9 +64,7 @@ private:
 
 	PlatformLayer* m_pPlatformLayer = nullptr;
 	CoreSystem* m_pCoreSystem = nullptr;
-	ResourceManager* m_pResourceManager = nullptr;
-	GraphicsEngine* m_pGraphicsEngine = nullptr;
-	GameCore* m_pGameCore = nullptr;
+	EngineCommand* m_pEngineCommand = nullptr;
 	bool m_IsRun = true;
 
 	// 現在のブランチ
