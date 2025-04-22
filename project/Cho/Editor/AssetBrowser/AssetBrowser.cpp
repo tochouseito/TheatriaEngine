@@ -64,7 +64,7 @@ void AssetBrowser::FileGrid(FolderNode& root)
 			Cho::FileSystem::AddFile(dropPath, *target, m_EditorManager->GetEngineCommand());
 		}
     }
-
+    
     constexpr float iconSize = 64.0f;
     constexpr float padding = 8.0f;
     float cellSize = iconSize + padding;

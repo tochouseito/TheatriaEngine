@@ -3,6 +3,7 @@
 #include "Core/Utility/IDType.h"
 #include "GameCore/ScriptAPI/ScriptAPI.h"
 
+using ObjectParameter = std::variant<int, float, bool, Vector3>;
 class ECSManager;
 class ResourceManager;
 class ObjectContainer;
@@ -71,6 +72,8 @@ public:
 	Rigidbody2DAPI rigidbody2D;		// Rigidbody2DAPI
 
 	InputAPI input;					// InputAPI
+
+	std::unordered_map<std::string, ObjectParameter> parameters;	// スクリプト用パラメータ
 private:
 	friend class ScriptGenerateInstanceSystem;
 	friend class ScriptInitializeSystem;
