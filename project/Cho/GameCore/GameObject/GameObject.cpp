@@ -17,6 +17,7 @@ void GameObject::InitializeTransformAPI()
 	// TransformComponent を取得
 	TransformComponent* tf = m_ECS->GetComponent<TransformComponent>(m_Entity);
 	transform.data = tf;
+	tf->parent.reset();
 
 	// 関数でのアクセスも一応用意（なくても良い場合は省略OK）
 	if (tf)
