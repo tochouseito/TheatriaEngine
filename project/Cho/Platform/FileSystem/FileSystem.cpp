@@ -1697,7 +1697,11 @@ bool Cho::FileSystem::AddFile(const path& filePath, FolderNode& folderNode, Engi
             path dstPath = folderNode.folderPath / filePath.filename();
 
             // コピー（上書き許可）
-            fs::copy_file(filePath, dstPath, fs::copy_options::overwrite_existing);
+            if (!fs::copy_file(filePath, dstPath, fs::copy_options::overwrite_existing))
+            {
+				// コピー失敗
+				return false;
+            }
 
             // コピー後のパスで処理
             if (ProcessFile(dstPath, engineCommand))

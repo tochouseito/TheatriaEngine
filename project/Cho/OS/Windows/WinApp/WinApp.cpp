@@ -129,6 +129,9 @@ void WinApp::CreateGameWindow() {
 	// ウィンドウを表示する
 	ShowWindow(m_HWND, SW_MAXIMIZE);// 最大化表示SW_MAXIMIZE
 
+	// ドロップをアクティブにする
+	DragAcceptFiles(m_HWND, TRUE);
+
 	// Log出力
 	Log::Write(LogLevel::Info, "CreateGameWindow End");
 }
