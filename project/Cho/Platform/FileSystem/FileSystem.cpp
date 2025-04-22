@@ -1597,6 +1597,20 @@ FolderNode Cho::FileSystem::ScanRecursive(const path& path, EngineCommand* engin
     return node;
 }
 
+// フォルダノードをパスで検索
+FolderNode* Cho::FileSystem::FindFolderNodeByPath(FolderNode& node, const std::filesystem::path& target)
+{
+    if (node.folderPath == target)
+        return &node;
+
+    for (auto& child : node.children)
+    {
+        if (FolderNode* found = FindFolderNodeByPath(child, target))
+            return found;
+    }
+    return nullptr;
+}
+
 bool Cho::FileSystem::ProcessFile(const path& filePath, EngineCommand* engineCommand)
 {
 	std::wstring wFileName = filePath.filename().wstring();
@@ -1671,8 +1685,64 @@ bool Cho::FileSystem::ProcessFile(const path& filePath, EngineCommand* engineCom
 	return false;
 }
 
-bool Cho::FileSystem::AddFile(const path& filePath, EngineCommand* engineCommand)
+bool Cho::FileSystem::AddFile(const path& filePath, FolderNode& folderNode, EngineCommand* engineCommand)
 {
-    filePath;engineCommand;
+    namespace fs = std::filesystem;
+    if (filePath.empty() || !fs::exists(filePath)) return false;
+
+    try
+    {
+        if (fs::is_regular_file(filePath))
+        {
+            path dstPath = folderNode.folderPath / filePath.filename();
+
+            // コピー（上書き許可）
+            fs::copy_file(filePath, dstPath, fs::copy_options::overwrite_existing);
+
+            // コピー後のパスで処理
+            if (ProcessFile(dstPath, engineCommand))
+            {
+                folderNode.files.push_back(dstPath);
+                return true;
+            } else
+            {
+                fs::remove(dstPath); // 処理失敗なら削除
+            }
+        } else if (fs::is_directory(filePath))
+        {
+            path dstDir = folderNode.folderPath / filePath.filename();
+
+            // ディレクトリ作成
+            fs::create_directories(dstDir);
+
+            FolderNode childNode;
+            childNode.folderPath = dstDir;
+
+            bool hasValid = false;
+
+            for (const auto& entry : fs::directory_iterator(filePath))
+            {
+                if (AddFile(entry.path(), childNode, engineCommand))
+                {
+                    hasValid = true;
+                }
+            }
+
+            if (hasValid)
+            {
+                folderNode.children.push_back(std::move(childNode));
+                return true;
+            } else
+            {
+                fs::remove_all(dstDir); // 有効なファイルがなければ削除
+            }
+        }
+    }
+    catch (const fs::filesystem_error& e)
+    {
+        // ログ出力などがあれば追加
+        Cho::Log::Write(LogLevel::Assert,"AddFile failed: " + filePath.string() + " (" + e.what() + ")");
+    }
+
     return false;
 }

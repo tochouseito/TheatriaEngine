@@ -3,7 +3,6 @@
 #include "Editor/EditorManager/EditorManager.h"
 #include "Core/Utility/FontCode.h"
 #include "OS/Windows/WinApp/WinApp.h"
-#include "Platform/FileSystem/FileSystem.h"
 
 void AssetBrowser::Initialize()
 {
@@ -20,91 +19,91 @@ void AssetBrowser::Window()
 	// 移動を無効にするフラグ
 	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove;
 	ImGui::Begin("AssetBrowser", nullptr, windowFlags);
-
-	ImGui::Text("%s %s", ICON_MATERIAL_FOLDER, currentPath.filename().string().c_str());
-    ImGui::Separator();
-    ImGui::Columns(2);
-    std::wstring projectPath = L"GameProjects/" + FileSystem::m_sProjectName;
-    DrawDirectoryTree(ConvertString(projectPath));
-    ImGui::NextColumn();
-    if (!currentPath.empty())
-    {
-        DrawAssetGrid(currentPath);
-    }
-
-    ImGui::Columns(1);
-
+    // 左：フォルダー階層
+    FolderTree(Cho::FileSystem::g_ProjectFiles);
 	ImGui::End();
+	// ファイルの表示
+	ImGui::Begin("FileGrid");
+    // 右：ファイル表示
+    FileGrid(Cho::FileSystem::g_ProjectFiles);
+    ImGui::End();
 }
 
-
-void AssetBrowser::DrawDirectoryTree(const std::filesystem::path& path)
+void AssetBrowser::FolderTree(FolderNode& node)
 {
-    for (const auto& entry : std::filesystem::directory_iterator(path))
+    node = Cho::FileSystem::g_ProjectFiles;
+    std::string label = node.folderPath.filename().string();
+    if (label.empty()) { label = "Assets"; }
+    bool opened = ImGui::TreeNode(label.c_str());
+    if (ImGui::IsItemClicked())
     {
-        if (!entry.is_directory()) continue;
-
-        std::string label = std::string(ICON_MATERIAL_FOLDER) + " " + entry.path().filename().string();
-        bool opened = ImGui::TreeNode(label.c_str());
-
-        if (ImGui::IsItemClicked())
-            currentPath = entry.path();
-
-        if (opened)
+        m_SelectedFolder = node.folderPath;
+    }
+    if (opened)
+    {
+        for (auto& child : node.children)
         {
-            DrawDirectoryTree(entry.path());
-            ImGui::TreePop();
+            FolderTree(child);
         }
+        ImGui::TreePop();
     }
 }
 
-void AssetBrowser::DrawAssetGrid(const std::filesystem::path& path)
+void AssetBrowser::FileGrid(FolderNode& root)
 {
+    FolderNode* target = Cho::FileSystem::FindFolderNodeByPath(root, m_SelectedFolder);
+    if (!target) return;
+
+	// ウィンドウからファイル名のドロップがあった場合
+    if (WinApp::IsDropFiles())
+    {
+		for (const auto& filePath : WinApp::GetDropFiles())
+		{
+			// ドロップされたファイルを処理する
+			std::filesystem::path dropPath = filePath;
+			Cho::FileSystem::AddFile(dropPath, *target, m_EditorManager->GetEngineCommand());
+		}
+    }
+
     constexpr float iconSize = 64.0f;
     constexpr float padding = 8.0f;
     float cellSize = iconSize + padding;
-    float panelWidth = ImGui::GetContentRegionAvail().x;
-    int columnCount = static_cast<int>(panelWidth / cellSize);
+    int columnCount = static_cast<int>(ImGui::GetContentRegionAvail().x / cellSize);
     if (columnCount < 1) columnCount = 1;
 
     ImGui::Columns(columnCount, nullptr, false);
 
-    for (const auto& entry : std::filesystem::directory_iterator(path))
+    for (const auto& filePath : target->files)
     {
-        std::string icon = GetIconForEntry(entry);
+        std::wstring wname = filePath.filename().wstring();
+        std::wstring wext = filePath.extension().wstring();
+		std::string name = ConvertString(wname);
+		std::string ext = ConvertString(wext);
+        std::string icon = GetIconForExtension(ext, false);
+		std::string uniqueId = icon + "##" + name;
 
-        ImGui::Button(icon.c_str(), ImVec2(iconSize, iconSize));
+        ImGui::Button(uniqueId.c_str(), ImVec2(iconSize, iconSize));
+
         if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
         {
-            if (entry.is_directory())
-                currentPath = entry.path();
-            else
-                ; // OpenAsset(entry.path()); // 外部処理へ
+            // OpenAsset(filePath); // 必要なら処理追加
         }
 
-        ImGui::TextWrapped("%s", entry.path().filename().string().c_str());
+        ImGui::TextWrapped("%s", name.c_str());
         ImGui::NextColumn();
     }
 
     ImGui::Columns(1);
 }
 
-const char* AssetBrowser::GetIconForEntry(const std::filesystem::directory_entry& entry)
+std::string AssetBrowser::GetIconForExtension(const std::string& ext, bool isDirectory)
 {
-    if (entry.is_directory()) return ICON_MATERIAL_FOLDER;
-
-    std::string ext = entry.path().extension().string();
-    std::transform(ext.begin(), ext.end(), ext.begin(),
-        [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-
-
-    if (ext == ".obj" || ext == ".gltf" || ext == ".glb") return ICON_MATERIAL_MODEL;
-    if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".bmp") return ICON_MATERIAL_IMAGE;
-    if (ext == ".wav" || ext == ".mp3" || ext == ".ogg") return ICON_MATERIAL_AUDIO;
+    if (isDirectory) return ICON_MATERIAL_FOLDER;
+    if (ext == ".obj" || ext == ".gltf") return ICON_MATERIAL_MODEL;
+    if (ext == ".png" || ext == ".jpg") return ICON_MATERIAL_IMAGE;
+    if (ext == ".wav" || ext == ".mp3") return ICON_MATERIAL_AUDIO;
     if (ext == ".effect") return ICON_MATERIAL_EFFECT;
-    if (ext == ".param" || ext == ".json") return ICON_MATERIAL_SETTING;
-    if (ext == ".cpp" || ext == ".h") return ICON_MATERIAL_SCRIPT;
     if (ext == ".scene") return ICON_MATERIAL_SCENE;
-
-    return ICON_MATERIAL_FILE;
+    if (ext == ".cpp" || ext == ".h") return ICON_MATERIAL_SCRIPT;
+    return std::string(ICON_MATERIAL_FILE);
 }

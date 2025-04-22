@@ -62,8 +62,8 @@ namespace Cho
     };
     struct FolderNode
     {
-		path folderPath;
-		std::vector<path> files;
+		std::filesystem::path folderPath;
+		std::vector<std::filesystem::path> files;
 		std::vector<FolderNode> children;
     };
 
@@ -100,10 +100,12 @@ namespace Cho
         // フォルダ走査
         static void ScanFolder(const path& rootPath,EngineCommand* engineCommand);
         static FolderNode ScanRecursive(const path& path, EngineCommand* engineCommand);
+		// フォルダノードをパスで検索
+        static FolderNode* FindFolderNodeByPath(FolderNode& node, const std::filesystem::path& target);
         // 拡張子ごとに処理を分ける関数
         static bool ProcessFile(const path& filePath, EngineCommand* engineCommand);
         // ファイル、フォルダを追加、処理
-		static bool AddFile(const path& filePath, EngineCommand* engineCommand);
+		static bool AddFile(const path& filePath, FolderNode& folderNode,EngineCommand* engineCommand);
 		// プロジェクトフォルダを探す
         static std::optional<std::filesystem::path> FindOrCreateGameProjects();
 		// プロジェクトフォルダを取得

@@ -1,6 +1,6 @@
 #pragma once
 #include "Editor/BaseEditor/BaseEditor.h"
-#include <filesystem>
+#include "Platform/FileSystem/FileSystem.h"
 class AssetBrowser : public BaseEditor
 {
 public:
@@ -15,10 +15,11 @@ public:
 	void Update() override;
 	void Window() override;
 private:
-	void DrawDirectoryTree(const std::filesystem::path& path);
-	void DrawAssetGrid(const std::filesystem::path& path);
-	const char* GetIconForEntry(const std::filesystem::directory_entry& entry);
+	void FolderTree(FolderNode& node);
+    void FileGrid(FolderNode& root);
+	std::string GetIconForExtension(const std::string& ext, bool isDirectory);
 
-	std::filesystem::path currentPath = "";
+	// 選択中のフォルダ
+	std::filesystem::path m_SelectedFolder;
 };
 

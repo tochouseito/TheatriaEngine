@@ -128,6 +128,15 @@ public:
 	}
 	// ダミーGameObjectを取得
 	GameObject& GetDummyGameObject() { return m_DummyGameObject; }
+	// GameObject全て初期化
+	void InitializeAllGameObjects()
+	{
+		for (auto& obj : m_GameObjects.GetVector())
+		{
+			if (!obj.IsActive()) continue;
+			obj.Initialize();
+		}
+	}
 private:
 	ECSManager* m_ECS = nullptr;	// ECSManager
 	ResourceManager* m_ResourceManager = nullptr;	// ResourceManager
