@@ -289,7 +289,10 @@ private:
 		rb.velocity.y = velocity.y;
 
 		Vector3 radians = {};
-		radians.z = rb.runtimeBody->GetAngle(); // radians
+		if (!rb.fixedRotation)
+		{
+			radians.z = rb.runtimeBody->GetAngle(); // radians
+		}
 		Vector3 degrees = ChoMath::RadiansToDegrees(radians);
 		transform.degrees.z = degrees.z;
 		
