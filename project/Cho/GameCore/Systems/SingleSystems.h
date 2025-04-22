@@ -277,7 +277,13 @@ private:
 
 		if (rb.requestedPosition)
 		{
-			rb.runtimeBody->SetTransform(*rb.requestedPosition, rb.runtimeBody->GetAngle());
+			if (rb.fixedRotation)
+			{
+				rb.runtimeBody->SetTransform(*rb.requestedPosition, ChoMath::DegreesToRadians(transform.degrees).z);
+			} else
+			{
+				rb.runtimeBody->SetTransform(*rb.requestedPosition, rb.runtimeBody->GetAngle());
+			}
 			rb.requestedPosition.reset();
 		}
 		const b2Vec2& pos = rb.runtimeBody->GetPosition();
@@ -292,6 +298,9 @@ private:
 		if (!rb.fixedRotation)
 		{
 			radians.z = rb.runtimeBody->GetAngle(); // radians
+		} else
+		{
+			radians.z = ChoMath::DegreesToRadians(transform.degrees).z;
 		}
 		Vector3 degrees = ChoMath::RadiansToDegrees(radians);
 		transform.degrees.z = degrees.z;
