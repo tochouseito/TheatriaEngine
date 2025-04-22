@@ -42,6 +42,7 @@ void ResourceManager::GenerateManager(GraphicsEngine* graphicsEngine)
 {
 	m_TextureManager = std::make_unique<TextureManager>(this, graphicsEngine, m_Device);
 	m_ModelManager = std::make_unique<ModelManager>(this);
+	m_SoundManager = std::make_unique<SoundManager>(this);
 }
 
 uint32_t ResourceManager::CreateColorBuffer(D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES state)

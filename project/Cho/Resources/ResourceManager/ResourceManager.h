@@ -14,6 +14,7 @@
 #include "Resources/ModelManager/ModelManager.h"
 #include "Resources/TextureManager/TextureManager.h"
 #include "Resources/ScriptContainer/ScriptContainer.h"
+#include "Resources/SoundManager/SoundManager.h"
 #include "Core/Utility/CompBufferData.h"
 
 enum IntegrationDataType
@@ -215,6 +216,8 @@ private:
 	std::unique_ptr<ModelManager> m_ModelManager = nullptr;
 	// スクリプトコンテナ
 	std::unique_ptr<ScriptContainer> m_ScriptContainer = nullptr;
+	// サウンドマネージャ
+	std::unique_ptr<SoundManager> m_SoundManager = nullptr;
 	//// GPUResourceUpdate用のマッピングデータ
 	//FVector<BUFFER_DATA_TF*> m_MappedTF;
 	//FVector<BUFFER_DATA_VIEWPROJECTION*> m_MappedViewProjection;

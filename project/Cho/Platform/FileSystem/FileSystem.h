@@ -59,6 +59,20 @@ namespace Cho
         float fixedDeltaTime = 1.0f / 60.0f;
         bool debugMode = false;
     };
+    struct FolderNode
+    {
+		path folderPath;
+		std::vector<path> files;
+		std::vector<FolderNode> children;
+    };
+
+    // フォルダ走査
+    static void ScanFolder(const path& rootPath);
+    static FolderNode ScanRecursive(const path& path);
+    // 拡張子ごとに処理を分ける関数
+	static bool ProcessFile(const path& filePath);
+    
+    static inline FolderNode g_ProjectFiles;
 
     // ComponentsSerializer
     namespace Serialization
@@ -147,7 +161,6 @@ namespace Cho
         // プロジェクトフォルダを読み込む
         static bool LoadProjectFolder(const std::wstring& projectName, SceneManager* sceneManager, ObjectContainer* container, ECSManager* ecs, ResourceManager* resourceManager);
 
-
         static FileType DetectFileType(const nlohmann::json& j)
         {
             std::string type = j.value("fileType", "");
@@ -167,6 +180,7 @@ namespace Cho
         // GUID 生成
         static std::string GenerateGUID();
         static std::wstring m_sProjectName;
+
         class ScriptProject
         {
         public:

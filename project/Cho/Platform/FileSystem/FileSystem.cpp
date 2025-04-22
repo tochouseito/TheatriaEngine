@@ -1577,3 +1577,71 @@ void Cho::Deserialization::FromJson(const json& j, BoxCollider2DComponent& bc)
 	bc.friction = j.value("friction", 0.5f);
 	bc.restitution = j.value("restitution", 0.0f);
 }
+
+void Cho::ScanFolder(const path& rootPath)
+{
+    g_ProjectFiles = ScanRecursive(rootPath);
+}
+
+FolderNode Cho::ScanRecursive(const path& path)
+{
+    FolderNode node;        // 一番上のノード
+	node.folderPath = path; // フォルダパス
+
+    // フォルダの中を走査
+    for (const auto& entry : directory_iterator(path))
+    {
+		// フォルダなら再帰処理
+        if (entry.is_directory())
+        {
+			node.children.push_back(ScanRecursive(entry.path()));
+        }
+		// ファイルなら処理
+		else if (entry.is_regular_file())
+		{
+            if (ProcessFile(entry.path()))// 処理に成功したらノードに追加
+            {
+                node.files.push_back(entry.path());
+            }
+		}
+    }
+    return node;
+}
+
+bool Cho::ProcessFile(const path& filePath)
+{
+	std::wstring wFileName = filePath.filename().wstring();
+
+    // テクスチャファイル
+    if (wFileName.ends_with(L".dds")|| wFileName.ends_with(L".png") || wFileName.ends_with(L".jpg"))
+    {
+		// テクスチャの処理
+        return true;
+    }
+	// モデルファイル
+    if (wFileName.ends_with(L".fbx") || wFileName.ends_with(L".gltf") || wFileName.ends_with(L".obj"))
+    {
+		// モデルの処理
+		return true;
+    }
+	// 音声ファイル
+	if (wFileName.ends_with(L".wav") || wFileName.ends_with(L".mp3"))
+	{
+		// 音声の処理
+		return true;
+	}
+	// スクリプトファイル
+	if (wFileName.ends_with(L".cpp") || wFileName.ends_with(L".h"))
+	{
+		// スクリプトの処理
+		return true;
+	}
+	// jsonファイル
+	if (wFileName.ends_with(L".json"))
+	{
+		// jsonの処理
+		return true;
+	}
+	// その他のファイルは無視
+	return false;
+}
