@@ -42,6 +42,7 @@ public:
 		{
 			m_TypeToObjectIDs[type].erase(std::remove(m_TypeToObjectIDs[type].begin(), m_TypeToObjectIDs[type].end(), id), m_TypeToObjectIDs[type].end());
 		}
+		m_GameObjects[id].SetInactive();
 		m_GameObjects.erase(id);
 	}
 	// プレハブを追加

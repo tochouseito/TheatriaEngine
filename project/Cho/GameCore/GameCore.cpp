@@ -93,6 +93,7 @@ void GameCore::GameStop()
 	// 生成されたオブジェクトを削除
 	ClearGenerateObject();
 	m_GameGenerateID.clear();
+	m_pObjectContainer->InitializeAllGameObjects();
 	// DLLのアンロード
 	FileSystem::ScriptProject::UnloadScriptDLL();
 	isRunning = false;
