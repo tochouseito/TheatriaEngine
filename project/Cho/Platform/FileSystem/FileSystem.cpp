@@ -909,7 +909,7 @@ FileType Cho::FileSystem::GetJsonFileType(const std::filesystem::path& path)
 
 void Cho::FileSystem::SaveProject(SceneManager* sceneManager, ObjectContainer* container, ECSManager* ecs, ResourceManager* resourceManager)
 {
-    if (!m_sProjectName.empty()) { return; }
+    if (m_sProjectName.empty()) { return; }
     // セーブ
     for (auto& scene : sceneManager->GetScenes().GetVector())
     {
