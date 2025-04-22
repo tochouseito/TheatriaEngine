@@ -15,6 +15,7 @@ class SceneManager;
 class ECSManager;
 class ObjectContainer;
 class ResourceManager;
+class EngineCommand;
 namespace Cho
 {
     enum FileType
@@ -66,14 +67,6 @@ namespace Cho
 		std::vector<FolderNode> children;
     };
 
-    // フォルダ走査
-    static void ScanFolder(const path& rootPath);
-    static FolderNode ScanRecursive(const path& path);
-    // 拡張子ごとに処理を分ける関数
-	static bool ProcessFile(const path& filePath);
-    
-    static inline FolderNode g_ProjectFiles;
-
     // ComponentsSerializer
     namespace Serialization
     {
@@ -104,6 +97,13 @@ namespace Cho
     class FileSystem
     {
     public:
+        // フォルダ走査
+        static void ScanFolder(const path& rootPath,EngineCommand* engineCommand);
+        static FolderNode ScanRecursive(const path& path, EngineCommand* engineCommand);
+        // 拡張子ごとに処理を分ける関数
+        static bool ProcessFile(const path& filePath, EngineCommand* engineCommand);
+        // ファイル、フォルダを追加、処理
+		static bool AddFile(const path& filePath, EngineCommand* engineCommand);
 		// プロジェクトフォルダを探す
         static std::optional<std::filesystem::path> FindOrCreateGameProjects();
 		// プロジェクトフォルダを取得
@@ -130,17 +130,11 @@ namespace Cho
             ECSManager* ecs
         );
 		// シーンファイルを読み込む
-        static bool LoadSceneFile(
-            const std::wstring& filePath,
-            SceneManager* sceneManager,
-            ObjectContainer* container,
-            ECSManager* ecs,
-			ResourceManager* resourceManager
-        );
+        static bool LoadSceneFile(const std::wstring& filePath,EngineCommand* engineCommand);
         // スクリプトのファイルを保存
 		static bool SaveScriptFile(const std::wstring& directory,ResourceManager* resourceManager);
 		// スクリプトのファイルを読み込む
-		static bool LoadScriptFile(const std::wstring& filePath, ResourceManager* resourceManager);
+		static bool LoadScriptFile(const std::wstring& filePath, EngineCommand* engineCommand);
 		// ゲームパラメーターファイルを保存
         static bool SaveGameParameter(const std::wstring& filePath,
             const std::string& group,
@@ -159,7 +153,7 @@ namespace Cho
         // プロジェクトを保存
 		static void SaveProject(SceneManager* sceneManager, ObjectContainer* container, ECSManager* ecs, ResourceManager* resourceManager);
         // プロジェクトフォルダを読み込む
-        static bool LoadProjectFolder(const std::wstring& projectName, SceneManager* sceneManager, ObjectContainer* container, ECSManager* ecs, ResourceManager* resourceManager);
+        static bool LoadProjectFolder(const std::wstring& projectName, EngineCommand* engineCommand);
 
         static FileType DetectFileType(const nlohmann::json& j)
         {
@@ -180,6 +174,7 @@ namespace Cho
         // GUID 生成
         static std::string GenerateGUID();
         static std::wstring m_sProjectName;
+        static inline FolderNode g_ProjectFiles;
 
         class ScriptProject
         {

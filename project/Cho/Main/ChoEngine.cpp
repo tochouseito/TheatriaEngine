@@ -60,7 +60,7 @@ void ChoEngine::Initialize()
 	editorManager->Initialize();
 
 	// HubManager初期化
-	hubManager = std::make_unique<HubManager>(platformLayer.get(),coreSystem.get(),resourceManager.get(),graphicsEngine.get(),gameCore.get());
+	hubManager = std::make_unique<HubManager>(platformLayer.get(),coreSystem.get(),engineCommand.get());
 	hubManager->Initialize();
 }
 
@@ -195,7 +195,7 @@ void ChoEngine::Start()
 		editorManager = std::make_unique<EditorManager>(engineCommand.get(), platformLayer->GetInputManager());
 		editorManager->Initialize();
 		// HubManager初期化
-		hubManager = std::make_unique<HubManager>(platformLayer.get(), coreSystem.get(), resourceManager.get(), graphicsEngine.get(), gameCore.get());
+		hubManager = std::make_unique<HubManager>(platformLayer.get(), coreSystem.get(), engineCommand.get());
 		hubManager->Initialize();
 		// プロジェクト読み込み
 		hubManager->ReloadProject();
