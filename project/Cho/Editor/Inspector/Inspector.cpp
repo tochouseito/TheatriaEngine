@@ -50,6 +50,7 @@ void Inspector::ComponentsView(GameObject* object)
 	MeshFilterComponentView(object);
 	MeshRendererComponentView(object);
 	CameraComponentView(object);
+	MaterialComponentView(object);
 	ScriptComponentView(object);
 	LineRendererComponentView(object);
 	Rigidbody2DComponentView(object);
@@ -118,6 +119,21 @@ void Inspector::CameraComponentView(GameObject* object)
 	if (camera)
 	{
 		ImGui::Text("Camera Component");
+	}
+}
+
+void Inspector::MaterialComponentView(GameObject* object)
+{
+	// メッシュオブジェクトじゃないならスキップ
+	if (object->GetType() != ObjectType::MeshObject)
+	{
+		return;
+	}
+	// MaterialComponentを取得
+	MaterialComponent* material = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<MaterialComponent>(object->GetEntity());
+	if (material)
+	{
+		ImGui::Text("Material Component");
 	}
 }
 

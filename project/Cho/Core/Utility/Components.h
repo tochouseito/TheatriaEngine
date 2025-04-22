@@ -173,6 +173,16 @@ struct PolygonCollider2DComponent : public IComponentTag
 	float restitution = 0.0f;
 	b2Fixture* runtimeFixture = nullptr;
 };
+// マテリアルコンポーネント
+struct MaterialComponent : public IComponentTag
+{
+	Color color;
+	int enableLighting;
+	Matrix4 matUV;
+	float shininess;
+	std::optional<uint32_t> textureID = std::nullopt;	// テクスチャID
+	std::optional<uint32_t> bufferIndex = std::nullopt;	// バッファーインデックス
+};
 
 // マルチコンポーネントを許可
 template<>

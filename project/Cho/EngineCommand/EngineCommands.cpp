@@ -283,3 +283,24 @@ bool RenameObjectCommand::Undo(EngineCommand* edit)
 	edit;
 	return false;
 }
+
+bool AddMaterialComponent::Execute(EngineCommand* edit)
+{
+	// MaterialComponentを追加
+	MaterialComponent* material = edit->m_GameCore->GetECSManager()->AddComponent<MaterialComponent>(m_Entity);
+	if (!material) { return false; }
+	// 初期値
+	material->color = Color(1.0f, 1.0f, 1.0f, 1.0f);
+	material->enableLighting = true;
+	material->matUV = Matrix4::Identity();
+	material->shininess = 0.0f;
+	// Resourceの生成
+	material->bufferIndex = edit->m_ResourceManager->CreateConstantBuffer<BUFFER_DATA_MATERIAL>();
+	return true;
+}
+
+bool AddMaterialComponent::Undo(EngineCommand* edit)
+{
+	edit;
+	return false;
+}
