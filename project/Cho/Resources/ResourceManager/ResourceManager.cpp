@@ -11,6 +11,8 @@ ResourceManager::ResourceManager(ID3D12Device8* device)
 	CreateHeap(device);
 	// 統合データの作成
 	CreateIntegrationBuffers();
+	// ダミーマテリアルの作成
+	CreateDummyMaterial();
 	// スクリプトコンテナの作成
 	m_ScriptContainer = std::make_unique<ScriptContainer>();
 	// 初期化
@@ -139,4 +141,21 @@ void ResourceManager::CreateHeap(ID3D12Device8* device)
 	m_SUVDescriptorHeap = std::make_unique<DescriptorHeap>(device, kMaxSUVDescriptorHeapSize, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, true);
 	m_RTVDescriptorHeap = std::make_unique<DescriptorHeap>(device, kMaxRTVDescriptorHeapSize, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, false);
 	m_DSVDescriptorHeap = std::make_unique<DescriptorHeap>(device, kMaxDSVDescriptorHeapSize, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, false);
+}
+
+void ResourceManager::CreateDummyMaterial()
+{
+	uint32_t mapID = m_IntegrationData[IntegrationDataType::Material]->GetMapID();
+	if (mapID == 0) { Log::Write(LogLevel::Assert, "DummyMaterial Create"); }
+	StructuredBuffer<BUFFER_DATA_MATERIAL>* pIntegrationBuffer = dynamic_cast<StructuredBuffer<BUFFER_DATA_MATERIAL>*>(GetIntegrationBuffer(IntegrationDataType::Material));
+	// ダミーマテリアルの初期化
+	BUFFER_DATA_MATERIAL data = {};
+	Color color;
+	data.color = color.From255(200, 200, 200);
+	data.enableLighting = true;
+	data.enableTexture = false;
+	data.matUV = Matrix4::Identity();
+	data.shininess = 0.0f;
+	data.textureId = 0;
+	pIntegrationBuffer->UpdateData(data, mapID);
 }

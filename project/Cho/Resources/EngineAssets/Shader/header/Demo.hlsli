@@ -3,6 +3,17 @@ struct Transform
     float4x4 matWorld;
     float4x4 worldInverse;
     float4x4 rootNode;
+    int materialID;
+};
+
+struct Material
+{
+    float4 color;
+    float4x4 matUV;
+    float shininess;
+    int enableLighting;
+    int enableTexture;
+    int textureID;
 };
 
 struct VertexShaderOutput

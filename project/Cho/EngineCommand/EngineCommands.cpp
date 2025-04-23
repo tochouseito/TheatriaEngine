@@ -219,11 +219,18 @@ bool DeleteObjectCommand::Execute(EngineCommand* edit)
 	}
 	// TransformMapIDを返却
 	edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::Transform)->RemoveMapID(transform->mapID.value());
+	MaterialComponent* material = edit->m_GameCore->GetECSManager()->GetComponent<MaterialComponent>(object.GetEntity());
+	if (material)
+	{
+		// Material統合バッファからmapIDを返却
+		edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::Material)->RemoveMapID(material->mapID.value());
+	}
 	// 削除前にComponentを記録する
 	m_Transform = *transform;
 	if (meshFilter) { m_MeshFilter = *meshFilter; }
 	MeshRendererComponent* meshRenderer = edit->m_GameCore->GetECSManager()->GetComponent<MeshRendererComponent>(object.GetEntity());
 	if (meshRenderer) { m_MeshRenderer = *meshRenderer; }
+	if (material) { m_Material = *material; }
 	ScriptComponent* script = edit->m_GameCore->GetECSManager()->GetComponent<ScriptComponent>(object.GetEntity());
 	if (script) { m_Script = *script; }
 	std::vector<LineRendererComponent>* lineRenderer = edit->m_GameCore->GetECSManager()->GetAllComponents<LineRendererComponent>(object.GetEntity());
@@ -236,6 +243,7 @@ bool DeleteObjectCommand::Execute(EngineCommand* edit)
 	edit->m_GameCore->GetECSManager()->RemoveComponent<TransformComponent>(object.GetEntity());
 	if (meshFilter) { edit->m_GameCore->GetECSManager()->RemoveComponent<MeshFilterComponent>(object.GetEntity()); }
 	if (meshRenderer) { edit->m_GameCore->GetECSManager()->RemoveComponent<MeshRendererComponent>(object.GetEntity()); }
+	if (material) { edit->m_GameCore->GetECSManager()->RemoveComponent<MaterialComponent>(object.GetEntity()); }
 	if (script) { edit->m_GameCore->GetECSManager()->RemoveComponent<ScriptComponent>(object.GetEntity()); }
 	if (lineRenderer) { edit->m_GameCore->GetECSManager()->RemoveAllComponents<LineRendererComponent>(object.GetEntity()); }
 	if (rb) { edit->m_GameCore->GetECSManager()->RemoveComponent<Rigidbody2DComponent>(object.GetEntity()); }
@@ -290,17 +298,16 @@ bool AddMaterialComponent::Execute(EngineCommand* edit)
 	MaterialComponent* material = edit->m_GameCore->GetECSManager()->AddComponent<MaterialComponent>(m_Entity);
 	if (!material) { return false; }
 	// 初期値
-	material->color = Color(1.0f, 1.0f, 1.0f, 1.0f);
+	Color color;
+	material->color = color.From255(200, 200, 200);
 	material->enableLighting = true;
 	material->matUV = Matrix4::Identity();
 	material->shininess = 0.0f;
 	// Material統合バッファからmapIDを取得
-	//uint32_t mapID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::Material)->GetMapID();
+	uint32_t mapID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::Material)->GetMapID();
 	TransformComponent* transform = edit->m_GameCore->GetECSManager()->GetComponent<TransformComponent>(m_Entity);
-	uint32_t mapID = transform->mapID.value();
-	// mapIDを設定
+	transform->materialID = mapID;
 	material->mapID = mapID;
-	//material->textureID = edit->m_ResourceManager->GetTextureManager()->GetDummyTextureBuffer();
 	return true;
 }
 

@@ -393,7 +393,6 @@
   <ItemGroup>
     <None Include="Resources\EngineAssets\Shader\header\Demo.hlsli" />
     <None Include="Resources\EngineAssets\Shader\header\LineDraw.hlsli" />
-    <None Include="Resources\EngineAssets\Shader\header\Material.hlsli" />
     <None Include="Resources\EngineAssets\Shader\header\ScreenCopy.hlsli" />
     <None Include="Resources\EngineAssets\Shader\header\ViewProjection.hlsli" />
   </ItemGroup>

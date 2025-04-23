@@ -424,3 +424,25 @@ private:
 	ECSManager* m_ECS = nullptr;
 	b2World* m_World = nullptr;
 };
+
+// マテリアルの更新システム
+class MaterialUpdateSystem : public ECSManager::System<MaterialComponent>
+{
+public:
+	MaterialUpdateSystem(ECSManager* ecs, ResourceManager* resourceManager, IStructuredBuffer* integrationBuffer)
+		: ECSManager::System< MaterialComponent>([this](Entity e, MaterialComponent& material)
+			{
+				e;
+				TransferComponent(material);
+			}),
+		m_pECS(ecs), m_pResourceManager(resourceManager)
+	{
+		m_pIntegrationBuffer = dynamic_cast<StructuredBuffer<BUFFER_DATA_MATERIAL>*>(integrationBuffer);
+	}
+	~MaterialUpdateSystem() = default;
+private:
+	void TransferComponent(const MaterialComponent& material);
+	ECSManager* m_pECS = nullptr;
+	ResourceManager* m_pResourceManager = nullptr;
+	StructuredBuffer<BUFFER_DATA_MATERIAL>* m_pIntegrationBuffer = nullptr;
+};

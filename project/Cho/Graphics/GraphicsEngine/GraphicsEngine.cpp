@@ -407,11 +407,12 @@ void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& ga
 			// UseTransformBufferをセット
 			IStructuredBuffer* useTransformBuffer = resourceManager.GetBuffer<IStructuredBuffer>(modelData.useTransformBufferIndex);
 			context->SetGraphicsRootDescriptorTable(2, useTransformBuffer->GetSRVGpuHandle());
-			// マテリアル
-			//IStructuredBuffer* materialBuffer = resourceManager.GetIntegrationBuffer(IntegrationDataType::Material);
+			// マテリアル統合バッファをセット
+			IStructuredBuffer* materialBuffer = resourceManager.GetIntegrationBuffer(IntegrationDataType::Material);
+			context->SetGraphicsRootDescriptorTable(3, materialBuffer->GetSRVGpuHandle());
 			// ダミーテクスチャをセット
 			PixelBuffer* dummyTexture = resourceManager.GetTextureManager()->GetDummyTextureBuffer();
-			context->SetGraphicsRootDescriptorTable(3, dummyTexture->GetSRVGpuHandle());
+			context->SetGraphicsRootDescriptorTable(4, dummyTexture->GetSRVGpuHandle());
 			// インスタンス数を取得
 			UINT numInstance = static_cast<UINT>(modelData.useTransformList.size());
 			// DrawCall

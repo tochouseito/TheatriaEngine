@@ -169,6 +169,8 @@ void GameCore::CreateSystems(InputManager* input, ResourceManager* resourceManag
 	// 更新システムの登録
 	std::unique_ptr<ECSManager::ISystem> scriptUpdateSystem = std::make_unique<ScriptUpdateSystem>(m_pObjectContainer.get(), input, m_pECSManager.get(), resourceManager);
 	m_pSingleSystemManager->RegisterSystem(std::move(scriptUpdateSystem), SystemState::Update);
+	std::unique_ptr<ECSManager::ISystem> materialUpdateSystem = std::make_unique<MaterialUpdateSystem>(m_pECSManager.get(), resourceManager, resourceManager->GetIntegrationBuffer(IntegrationDataType::Material));
+	m_pSingleSystemManager->RegisterSystem(std::move(materialUpdateSystem), SystemState::Update);
 	std::unique_ptr<ECSManager::ISystem> tfUpdateSystem = std::make_unique<TransformUpdateSystem>(m_pECSManager.get(), resourceManager, resourceManager->GetIntegrationBuffer(IntegrationDataType::Transform));
 	m_pSingleSystemManager->RegisterSystem(std::move(tfUpdateSystem), SystemState::Update);
 	std::unique_ptr<ECSManager::ISystem> cameraSystem = std::make_unique<CameraUpdateSystem>(m_pECSManager.get(), resourceManager, resourceManager->GetIntegrationBuffer(IntegrationDataType::Transform));
@@ -193,6 +195,8 @@ void GameCore::CreateSystems(InputManager* input, ResourceManager* resourceManag
 
 	// エディタシステム
 	// シングルシステムの生成
+	std::unique_ptr<ECSManager::ISystem> materialEditorSystem = std::make_unique<MaterialEditorSystem>(m_pECSManager.get(), resourceManager, resourceManager->GetIntegrationBuffer(IntegrationDataType::Material));
+	m_pEditorSingleSystem->RegisterSystem(std::move(materialEditorSystem), SystemState::Update);
 	std::unique_ptr<ECSManager::ISystem> transformEditorSystem = std::make_unique<TransformEditorSystem>(m_pECSManager.get(), resourceManager, resourceManager->GetIntegrationBuffer(IntegrationDataType::Transform));
 	m_pEditorSingleSystem->RegisterSystem(std::move(transformEditorSystem), SystemState::Update);
 	std::unique_ptr<ECSManager::ISystem> cameraEditorSystem = std::make_unique<CameraEditorSystem>(m_pECSManager.get(), resourceManager, resourceManager->GetIntegrationBuffer(IntegrationDataType::Transform));

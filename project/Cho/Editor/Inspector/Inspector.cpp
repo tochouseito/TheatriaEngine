@@ -310,6 +310,7 @@ void Inspector::AddComponent(GameObject* object)
 	static bool isOpen = false;
 	MeshFilterComponent* mesh;
 	MeshRendererComponent* render;
+	MaterialComponent* material;
 	ScriptComponent* script;
 	std::vector<LineRendererComponent>* lines;
 	lines;
@@ -349,6 +350,18 @@ void Inspector::AddComponent(GameObject* object)
 					// MeshRendererComponentを追加
 					std::unique_ptr<AddMeshRendererComponent> addRenderComp = std::make_unique<AddMeshRendererComponent>(object->GetEntity());
 					m_EngineCommand->ExecuteCommand(std::move(addRenderComp));
+					isOpen = false;
+				}
+			}
+			// MaterialComponentがあるか
+			material = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<MaterialComponent>(object->GetEntity());
+			if (!material)
+			{
+				if (ImGui::Selectable("MaterialComponent"))
+				{
+					// MaterialComponentを追加
+					std::unique_ptr<AddMaterialComponent> addMaterialComp = std::make_unique<AddMaterialComponent>(object->GetEntity());
+					m_EngineCommand->ExecuteCommand(std::move(addMaterialComp));
 					isOpen = false;
 				}
 			}

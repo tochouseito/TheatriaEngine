@@ -53,6 +53,7 @@ struct TransformComponent : public IComponentTag
 	//uint32_t bufferIndex = UINT32_MAX;				// バッファーインデックス
 	std::optional<uint32_t> mapID = std::nullopt;		// マップインデックス
 	TransformStartValue startValue;						// 初期値保存用
+	std::optional<uint32_t> materialID = std::nullopt;	// マテリアルID
 };
 // Node用Transform構造体
 struct NodeTransform
@@ -181,7 +182,7 @@ struct MaterialComponent : public IComponentTag
 	Matrix4 matUV;
 	float shininess;
 	std::optional<uint32_t> textureID = std::nullopt;	// テクスチャID
-	std::optional<uint32_t> mapID = std::nullopt;		// マップインデックス
+	std::optional<uint32_t> mapID = std::nullopt;
 };
 
 // マルチコンポーネントを許可

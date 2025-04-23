@@ -32,7 +32,7 @@ VSOut main(VSIn input, uint instanceId : SV_InstanceID) {
     //
     output.cameraPosition = gVP.cameraPosition;
     // 
-    output.materialID = index;
+    output.materialID = tf.materialID;
 
     return output;
 }

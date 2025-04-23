@@ -10,6 +10,7 @@ struct BUFFER_DATA_TF final
     Matrix4 worldInverse;	// 64バイト
 	// モデルのRootMatrix
     Matrix4 rootMatrix;		// 64バイト
+	uint32_t materialID;	// 4バイト
 };
 // ViewProjection
 struct BUFFER_DATA_VIEWPROJECTION final
@@ -33,11 +34,9 @@ struct BUFFER_DATA_LINE final
 struct BUFFER_DATA_MATERIAL final
 {
 	Color color;		// 16バイト
+	Matrix4 matUV;		// 64バイト
+	float shininess;	// 4バイト
 	int enableLighting;	// 4バイト
 	int enableTexture;	// 4バイト
 	int textureId;		// 4バイト
-	float padding1[1];	// 4バイト
-	Matrix4 matUV;		// 64バイト
-	float shininess;	// 4バイト
-	float padding2[3];	// 12バイト
 };
