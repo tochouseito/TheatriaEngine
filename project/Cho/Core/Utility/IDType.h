@@ -12,7 +12,7 @@ enum class ObjectType
 {
 	MeshObject = 0,		// メッシュオブジェクト
 	Camera,				// カメラオブジェクト
-	Particle,			// パーティクルオブジェクト
+	ParticleSystem,		// パーティクルシステムオブジェクト
 	Effect,				// エフェクトオブジェクト
 	//Light,			// ライトオブジェクト
 	Count,				// カウント
@@ -24,6 +24,7 @@ inline const char* ObjectTypeToWString(ObjectType type)
 	{
 	case ObjectType::MeshObject: return "MeshObject";
 	case ObjectType::Camera:  return "Camera";
+	case ObjectType::ParticleSystem: return "ParticleSystem";
 	case ObjectType::Effect:  return "Effect";
 	default:                  return "Unknown";
 	}
@@ -33,6 +34,7 @@ inline ObjectType ObjectTypeFromString(const std::string& str)
 {
 	if (str == "MeshObject") return ObjectType::MeshObject;
 	if (str == "Camera") return ObjectType::Camera;
+	if (str == "ParticleSystem") return ObjectType::ParticleSystem;
 	if (str == "Effect") return ObjectType::Effect;
 	return ObjectType::Count; // または Unknown があればそちら
 }

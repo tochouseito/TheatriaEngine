@@ -31,6 +31,9 @@ class EngineCommand
 	friend class DeleteObjectCommand;
 	friend class RenameObjectCommand;
 	friend class AddMaterialComponent;
+	friend class AddParticleSystemObjectCommand;
+	friend class AddEmitterComponent;
+	friend class AddParticleComponent;
 	// Editor
 
 public:

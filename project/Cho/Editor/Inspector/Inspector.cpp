@@ -350,6 +350,21 @@ void Inspector::BoxCollider2DComponentView(GameObject* object)
 	}
 }
 
+void Inspector::EmitterComponentView(GameObject* object)
+{
+	EmitterComponent* emitter = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<EmitterComponent>(object->GetEntity());
+	if (emitter)
+	{
+		if (ImGui::TreeNode("Emitter"))
+		{
+			ImGui::DragFloat3("Position", &emitter->position.x, 0.1f);
+			ImGui::DragFloat("radius", &emitter->radius, 0.1f, 0.0f, 100.0f);
+			ImGui::DragFloat("Emit Frequency", &emitter->frequency, 0.1f, 0.0f, 100.0f);
+			ImGui::DragFloat("Emit frequencyTime", &emitter->frequencyTime, 0.1f, 0.0f, 100.0f);
+		}
+	}
+}
+
 
 void Inspector::AddComponent(GameObject* object)
 {

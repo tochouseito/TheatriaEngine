@@ -186,6 +186,32 @@ struct MaterialComponent : public IComponentTag
 	std::optional<uint32_t> textureID = std::nullopt;	// テクスチャID
 	std::optional<uint32_t> mapID = std::nullopt;
 };
+// エミッターコンポーネント
+struct EmitterComponent : public IComponentTag
+{
+	Vector3 position = { 0.0f,0.0f,0.0f };	// 位置
+	float radius = 1.0f;					// 射出半径
+	uint32_t count = 10;					// 射出数
+	float frequency = 0.5f;					// 射出間隔
+	float frequencyTime = 0.0f;				// 射出間隔調整用時間
+	uint32_t emit = 0;						// 射出許可
+	std::optional<uint32_t> particleID = std::nullopt;	// パーティクルID
+	// バッファインデックス
+	std::optional<uint32_t> bufferIndex = std::nullopt;
+};
+// パーティクルコンポーネント
+struct ParticleComponent : public IComponentTag
+{
+	uint32_t count = 512;// パーティクル数
+	Matrix4 matBillboard = ChoMath::MakeIdentity4x4();
+	float time = 0.0f;
+	float deltaTime = 0.0f;
+	// バッファーインデックス
+	std::optional<uint32_t> bufferIndex = std::nullopt;
+	std::optional<uint32_t> perFrameBufferIndex = std::nullopt;
+	std::optional<uint32_t> freeListIndexBufferIndex = std::nullopt;
+	std::optional<uint32_t> freeListBufferIndex = std::nullopt;
+};
 
 // マルチコンポーネントを許可
 template<>

@@ -76,6 +76,24 @@ public:
 		return index;
 	}
 	template<typename T>
+	uint32_t CreateRWStructuredBuffer(const UINT& numElements)
+	{
+		// 構造化バッファの生成
+		std::unique_ptr<RWStructuredBuffer<T>> buffer = std::make_unique<RWStructuredBuffer<T>>();
+		buffer->CreateRWStructuredBufferResource(m_Device, numElements);
+		// UAVの生成
+		D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
+		uavDesc.Format = DXGI_FORMAT_UNKNOWN;
+		uavDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
+		uavDesc.Buffer.FirstElement = 0;
+		uavDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
+		uavDesc.Buffer.NumElements = buffer->GetNumElements();
+		uavDesc.Buffer.StructureByteStride = buffer->GetStructureByteStride();
+		buffer->CreateUAV(m_Device, uavDesc, m_SUVDescriptorHeap.get());
+		uint32_t index = static_cast<uint32_t>(m_UAVBuffers.push_back(std::move(buffer)));
+		return index;
+	}
+	template<typename T>
 	uint32_t CreateVertexBuffer(const UINT& numElements)
 	{
 		// 頂点バッファの生成
@@ -158,7 +176,10 @@ public:
 		} else if constexpr (std::is_same_v<T, PixelBuffer>)
 		{
 			return m_TextureBuffers[index.value()].get();
-		} else
+		} else if constexpr (std::is_same_v<T, IRWStructuredBuffer>)
+		{
+			return m_UAVBuffers[index.value()].get();
+		}else
 			assert(false && "Invalid buffer type");
 	}
 
@@ -244,6 +265,8 @@ private:
 	FVector<std::unique_ptr<DepthBuffer>> m_DepthBuffers;
 	// テクスチャバッファ
 	FVector<std::unique_ptr<PixelBuffer>> m_TextureBuffers;
+	// UAVバッファ
+	FVector<std::unique_ptr<IRWStructuredBuffer>> m_UAVBuffers;
 	// 統合バッファ
 	std::array<std::unique_ptr<IIntegrationData>, IntegrationDataType::kCount> m_IntegrationData;
 	// デバッグカメラバッファ

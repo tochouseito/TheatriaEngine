@@ -275,4 +275,124 @@ private:
 	std::optional<uint32_t> m_SRVHandleIndex = std::nullopt;
 };
 
+// UAVのインターフェース
+class IRWStructuredBuffer : public GpuBuffer
+{
+public:
+	// Constructor
+	IRWStructuredBuffer() : GpuBuffer()
+	{
+	}
+	// Constructor
+	IRWStructuredBuffer(ID3D12Resource* pResource, D3D12_RESOURCE_STATES CurrentState) :
+		GpuBuffer(pResource, CurrentState)
+	{
+	}
+	// Destructor
+	virtual ~IRWStructuredBuffer() = default;
+	// リソース作成
+	virtual void CreateRWStructuredBufferResource(ID3D12Device* device, const UINT& numElements) = 0;
+	// SRV作成
+	virtual bool CreateUAV(ID3D12Device8* device, D3D12_UNORDERED_ACCESS_VIEW_DESC& uavDesc, DescriptorHeap* pDescriptorHeap) = 0;
+	// ディスクリプタハンドルを取得
+	virtual D3D12_CPU_DESCRIPTOR_HANDLE GetUAVCpuHandle() const = 0;
+	virtual D3D12_GPU_DESCRIPTOR_HANDLE GetUAVGpuHandle() const = 0;
+	// ディスクリプタハンドルインデックスを取得
+	virtual std::optional<uint32_t> GetUAVHandleIndex() const = 0;
+};
 
+// UAVのクラス
+template<typename T>
+class RWStructuredBuffer : public IRWStructuredBuffer
+{
+public:
+	// Constructor
+	RWStructuredBuffer() : IRWStructuredBuffer()
+	{
+	}
+	// Constructor
+	RWStructuredBuffer(ID3D12Resource* pResource, D3D12_RESOURCE_STATES CurrentState) :
+		IRWStructuredBuffer(pResource, CurrentState)
+	{
+	}
+	// Destructor
+	~RWStructuredBuffer()
+	{
+		m_UAVCpuHandle = {};
+		m_UAVGpuHandle = {};
+		m_UAVHandleIndex = std::nullopt;
+	}
+	void CreateRWStructuredBufferResource(ID3D12Device8* device, const UINT& numElements) override
+	{
+		// 構造体のサイズを確認
+		if constexpr (std::is_class_v<T>)// クラス、構造体用
+		{
+			size_t size = sizeof(T);
+			bool isValid = size % 16 != 0;
+			if (isValid)
+			{
+				Log::Write(LogLevel::Assert, "Structure size must be multiple of 16 bytes");
+			}
+		}
+		UINT structureByteStride = static_cast<UINT>(sizeof(T));
+		D3D12_HEAP_PROPERTIES heapProperties{};
+		heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;// DefaultHeapを使う
+		GpuBuffer::CreateBuffer(
+			device, heapProperties, D3D12_HEAP_FLAG_NONE,
+			D3D12_RESOURCE_STATE_COMMON,
+			D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
+			numElements, structureByteStride);
+	}
+	bool CreateUAV(ID3D12Device8* device, D3D12_UNORDERED_ACCESS_VIEW_DESC& uavDesc, DescriptorHeap* pDescriptorHeap) override
+	{
+		// ヒープがUAVタイプかどうか確認
+		if (pDescriptorHeap->GetType() != D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV)
+		{
+			Log::Write(LogLevel::Assert, "DescriptorHeap is not UAV type");
+			return false;
+		}
+		// リソースがあるかどうか確認
+		if (!GetResource())
+		{
+			Log::Write(LogLevel::Assert, "Resource is null");
+			return false;
+		}
+		// 新しいディスクリプタのインデッ���スとハンドルを取得
+		if (!m_UAVHandleIndex.has_value())
+		{
+			m_UAVHandleIndex = pDescriptorHeap->Allocate();
+		}
+		if (!m_UAVHandleIndex.has_value())
+		{
+			Log::Write(LogLevel::Warn, "DescriptorHeap is full");
+			return false;
+		}
+		m_UAVCpuHandle = pDescriptorHeap->GetCPUDescriptorHandle(m_UAVHandleIndex.value());
+		m_UAVGpuHandle = pDescriptorHeap->GetGPUDescriptorHandle(m_UAVHandleIndex.value());
+		device->CreateUnorderedAccessView(
+			GetResource(),
+			nullptr,
+			&uavDesc,
+			m_UAVCpuHandle
+		);
+		return true;
+	}
+	void Unmap()
+	{
+		if (GetResource())
+		{
+			GetResource()->Unmap(0, nullptr);
+		}
+	}
+	// ディスクリプタハンドルを取得
+	D3D12_CPU_DESCRIPTOR_HANDLE GetUAVCpuHandle() const override { return m_UAVCpuHandle; }
+	D3D12_GPU_DESCRIPTOR_HANDLE GetUAVGpuHandle() const override { return m_UAVGpuHandle; }
+	// ディスクリプタハンドルインデックスを取得
+	std::optional<uint32_t> GetUAVHandleIndex() const override { return m_UAVHandleIndex; }
+private:
+	// ディスクリプタハンドル
+	D3D12_CPU_DESCRIPTOR_HANDLE m_UAVCpuHandle = {};
+	D3D12_GPU_DESCRIPTOR_HANDLE m_UAVGpuHandle = {};
+	// ディスクリプタハンドルインデックス
+	std::optional<uint32_t> m_UAVHandleIndex = std::nullopt;
+};

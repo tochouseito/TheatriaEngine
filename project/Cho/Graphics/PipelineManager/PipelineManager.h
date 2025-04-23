@@ -52,10 +52,22 @@ private:
 	void CreatePipelineIntegrate(ID3D12Device8* device);
 	void CreatePipelineLine(ID3D12Device8* device);
 
+	// Particle
+	void CreatePipelineParticle(ID3D12Device8* device);
+	void CreatePipelineParticleInit(ID3D12Device8* device);
+	void CreatePipelineParticleUpdate(ID3D12Device8* device);
+	void CreatePipelineParticleEmit(ID3D12Device8* device);
+
 	std::unique_ptr<DXShaderCompiler> m_pShaderCompiler = nullptr;
 	PSO m_DemoPSO;
 	PSO m_ScreenCopyPSO;
 	PSO m_IntegratePSO;
 	PSO m_LinePSO;
+
+	// Particle
+	PSO m_ParticlePSO;
+	PSO m_ParticleInitPSO;
+	PSO m_ParticleUpdatePSO;
+	PSO m_ParticleEmitPSO;
 };
 

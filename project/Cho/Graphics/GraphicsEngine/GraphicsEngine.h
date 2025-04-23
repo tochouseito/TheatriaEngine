@@ -114,6 +114,9 @@ private:
 	// デバッグ用深度バッファの生成
 	void CreateDebugDepthBuffer();
 
+	// タイプごとに描画
+	void DrawParticles(CommandContext* context, ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode);
+
 	ID3D12Device8* m_Device = nullptr;
 	ResourceManager* m_ResourceManager = nullptr;
 	std::unique_ptr<SwapChain> m_SwapChain = nullptr;
