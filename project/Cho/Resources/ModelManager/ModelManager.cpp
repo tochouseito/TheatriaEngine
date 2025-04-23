@@ -8,6 +8,169 @@
 #include "Core/Utility/GenerateUnique.h"
 using namespace Cho;
 
+bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
+{
+	Log::Write(LogLevel::Info, "LoadModelFile");
+	// 変数の宣言
+	std::string line;// ファイルから読んだ1行を格納するもの
+	Assimp::Importer importer;
+	std::string filePathString = filePath.string();
+	ModelData modelData;
+	// 頂点数とインデックス数
+	uint32_t vertices=0;// 頂点数
+	uint32_t indices=0;// インデックス数
+
+	// ここからファイルを開く
+	Log::Write(LogLevel::Info, "Start ReadFile");
+	const aiScene* scene = importer.ReadFile(filePathString.c_str(), aiProcess_FlipWindingOrder | aiProcess_FlipUVs);
+	Log::Write(LogLevel::Info, "End ReadFile");
+	std::string err = importer.GetErrorString();
+	err = "ErrorString:" + err;
+	Log::Write(LogLevel::Info, err);
+	if (!scene->HasMeshes())
+	{
+		Log::Write(LogLevel::Assert, "No Meshes");// メッシュがないのは対応しない
+	}
+	// SceneのRootNodeを読んでシーン全体の階層構造を作り上げる
+	modelData.rootNode = ReadNode(scene->mRootNode);
+	// 
+	modelData.name = filePath.stem().wstring();
+	modelData.name = GenerateUniqueName(modelData.name, m_ModelNameContainer);
+	// メッシュのデータを保存
+	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex)
+	{
+		MeshData meshData;
+		aiMesh* mesh = scene->mMeshes[meshIndex];
+		meshData.name = ConvertString(mesh->mName.C_Str());
+		vertices = mesh->mNumVertices;
+		for (uint32_t faceIndex = 0; faceIndex < mesh->mNumFaces; ++faceIndex)
+		{
+			aiFace& face = mesh->mFaces[faceIndex];
+			// 三角形の処理
+			if (face.mNumIndices == 3)
+			{
+				for (uint32_t element = 0; element < face.mNumIndices; ++element)
+				{
+					indices++;
+				}
+			}
+			// 四角形の処理（四角形の2つの三角形に分割）
+			else if (face.mNumIndices == 4)
+			{
+				// 四角形の1つ目の三角形(0,1,2)
+				indices++;
+				indices++;
+				indices++;
+
+				// 四角形の2つ目の三角形(0,1,2)
+				indices++;
+				indices++;
+				indices++;
+			}
+			// サポート外のポリゴン数の場合のエラーチェック
+			else
+			{
+				assert(false && "Unsupported polygon type");
+			}
+		}
+
+		// メモリ確保
+		meshData.vertices.resize(vertices);
+		meshData.indices.resize(indices);
+
+		modelData.meshes.push_back(meshData);
+	}
+
+	// Meshの解析
+	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex)
+	{
+		aiMesh* mesh = scene->mMeshes[meshIndex];
+		assert(mesh->HasNormals());// 法線がないMeshは非対応
+		std::string meshName = mesh->mName.C_Str();
+		std::wstring meshName2 = ConvertString(mesh->mName.C_Str());
+		//modelData->objects[meshName].material.isTexture = mesh->HasTextureCoords(0);
+
+		for (uint32_t vertexIndex = 0; vertexIndex < mesh->mNumVertices; ++vertexIndex)
+		{
+			//VertexData vertex;
+			aiVector3D& position = mesh->mVertices[vertexIndex];
+			aiVector3D& normal = mesh->mNormals[vertexIndex];
+			// UV座標のチェックと設定
+			if (mesh->HasTextureCoords(0))
+			{
+				aiVector3D& texcoord = mesh->mTextureCoords[0][vertexIndex];
+				modelData.meshes[meshIndex].vertices[vertexIndex].texCoord = { texcoord.x,texcoord.y };
+			} else
+			{
+				modelData.meshes[meshIndex].vertices[vertexIndex].texCoord = { 0.0f,0.0f };// ダミーのUV座標
+			}
+			modelData.meshes[meshIndex].vertices[vertexIndex].position = { position.x,position.y,position.z,1.0f };
+			modelData.meshes[meshIndex].vertices[vertexIndex].normal = { normal.x,normal.y,normal.z };
+			modelData.meshes[meshIndex].vertices[vertexIndex].position.x *= -1.0f;
+			modelData.meshes[meshIndex].vertices[vertexIndex].normal.x *= -1.0f;
+		}
+		// Index解析
+		uint32_t indexCount = 0;
+		for (uint32_t faceIndex = 0; faceIndex < mesh->mNumFaces; ++faceIndex)
+		{
+			aiFace& face = mesh->mFaces[faceIndex];
+			// 三角形の処理
+			if (face.mNumIndices == 3)
+			{
+				for (uint32_t element = 0; element < face.mNumIndices; ++element)
+				{
+					uint32_t vertexIndex = face.mIndices[element];
+					modelData.meshes[meshIndex].indices[indexCount] = vertexIndex;
+					indexCount++;
+				}
+			}
+			// 四角形の処理（四角形の2つの三角形に分割）
+			else if (face.mNumIndices == 4)
+			{
+				// 四角形の1つ目の三角形(0,1,2)
+				modelData.meshes[meshIndex].indices[indexCount] = face.mIndices[0];
+				indexCount++;
+				modelData.meshes[meshIndex].indices[indexCount] = face.mIndices[1];
+				indexCount++;
+				modelData.meshes[meshIndex].indices[indexCount] = face.mIndices[2];
+				indexCount++;
+
+				// 四角形の2つ目の三角形(0,1,2)
+				modelData.meshes[meshIndex].indices[indexCount] = face.mIndices[0];
+				indexCount++;
+				modelData.meshes[meshIndex].indices[indexCount] = face.mIndices[2];
+				indexCount++;
+				modelData.meshes[meshIndex].indices[indexCount] = face.mIndices[3];
+			}
+			// サポート外のポリゴン数の場合のエラーチェック
+			else
+			{
+				assert(false && "Unsupported polygon type");
+			}
+		}
+
+		//// マテリアル解析
+		//uint32_t materialIndex = mesh->mMaterialIndex;
+		//aiMaterial* material = scene->mMaterials[materialIndex];
+		//if (material->GetTextureCount(aiTextureType_DIFFUSE) != 0)
+		//{
+		//	aiString textureFilePath;
+		//	material->GetTexture(aiTextureType_DIFFUSE, 0, &textureFilePath);
+		//	// 画像テクスチャの読み込み処理
+		//	texLoader_->Load(textureFilePath.C_Str());
+
+		//	modelData->objects[meshName].material.textureName = fs::path(textureFilePath.C_Str()).filename().string();
+		//	modelData->objects[meshName].material.isTexture = true;
+		//} else
+		//{
+		//	modelData->objects[meshName].material.isTexture = false;
+		//}
+	}
+	// modelDataを追加
+	AddModelData(modelData);
+	return true;
+}
+
 // 名前で検索してインデックスを取得する
 std::optional<uint32_t> ModelManager::GetModelDataIndex(const std::wstring& name)
 {
@@ -51,18 +214,18 @@ void ModelManager::RegisterModelUseList(const std::variant<uint32_t, std::wstrin
 				return;
 			}
 		}
-		// ほかのモデルに登録されていたら、削除
-		for (auto& model : m_Models.GetVector())
+	}
+	// ほかのモデルに登録されていたら、削除
+	for (auto& model : m_Models.GetVector())
+	{
+		if (model.useTransformList.size() > 0)
 		{
-			if (model.useTransformList.size() > 0)
+			for (auto& index : model.useTransformList)
 			{
-				for (auto& index : model.useTransformList)
+				if (index == transformMapID)
 				{
-					if (index == transformMapID)
-					{
-						model.useTransformList.remove(index);
-						break;
-					}
+					model.useTransformList.remove(index);
+					break;
 				}
 			}
 		}
@@ -368,6 +531,36 @@ void ModelManager::CreatePlane()
 	modelData.meshes.push_back(meshData);
 	// modelDataを追加
 	AddModelData(modelData);
+}
+
+Node ModelManager::ReadNode(aiNode* node)
+{
+	Node result;
+	Node result2;
+	aiMatrix4x4 aiLocalMatrix = node->mTransformation;// nodeのlocalMatrixを取得
+	aiLocalMatrix.Transpose();// 列ベクトルを行ベクトルに転置
+	for (uint32_t mindex = 0; mindex < 4; ++mindex)
+	{
+		for (uint32_t index = 0; index < 4; ++index)
+		{
+			result2.localMatrix.m[mindex][index] = aiLocalMatrix[mindex][index];
+		}
+	}
+	aiVector3D scale, translate;
+	aiQuaternion rotate;
+	node->mTransformation.Decompose(scale, rotate, translate);// assimpの行列からSRTを抽出する関数を利用
+	result.transform.scale = { scale.x,scale.y,scale.z };// scaleはそのまま
+	result.transform.rotation = { rotate.x,-rotate.y,-rotate.z,rotate.w };// x軸を反転。さらに回転方向が逆なので軸を反転させる
+	result.transform.translation = { -translate.x,translate.y,translate.z };// x軸を反転
+	result.localMatrix = ChoMath::MakeAffineMatrix(result.transform.scale, result.transform.rotation, result.transform.translation);
+	result.name = node->mName.C_Str();// Node名を格納
+	result.children.resize(node->mNumChildren);// 子供の数だけ確保
+	for (uint32_t childIndex = 0; childIndex < node->mNumChildren; ++childIndex)
+	{
+		// 再帰的に読んで階層構造を作っていく
+		result.children[childIndex] = ReadNode(node->mChildren[childIndex]);
+	}
+	return result;
 }
 
 // ModelDataの追加

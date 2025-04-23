@@ -89,6 +89,26 @@ void Inspector::MeshFilterComponentView(GameObject* object)
 	if (mesh)
 	{
 		ImGui::Text("Mesh Component");
+		if (ImGui::BeginMenu("MeshSelect"))
+		{
+			for (const auto& modelName : m_EngineCommand->GetResourceManager()->GetModelManager()->GetModelNameContainer())
+			{
+				std::string name = ConvertString(modelName.first);
+				if (ImGui::MenuItem(name.c_str()))
+				{
+					// Transformとの連携
+					TransformComponent* transform = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<TransformComponent>(object->GetEntity());
+					// モデル名を設定
+					mesh->modelName = modelName.first;
+					// モデルのIDを取得
+					mesh->modelID = m_EngineCommand->GetResourceManager()->GetModelManager()->GetModelDataIndex(mesh->modelName);
+					// モデルのUseListに登録
+					m_EngineCommand->GetResourceManager()->GetModelManager()->RegisterModelUseList(mesh->modelID.value(), transform->mapID.value());
+				}
+			}
+
+			ImGui::EndMenu();
+		}
 	}
 }
 

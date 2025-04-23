@@ -10,9 +10,12 @@ using PrefabID = uint32_t;
 // オブジェクトのタイプ
 enum class ObjectType
 {
-	MeshObject = 0,// メッシュオブジェクト
-	Camera,// カメラオブジェクト
-	Count,// カウント
+	MeshObject = 0,		// メッシュオブジェクト
+	Camera,				// カメラオブジェクト
+	Particle,			// パーティクルオブジェクト
+	Effect,				// エフェクトオブジェクト
+	//Light,			// ライトオブジェクト
+	Count,				// カウント
 };
 
 inline const char* ObjectTypeToWString(ObjectType type)
@@ -21,6 +24,7 @@ inline const char* ObjectTypeToWString(ObjectType type)
 	{
 	case ObjectType::MeshObject: return "MeshObject";
 	case ObjectType::Camera:  return "Camera";
+	case ObjectType::Effect:  return "Effect";
 	default:                  return "Unknown";
 	}
 }
@@ -29,5 +33,6 @@ inline ObjectType ObjectTypeFromString(const std::string& str)
 {
 	if (str == "MeshObject") return ObjectType::MeshObject;
 	if (str == "Camera") return ObjectType::Camera;
+	if (str == "Effect") return ObjectType::Effect;
 	return ObjectType::Count; // または Unknown があればそちら
 }
