@@ -3,6 +3,7 @@
 #include "Core/Utility/FVector.h"
 #include "SDK/DirectX/DirectX12/stdafx/stdafx.h"
 #include <unordered_map>
+#include <filesystem>
 #include <list>
 // 頂点データ構造体
 struct VertexData
@@ -10,6 +11,13 @@ struct VertexData
 	Vector4 position = { 0.0f };
 	Vector2 texCoord = { 0.0f };
 	Vector3 normal = { 0.0f };
+};
+struct Node
+{
+	NodeTransform transform;
+	Matrix4 localMatrix;
+	std::string name;
+	std::vector<Node> children;
 };
 struct MeshData
 {
@@ -23,6 +31,7 @@ struct ModelData
 {
 	std::wstring name;
 	std::vector<MeshData> meshes;
+	Node rootNode;
 	// このモデルを使用しているTransformのインデックス
 	std::list<uint32_t> useTransformList;
 	// このモデルを使用しているTFリストのバッファインデックス
@@ -42,6 +51,9 @@ public:
 	{
 
 	}
+	// モデルファイルを読み込む
+	bool LoadModelFile(const std::filesystem::path& filePath);
+
 	// 名前コンテナを取得する
 	std::unordered_map<std::wstring, uint32_t>& GetModelNameContainer() { return m_ModelNameContainer; }
 	// モデルデータコンテナを取得する
@@ -63,6 +75,8 @@ private:
 	void CreateSphere();
 	// Planeの生成
 	void CreatePlane();
+	// 
+	Node ReadNode(aiNode* node);
 	// モデルコンテナの要素数を取得する
 	//uint32_t GetModelDataSize() { return static_cast<uint32_t>(m_Models.size()); }
 	// ModelDataの追加
@@ -75,6 +89,6 @@ private:
 	std::unordered_map<std::wstring, uint32_t> m_ModelNameContainer;
 
 	// モデルの使用可能なTransformの数のオフセット
-	static const uint32_t kUseTransformOffset = 50;
+	static const uint32_t kUseTransformOffset = 100;
 };
 
