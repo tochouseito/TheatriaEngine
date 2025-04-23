@@ -319,6 +319,10 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory,BaseScene* sce
             {
                 comps["MeshRenderer"] = Cho::Serialization::ToJson(*r);
             }
+			if (const auto* m = ecs->GetComponent<MaterialComponent>(entity))
+			{
+				comps["Material"] = Cho::Serialization::ToJson(*m);
+			}
 			if (const auto* s = ecs->GetComponent<ScriptComponent>(entity))
 			{
 				comps["Script"] = Cho::Serialization::ToJson(*s);
@@ -503,6 +507,19 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
                     MeshRendererComponent* renderer = ecs->AddComponent<MeshRendererComponent>(entity);
 					renderer->visible = r.visible;
                 }
+
+				if (comps.contains("Material"))
+				{
+					MaterialComponent m{};
+					auto& jm = comps["Material"];
+					// MaterialComponentの読み込み
+					Deserialization::FromJson(jm, m);
+					MaterialComponent* material = ecs->AddComponent<MaterialComponent>(entity);
+					*material = m;
+					TransformComponent* transform = ecs->GetComponent<TransformComponent>(entity);
+					transform->materialID = resourceManager->GetIntegrationData(IntegrationDataType::Material)->GetMapID();
+					material->mapID = transform->materialID;
+				}
 
                 if (comps.contains("Script"))
                 {
@@ -819,6 +836,16 @@ json Cho::Serialization::ToJson(const MeshRendererComponent& r)
     json j;
     j["visible"] = r.visible;
     return j;
+}
+
+json Cho::Serialization::ToJson(const MaterialComponent& m)
+{
+    json j;
+	j["Color"] = { m.color.r, m.color.g, m.color.b, m.color.a };
+	j["enableLighting"] = m.enableLighting;
+	j["shininess"] = m.shininess;
+	j["textureName"] = m.textureName;
+	return j;
 }
 
 json Cho::Serialization::ToJson(const ScriptComponent& s)
@@ -1508,6 +1535,14 @@ void Cho::Deserialization::FromJson(const json& j, MeshFilterComponent& m)
 void Cho::Deserialization::FromJson(const json& j, MeshRendererComponent& r)
 {
 	r.visible = j.value("visible", true);
+}
+
+void Cho::Deserialization::FromJson(const json& j, MaterialComponent& m)
+{
+	m.color = { j["Color"][0], j["Color"][1], j["Color"][2], j["Color"][3] };
+	m.textureName = j.value("textureName", "");
+	m.enableLighting = j.value("enableLighting", true);
+	m.shininess = j.value("shininess", 32.0f);
 }
 
 void Cho::Deserialization::FromJson(const json& j, ScriptComponent& s)

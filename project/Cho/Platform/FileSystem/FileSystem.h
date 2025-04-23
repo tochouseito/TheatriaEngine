@@ -75,6 +75,7 @@ namespace Cho
         json ToJson(const CameraComponent& c);
         json ToJson(const MeshFilterComponent& m);
         json ToJson(const MeshRendererComponent& r);
+		json ToJson(const MaterialComponent& m);
 		json ToJson(const ScriptComponent& s);
 		json ToJson(const std::vector<LineRendererComponent>& ls);
 		json ToJson(const Rigidbody2DComponent& rb);
@@ -88,6 +89,7 @@ namespace Cho
 		void FromJson(const json& j, CameraComponent& c);
 		void FromJson(const json& j, MeshFilterComponent& m);
 		void FromJson(const json& j, MeshRendererComponent& r);
+		void FromJson(const json& j, MaterialComponent& m);
 		void FromJson(const json& j, ScriptComponent& s);
 		void FromJson(const json& j, std::vector<LineRendererComponent>& ls);
 		void FromJson(const json& j, Rigidbody2DComponent& rb);
