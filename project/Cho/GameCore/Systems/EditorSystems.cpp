@@ -92,6 +92,13 @@ void TransformEditorSystem::TransferMatrix(TransformComponent& transform)
 	data.matWorld = transform.matWorld;
 	data.worldInverse = ChoMath::Transpose(Matrix4::Inverse(transform.matWorld));
 	data.rootMatrix = transform.rootMatrix;
+	if (transform.materialID)
+	{
+		data.materialID = transform.materialID.value();
+	} else
+	{
+		data.materialID = 0;
+	}
 	m_pIntegrationBuffer->UpdateData(data, transform.mapID.value());
 }
 

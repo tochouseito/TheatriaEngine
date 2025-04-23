@@ -178,9 +178,10 @@ struct PolygonCollider2DComponent : public IComponentTag
 struct MaterialComponent : public IComponentTag
 {
 	Color color;
-	int enableLighting;
+	bool enableLighting;
 	Matrix4 matUV;
 	float shininess;
+	std::string textureName = "";	// テクスチャ名
 	std::optional<uint32_t> textureID = std::nullopt;	// テクスチャID
 	std::optional<uint32_t> mapID = std::nullopt;
 };

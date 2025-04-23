@@ -134,6 +134,7 @@ void Inspector::MaterialComponentView(GameObject* object)
 	if (material)
 	{
 		ImGui::Text("Material Component");
+		ImGui::ColorEdit4("Color", &material->color.r);
 	}
 }
 
