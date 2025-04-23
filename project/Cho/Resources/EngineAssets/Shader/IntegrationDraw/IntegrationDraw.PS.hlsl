@@ -1,9 +1,11 @@
 #include "../header/Demo.hlsli"
+#include "../header/Material.hlsli"
 
 // マテリアル
-//ConstantBuffer<Material> gMaterial : register(b0);
+//StructuredBuffer<Material> gIMaterial : register(t0);
 
 // テクスチャリソース(カラー)
+//Texture2D<float4> gTextures[] : register(t1);
 Texture2D<float4> gTexture : register(t0);
 
 // サンプラー
@@ -13,14 +15,19 @@ struct PixelShaderOutput {
     float4 color : SV_TARGET0;
 };
 
-PixelShaderOutput main(VertexShaderOutput input) {
+PixelShaderOutput main(VSOut input) {
     PixelShaderOutput output;
     
-    // テクスチャ
-    //float4 transformedUV = mul(float4(input.texcoord, 0.0f, 1.0f), gMaterial.matUV);
-    //float4 textureColor = gTexture.Sample(gSampler, transformedUV.xy);
+    //float4 textureColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
     
-    //output.color = gMaterial.color * textureColor;
+    //if (gIMaterial[input.materialID].enableTexture != 0) {
+    //    // テクスチャ
+    //    float4 transformedUV = mul(float4(input.texcoord, 0.0f, 1.0f), gIMaterial[input.materialID].matUV);
+    //    textureColor = gTextures[gIMaterial[input.materialID].textureID].Sample(gSampler, transformedUV.xy);
+    //}
+    
+    //// 合計
+    //output.color = gIMaterial[input.materialID].color * textureColor;
     output.color = gTexture.Sample(gSampler, input.texcoord);
 
     return output;

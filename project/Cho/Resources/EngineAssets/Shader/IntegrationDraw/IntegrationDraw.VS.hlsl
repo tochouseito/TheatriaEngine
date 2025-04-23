@@ -28,6 +28,8 @@ VSOut main(VSIn input, uint instanceId : SV_InstanceID) {
     output.worldPosition = mul(input.position, mul(gITF[gUseIndex[instanceId]].matWorld, gITF[gUseIndex[instanceId]].rootNode)).xyz;
     //
     output.cameraPosition = gVP.cameraPosition;
+    // 
+    output.materialID = gUseIndex[instanceId];
 
     return output;
 }

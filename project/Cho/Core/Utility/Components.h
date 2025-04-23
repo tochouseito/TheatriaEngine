@@ -181,7 +181,7 @@ struct MaterialComponent : public IComponentTag
 	Matrix4 matUV;
 	float shininess;
 	std::optional<uint32_t> textureID = std::nullopt;	// テクスチャID
-	std::optional<uint32_t> bufferIndex = std::nullopt;	// バッファーインデックス
+	std::optional<uint32_t> mapID = std::nullopt;		// マップインデックス
 };
 
 // マルチコンポーネントを許可

@@ -35,7 +35,8 @@ struct BUFFER_DATA_MATERIAL final
 	Color color;		// 16バイト
 	int enableLighting;	// 4バイト
 	int enableTexture;	// 4バイト
-	float padding1[2];	// 8バイト
+	int textureId;		// 4バイト
+	float padding1[1];	// 4バイト
 	Matrix4 matUV;		// 64バイト
 	float shininess;	// 4バイト
 	float padding2[3];	// 12バイト

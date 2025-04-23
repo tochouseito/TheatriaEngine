@@ -294,8 +294,13 @@ bool AddMaterialComponent::Execute(EngineCommand* edit)
 	material->enableLighting = true;
 	material->matUV = Matrix4::Identity();
 	material->shininess = 0.0f;
-	// Resourceの生成
-	material->bufferIndex = edit->m_ResourceManager->CreateConstantBuffer<BUFFER_DATA_MATERIAL>();
+	// Material統合バッファからmapIDを取得
+	//uint32_t mapID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::Material)->GetMapID();
+	TransformComponent* transform = edit->m_GameCore->GetECSManager()->GetComponent<TransformComponent>(m_Entity);
+	uint32_t mapID = transform->mapID.value();
+	// mapIDを設定
+	material->mapID = mapID;
+	//material->textureID = edit->m_ResourceManager->GetTextureManager()->GetDummyTextureBuffer();
 	return true;
 }
 

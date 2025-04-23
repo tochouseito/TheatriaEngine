@@ -1,4 +1,5 @@
 #include "../header/Demo.hlsli"
+#include "../header/Material.hlsli"
 
 // マテリアル
 ConstantBuffer<Material> gMaterial : register(b0);
