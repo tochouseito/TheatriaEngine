@@ -31,7 +31,7 @@ void PixelBuffer::RemakePixelBufferResource(ID3D12Device8* device, D3D12_RESOURC
 	GpuResource::RemakeResource(device, heapProperties, D3D12_HEAP_FLAG_NONE, desc, state, clearValue);
 }
 
-bool PixelBuffer::CreateSRV(ID3D12Device8* device, D3D12_SHADER_RESOURCE_VIEW_DESC& srvDesc, DescriptorHeap* pDescriptorHeap)
+bool PixelBuffer::CreateSRV(ID3D12Device8* device, D3D12_SHADER_RESOURCE_VIEW_DESC& srvDesc, SUVDescriptorHeap* pDescriptorHeap)
 {
 	// ヒープがSRVタイプかどうか確認
 	if (pDescriptorHeap->GetType() != D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV)
@@ -49,7 +49,7 @@ bool PixelBuffer::CreateSRV(ID3D12Device8* device, D3D12_SHADER_RESOURCE_VIEW_DE
 	// すでにSRVが作成されている場合はインデックスを取得しない
 	if (!m_SRVHandleIndex.has_value())
 	{
-		m_SRVHandleIndex = pDescriptorHeap->Allocate();
+		m_SRVHandleIndex = pDescriptorHeap->TextureAllocate();
 	}
 	// ディスクリプタヒープがいっぱいの場合は警告を出して終了
 	if (!m_SRVHandleIndex.has_value())

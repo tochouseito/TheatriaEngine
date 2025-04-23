@@ -138,7 +138,7 @@ void ResourceManager::CreateIntegrationBuffers()
 
 void ResourceManager::CreateHeap(ID3D12Device8* device)
 {
-	m_SUVDescriptorHeap = std::make_unique<DescriptorHeap>(device, kMaxSUVDescriptorHeapSize, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, true);
+	m_SUVDescriptorHeap = std::make_unique<SUVDescriptorHeap>(device, kMaxSUVDescriptorHeapSize, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, true,kMaxTextureCount);
 	m_RTVDescriptorHeap = std::make_unique<DescriptorHeap>(device, kMaxRTVDescriptorHeapSize, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, false);
 	m_DSVDescriptorHeap = std::make_unique<DescriptorHeap>(device, kMaxDSVDescriptorHeapSize, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, false);
 }

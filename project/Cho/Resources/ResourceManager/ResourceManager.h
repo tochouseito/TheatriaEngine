@@ -169,7 +169,7 @@ public:
 	BUFFER_DATA_VIEWPROJECTION* GetMappedViewProjection(const uint32_t& index) { return m_MappedViewProjection[index]; }*/
 
 	//Getters
-	DescriptorHeap* GetSUVDHeap() const { return m_SUVDescriptorHeap.get(); }
+	SUVDescriptorHeap* GetSUVDHeap() const { return m_SUVDescriptorHeap.get(); }
 	DescriptorHeap* GetRTVDHeap() const { return m_RTVDescriptorHeap.get(); }
 	DescriptorHeap* GetDSVDHeap() const { return m_DSVDescriptorHeap.get(); }
 	TextureManager* GetTextureManager() const { return m_TextureManager.get(); }
@@ -214,7 +214,7 @@ private:
 	// Device
 	ID3D12Device8* m_Device = nullptr;
 	// SUVディスクリプタヒープ
-	std::unique_ptr<DescriptorHeap> m_SUVDescriptorHeap = nullptr;
+	std::unique_ptr<SUVDescriptorHeap> m_SUVDescriptorHeap = nullptr;
 	// RTVディスクリプタヒープ
 	std::unique_ptr<DescriptorHeap> m_RTVDescriptorHeap = nullptr;
 	// DSVディスクリプタヒープ
@@ -253,5 +253,7 @@ private:
 	static const uint32_t kIntegrationTFBufferSize = 1024;// Transformの統合バッファのサイズ
 	static const uint32_t kIntegrationLineBufferSize = 1024;// Lineの統合バッファのサイズ
 	static const uint32_t kIntegrationMaterialBufferSize = 1024;// Materialの統合バッファのサイズ
+	// Texture最大数
+	static const uint32_t kMaxTextureCount = 256;
 };
 

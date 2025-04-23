@@ -84,3 +84,37 @@ D3D12_GPU_DESCRIPTOR_HANDLE DescriptorHeap::GetGPUDescriptorHandle(const uint32_
 	handleGPU.ptr += (m_Size* index);
 	return handleGPU;
 }
+
+std::optional<uint32_t> SUVDescriptorHeap::TextureAllocate()
+{
+	// 返却されたインデックスがあればそれを使用
+	if (!m_RemovedHandleIndex.empty())
+	{
+		uint32_t result = m_RemovedHandleIndex.back();
+		m_RemovedHandleIndex.pop_back();
+		return result;
+	}
+	// 最大数を超えた場合はnullptrを返す
+	if (m_MaxTextureCount <= m_NextHandleIndex)
+	{
+		Log::Write(LogLevel::Warn, "DescriptorHeap is full");
+		return std::nullopt;
+	}
+	// 返却されたインデックスがなければ次のインデックスを使用
+	uint32_t result = m_NextHandleIndex;
+	m_NextHandleIndex++;
+	return result;
+}
+
+bool SUVDescriptorHeap::TextureRemoveHandle(const uint32_t& index)
+{
+	// 返却されたインデックスが最大数を超えた場合はエラー
+	if (index >= m_MaxTextureCount)
+	{
+		Log::Write(LogLevel::Assert, "Invalid index for DescriptorHeap");
+		return false;
+	}
+	// 返却されたインデックスをリサイクルコンテナに追加
+	m_RemovedHandleIndex.push_back(index);
+	return true;
+}

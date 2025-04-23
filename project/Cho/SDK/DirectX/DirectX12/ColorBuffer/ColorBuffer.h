@@ -20,6 +20,7 @@ public:
 		m_RTVCpuHandle = {};
 		m_RTVHandleIndex = std::nullopt;
 	}
+	bool CreateSRV(ID3D12Device8* device, D3D12_SHADER_RESOURCE_VIEW_DESC& srvDesc, SUVDescriptorHeap* pDescriptorHeap) override;
 	bool CreateRTV(ID3D12Device8* device, D3D12_RENDER_TARGET_VIEW_DESC& rtvDesc, DescriptorHeap* pDescriptorHeap);
 	// ディスクリプタハンドルを取得
 	D3D12_CPU_DESCRIPTOR_HANDLE GetRTVCpuHandle() const { return m_RTVCpuHandle; }
