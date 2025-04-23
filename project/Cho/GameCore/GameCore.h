@@ -26,7 +26,7 @@ public:
 	~GameCore() 
 	{
 	}
-	void Initialize(InputManager* input,ResourceManager* resourceManager);
+	void Initialize(InputManager* input,ResourceManager* resourceManager, GraphicsEngine* graphicsEngine);
 	void SetEngineCommandPtr(EngineCommand* engineCommand) { m_EngineCommand = engineCommand; }
 	void Start(ResourceManager& resourceManager);
 	void Update(ResourceManager& resourceManager, GraphicsEngine& graphicsEngine);
@@ -40,7 +40,7 @@ public:
 	void InitializeGenerateObject();
 	void ClearGenerateObject();
 private:
-	void CreateSystems(InputManager* input, ResourceManager* resourceManager);
+	void CreateSystems(InputManager* input, ResourceManager* resourceManager,GraphicsEngine* graphicsEngine);
 
 	// シーンマネージャー
 	std::unique_ptr<SceneManager> m_pSceneManager = nullptr;

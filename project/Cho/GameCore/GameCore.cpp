@@ -8,7 +8,7 @@
 #include "GameCore/Systems/EditorSystems.h"
 #include "EngineCommand/EngineCommands.h"
 
-void GameCore::Initialize(InputManager* input, ResourceManager* resourceManager)
+void GameCore::Initialize(InputManager* input, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine)
 {
 	// シーンマネージャーの生成
 	m_pSceneManager = std::make_unique<SceneManager>(resourceManager);
@@ -29,7 +29,7 @@ void GameCore::Initialize(InputManager* input, ResourceManager* resourceManager)
 	m_pContactListener = std::make_unique<ContactListener2D>(m_pECSManager.get(), resourceManager, input, m_pObjectContainer.get());
 	m_pPhysicsWorld->SetContactListener(m_pContactListener.get());
 	// システムの生成
-	CreateSystems(input,resourceManager);
+	CreateSystems(input,resourceManager,graphicsEngine);
 }
 
 void GameCore::Start(ResourceManager& resourceManager)
@@ -152,7 +152,7 @@ void GameCore::ClearGenerateObject()
 	m_GameInitializedID.clear();
 }
 
-void GameCore::CreateSystems(InputManager* input, ResourceManager* resourceManager)
+void GameCore::CreateSystems(InputManager* input, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine)
 {
 	// シングルシステム
 	// 初期化システムの登録

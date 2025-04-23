@@ -446,3 +446,4 @@ private:
 	ResourceManager* m_pResourceManager = nullptr;
 	StructuredBuffer<BUFFER_DATA_MATERIAL>* m_pIntegrationBuffer = nullptr;
 };
+// 
