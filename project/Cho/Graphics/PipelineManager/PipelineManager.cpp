@@ -459,7 +459,7 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 	// Texture
 	D3D12_DESCRIPTOR_RANGE textureRange = {};
 	textureRange.BaseShaderRegister = 1;
-	textureRange.NumDescriptors = 1;
+	textureRange.NumDescriptors = 256;
 	textureRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	textureRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 	rootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;

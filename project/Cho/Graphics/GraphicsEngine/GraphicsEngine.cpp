@@ -411,8 +411,10 @@ void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& ga
 			IStructuredBuffer* materialBuffer = resourceManager.GetIntegrationBuffer(IntegrationDataType::Material);
 			context->SetGraphicsRootDescriptorTable(3, materialBuffer->GetSRVGpuHandle());
 			// ダミーテクスチャをセット
-			PixelBuffer* dummyTexture = resourceManager.GetTextureManager()->GetDummyTextureBuffer();
-			context->SetGraphicsRootDescriptorTable(4, dummyTexture->GetSRVGpuHandle());
+			//PixelBuffer* dummyTexture = resourceManager.GetTextureManager()->GetDummyTextureBuffer();
+			//context->SetGraphicsRootDescriptorTable(4, dummyTexture->GetSRVGpuHandle());
+			// 配列テクスチャのためヒープをセット
+			context->SetGraphicsRootDescriptorTable(4, resourceManager.GetSUVDHeap()->GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
 			// インスタンス数を取得
 			UINT numInstance = static_cast<UINT>(modelData.useTransformList.size());
 			// DrawCall
