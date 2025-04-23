@@ -1,7 +1,7 @@
 #include "../header/Demo.hlsli"
 
 // マテリアル
-StructuredBuffer<Material> gIMaterial : register(t0);
+StructuredBuffer<Material> gIMaterial : register(t2);
 
 // テクスチャリソース(カラー)
 //Texture2D<float4> gTextures[] : register(t1);

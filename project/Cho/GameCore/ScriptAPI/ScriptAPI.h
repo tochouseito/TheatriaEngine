@@ -12,6 +12,7 @@ struct TransformAPI
 	// 関数
 	Vector3& position() { return data->translation; }
 	Vector3& rotation() { return data->degrees; }
+	Quaternion& quaternion() { return data->rotation; }
 	Scale& scale() { return data->scale; }
 	std::function<void(Entity, const Vector3&)> SetPosition;
 	std::function<Vector3(Entity)> GetPosition;
