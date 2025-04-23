@@ -21,6 +21,7 @@ enum IntegrationDataType
 {
 	Transform=0,
 	Line,
+	Material,
 	kCount,
 };
 
@@ -243,5 +244,6 @@ private:
 	// static member
 	static const uint32_t kIntegrationTFBufferSize = 1024;// Transformの統合バッファのサイズ
 	static const uint32_t kIntegrationLineBufferSize = 1024;// Lineの統合バッファのサイズ
+	static const uint32_t kIntegrationMaterialBufferSize = 1024;// Materialの統合バッファのサイズ
 };
 

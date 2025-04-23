@@ -408,7 +408,7 @@ void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& ga
 			IStructuredBuffer* useTransformBuffer = resourceManager.GetBuffer<IStructuredBuffer>(modelData.useTransformBufferIndex);
 			context->SetGraphicsRootDescriptorTable(2, useTransformBuffer->GetSRVGpuHandle());
 			// マテリアル
-
+			//IStructuredBuffer* materialBuffer = resourceManager.GetIntegrationBuffer(IntegrationDataType::Material);
 			// ダミーテクスチャをセット
 			PixelBuffer* dummyTexture = resourceManager.GetTextureManager()->GetDummyTextureBuffer();
 			context->SetGraphicsRootDescriptorTable(3, dummyTexture->GetSRVGpuHandle());

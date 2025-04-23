@@ -129,6 +129,9 @@ void ResourceManager::CreateIntegrationBuffers()
 	// Line統合バッファ
 	std::optional<uint32_t> lineIndex = CreateVertexBuffer<BUFFER_DATA_LINE>(kIntegrationLineBufferSize);
 	m_IntegrationData[IntegrationDataType::Line] = std::make_unique<IntegrationData<BUFFER_DATA_LINE>>(lineIndex, kIntegrationLineBufferSize);
+	// Material統合バッファ
+	std::optional<uint32_t> materialIndex = CreateStructuredBuffer<BUFFER_DATA_MATERIAL>(kIntegrationMaterialBufferSize);
+	m_IntegrationData[IntegrationDataType::Material] = std::make_unique<IntegrationData<BUFFER_DATA_MATERIAL>>(materialIndex, kIntegrationMaterialBufferSize);
 }
 
 void ResourceManager::CreateHeap(ID3D12Device8* device)
