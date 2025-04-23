@@ -32,6 +32,8 @@ public:
 	{
 
 	}
+	// テクスチャファイルの読み込み
+	void LoadTextureFile(const fs::path& filePath);
 	// Engineのリソースをロード
 	void LoadEngineTexture();
 	// Resourceのアップロード

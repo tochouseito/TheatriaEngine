@@ -143,6 +143,7 @@ private:
 	std::optional<CameraComponent> m_Camera;
 	std::optional<MeshFilterComponent> m_MeshFilter;
 	std::optional<MeshRendererComponent> m_MeshRenderer;
+	std::optional<MaterialComponent> m_Material;
 	std::optional<ScriptComponent> m_Script;
 	std::optional<std::vector<LineRendererComponent>> m_LineRenderer;
 	std::optional<Rigidbody2DComponent> m_Rigidbody2D;
@@ -162,4 +163,17 @@ private:
 	uint32_t m_ObjectID;
 	std::wstring m_NewName;
 	std::wstring m_PreName;
+};
+// マテリアルコンポーネントを追加するコマンド
+class AddMaterialComponent :public IEngineCommand
+{
+public:
+	AddMaterialComponent(const uint32_t& entity) :
+		m_Entity(entity)
+	{
+	}
+	bool Execute(EngineCommand* edit)override;
+	bool Undo(EngineCommand* edit)override;
+private:
+	uint32_t m_Entity;
 };

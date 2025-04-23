@@ -21,6 +21,7 @@ enum IntegrationDataType
 {
 	Transform=0,
 	Line,
+	Material,
 	kCount,
 };
 
@@ -115,6 +116,9 @@ public:
 		case IntegrationDataType::Transform:
 			return GetBuffer<IStructuredBuffer>(m_IntegrationData[IntegrationDataType::Transform]->GetBufferIndex());
 			break;
+		case IntegrationDataType::Material:
+			return GetBuffer<IStructuredBuffer>(m_IntegrationData[IntegrationDataType::Material]->GetBufferIndex());
+			break;
 		default:
 			break;
 		}
@@ -181,6 +185,9 @@ public:
 		case IntegrationDataType::Line:
 			return m_IntegrationData[IntegrationDataType::Line].get();
 			break;
+		case IntegrationDataType::Material:
+			return m_IntegrationData[IntegrationDataType::Material].get();
+			break;
 		default:
 			break;
 		}
@@ -201,6 +208,8 @@ private:
 	static const uint32_t kMaxSUVDescriptorHeapSize = 1024;
 	static const uint32_t kMaxRTVDescriptorHeapSize = 20;
 	static const uint32_t kMaxDSVDescriptorHeapSize = 2;
+	// ダミーマテリアル作成
+	void CreateDummyMaterial();
 
 	// Device
 	ID3D12Device8* m_Device = nullptr;
@@ -243,5 +252,6 @@ private:
 	// static member
 	static const uint32_t kIntegrationTFBufferSize = 1024;// Transformの統合バッファのサイズ
 	static const uint32_t kIntegrationLineBufferSize = 1024;// Lineの統合バッファのサイズ
+	static const uint32_t kIntegrationMaterialBufferSize = 1024;// Materialの統合バッファのサイズ
 };
 

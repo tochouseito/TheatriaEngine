@@ -15,19 +15,24 @@ struct VSIn {
 VSOut main(VSIn input, uint instanceId : SV_InstanceID) {
     VSOut output;
     
+    uint index = gUseIndex[instanceId];
+    Transform tf = gITF[index];
+    
     // worldViewProjection
     float4x4 WVP = mul(gVP.view, gVP.projection);
-    WVP = mul(gITF[gUseIndex[instanceId]].matWorld, WVP);
+    WVP = mul(tf.matWorld, WVP);
     // rootNode適用
-    output.position = mul(input.position, mul(gITF[gUseIndex[instanceId]].rootNode, WVP));
+    output.position = mul(input.position, mul(tf.rootNode, WVP));
     // texcoord
     output.texcoord = input.texcoord;
     // normal
-    output.normal = normalize(mul(input.normal, (float3x3) gITF[gUseIndex[instanceId]].worldInverse));
+    output.normal = normalize(mul(input.normal, (float3x3)tf.worldInverse));
     //
-    output.worldPosition = mul(input.position, mul(gITF[gUseIndex[instanceId]].matWorld, gITF[gUseIndex[instanceId]].rootNode)).xyz;
+    output.worldPosition = mul(input.position, mul(tf.matWorld, tf.rootNode)).xyz;
     //
     output.cameraPosition = gVP.cameraPosition;
+    // 
+    output.materialID = tf.materialID;
 
     return output;
 }

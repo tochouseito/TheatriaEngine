@@ -50,6 +50,7 @@ void Inspector::ComponentsView(GameObject* object)
 	MeshFilterComponentView(object);
 	MeshRendererComponentView(object);
 	CameraComponentView(object);
+	MaterialComponentView(object);
 	ScriptComponentView(object);
 	LineRendererComponentView(object);
 	Rigidbody2DComponentView(object);
@@ -118,6 +119,21 @@ void Inspector::CameraComponentView(GameObject* object)
 	if (camera)
 	{
 		ImGui::Text("Camera Component");
+	}
+}
+
+void Inspector::MaterialComponentView(GameObject* object)
+{
+	// メッシュオブジェクトじゃないならスキップ
+	if (object->GetType() != ObjectType::MeshObject)
+	{
+		return;
+	}
+	// MaterialComponentを取得
+	MaterialComponent* material = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<MaterialComponent>(object->GetEntity());
+	if (material)
+	{
+		ImGui::Text("Material Component");
 	}
 }
 
@@ -294,6 +310,7 @@ void Inspector::AddComponent(GameObject* object)
 	static bool isOpen = false;
 	MeshFilterComponent* mesh;
 	MeshRendererComponent* render;
+	MaterialComponent* material;
 	ScriptComponent* script;
 	std::vector<LineRendererComponent>* lines;
 	lines;
@@ -333,6 +350,18 @@ void Inspector::AddComponent(GameObject* object)
 					// MeshRendererComponentを追加
 					std::unique_ptr<AddMeshRendererComponent> addRenderComp = std::make_unique<AddMeshRendererComponent>(object->GetEntity());
 					m_EngineCommand->ExecuteCommand(std::move(addRenderComp));
+					isOpen = false;
+				}
+			}
+			// MaterialComponentがあるか
+			material = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<MaterialComponent>(object->GetEntity());
+			if (!material)
+			{
+				if (ImGui::Selectable("MaterialComponent"))
+				{
+					// MaterialComponentを追加
+					std::unique_ptr<AddMaterialComponent> addMaterialComp = std::make_unique<AddMaterialComponent>(object->GetEntity());
+					m_EngineCommand->ExecuteCommand(std::move(addMaterialComp));
 					isOpen = false;
 				}
 			}

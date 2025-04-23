@@ -3,6 +3,17 @@ struct Transform
     float4x4 matWorld;
     float4x4 worldInverse;
     float4x4 rootNode;
+    int materialID;
+};
+
+struct Material
+{
+    float4 color;
+    float4x4 matUV;
+    float shininess;
+    int enableLighting;
+    int enableTexture;
+    int textureID;
 };
 
 struct VertexShaderOutput
@@ -21,6 +32,7 @@ struct VSOut
     float3 normal : NORMAL0;
     float3 worldPosition : POSITION0;
     float3 cameraPosition : CAMERAPOS0;
+    int materialID : MATERIALID0;
 };
 
 struct ViewProjection
@@ -31,12 +43,4 @@ struct ViewProjection
     float4x4 matWorld;
     float4x4 matBillboard;
     float3 cameraPosition;
-};
-
-struct Material
-{
-    float4 color;
-    int enableLighting;
-    float4x4 matUV;
-    float shininess;
 };

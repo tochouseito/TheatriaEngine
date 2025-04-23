@@ -30,6 +30,7 @@ class EngineCommand
 	friend class AddBoxCollider2DComponent;
 	friend class DeleteObjectCommand;
 	friend class RenameObjectCommand;
+	friend class AddMaterialComponent;
 	// Editor
 
 public:

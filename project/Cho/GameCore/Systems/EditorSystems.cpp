@@ -113,3 +113,22 @@ void CameraEditorSystem::TransferMatrix(TransformComponent& transform, CameraCom
 	ConstantBuffer<BUFFER_DATA_VIEWPROJECTION>* buffer = dynamic_cast<ConstantBuffer<BUFFER_DATA_VIEWPROJECTION>*>(m_pResourceManager->GetBuffer<IConstantBuffer>(camera.bufferIndex));
 	buffer->UpdateData(data);
 }
+
+void MaterialEditorSystem::TransferComponent(const MaterialComponent& material)
+{
+	BUFFER_DATA_MATERIAL data = {};
+	data.color = material.color;
+	data.enableLighting = material.enableLighting;
+	if (material.textureID)
+	{
+		data.enableTexture = true;
+		data.textureId = material.textureID.value();
+	} else
+	{
+		data.enableTexture = 0;
+		data.textureId = 0;
+	}
+	data.matUV = material.matUV;
+	data.shininess = material.shininess;
+	m_pIntegrationBuffer->UpdateData(data, material.mapID.value());
+}

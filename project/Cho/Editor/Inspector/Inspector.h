@@ -20,6 +20,7 @@ private:
 	void MeshFilterComponentView(GameObject* object);
 	void MeshRendererComponentView(GameObject* object);
 	void CameraComponentView(GameObject* object);
+	void MaterialComponentView(GameObject* object);
 	void ScriptComponentView(GameObject* object);
 	void LineRendererComponentView(GameObject* object);
 	void Rigidbody2DComponentView(GameObject* object);

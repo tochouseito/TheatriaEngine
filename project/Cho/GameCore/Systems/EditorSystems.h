@@ -57,3 +57,25 @@ private:
 	ResourceManager* m_pResourceManager = nullptr;
 	StructuredBuffer<BUFFER_DATA_TF>* m_pIntegrationBuffer = nullptr;
 };
+
+// マテリアルの更新システム
+class MaterialEditorSystem : public ECSManager::System<MaterialComponent>
+{
+public:
+	MaterialEditorSystem(ECSManager* ecs, ResourceManager* resourceManager, IStructuredBuffer* integrationBuffer)
+		: ECSManager::System<MaterialComponent>([this](Entity e, MaterialComponent& material)
+			{
+				e;
+				TransferComponent(material);
+			}),
+		m_pECS(ecs), m_pResourceManager(resourceManager)
+	{
+		m_pIntegrationBuffer = dynamic_cast<StructuredBuffer<BUFFER_DATA_MATERIAL>*>(integrationBuffer);
+	}
+	~MaterialEditorSystem() = default;
+private:
+	void TransferComponent(const MaterialComponent& material);
+	ECSManager* m_pECS = nullptr;
+	ResourceManager* m_pResourceManager = nullptr;
+	StructuredBuffer<BUFFER_DATA_MATERIAL>* m_pIntegrationBuffer = nullptr;
+};

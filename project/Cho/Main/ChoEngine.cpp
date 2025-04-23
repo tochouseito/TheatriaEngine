@@ -39,6 +39,9 @@ void ChoEngine::Initialize()
 	graphicsEngine->CreateSwapChain(dx12->GetDXGIFactory());
 	graphicsEngine->Init();
 
+	// Model,TextureManager初期化
+	resourceManager->GenerateManager(graphicsEngine.get());
+
 	// ImGuiManager初期化
 	imGuiManager = std::make_unique<ImGuiManager>();
 	imGuiManager->Initialize(dx12->GetDevice(), resourceManager.get());
@@ -46,9 +49,6 @@ void ChoEngine::Initialize()
 	// GameCore初期化
 	gameCore = std::make_unique<GameCore>();
 	gameCore->Initialize(platformLayer->GetInputManager(), resourceManager.get());
-
-	// Model,TextureManager初期化
-	resourceManager->GenerateManager(graphicsEngine.get());
 
 	// EngineCommand初期化
 	engineCommand = std::make_unique<EngineCommand>(gameCore.get(), resourceManager.get(), graphicsEngine.get());
@@ -179,14 +179,14 @@ void ChoEngine::Start()
 		graphicsEngine = std::make_unique<GraphicsEngine>(dx12->GetDevice(), resourceManager.get(), GetRuntimeMode());
 		graphicsEngine->CreateSwapChain(dx12->GetDXGIFactory());
 		graphicsEngine->Init();
+		// Model,TextureManager初期化
+		resourceManager->GenerateManager(graphicsEngine.get());
 		// ImGuiManager初期化
 		imGuiManager = std::make_unique<ImGuiManager>();
 		imGuiManager->Initialize(dx12->GetDevice(), resourceManager.get());
 		// GameCore初期化
 		gameCore = std::make_unique<GameCore>();
 		gameCore->Initialize(platformLayer->GetInputManager(), resourceManager.get());
-		// Model,TextureManager初期化
-		resourceManager->GenerateManager(graphicsEngine.get());
 		// EngineCommand初期化
 		engineCommand = std::make_unique<EngineCommand>(gameCore.get(), resourceManager.get(), graphicsEngine.get());
 		// GameCoreにEngineCommandをセット
