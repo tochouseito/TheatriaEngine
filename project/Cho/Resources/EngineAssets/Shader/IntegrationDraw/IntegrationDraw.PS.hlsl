@@ -4,8 +4,8 @@
 StructuredBuffer<Material> gIMaterial : register(t0);
 
 // テクスチャリソース(カラー)
-//Texture2D<float4> gTextures[] : register(t1);
-Texture2D<float4> gTexture : register(t1);
+Texture2D<float4> gTextures[] : register(t1);
+//Texture2D<float4> gTexture : register(t1);
 
 // サンプラー
 SamplerState gSampler : register(s0);
@@ -23,7 +23,7 @@ PixelShaderOutput main(VSOut input) {
     {
         // テクスチャ
         float4 transformedUV = mul(float4(input.texcoord, 0.0f, 1.0f), gIMaterial[input.materialID].matUV);
-        textureColor = gTexture.Sample(gSampler, transformedUV.xy);
+        textureColor = gTextures[material.textureID].Sample(gSampler, transformedUV.xy);
     }
         // 合計
     output.color = material.color * textureColor;

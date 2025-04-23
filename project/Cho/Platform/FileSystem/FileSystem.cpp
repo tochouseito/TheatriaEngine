@@ -1618,6 +1618,14 @@ FolderNode Cho::FileSystem::ScanRecursive(const path& path, EngineCommand* engin
 		// フォルダなら再帰処理
         if (entry.is_directory())
         {
+			// フォルダ名がbin,obj,.vs,.gitの場合はスキップ
+            if (entry.path().filename() == "bin" ||
+                entry.path().filename() == "obj" ||
+                entry.path().filename() == ".vs" ||
+                entry.path().filename() == ".git")
+            {
+                continue;
+            }
 			node.children.push_back(ScanRecursive(entry.path(),engineCommand));
         }
 		// ファイルなら処理
