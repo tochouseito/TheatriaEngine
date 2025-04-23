@@ -31,7 +31,6 @@ void AssetBrowser::Window()
 
 void AssetBrowser::FolderTree(FolderNode& node)
 {
-    node = Cho::FileSystem::g_ProjectFiles;
     std::string label = node.folderPath.filename().string();
     if (label.empty()) { label = "Assets"; }
     bool opened = ImGui::TreeNode(label.c_str());
@@ -82,11 +81,28 @@ void AssetBrowser::FileGrid(FolderNode& root)
         std::string icon = GetIconForExtension(ext, false);
 		std::string uniqueId = icon + "##" + name;
 
-        ImGui::Button(uniqueId.c_str(), ImVec2(iconSize, iconSize));
+        // 画像ファイルのみドラッグ＆ドロップを有効にする
+        if (ext == ".png" || ext == ".jpg")
+        {
+            // 画像を表示
+            ImTextureID textureId = (ImTextureID)m_EngineCommand->GetTextureHandle(wname).ptr;
+            ImGui::ImageButton(uniqueId.c_str(), textureId, ImVec2(iconSize, iconSize));
+            if (ImGui::BeginDragDropSource())
+            {
+                const char* fileName = name.c_str();
+                ImGui::SetDragDropPayload("Texture", fileName, strlen(fileName) + 1);
+                ImGui::EndDragDropSource();
+            }
+        } else
+        {
+            ImGui::Button(uniqueId.c_str(), ImVec2(iconSize, iconSize));
+        }
 
         if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
         {
-            // OpenAsset(filePath); // 必要なら処理追加
+			// ファイルを開く処理
+			//std::string path = filePath.string();
+			//ShellExecuteA(nullptr, "open", path.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
         }
 
         ImGui::TextWrapped("%s", name.c_str());

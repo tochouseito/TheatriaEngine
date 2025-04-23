@@ -843,8 +843,10 @@ json Cho::Serialization::ToJson(const MaterialComponent& m)
     json j;
 	j["Color"] = { m.color.r, m.color.g, m.color.b, m.color.a };
 	j["enableLighting"] = m.enableLighting;
+	j["enableTexture"] = m.enableTexture;
 	j["shininess"] = m.shininess;
-	j["textureName"] = m.textureName;
+	std::string textureName = ConvertString(m.textureName);
+	j["textureName"] = textureName;
 	return j;
 }
 
@@ -1540,8 +1542,9 @@ void Cho::Deserialization::FromJson(const json& j, MeshRendererComponent& r)
 void Cho::Deserialization::FromJson(const json& j, MaterialComponent& m)
 {
 	m.color = { j["Color"][0], j["Color"][1], j["Color"][2], j["Color"][3] };
-	m.textureName = j.value("textureName", "");
+	m.textureName = ConvertString(j.value("textureName",""));
 	m.enableLighting = j.value("enableLighting", true);
+	m.enableTexture = j.value("enableTexture",false);
 	m.shininess = j.value("shininess", 32.0f);
 }
 

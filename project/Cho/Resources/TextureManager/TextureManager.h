@@ -40,6 +40,38 @@ public:
 	void UploadTextureDataEx(ID3D12Resource* resource, const DirectX::ScratchImage& mipImages);
 	// ダミーテクスチャバッファを取得
 	PixelBuffer* GetDummyTextureBuffer();
+	// テクスチャが存在するか
+	bool IsTextureExist(const std::wstring& name)
+	{
+		return m_TextureNameContainer.contains(name);
+	}
+	// IDを取得
+	uint32_t GetTextureID(const std::wstring& name)
+	{
+		if (m_TextureNameContainer.contains(name))
+		{
+			return m_TextureNameContainer[name];
+		}
+		return 0;
+	}
+	// テクスチャデータを取得
+	TextureData* GetTextureData(const uint32_t& id)
+	{
+		if (m_Textures.isValid(id))
+		{
+			return &m_Textures[id];
+		}
+		return &m_Textures[0];
+	}
+	// 名前でテクスチャデータを取得
+	TextureData* GetTextureData(const std::wstring& name)
+	{
+		if (m_TextureNameContainer.contains(name))
+		{
+			return &m_Textures[m_TextureNameContainer[name]];
+		}
+		return &m_Textures[0];
+	}
 private:
 	ResourceManager* m_ResourceManager = nullptr;
 	GraphicsEngine* m_GraphicsEngine = nullptr;

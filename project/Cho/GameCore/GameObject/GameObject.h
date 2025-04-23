@@ -70,6 +70,7 @@ public:
 	CameraAPI camera;				// CameraAPI
 	LineRendererAPI lineRenderer;	// LineRendererAPI
 	Rigidbody2DAPI rigidbody2D;		// Rigidbody2DAPI
+	MaterialAPI material;			// MaterialAPI
 
 	InputAPI input;					// InputAPI
 
@@ -102,6 +103,7 @@ private:
 		InitializeCameraAPI();
 		InitializeLineRendererAPI();
 		InitializeRigidbody2DAPI();
+		InitializeMaterialAPI();
 		InitializeInputAPI();
 	}
 
@@ -109,6 +111,7 @@ private:
 	void InitializeCameraAPI();
 	void InitializeLineRendererAPI();
 	void InitializeRigidbody2DAPI();
+	void InitializeMaterialAPI();
 	void InitializeInputAPI();
 public:
 	// コンストラクタ
