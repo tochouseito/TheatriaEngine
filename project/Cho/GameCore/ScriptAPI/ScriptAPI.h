@@ -88,11 +88,21 @@ struct Rigidbody2DAPI
 	// ライン上の最初にヒットしたオブジェクトを取得
 	std::function<GameObject& (const Vector2& start, const Vector2& end)> Linecast;
 private:
-	//friend struct ScriptContext;
 	friend class GameObject;
 	Rigidbody2DComponent* data = nullptr;
 	// 最後の法線（内部的に保持、ただし状態は保持しないなら静的でもよい）
 	b2Vec2 m_LastHitNormal = b2Vec2(0.0f, 1.0f); // 一時的な用途
+};
+
+// MaterialAPI
+struct MaterialAPI
+{
+	// 関数
+	Color& color() { return data->color; }
+	std::wstring& textureName() { return data->textureName; }
+private:
+	friend class GameObject;
+	MaterialComponent* data = nullptr;
 };
 
 //InputAPI

@@ -152,6 +152,22 @@ void GameObject::InitializeRigidbody2DAPI()
 	}
 }
 
+void GameObject::InitializeMaterialAPI()
+{
+	if (!m_ECS || !m_ResourceManager)
+	{
+		material.data = nullptr;
+		return;
+	}
+	// MaterialComponent を取得
+	MaterialComponent* mat = m_ECS->GetComponent<MaterialComponent>(m_Entity);
+	material.data = mat;
+	if (mat)
+	{
+		
+	}
+}
+
 void GameObject::InitializeInputAPI()
 {
 	if (!m_InputManager)

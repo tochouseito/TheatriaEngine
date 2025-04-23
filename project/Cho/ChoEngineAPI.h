@@ -39,5 +39,6 @@ namespace ChoSystem
 		GameParameterVariant& outValue);
 	// ゲームオブジェクト複製
 	CHO_API void CloneGameObject(std::optional<uint32_t> id, Vector3 generatePosition);
+
 #endif
 }

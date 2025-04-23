@@ -126,16 +126,28 @@ void MaterialEditorSystem::TransferComponent(const MaterialComponent& material)
 	BUFFER_DATA_MATERIAL data = {};
 	data.color = material.color;
 	data.enableLighting = material.enableLighting;
-	if (material.textureID)
+	if (material.enableTexture)
 	{
 		data.enableTexture = true;
-		data.textureId = material.textureID.value();
+		if (!material.textureName.empty()&&m_pResourceManager->GetTextureManager()->IsTextureExist(material.textureName))
+		{
+			if (material.textureID.has_value())
+			{
+				data.textureId = material.textureID.value();
+			} else
+			{
+				data.textureId = m_pResourceManager->GetTextureManager()->GetTextureID(material.textureName);
+			}
+		} else
+		{
+			data.textureId = 0;
+		}
 	} else
 	{
 		data.enableTexture = 0;
 		data.textureId = 0;
 	}
-	data.matUV = material.matUV;
+	data.matUV = material.matUV.Identity();
 	data.shininess = material.shininess;
 	m_pIntegrationBuffer->UpdateData(data, material.mapID.value());
 }

@@ -135,6 +135,31 @@ void Inspector::MaterialComponentView(GameObject* object)
 	{
 		ImGui::Text("Material Component");
 		ImGui::ColorEdit4("Color", &material->color.r);
+		ImGui::Checkbox("UseTexture", &material->enableTexture);
+		if (material->enableTexture)
+		{
+			// テクスチャ名を表示
+			if (material->textureName.empty())
+			{
+				ImGui::Text("Texture Name: None");
+			} else
+			{
+				ImGui::Text("Texture Name: %s",ConvertString(material->textureName).c_str());
+			}
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Texture"))
+				{
+					// ドロップされたテクスチャのIDを取得
+					const char* textureName = static_cast<const char*>(payload->Data);
+					// テクスチャ名を設定
+					material->textureName = ConvertString(textureName);
+					// テクスチャIDを取得
+					material->textureID = m_EngineCommand->GetResourceManager()->GetTextureManager()->GetTextureID(material->textureName);
+				}
+				ImGui::EndDragDropTarget();
+			}
+		}
 	}
 }
 
