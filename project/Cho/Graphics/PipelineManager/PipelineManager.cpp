@@ -406,42 +406,94 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 			L"Cho/Resources/EngineAssets/Shader/IntegrationDraw/IntegrationDraw.VS.hlsl",
 			L"vs_6_5"
 		);
-	ComPtr<ID3D12ShaderReflection> pVSReflection = m_pShaderCompiler->ReflectShader(pVSBlob.Get());
+	//ComPtr<ID3D12ShaderReflection> pVSReflection = m_pShaderCompiler->ReflectShader(pVSBlob.Get());
 
 	ComPtr<IDxcBlob> pPSBlob =
 		m_pShaderCompiler->CompileShader(
 			L"Cho/Resources/EngineAssets/Shader/IntegrationDraw/IntegrationDraw.PS.hlsl",
 			L"ps_6_5"
 		);
-	ComPtr<ID3D12ShaderReflection> pPSReflection = m_pShaderCompiler->ReflectShader(pPSBlob.Get());
+	//ComPtr<ID3D12ShaderReflection> pPSReflection = m_pShaderCompiler->ReflectShader(pPSBlob.Get());
 	// CreateRootSignature
 	D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc = {};
 	rootSignatureDesc.Flags =
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-	// RootParameters
-	std::vector< D3D12_ROOT_PARAMETER>rootParameters;
-	std::vector<D3D12_DESCRIPTOR_RANGE>descriptorRange;
-	std::vector<std::pair<uint32_t, std::string>> parameterPair;
-	// Vertex Buffer
-	parameterPair = CreateRootParameters(pVSReflection.Get(), rootParameters, descriptorRange, D3D12_SHADER_VISIBILITY_VERTEX);
-	for (std::pair<uint32_t, std::string> rootParam : parameterPair)
-	{
-		m_IntegratePSO.rootParameters.push_back(rootParam);
-	}
-	// Pixel Shader
-	parameterPair = CreateRootParameters(pPSReflection.Get(), rootParameters, descriptorRange, D3D12_SHADER_VISIBILITY_PIXEL);
-	uint32_t offset = static_cast<uint32_t>(parameterPair.size());
-	for (std::pair<uint32_t, std::string> rootParam : parameterPair)
-	{
-		rootParam.first += offset;
-		m_IntegratePSO.rootParameters.push_back(rootParam);
-	}
-	for (int32_t i = 0; i < rootParameters.size(); ++i)
-	{
-		rootParameters[i].DescriptorTable.pDescriptorRanges = &descriptorRange[i];
-	}
-	rootSignatureDesc.pParameters = rootParameters.data();
-	rootSignatureDesc.NumParameters = static_cast<UINT>(rootParameters.size());
+
+	// ジェネリックに作成
+	D3D12_ROOT_PARAMETER rootParameters[5] = {};
+
+	// ViewProjection
+	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	rootParameters[0].Descriptor.ShaderRegister = 0;
+	// IntegrationTransform
+	D3D12_DESCRIPTOR_RANGE integrationTransformRange = {};
+	integrationTransformRange.BaseShaderRegister = 0;
+	integrationTransformRange.NumDescriptors = 1;
+	integrationTransformRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	integrationTransformRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	rootParameters[1].DescriptorTable.pDescriptorRanges = &integrationTransformRange;
+	rootParameters[1].DescriptorTable.NumDescriptorRanges = 1;
+	// UseTransformList
+	D3D12_DESCRIPTOR_RANGE useTransformListRange = {};
+	useTransformListRange.BaseShaderRegister = 1;
+	useTransformListRange.NumDescriptors = 1;
+	useTransformListRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	useTransformListRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	rootParameters[2].DescriptorTable.pDescriptorRanges = &useTransformListRange;
+	rootParameters[2].DescriptorTable.NumDescriptorRanges = 1;
+	// IntegrationMaterial
+	D3D12_DESCRIPTOR_RANGE integrationMaterialRange = {};
+	integrationMaterialRange.BaseShaderRegister = 0;
+	integrationMaterialRange.NumDescriptors = 1;
+	integrationMaterialRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	integrationMaterialRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[3].DescriptorTable.pDescriptorRanges = &integrationMaterialRange;
+	rootParameters[3].DescriptorTable.NumDescriptorRanges = 1;
+	// Texture
+	D3D12_DESCRIPTOR_RANGE textureRange = {};
+	textureRange.BaseShaderRegister = 1;
+	textureRange.NumDescriptors = 1;
+	textureRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	textureRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[4].DescriptorTable.pDescriptorRanges = &textureRange;
+	rootParameters[4].DescriptorTable.NumDescriptorRanges = 1;
+
+	rootSignatureDesc.pParameters = rootParameters;
+	rootSignatureDesc.NumParameters = _countof(rootParameters);
+
+	//// RootParameters
+	//std::vector< D3D12_ROOT_PARAMETER>rootParameters;
+	//std::vector<D3D12_DESCRIPTOR_RANGE>descriptorRange;
+	//std::vector<std::pair<uint32_t, std::string>> parameterPair;
+	//// Vertex Buffer
+	//parameterPair = CreateRootParameters(pVSReflection.Get(), rootParameters, descriptorRange, D3D12_SHADER_VISIBILITY_VERTEX);
+	//for (std::pair<uint32_t, std::string> rootParam : parameterPair)
+	//{
+	//	m_IntegratePSO.rootParameters.push_back(rootParam);
+	//}
+	//// Pixel Shader
+	//parameterPair = CreateRootParameters(pPSReflection.Get(), rootParameters, descriptorRange, D3D12_SHADER_VISIBILITY_PIXEL);
+	//uint32_t offset = static_cast<uint32_t>(parameterPair.size());
+	//for (std::pair<uint32_t, std::string> rootParam : parameterPair)
+	//{
+	//	rootParam.first += offset;
+	//	m_IntegratePSO.rootParameters.push_back(rootParam);
+	//}
+	//for (int32_t i = 0; i < rootParameters.size(); ++i)
+	//{
+	//	rootParameters[i].DescriptorTable.pDescriptorRanges = &descriptorRange[i];
+	//}
+	//rootSignatureDesc.pParameters = rootParameters.data();
+	//rootSignatureDesc.NumParameters = static_cast<UINT>(rootParameters.size());
 	// Static Sampler
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
 	staticSamplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;// バイリニアフィルタ
