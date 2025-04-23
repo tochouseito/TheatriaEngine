@@ -117,6 +117,13 @@ void MainMenu::FileMenu()
 		{
 			m_EngineCommand->SaveProjectFile(FileSystem::m_sProjectName);
 		}
+        if (m_EditorManager->GetWorkSpaceType() == WorkSpaceType::EffectEdit)
+        {
+            if (ImGui::MenuItem("エフェクトを保存"))
+            {
+
+            }
+        }
         ImGui::EndMenu();
     }
 }

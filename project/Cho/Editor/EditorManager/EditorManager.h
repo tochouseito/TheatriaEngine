@@ -13,6 +13,7 @@
 #include "Editor/Console/Console.h"
 #include "Editor/EffectEditor/EffectEditor.h"
 #include "Editor/EffectView/EffectView.h"
+#include "Editor/EffectHierarchy/EffectHierarchy.h"
 
 enum WorkSpaceType
 {
@@ -39,6 +40,7 @@ public:
 		m_Console = std::make_unique<Console>(this);
 		m_EffectEditor = std::make_unique<EffectEditor>(this);
 		m_EffectView = std::make_unique<EffectView>(this,m_DebugCamera.get());
+		m_EffectHierarchy = std::make_unique<EffectHierarchy>(this);
 	}
 	~EditorManager()
 	{
@@ -48,6 +50,7 @@ public:
 	EngineCommand* GetEngineCommand() { return m_EngineCommand; }
 	InputManager* GetInputManager() { return m_InputManager; }
 	void SetWorkSpaceType(const std::string& typeName);
+	WorkSpaceType GetWorkSpaceType() { return m_WorkSpaceType; }
 private:
 	EngineCommand* m_EngineCommand = nullptr;
 	InputManager* m_InputManager = nullptr;
@@ -62,6 +65,7 @@ private:
 	std::unique_ptr<Console> m_Console = nullptr;
 	std::unique_ptr<EffectEditor> m_EffectEditor = nullptr;
 	std::unique_ptr<EffectView> m_EffectView = nullptr;
+	std::unique_ptr<EffectHierarchy> m_EffectHierarchy = nullptr;
 
 	// ワークスペース
 	WorkSpaceType m_WorkSpaceType = WorkSpaceType::SceneEdit;

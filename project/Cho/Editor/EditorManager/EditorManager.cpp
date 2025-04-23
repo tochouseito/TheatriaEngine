@@ -25,6 +25,8 @@ void EditorManager::Initialize()
 	m_EffectView->Initialize();
 	// EffectEditor
 	m_EffectEditor->Initialize();
+	// EffectHierarchy
+	m_EffectHierarchy->Initialize();
 }
 
 void EditorManager::Update()
@@ -52,6 +54,8 @@ void EditorManager::Update()
 		m_EffectView->Update();
 		// EffectEditor
 		m_EffectEditor->Update();
+		// EffectHierarchy
+		m_EffectHierarchy->Update();
 		break;
 	default:
 		break;
