@@ -1672,7 +1672,7 @@ bool Cho::FileSystem::ProcessFile(const path& filePath, EngineCommand* engineCom
     if (wFileName.ends_with(L".fbx") || wFileName.ends_with(L".gltf") || wFileName.ends_with(L".obj"))
     {
 		// モデルの処理
-        return false;
+        return engineCommand->GetResourceManager()->GetModelManager()->LoadModelFile(filePath);
     }
 	// 音声ファイル
 	if (wFileName.ends_with(L".wav") || wFileName.ends_with(L".mp3"))

@@ -2,9 +2,14 @@
 #include "ChoMath.h"
 #include "Core/Utility/FVector.h"
 #include "SDK/DirectX/DirectX12/stdafx/stdafx.h"
+#include "Core/Utility/Components.h"
 #include <unordered_map>
 #include <filesystem>
 #include <list>
+// assimp
+#include<assimp/Importer.hpp>
+#include<assimp/scene.h>
+#include<assimp/postprocess.h>
 // 頂点データ構造体
 struct VertexData
 {

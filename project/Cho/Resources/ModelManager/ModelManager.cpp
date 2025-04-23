@@ -7,10 +7,6 @@
 #include "Core/ChoLog/ChoLog.h"
 #include "Core/Utility/GenerateUnique.h"
 using namespace Cho;
-// assimp
-#include<assimp/Importer.hpp>
-#include<assimp/scene.h>
-#include<assimp/postprocess.h>
 
 bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 {
@@ -19,6 +15,10 @@ bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 	std::string line;// ファイルから読んだ1行を格納するもの
 	Assimp::Importer importer;
 	std::string filePathString = filePath.string();
+	ModelData modelData;
+	// 頂点数とインデックス数
+	uint32_t vertices=0;// 頂点数
+	uint32_t indices=0;// インデックス数
 
 	// ここからファイルを開く
 	Log::Write(LogLevel::Info, "Start ReadFile");
@@ -32,20 +32,17 @@ bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 		Log::Write(LogLevel::Assert, "No Meshes");// メッシュがないのは対応しない
 	}
 	// SceneのRootNodeを読んでシーン全体の階層構造を作り上げる
-	modelData->rootNode = ReadNode(scene->mRootNode);
-
+	modelData.rootNode = ReadNode(scene->mRootNode);
+	// 
+	modelData.name = filePath.stem().wstring();
+	modelData.name = GenerateUniqueName(modelData.name, m_ModelNameContainer);
 	// メッシュのデータを保存
-	Meshes meshes;
-	meshes.meshesName = entry.path().stem().string();
-	// 各メッシュの名前を保存
 	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex)
 	{
 		MeshData meshData;
 		aiMesh* mesh = scene->mMeshes[meshIndex];
-		meshData.name = mesh->mName.C_Str();
-		modelData->meshNames.push_back(meshData.name);
-		modelData->objects[meshData.name];// ObjectDataを作成
-		meshData.size.vertices = mesh->mNumVertices;
+		meshData.name = ConvertString(mesh->mName.C_Str());
+		vertices = mesh->mNumVertices;
 		for (uint32_t faceIndex = 0; faceIndex < mesh->mNumFaces; ++faceIndex)
 		{
 			aiFace& face = mesh->mFaces[faceIndex];
@@ -54,21 +51,21 @@ bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 			{
 				for (uint32_t element = 0; element < face.mNumIndices; ++element)
 				{
-					meshData.size.indices++;
+					indices++;
 				}
 			}
 			// 四角形の処理（四角形の2つの三角形に分割）
 			else if (face.mNumIndices == 4)
 			{
 				// 四角形の1つ目の三角形(0,1,2)
-				meshData.size.indices++;
-				meshData.size.indices++;
-				meshData.size.indices++;
+				indices++;
+				indices++;
+				indices++;
 
 				// 四角形の2つ目の三角形(0,1,2)
-				meshData.size.indices++;
-				meshData.size.indices++;
-				meshData.size.indices++;
+				indices++;
+				indices++;
+				indices++;
 			}
 			// サポート外のポリゴン数の場合のエラーチェック
 			else
@@ -77,100 +74,11 @@ bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 			}
 		}
 
-		// VBVのSRVリソース作成
-		meshData.srvVBVIndex = rvManager_->GetNewHandle();
-		rvManager_->CreateSRVResource(
-			meshData.srvVBVIndex,
-			sizeof(VertexData) * meshData.size.vertices
-		);
-
-		rvManager_->CreateSRVforStructuredBuffer(
-			meshData.srvVBVIndex,
-			static_cast<UINT>(meshData.size.vertices),
-			static_cast<UINT>(sizeof(VertexData))
-		);
-
-		// IBVのSRVリソース作成
-		meshData.srvIBVIndex = rvManager_->GetNewHandle();
-		rvManager_->CreateSRVResource(
-			meshData.srvIBVIndex,
-			sizeof(uint32_t) * meshData.size.indices
-		);
-
-		rvManager_->CreateSRVforStructuredBuffer(
-			meshData.srvIBVIndex,
-			static_cast<UINT>(meshData.size.indices),
-			static_cast<UINT>(sizeof(uint32_t))
-		);
-
 		// メモリ確保
-		meshData.vertices.resize(meshData.size.vertices);
-		meshData.indices.resize(meshData.size.indices);
+		meshData.vertices.resize(vertices);
+		meshData.indices.resize(indices);
 
-		meshes.meshData.push_back(meshData);
-		if (!mesh->mNumBones)
-		{
-			modelData->isBone = false;
-		} else
-		{
-			modelData->isBone = true;
-		}
-	}
-
-	if (scene->mNumAnimations != 0)
-	{
-		meshes.meshData[0].isAnimation = true;
-		LoadAnimationFile(modelData, directoryPath, entry);
-		if (modelData->isBone)
-		{
-			if (scene->mNumMeshes > 1)
-			{
-				// 複数メッシュのアニメーションは対応しない
-				assert(0);
-			}
-			CreateSkeleton(modelData, modelData->rootNode);
-			uint32_t meshNum = 0;
-			for (std::string& name : modelData->meshNames)
-			{
-				name;
-				CreateSkinCluster(modelData, meshes.meshData[meshNum]);
-				meshNum++;
-			}
-			// Resourceの作成
-			modelData->meshIndex = rvManager_->CreateMeshResource(
-				&meshes
-			);
-
-			meshNum = 0;
-			for (std::string& name : modelData->meshNames)
-			{
-				modelData->objects[name].infoCBVIndex = rvManager_->CreateCBV(sizeof(SkinningInformation));
-				rvManager_->GetCBVResource(modelData->objects[name].infoCBVIndex)->Map(0, nullptr, reinterpret_cast<void**>(&modelData->objects[name].infoData));
-				modelData->objects[name].infoData->numVertices = static_cast<uint32_t>(meshes.meshData[meshNum].size.vertices);
-				meshNum++;
-			}
-		}
-	} else
-	{
-		// Resourceの作成
-		modelData->meshIndex = rvManager_->CreateMeshResource(
-			&meshes
-		);
-	}
-
-	Meshes* mappedMeshes = rvManager_->GetMesh(modelData->meshIndex);
-
-	// マッピング
-	for (MeshData& meshData : mappedMeshes->meshData)
-	{
-		meshData.mappedVertices = nullptr;
-		meshData.mappedIndices = nullptr;
-		rvManager_->GetMeshViewData(meshData.meshViewIndex)->vbvData.resource->Map(
-			0, nullptr, &meshData.mappedVertices
-		);
-		rvManager_->GetMeshViewData(meshData.meshViewIndex)->ibvData.resource->Map(
-			0, nullptr, &meshData.mappedIndices
-		);
+		modelData.meshes.push_back(meshData);
 	}
 
 	// Meshの解析
@@ -180,7 +88,7 @@ bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 		assert(mesh->HasNormals());// 法線がないMeshは非対応
 		std::string meshName = mesh->mName.C_Str();
 		std::wstring meshName2 = ConvertString(mesh->mName.C_Str());
-		modelData->objects[meshName].material.isTexture = mesh->HasTextureCoords(0);
+		//modelData->objects[meshName].material.isTexture = mesh->HasTextureCoords(0);
 
 		for (uint32_t vertexIndex = 0; vertexIndex < mesh->mNumVertices; ++vertexIndex)
 		{
@@ -191,15 +99,15 @@ bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 			if (mesh->HasTextureCoords(0))
 			{
 				aiVector3D& texcoord = mesh->mTextureCoords[0][vertexIndex];
-				mappedMeshes->meshData[meshIndex].vertices[vertexIndex].texcoord = { texcoord.x,texcoord.y };
+				modelData.meshes[meshIndex].vertices[vertexIndex].texCoord = { texcoord.x,texcoord.y };
 			} else
 			{
-				mappedMeshes->meshData[meshIndex].vertices[vertexIndex].texcoord = { 0.0f,0.0f };// ダミーのUV座標
+				modelData.meshes[meshIndex].vertices[vertexIndex].texCoord = { 0.0f,0.0f };// ダミーのUV座標
 			}
-			mappedMeshes->meshData[meshIndex].vertices[vertexIndex].position = { position.x,position.y,position.z,1.0f };
-			mappedMeshes->meshData[meshIndex].vertices[vertexIndex].normal = { normal.x,normal.y,normal.z };
-			mappedMeshes->meshData[meshIndex].vertices[vertexIndex].position.x *= -1.0f;
-			mappedMeshes->meshData[meshIndex].vertices[vertexIndex].normal.x *= -1.0f;
+			modelData.meshes[meshIndex].vertices[vertexIndex].position = { position.x,position.y,position.z,1.0f };
+			modelData.meshes[meshIndex].vertices[vertexIndex].normal = { normal.x,normal.y,normal.z };
+			modelData.meshes[meshIndex].vertices[vertexIndex].position.x *= -1.0f;
+			modelData.meshes[meshIndex].vertices[vertexIndex].normal.x *= -1.0f;
 		}
 		// Index解析
 		uint32_t indexCount = 0;
@@ -212,7 +120,7 @@ bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 				for (uint32_t element = 0; element < face.mNumIndices; ++element)
 				{
 					uint32_t vertexIndex = face.mIndices[element];
-					mappedMeshes->meshData[meshIndex].indices[indexCount] = vertexIndex;
+					modelData.meshes[meshIndex].indices[indexCount] = vertexIndex;
 					indexCount++;
 				}
 			}
@@ -220,19 +128,19 @@ bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 			else if (face.mNumIndices == 4)
 			{
 				// 四角形の1つ目の三角形(0,1,2)
-				mappedMeshes->meshData[meshIndex].indices[indexCount] = face.mIndices[0];
+				modelData.meshes[meshIndex].indices[indexCount] = face.mIndices[0];
 				indexCount++;
-				mappedMeshes->meshData[meshIndex].indices[indexCount] = face.mIndices[1];
+				modelData.meshes[meshIndex].indices[indexCount] = face.mIndices[1];
 				indexCount++;
-				mappedMeshes->meshData[meshIndex].indices[indexCount] = face.mIndices[2];
+				modelData.meshes[meshIndex].indices[indexCount] = face.mIndices[2];
 				indexCount++;
 
 				// 四角形の2つ目の三角形(0,1,2)
-				mappedMeshes->meshData[meshIndex].indices[indexCount] = face.mIndices[0];
+				modelData.meshes[meshIndex].indices[indexCount] = face.mIndices[0];
 				indexCount++;
-				mappedMeshes->meshData[meshIndex].indices[indexCount] = face.mIndices[2];
+				modelData.meshes[meshIndex].indices[indexCount] = face.mIndices[2];
 				indexCount++;
-				mappedMeshes->meshData[meshIndex].indices[indexCount] = face.mIndices[3];
+				modelData.meshes[meshIndex].indices[indexCount] = face.mIndices[3];
 			}
 			// サポート外のポリゴン数の場合のエラーチェック
 			else
@@ -241,70 +149,26 @@ bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 			}
 		}
 
-		// コピー
-		memcpy(
-			mappedMeshes->meshData[meshIndex].mappedVertices,
-			mappedMeshes->meshData[meshIndex].vertices.data(),
-			sizeof(VertexData) * mappedMeshes->meshData[meshIndex].size.vertices
-		);
-		memcpy(
-			mappedMeshes->meshData[meshIndex].mappedIndices,
-			mappedMeshes->meshData[meshIndex].indices.data(),
-			sizeof(uint32_t) * mappedMeshes->meshData[meshIndex].size.indices
-		);
+		//// マテリアル解析
+		//uint32_t materialIndex = mesh->mMaterialIndex;
+		//aiMaterial* material = scene->mMaterials[materialIndex];
+		//if (material->GetTextureCount(aiTextureType_DIFFUSE) != 0)
+		//{
+		//	aiString textureFilePath;
+		//	material->GetTexture(aiTextureType_DIFFUSE, 0, &textureFilePath);
+		//	// 画像テクスチャの読み込み処理
+		//	texLoader_->Load(textureFilePath.C_Str());
 
-		// マップ解除
-		rvManager_->GetMeshViewData(
-			mappedMeshes->meshData[meshIndex].meshViewIndex)->vbvData.resource->
-			Unmap(0, nullptr);
-		rvManager_->GetMeshViewData(
-			mappedMeshes->meshData[meshIndex].meshViewIndex)->ibvData.resource->
-			Unmap(0, nullptr);
-		mappedMeshes->meshData[meshIndex].mappedVertices = nullptr;
-		mappedMeshes->meshData[meshIndex].mappedIndices = nullptr;
-
-		/*ボーン解析*/
-		for (uint32_t boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex)
-		{
-			aiBone* bone = mesh->mBones[boneIndex];// AssimpではJointをBoneと呼んでいる
-			std::string jointName = bone->mName.C_Str();
-			JointWeightData& jointWeightData = modelData->objects[meshName].skinClusterData[jointName];
-
-			aiMatrix4x4 bindPoseMatrixAssimp = bone->mOffsetMatrix.Inverse();// BindPoseMatrixに戻す
-			aiVector3D scale, translate;
-			aiQuaternion rotate;
-			bindPoseMatrixAssimp.Decompose(scale, rotate, translate);// 成分を抽出
-			/*左手系のBindPoseMatrixを作る*/
-			Matrix4 bindPoseMatrix = MakeAffineMatrix(
-				{ scale.x,scale.y,scale.z }, { rotate.x,-rotate.y,-rotate.z,rotate.w }, { -translate.x,translate.y,translate.z });
-			/*InverseBindPoseMatrixにする*/
-			jointWeightData.inverseBindPoseMatrix = Matrix4::Inverse(bindPoseMatrix);
-
-			for (uint32_t weightIndex = 0; weightIndex < bone->mNumWeights; ++weightIndex)
-			{
-				jointWeightData.vertexWeights.push_back({ bone->mWeights[weightIndex].mWeight,bone->mWeights[weightIndex].mVertexId });
-			}
-		}
-
-		CreateInfluence(modelData, mappedMeshes->meshData[meshIndex]);
-
-		// マテリアル解析
-		uint32_t materialIndex = mesh->mMaterialIndex;
-		aiMaterial* material = scene->mMaterials[materialIndex];
-		if (material->GetTextureCount(aiTextureType_DIFFUSE) != 0)
-		{
-			aiString textureFilePath;
-			material->GetTexture(aiTextureType_DIFFUSE, 0, &textureFilePath);
-			// 画像テクスチャの読み込み処理
-			texLoader_->Load(textureFilePath.C_Str());
-
-			modelData->objects[meshName].material.textureName = fs::path(textureFilePath.C_Str()).filename().string();
-			modelData->objects[meshName].material.isTexture = true;
-		} else
-		{
-			modelData->objects[meshName].material.isTexture = false;
-		}
+		//	modelData->objects[meshName].material.textureName = fs::path(textureFilePath.C_Str()).filename().string();
+		//	modelData->objects[meshName].material.isTexture = true;
+		//} else
+		//{
+		//	modelData->objects[meshName].material.isTexture = false;
+		//}
 	}
+	// modelDataを追加
+	AddModelData(modelData);
+	return true;
 }
 
 // 名前で検索してインデックスを取得する
@@ -350,18 +214,18 @@ void ModelManager::RegisterModelUseList(const std::variant<uint32_t, std::wstrin
 				return;
 			}
 		}
-		// ほかのモデルに登録されていたら、削除
-		for (auto& model : m_Models.GetVector())
+	}
+	// ほかのモデルに登録されていたら、削除
+	for (auto& model : m_Models.GetVector())
+	{
+		if (model.useTransformList.size() > 0)
 		{
-			if (model.useTransformList.size() > 0)
+			for (auto& index : model.useTransformList)
 			{
-				for (auto& index : model.useTransformList)
+				if (index == transformMapID)
 				{
-					if (index == transformMapID)
-					{
-						model.useTransformList.remove(index);
-						break;
-					}
+					model.useTransformList.remove(index);
+					break;
 				}
 			}
 		}
