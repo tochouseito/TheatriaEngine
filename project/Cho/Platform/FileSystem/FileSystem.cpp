@@ -361,7 +361,20 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory,BaseScene* sce
 				comps["LineRenderer"] = Cho::Serialization::ToJson(*lineRenderers);
 			}
             break;
-
+		case ObjectType::ParticleSystem:
+			if (const auto* t = ecs->GetComponent<TransformComponent>(entity))
+			{
+				comps["Transform"] = Cho::Serialization::ToJson(*t);
+			}
+			if (const auto* p = ecs->GetComponent<ParticleComponent>(entity))
+			{
+				comps["Particle"] = Cho::Serialization::ToJson(*p);
+			}
+			if (const auto* e = ecs->GetComponent<EmitterComponent>(entity))
+			{
+				comps["Emitter"] = Cho::Serialization::ToJson(*e);
+			}
+            break;
         default:
             break;
         }
@@ -610,6 +623,35 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
 					box->density = b.density;
 					box->friction = b.friction;
 					box->restitution = b.restitution;
+                }
+
+                // Emitter
+                if (comps.contains("Emitter"))
+                {
+                    EmitterComponent e{};
+                    auto& je = comps["Emitter"];
+					Deserialization::FromJson(je, e);
+					EmitterComponent* emitter = ecs->AddComponent<EmitterComponent>(entity);
+					*emitter = e;
+					emitter->bufferIndex = resourceManager->CreateConstantBuffer<BUFFER_DATA_EMITTER>();
+                }
+
+				// Particle
+                if (comps.contains("Particle"))
+                {
+                    ParticleComponent p{};
+                    auto& jp = comps["Particle"];
+                    Deserialization::FromJson(jp, p);
+                    ParticleComponent* particle = ecs->AddComponent<ParticleComponent>(entity);
+                    *particle = p;
+                    // パーティクル
+                    particle->bufferIndex = resourceManager->CreateRWStructuredBuffer<BUFFER_DATA_PARTICLE>(particle->count);
+                    // PerFrame
+                    particle->perFrameBufferIndex = resourceManager->CreateConstantBuffer<BUFFER_DATA_PARTICLE_PERFRAME>();
+                    // FreeListIndex
+                    particle->freeListIndexBufferIndex = resourceManager->CreateRWStructuredBuffer<int32_t>(1);
+                    // FreeList
+                    particle->freeListBufferIndex = resourceManager->CreateRWStructuredBuffer<uint32_t>(particle->count);
                 }
             }
         }
@@ -903,6 +945,24 @@ json Cho::Serialization::ToJson(const BoxCollider2DComponent& bc)
 	j["density"] = bc.density;
 	j["friction"] = bc.friction;   
 	j["restitution"] = bc.restitution;
+	return j;
+}
+
+json Cho::Serialization::ToJson(const EmitterComponent& e)
+{
+	json j;
+	j["position"] = { e.position.x, e.position.y, e.position.z };
+	j["radius"] = e.radius;
+	j["count"] = e.count;
+	j["frequency"] = e.frequency;
+	j["frequencyTime"] = e.frequencyTime;
+	return j;
+}
+
+json Cho::Serialization::ToJson(const ParticleComponent& p)
+{
+    json j;
+	j["count"] = p.count;
 	return j;
 }
 
@@ -1602,6 +1662,20 @@ void Cho::Deserialization::FromJson(const json& j, BoxCollider2DComponent& bc)
 	bc.density = j.value("density", 1.0f);
 	bc.friction = j.value("friction", 0.5f);
 	bc.restitution = j.value("restitution", 0.0f);
+}
+
+void Cho::Deserialization::FromJson(const json& j, EmitterComponent& e)
+{
+	e.position = { j["position"][0], j["position"][1], j["position"][2] };
+	e.radius = j.value("radius", 1.0f);
+	e.count = j.value("count", 100);
+	e.frequency = j.value("frequency", 0.1f);
+	e.frequencyTime = j.value("frequencyTime", 0.1f);
+}
+
+void Cho::Deserialization::FromJson(const json& j, ParticleComponent& p)
+{
+	p.count = j.value("count", 1024);
 }
 
 void Cho::FileSystem::ScanFolder(const path& rootPath, EngineCommand* engineCommand)

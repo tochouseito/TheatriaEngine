@@ -192,6 +192,8 @@ void GameCore::CreateSystems(InputManager* input, ResourceManager* resourceManag
 	m_pSingleSystemManager->RegisterSystem(std::move(scriptFinalizeSystem), SystemState::Finalize);
 	std::unique_ptr<ECSManager::ISystem> physicsResetSystem = std::make_unique<Rigidbody2DResetSystem>(m_pECSManager.get(), m_pPhysicsWorld.get());
 	m_pSingleSystemManager->RegisterSystem(std::move(physicsResetSystem), SystemState::Finalize);
+	std::unique_ptr<ECSManager::ISystem> particleFinaSystem = std::make_unique<ParticleInitializeSystem>(m_pECSManager.get(), resourceManager, graphicsEngine);
+	m_pSingleSystemManager->RegisterSystem(std::move(particleFinaSystem), SystemState::Finalize);
 	// マルチシステム
 	// 初期化システムの登録
 	// 更新システムの登録

@@ -15,12 +15,12 @@ PixelShaderOutput main(VSOutput input) {
     
     // テクスチャ
     //float4 transformedUV = mul(float4(input.texcoord, 0.0f, 1.0f), uvTransform);
-    float4 textureColor = gTexture.Sample(gSampler, input.texcoord);
+    float4 textureColor = gTexture.Sample(gSampler, input.texcoord.xy);
     output.color = textureColor * input.color;
     // textureのa値が0のときにPixelを棄却
-    if (textureColor.a <= 0.5) {
-        discard;
-    }
+    //if (textureColor.a <= 0.5) {
+    //    discard;
+    //}
     if (textureColor.a == 0.0) {
         discard;
     }
