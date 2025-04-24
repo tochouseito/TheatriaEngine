@@ -85,6 +85,17 @@ void CommandContext::BarrierTransition(ID3D12Resource* pResource, D3D12_RESOURCE
 	m_CommandList->ResourceBarrier(1, &barrier);
 }
 
+void CommandContext::BarrierUAV(D3D12_RESOURCE_BARRIER_TYPE Type, D3D12_RESOURCE_BARRIER_FLAGS Flags, ID3D12Resource* pResource)
+{
+	// 並列処理の阻止
+	D3D12_RESOURCE_BARRIER barrier{};
+	barrier.Type = Type;
+	barrier.Flags = Flags;
+	barrier.UAV.pResource = pResource;
+	// UAVバリアを張る
+	m_CommandList->ResourceBarrier(1, &barrier);
+}
+
 void CommandContext::ResourceBarrier(UINT NumBarriers, const D3D12_RESOURCE_BARRIER* pBarriers)
 {
 	// リソースバリアの設定
@@ -133,10 +144,22 @@ void CommandContext::SetGraphicsPipelineState(ID3D12PipelineState* pso)
 	m_CommandList->SetPipelineState(pso);
 }
 
+void CommandContext::SetComputePipelineState(ID3D12PipelineState* pso)
+{
+	// コンピュートパイプラインステートの設定
+	m_CommandList->SetPipelineState(pso);
+}
+
 void CommandContext::SetGraphicsRootSignature(ID3D12RootSignature* rootSignature)
 {
 	// ルートシグネチャの設定
 	m_CommandList->SetGraphicsRootSignature(rootSignature);
+}
+
+void CommandContext::SetComputeRootSignature(ID3D12RootSignature* rootSignature)
+{
+	// コンピュートルートシグネチャの設定
+	m_CommandList->SetComputeRootSignature(rootSignature);
 }
 
 void CommandContext::SetVertexBuffers(UINT StartSlot, UINT Count, const D3D12_VERTEX_BUFFER_VIEW* pViews)
@@ -157,10 +180,22 @@ void CommandContext::SetGraphicsRootConstantBufferView(UINT RootParameterIndex, 
 	m_CommandList->SetGraphicsRootConstantBufferView(RootParameterIndex, BufferLocation);
 }
 
+void CommandContext::SetComputeRootConstantBufferView(UINT RootParameterIndex, D3D12_GPU_VIRTUAL_ADDRESS BufferLocation)
+{
+	// コンピュートルート定数バッファビューの設定
+	m_CommandList->SetComputeRootConstantBufferView(RootParameterIndex, BufferLocation);
+}
+
 void CommandContext::SetGraphicsRootDescriptorTable(UINT RootParameterIndex, D3D12_GPU_DESCRIPTOR_HANDLE BaseDescriptor)
 {
 	// ルートディスクリプタテーブルの設定
 	m_CommandList->SetGraphicsRootDescriptorTable(RootParameterIndex, BaseDescriptor);
+}
+
+void CommandContext::SetComputeRootDescriptorTable(UINT RootParameterIndex, D3D12_GPU_DESCRIPTOR_HANDLE BaseDescriptor)
+{
+	// コンピュートルートディスクリプタテーブルの設定
+	m_CommandList->SetComputeRootDescriptorTable(RootParameterIndex, BaseDescriptor);
 }
 
 void CommandContext::DrawInstanced(UINT VertexCountPerInstance, UINT InstanceCount, UINT StartVertexLocation, UINT StartInstanceLocation)
@@ -173,6 +208,12 @@ void CommandContext::DrawIndexedInstanced(UINT IndexCountPerInstance, UINT Insta
 {
 	// インデックス付き描画
 	m_CommandList->DrawIndexedInstanced(IndexCountPerInstance, InstanceCount, StartIndexLocation, BaseVertexLocation, StartInstanceLocation);
+}
+
+void CommandContext::Dispatch(UINT ThreadGroupCountX, UINT ThreadGroupCountY, UINT ThreadGroupCountZ)
+{
+	// コンピュートシェーダのディスパッチ
+	m_CommandList->Dispatch(ThreadGroupCountX, ThreadGroupCountY, ThreadGroupCountZ);
 }
 
 GraphicsContext::GraphicsContext(ID3D12Device* device)

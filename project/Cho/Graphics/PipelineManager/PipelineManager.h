@@ -40,6 +40,11 @@ public:
 	PSO GetScreenCopyPSO() { return m_ScreenCopyPSO; }
 	PSO GetIntegratePSO() { return m_IntegratePSO; }
 	PSO GetLinePSO() { return m_LinePSO; }
+	// Particle
+	PSO GetParticlePSO() { return m_ParticlePSO; }
+	PSO GetParticleInitPSO() { return m_ParticleInitPSO; }
+	PSO GetParticleUpdatePSO() { return m_ParticleUpdatePSO; }
+	PSO GetParticleEmitPSO() { return m_ParticleEmitPSO; }
 private:
 	std::vector<std::pair<uint32_t, std::string>> CreateRootParameters(
 		ID3D12ShaderReflection* pReflector,

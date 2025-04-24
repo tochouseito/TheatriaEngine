@@ -143,6 +143,11 @@ void MainMenu::EditMenu()
 			std::unique_ptr<AddCameraObjectCommand> addCameraObject = std::make_unique<AddCameraObjectCommand>();
             m_EngineCommand->ExecuteCommand(std::move(addCameraObject));
 		}
+		if (ImGui::MenuItem("パーティクルシステムオブジェクト"))
+		{
+			std::unique_ptr<AddParticleSystemObjectCommand> addParticleSystemObject = std::make_unique<AddParticleSystemObjectCommand>();
+			m_EngineCommand->ExecuteCommand(std::move(addParticleSystemObject));
+		}
 
         // メニュー選択でポップアップを開く
         if (ImGui::MenuItem("スクリプト"))

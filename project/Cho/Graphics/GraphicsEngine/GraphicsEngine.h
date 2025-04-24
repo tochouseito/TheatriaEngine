@@ -56,6 +56,8 @@ class GraphicsEngine : public Engine
 {
 	friend class TextureManager;
 	friend class EngineCommand;
+	friend class ParticleInitializeSystem;
+	friend class ParticleUpdateSystem;
 public:
 	// Constructor
 	GraphicsEngine(ID3D12Device8* device,ResourceManager* resourceManager,RuntimeMode mode) : 
@@ -83,6 +85,8 @@ public:
 	void PostRenderWithImGui(ImGuiManager* imgui);
 	// レンダーターゲットテクスチャ、ImGui、スワップチェーンのリサイズ
 	void ScreenResize();
+
+	PipelineManager* GetPipelineManager() { return m_PipelineManager.get(); }
 
 	// GameTextureのBufferIDを取得
 	uint32_t GetGameTextureBufferID() { return m_RenderTextures[GameScreen].m_BufferIndex.value(); }

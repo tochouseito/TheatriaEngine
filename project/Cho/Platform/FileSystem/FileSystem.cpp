@@ -533,7 +533,6 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
                         ScriptComponent* script = ecs->AddComponent<ScriptComponent>(entity);
                         script->scriptName = s.scriptName;
 						script->objectID = s.objectID;
-                        //script->entity = s.entity;
                     }
                 }
 

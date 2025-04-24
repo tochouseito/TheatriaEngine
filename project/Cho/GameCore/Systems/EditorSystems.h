@@ -5,6 +5,7 @@
 #include "GameCore/ScriptAPI/ScriptAPI.h"
 
 class ResourceManager;
+class GraphicsEngine;
 
 // エディタのTransform更新システム
 class TransformEditorSystem : public ECSManager::System<TransformComponent>
@@ -78,4 +79,24 @@ private:
 	ECSManager* m_pECS = nullptr;
 	ResourceManager* m_pResourceManager = nullptr;
 	StructuredBuffer<BUFFER_DATA_MATERIAL>* m_pIntegrationBuffer = nullptr;
+};
+// エミッターの更新システム
+class EmitterEditorUpdateSystem : public ECSManager::System<EmitterComponent>
+{
+public:
+	EmitterEditorUpdateSystem(ECSManager* ecs, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine)
+		: ECSManager::System<EmitterComponent>([this](Entity e, EmitterComponent& emitter)
+			{
+				e;
+				UpdateEmitter(emitter);
+			}),
+		m_pECS(ecs), m_pResourceManager(resourceManager), m_pGraphicsEngine(graphicsEngine)
+	{
+	}
+	~EmitterEditorUpdateSystem() = default;
+private:
+	void UpdateEmitter(EmitterComponent& emitter);
+	ECSManager* m_pECS = nullptr;
+	ResourceManager* m_pResourceManager = nullptr;
+	GraphicsEngine* m_pGraphicsEngine = nullptr;
 };

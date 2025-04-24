@@ -3,6 +3,7 @@
 #include "Resources/ResourceManager/ResourceManager.h"
 #include "GameCore/IScript/IScript.h"
 #include "Platform/FileSystem/FileSystem.h"
+#include "Platform/Timer/Timer.h"
 #include "Core/ChoLog/ChoLog.h"
 using namespace Cho;
 
@@ -150,4 +151,30 @@ void MaterialEditorSystem::TransferComponent(const MaterialComponent& material)
 	data.matUV = material.matUV.Identity();
 	data.shininess = material.shininess;
 	m_pIntegrationBuffer->UpdateData(data, material.mapID.value());
+}
+
+void EmitterEditorUpdateSystem::UpdateEmitter(EmitterComponent& emitter)
+{
+	emitter.frequencyTime += DeltaTime();
+
+	// 射出間隔を上回ったら射出許可を出して時間を調整
+	if (emitter.frequency <= emitter.frequencyTime)
+	{
+		emitter.frequencyTime = 0.0f;
+		emitter.emit = 1;
+	} else
+	{
+		// 射出間隔を上回ってないので、許可は出せない
+		emitter.emit = 0;
+	}
+
+	BUFFER_DATA_EMITTER data = {};
+	data.position = emitter.position;
+	data.radius = emitter.radius;
+	data.count = emitter.count;
+	data.frequency = emitter.frequency;
+	data.frequencyTime = emitter.frequencyTime;
+	data.emit = emitter.emit;
+	ConstantBuffer<BUFFER_DATA_EMITTER>* buffer = dynamic_cast<ConstantBuffer<BUFFER_DATA_EMITTER>*>(m_pResourceManager->GetBuffer<IConstantBuffer>(emitter.bufferIndex));
+	buffer->UpdateData(data);
 }

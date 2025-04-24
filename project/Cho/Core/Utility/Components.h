@@ -202,7 +202,7 @@ struct EmitterComponent : public IComponentTag
 // パーティクルコンポーネント
 struct ParticleComponent : public IComponentTag
 {
-	uint32_t count = 512;// パーティクル数
+	uint32_t count = 1024;// パーティクル数
 	Matrix4 matBillboard = ChoMath::MakeIdentity4x4();
 	float time = 0.0f;
 	float deltaTime = 0.0f;

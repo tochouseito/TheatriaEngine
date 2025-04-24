@@ -19,6 +19,7 @@ public:
 
 	virtual void SetDescriptorHeap(ID3D12DescriptorHeap* heap);
 	virtual void BarrierTransition(ID3D12Resource* pResource, D3D12_RESOURCE_STATES Before, D3D12_RESOURCE_STATES After);
+	virtual void BarrierUAV(D3D12_RESOURCE_BARRIER_TYPE Type, D3D12_RESOURCE_BARRIER_FLAGS Flags, ID3D12Resource* pResource);
 	virtual void ResourceBarrier(UINT NumBarriers, const D3D12_RESOURCE_BARRIER* pBarriers);
 	virtual void SetRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE* rtvHandle, D3D12_CPU_DESCRIPTOR_HANDLE* dsvHandle = nullptr);
 	virtual void ClearRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE handle);
@@ -27,13 +28,18 @@ public:
 	virtual void SetScissorRect(const D3D12_RECT& rect);
 	virtual void SetPrimitiveTopology(D3D12_PRIMITIVE_TOPOLOGY topology);
 	virtual void SetGraphicsPipelineState(ID3D12PipelineState* pso);
+	virtual void SetComputePipelineState(ID3D12PipelineState* pso);
 	virtual void SetGraphicsRootSignature(ID3D12RootSignature* rootSignature);
+	virtual void SetComputeRootSignature(ID3D12RootSignature* rootSignature);
 	virtual void SetVertexBuffers(UINT StartSlot, UINT Count, const D3D12_VERTEX_BUFFER_VIEW* pViews);
 	virtual void SetIndexBuffer(const D3D12_INDEX_BUFFER_VIEW* pView);
 	virtual void SetGraphicsRootConstantBufferView(UINT RootParameterIndex, D3D12_GPU_VIRTUAL_ADDRESS BufferLocation);
+	virtual void SetComputeRootConstantBufferView(UINT RootParameterIndex, D3D12_GPU_VIRTUAL_ADDRESS BufferLocation);
 	virtual void SetGraphicsRootDescriptorTable(UINT RootParameterIndex, D3D12_GPU_DESCRIPTOR_HANDLE BaseDescriptor);
+	virtual void SetComputeRootDescriptorTable(UINT RootParameterIndex, D3D12_GPU_DESCRIPTOR_HANDLE BaseDescriptor);
 	virtual void DrawInstanced(UINT VertexCountPerInstance, UINT InstanceCount, UINT StartVertexLocation, UINT StartInstanceLocation);
 	virtual void DrawIndexedInstanced(UINT IndexCountPerInstance, UINT InstanceCount, UINT StartIndexLocation, INT BaseVertexLocation, UINT StartInstanceLocation);
+	virtual void Dispatch(UINT ThreadGroupCountX, UINT ThreadGroupCountY, UINT ThreadGroupCountZ);
 protected:
 	ComPtr<ID3D12CommandAllocator> m_CommandAllocator;
 	ComPtr<ID3D12GraphicsCommandList6> m_CommandList;

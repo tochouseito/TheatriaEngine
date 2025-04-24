@@ -291,7 +291,7 @@ public:
 	// Destructor
 	virtual ~IRWStructuredBuffer() = default;
 	// リソース作成
-	virtual void CreateRWStructuredBufferResource(ID3D12Device* device, const UINT& numElements) = 0;
+	virtual void CreateRWStructuredBufferResource(ID3D12Device8* device, const UINT& numElements) = 0;
 	// SRV作成
 	virtual bool CreateUAV(ID3D12Device8* device, D3D12_UNORDERED_ACCESS_VIEW_DESC& uavDesc, DescriptorHeap* pDescriptorHeap) = 0;
 	// ディスクリプタハンドルを取得

@@ -365,9 +365,8 @@ bool AddEmitterComponent::Execute(EngineCommand* edit)
 	EmitterComponent* emitter = edit->m_GameCore->GetECSManager()->AddComponent<EmitterComponent>(m_Entity);
 	if (!emitter) { return false; }
 	emitter->bufferIndex = edit->m_ResourceManager->CreateConstantBuffer<BUFFER_DATA_EMITTER>();
-	// ParticleComponentを取得
 
-	return false;
+	return true;
 }
 
 bool AddEmitterComponent::Undo(EngineCommand* edit)
@@ -378,8 +377,19 @@ bool AddEmitterComponent::Undo(EngineCommand* edit)
 
 bool AddParticleComponent::Execute(EngineCommand* edit)
 {
-	edit;
-	return false;
+	// ParticleComponentを追加
+	ParticleComponent* particle = edit->m_GameCore->GetECSManager()->AddComponent<ParticleComponent>(m_Entity);
+	if (!particle) { return false; }
+	// Resourceの生成
+	// パーティクル
+	particle->bufferIndex = edit->m_ResourceManager->CreateRWStructuredBuffer<BUFFER_DATA_PARTICLE>(particle->count);
+	// PerFrame
+	particle->perFrameBufferIndex = edit->m_ResourceManager->CreateConstantBuffer<BUFFER_DATA_PARTICLE_PERFRAME>();
+	// FreeListIndex
+	particle->freeListIndexBufferIndex = edit->m_ResourceManager->CreateRWStructuredBuffer<int32_t>(1);
+	// FreeList
+	particle->freeListBufferIndex = edit->m_ResourceManager->CreateRWStructuredBuffer<uint32_t>(particle->count);
+	return true;
 }
 
 bool AddParticleComponent::Undo(EngineCommand* edit)

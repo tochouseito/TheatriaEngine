@@ -158,6 +158,8 @@ void GameCore::CreateSystems(InputManager* input, ResourceManager* resourceManag
 	// 初期化システムの登録
 	std::unique_ptr<ECSManager::ISystem> tfStateSystem = std::make_unique<TransformInitializeSystem>(m_pECSManager.get());
 	m_pSingleSystemManager->RegisterSystem(std::move(tfStateSystem), SystemState::Initialize);
+	std::unique_ptr<ECSManager::ISystem> particleInitSystem = std::make_unique<ParticleInitializeSystem>(m_pECSManager.get(),resourceManager,graphicsEngine);
+	m_pSingleSystemManager->RegisterSystem(std::move(particleInitSystem), SystemState::Initialize);
 	std::unique_ptr<ECSManager::ISystem> scriptGenerateSystem = std::make_unique<ScriptGenerateInstanceSystem>(m_pObjectContainer.get(), input, m_pECSManager.get(), resourceManager);
 	m_pSingleSystemManager->RegisterSystem(std::move(scriptGenerateSystem), SystemState::Initialize);
 	std::unique_ptr<ECSManager::ISystem> scriptInitializeSystem = std::make_unique<ScriptInitializeSystem>(m_pObjectContainer.get(), input, m_pECSManager.get(), resourceManager);
@@ -175,6 +177,10 @@ void GameCore::CreateSystems(InputManager* input, ResourceManager* resourceManag
 	m_pSingleSystemManager->RegisterSystem(std::move(tfUpdateSystem), SystemState::Update);
 	std::unique_ptr<ECSManager::ISystem> cameraSystem = std::make_unique<CameraUpdateSystem>(m_pECSManager.get(), resourceManager, resourceManager->GetIntegrationBuffer(IntegrationDataType::Transform));
 	m_pSingleSystemManager->RegisterSystem(std::move(cameraSystem), SystemState::Update);
+	std::unique_ptr<ECSManager::ISystem> emitterUpdateSystem = std::make_unique<EmitterUpdateSystem>(m_pECSManager.get(), resourceManager, graphicsEngine);
+	m_pSingleSystemManager->RegisterSystem(std::move(emitterUpdateSystem), SystemState::Update);
+	std::unique_ptr<ECSManager::ISystem> particleUpdateSystem = std::make_unique<ParticleUpdateSystem>(m_pECSManager.get(), resourceManager,graphicsEngine);
+	m_pSingleSystemManager->RegisterSystem(std::move(particleUpdateSystem), SystemState::Update);
 	std::unique_ptr<ECSManager::ISystem> collisionSystem = std::make_unique<CollisionSystem>(m_pECSManager.get(), resourceManager, input, m_pObjectContainer.get());
 	m_pSingleSystemManager->RegisterSystem(std::move(collisionSystem), SystemState::Update);
 	std::unique_ptr<ECSManager::ISystem> rbUpdateSystem = std::make_unique<Rigidbody2DUpdateSystem>(m_pECSManager.get(), m_pPhysicsWorld.get());
@@ -201,6 +207,8 @@ void GameCore::CreateSystems(InputManager* input, ResourceManager* resourceManag
 	m_pEditorSingleSystem->RegisterSystem(std::move(transformEditorSystem), SystemState::Update);
 	std::unique_ptr<ECSManager::ISystem> cameraEditorSystem = std::make_unique<CameraEditorSystem>(m_pECSManager.get(), resourceManager, resourceManager->GetIntegrationBuffer(IntegrationDataType::Transform));
 	m_pEditorSingleSystem->RegisterSystem(std::move(cameraEditorSystem), SystemState::Update);
+	std::unique_ptr<ECSManager::ISystem> emitterEditorSystem = std::make_unique<EmitterEditorUpdateSystem>(m_pECSManager.get(), resourceManager, graphicsEngine);
+	m_pEditorSingleSystem->RegisterSystem(std::move(emitterEditorSystem), SystemState::Update);
 	// マルチシステムの生成
 	std::unique_ptr<ECSManager::IMultiSystem> lineRendererEditorSystem = std::make_unique<LineRendererSystem>(m_pECSManager.get(), resourceManager);
 	m_pEditorMultiSystem->RegisterSystem(std::move(lineRendererEditorSystem), SystemState::Update);

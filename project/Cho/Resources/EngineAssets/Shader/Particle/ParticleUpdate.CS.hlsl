@@ -1,9 +1,13 @@
 #include "../header/Particle.hlsli"
 static const uint kMaxParticles = 1024;
 
+// UAV: パーティクルリソース
 RWStructuredBuffer<Particle> gParticles : register(u0);
+// CBV: PerFrameリソース
 ConstantBuffer<PerFrame> gPerFrame : register(b0);
+// UAV: パーティクルのフリースロットリストインデックス
 RWStructuredBuffer<int> gFreeListIndex : register(u1);
+// UAV: パーティクルのフリースロットリスト
 RWStructuredBuffer<uint> gFreeList : register(u2);
 
 [numthreads(1024, 1, 1)]
