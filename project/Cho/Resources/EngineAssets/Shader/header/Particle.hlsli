@@ -7,9 +7,9 @@ struct Particle {
     ParticlePVA position;
     ParticlePVA rotation;
     ParticlePVA scale;
+    float4 color;
     float lifeTime;
     float currentTime;
-    float4 color;
     int isAlive;
 };
 struct PVAVector3 {

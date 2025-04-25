@@ -40,8 +40,7 @@ void main(uint3 DTid : SV_DispatchThreadID) {
             InterlockedAdd(gFreeListIndex[0], -1, freeListIndex);
             if (0 <= freeListIndex && freeListIndex < kMaxParticles) {
                 uint particleIndex = gFreeList[freeListIndex];
-                
-                
+           
                 gParticles[particleIndex].scale.value = float3(0.5f, 0.5f, 0.5f);
                 gParticles[particleIndex].position.value = gEmitter.translate;
                 gParticles[particleIndex].color.rgb = float3(1.0f, 1.0f, 1.0f);

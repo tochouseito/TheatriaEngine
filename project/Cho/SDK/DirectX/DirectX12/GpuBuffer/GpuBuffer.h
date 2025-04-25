@@ -179,16 +179,6 @@ public:
 	}
 	void CreateStructuredBufferResource(ID3D12Device* device, const UINT& numElements) override
 	{
-		// 構造体のサイズを確認
-		if constexpr (std::is_class_v<T>)// クラス、構造体用
-		{
-			size_t size = sizeof(T);
-			bool isValid = size % 16 != 0;
-			if (isValid)
-			{
-				Log::Write(LogLevel::Assert, "Structure size must be multiple of 16 bytes");
-			}
-		}
 		// リソースのサイズ
 		UINT structureByteStride = static_cast<UINT>(sizeof(T));
 		// リソース用のヒープの設定
@@ -324,16 +314,6 @@ public:
 	}
 	void CreateRWStructuredBufferResource(ID3D12Device8* device, const UINT& numElements) override
 	{
-		// 構造体のサイズを確認
-		if constexpr (std::is_class_v<T>)// クラス、構造体用
-		{
-			size_t size = sizeof(T);
-			bool isValid = size % 16 != 0;
-			if (isValid)
-			{
-				Log::Write(LogLevel::Assert, "Structure size must be multiple of 16 bytes");
-			}
-		}
 		UINT structureByteStride = static_cast<UINT>(sizeof(T));
 		D3D12_HEAP_PROPERTIES heapProperties{};
 		heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;// DefaultHeapを使う

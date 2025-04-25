@@ -11,6 +11,7 @@ struct BUFFER_DATA_TF final
 	// モデルのRootMatrix
     Matrix4 rootMatrix;		// 64バイト
 	uint32_t materialID;	// 4バイト
+	float padding[3];	// 12バイト
 };
 // ViewProjection
 struct BUFFER_DATA_VIEWPROJECTION final
@@ -27,7 +28,6 @@ struct BUFFER_DATA_VIEWPROJECTION final
 struct BUFFER_DATA_LINE final
 {
 	Vector3 position;	// 12バイト
-	float padding1;		// 4バイト
 	Color color;		// 16バイト
 };
 // Material
@@ -56,6 +56,7 @@ struct BUFFER_DATA_PARTICLE_PERFRAME final
 {
 	float time;
 	float deltaTime;
+	float padding[2];
 };
 struct PVAVector3Data// 位置,角度,拡縮
 {
@@ -99,11 +100,11 @@ struct ParticlePVAData
 };
 struct BUFFER_DATA_PARTICLE final
 {
-	ParticlePVAData position;	// 位置
-	ParticlePVAData rotation;	// 回転
-	ParticlePVAData scale;		// スケール
-	float lifeTime;// 4バイト
-	float currentTime;	// 4バイト
-	Color color;	// 16バイト
-	int isAlive;	// 4バイト
+	ParticlePVAData position;	// 36バイト
+	ParticlePVAData rotation;	// 36バイト
+	ParticlePVAData scale;		// 36バイト
+	Color color;				// 16バイト
+	float lifeTime;				// 4バイト
+	float currentTime;			// 4バイト
+	int isAlive;				// 4バイト
 };

@@ -360,6 +360,8 @@ void EmitterUpdateSystem::UpdateEmitter(EmitterComponent& emitter)
 
 void ParticleInitializeSystem::InitializeParticle(ParticleComponent& particle)
 {
+	particle.time = 0.0f;
+
 	// CSで初期化
 	// コンテキスト取得
 	CommandContext* context = m_pGraphicsEngine->GetCommandContext();

@@ -34,6 +34,10 @@ private:// メンバ関数
 
 	// デバイスの生成
 	void CreateDevice();
+
+    // 各サポートチェック
+    void CheckD3D12Features();
+
 private:// メンバ変数
 	ComPtr<IDXGIFactory7> m_DXGIFactory = nullptr;// DXGIファクトリ
 	ComPtr<ID3D12Device8> m_Device = nullptr;// デバイス

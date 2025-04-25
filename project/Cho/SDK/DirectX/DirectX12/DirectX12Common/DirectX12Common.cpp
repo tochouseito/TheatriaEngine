@@ -129,25 +129,8 @@ void DirectX12Common::CreateDevice()
 	// 初期化完了ログ
 	Log::Write(LogLevel::Info, "Complete create D3D12Device!!!");
 
-	// シェーダモデルをチェック.
-	{
-		D3D12_FEATURE_DATA_SHADER_MODEL shaderModel = { D3D_SHADER_MODEL_6_5 };
-		hr = m_Device->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &shaderModel, sizeof(shaderModel));
-		if (FAILED(hr) || (shaderModel.HighestShaderModel < D3D_SHADER_MODEL_6_5))
-		{
-			Log::Write(LogLevel::Assert, "Shader Model 6.5 is not supported");
-		}
-	}
-
-	// メッシュシェーダをサポートしているかどうかチェック.
-	{
-		D3D12_FEATURE_DATA_D3D12_OPTIONS7 features = {};
-		hr = m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS7, &features, sizeof(features));
-		if (FAILED(hr) || (features.MeshShaderTier == D3D12_MESH_SHADER_TIER_NOT_SUPPORTED))
-		{
-			Log::Write(LogLevel::Assert, "Mesh Shader is not supported");
-		}
-	}
+	// デバイスの機能をチェック
+	CheckD3D12Features();
 
 #ifdef _DEBUG
 	Microsoft::WRL::ComPtr< ID3D12InfoQueue> infoQueue;
@@ -184,4 +167,99 @@ void DirectX12Common::CreateDevice()
 	}
 
 #endif // DEBUG
+}
+
+// 各サポートチェック
+void DirectX12Common::CheckD3D12Features()
+{
+	// シェーダモデルをチェック.
+	{
+		D3D12_FEATURE_DATA_SHADER_MODEL shaderModel = { D3D_SHADER_MODEL_6_5 };
+		if (SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &shaderModel, sizeof(shaderModel))))
+		{
+			Log::Write(LogLevel::Info, "Shader Model 6.5 is supported");
+		} else
+		{
+			Log::Write(LogLevel::Assert, "Shader Model 6.5 is not supported");
+		}
+	}
+
+	// メッシュシェーダをサポートしているかどうかチェック.
+	{
+		D3D12_FEATURE_DATA_D3D12_OPTIONS7 features = {};
+		if (SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS7, &features, sizeof(features))))
+		{
+			std::cout << "Mesh Shader: ";
+			if (features.MeshShaderTier != D3D12_MESH_SHADER_TIER_NOT_SUPPORTED)
+			{
+				// メッシュシェーダのティアを表示
+				Log::Write(LogLevel::Info, std::format("Mesh Shader Tier: {}", (int)features.MeshShaderTier));
+				std::cout << "Supported (Tier " << (int)features.MeshShaderTier << ")\n";
+			} else
+			{
+				Log::Write(LogLevel::Assert, "Mesh Shader: Not Supported");
+			}
+		}
+	}
+
+	// Raytracing
+	{
+		D3D12_FEATURE_DATA_D3D12_OPTIONS5 options5 = {};
+		if (SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &options5, sizeof(options5))))
+		{
+			std::cout << "Raytracing (DXR): ";
+			if (options5.RaytracingTier != D3D12_RAYTRACING_TIER_NOT_SUPPORTED)
+			{
+				Log::Write(LogLevel::Info, std::format("Raytracing Tier: {}", (int)options5.RaytracingTier));
+			} else {
+				Log::Write(LogLevel::Assert, "Raytracing: Not Supported");
+			}
+		}
+	}
+
+	// Variable Rate Shading (VRS)
+	{
+		D3D12_FEATURE_DATA_D3D12_OPTIONS6 options6 = {};
+		if (SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS6, &options6, sizeof(options6))))
+		{
+			std::cout << "Variable Rate Shading (VRS): ";
+			if (options6.VariableShadingRateTier != D3D12_VARIABLE_SHADING_RATE_TIER_NOT_SUPPORTED)
+			{
+				Log::Write(LogLevel::Info, std::format("Variable Rate Shading Tier: {}", (int)options6.VariableShadingRateTier));
+			} else
+			{
+				Log::Write(LogLevel::Assert, "Variable Rate Shading (VRS): Not Supported");
+			}
+		}
+	}
+
+	// Sampler Feedback
+	{
+		D3D12_FEATURE_DATA_D3D12_OPTIONS7 options7 = {};
+		if (SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS7, &options7, sizeof(options7))))
+		{
+			if (options7.SamplerFeedbackTier != D3D12_SAMPLER_FEEDBACK_TIER_NOT_SUPPORTED)
+			{
+				Log::Write(LogLevel::Info, std::format("Sampler Feedback Tier: {}", (int)options7.SamplerFeedbackTier));
+			} else
+			{
+				Log::Write(LogLevel::Assert, "Sampler Feedback: Not Supported");
+			}
+		}
+	}
+
+	// ExecuteIndirect (Resource Binding Tierを間接的に利用可否チェック)
+	{
+		D3D12_FEATURE_DATA_D3D12_OPTIONS options = {};
+		if (SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &options, sizeof(options))))
+		{
+			if (options.ResourceBindingTier != D3D12_RESOURCE_BINDING_TIER_1)
+			{
+				Log::Write(LogLevel::Info, std::format("Resource Binding Tier: {}", (int)options.ResourceBindingTier));
+			} else
+			{
+				Log::Write(LogLevel::Assert, "Resource Binding Tier: Not Supported");
+			}
+		}
+	}
 }
