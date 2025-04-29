@@ -649,9 +649,9 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
                     // PerFrame
                     particle->perFrameBufferIndex = resourceManager->CreateConstantBuffer<BUFFER_DATA_PARTICLE_PERFRAME>();
                     // FreeListIndex
-                    particle->freeListIndexBufferIndex = resourceManager->CreateRWStructuredBuffer<int32_t>(1);
+                    //particle->freeListIndexBufferIndex = resourceManager->CreateRWStructuredBuffer<int32_t>(1);
                     // FreeList
-                    particle->freeListBufferIndex = resourceManager->CreateRWStructuredBuffer<uint32_t>(particle->count);
+                    particle->freeListBufferIndex = resourceManager->CreateRWStructuredBuffer<uint32_t>(particle->count, true);
                 }
             }
         }

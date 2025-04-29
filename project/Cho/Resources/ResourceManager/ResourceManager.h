@@ -76,7 +76,7 @@ public:
 		return index;
 	}
 	template<typename T>
-	uint32_t CreateRWStructuredBuffer(const UINT& numElements)
+	uint32_t CreateRWStructuredBuffer(const UINT& numElements, bool useCounter = false)
 	{
 		// 構造化バッファの生成
 		std::unique_ptr<RWStructuredBuffer<T>> buffer = std::make_unique<RWStructuredBuffer<T>>();
@@ -89,7 +89,7 @@ public:
 		uavDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
 		uavDesc.Buffer.NumElements = buffer->GetNumElements();
 		uavDesc.Buffer.StructureByteStride = buffer->GetStructureByteStride();
-		buffer->CreateUAV(m_Device, uavDesc, m_SUVDescriptorHeap.get());
+		buffer->CreateUAV(m_Device, uavDesc, m_SUVDescriptorHeap.get(), useCounter);
 		uint32_t index = static_cast<uint32_t>(m_UAVBuffers.push_back(std::move(buffer)));
 		return index;
 	}

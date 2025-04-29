@@ -283,12 +283,19 @@ public:
 	// リソース作成
 	virtual void CreateRWStructuredBufferResource(ID3D12Device8* device, const UINT& numElements) = 0;
 	// SRV作成
-	virtual bool CreateUAV(ID3D12Device8* device, D3D12_UNORDERED_ACCESS_VIEW_DESC& uavDesc, DescriptorHeap* pDescriptorHeap) = 0;
+	virtual bool CreateUAV(ID3D12Device8* device, D3D12_UNORDERED_ACCESS_VIEW_DESC& uavDesc, DescriptorHeap* pDescriptorHeap, bool useCounter = false) = 0;
 	// ディスクリプタハンドルを取得
 	virtual D3D12_CPU_DESCRIPTOR_HANDLE GetUAVCpuHandle() const = 0;
 	virtual D3D12_GPU_DESCRIPTOR_HANDLE GetUAVGpuHandle() const = 0;
 	// ディスクリプタハンドルインデックスを取得
 	virtual std::optional<uint32_t> GetUAVHandleIndex() const = 0;
+	// カウンターリソースを取得
+	virtual ID3D12Resource* GetCounterResource() { return m_CounterResource.GetResource(); }
+	// カウンターリソースの初期化用
+	virtual ID3D12Resource* GetCounterZeroResource() { return m_CounterZeroResource.GetResource(); }
+protected:
+	GpuResource m_CounterResource;// カウンターリソース
+	GpuResource m_CounterZeroResource;// カウンターリソースの初期化用
 };
 
 // UAVのクラス
@@ -323,7 +330,7 @@ public:
 			D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
 			numElements, structureByteStride);
 	}
-	bool CreateUAV(ID3D12Device8* device, D3D12_UNORDERED_ACCESS_VIEW_DESC& uavDesc, DescriptorHeap* pDescriptorHeap) override
+	bool CreateUAV(ID3D12Device8* device, D3D12_UNORDERED_ACCESS_VIEW_DESC& uavDesc, DescriptorHeap* pDescriptorHeap, bool useCounter = false) override
 	{
 		// ヒープがUAVタイプかどうか確認
 		if (pDescriptorHeap->GetType() != D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV)
@@ -337,7 +344,7 @@ public:
 			Log::Write(LogLevel::Assert, "Resource is null");
 			return false;
 		}
-		// 新しいディスクリプタのインデッ���スとハンドルを取得
+		// 新しいディスクリプタのインデックスとハンドルを取得
 		if (!m_UAVHandleIndex.has_value())
 		{
 			m_UAVHandleIndex = pDescriptorHeap->Allocate();
@@ -349,12 +356,72 @@ public:
 		}
 		m_UAVCpuHandle = pDescriptorHeap->GetCPUDescriptorHandle(m_UAVHandleIndex.value());
 		m_UAVGpuHandle = pDescriptorHeap->GetGPUDescriptorHandle(m_UAVHandleIndex.value());
-		device->CreateUnorderedAccessView(
-			GetResource(),
-			nullptr,
-			&uavDesc,
-			m_UAVCpuHandle
-		);
+
+		if (useCounter)
+		{
+			// カウンターを使用する場合はカウンターリソースを作成
+			uavDesc.Buffer.CounterOffsetInBytes = 0;
+			// UAVカウンターリソース
+			D3D12_HEAP_PROPERTIES heapProperties{};
+			heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;// GPU専用
+			// リソースの設定
+			D3D12_RESOURCE_DESC resourceDesc{};
+			resourceDesc.Width = 4;// リソースのサイズ
+			// バッファリソースの設定
+			resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+			resourceDesc.Height = 1;
+			resourceDesc.DepthOrArraySize = 1;
+			resourceDesc.MipLevels = 1;
+			resourceDesc.SampleDesc.Count = 1;
+			resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+			resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+			m_CounterResource.CreateResource(
+				device,
+				heapProperties,
+				D3D12_HEAP_FLAG_NONE,
+				resourceDesc,
+				D3D12_RESOURCE_STATE_COMMON,
+				nullptr);
+			// カウンターリソースの初期化
+			D3D12_HEAP_PROPERTIES heapProps = {};
+			heapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
+
+			D3D12_RESOURCE_DESC bufferDesc = {};
+			bufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+			bufferDesc.Width = sizeof(UINT);
+			bufferDesc.Height = 1;
+			bufferDesc.DepthOrArraySize = 1;
+			bufferDesc.MipLevels = 1;
+			bufferDesc.SampleDesc.Count = 1;
+			bufferDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+			bufferDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+			m_CounterZeroResource.CreateResource(
+				device,
+				heapProps,
+				D3D12_HEAP_FLAG_NONE,
+				bufferDesc,
+				D3D12_RESOURCE_STATE_GENERIC_READ,
+				nullptr);
+			// マップして書き込む
+			UINT* pData = nullptr;
+			m_CounterZeroResource.GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&pData));
+			*pData = 0;
+			m_CounterZeroResource.GetResource()->Unmap(0, nullptr);
+
+			device->CreateUnorderedAccessView(
+				GetResource(),
+				m_CounterResource.GetResource(),
+				&uavDesc,
+				m_UAVCpuHandle);
+		} else
+		{
+			device->CreateUnorderedAccessView(
+				GetResource(),
+				nullptr,
+				&uavDesc,
+				m_UAVCpuHandle
+			);
+		}
 		return true;
 	}
 	void Unmap()

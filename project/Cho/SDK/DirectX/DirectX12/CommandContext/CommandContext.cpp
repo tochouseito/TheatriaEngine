@@ -120,6 +120,12 @@ void CommandContext::ClearDepthStencil(D3D12_CPU_DESCRIPTOR_HANDLE handle)
 	m_CommandList->ClearDepthStencilView(handle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 }
 
+void CommandContext::ClearUnorderedAccessViewUint(D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle, D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle, ID3D12Resource* pResource,const UINT* value,UINT numRects, const D3D12_RECT* pRects)
+{
+	// UAVのクリア
+	m_CommandList->ClearUnorderedAccessViewUint(gpuHandle, cpuHandle, pResource, value, numRects, pRects);
+}
+
 void CommandContext::SetViewport(const D3D12_VIEWPORT& viewport)
 {
 	// ビューポートの設定
@@ -196,6 +202,12 @@ void CommandContext::SetComputeRootDescriptorTable(UINT RootParameterIndex, D3D1
 {
 	// コンピュートルートディスクリプタテーブルの設定
 	m_CommandList->SetComputeRootDescriptorTable(RootParameterIndex, BaseDescriptor);
+}
+
+void CommandContext::CopyBufferRegion(ID3D12Resource* pDstResource, UINT DstOffset, ID3D12Resource* pSrcResource, UINT SrcOffset, UINT NumBytes)
+{
+	// バッファのコピー
+	m_CommandList->CopyBufferRegion(pDstResource, DstOffset, pSrcResource, SrcOffset, NumBytes);
 }
 
 void CommandContext::DrawInstanced(UINT VertexCountPerInstance, UINT InstanceCount, UINT StartVertexLocation, UINT StartInstanceLocation)

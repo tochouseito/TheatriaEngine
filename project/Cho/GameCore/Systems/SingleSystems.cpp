@@ -367,6 +367,12 @@ void ParticleInitializeSystem::InitializeParticle(ParticleComponent& particle)
 	CommandContext* context = m_pGraphicsEngine->GetCommandContext();
 	// コマンドリスト開始
 	m_pGraphicsEngine->BeginCommandContext(context);
+	// カウンターリセット
+	IRWStructuredBuffer* freeListBuffer = m_pResourceManager->GetBuffer<IRWStructuredBuffer>(particle.freeListBufferIndex);
+	// カウンターを0で初期化
+	context->CopyBufferRegion(freeListBuffer->GetCounterResource(), 0, freeListBuffer->GetCounterZeroResource(), 0, sizeof(UINT));
+	//UINT clearValue[4] = { 0,0,0,0 };
+	//context->ClearUnorderedAccessViewUint(freeListBuffer->GetUAVGpuHandle(), freeListBuffer->GetUAVCpuHandle(), freeListBuffer->GetResource(), clearValue, 0, nullptr);
 	// パイプラインセット
 	context->SetComputePipelineState(m_pGraphicsEngine->GetPipelineManager()->GetParticleInitPSO().pso.Get());
 	// ルートシグネチャセット
@@ -375,11 +381,10 @@ void ParticleInitializeSystem::InitializeParticle(ParticleComponent& particle)
 	IRWStructuredBuffer* particleBuffer = m_pResourceManager->GetBuffer<IRWStructuredBuffer>(particle.bufferIndex);
 	context->SetComputeRootDescriptorTable(0, particleBuffer->GetUAVGpuHandle());
 	// フリーリストインデックスバッファをセット
-	IRWStructuredBuffer* freeListIndexBuffer = m_pResourceManager->GetBuffer<IRWStructuredBuffer>(particle.freeListIndexBufferIndex);
-	context->SetComputeRootDescriptorTable(1, freeListIndexBuffer->GetUAVGpuHandle());
+	//IRWStructuredBuffer* freeListIndexBuffer = m_pResourceManager->GetBuffer<IRWStructuredBuffer>(particle.freeListIndexBufferIndex);
+	//context->SetComputeRootDescriptorTable(1, freeListIndexBuffer->GetUAVGpuHandle());
 	// フリーリストバッファをセット
-	IRWStructuredBuffer* freeListBuffer = m_pResourceManager->GetBuffer<IRWStructuredBuffer>(particle.freeListBufferIndex);
-	context->SetComputeRootDescriptorTable(2, freeListBuffer->GetUAVGpuHandle());
+	context->SetComputeRootDescriptorTable(1, freeListBuffer->GetUAVGpuHandle());
 	// Dispatch
 	context->Dispatch(particle.count, 1, 1);
 	// コマンドリストをクローズ
@@ -417,17 +422,17 @@ void ParticleUpdateSystem::UpdateParticle(EmitterComponent& emitter, ParticleCom
 	IConstantBuffer* perFrameBuffer = m_pResourceManager->GetBuffer<IConstantBuffer>(particle.perFrameBufferIndex);
 	context->SetComputeRootConstantBufferView(2, perFrameBuffer->GetResource()->GetGPUVirtualAddress());
 	// フリーリストインデックスバッファをセット
-	IRWStructuredBuffer* freeListIndexBuffer = m_pResourceManager->GetBuffer<IRWStructuredBuffer>(particle.freeListIndexBufferIndex);
-	context->SetComputeRootDescriptorTable(3, freeListIndexBuffer->GetUAVGpuHandle());
+	//IRWStructuredBuffer* freeListIndexBuffer = m_pResourceManager->GetBuffer<IRWStructuredBuffer>(particle.freeListIndexBufferIndex);
+	//context->SetComputeRootDescriptorTable(3, freeListIndexBuffer->GetUAVGpuHandle());
 	// フリーリストバッファをセット
 	IRWStructuredBuffer* freeListBuffer = m_pResourceManager->GetBuffer<IRWStructuredBuffer>(particle.freeListBufferIndex);
-	context->SetComputeRootDescriptorTable(4, freeListBuffer->GetUAVGpuHandle());
+	context->SetComputeRootDescriptorTable(3, freeListBuffer->GetUAVGpuHandle());
 	// Dispatch
 	context->Dispatch(1, 1, 1);
 	
 	// EmitとUpdateの並列を阻止
 	context->BarrierUAV(D3D12_RESOURCE_BARRIER_TYPE_UAV, D3D12_RESOURCE_BARRIER_FLAG_NONE, particleBuffer->GetResource());
-	context->BarrierUAV(D3D12_RESOURCE_BARRIER_TYPE_UAV, D3D12_RESOURCE_BARRIER_FLAG_NONE, freeListIndexBuffer->GetResource());
+	//context->BarrierUAV(D3D12_RESOURCE_BARRIER_TYPE_UAV, D3D12_RESOURCE_BARRIER_FLAG_NONE, freeListIndexBuffer->GetResource());
 	context->BarrierUAV(D3D12_RESOURCE_BARRIER_TYPE_UAV, D3D12_RESOURCE_BARRIER_FLAG_NONE, freeListBuffer->GetResource());
 
 	// Update
@@ -440,9 +445,9 @@ void ParticleUpdateSystem::UpdateParticle(EmitterComponent& emitter, ParticleCom
 	// PerFrameバッファをセット
 	context->SetComputeRootConstantBufferView(1, perFrameBuffer->GetResource()->GetGPUVirtualAddress());
 	// フリーリストインデックスバッファをセット
-	context->SetComputeRootDescriptorTable(2, freeListIndexBuffer->GetUAVGpuHandle());
+	//context->SetComputeRootDescriptorTable(2, freeListIndexBuffer->GetUAVGpuHandle());
 	// フリーリストバッファをセット
-	context->SetComputeRootDescriptorTable(3, freeListBuffer->GetUAVGpuHandle());
+	context->SetComputeRootDescriptorTable(2, freeListBuffer->GetUAVGpuHandle());
 	// Dispatch
 	context->Dispatch(1, 1, 1);
 
