@@ -1,19 +1,6 @@
 #include "../header/Particle.hlsli"
 #include "../header/Random.hlsli"
 
-class RandomGenerator {
-    float3 seed;
-    float3 Generate3d() {
-        seed = rand3dTo3d(seed);
-        return seed;
-    }
-    float Generate1d() {
-        float result = rand3dTo1d(seed);
-        seed.x = result;
-        return result;
-    }
-};
-
 static const uint kMaxParticles = 1024;
 // UAV: パーティクル
 RWStructuredBuffer<Particle> gParticles : register(u0);
@@ -25,8 +12,6 @@ ConstantBuffer<PerFrame> gPerFrame : register(b1);
 RWStructuredBuffer<int> gFreeListIndex : register(u1);
 // UAV: フリーリスト
 RWStructuredBuffer<uint> gFreeList : register(u2);
-// 
-//StructuredBuffer<ParticleParameter> gParameter : register(t0);
 
 [numthreads(1, 1, 1)]
 void main(uint3 DTid : SV_DispatchThreadID) {

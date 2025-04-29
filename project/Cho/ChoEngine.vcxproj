@@ -50,6 +50,7 @@
     <ClCompile Include="Editor\EffectEditor\EffectEditor.cpp" />
     <ClCompile Include="Editor\EffectView\EffectView.cpp" />
     <ClCompile Include="Editor\EffectHierarchy\EffectHierarchy.cpp" />
+    <ClCompile Include="Resources\EffectContainer\EffectContainer.cpp" />
     <ClCompile Include="EngineCommand\EngineCommand.cpp" />
     <ClCompile Include="EngineCommand\EngineCommands.cpp" />
     <ClCompile Include="Engine\Engine.cpp" />
@@ -301,6 +302,7 @@
     <ClInclude Include="Core\Utility\Color.h" />
     <ClInclude Include="Core\Utility\CompBufferData.h" />
     <ClInclude Include="Core\Utility\Components.h" />
+    <ClInclude Include="Core\Utility\EffectStruct.h" />
     <ClInclude Include="Core\Utility\FArray.h" />
     <ClInclude Include="Core\Utility\FontCode.h" />
     <ClInclude Include="Core\Utility\FVector.h" />
@@ -330,6 +332,7 @@
     <ClInclude Include="Editor\EffectEditor\EffectEditor.h" />
     <ClInclude Include="Editor\EffectView\EffectView.h" />
     <ClInclude Include="Editor\EffectHierarchy\EffectHierarchy.h" />
+    <ClInclude Include="Resources\EffectContainer\EffectContainer.h" />
     <ClInclude Include="EngineCommand\EngineCommand.h" />
     <ClInclude Include="EngineCommand\EngineCommands.h" />
     <ClInclude Include="Engine\Engine.h" />

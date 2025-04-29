@@ -27,3 +27,16 @@ float GenerateRandomInRange(float seed, float median, float amplitude) {
     
     return median + amplitude * (randomValue * 2.0 - 1.0);
 }
+
+class RandomGenerator {
+    float3 seed;
+    float3 Generate3d() {
+        seed = rand3dTo3d(seed);
+        return seed;
+    }
+    float Generate1d() {
+        float result = rand3dTo1d(seed);
+        seed.x = result;
+        return result;
+    }
+};
