@@ -293,9 +293,12 @@ public:
 	virtual ID3D12Resource* GetCounterResource() { return m_CounterResource.GetResource(); }
 	// カウンターリソースの初期化用
 	virtual ID3D12Resource* GetCounterZeroResource() { return m_CounterZeroResource.GetResource(); }
+	// カウンターリソースの値用
+	virtual ID3D12Resource* GetCounterValueResource() { return m_CounterValueResource.GetResource(); }
 protected:
 	GpuResource m_CounterResource;// カウンターリソース
 	GpuResource m_CounterZeroResource;// カウンターリソースの初期化用
+	GpuResource m_CounterValueResource;// カウンターリソースの値用
 };
 
 // UAVのクラス
@@ -383,31 +386,56 @@ public:
 				D3D12_RESOURCE_STATE_COMMON,
 				nullptr);
 			// カウンターリソースの初期化
-			D3D12_HEAP_PROPERTIES heapProps = {};
-			heapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
+			{
+				D3D12_HEAP_PROPERTIES heapProps = {};
+				heapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
 
-			D3D12_RESOURCE_DESC bufferDesc = {};
-			bufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-			bufferDesc.Width = sizeof(UINT);
-			bufferDesc.Height = 1;
-			bufferDesc.DepthOrArraySize = 1;
-			bufferDesc.MipLevels = 1;
-			bufferDesc.SampleDesc.Count = 1;
-			bufferDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-			bufferDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-			m_CounterZeroResource.CreateResource(
-				device,
-				heapProps,
-				D3D12_HEAP_FLAG_NONE,
-				bufferDesc,
-				D3D12_RESOURCE_STATE_GENERIC_READ,
-				nullptr);
-			// マップして書き込む
-			UINT* pData = nullptr;
-			m_CounterZeroResource.GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&pData));
-			*pData = 0;
-			m_CounterZeroResource.GetResource()->Unmap(0, nullptr);
+				D3D12_RESOURCE_DESC bufferDesc = {};
+				bufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+				bufferDesc.Width = sizeof(UINT);
+				bufferDesc.Height = 1;
+				bufferDesc.DepthOrArraySize = 1;
+				bufferDesc.MipLevels = 1;
+				bufferDesc.SampleDesc.Count = 1;
+				bufferDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+				bufferDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+				m_CounterZeroResource.CreateResource(
+					device,
+					heapProps,
+					D3D12_HEAP_FLAG_NONE,
+					bufferDesc,
+					D3D12_RESOURCE_STATE_GENERIC_READ,
+					nullptr);
+				// マップして書き込む
+				UINT* pData = nullptr;
+				m_CounterZeroResource.GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&pData));
+				*pData = 0;
+				m_CounterZeroResource.GetResource()->Unmap(0, nullptr);
+			}
+			// カウンター値を取得する用のリソース
+			{
+				D3D12_HEAP_PROPERTIES heapProps = {};
+				heapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
 
+				D3D12_RESOURCE_DESC bufferDesc = {};
+				bufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+				bufferDesc.Width = sizeof(UINT);
+				bufferDesc.Height = 1;
+				bufferDesc.DepthOrArraySize = 1;
+				bufferDesc.MipLevels = 1;
+				bufferDesc.SampleDesc.Count = 1;
+				bufferDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+				bufferDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+				m_CounterValueResource.CreateResource(
+					device,
+					heapProps,
+					D3D12_HEAP_FLAG_NONE,
+					bufferDesc,
+					D3D12_RESOURCE_STATE_GENERIC_READ,
+					nullptr);
+			}
+
+			// UAVを作成
 			device->CreateUnorderedAccessView(
 				GetResource(),
 				m_CounterResource.GetResource(),
