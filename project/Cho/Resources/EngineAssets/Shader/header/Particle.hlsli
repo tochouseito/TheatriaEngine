@@ -10,41 +10,7 @@ struct Particle {
     float4 color;
     float lifeTime;
     float currentTime;
-    int isAlive;
-};
-struct PVAVector3 {
-    float3 first;
-    float3 second;
-    uint isMedian;
-};
-
-struct PVA {
-    PVAVector3 value;
-    PVAVector3 velocity;
-    PVAVector3 acceleration;
-};
-
-struct ParticlePosition {
-    uint type;
-    float3 value;
-    PVA pva;
-};
-
-struct ParticleRotation {
-    uint type;
-    float3 value;
-    PVA pva;
-};
-
-struct ParticleScale {
-    uint type;
-    float3 value;
-    PVA pva;
-};
-struct ParticleParameter {
-    ParticlePosition position;
-    ParticleRotation rotation;
-    ParticleScale scale;
+    uint isAlive;
 };
 struct PerFrame {
     float time;

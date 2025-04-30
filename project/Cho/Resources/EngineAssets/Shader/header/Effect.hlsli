@@ -205,3 +205,21 @@ struct EffectRoot {
     TimeManager timeManager; 
     uint isRun;
 };
+
+struct EffectParticlePVA {
+    float3 value;
+    float3 velocity;
+    float3 acceleration;
+};
+struct EffectParticle {
+    EffectParticlePVA position;
+    EffectParticlePVA rotation;
+    EffectParticlePVA scale;
+    float4 color;
+    float lifeTime;
+    float currentTime;
+    uint isAlive;
+    uint rootID;
+    uint nodeID;
+    uint meshID;
+};

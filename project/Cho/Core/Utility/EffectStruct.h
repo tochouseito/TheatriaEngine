@@ -256,13 +256,14 @@ struct EffectDraw
 // ノード
 struct EffectNode
 {
+	std::string name;               // ノード名
     EffectCommon common;            // 共通情報
     EffectSRT position;             // 位置
     EffectSRT rotation;             // 回転
     EffectSRT scale;                // スケール
     EffectDrawCommon drawCommon;    // 描画共通情報
     EffectDraw draw;                // 描画情報
-    uint32_t parentIndex;               // 親インデックス
+    uint32_t parentIndex;           // 親インデックス
 };
 
 struct TimeManager

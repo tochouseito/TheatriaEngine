@@ -26,4 +26,5 @@ void main(uint3 DTid : SV_DispatchThreadID) {
             gFreeList.Append(particleIndex); // 死んだらAppend
         }
     }
+    
 }
