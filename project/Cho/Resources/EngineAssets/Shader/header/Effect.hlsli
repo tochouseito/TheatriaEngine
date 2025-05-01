@@ -208,7 +208,10 @@ static const uint kMaxParticles = 1024;
 
 struct EffectRoot {
     TimeManager timeManager; 
+    float3 position;
     uint isRun;
+    uint isLoop;
+    uint nodeID[64];
 };
 
 struct EffectParticlePVA {
@@ -227,14 +230,4 @@ struct EffectParticle {
     uint rootID;
     uint nodeID;
     uint meshID;
-};
-
-struct EffectData {
-    
-};
-struct EffectNodeData {
-    
-};
-struct EffectSpriteData {
-    
 };

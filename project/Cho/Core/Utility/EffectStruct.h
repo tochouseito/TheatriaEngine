@@ -5,6 +5,7 @@
 #include "Matrix4.h"
 #include "Core/Utility/Color.h"
 #include <cstdint>
+#include <vector>
 
 struct RandValue
 {
@@ -275,14 +276,17 @@ struct TimeManager
 
 struct EffectRoot
 {
-	std::string name;           // エフェクト名
     TimeManager timeManager;    // 時間管理
-    bool isRun;
+    uint32_t isRun;
+    uint32_t isLoop;               // ループフラグ
+	uint32_t nodeID[64];           // ノードID
 };
 
 struct EffectData
 {
-	std::string name;               // エフェクト名
-	TimeManager timeManager;        // 時間管理
-	std::vector<EffectNode> nodes;  // ノード
+    std::string name;           // エフェクト名
+    TimeManager timeManager;    // 時間管理
+    uint32_t isRun;
+    uint32_t isLoop;               // ループフラグ
+	std::vector<uint32_t> nodeID;           // ノードID
 };
