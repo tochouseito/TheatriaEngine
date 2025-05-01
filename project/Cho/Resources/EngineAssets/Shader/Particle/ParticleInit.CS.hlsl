@@ -11,7 +11,8 @@ RWStructuredBuffer<uint> gCounter : register(u2);
 
 [numthreads(kMaxParticles, 1, 1)]
 void main(uint3 DTid : SV_DispatchThreadID) {
-    uint particleIndex = DTid.x;
+    // 逆順にAppend
+    uint particleIndex = kMaxParticles - DTid.x - 1;
     // 最初に一回だけカウンターを初期化
     if (DTid.x == 0) {
         gCounter[0] = 0;

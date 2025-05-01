@@ -10,9 +10,11 @@ RWStructuredBuffer<EffectSprite> gEffectMesh : register(u2);
 RWStructuredBuffer<EffectParticle> gEffectParticle : register(u3);
 // UAV : EffectParticleFreeList 128x1024個
 AppendStructuredBuffer<uint> gEffectParticleFreeList : register(u4);
+// UAV : ParticleFreeListCounter 1個
+RWStructuredBuffer<uint> gEffectParticleFreeListCounter : register(u5);
 
 [numthreads(kMaxParticles, 1, 1)]
-void main(uint3 DTid : SV_DispatchThreadID, uint3 Gid : SV_GroupID,uint3 GTid : SV_GroupThreadID) {
+void main(uint3 DTid : SV_DispatchThreadID, uint3 Gid : SV_GroupID, uint3 GTid : SV_GroupThreadID) {
     // すべてのバッファの初期化
     uint i = DTid.x;
     //--Root--//
@@ -28,6 +30,10 @@ void main(uint3 DTid : SV_DispatchThreadID, uint3 Gid : SV_GroupID,uint3 GTid : 
         gEffectMesh[i] = (EffectSprite) 0;
     }
     //--Particle--//
+    // 一回だけ初期化
+    if (i == 0) {
+        gEffectParticleFreeListCounter[0] = 0;
+    }
     gEffectParticle[i] = (EffectParticle) 0;
     gEffectParticleFreeList.Append(i);
 }

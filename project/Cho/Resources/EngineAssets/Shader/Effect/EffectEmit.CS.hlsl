@@ -8,10 +8,6 @@ RWStructuredBuffer<EffectRoot> gEffectRoot : register(u0);
 RWStructuredBuffer<EffectNode> gEffectNode : register(u1);
 // UAV : EffectMeshData 1024個
 RWStructuredBuffer<EffectSprite> gEffectMesh : register(u2);
-// UAV : EffectParticle 128x1024個
-RWStructuredBuffer<EffectParticle> gEffectParticle : register(u3);
-// UAV : EffectParticleFreeList 128x1024個
-//ConsumeStructuredBuffer<uint> gEffectParticleFreeList : register(u4);
 
 //--元データ--//
 // SRV : EffectData 128個
@@ -25,10 +21,12 @@ StructuredBuffer<EffectSpriteData> gEffectMeshData : register(t2);
 // SRV : EffectIndex 128個
 StructuredBuffer<uint> gEffectDataIndex : register(t3);
 
-[numthreads(kMaxParticles, 1, 1)]
+/*
+EffectEmitはEffectの元データからGPU側にインスタンスを生成するシェーダーです
+発生イベントが発火したエフェクト数だけDispatchされます
+*/
+[numthreads(1, 1, 1)]
 void main(uint3 DTid : SV_DispatchThreadID, uint3 Gid : SV_GroupID, uint3 GTid : SV_GroupThreadID) {
     // Dispatchによって渡されるEffectIndex
     uint dispatchIndex = Gid.x;
-    // 乱数生成器
-    RandomGenerator random;
 }
