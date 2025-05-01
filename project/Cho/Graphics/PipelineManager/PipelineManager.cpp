@@ -899,7 +899,7 @@ void PipelineManager::CreatePipelineParticleInit(ID3D12Device8* device)
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 	// RootParameter作成。PixelShaderのMaterialとVertexShaderのTransform
-	D3D12_ROOT_PARAMETER rootParameter[2] = {};
+	D3D12_ROOT_PARAMETER rootParameter[3] = {};
 
 	D3D12_DESCRIPTOR_RANGE descriptorUAVRange = {};
 	descriptorUAVRange.BaseShaderRegister = 0;
@@ -922,6 +922,11 @@ void PipelineManager::CreatePipelineParticleInit(ID3D12Device8* device)
 	rootParameter[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 	rootParameter[1].DescriptorTable.pDescriptorRanges = &descriptorUAVRange1;// Tableの中身の配列を指定
 	rootParameter[1].DescriptorTable.NumDescriptorRanges = 1;// Tableで利用する数
+
+	// Counter
+	rootParameter[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_UAV;
+	rootParameter[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	rootParameter[2].Descriptor.ShaderRegister = 2;
 
 	//D3D12_DESCRIPTOR_RANGE descriptorUAVRange2 = {};
 	//descriptorUAVRange2.BaseShaderRegister = 2;

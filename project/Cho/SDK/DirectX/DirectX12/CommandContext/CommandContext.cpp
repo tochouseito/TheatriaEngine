@@ -192,6 +192,30 @@ void CommandContext::SetComputeRootConstantBufferView(UINT RootParameterIndex, D
 	m_CommandList->SetComputeRootConstantBufferView(RootParameterIndex, BufferLocation);
 }
 
+void CommandContext::SetGraphicsRootShaderResourceView(UINT RootParameterIndex, D3D12_GPU_VIRTUAL_ADDRESS BufferLocation)
+{
+	// ルートシェーダリソースビューの設定
+	m_CommandList->SetGraphicsRootShaderResourceView(RootParameterIndex, BufferLocation);
+}
+
+void CommandContext::SetComputeRootShaderResourceView(UINT RootParameterIndex, D3D12_GPU_VIRTUAL_ADDRESS BufferLocation)
+{
+	// コンピュートルートシェーダリソースビューの設定
+	m_CommandList->SetComputeRootShaderResourceView(RootParameterIndex, BufferLocation);
+}
+
+void CommandContext::SetGraphicsRootUnorderedAccessView(UINT RootParameterIndex, D3D12_GPU_VIRTUAL_ADDRESS BufferLocation)
+{
+	// ルートシェーダリソースビューの設定
+	m_CommandList->SetGraphicsRootUnorderedAccessView(RootParameterIndex, BufferLocation);
+}
+
+void CommandContext::SetComputeRootUnorderedAccessView(UINT RootParameterIndex, D3D12_GPU_VIRTUAL_ADDRESS BufferLocation)
+{
+	// コンピュートルートシェーダリソースビューの設定
+	m_CommandList->SetComputeRootUnorderedAccessView(RootParameterIndex, BufferLocation);
+}
+
 void CommandContext::SetGraphicsRootDescriptorTable(UINT RootParameterIndex, D3D12_GPU_DESCRIPTOR_HANDLE BaseDescriptor)
 {
 	// ルートディスクリプタテーブルの設定

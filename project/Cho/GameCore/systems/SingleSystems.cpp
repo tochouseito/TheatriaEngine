@@ -367,12 +367,6 @@ void ParticleInitializeSystem::InitializeParticle(ParticleComponent& particle)
 	CommandContext* context = m_pGraphicsEngine->GetCommandContext();
 	// コマンドリスト開始
 	m_pGraphicsEngine->BeginCommandContext(context);
-	// カウンターリセット
-	IRWStructuredBuffer* freeListBuffer = m_pResourceManager->GetBuffer<IRWStructuredBuffer>(particle.freeListBufferIndex);
-	// カウンターを0で初期化
-	context->CopyBufferRegion(freeListBuffer->GetCounterResource(), 0, freeListBuffer->GetCounterZeroResource(), 0, sizeof(UINT));
-	//UINT clearValue[4] = { 0,0,0,0 };
-	//context->ClearUnorderedAccessViewUint(freeListBuffer->GetUAVGpuHandle(), freeListBuffer->GetUAVCpuHandle(), freeListBuffer->GetResource(), clearValue, 0, nullptr);
 	// パイプラインセット
 	context->SetComputePipelineState(m_pGraphicsEngine->GetPipelineManager()->GetParticleInitPSO().pso.Get());
 	// ルートシグネチャセット
@@ -380,13 +374,13 @@ void ParticleInitializeSystem::InitializeParticle(ParticleComponent& particle)
 	// パーティクルバッファをセット
 	IRWStructuredBuffer* particleBuffer = m_pResourceManager->GetBuffer<IRWStructuredBuffer>(particle.bufferIndex);
 	context->SetComputeRootDescriptorTable(0, particleBuffer->GetUAVGpuHandle());
-	// フリーリストインデックスバッファをセット
-	//IRWStructuredBuffer* freeListIndexBuffer = m_pResourceManager->GetBuffer<IRWStructuredBuffer>(particle.freeListIndexBufferIndex);
-	//context->SetComputeRootDescriptorTable(1, freeListIndexBuffer->GetUAVGpuHandle());
 	// フリーリストバッファをセット
+	IRWStructuredBuffer* freeListBuffer = m_pResourceManager->GetBuffer<IRWStructuredBuffer>(particle.freeListBufferIndex);
 	context->SetComputeRootDescriptorTable(1, freeListBuffer->GetUAVGpuHandle());
+	// カウンターバッファをセット
+	context->SetComputeRootUnorderedAccessView(2, freeListBuffer->GetCounterResource()->GetGPUVirtualAddress());
 	// Dispatch
-	context->Dispatch(particle.count, 1, 1);
+	context->Dispatch(1, 1, 1);
 	// コマンドリストをクローズ
 	m_pGraphicsEngine->EndCommandContext(context,QueueType::Compute);
 	// GPUの処理が終わるまで待機

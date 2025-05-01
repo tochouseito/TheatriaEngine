@@ -201,6 +201,11 @@ struct TimeManager {
     float deltaTime;
 };
 
+static const uint kMaxRoot = 128;
+static const uint kMaxNode = 1024;
+static const uint kMaxMeshData = 1024;
+static const uint kMaxParticles = 1024;
+
 struct EffectRoot {
     TimeManager timeManager; 
     uint isRun;
@@ -222,4 +227,14 @@ struct EffectParticle {
     uint rootID;
     uint nodeID;
     uint meshID;
+};
+
+struct EffectData {
+    
+};
+struct EffectNodeData {
+    
+};
+struct EffectSpriteData {
+    
 };

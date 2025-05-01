@@ -32,5 +32,6 @@ private:
 	FVector<EffectData> m_EffectData; // エフェクトデータ
 	std::unordered_map<std::string, uint32_t> m_EffectNameToIndex; // エフェクト名とインデックスのマップ
 	EffectData m_EffectDataTemp; // 編集用エフェクトデータ
+	static const inline uint32_t kMaxEffectDataSize = 128; // 最大エフェクト数
 };
 
