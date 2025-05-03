@@ -33,6 +33,7 @@ void main(uint3 DTid : SV_DispatchThreadID) {
                 gParticles[particleIndex].isAlive = true;
             }
             else {
+                // カウンターが0ならConsumeしないようにする
                 break; // 空きなし
             }
         }

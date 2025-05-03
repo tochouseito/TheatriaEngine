@@ -396,9 +396,11 @@
     <ClInclude Include="Resources\SoundManager\SoundManager.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\EngineAssets\Shader\header\Billboard.hlsli" />
     <None Include="Resources\EngineAssets\Shader\header\Demo.hlsli" />
     <None Include="Resources\EngineAssets\Shader\header\Effect.hlsli" />
     <None Include="Resources\EngineAssets\Shader\header\LineDraw.hlsli" />
+    <None Include="Resources\EngineAssets\Shader\header\Math.hlsli" />
     <None Include="Resources\EngineAssets\Shader\header\Particle.hlsli" />
     <None Include="Resources\EngineAssets\Shader\header\Random.hlsli" />
     <None Include="Resources\EngineAssets\Shader\header\ScreenCopy.hlsli" />

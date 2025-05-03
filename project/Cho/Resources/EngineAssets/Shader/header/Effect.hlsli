@@ -106,7 +106,8 @@ struct UVAnimationParameter {
 };
 
 struct EffectDrawCommon {
-    uint materialType = 0;                      
+    uint materialType = 0;  
+    uint textureID;
     float emissive;                             
     uint isFadeIn;                              
     uint isFadeOutType;                        
@@ -128,10 +129,8 @@ static const uint COLOR_TYPE_RANDOM = 1;
 static const uint COLOR_TYPE_EASING = 2;    
 
 struct RandColor {
-    RandValue r; 
-    RandValue g;
-    RandValue b; 
-    RandValue a; 
+    float4 minColor;
+    float4 maxColor;
 };
 
 struct EasingColor {
@@ -169,7 +168,7 @@ struct SpriteVertexPosition {
 };
 
 struct EffectSprite {
-    uint ColorType;                         
+    uint colorType;                         
     float4 color;                          
     RandColor randColor;                    
     EasingColor easingColor;                
@@ -211,7 +210,7 @@ struct EffectRoot {
     float3 position;
     uint isRun;
     uint isLoop;
-    uint nodeID[64];
+    uint nodeID[128];
 };
 
 struct EffectParticlePVA {
@@ -230,4 +229,17 @@ struct EffectParticle {
     uint rootID;
     uint nodeID;
     uint meshID;
+};
+
+struct VSInput {
+    float4 position : POSITION;
+    float2 texcoord : TEXCOORD0;
+    float3 normal : NORMAL0;
+    float4 color : COLOR0;
+};
+struct VSOutput {
+    float4 position : SV_POSITION;
+    float2 texcoord : TEXCOORD0;
+    float3 normal : NORMAL0;
+    float4 color : COLOR0;
 };

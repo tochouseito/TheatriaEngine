@@ -39,4 +39,9 @@ class RandomGenerator {
         seed.x = result;
         return result;
     }
+    float GenerateInRange(float min, float max) {
+        float r = Generate1d();
+        float normalized = (r + 1.0) * 0.5;
+        return lerp(min, max, normalized);
+    }
 };
