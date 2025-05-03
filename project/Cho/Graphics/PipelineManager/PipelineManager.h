@@ -63,6 +63,12 @@ private:
 	void CreatePipelineParticleUpdate(ID3D12Device8* device);
 	void CreatePipelineParticleEmit(ID3D12Device8* device);
 
+	// EffectEditor
+	void CreatePipelineEffectEditor(ID3D12Device8* device);
+	void CreatePipelineEffectEditorInit(ID3D12Device8* device);
+	void CreatePipelineEffectEditorUpdate(ID3D12Device8* device);
+	void CreatePipelineEffectEditorEmit(ID3D12Device8* device);
+
 	std::unique_ptr<DXShaderCompiler> m_pShaderCompiler = nullptr;
 	PSO m_DemoPSO;
 	PSO m_ScreenCopyPSO;
@@ -74,5 +80,11 @@ private:
 	PSO m_ParticleInitPSO;
 	PSO m_ParticleUpdatePSO;
 	PSO m_ParticleEmitPSO;
+
+	// EffectEditor
+	PSO m_EffectEditorPSO;
+	PSO m_EffectEditorInitPSO;
+	PSO m_EffectEditorUpdatePSO;
+	PSO m_EffectEditorEmitPSO;
 };
 

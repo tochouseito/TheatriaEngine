@@ -44,6 +44,7 @@ VSOutput main(VSInput input, uint instanceId : SV_InstanceID){
     output.texcoord = input.texcoord;
     output.normal = input.normal;
     output.color = particle.color;
+    output.instanceId = instanceId;
     
     return output;
 }

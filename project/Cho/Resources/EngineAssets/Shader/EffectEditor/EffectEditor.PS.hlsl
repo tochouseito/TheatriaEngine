@@ -14,10 +14,10 @@ struct PSOutput {
     float4 color : SV_TARGET0;
 };
 
-PSOutput main(VSOutput input, uint instanceId : SV_InstanceID) {
+PSOutput main(VSOutput input) {
     PSOutput output;
 	
-    EffectParticle particle = gEffectParticle[instanceId];
+    EffectParticle particle = gEffectParticle[input.instanceId];
     EffectNode node = gEffectNode[particle.nodeID];
     float4 textureColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
     textureColor = gTextures[node.drawCommon.textureID].Sample(gSampler, input.texcoord);

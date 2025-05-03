@@ -106,7 +106,7 @@ struct UVAnimationParameter {
 };
 
 struct EffectDrawCommon {
-    uint materialType = 0;  
+    uint materialType;  
     uint textureID;
     float emissive;                             
     uint isFadeIn;                              
@@ -235,11 +235,11 @@ struct VSInput {
     float4 position : POSITION;
     float2 texcoord : TEXCOORD0;
     float3 normal : NORMAL0;
-    float4 color : COLOR0;
 };
 struct VSOutput {
     float4 position : SV_POSITION;
     float2 texcoord : TEXCOORD0;
     float3 normal : NORMAL0;
     float4 color : COLOR0;
+    uint instanceId : SV_InstanceID;
 };
