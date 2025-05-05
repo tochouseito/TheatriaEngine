@@ -125,6 +125,17 @@ public:
 			Log::Write(LogLevel::Assert, "Index out of range");
 		}
 	}
+	T& GetData()
+	{
+		if (m_MappedData.size() > 0)
+		{
+			return m_MappedData[0];
+		} else
+		{
+			Log::Write(LogLevel::Assert, "Index out of range");
+			return m_MappedData[0];
+		}
+	}
 private:
 	// マッピングデータ
 	std::span<T> m_MappedData;
@@ -248,6 +259,17 @@ public:
 		} else
 		{
 			Log::Write(LogLevel::Assert, "Index out of range");
+		}
+	}
+	T& GetData(const uint32_t& index)
+	{
+		if (m_MappedData.size() > index)
+		{
+			return m_MappedData[index];
+		} else
+		{
+			Log::Write(LogLevel::Assert, "Index out of range");
+			return m_MappedData[0];
 		}
 	}
 	// ディスクリプタハンドルを取得

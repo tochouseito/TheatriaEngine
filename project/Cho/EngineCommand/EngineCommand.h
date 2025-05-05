@@ -38,6 +38,7 @@ class EngineCommand
 	friend class AddEffectObjectCommand;
 	// Editor
 	friend class EffectEditorUpdateSystem;
+	friend class EffectEditor;
 
 	friend class GraphicsEngine;
 public:

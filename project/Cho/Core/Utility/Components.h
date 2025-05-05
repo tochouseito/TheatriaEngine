@@ -223,9 +223,11 @@ struct EffectComponent : public IComponentTag
 	float deltaTime = 0.0f;	// デルタ時間
 	bool isRun = false;	// 実行フラグ
 	bool isPreRun = false;	// プリセット実行フラグ
-	bool isLoop = false;	// ループフラグ
+	bool isLoop = true;	// ループフラグ
+	bool isReset = false;	// リセットフラグ
 	std::vector<uint32_t> nodeID;	// ノードID
 	std::vector<EffectNodeData> nodeData;	// ノードデータ
+
 };
 
 // マルチコンポーネントを許可

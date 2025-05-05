@@ -169,7 +169,9 @@ void MainMenu::EditMenu()
 				EffectComponent* effect = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<EffectComponent>(m_EngineCommand->GetEffectEntity().value());
                 uint32_t nodeID = m_EngineCommand->GetNodeIntegrationData()->GetMapID();
 				effect->nodeID.push_back(nodeID);
-				effect->nodeData.push_back(EffectNodeData(nodeID));
+				std::string nodeName = "Node" + std::to_string(nodeID);
+				effect->nodeData.push_back(EffectNodeData(nodeID,nodeName));
+				effect->nodeData[nodeID].scale.value = { 1.0f, 1.0f, 1.0f };
                 effect->nodeData[nodeID].draw.meshDataIndex = m_EngineCommand->GetSpriteIntegrationData()->GetMapID();
             }
             break;

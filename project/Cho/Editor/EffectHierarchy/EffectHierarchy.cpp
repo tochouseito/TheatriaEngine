@@ -43,7 +43,8 @@ void EffectHierarchy::Window()
 		{
 			flags |= ImGuiTreeNodeFlags_Selected; // 選択中のオブジェクトをハイライト
 		}
-		bool isTreeOpen = ImGui::TreeNodeEx(node.name.c_str(), flags);
+		std::string label = node.name + "##" + std::to_string(node.id);
+		bool isTreeOpen = ImGui::TreeNodeEx(label.c_str(), flags);
 
 		// 親ノードが左クリックされた場合の処理
 		if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
@@ -56,7 +57,7 @@ void EffectHierarchy::Window()
 		{
 			// 選択中のオブジェクトを更新
 			m_EngineCommand->SetEffectNode(node.id);
-			ImGui::OpenPopup("HierarchyPopupMenu");
+			//ImGui::OpenPopup("HierarchyPopupMenu");
 		}
 		// ダブルクリックで編集モードに切り替え
 		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))

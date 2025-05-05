@@ -86,7 +86,7 @@ enum class EFFECT_SRT_TYPE
 
 struct EffectSRT
 {
-    uint32_t type;          // タイプ
+    uint32_t type = 0;          // タイプ
     Vector3 value;       // 値
     PVA pva;            // 値、速度、加速度
     EasingValue easing; // イージング値
@@ -100,17 +100,17 @@ enum class INFLUNCE_TYPE
 
 struct EffectCommon
 {
-    uint32_t emitCount;                 // 生成数
-    uint32_t isUnlimit;                 // 無限生成フラグ
-    uint32_t PosInfluenceType;          // 位置影響タイプ
-    uint32_t RotInfluenceType;          // 回転影響タイプ
-    uint32_t SclInfluenceType;          // スケール影響タイプ
-    uint32_t deleteLifetime;            // 寿命で削除
-    uint32_t deleteParentDeleted;       // 親削除で削除
-    uint32_t deleteAllChildrenDeleted;  // 全ての子削除で削除
-    RandValue lifeTime;             // 生存時間
-    RandValue emitTime;             // 生成時間
-    RandValue emitStartTime;        // 生成開始時間
+    uint32_t emitCount = 1;                 // 生成数
+    uint32_t isUnlimited = 0;                 // 無限生成フラグ
+    uint32_t PosInfluenceType = 0;          // 位置影響タイプ
+    uint32_t RotInfluenceType = 0;          // 回転影響タイプ
+    uint32_t SclInfluenceType = 0;          // スケール影響タイプ
+    uint32_t deleteLifetime = 0;            // 寿命で削除
+    uint32_t deleteParentDeleted = 0;       // 親削除で削除
+    uint32_t deleteAllChildrenDeleted = 0;  // 全ての子削除で削除
+    RandValue lifeTime = {};             // 生存時間
+    RandValue emitTime = {};             // 生成時間
+    RandValue emitStartTime = {};        // 生成開始時間
 };
 
 // FadeOutタイプ
@@ -153,7 +153,7 @@ struct UVAnimationParameter
 struct EffectDrawCommon
 {
     uint32_t materialType = 0;                      // マテリアルタイプ(現在は通常のみ)
-	uint32_t textureID;                          // テクスチャインデックス
+	uint32_t textureID = 0;                          // テクスチャインデックス
     float emissive;                             // 発光値
     uint32_t isFadeIn;                              // フェードイン(0:しない 1:する)
     uint32_t isFadeOutType;                         // フェードアウトタイプ
@@ -238,20 +238,20 @@ struct SpriteVertexPosition
 
 struct EffectSprite
 {
-    COLOR_TYPE ColorType;                         // 色タイプ
+    uint32_t colorType=0;                         // 色タイプ
     Color color;                           // 色
     RandColor randColor;                    // ランダム色
     EasingColor easingColor;                // イージング色
-    PLACEMENT_TYPE placement;                         // 配置方法
-    VERTEX_COLOR_TYPE VertexColorType;                   // 頂点色タイプ
+    uint32_t placement = 0;                         // 配置方法
+    uint32_t VertexColorType = 0;                   // 頂点色タイプ
     SpriteVertexColor vertexColor;          // 頂点色
-	VERTEX_POSITION_TYPE VertexPositionType;                 // 頂点座標タイプ
+    uint32_t VertexPositionType = 0;                 // 頂点座標タイプ
     SpriteVertexPosition vertexPosition;    // 頂点座標
 };
 
 struct EffectDraw
 {
-	uint32_t meshType;          // メッシュタイプ
+	uint32_t meshType = 1;          // メッシュタイプ
 	uint32_t meshDataIndex;     // メッシュデータインデックス
 };
 
@@ -269,8 +269,8 @@ struct EffectNode
 
 struct EffectNodeData
 {
-	EffectNodeData(const uint32_t& id) : id(id) {}
-    std::string name="Node";               // ノード名
+	EffectNodeData(const uint32_t& id,const std::string& newName) : id(id),name(newName) {}
+    std::string name;               // ノード名
     EffectCommon common;            // 共通情報
     EffectSRT position;             // 位置
     EffectSRT rotation;             // 回転
@@ -279,6 +279,7 @@ struct EffectNodeData
     EffectDraw draw;                // 描画情報
     uint32_t parentIndex;           // 親インデックス
 	uint32_t id;                // ノードID
+	EffectSprite sprite;              // スプライト情報
 };
 
 struct TimeManager

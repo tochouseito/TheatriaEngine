@@ -184,6 +184,36 @@ void EmitterEditorUpdateSystem::UpdateEmitter(EmitterComponent& emitter)
 
 void EffectEditorUpdateSystem::UpdateEffect(EffectComponent& effect)
 {
+	if (effect.isReset)
+	{
+		// エフェクトの時間をリセット
+		effect.globalTime = 0.0f;
+		effect.deltaTime = 0.0f;
+		effect.isRun = false;
+		// 初期化
+		CommandContext* context = m_pEngineCommand->GetGraphicsEngine()->GetCommandContext();
+		// コマンドリスト開始
+		m_pEngineCommand->GetGraphicsEngine()->BeginCommandContext(context);
+		// パイプラインセット
+		context->SetComputePipelineState(m_pEngineCommand->GetGraphicsEngine()->GetPipelineManager()->GetEffectEditorInitPSO().pso.Get());
+		// ルートシグネチャセット
+		context->SetComputeRootSignature(m_pEngineCommand->GetGraphicsEngine()->GetPipelineManager()->GetEffectEditorInitPSO().rootSignature.Get());
+		// Particleバッファをセット
+		IRWStructuredBuffer* particleBuffer = m_pEngineCommand->GetResourceManager()->GetBuffer<IRWStructuredBuffer>(m_pEngineCommand->m_EffectParticleIndex);
+		context->SetComputeRootDescriptorTable(0, particleBuffer->GetUAVGpuHandle());
+		// ParticleListバッファをセット
+		IRWStructuredBuffer* particleListBuffer = m_pEngineCommand->GetResourceManager()->GetBuffer<IRWStructuredBuffer>(m_pEngineCommand->m_EffectParticleFreeListIndex);
+		context->SetComputeRootDescriptorTable(1, particleListBuffer->GetUAVGpuHandle());
+		// ListCounterバッファをセット
+		context->SetComputeRootUnorderedAccessView(2, particleListBuffer->GetCounterResource()->GetGPUVirtualAddress());
+		// Dispatch
+		context->Dispatch(128, 1, 1);
+		// クローズ
+		m_pEngineCommand->GetGraphicsEngine()->EndCommandContext(context, QueueType::Compute);
+		// 待機
+		m_pEngineCommand->GetGraphicsEngine()->WaitForGPU(QueueType::Compute);
+		effect.isReset = false;
+	}
 	// editorのエフェクトの更新
 	if (effect.isRun)
 	{
@@ -256,6 +286,17 @@ void EffectEditorUpdateSystem::UpdateEffect(EffectComponent& effect)
 		node.draw = effect.nodeData[i].draw;
 		node.parentIndex = effect.nodeData[i].parentIndex;
 		nodeBuffer->UpdateData(node, effect.nodeData[i].id);
+		EffectSprite sprite = {};
+		sprite.colorType = effect.nodeData[i].sprite.colorType;
+		sprite.color = effect.nodeData[i].sprite.color;
+		sprite.randColor = effect.nodeData[i].sprite.randColor;
+		sprite.easingColor = effect.nodeData[i].sprite.easingColor;
+		sprite.placement = effect.nodeData[i].sprite.placement;
+		sprite.VertexColorType = effect.nodeData[i].sprite.VertexColorType;
+		sprite.vertexColor = effect.nodeData[i].sprite.vertexColor;
+		sprite.VertexPositionType = effect.nodeData[i].sprite.VertexPositionType;
+		sprite.vertexPosition = effect.nodeData[i].sprite.vertexPosition;
+		spriteBuffer->UpdateData(sprite, effect.nodeData[i].draw.meshDataIndex);
 	}
 	buffer->UpdateData(root);
 
