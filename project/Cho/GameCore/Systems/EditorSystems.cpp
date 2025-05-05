@@ -190,7 +190,7 @@ void EffectEditorUpdateSystem::UpdateEffect(EffectComponent& effect)
 		// エフェクトの時間を更新
 		effect.deltaTime = Timer::GetDeltaTime();
 		effect.globalTime += effect.deltaTime;
-		if (effect.globalTime > effect.maxTime)
+		if (!effect.isPreRun||effect.globalTime > effect.maxTime)
 		{
 			// 初期化
 			CommandContext* context = m_pEngineCommand->GetGraphicsEngine()->GetCommandContext();
@@ -215,15 +215,19 @@ void EffectEditorUpdateSystem::UpdateEffect(EffectComponent& effect)
 			// 待機
 			m_pEngineCommand->GetGraphicsEngine()->WaitForGPU(QueueType::Compute);
 
-			if (effect.isLoop)
+			if (effect.isPreRun)
 			{
-				effect.globalTime = 0.0f;
-			} else
-			{
-				effect.globalTime = 0.0f;
-				effect.isRun = false;
+				if (effect.isLoop)
+				{
+					effect.globalTime = 0.0f;
+				} else
+				{
+					effect.globalTime = 0.0f;
+					effect.isRun = false;
+				}
 			}
 		}
+		effect.isPreRun = effect.isRun;
 	} else
 	{
 		return;

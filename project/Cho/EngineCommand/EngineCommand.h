@@ -35,6 +35,7 @@ class EngineCommand
 	friend class AddParticleSystemObjectCommand;
 	friend class AddEmitterComponent;
 	friend class AddParticleComponent;
+	friend class AddEffectObjectCommand;
 	// Editor
 	friend class EffectEditorUpdateSystem;
 
@@ -112,9 +113,22 @@ public:
 	UINT GetGameResolutionY() const;
 	// 新たに編集用のエフェクトを作成
 	void CreateNewEffect();
+	// エフェクトのEntityを取得
+	std::optional<uint32_t> GetEffectEntity() const { return m_EffectEntity; }
+	// 選択中のNodeをセット
+	void SetEffectNode(uint32_t nodeID) { m_EffectNode = nodeID; }
+	// エフェクトのノードを取得
+	std::optional<uint32_t> GetEffectNode() const { return m_EffectNode; }
+	// 統合バッファ
+	IIntegrationData* GetNodeIntegrationData() { return m_NodeIntegrationData.get(); }
+	IIntegrationData* GetSpriteIntegrationData() { return m_SpriteIntegrationData.get(); }
 private:
 	// 選択中のオブジェクト
 	GameObject* m_SelectedObject = nullptr;
+	// 編集中のエフェクトEntity
+	std::optional<uint32_t> m_EffectEntity = std::nullopt;
+	// 選択中のEffectNode
+	std::optional<uint32_t> m_EffectNode = std::nullopt;
 
 	GameCore* m_GameCore = nullptr;
 	ResourceManager* m_ResourceManager = nullptr;

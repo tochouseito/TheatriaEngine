@@ -29,7 +29,8 @@ void GameCore::Initialize(InputManager* input, ResourceManager* resourceManager,
 	m_pContactListener = std::make_unique<ContactListener2D>(m_pECSManager.get(), resourceManager, input, m_pObjectContainer.get());
 	m_pPhysicsWorld->SetContactListener(m_pContactListener.get());
 	// システムの生成
-	CreateSystems(input,resourceManager,graphicsEngine);
+	input;resourceManager;graphicsEngine;
+	//CreateSystems(input,resourceManager,graphicsEngine);
 }
 
 void GameCore::Start(ResourceManager& resourceManager)

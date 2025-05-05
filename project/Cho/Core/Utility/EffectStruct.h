@@ -269,7 +269,8 @@ struct EffectNode
 
 struct EffectNodeData
 {
-    std::string name;               // ノード名
+	EffectNodeData(const uint32_t& id) : id(id) {}
+    std::string name="Node";               // ノード名
     EffectCommon common;            // 共通情報
     EffectSRT position;             // 位置
     EffectSRT rotation;             // 回転

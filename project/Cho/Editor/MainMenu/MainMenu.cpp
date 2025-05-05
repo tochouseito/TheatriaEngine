@@ -3,6 +3,7 @@
 #include <imgui.h>
 #include "OS/Windows/WinApp/WinApp.h"
 #include "Editor/EditorManager/EditorManager.h"
+#include "GameCore/GameCore.h"
 #include "EngineCommand/EngineCommands.h"
 #include "GameCore/GameObject/GameObject.h"
 #include "Platform/FileSystem/FileSystem.h"
@@ -159,6 +160,17 @@ void MainMenu::EditMenu()
             if (ImGui::MenuItem("新規作成"))
             {
                 m_EngineCommand->CreateNewEffect();
+				std::unique_ptr<AddEffectObjectCommand> addEffectObject = std::make_unique<AddEffectObjectCommand>();
+				m_EngineCommand->ExecuteCommand(std::move(addEffectObject));
+            }
+            if (ImGui::MenuItem("ノードの追加"))
+            {
+				// 現在の編集中のRootにノードを追加
+				EffectComponent* effect = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<EffectComponent>(m_EngineCommand->GetEffectEntity().value());
+                uint32_t nodeID = m_EngineCommand->GetNodeIntegrationData()->GetMapID();
+				effect->nodeID.push_back(nodeID);
+				effect->nodeData.push_back(EffectNodeData(nodeID));
+                effect->nodeData[nodeID].draw.meshDataIndex = m_EngineCommand->GetSpriteIntegrationData()->GetMapID();
             }
             break;
         default:

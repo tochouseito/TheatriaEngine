@@ -41,6 +41,19 @@ public:
 private:
 	uint32_t m_ObjectID;
 };
+// Editor用のEffectオブジェクトを追加するコマンド
+class AddEffectObjectCommand :public IEngineCommand
+{
+public:
+	AddEffectObjectCommand()
+	{
+	}
+	bool Execute(EngineCommand* edit)override;
+	bool Undo(EngineCommand* edit)override;
+private:
+	uint32_t m_Entity;
+};
+
 // MeshFilterComponentを追加するコマンド
 class AddMeshFilterComponent :public IEngineCommand
 {

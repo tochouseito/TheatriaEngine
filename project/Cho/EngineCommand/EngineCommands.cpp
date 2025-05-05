@@ -397,3 +397,34 @@ bool AddParticleComponent::Undo(EngineCommand* edit)
 	edit;
 	return false;
 }
+
+bool AddEffectObjectCommand::Execute(EngineCommand* edit)
+{
+	// CurrentSceneがないなら失敗
+	if (!edit->m_GameCore->GetSceneManager()->GetCurrentScene())
+	{
+		Log::Write(LogLevel::Assert, "Current Scene is nullptr");
+		return false;
+	}
+	// 各IDの取得
+	// Entity
+	Entity entity = edit->m_GameCore->GetECSManager()->GenerateEntity();
+	m_Entity = entity;
+	// デフォルトの名前
+	std::wstring name = L"EditorEffect";
+	// 重複回避
+	name = GenerateUniqueName(name, edit->m_GameCore->GetObjectContainer()->GetNameToObjectID());
+	// EffectComponentを追加
+	EffectComponent* effect = edit->m_GameCore->GetECSManager()->AddComponent<EffectComponent>(entity);
+	if (!effect) { return false; }
+	effect->isRun = false;
+	effect->isLoop = false;
+	edit->m_EffectEntity = entity;
+	return true;
+}
+
+bool AddEffectObjectCommand::Undo(EngineCommand* edit)
+{
+	edit;
+	return false;
+}

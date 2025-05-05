@@ -19,6 +19,7 @@ class BoxCollider2DInitSystem;
 
 class GameCore
 {
+	friend class ChoEngine;
 public:
 	GameCore()
 	{
