@@ -198,6 +198,7 @@ struct TimeManager {
     float globalTime;
     float maxTime;
     float deltaTime;
+    float padding;
 };
 
 static const uint kMaxRoot = 128;
@@ -207,9 +208,9 @@ static const uint kMaxParticles = 1024;
 
 struct EffectRoot {
     TimeManager timeManager; 
-    float3 position;
     uint isRun;
     uint isLoop;
+    float padding[2];
     uint nodeID[128];
 };
 

@@ -63,10 +63,10 @@ struct EasingValue
 {
     RandVector3 startPoint;     // 始点
     RandVector3 endPoint;       // 終点
-    EFFECT_EASING_TYPE easingType;            // イージングタイプ
-    EFFECT_SPEED_TYPE startSpeedType;        // 始点速度タイプ
-    EFFECT_SPEED_TYPE endSpeedType;          // 終点速度タイプ
-    bool isMedianPoint;         // 中間点有効
+    uint32_t easingType;            // イージングタイプ
+    uint32_t startSpeedType;        // 始点速度タイプ
+    uint32_t endSpeedType;          // 終点速度タイプ
+    uint32_t isMedianPoint;         // 中間点有効
     RandVector3 medianPoint;    // 中間点
 };
 
@@ -86,7 +86,7 @@ enum class EFFECT_SRT_TYPE
 
 struct EffectSRT
 {
-    EFFECT_SRT_TYPE type;          // タイプ
+    uint32_t type;          // タイプ
     Vector3 value;       // 値
     PVA pva;            // 値、速度、加速度
     EasingValue easing; // イージング値
@@ -101,13 +101,13 @@ enum class INFLUNCE_TYPE
 struct EffectCommon
 {
     uint32_t emitCount;                 // 生成数
-    bool isUnlimit;                 // 無限生成フラグ
-    INFLUNCE_TYPE PosInfluenceType;          // 位置影響タイプ
-    INFLUNCE_TYPE RotInfluenceType;          // 回転影響タイプ
-    INFLUNCE_TYPE SclInfluenceType;          // スケール影響タイプ
-    bool deleteLifetime;            // 寿命で削除
-    bool deleteParentDeleted;       // 親削除で削除
-    bool deleteAllChildrenDeleted;  // 全ての子削除で削除
+    uint32_t isUnlimit;                 // 無限生成フラグ
+    uint32_t PosInfluenceType;          // 位置影響タイプ
+    uint32_t RotInfluenceType;          // 回転影響タイプ
+    uint32_t SclInfluenceType;          // スケール影響タイプ
+    uint32_t deleteLifetime;            // 寿命で削除
+    uint32_t deleteParentDeleted;       // 親削除で削除
+    uint32_t deleteAllChildrenDeleted;  // 全ての子削除で削除
     RandValue lifeTime;             // 生存時間
     RandValue emitTime;             // 生成時間
     RandValue emitStartTime;        // 生成開始時間
@@ -145,17 +145,18 @@ struct UVAnimationParameter
     uint32_t oneTime;           // 1回分の時間
     uint32_t widthSheetCount;   // 横の枚数
     uint32_t heightSheetCount;  // 縦の枚数
-    bool isLoop;            // ループフラグ
+    uint32_t isLoop;            // ループフラグ
     RandValue startSheet;   // 開始シート
-    bool interpolation;     // 補間フラグ
+    uint32_t interpolation;     // 補間フラグ
 };
 
 struct EffectDrawCommon
 {
     uint32_t materialType = 0;                      // マテリアルタイプ(現在は通常のみ)
+	uint32_t textureID;                          // テクスチャインデックス
     float emissive;                             // 発光値
-    bool isFadeIn;                              // フェードイン(0:しない 1:する)
-    FADEOUT_TYPE isFadeOutType;                         // フェードアウトタイプ
+    uint32_t isFadeIn;                              // フェードイン(0:しない 1:する)
+    uint32_t isFadeOutType;                         // フェードアウトタイプ
     UVConstantValue constantValue;              // UV定数値
     UVAnimationParameter animationParameter;    // UVアニメーションパラメータ
 };
@@ -250,14 +251,13 @@ struct EffectSprite
 
 struct EffectDraw
 {
-	EFFECT_MESH_TYPE meshType;          // メッシュタイプ
+	uint32_t meshType;          // メッシュタイプ
 	uint32_t meshDataIndex;     // メッシュデータインデックス
 };
 
 // ノード
 struct EffectNode
 {
-	std::string name;               // ノード名
     EffectCommon common;            // 共通情報
     EffectSRT position;             // 位置
     EffectSRT rotation;             // 回転
@@ -267,11 +267,25 @@ struct EffectNode
     uint32_t parentIndex;           // 親インデックス
 };
 
+struct EffectNodeData
+{
+    std::string name;               // ノード名
+    EffectCommon common;            // 共通情報
+    EffectSRT position;             // 位置
+    EffectSRT rotation;             // 回転
+    EffectSRT scale;                // スケール
+    EffectDrawCommon drawCommon;    // 描画共通情報
+    EffectDraw draw;                // 描画情報
+    uint32_t parentIndex;           // 親インデックス
+	uint32_t id;                // ノードID
+};
+
 struct TimeManager
 {
     float globalTime;
     float maxTime;
     float deltaTime;
+    float padding[1];
 };
 
 struct EffectRoot
@@ -279,7 +293,8 @@ struct EffectRoot
     TimeManager timeManager;    // 時間管理
     uint32_t isRun;
     uint32_t isLoop;               // ループフラグ
-	uint32_t nodeID[64];           // ノードID
+	float padding[2];
+	uint32_t nodeID[128];           // ノードID
 };
 
 struct EffectData
@@ -289,4 +304,24 @@ struct EffectData
     uint32_t isRun;
     uint32_t isLoop;               // ループフラグ
 	std::vector<uint32_t> nodeID;           // ノードID
+};
+
+struct EffectParticlePVA
+{
+    Vector3 value;
+	Vector3 velocity;
+	Vector3 acceleration;
+};
+struct EffectParticle
+{
+	EffectParticlePVA position;         // 位置
+	EffectParticlePVA rotation;         // 回転
+	EffectParticlePVA scale;            // スケール
+	Color color;               // 色
+	float lifeTime;             // 寿命
+	float currentTime;         // 現在時間
+	uint32_t isAlive;            // 生存フラグ
+    uint32_t rootID;
+	uint32_t nodeID;
+    uint32_t meshID;
 };

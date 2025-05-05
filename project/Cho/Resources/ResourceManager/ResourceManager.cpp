@@ -159,3 +159,4 @@ void ResourceManager::CreateDummyMaterial()
 	data.textureId = 0;
 	pIntegrationBuffer->UpdateData(data, mapID);
 }
+

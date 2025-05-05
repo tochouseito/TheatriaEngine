@@ -64,7 +64,6 @@ void Cho::Log::Write(LogLevel level,
                     WriteToFile(logMessage);
 #endif
                     CHO_ASSERT(false,logMessage.c_str()); // assert 発動
-                    //assert(false && logMessage.c_str()); // assert 発動
                     return;
                 }
                 // 成功時は単に出力（レベルはInfoにする）
@@ -89,7 +88,6 @@ void Cho::Log::Write(LogLevel level,
                     WriteToFile(logMessage);
 #endif
                     CHO_ASSERT(false,logMessage.c_str()); // assert 発動
-                    //assert(false && logMessage.c_str()); // assert 発動
                     return;
                 }
                 // 成功時はInfoとして出力
@@ -108,7 +106,6 @@ void Cho::Log::Write(LogLevel level,
             WriteToFile(logMessage);
 #endif
 			CHO_ASSERT(false,logMessage.c_str()); // assert 発動
-            //assert(false && logMessage.c_str()); // assert 発動
             return;
         }
     }

@@ -211,6 +211,9 @@ void GameCore::CreateSystems(InputManager* input, ResourceManager* resourceManag
 	m_pEditorSingleSystem->RegisterSystem(std::move(cameraEditorSystem), SystemState::Update);
 	std::unique_ptr<ECSManager::ISystem> emitterEditorSystem = std::make_unique<EmitterEditorUpdateSystem>(m_pECSManager.get(), resourceManager, graphicsEngine);
 	m_pEditorSingleSystem->RegisterSystem(std::move(emitterEditorSystem), SystemState::Update);
+	std::unique_ptr<ECSManager::ISystem> effectEditorSystem = std::make_unique<EffectEditorUpdateSystem>(m_pECSManager.get(), m_EngineCommand);
+	m_pEditorSingleSystem->RegisterSystem(std::move(effectEditorSystem), SystemState::Update);
+
 	// マルチシステムの生成
 	std::unique_ptr<ECSManager::IMultiSystem> lineRendererEditorSystem = std::make_unique<LineRendererSystem>(m_pECSManager.get(), resourceManager);
 	m_pEditorMultiSystem->RegisterSystem(std::move(lineRendererEditorSystem), SystemState::Update);

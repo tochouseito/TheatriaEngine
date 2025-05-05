@@ -54,6 +54,7 @@ void ChoEngine::Initialize()
 	engineCommand = std::make_unique<EngineCommand>(gameCore.get(), resourceManager.get(), graphicsEngine.get());
 	// GameCoreにEngineCommandをセット
 	gameCore->SetEngineCommandPtr(engineCommand.get());
+	graphicsEngine->SetEngineCommand(engineCommand.get());
 
 	// EditorManager初期化
 	editorManager = std::make_unique<EditorManager>(engineCommand.get(), platformLayer->GetInputManager());

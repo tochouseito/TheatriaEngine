@@ -1,7 +1,10 @@
 #include "pch.h"
 #include "EditorSystems.h"
 #include "Resources/ResourceManager/ResourceManager.h"
+#include "Graphics/GraphicsEngine/GraphicsEngine.h"
+#include "EngineCommand/EngineCommand.h"
 #include "GameCore/IScript/IScript.h"
+#include "Core/Utility/EffectStruct.h"
 #include "Platform/FileSystem/FileSystem.h"
 #include "Platform/Timer/Timer.h"
 #include "Core/ChoLog/ChoLog.h"
@@ -177,4 +180,129 @@ void EmitterEditorUpdateSystem::UpdateEmitter(EmitterComponent& emitter)
 	data.emit = emitter.emit;
 	ConstantBuffer<BUFFER_DATA_EMITTER>* buffer = dynamic_cast<ConstantBuffer<BUFFER_DATA_EMITTER>*>(m_pResourceManager->GetBuffer<IConstantBuffer>(emitter.bufferIndex));
 	buffer->UpdateData(data);
+}
+
+void EffectEditorUpdateSystem::UpdateEffect(EffectComponent& effect)
+{
+	// editorのエフェクトの更新
+	if (effect.isRun)
+	{
+		// エフェクトの時間を更新
+		effect.deltaTime = Timer::GetDeltaTime();
+		effect.globalTime += effect.deltaTime;
+		if (effect.globalTime > effect.maxTime)
+		{
+			// 初期化
+			CommandContext* context = m_pEngineCommand->GetGraphicsEngine()->GetCommandContext();
+			// コマンドリスト開始
+			m_pEngineCommand->GetGraphicsEngine()->BeginCommandContext(context);
+			// パイプラインセット
+			context->SetComputePipelineState(m_pEngineCommand->GetGraphicsEngine()->GetPipelineManager()->GetEffectEditorInitPSO().pso.Get());
+			// ルートシグネチャセット
+			context->SetComputeRootSignature(m_pEngineCommand->GetGraphicsEngine()->GetPipelineManager()->GetEffectEditorInitPSO().rootSignature.Get());
+			// Particleバッファをセット
+			IRWStructuredBuffer* particleBuffer = m_pEngineCommand->GetResourceManager()->GetBuffer<IRWStructuredBuffer>(m_pEngineCommand->m_EffectParticleIndex);
+			context->SetComputeRootDescriptorTable(0, particleBuffer->GetUAVGpuHandle());
+			// ParticleListバッファをセット
+			IRWStructuredBuffer* particleListBuffer = m_pEngineCommand->GetResourceManager()->GetBuffer<IRWStructuredBuffer>(m_pEngineCommand->m_EffectParticleFreeListIndex);
+			context->SetComputeRootDescriptorTable(1, particleListBuffer->GetUAVGpuHandle());
+			// ListCounterバッファをセット
+			context->SetComputeRootUnorderedAccessView(2, particleListBuffer->GetCounterResource()->GetGPUVirtualAddress());
+			// Dispatch
+			context->Dispatch(128, 1, 1);
+			// クローズ
+			m_pEngineCommand->GetGraphicsEngine()->EndCommandContext(context, QueueType::Compute);
+			// 待機
+			m_pEngineCommand->GetGraphicsEngine()->WaitForGPU(QueueType::Compute);
+
+			if (effect.isLoop)
+			{
+				effect.globalTime = 0.0f;
+			} else
+			{
+				effect.globalTime = 0.0f;
+				effect.isRun = false;
+			}
+		}
+	} else
+	{
+		return;
+	}
+	// ノードがないならスキップ
+	if (effect.nodeID.empty()) { return; }
+	// Root
+	ConstantBuffer<EffectRoot>* buffer = dynamic_cast<ConstantBuffer<EffectRoot>*>(m_pEngineCommand->GetResourceManager()->GetBuffer<IConstantBuffer>(m_pEngineCommand->m_EffectRootIndex));
+	EffectRoot root = {};
+	root.timeManager.globalTime = effect.globalTime;
+	root.timeManager.maxTime = effect.maxTime;
+	root.timeManager.deltaTime = effect.deltaTime;
+	root.isRun = effect.isRun;
+	root.isLoop = effect.isLoop;
+	StructuredBuffer<EffectNode>* nodeBuffer = dynamic_cast<StructuredBuffer<EffectNode>*>(m_pEngineCommand->GetResourceManager()->GetBuffer<IStructuredBuffer>(m_pEngineCommand->m_EffectNodeIndex));
+	StructuredBuffer<EffectSprite>* spriteBuffer = dynamic_cast<StructuredBuffer<EffectSprite>*>(m_pEngineCommand->GetResourceManager()->GetBuffer<IStructuredBuffer>(m_pEngineCommand->m_EffectSpriteIndex));
+	for (size_t i = 0; i < effect.nodeID.size(); i++)
+	{
+		root.nodeID[i] = effect.nodeID[i];
+		EffectNode node = {};
+		node.common = effect.nodeData[i].common;
+		node.position = effect.nodeData[i].position;
+		node.rotation = effect.nodeData[i].rotation;
+		node.scale = effect.nodeData[i].scale;
+		node.drawCommon = effect.nodeData[i].drawCommon;
+		node.draw = effect.nodeData[i].draw;
+		node.parentIndex = effect.nodeData[i].parentIndex;
+		nodeBuffer->UpdateData(node, effect.nodeData[i].id);
+	}
+	buffer->UpdateData(root);
+
+	// Emit
+	CommandContext* context = m_pEngineCommand->GetGraphicsEngine()->GetCommandContext();
+	// コマンドリスト開始
+	m_pEngineCommand->GetGraphicsEngine()->BeginCommandContext(context);
+	// パイプラインセット
+	context->SetComputePipelineState(m_pEngineCommand->GetGraphicsEngine()->GetPipelineManager()->GetEffectEditorEmitPSO().pso.Get());
+	// ルートシグネチャセット
+	context->SetComputeRootSignature(m_pEngineCommand->GetGraphicsEngine()->GetPipelineManager()->GetEffectEditorEmitPSO().rootSignature.Get());
+	// Rootをセット
+	context->SetComputeRootConstantBufferView(0, buffer->GetResource()->GetGPUVirtualAddress());
+	// ノードバッファをセット
+	context->SetComputeRootDescriptorTable(1, nodeBuffer->GetSRVGpuHandle());
+	// スプライトバッファをセット
+	context->SetComputeRootDescriptorTable(2, spriteBuffer->GetSRVGpuHandle());
+	// Particleバッファをセット
+	IRWStructuredBuffer* particleBuffer = m_pEngineCommand->GetResourceManager()->GetBuffer<IRWStructuredBuffer>(m_pEngineCommand->m_EffectParticleIndex);
+	context->SetComputeRootDescriptorTable(3, particleBuffer->GetUAVGpuHandle());
+	// ParticleListバッファをセット
+	IRWStructuredBuffer* particleListBuffer = m_pEngineCommand->GetResourceManager()->GetBuffer<IRWStructuredBuffer>(m_pEngineCommand->m_EffectParticleFreeListIndex);
+	context->SetComputeRootDescriptorTable(4, particleListBuffer->GetUAVGpuHandle());
+	// ListCounterバッファをセット
+	context->SetComputeRootUnorderedAccessView(5, particleListBuffer->GetCounterResource()->GetGPUVirtualAddress());
+	// Dispatch
+	context->Dispatch(static_cast<UINT>(effect.nodeID.size()), 1, 1);
+
+	// 並列阻止
+	context->BarrierUAV(D3D12_RESOURCE_BARRIER_TYPE_UAV, D3D12_RESOURCE_BARRIER_FLAG_NONE, particleBuffer->GetResource());
+	context->BarrierUAV(D3D12_RESOURCE_BARRIER_TYPE_UAV, D3D12_RESOURCE_BARRIER_FLAG_NONE, particleListBuffer->GetResource());
+
+	// Update
+	// パイプラインセット
+	context->SetComputePipelineState(m_pEngineCommand->GetGraphicsEngine()->GetPipelineManager()->GetEffectEditorUpdatePSO().pso.Get());
+	// ルートシグネチャセット
+	context->SetComputeRootSignature(m_pEngineCommand->GetGraphicsEngine()->GetPipelineManager()->GetEffectEditorUpdatePSO().rootSignature.Get());
+	// Rootをセット
+	context->SetComputeRootConstantBufferView(0, buffer->GetResource()->GetGPUVirtualAddress());
+	// ノードバッファをセット
+	context->SetComputeRootDescriptorTable(1, nodeBuffer->GetSRVGpuHandle());
+	// スプライトバッファをセット
+	context->SetComputeRootDescriptorTable(2, spriteBuffer->GetSRVGpuHandle());
+	// Particleバッファをセット
+	context->SetComputeRootDescriptorTable(3, particleBuffer->GetUAVGpuHandle());
+	// ParticleListバッファをセット
+	context->SetComputeRootDescriptorTable(4, particleListBuffer->GetUAVGpuHandle());
+	// Dispatch
+	context->Dispatch(static_cast<UINT>(effect.nodeID.size()), 1, 1);
+	// クローズ
+	m_pEngineCommand->GetGraphicsEngine()->EndCommandContext(context, QueueType::Compute);
+	// 待機
+	m_pEngineCommand->GetGraphicsEngine()->WaitForGPU(QueueType::Compute);
 }
