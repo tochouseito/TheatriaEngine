@@ -57,7 +57,7 @@ void GraphicsEngine::Render(ResourceManager& resourceManager, GameCore& gameCore
 	// フォワードレンダリング
 	DrawForward(resourceManager, gameCore, mode);
 	// ポストプロセス
-	DrawPostProcess(resourceManager, gameCore, mode);
+	//DrawPostProcess(resourceManager, gameCore, mode);
 }
 
 void GraphicsEngine::PostRender(ImGuiManager* imgui, RenderMode mode)
@@ -274,6 +274,30 @@ void GraphicsEngine::SetRenderTargets(CommandContext* context, DrawPass pass, Re
 	case Forward:
 		break;
 	case PostProcess:
+		// レンダリングモードでシーン描画かどうかを判定
+		if (mode == RenderMode::Game)
+		{
+			renderTexType = RenderTextureType::PostProcessScreen;
+		} else if (mode == RenderMode::Debug)
+		{
+			renderTexType = RenderTextureType::ScenePostProcessScreen;
+		} else if (mode == RenderMode::Editor)
+		{
+			break;
+		}
+		// ポストプロセス用のテクスチャの状態遷移
+		setTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_RenderTextures[renderTexType].m_BufferIndex);
+		context->BarrierTransition(
+			setTex->GetResource(),
+			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+			D3D12_RESOURCE_STATE_RENDER_TARGET
+		);
+		// RTVの設定
+		renderTexType = RenderTextureType::PostProcessScreen;
+		rtvHandle = m_ResourceManager->GetBuffer<ColorBuffer>(m_RenderTextures[renderTexType].m_BufferIndex)->GetRTVCpuHandle();
+		context->SetRenderTarget(&rtvHandle);
+		context->ClearRenderTarget(rtvHandle);
+		SetRenderState(context, ViewportSwapChain);
 		break;
 	case SwapChainPass:
 		// RTV,DSVの設定
@@ -527,9 +551,58 @@ void GraphicsEngine::DrawForward(ResourceManager& resourceManager, GameCore& gam
 
 void GraphicsEngine::DrawPostProcess(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode)
 {
-	resourceManager;
-	gameCore;
-	mode;
+	// コンテキスト取得
+	CommandContext* context = GetCommandContext();
+	// コマンドリスト開始
+	BeginCommandContext(context);
+	// レンダーターゲットの設定
+	SetRenderTargets(context, DrawPass::PostProcess, mode);
+	// 描画設定
+	SetRenderState(context, ViewportGame);
+	if (mode != RenderMode::Editor)
+	{
+		// プリミティブトポロジの設定
+		context->SetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		// パイプラインセット
+		context->SetGraphicsPipelineState(m_PipelineManager->GetIntegratePSO().pso.Get());
+		// ルートシグネチャセット
+		context->SetGraphicsRootSignature(m_PipelineManager->GetIntegratePSO().rootSignature.Get());
+		// シーンがないならスキップ
+		if (!gameCore.GetSceneManager()->GetCurrentScene()) { return; }
+		IConstantBuffer* cameraBuffer = nullptr;
+		// メインカメラを取得
+		if (mode == RenderMode::Game)
+		{
+			// カメラオブジェクトのIDを取得
+			std::optional<uint32_t> cameraID = gameCore.GetSceneManager()->GetCurrentScene()->GetMainCameraID();
+			if (!cameraID) { return; }
+			// カメラオブジェクトを取得
+			GameObject& cameraObject = gameCore.GetObjectContainer()->GetGameObject(cameraID.value());
+			if (!cameraObject.IsActive()) { return; }
+			// カメラのバッファインデックスを取得
+			CameraComponent* cameraComponent = gameCore.GetECSManager()->GetComponent<CameraComponent>(cameraObject.GetEntity());
+			if (!cameraComponent) { return; }
+			// カメラのバッファを取得
+			cameraBuffer = resourceManager.GetBuffer<IConstantBuffer>(cameraComponent->bufferIndex);
+			// カメラがないならスキップ
+			if (!cameraBuffer) { return; }
+		} else// デバッグカメラ
+		{
+			// カメラのバッファを取得
+			cameraBuffer = resourceManager.GetDebugCameraBuffer();
+			// カメラがないならスキップ
+			if (!cameraBuffer) { return; }
+		}
+		// オフスクリーンレンダリングテクスチャをセット
+		//context->SetGraphicsRootDescriptorTable(0, m_ResourceManager->GetBuffer<ColorBuffer>(m_RenderTextures[renderTexType].m_BufferIndex)->GetSRVGpuHandle());
+		// DrawCall
+		//context->DrawInstanced(3, 1, 0, 0);
+	}
+
+	// コマンドリスト終了
+	EndCommandContext(context, Graphics);
+	// GPUの完了待ち
+	WaitForGPU(Graphics);
 }
 
 void GraphicsEngine::CreateDepthBuffer()

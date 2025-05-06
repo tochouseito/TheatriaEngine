@@ -14,6 +14,8 @@ enum RenderTextureType
 	GameScreen = 0,// ゲーム画面用描画結果
 	SceneScreen,// シーン画面用描画結果
 	EffectEditScreen,// エフェクトエディタ用描画結果
+	PostProcessScreen,// ポストプロセス用描画結果
+	ScenePostProcessScreen,// シーンポストプロセス用描画結果
 	RenderTextureTypeCount,// 種類数(使用禁止)
 };
 
