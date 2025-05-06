@@ -5,6 +5,8 @@
 #include "GameCore/ScriptAPI/ScriptAPI.h"
 
 class ResourceManager;
+class GraphicsEngine;
+class EngineCommand;
 
 // エディタのTransform更新システム
 class TransformEditorSystem : public ECSManager::System<TransformComponent>
@@ -78,4 +80,44 @@ private:
 	ECSManager* m_pECS = nullptr;
 	ResourceManager* m_pResourceManager = nullptr;
 	StructuredBuffer<BUFFER_DATA_MATERIAL>* m_pIntegrationBuffer = nullptr;
+};
+// エミッターの更新システム
+class EmitterEditorUpdateSystem : public ECSManager::System<EmitterComponent>
+{
+public:
+	EmitterEditorUpdateSystem(ECSManager* ecs, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine)
+		: ECSManager::System<EmitterComponent>([this](Entity e, EmitterComponent& emitter)
+			{
+				e;
+				UpdateEmitter(emitter);
+			}),
+		m_pECS(ecs), m_pResourceManager(resourceManager), m_pGraphicsEngine(graphicsEngine)
+	{
+	}
+	~EmitterEditorUpdateSystem() = default;
+private:
+	void UpdateEmitter(EmitterComponent& emitter);
+	ECSManager* m_pECS = nullptr;
+	ResourceManager* m_pResourceManager = nullptr;
+	GraphicsEngine* m_pGraphicsEngine = nullptr;
+};
+
+// エフェクトEditorの更新システム
+class EffectEditorUpdateSystem : public ECSManager::System<EffectComponent>
+{
+public:
+	EffectEditorUpdateSystem(ECSManager* ecs, EngineCommand* engineCommand)
+		: ECSManager::System<EffectComponent>([this](Entity e, EffectComponent& effect)
+			{
+				e;
+				UpdateEffect(effect);
+			}),
+		m_pECS(ecs), m_pEngineCommand(engineCommand)
+	{
+	}
+	~EffectEditorUpdateSystem() = default;
+private:
+	void UpdateEffect(EffectComponent& effect);
+	ECSManager* m_pECS = nullptr;
+	EngineCommand* m_pEngineCommand = nullptr;
 };

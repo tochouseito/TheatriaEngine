@@ -52,10 +52,14 @@ struct RenderTexture
 class ResourceManager;
 class ImGuiManager;
 class GameCore;
+class EngineCommand;
 class GraphicsEngine : public Engine
 {
 	friend class TextureManager;
 	friend class EngineCommand;
+	friend class ParticleInitializeSystem;
+	friend class ParticleUpdateSystem;
+	friend class EffectEditorUpdateSystem;
 public:
 	// Constructor
 	GraphicsEngine(ID3D12Device8* device,ResourceManager* resourceManager,RuntimeMode mode) : 
@@ -75,6 +79,7 @@ public:
 		WaitForGPU(Copy);
 	}
 	void Init();
+	void SetEngineCommand(EngineCommand* engineCommand) { m_EngineCommand = engineCommand; }
 	// SwapChainの生成
 	void CreateSwapChain(IDXGIFactory7* dxgiFactory);
 	void PreRender();
@@ -83,6 +88,8 @@ public:
 	void PostRenderWithImGui(ImGuiManager* imgui);
 	// レンダーターゲットテクスチャ、ImGui、スワップチェーンのリサイズ
 	void ScreenResize();
+
+	PipelineManager* GetPipelineManager() { return m_PipelineManager.get(); }
 
 	// GameTextureのBufferIDを取得
 	uint32_t GetGameTextureBufferID() { return m_RenderTextures[GameScreen].m_BufferIndex.value(); }
@@ -114,8 +121,14 @@ private:
 	// デバッグ用深度バッファの生成
 	void CreateDebugDepthBuffer();
 
+	// タイプごとに描画
+	void DrawParticles(CommandContext* context, ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode);
+	void EffectEditorDraw(CommandContext* context, ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode);
+
 	ID3D12Device8* m_Device = nullptr;
 	ResourceManager* m_ResourceManager = nullptr;
+	EngineCommand* m_EngineCommand = nullptr;
+
 	std::unique_ptr<SwapChain> m_SwapChain = nullptr;
 	std::unique_ptr<GraphicsCore> m_GraphicsCore = nullptr;
 	std::unique_ptr<DepthManager> m_DepthManager = nullptr;

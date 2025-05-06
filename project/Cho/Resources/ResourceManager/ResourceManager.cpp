@@ -146,7 +146,7 @@ void ResourceManager::CreateHeap(ID3D12Device8* device)
 void ResourceManager::CreateDummyMaterial()
 {
 	uint32_t mapID = m_IntegrationData[IntegrationDataType::Material]->GetMapID();
-	if (mapID == 0) { Log::Write(LogLevel::Assert, "DummyMaterial Create"); }
+	if (mapID != 0) { Log::Write(LogLevel::Assert, "DummyMaterial Create Fail"); }
 	StructuredBuffer<BUFFER_DATA_MATERIAL>* pIntegrationBuffer = dynamic_cast<StructuredBuffer<BUFFER_DATA_MATERIAL>*>(GetIntegrationBuffer(IntegrationDataType::Material));
 	// ダミーマテリアルの初期化
 	BUFFER_DATA_MATERIAL data = {};
@@ -159,3 +159,4 @@ void ResourceManager::CreateDummyMaterial()
 	data.textureId = 0;
 	pIntegrationBuffer->UpdateData(data, mapID);
 }
+

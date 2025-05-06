@@ -3,6 +3,7 @@
 #include <Externals/box2d/include/box2d/box2d.h>
 #include "Core/Utility/Color.h"
 #include "Core/Utility/IDType.h"
+#include "Core/Utility/EffectStruct.h"
 #include <vector>         // C++98
 #include <array>          // C++11
 #include <functional>     // C++98
@@ -185,6 +186,48 @@ struct MaterialComponent : public IComponentTag
 	std::wstring textureName = L"";	// テクスチャ名
 	std::optional<uint32_t> textureID = std::nullopt;	// テクスチャID
 	std::optional<uint32_t> mapID = std::nullopt;
+};
+// エミッターコンポーネント
+struct EmitterComponent : public IComponentTag
+{
+	Vector3 position = { 0.0f,0.0f,0.0f };	// 位置
+	float radius = 1.0f;					// 射出半径
+	uint32_t count = 10;					// 射出数
+	float frequency = 0.5f;					// 射出間隔
+	float frequencyTime = 0.0f;				// 射出間隔調整用時間
+	uint32_t emit = 0;						// 射出許可
+	std::optional<uint32_t> particleID = std::nullopt;	// パーティクルID
+	// バッファインデックス
+	std::optional<uint32_t> bufferIndex = std::nullopt;
+};
+// パーティクルコンポーネント
+struct ParticleComponent : public IComponentTag
+{
+	uint32_t count = 1024;// パーティクル数
+	Matrix4 matBillboard = ChoMath::MakeIdentity4x4();
+	float time = 0.0f;
+	float deltaTime = 0.0f;
+	// バッファーインデックス
+	std::optional<uint32_t> bufferIndex = std::nullopt;
+	std::optional<uint32_t> perFrameBufferIndex = std::nullopt;
+	std::optional<uint32_t> freeListIndexBufferIndex = std::nullopt;
+	std::optional<uint32_t> freeListBufferIndex = std::nullopt;
+};
+// エフェクトコンポーネント
+struct EffectComponent : public IComponentTag
+{
+	std::wstring effectName = L"";	// エフェクト名
+	std::optional<uint32_t> effectID = std::nullopt;	// エフェクトID
+	float globalTime = 0.0f;	// グローバル時間
+	float maxTime = 120.0f;	// 最大時間
+	float deltaTime = 0.0f;	// デルタ時間
+	bool isRun = false;	// 実行フラグ
+	bool isPreRun = false;	// プリセット実行フラグ
+	bool isLoop = true;	// ループフラグ
+	bool isReset = false;	// リセットフラグ
+	std::vector<uint32_t> nodeID;	// ノードID
+	std::vector<EffectNodeData> nodeData;	// ノードデータ
+
 };
 
 // マルチコンポーネントを許可

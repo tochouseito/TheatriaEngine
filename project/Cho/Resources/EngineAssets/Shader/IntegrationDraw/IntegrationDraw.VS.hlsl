@@ -11,6 +11,8 @@ struct VSIn {
     float4 position : POSITION;
     float2 texcoord : TEXCOORD0;
     float3 normal : NORMAL0;
+    float4 color : COLOR;
+    uint vertexID : VERTEXID;
 };
 VSOut main(VSIn input, uint instanceId : SV_InstanceID) {
     VSOut output;

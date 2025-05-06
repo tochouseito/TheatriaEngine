@@ -25,6 +25,8 @@ private:
 	void LineRendererComponentView(GameObject* object);
 	void Rigidbody2DComponentView(GameObject* object);
 	void BoxCollider2DComponentView(GameObject* object);
+	void EmitterComponentView(GameObject* object);
+	void ParticleComponentView(GameObject* object);
 	// コンポーネントの追加
 	void AddComponent(GameObject* object);
 };

@@ -1,11 +1,13 @@
 #include "pch.h"
 #include "SingleSystems.h"
 #include "Resources/ResourceManager/ResourceManager.h"
+#include "Graphics/GraphicsEngine/GraphicsEngine.h"
 #include "GameCore/ObjectContainer/ObjectContainer.h"
 #include "GameCore/IScript/IScript.h"
 #include "Platform/FileSystem/FileSystem.h"
 #include "Core/ChoLog/ChoLog.h"
 using namespace Cho;
+#include "Platform/Timer/Timer.h"
 // 優先度順に更新する
 void TransformUpdateSystem::priorityUpdate(ECSManager* ecs)
 {
@@ -328,4 +330,124 @@ void MaterialUpdateSystem::TransferComponent(const MaterialComponent& material)
 	data.matUV = material.matUV.Identity();
 	data.shininess = material.shininess;
 	m_pIntegrationBuffer->UpdateData(data, material.mapID.value());
+}
+
+void EmitterUpdateSystem::UpdateEmitter(EmitterComponent& emitter)
+{
+	emitter.frequencyTime += DeltaTime();
+
+	// 射出間隔を上回ったら射出許可を出して時間を調整
+	if (emitter.frequency <= emitter.frequencyTime)
+	{
+		emitter.frequencyTime = 0.0f;
+		emitter.emit = 1;
+	} else
+	{
+		// 射出間隔を上回ってないので、許可は出せない
+		emitter.emit = 1;
+	}
+
+	BUFFER_DATA_EMITTER data = {};
+	data.position = emitter.position;
+	data.radius = emitter.radius;
+	data.count = emitter.count;
+	data.frequency = emitter.frequency;
+	data.frequencyTime = emitter.frequencyTime;
+	data.emit = emitter.emit;
+	ConstantBuffer<BUFFER_DATA_EMITTER>* buffer = dynamic_cast<ConstantBuffer<BUFFER_DATA_EMITTER>*>(m_pResourceManager->GetBuffer<IConstantBuffer>(emitter.bufferIndex));
+	buffer->UpdateData(data);
+}
+
+void ParticleInitializeSystem::InitializeParticle(ParticleComponent& particle)
+{
+	particle.time = 0.0f;
+
+	// CSで初期化
+	// コンテキスト取得
+	CommandContext* context = m_pGraphicsEngine->GetCommandContext();
+	// コマンドリスト開始
+	m_pGraphicsEngine->BeginCommandContext(context);
+	// パイプラインセット
+	context->SetComputePipelineState(m_pGraphicsEngine->GetPipelineManager()->GetParticleInitPSO().pso.Get());
+	// ルートシグネチャセット
+	context->SetComputeRootSignature(m_pGraphicsEngine->GetPipelineManager()->GetParticleInitPSO().rootSignature.Get());
+	// パーティクルバッファをセット
+	IRWStructuredBuffer* particleBuffer = m_pResourceManager->GetBuffer<IRWStructuredBuffer>(particle.bufferIndex);
+	context->SetComputeRootDescriptorTable(0, particleBuffer->GetUAVGpuHandle());
+	// フリーリストバッファをセット
+	IRWStructuredBuffer* freeListBuffer = m_pResourceManager->GetBuffer<IRWStructuredBuffer>(particle.freeListBufferIndex);
+	context->SetComputeRootDescriptorTable(1, freeListBuffer->GetUAVGpuHandle());
+	// カウンターバッファをセット
+	context->SetComputeRootUnorderedAccessView(2, freeListBuffer->GetCounterResource()->GetGPUVirtualAddress());
+	// Dispatch
+	context->Dispatch(1, 1, 1);
+	// コマンドリストをクローズ
+	m_pGraphicsEngine->EndCommandContext(context,QueueType::Compute);
+	// GPUの処理が終わるまで待機
+	m_pGraphicsEngine->WaitForGPU(QueueType::Compute);
+}
+
+void ParticleUpdateSystem::UpdateParticle(EmitterComponent& emitter, ParticleComponent& particle)
+{
+	particle.time += DeltaTime();
+	particle.deltaTime = DeltaTime();
+
+	{
+		BUFFER_DATA_PARTICLE_PERFRAME data = {};
+		data.time = particle.time;
+		data.deltaTime = particle.deltaTime;
+		ConstantBuffer<BUFFER_DATA_PARTICLE_PERFRAME>* buffer = dynamic_cast<ConstantBuffer<BUFFER_DATA_PARTICLE_PERFRAME>*>(m_pResourceManager->GetBuffer<IConstantBuffer>(particle.perFrameBufferIndex));
+		buffer->UpdateData(data);
+	}
+	// Emit
+	CommandContext* context = m_pGraphicsEngine->GetCommandContext();
+	m_pGraphicsEngine->BeginCommandContext(context);
+	// パイプラインセット
+	context->SetComputePipelineState(m_pGraphicsEngine->GetPipelineManager()->GetParticleEmitPSO().pso.Get());
+	// ルートシグネチャセット
+	context->SetComputeRootSignature(m_pGraphicsEngine->GetPipelineManager()->GetParticleEmitPSO().rootSignature.Get());
+	// パーティクルバッファをセット
+	IRWStructuredBuffer* particleBuffer = m_pResourceManager->GetBuffer<IRWStructuredBuffer>(particle.bufferIndex);
+	context->SetComputeRootDescriptorTable(0, particleBuffer->GetUAVGpuHandle());
+	// エミッターバッファをセット
+	IConstantBuffer* emitterBuffer = m_pResourceManager->GetBuffer<IConstantBuffer>(emitter.bufferIndex);
+	context->SetComputeRootConstantBufferView(1, emitterBuffer->GetResource()->GetGPUVirtualAddress());
+	// PerFrameバッファをセット
+	IConstantBuffer* perFrameBuffer = m_pResourceManager->GetBuffer<IConstantBuffer>(particle.perFrameBufferIndex);
+	context->SetComputeRootConstantBufferView(2, perFrameBuffer->GetResource()->GetGPUVirtualAddress());
+	// フリーリストインデックスバッファをセット
+	//IRWStructuredBuffer* freeListIndexBuffer = m_pResourceManager->GetBuffer<IRWStructuredBuffer>(particle.freeListIndexBufferIndex);
+	//context->SetComputeRootDescriptorTable(3, freeListIndexBuffer->GetUAVGpuHandle());
+	// フリーリストバッファをセット
+	IRWStructuredBuffer* freeListBuffer = m_pResourceManager->GetBuffer<IRWStructuredBuffer>(particle.freeListBufferIndex);
+	context->SetComputeRootDescriptorTable(3, freeListBuffer->GetUAVGpuHandle());
+	// Dispatch
+	context->Dispatch(1, 1, 1);
+	
+	// EmitとUpdateの並列を阻止
+	context->BarrierUAV(D3D12_RESOURCE_BARRIER_TYPE_UAV, D3D12_RESOURCE_BARRIER_FLAG_NONE, particleBuffer->GetResource());
+	//context->BarrierUAV(D3D12_RESOURCE_BARRIER_TYPE_UAV, D3D12_RESOURCE_BARRIER_FLAG_NONE, freeListIndexBuffer->GetResource());
+	context->BarrierUAV(D3D12_RESOURCE_BARRIER_TYPE_UAV, D3D12_RESOURCE_BARRIER_FLAG_NONE, freeListBuffer->GetResource());
+
+	// Update
+	// パイプラインセット
+	context->SetComputePipelineState(m_pGraphicsEngine->GetPipelineManager()->GetParticleUpdatePSO().pso.Get());
+	// ルートシグネチャセット
+	context->SetComputeRootSignature(m_pGraphicsEngine->GetPipelineManager()->GetParticleUpdatePSO().rootSignature.Get());
+	// パーティクルバッファをセット
+	context->SetComputeRootDescriptorTable(0, particleBuffer->GetUAVGpuHandle());
+	// PerFrameバッファをセット
+	context->SetComputeRootConstantBufferView(1, perFrameBuffer->GetResource()->GetGPUVirtualAddress());
+	// フリーリストインデックスバッファをセット
+	//context->SetComputeRootDescriptorTable(2, freeListIndexBuffer->GetUAVGpuHandle());
+	// フリーリストバッファをセット
+	context->SetComputeRootDescriptorTable(2, freeListBuffer->GetUAVGpuHandle());
+	// Dispatch
+	context->Dispatch(1, 1, 1);
+
+	// クローズ
+	m_pGraphicsEngine->EndCommandContext(context, QueueType::Compute);
+	// GPUの処理が終わるまで待機
+	m_pGraphicsEngine->WaitForGPU(QueueType::Compute);
+
 }

@@ -80,6 +80,8 @@ namespace Cho
 		json ToJson(const std::vector<LineRendererComponent>& ls);
 		json ToJson(const Rigidbody2DComponent& rb);
 		json ToJson(const BoxCollider2DComponent& bc);
+		json ToJson(const EmitterComponent& e);
+		json ToJson(const ParticleComponent& p);
     }
 	// ComponentsDeserializer
 	namespace Deserialization
@@ -94,6 +96,8 @@ namespace Cho
 		void FromJson(const json& j, std::vector<LineRendererComponent>& ls);
 		void FromJson(const json& j, Rigidbody2DComponent& rb);
 		void FromJson(const json& j, BoxCollider2DComponent& bc);
+		void FromJson(const json& j, EmitterComponent& e);
+		void FromJson(const json& j, ParticleComponent& p);
 	}
 
     class FileSystem

@@ -16,6 +16,8 @@ struct VertexData
 	Vector4 position = { 0.0f };
 	Vector2 texCoord = { 0.0f };
 	Vector3 normal = { 0.0f };
+	Color color = { 1.0f,1.0f,1.0f,1.0f };
+	uint32_t vertexID = 0;
 };
 struct Node
 {
@@ -67,6 +69,14 @@ public:
 	std::optional<uint32_t> GetModelDataIndex(const std::wstring& name);
 	// モデルデータを取得する
 	ModelData* GetModelData(const uint32_t& index) { return &m_Models[index]; }
+	ModelData* GetModelData(const std::wstring& name)
+	{
+		if (m_ModelNameContainer.contains(name))
+		{
+			return &m_Models[m_ModelNameContainer[name]];
+		}
+		return nullptr;
+	}
 	// モデルのUseListに登録する
 	void RegisterModelUseList(const std::variant<uint32_t,std::wstring>& key, const uint32_t& transformMapID);
 	// モデルのUseListから削除する

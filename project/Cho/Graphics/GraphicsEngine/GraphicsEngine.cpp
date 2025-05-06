@@ -2,6 +2,7 @@
 #include "GraphicsEngine.h"
 #include "OS/Windows/WinApp/WinApp.h"
 #include "Resources/ResourceManager/ResourceManager.h"
+#include "EngineCommand/EngineCommand.h"
 #include "SDK/ImGui/ImGuiManager/ImGuiManager.h"
 #include "GameCore/GameCore.h"
 #include "Core/ChoLog/ChoLog.h"
@@ -410,9 +411,6 @@ void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& ga
 			// マテリアル統合バッファをセット
 			IStructuredBuffer* materialBuffer = resourceManager.GetIntegrationBuffer(IntegrationDataType::Material);
 			context->SetGraphicsRootDescriptorTable(3, materialBuffer->GetSRVGpuHandle());
-			// ダミーテクスチャをセット
-			//PixelBuffer* dummyTexture = resourceManager.GetTextureManager()->GetDummyTextureBuffer();
-			//context->SetGraphicsRootDescriptorTable(4, dummyTexture->GetSRVGpuHandle());
 			// 配列テクスチャのためヒープをセット
 			context->SetGraphicsRootDescriptorTable(4, resourceManager.GetSUVDHeap()->GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
 			// インスタンス数を取得
@@ -465,6 +463,10 @@ void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& ga
 			// DrawCall
 			context->DrawInstanced(static_cast<UINT>(resourceManager.GetIntegrationData(IntegrationDataType::Line)->GetCurrentMapID()) * 2, 1, 0, 0);
 		}
+		// パーティクル
+		DrawParticles(context, resourceManager, gameCore, mode);
+		// EffectEditor
+		EffectEditorDraw(context, resourceManager, gameCore, mode);
 	} else
 	{
 		// パイプラインセット
@@ -587,4 +589,146 @@ void GraphicsEngine::CreateDebugDepthBuffer()
 	resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
 	// デバッグ用DepthBufferの生成
 	m_DepthManager->SetDebugDepthBufferIndex(m_ResourceManager->CreateDepthBuffer(resourceDesc, D3D12_RESOURCE_STATE_DEPTH_WRITE));
+}
+
+void GraphicsEngine::DrawParticles(CommandContext* context, ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode)
+{
+	// プリミティブトポロジの設定
+	context->SetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	// パイプラインセット
+	context->SetGraphicsPipelineState(m_PipelineManager->GetParticlePSO().pso.Get());
+	// ルートシグネチャセット
+	context->SetGraphicsRootSignature(m_PipelineManager->GetParticlePSO().rootSignature.Get());
+
+	for (auto& object : gameCore.GetObjectContainer()->GetGameObjects().GetVector())
+	{
+		if (!object.IsActive()) { continue; }
+		if (object.GetType() != ObjectType::ParticleSystem) { continue; }
+		// EmitterComponentを取得
+		EmitterComponent* emitterComponent = gameCore.GetECSManager()->GetComponent<EmitterComponent>(object.GetEntity());
+		if (!emitterComponent) { continue; }
+		//if (!emitterComponent->particleID) { continue; }
+		// ParticleComponentを取得
+		ParticleComponent* particleComponent = gameCore.GetECSManager()->GetComponent<ParticleComponent>(object.GetEntity());
+		if (!particleComponent) { continue; }
+		// シーンがないならスキップ
+		if (!gameCore.GetSceneManager()->GetCurrentScene()) { continue; }
+		IConstantBuffer* cameraBuffer = nullptr;
+		// メインカメラを取得
+		if (mode == RenderMode::Game)
+		{
+			// カメラオブジェクトのIDを取得
+			std::optional<uint32_t> cameraID = gameCore.GetSceneManager()->GetCurrentScene()->GetMainCameraID();
+			if (!cameraID) { continue; }
+			// カメラオブジェクトを取得
+			GameObject& cameraObject = gameCore.GetObjectContainer()->GetGameObject(cameraID.value());
+			if (!cameraObject.IsActive()) { continue; }
+			// カメラのバッファインデックスを取得
+			CameraComponent* cameraComponent = gameCore.GetECSManager()->GetComponent<CameraComponent>(cameraObject.GetEntity());
+			if (!cameraComponent) { continue; }
+			// カメラのバッファを取得
+			cameraBuffer = resourceManager.GetBuffer<IConstantBuffer>(cameraComponent->bufferIndex);
+			// カメラがないならスキップ
+			if (!cameraBuffer) { continue; }
+		} else// デバッグカメラ
+		{
+			// カメラのバッファを取得
+			cameraBuffer = resourceManager.GetDebugCameraBuffer();
+			// カメラがないならスキップ
+			if (!cameraBuffer) { continue; }
+		}
+		// 板ポリ取得
+		ModelData* modelData = resourceManager.GetModelManager()->GetModelData(L"Plane");
+		if (!modelData) { break; }
+		// VBVをセット
+		D3D12_VERTEX_BUFFER_VIEW* vbv = resourceManager.GetBuffer<IVertexBuffer>(modelData->meshes[0].vertexBufferIndex)->GetVertexBufferView();
+		context->SetVertexBuffers(0, 1, vbv);
+		// IBVをセット
+		D3D12_INDEX_BUFFER_VIEW* ibv = resourceManager.GetBuffer<IIndexBuffer>(modelData->meshes[0].indexBufferIndex)->GetIndexBufferView();
+		context->SetIndexBuffer(ibv);
+		// カメラバッファをセット
+		context->SetGraphicsRootConstantBufferView(0, cameraBuffer->GetResource()->GetGPUVirtualAddress());
+		// パーティクルバッファをセット
+		IRWStructuredBuffer* particleBuffer = resourceManager.GetBuffer<IRWStructuredBuffer>(particleComponent->bufferIndex);
+		context->SetGraphicsRootDescriptorTable(1, particleBuffer->GetUAVGpuHandle());
+		// ダミーマテリアル
+		PixelBuffer* dummyTexture = resourceManager.GetTextureManager()->GetDummyTextureBuffer();
+		context->SetGraphicsRootDescriptorTable(2, dummyTexture->GetSRVGpuHandle());
+		// DrawCall
+		context->DrawIndexedInstanced(static_cast<UINT>(modelData->meshes[0].indices.size()), particleComponent->count, 0, 0, 0);
+	}
+}
+
+void GraphicsEngine::EffectEditorDraw(CommandContext* context, ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode)
+{
+	resourceManager;
+	gameCore;
+	mode;
+	// レンダーターゲットの設定
+	//SetRenderTargets(context, DrawPass::GBuffers, RenderMode::Editor);
+	// 描画設定
+	//SetRenderState(context, ViewportGame);
+	// プリミティブトポロジの設定
+	context->SetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	// パイプラインセット
+	context->SetGraphicsPipelineState(m_PipelineManager->GetEffectEditorPSO().pso.Get());
+	// ルートシグネチャセット
+	context->SetGraphicsRootSignature(m_PipelineManager->GetEffectEditorPSO().rootSignature.Get());
+	// シーンがないならスキップ
+	if (!gameCore.GetSceneManager()->GetCurrentScene()) { return; }
+	IConstantBuffer* cameraBuffer = nullptr;
+	// メインカメラを取得
+	if (mode == RenderMode::Game)
+	{
+		// カメラオブジェクトのIDを取得
+		std::optional<uint32_t> cameraID = gameCore.GetSceneManager()->GetCurrentScene()->GetMainCameraID();
+		if (!cameraID) { return; }
+		// カメラオブジェクトを取得
+		GameObject& cameraObject = gameCore.GetObjectContainer()->GetGameObject(cameraID.value());
+		if (!cameraObject.IsActive()) { return; }
+		// カメラのバッファインデックスを取得
+		CameraComponent* cameraComponent = gameCore.GetECSManager()->GetComponent<CameraComponent>(cameraObject.GetEntity());
+		if (!cameraComponent) { return; }
+		// カメラのバッファを取得
+		cameraBuffer = resourceManager.GetBuffer<IConstantBuffer>(cameraComponent->bufferIndex);
+		// カメラがないならスキップ
+		if (!cameraBuffer) { return; }
+	} else// デバッグカメラ
+	{
+		// カメラのバッファを取得
+		cameraBuffer = resourceManager.GetDebugCameraBuffer();
+		// カメラがないならスキップ
+		if (!cameraBuffer) { return; }
+	}
+	// 板ポリ取得
+	ModelData* modelData = resourceManager.GetModelManager()->GetModelData(L"Plane");
+	if (!modelData) { return; }
+	// VBVをセット
+	D3D12_VERTEX_BUFFER_VIEW* vbv = resourceManager.GetBuffer<IVertexBuffer>(modelData->meshes[0].vertexBufferIndex)->GetVertexBufferView();
+	context->SetVertexBuffers(0, 1, vbv);
+	// IBVをセット
+	D3D12_INDEX_BUFFER_VIEW* ibv = resourceManager.GetBuffer<IIndexBuffer>(modelData->meshes[0].indexBufferIndex)->GetIndexBufferView();
+	context->SetIndexBuffer(ibv);
+	// カメラバッファをセット
+	context->SetGraphicsRootConstantBufferView(0, cameraBuffer->GetResource()->GetGPUVirtualAddress());
+	// RootBufferをセット
+	IConstantBuffer* rootBuffer = resourceManager.GetBuffer<IConstantBuffer>(m_EngineCommand->m_EffectRootIndex);
+	context->SetGraphicsRootConstantBufferView(1, rootBuffer->GetResource()->GetGPUVirtualAddress());
+	// NodeBufferをセット
+	IStructuredBuffer* nodeBuffer = resourceManager.GetBuffer<IStructuredBuffer>(m_EngineCommand->m_EffectNodeIndex);
+	context->SetGraphicsRootDescriptorTable(2, nodeBuffer->GetSRVGpuHandle());
+	// EffectSpriteBufferをセット
+	IStructuredBuffer* effectSpriteBuffer = resourceManager.GetBuffer<IStructuredBuffer>(m_EngineCommand->m_EffectSpriteIndex);
+	context->SetGraphicsRootDescriptorTable(3, effectSpriteBuffer->GetSRVGpuHandle());
+	// EffectParticleBufferをセット
+	IRWStructuredBuffer* effectParticleBuffer = resourceManager.GetBuffer<IRWStructuredBuffer>(m_EngineCommand->m_EffectParticleIndex);
+	context->SetGraphicsRootDescriptorTable(4, effectParticleBuffer->GetUAVGpuHandle());
+	// EffectNodeBufferをセット
+	context->SetGraphicsRootDescriptorTable(5, nodeBuffer->GetSRVGpuHandle());
+	// ParticleBufferをセット
+	context->SetGraphicsRootDescriptorTable(6, effectParticleBuffer->GetUAVGpuHandle());
+	// TextureBufferをセット
+	context->SetGraphicsRootDescriptorTable(7, resourceManager.GetSUVDHeap()->GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
+	// DrawCall
+	context->DrawIndexedInstanced(static_cast<UINT>(modelData->meshes[0].indices.size()), 128 * 1024, 0, 0, 0);
 }

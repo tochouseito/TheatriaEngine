@@ -5,6 +5,7 @@
 #include "GameCore/ScriptAPI/ScriptAPI.h"
 
 class ResourceManager;
+class GraphicsEngine;
 class GameCoreCommand;
 class ScriptContainer;
 class ObjectContainer;
@@ -445,4 +446,66 @@ private:
 	ECSManager* m_pECS = nullptr;
 	ResourceManager* m_pResourceManager = nullptr;
 	StructuredBuffer<BUFFER_DATA_MATERIAL>* m_pIntegrationBuffer = nullptr;
+};
+// エミッター更新システム
+class EmitterUpdateSystem : public ECSManager::System<EmitterComponent>
+{
+public:
+	EmitterUpdateSystem(ECSManager* ecs, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine)
+		: ECSManager::System<EmitterComponent>([this](Entity e, EmitterComponent& emitter)
+			{
+				e;
+				UpdateEmitter(emitter);
+			}),
+		m_pECS(ecs), m_pResourceManager(resourceManager), m_pGraphicsEngine(graphicsEngine)
+	{
+	}
+	~EmitterUpdateSystem() = default;
+private:
+	void UpdateEmitter(EmitterComponent& emitter);
+	ECSManager* m_pECS = nullptr;
+	ResourceManager* m_pResourceManager = nullptr;
+	GraphicsEngine* m_pGraphicsEngine = nullptr;
+};
+
+// パーティクル初期化システム
+class ParticleInitializeSystem : public ECSManager::System<ParticleComponent>
+{
+public:
+	ParticleInitializeSystem(ECSManager* ecs, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine)
+		: ECSManager::System<ParticleComponent>([this](Entity e, ParticleComponent& particle)
+			{
+				e;
+				InitializeParticle(particle);
+			}),
+		m_pECS(ecs), m_pResourceManager(resourceManager), m_pGraphicsEngine(graphicsEngine)
+	{
+	}
+	~ParticleInitializeSystem() = default;
+private:
+	void InitializeParticle(ParticleComponent& particle);
+	ECSManager* m_pECS = nullptr;
+	ResourceManager* m_pResourceManager = nullptr;
+	GraphicsEngine* m_pGraphicsEngine = nullptr;
+};
+
+// パーティクル更新システム
+class ParticleUpdateSystem : public ECSManager::System<EmitterComponent,ParticleComponent>
+{
+public:
+	ParticleUpdateSystem(ECSManager* ecs, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine)
+		: ECSManager::System<EmitterComponent, ParticleComponent>([this](Entity e, EmitterComponent& emitter, ParticleComponent& particle)
+			{
+				e;
+				UpdateParticle(emitter, particle);
+			}),
+		m_pECS(ecs), m_pResourceManager(resourceManager), m_pGraphicsEngine(graphicsEngine)
+	{
+	}
+	~ParticleUpdateSystem() = default;
+private:
+	void UpdateParticle(EmitterComponent& emitter, ParticleComponent& particle);
+	ECSManager* m_pECS = nullptr;
+	ResourceManager* m_pResourceManager = nullptr;
+	GraphicsEngine* m_pGraphicsEngine = nullptr;
 };

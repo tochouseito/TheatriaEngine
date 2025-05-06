@@ -29,6 +29,31 @@ public:
 private:
 	uint32_t m_ObjectID;
 };
+// パーティクルシステムオブジェクトを追加するコマンド
+class AddParticleSystemObjectCommand :public IEngineCommand
+{
+public:
+	AddParticleSystemObjectCommand()
+	{
+	}
+	bool Execute(EngineCommand* edit)override;
+	bool Undo(EngineCommand* edit)override;
+private:
+	uint32_t m_ObjectID;
+};
+// Editor用のEffectオブジェクトを追加するコマンド
+class AddEffectObjectCommand :public IEngineCommand
+{
+public:
+	AddEffectObjectCommand()
+	{
+	}
+	bool Execute(EngineCommand* edit)override;
+	bool Undo(EngineCommand* edit)override;
+private:
+	uint32_t m_Entity;
+};
+
 // MeshFilterComponentを追加するコマンド
 class AddMeshFilterComponent :public IEngineCommand
 {
@@ -148,6 +173,8 @@ private:
 	std::optional<std::vector<LineRendererComponent>> m_LineRenderer;
 	std::optional<Rigidbody2DComponent> m_Rigidbody2D;
 	std::optional<BoxCollider2DComponent> m_BoxCollider2D;
+	std::optional<EmitterComponent> m_Emitter;
+	std::optional<ParticleComponent> m_Particle;
 };
 // オブジェクトの名前を変更するコマンド
 class RenameObjectCommand : public IEngineCommand
@@ -169,6 +196,32 @@ class AddMaterialComponent :public IEngineCommand
 {
 public:
 	AddMaterialComponent(const uint32_t& entity) :
+		m_Entity(entity)
+	{
+	}
+	bool Execute(EngineCommand* edit)override;
+	bool Undo(EngineCommand* edit)override;
+private:
+	uint32_t m_Entity;
+};
+// Emitterコンポーネントを追加するコマンド
+class AddEmitterComponent :public IEngineCommand
+{
+public:
+	AddEmitterComponent(const uint32_t& entity) :
+		m_Entity(entity)
+	{
+	}
+	bool Execute(EngineCommand* edit)override;
+	bool Undo(EngineCommand* edit)override;
+private:
+	uint32_t m_Entity;
+};
+// Particleコンポーネントを追加するコマンド
+class AddParticleComponent :public IEngineCommand
+{
+public:
+	AddParticleComponent(const uint32_t& entity) :
 		m_Entity(entity)
 	{
 	}

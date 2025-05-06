@@ -108,6 +108,8 @@ bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 			modelData.meshes[meshIndex].vertices[vertexIndex].normal = { normal.x,normal.y,normal.z };
 			modelData.meshes[meshIndex].vertices[vertexIndex].position.x *= -1.0f;
 			modelData.meshes[meshIndex].vertices[vertexIndex].normal.x *= -1.0f;
+			modelData.meshes[meshIndex].vertices[vertexIndex].color = { 1.0f,1.0f,1.0f,1.0f };
+			modelData.meshes[meshIndex].vertices[vertexIndex].vertexID = vertexIndex;
 		}
 		// Index解析
 		uint32_t indexCount = 0;
@@ -341,40 +343,40 @@ void ModelManager::CreateCube()
 	// 頂点データを設定
 #pragma region
 	// 右面
-	meshData.vertices[0] = { {0.5f,  0.5f,  0.5f, 1.0f}, {1.0f, 0.0f}, {1.0f, 0.0f, 0.0f} }; // 右上
-	meshData.vertices[1] = { {0.5f,  0.5f, -0.5f, 1.0f}, {0.0f, 0.0f}, {1.0f, 0.0f, 0.0f} }; // 左上
-	meshData.vertices[2] = { {0.5f, -0.5f,  0.5f, 1.0f}, {1.0f, 1.0f}, {1.0f, 0.0f, 0.0f} }; // 右下
-	meshData.vertices[3] = { {0.5f, -0.5f, -0.5f, 1.0f}, {0.0f, 1.0f}, {1.0f, 0.0f, 0.0f} }; // 左下
+	meshData.vertices[0] = { {0.5f,  0.5f,  0.5f, 1.0f}, {1.0f, 0.0f}, {1.0f, 0.0f, 0.0f},{1.0f,1.0f,1.0f,1.0f},{0} }; // 右上
+	meshData.vertices[1] = { {0.5f,  0.5f, -0.5f, 1.0f}, {0.0f, 0.0f}, {1.0f, 0.0f, 0.0f} ,{1.0f,1.0f,1.0f,1.0f},{1} }; // 左上
+	meshData.vertices[2] = { {0.5f, -0.5f,  0.5f, 1.0f}, {1.0f, 1.0f}, {1.0f, 0.0f, 0.0f} ,{1.0f,1.0f,1.0f,1.0f},{2} }; // 右下
+	meshData.vertices[3] = { {0.5f, -0.5f, -0.5f, 1.0f}, {0.0f, 1.0f}, {1.0f, 0.0f, 0.0f},{1.0f,1.0f,1.0f,1.0f},{3} }; // 左下
 
 	// 左面
-	meshData.vertices[4] = { {-0.5f,  0.5f, -0.5f, 1.0f}, {1.0f, 0.0f}, {-1.0f, 0.0f, 0.0f} }; // 左上
-	meshData.vertices[5] = { {-0.5f,  0.5f,  0.5f, 1.0f}, {0.0f, 0.0f}, {-1.0f, 0.0f, 0.0f} }; // 右上
-	meshData.vertices[6] = { {-0.5f, -0.5f, -0.5f, 1.0f}, {1.0f, 1.0f}, {-1.0f, 0.0f, 0.0f} }; // 左下
-	meshData.vertices[7] = { {-0.5f, -0.5f,  0.5f, 1.0f}, {0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f} }; // 右下
+	meshData.vertices[4] = { {-0.5f,  0.5f, -0.5f, 1.0f}, {1.0f, 0.0f}, {-1.0f, 0.0f, 0.0f} ,{1.0f,1.0f,1.0f,1.0f},{4} }; // 左上
+	meshData.vertices[5] = { {-0.5f,  0.5f,  0.5f, 1.0f}, {0.0f, 0.0f}, {-1.0f, 0.0f, 0.0f} ,{1.0f,1.0f,1.0f,1.0f},{5} }; // 右上
+	meshData.vertices[6] = { {-0.5f, -0.5f, -0.5f, 1.0f}, {1.0f, 1.0f}, {-1.0f, 0.0f, 0.0f} ,{1.0f,1.0f,1.0f,1.0f},{6} }; // 左下
+	meshData.vertices[7] = { {-0.5f, -0.5f,  0.5f, 1.0f}, {0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f} ,{1.0f,1.0f,1.0f,1.0f},{7} }; // 右下
 
 	// 前面
-	meshData.vertices[8] = { {-0.5f,  0.5f,  0.5f, 1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, 1.0f} }; // 左上
-	meshData.vertices[9] = { { 0.5f,  0.5f,  0.5f, 1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, 1.0f} }; // 右上
-	meshData.vertices[10] = { {-0.5f, -0.5f,  0.5f, 1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, 1.0f} }; // 左下
-	meshData.vertices[11] = { { 0.5f, -0.5f,  0.5f, 1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, 1.0f} }; // 右下
+	meshData.vertices[8] = { {-0.5f,  0.5f,  0.5f, 1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, 1.0f} ,{1.0f,1.0f,1.0f,1.0f},{8} }; // 左上
+	meshData.vertices[9] = { { 0.5f,  0.5f,  0.5f, 1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, 1.0f} ,{1.0f,1.0f,1.0f,1.0f},{9} }; // 右上
+	meshData.vertices[10] = { {-0.5f, -0.5f,  0.5f, 1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, 1.0f} ,{1.0f,1.0f,1.0f,1.0f},{10} }; // 左下
+	meshData.vertices[11] = { { 0.5f, -0.5f,  0.5f, 1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, 1.0f} ,{1.0f,1.0f,1.0f,1.0f},{11} }; // 右下
 
 	// 後面
-	meshData.vertices[12] = { { 0.5f,  0.5f, -0.5f, 1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, -1.0f} }; // 右上
-	meshData.vertices[13] = { {-0.5f,  0.5f, -0.5f, 1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, -1.0f} }; // 左上
-	meshData.vertices[14] = { { 0.5f, -0.5f, -0.5f, 1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, -1.0f} }; // 右下
-	meshData.vertices[15] = { {-0.5f, -0.5f, -0.5f, 1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, -1.0f} }; // 左下
+	meshData.vertices[12] = { { 0.5f,  0.5f, -0.5f, 1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, -1.0f} ,{1.0f,1.0f,1.0f,1.0f},{12} }; // 右上
+	meshData.vertices[13] = { {-0.5f,  0.5f, -0.5f, 1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, -1.0f} ,{1.0f,1.0f,1.0f,1.0f},{13} }; // 左上
+	meshData.vertices[14] = { { 0.5f, -0.5f, -0.5f, 1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, -1.0f} ,{1.0f,1.0f,1.0f,1.0f},{14} }; // 右下
+	meshData.vertices[15] = { {-0.5f, -0.5f, -0.5f, 1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, -1.0f},{1.0f,1.0f,1.0f,1.0f},{15} }; // 左下
 
 	// 上面
-	meshData.vertices[16] = { {-0.5f,  0.5f, -0.5f, 1.0f}, {0.0f, 0.0f}, {0.0f, 1.0f, 0.0f} }; // 左奥
-	meshData.vertices[17] = { { 0.5f,  0.5f, -0.5f, 1.0f}, {1.0f, 0.0f}, {0.0f, 1.0f, 0.0f} }; // 右奥
-	meshData.vertices[18] = { {-0.5f,  0.5f,  0.5f, 1.0f}, {0.0f, 1.0f}, {0.0f, 1.0f, 0.0f} }; // 左前
-	meshData.vertices[19] = { { 0.5f,  0.5f,  0.5f, 1.0f}, {1.0f, 1.0f}, {0.0f, 1.0f, 0.0f} }; // 右前
+	meshData.vertices[16] = { {-0.5f,  0.5f, -0.5f, 1.0f}, {0.0f, 0.0f}, {0.0f, 1.0f, 0.0f} ,{1.0f,1.0f,1.0f,1.0f},{16} }; // 左奥
+	meshData.vertices[17] = { { 0.5f,  0.5f, -0.5f, 1.0f}, {1.0f, 0.0f}, {0.0f, 1.0f, 0.0f} ,{1.0f,1.0f,1.0f,1.0f},{17} }; // 右奥
+	meshData.vertices[18] = { {-0.5f,  0.5f,  0.5f, 1.0f}, {0.0f, 1.0f}, {0.0f, 1.0f, 0.0f} ,{1.0f,1.0f,1.0f,1.0f},{18} }; // 左前
+	meshData.vertices[19] = { { 0.5f,  0.5f,  0.5f, 1.0f}, {1.0f, 1.0f}, {0.0f, 1.0f, 0.0f} ,{1.0f,1.0f,1.0f,1.0f},{19} }; // 右前
 
 	// 下面
-	meshData.vertices[20] = { {-0.5f, -0.5f,  0.5f, 1.0f}, {0.0f, 0.0f}, {0.0f, -1.0f, 0.0f} }; // 左前
-	meshData.vertices[21] = { { 0.5f, -0.5f,  0.5f, 1.0f}, {1.0f, 0.0f}, {0.0f, -1.0f, 0.0f} }; // 右前
-	meshData.vertices[22] = { {-0.5f, -0.5f, -0.5f, 1.0f}, {0.0f, 1.0f}, {0.0f, -1.0f, 0.0f} }; // 左奥
-	meshData.vertices[23] = { { 0.5f, -0.5f, -0.5f, 1.0f}, {1.0f, 1.0f}, {0.0f, -1.0f, 0.0f} }; // 右奥
+	meshData.vertices[20] = { {-0.5f, -0.5f,  0.5f, 1.0f}, {0.0f, 0.0f}, {0.0f, -1.0f, 0.0f} ,{1.0f,1.0f,1.0f,1.0f},{20} }; // 左前
+	meshData.vertices[21] = { { 0.5f, -0.5f,  0.5f, 1.0f}, {1.0f, 0.0f}, {0.0f, -1.0f, 0.0f} ,{1.0f,1.0f,1.0f,1.0f},{21} }; // 右前
+	meshData.vertices[22] = { {-0.5f, -0.5f, -0.5f, 1.0f}, {0.0f, 1.0f}, {0.0f, -1.0f, 0.0f} ,{1.0f,1.0f,1.0f,1.0f},{22} }; // 左奥
+	meshData.vertices[23] = { { 0.5f, -0.5f, -0.5f, 1.0f}, {1.0f, 1.0f}, {0.0f, -1.0f, 0.0f} ,{1.0f,1.0f,1.0f,1.0f},{23} }; // 右奥
 
 	// 右面インデックス
 	meshData.indices[0] = 0; meshData.indices[1] = 2; meshData.indices[2] = 1;
@@ -446,6 +448,8 @@ void ModelManager::CreateSphere()
 			meshData.vertices[start].normal.x = meshData.vertices[start].position.x;
 			meshData.vertices[start].normal.y = meshData.vertices[start].position.y;
 			meshData.vertices[start].normal.z = meshData.vertices[start].position.z;
+			meshData.vertices[start].color = { 1.0f,1.0f,1.0f,1.0f };
+			meshData.vertices[start].vertexID = start;
 			// B頂点
 			meshData.vertices[start + 1].position.x = cos(lat + kLatEvery) * cos(lon);
 			meshData.vertices[start + 1].position.y = sin(lat + kLatEvery);
@@ -455,6 +459,8 @@ void ModelManager::CreateSphere()
 			meshData.vertices[start + 1].normal.x = meshData.vertices[start + 1].position.x;
 			meshData.vertices[start + 1].normal.y = meshData.vertices[start + 1].position.y;
 			meshData.vertices[start + 1].normal.z = meshData.vertices[start + 1].position.z;
+			meshData.vertices[start + 1].color = { 1.0f,1.0f,1.0f,1.0f };
+			meshData.vertices[start + 1].vertexID = start + 1;
 			// C頂点
 			meshData.vertices[start + 2].position.x = cos(lat) * cos(lon + kLonEvery);
 			meshData.vertices[start + 2].position.y = sin(lat);
@@ -464,6 +470,8 @@ void ModelManager::CreateSphere()
 			meshData.vertices[start + 2].normal.x = meshData.vertices[start + 2].position.x;
 			meshData.vertices[start + 2].normal.y = meshData.vertices[start + 2].position.y;
 			meshData.vertices[start + 2].normal.z = meshData.vertices[start + 2].position.z;
+			meshData.vertices[start + 2].color = { 1.0f,1.0f,1.0f,1.0f };
+			meshData.vertices[start + 2].vertexID = start + 2;
 			// D頂点
 			meshData.vertices[start + 3].position.x = cos(lat + kLatEvery) * cos(lon + kLonEvery);
 			meshData.vertices[start + 3].position.y = sin(lat + kLatEvery);
@@ -473,6 +481,8 @@ void ModelManager::CreateSphere()
 			meshData.vertices[start + 3].normal.x = meshData.vertices[start + 3].position.x;
 			meshData.vertices[start + 3].normal.y = meshData.vertices[start + 3].position.y;
 			meshData.vertices[start + 3].normal.z = meshData.vertices[start + 3].position.z;
+			meshData.vertices[start + 3].color = { 1.0f,1.0f,1.0f,1.0f };
+			meshData.vertices[start + 3].vertexID = start + 3;
 
 		}
 	}
@@ -515,10 +525,10 @@ void ModelManager::CreatePlane()
 	// 頂点データを設定
 #pragma region
 	// 頂点データ（重複なし）
-	meshData.vertices[0] = { { 1.0f,  1.0f, 0.0f, 1.0f }, { 1.0f, 0.0f }, { 0.0f, 0.0f, 1.0f } };  // 右上
-	meshData.vertices[1] = { {-1.0f,  1.0f, 0.0f, 1.0f }, { 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f } };  // 左上
-	meshData.vertices[2] = { { 1.0f, -1.0f, 0.0f, 1.0f }, { 1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f } };  // 右下
-	meshData.vertices[3] = { {-1.0f, -1.0f, 0.0f, 1.0f }, { 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f } };  // 左下
+	meshData.vertices[0] = { { 1.0f,  1.0f, 0.0f, 1.0f }, { 1.0f, 0.0f }, { 0.0f, 0.0f, 1.0f },{1.0f,1.0f,1.0f,1.0f},{0} };  // 右上
+	meshData.vertices[1] = { {-1.0f,  1.0f, 0.0f, 1.0f }, { 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f } ,{1.0f,1.0f,1.0f,1.0f},{1} };  // 左上
+	meshData.vertices[2] = { { 1.0f, -1.0f, 0.0f, 1.0f }, { 1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f } ,{1.0f,1.0f,1.0f,1.0f},{2} };  // 右下
+	meshData.vertices[3] = { {-1.0f, -1.0f, 0.0f, 1.0f }, { 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f },{1.0f,1.0f,1.0f,1.0f},{3} };  // 左下
 	// インデックスデータ
 	meshData.indices[0] = 0;
 	meshData.indices[1] = 1;

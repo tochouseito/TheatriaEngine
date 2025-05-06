@@ -3,6 +3,7 @@
 #include <imgui.h>
 #include "OS/Windows/WinApp/WinApp.h"
 #include "Editor/EditorManager/EditorManager.h"
+#include "GameCore/GameCore.h"
 #include "EngineCommand/EngineCommands.h"
 #include "GameCore/GameObject/GameObject.h"
 #include "Platform/FileSystem/FileSystem.h"
@@ -132,23 +133,53 @@ void MainMenu::EditMenu()
 {
     if (ImGui::BeginMenu("追加"))
     {
-        // 編集アクションをここに追加
-        if (ImGui::MenuItem("3Dオブジェクト"))
+        switch (m_EditorManager->GetWorkSpaceType())
         {
-            std::unique_ptr<Add3DObjectCommand> add3DObject = std::make_unique<Add3DObjectCommand>();
-            m_EngineCommand->ExecuteCommand(std::move(add3DObject));
+        case WorkSpaceType::SceneEdit:
+            if (ImGui::MenuItem("3Dオブジェクト"))
+            {
+                std::unique_ptr<Add3DObjectCommand> add3DObject = std::make_unique<Add3DObjectCommand>();
+                m_EngineCommand->ExecuteCommand(std::move(add3DObject));
+            }
+            if (ImGui::MenuItem("カメラオブジェクト"))
+            {
+                std::unique_ptr<AddCameraObjectCommand> addCameraObject = std::make_unique<AddCameraObjectCommand>();
+                m_EngineCommand->ExecuteCommand(std::move(addCameraObject));
+            }
+            if (ImGui::MenuItem("パーティクルシステムオブジェクト"))
+            {
+                std::unique_ptr<AddParticleSystemObjectCommand> addParticleSystemObject = std::make_unique<AddParticleSystemObjectCommand>();
+                m_EngineCommand->ExecuteCommand(std::move(addParticleSystemObject));
+            }
+            if (ImGui::MenuItem("スクリプト"))
+            {
+                m_OpenScriptPopup = true;
+            }
+            break;
+		case WorkSpaceType::EffectEdit:
+            if (ImGui::MenuItem("新規作成"))
+            {
+                m_EngineCommand->CreateNewEffect();
+				std::unique_ptr<AddEffectObjectCommand> addEffectObject = std::make_unique<AddEffectObjectCommand>();
+				m_EngineCommand->ExecuteCommand(std::move(addEffectObject));
+            }
+            if (ImGui::MenuItem("ノードの追加"))
+            {
+				// 現在の編集中のRootにノードを追加
+				EffectComponent* effect = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<EffectComponent>(m_EngineCommand->GetEffectEntity().value());
+                uint32_t nodeID = m_EngineCommand->GetNodeIntegrationData()->GetMapID();
+				effect->nodeID.push_back(nodeID);
+				std::string nodeName = "Node" + std::to_string(nodeID);
+				effect->nodeData.push_back(EffectNodeData(nodeID,nodeName));
+				effect->nodeData[nodeID].scale.value = { 1.0f, 1.0f, 1.0f };
+                effect->nodeData[nodeID].draw.meshDataIndex = m_EngineCommand->GetSpriteIntegrationData()->GetMapID();
+            }
+            break;
+        default:
+            break;
         }
-		if (ImGui::MenuItem("カメラオブジェクト"))
-		{
-			std::unique_ptr<AddCameraObjectCommand> addCameraObject = std::make_unique<AddCameraObjectCommand>();
-            m_EngineCommand->ExecuteCommand(std::move(addCameraObject));
-		}
 
-        // メニュー選択でポップアップを開く
-        if (ImGui::MenuItem("スクリプト"))
-        {
-            m_OpenScriptPopup = true;
-        }
+    
 
         ImGui::EndMenu(); // 「Edit」メニューを終了
     }

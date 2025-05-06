@@ -40,6 +40,16 @@ public:
 	PSO GetScreenCopyPSO() { return m_ScreenCopyPSO; }
 	PSO GetIntegratePSO() { return m_IntegratePSO; }
 	PSO GetLinePSO() { return m_LinePSO; }
+	// Particle
+	PSO GetParticlePSO() { return m_ParticlePSO; }
+	PSO GetParticleInitPSO() { return m_ParticleInitPSO; }
+	PSO GetParticleUpdatePSO() { return m_ParticleUpdatePSO; }
+	PSO GetParticleEmitPSO() { return m_ParticleEmitPSO; }
+	// EffectEditor
+	PSO GetEffectEditorPSO() { return m_EffectEditorPSO; }
+	PSO GetEffectEditorInitPSO() { return m_EffectEditorInitPSO; }
+	PSO GetEffectEditorUpdatePSO() { return m_EffectEditorUpdatePSO; }
+	PSO GetEffectEditorEmitPSO() { return m_EffectEditorEmitPSO; }
 private:
 	std::vector<std::pair<uint32_t, std::string>> CreateRootParameters(
 		ID3D12ShaderReflection* pReflector,
@@ -52,10 +62,34 @@ private:
 	void CreatePipelineIntegrate(ID3D12Device8* device);
 	void CreatePipelineLine(ID3D12Device8* device);
 
+	// Particle
+	void CreatePipelineParticle(ID3D12Device8* device);
+	void CreatePipelineParticleInit(ID3D12Device8* device);
+	void CreatePipelineParticleUpdate(ID3D12Device8* device);
+	void CreatePipelineParticleEmit(ID3D12Device8* device);
+
+	// EffectEditor
+	void CreatePipelineEffectEditor(ID3D12Device8* device);
+	void CreatePipelineEffectEditorInit(ID3D12Device8* device);
+	void CreatePipelineEffectEditorUpdate(ID3D12Device8* device);
+	void CreatePipelineEffectEditorEmit(ID3D12Device8* device);
+
 	std::unique_ptr<DXShaderCompiler> m_pShaderCompiler = nullptr;
 	PSO m_DemoPSO;
 	PSO m_ScreenCopyPSO;
 	PSO m_IntegratePSO;
 	PSO m_LinePSO;
+
+	// Particle
+	PSO m_ParticlePSO;
+	PSO m_ParticleInitPSO;
+	PSO m_ParticleUpdatePSO;
+	PSO m_ParticleEmitPSO;
+
+	// EffectEditor
+	PSO m_EffectEditorPSO;
+	PSO m_EffectEditorInitPSO;
+	PSO m_EffectEditorUpdatePSO;
+	PSO m_EffectEditorEmitPSO;
 };
 

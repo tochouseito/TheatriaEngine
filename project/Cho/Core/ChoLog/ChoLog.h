@@ -12,6 +12,16 @@
 #include <optional>
 #include <source_location>
 
+#define CHO_ASSERT(expr, msg) \
+    do { \
+        if (!(expr)) { \
+            std::string fullMsg = "Assertion failed!\n\nMessage: " + std::string(msg); \
+            MessageBoxA(nullptr, fullMsg.c_str(), "Assertion Error", MB_OK | MB_ICONERROR); \
+            __debugbreak(); \
+        } \
+    } while (false)
+
+
 std::wstring ConvertString(const std::string& str);
 std::string ConvertString(const std::wstring& str);
 

@@ -48,12 +48,14 @@ void ChoEngine::Initialize()
 
 	// GameCore初期化
 	gameCore = std::make_unique<GameCore>();
-	gameCore->Initialize(platformLayer->GetInputManager(), resourceManager.get());
+	gameCore->Initialize(platformLayer->GetInputManager(), resourceManager.get(),graphicsEngine.get());
 
 	// EngineCommand初期化
 	engineCommand = std::make_unique<EngineCommand>(gameCore.get(), resourceManager.get(), graphicsEngine.get());
 	// GameCoreにEngineCommandをセット
 	gameCore->SetEngineCommandPtr(engineCommand.get());
+	graphicsEngine->SetEngineCommand(engineCommand.get());
+	gameCore->CreateSystems(platformLayer->GetInputManager(), resourceManager.get(), graphicsEngine.get());
 
 	// EditorManager初期化
 	editorManager = std::make_unique<EditorManager>(engineCommand.get(), platformLayer->GetInputManager());
@@ -186,11 +188,13 @@ void ChoEngine::Start()
 		imGuiManager->Initialize(dx12->GetDevice(), resourceManager.get());
 		// GameCore初期化
 		gameCore = std::make_unique<GameCore>();
-		gameCore->Initialize(platformLayer->GetInputManager(), resourceManager.get());
+		gameCore->Initialize(platformLayer->GetInputManager(), resourceManager.get(),graphicsEngine.get());
 		// EngineCommand初期化
 		engineCommand = std::make_unique<EngineCommand>(gameCore.get(), resourceManager.get(), graphicsEngine.get());
 		// GameCoreにEngineCommandをセット
 		gameCore->SetEngineCommandPtr(engineCommand.get());
+		graphicsEngine->SetEngineCommand(engineCommand.get());
+		gameCore->CreateSystems(platformLayer->GetInputManager(), resourceManager.get(), graphicsEngine.get());
 		// EditorManager初期化
 		editorManager = std::make_unique<EditorManager>(engineCommand.get(), platformLayer->GetInputManager());
 		editorManager->Initialize();

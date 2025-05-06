@@ -239,6 +239,10 @@ bool DeleteObjectCommand::Execute(EngineCommand* edit)
 	if (rb) { m_Rigidbody2D = *rb; }
 	BoxCollider2DComponent* box = edit->m_GameCore->GetECSManager()->GetComponent<BoxCollider2DComponent>(object.GetEntity());
 	if (box) { m_BoxCollider2D = *box; }
+	EmitterComponent* emitter = edit->m_GameCore->GetECSManager()->GetComponent<EmitterComponent>(object.GetEntity());
+	if (emitter) { m_Emitter = *emitter; }
+	ParticleComponent* particle = edit->m_GameCore->GetECSManager()->GetComponent<ParticleComponent>(object.GetEntity());
+	if (particle) { m_Particle = *particle; }
 	// Componentの削除
 	edit->m_GameCore->GetECSManager()->RemoveComponent<TransformComponent>(object.GetEntity());
 	if (meshFilter) { edit->m_GameCore->GetECSManager()->RemoveComponent<MeshFilterComponent>(object.GetEntity()); }
@@ -248,6 +252,8 @@ bool DeleteObjectCommand::Execute(EngineCommand* edit)
 	if (lineRenderer) { edit->m_GameCore->GetECSManager()->RemoveAllComponents<LineRendererComponent>(object.GetEntity()); }
 	if (rb) { edit->m_GameCore->GetECSManager()->RemoveComponent<Rigidbody2DComponent>(object.GetEntity()); }
 	if (box) { edit->m_GameCore->GetECSManager()->RemoveComponent<BoxCollider2DComponent>(object.GetEntity()); }
+	if (emitter) { edit->m_GameCore->GetECSManager()->RemoveComponent<EmitterComponent>(object.GetEntity()); }
+	if (particle) { edit->m_GameCore->GetECSManager()->RemoveComponent<ParticleComponent>(object.GetEntity()); }
 	// Entityの削除
 	edit->m_GameCore->GetECSManager()->RemoveEntity(object.GetEntity());
 	// CurrentSceneから削除
@@ -312,6 +318,112 @@ bool AddMaterialComponent::Execute(EngineCommand* edit)
 }
 
 bool AddMaterialComponent::Undo(EngineCommand* edit)
+{
+	edit;
+	return false;
+}
+
+bool AddParticleSystemObjectCommand::Execute(EngineCommand* edit)
+{
+	// CurrentSceneがないなら失敗
+	if (!edit->m_GameCore->GetSceneManager()->GetCurrentScene())
+	{
+		Log::Write(LogLevel::Assert, "Current Scene is nullptr");
+		return false;
+	}
+	// 各IDの取得
+	// Entity
+	Entity entity = edit->m_GameCore->GetECSManager()->GenerateEntity();
+	// デフォルトの名前
+	std::wstring name = L"NewParticleSystem";
+	// 重複回避
+	name = GenerateUniqueName(name, edit->m_GameCore->GetObjectContainer()->GetNameToObjectID());
+	// Transform統合バッファからmapIDを取得
+	uint32_t mapID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::Transform)->GetMapID();
+	// TransformComponentを追加
+	TransformComponent* transform = edit->m_GameCore->GetECSManager()->AddComponent<TransformComponent>(entity);
+	transform->mapID = mapID;
+	// GameObjectを追加
+	ObjectID objectID = edit->m_GameCore->GetObjectContainer()->AddGameObject(entity, name, ObjectType::ParticleSystem);
+	m_ObjectID = objectID;
+	// シーンに追加
+	edit->m_GameCore->GetSceneManager()->GetCurrentScene()->AddUseObject(objectID);
+	// SelectedObjectを設定
+	edit->SetSelectedObject(&edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID));
+	return true;
+}
+
+bool AddParticleSystemObjectCommand::Undo(EngineCommand* edit)
+{
+	edit;
+	return false;
+}
+
+bool AddEmitterComponent::Execute(EngineCommand* edit)
+{
+	// EmitterComponentを追加
+	EmitterComponent* emitter = edit->m_GameCore->GetECSManager()->AddComponent<EmitterComponent>(m_Entity);
+	if (!emitter) { return false; }
+	emitter->bufferIndex = edit->m_ResourceManager->CreateConstantBuffer<BUFFER_DATA_EMITTER>();
+
+	return true;
+}
+
+bool AddEmitterComponent::Undo(EngineCommand* edit)
+{
+	edit;
+	return false;
+}
+
+bool AddParticleComponent::Execute(EngineCommand* edit)
+{
+	// ParticleComponentを追加
+	ParticleComponent* particle = edit->m_GameCore->GetECSManager()->AddComponent<ParticleComponent>(m_Entity);
+	if (!particle) { return false; }
+	// Resourceの生成
+	// パーティクル
+	particle->bufferIndex = edit->m_ResourceManager->CreateRWStructuredBuffer<BUFFER_DATA_PARTICLE>(particle->count);
+	// PerFrame
+	particle->perFrameBufferIndex = edit->m_ResourceManager->CreateConstantBuffer<BUFFER_DATA_PARTICLE_PERFRAME>();
+	// FreeListIndex
+	//particle->freeListIndexBufferIndex = edit->m_ResourceManager->CreateRWStructuredBuffer<int32_t>(1);
+	// FreeList
+	particle->freeListBufferIndex = edit->m_ResourceManager->CreateRWStructuredBuffer<uint32_t>(particle->count,true);
+	return true;
+}
+
+bool AddParticleComponent::Undo(EngineCommand* edit)
+{
+	edit;
+	return false;
+}
+
+bool AddEffectObjectCommand::Execute(EngineCommand* edit)
+{
+	// CurrentSceneがないなら失敗
+	if (!edit->m_GameCore->GetSceneManager()->GetCurrentScene())
+	{
+		Log::Write(LogLevel::Assert, "Current Scene is nullptr");
+		return false;
+	}
+	// 各IDの取得
+	// Entity
+	Entity entity = edit->m_GameCore->GetECSManager()->GenerateEntity();
+	m_Entity = entity;
+	// デフォルトの名前
+	std::wstring name = L"EditorEffect";
+	// 重複回避
+	name = GenerateUniqueName(name, edit->m_GameCore->GetObjectContainer()->GetNameToObjectID());
+	// EffectComponentを追加
+	EffectComponent* effect = edit->m_GameCore->GetECSManager()->AddComponent<EffectComponent>(entity);
+	if (!effect) { return false; }
+	effect->isRun = false;
+	effect->isLoop = true;
+	edit->m_EffectEntity = entity;
+	return true;
+}
+
+bool AddEffectObjectCommand::Undo(EngineCommand* edit)
 {
 	edit;
 	return false;

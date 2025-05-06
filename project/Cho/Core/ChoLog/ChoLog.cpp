@@ -56,14 +56,14 @@ void Cho::Log::Write(LogLevel level,
             {
                 if (!b)
                 {
-                    std::string logMessage = std::format("[ASSERT] {}:{} - {}{}", location.file_name(), location.line(), message, suffix);
+                    std::string logMessage = std::format("[ASSERT] {}:{} -\n {}{}", location.file_name(), location.line(), message, suffix);
 #ifdef _DEBUG
                     OutputDebugStringA((logMessage + "\n").c_str());
 #endif
 #ifdef NDEBUG
                     WriteToFile(logMessage);
 #endif
-                    assert(false); // assert 発動
+                    CHO_ASSERT(false,logMessage.c_str()); // assert 発動
                     return;
                 }
                 // 成功時は単に出力（レベルはInfoにする）
@@ -80,23 +80,37 @@ void Cho::Log::Write(LogLevel level,
             {
                 if (FAILED(hr))
                 {
-                    std::string logMessage = std::format("[ASSERT] {}:{} - {}{}", location.file_name(), location.line(), message, suffix);
+                    std::string logMessage = std::format("[ASSERT] {}:{} -\n {}{}", location.file_name(), location.line(), message, suffix);
 #ifdef _DEBUG
                     OutputDebugStringA((logMessage + "\n").c_str());
 #endif
 #ifdef NDEBUG
                     WriteToFile(logMessage);
 #endif
-                    assert(false); // assert 発動
+                    CHO_ASSERT(false,logMessage.c_str()); // assert 発動
                     return;
                 }
                 // 成功時はInfoとして出力
                 level = LogLevel::Info;
             }
         }
+    } else
+    {
+        if (level == LogLevel::Assert)
+        {
+            std::string logMessage = std::format("[ASSERT] {}:{} -\n {}", location.file_name(), location.line(), message);
+#ifdef _DEBUG
+            OutputDebugStringA((logMessage + "\n").c_str());
+#endif
+#ifdef NDEBUG
+            WriteToFile(logMessage);
+#endif
+			CHO_ASSERT(false,logMessage.c_str()); // assert 発動
+            return;
+        }
     }
 
-    std::string prefix = std::format("[{}] {}:{} - ", ToString(level), location.file_name(), location.line());
+    std::string prefix = std::format("[{}] {}:{} -\n ", ToString(level), location.file_name(), location.line());
     std::string fullMessage = prefix + message + suffix;
 
 #ifdef _DEBUG

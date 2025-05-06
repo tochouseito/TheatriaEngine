@@ -350,6 +350,40 @@ void Inspector::BoxCollider2DComponentView(GameObject* object)
 	}
 }
 
+void Inspector::EmitterComponentView(GameObject* object)
+{
+	EmitterComponent* emitter = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<EmitterComponent>(object->GetEntity());
+	if (emitter)
+	{
+		if (ImGui::TreeNode("Emitter"))
+		{
+			ImGui::DragFloat3("Position", &emitter->position.x, 0.1f);
+			ImGui::DragFloat("radius", &emitter->radius, 0.1f, 0.0f, 100.0f);
+			ImGui::DragFloat("Emit Frequency", &emitter->frequency, 0.1f, 0.0f, 100.0f);
+			ImGui::DragFloat("Emit frequencyTime", &emitter->frequencyTime, 0.1f, 0.0f, 100.0f);
+		}
+	}
+}
+
+void Inspector::ParticleComponentView(GameObject* object)
+{
+	ParticleComponent* particle = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<ParticleComponent>(object->GetEntity());
+	if (particle)
+	{
+		ImGui::Text("Particle Component");
+		/*if (ImGui::TreeNode("Particle"))
+		{
+			ImGui::DragFloat3("Position", &particle->position.x, 0.1f);
+			ImGui::DragFloat("radius", &particle->radius, 0.1f, 0.0f, 100.0f);
+			ImGui::DragFloat("lifeTime", &particle->lifeTime, 0.1f, 0.0f, 100.0f);
+			ImGui::DragFloat("speed", &particle->speed, 0.1f, 0.0f, 100.0f);
+			ImGui::DragFloat("angle", &particle->angle, 0.1f, 0.0f, 100.0f);
+			ImGui::DragFloat("gravity", &particle->gravity, 0.1f, -100.0f, 100.0f);
+			ImGui::TreePop();
+		}*/
+	}
+}
+
 
 void Inspector::AddComponent(GameObject* object)
 {
@@ -362,6 +396,8 @@ void Inspector::AddComponent(GameObject* object)
 	lines;
 	Rigidbody2DComponent* rigidbody;
 	BoxCollider2DComponent* boxCollider2d;
+	EmitterComponent* emitter;
+	ParticleComponent* particle;
 	if (!isOpen)
 	{
 		// コンポーネントの追加
@@ -485,6 +521,32 @@ void Inspector::AddComponent(GameObject* object)
 				isOpen = false;
 			}
 			//}
+			break;
+		case ObjectType::ParticleSystem:
+			// EmitterComponentがあるか
+			emitter = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<EmitterComponent>(object->GetEntity());
+			if (!emitter)
+			{
+				if (ImGui::Selectable("EmitterComponent"))
+				{
+					// EmitterComponentを追加
+					std::unique_ptr<AddEmitterComponent> addEmitterComp = std::make_unique<AddEmitterComponent>(object->GetEntity());
+					m_EngineCommand->ExecuteCommand(std::move(addEmitterComp));
+					isOpen = false;
+				}
+			}
+			// ParticleComponentがあるか
+			particle = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<ParticleComponent>(object->GetEntity());
+			if (!particle)
+			{
+				if (ImGui::Selectable("ParticleComponent"))
+				{
+					// ParticleComponentを追加
+					std::unique_ptr<AddParticleComponent> addParticleComp = std::make_unique<AddParticleComponent>(object->GetEntity());
+					m_EngineCommand->ExecuteCommand(std::move(addParticleComp));
+					isOpen = false;
+				}
+			}
 			break;
 		case ObjectType::Count:
 			break;
