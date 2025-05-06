@@ -206,7 +206,7 @@ void PipelineManager::CreatePipelineDemo(ID3D12Device8* device)
 	);
 	Log::Write(LogLevel::Assert, "Root signature created.", hr);
 	// InputLayout
-	D3D12_INPUT_ELEMENT_DESC inputElementDesc[3] = {};
+	D3D12_INPUT_ELEMENT_DESC inputElementDesc[5] = {};
 	inputElementDesc[0].SemanticName = "POSITION";
 	inputElementDesc[0].SemanticIndex = 0;
 	inputElementDesc[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
@@ -219,6 +219,14 @@ void PipelineManager::CreatePipelineDemo(ID3D12Device8* device)
 	inputElementDesc[2].SemanticIndex = 0;
 	inputElementDesc[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
 	inputElementDesc[2].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	inputElementDesc[3].SemanticName = "COLOR";
+	inputElementDesc[3].SemanticIndex = 0;
+	inputElementDesc[3].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	inputElementDesc[3].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	inputElementDesc[4].SemanticName = "VERTEXID";
+	inputElementDesc[4].SemanticIndex = 0;
+	inputElementDesc[4].Format = DXGI_FORMAT_R32_UINT;
+	inputElementDesc[4].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
 	inputLayoutDesc.pInputElementDescs = inputElementDesc;
 	inputLayoutDesc.NumElements = _countof(inputElementDesc);
@@ -347,7 +355,7 @@ void PipelineManager::CreatePipelineScreenCopy(ID3D12Device8* device)
 	);
 	Log::Write(LogLevel::Assert, "Root signature created.", hr);
 	// InputLayout
-	D3D12_INPUT_ELEMENT_DESC inputElementDesc[3] = {};
+	D3D12_INPUT_ELEMENT_DESC inputElementDesc[5] = {};
 	inputElementDesc[0].SemanticName = "POSITION";
 	inputElementDesc[0].SemanticIndex = 0;
 	inputElementDesc[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
@@ -360,6 +368,14 @@ void PipelineManager::CreatePipelineScreenCopy(ID3D12Device8* device)
 	inputElementDesc[2].SemanticIndex = 0;
 	inputElementDesc[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
 	inputElementDesc[2].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	inputElementDesc[3].SemanticName = "COLOR";
+	inputElementDesc[3].SemanticIndex = 0;
+	inputElementDesc[3].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	inputElementDesc[3].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	inputElementDesc[4].SemanticName = "VERTEXID";
+	inputElementDesc[4].SemanticIndex = 0;
+	inputElementDesc[4].Format = DXGI_FORMAT_R32_UINT;
+	inputElementDesc[4].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
 	inputLayoutDesc.pInputElementDescs = inputElementDesc;
 	inputLayoutDesc.NumElements = _countof(inputElementDesc);
@@ -536,7 +552,7 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 	);
 	Log::Write(LogLevel::Assert, "Root signature created.", hr);
 	// InputLayout
-	D3D12_INPUT_ELEMENT_DESC inputElementDesc[3] = {};
+	D3D12_INPUT_ELEMENT_DESC inputElementDesc[5] = {};
 	inputElementDesc[0].SemanticName = "POSITION";
 	inputElementDesc[0].SemanticIndex = 0;
 	inputElementDesc[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
@@ -549,6 +565,14 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 	inputElementDesc[2].SemanticIndex = 0;
 	inputElementDesc[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
 	inputElementDesc[2].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	inputElementDesc[3].SemanticName = "COLOR";
+	inputElementDesc[3].SemanticIndex = 0;
+	inputElementDesc[3].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	inputElementDesc[3].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	inputElementDesc[4].SemanticName = "VERTEXID";
+	inputElementDesc[4].SemanticIndex = 0;
+	inputElementDesc[4].Format = DXGI_FORMAT_R32_UINT;
+	inputElementDesc[4].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
 	inputLayoutDesc.pInputElementDescs = inputElementDesc;
 	inputLayoutDesc.NumElements = _countof(inputElementDesc);
@@ -811,7 +835,7 @@ void PipelineManager::CreatePipelineParticle(ID3D12Device8* device)
 	);
 	Log::Write(LogLevel::Assert, "Root signature created.", hr);
 	// InputLayout
-	D3D12_INPUT_ELEMENT_DESC inputElementDesc[3] = {};
+	D3D12_INPUT_ELEMENT_DESC inputElementDesc[5] = {};
 	inputElementDesc[0].SemanticName = "POSITION";
 	inputElementDesc[0].SemanticIndex = 0;
 	inputElementDesc[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
@@ -824,6 +848,14 @@ void PipelineManager::CreatePipelineParticle(ID3D12Device8* device)
 	inputElementDesc[2].SemanticIndex = 0;
 	inputElementDesc[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
 	inputElementDesc[2].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	inputElementDesc[3].SemanticName = "COLOR";
+	inputElementDesc[3].SemanticIndex = 0;
+	inputElementDesc[3].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	inputElementDesc[3].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	inputElementDesc[4].SemanticName = "VERTEXID";
+	inputElementDesc[4].SemanticIndex = 0;
+	inputElementDesc[4].Format = DXGI_FORMAT_R32_UINT;
+	inputElementDesc[4].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
 	inputLayoutDesc.pInputElementDescs = inputElementDesc;
 	inputLayoutDesc.NumElements = _countof(inputElementDesc);
@@ -1272,7 +1304,7 @@ void PipelineManager::CreatePipelineEffectEditor(ID3D12Device8* device)
 	);
 	Log::Write(LogLevel::Assert, "Root signature created.", hr);
 	// InputLayout
-	D3D12_INPUT_ELEMENT_DESC inputElementDesc[3] = {};
+	D3D12_INPUT_ELEMENT_DESC inputElementDesc[5] = {};
 	inputElementDesc[0].SemanticName = "POSITION";
 	inputElementDesc[0].SemanticIndex = 0;
 	inputElementDesc[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
@@ -1285,6 +1317,14 @@ void PipelineManager::CreatePipelineEffectEditor(ID3D12Device8* device)
 	inputElementDesc[2].SemanticIndex = 0;
 	inputElementDesc[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
 	inputElementDesc[2].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	inputElementDesc[3].SemanticName = "COLOR";
+	inputElementDesc[3].SemanticIndex = 0;
+	inputElementDesc[3].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	inputElementDesc[3].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	inputElementDesc[4].SemanticName = "VERTEXID";
+	inputElementDesc[4].SemanticIndex = 0;
+	inputElementDesc[4].Format = DXGI_FORMAT_R32_UINT;
+	inputElementDesc[4].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
 	inputLayoutDesc.pInputElementDescs = inputElementDesc;
 	inputLayoutDesc.NumElements = _countof(inputElementDesc);
@@ -1295,22 +1335,37 @@ void PipelineManager::CreatePipelineEffectEditor(ID3D12Device8* device)
 	blendDesc.RenderTarget[0].RenderTargetWriteMask =
 		D3D12_COLOR_WRITE_ENABLE_ALL;
 	blendDesc.RenderTarget[0].BlendEnable = true;
-	//blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+	////blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+	//blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	////blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+	////!< 加算。Src * SrcA + Dest * 1
+	//blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	//blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+	////blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;
+
+	//blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+	//blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ZERO;
+	//blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ONE;
+
+	/*blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ZERO;
 	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
-	//blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
-	//!< 加算。Src * SrcA + Dest * 1
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ONE;
 	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
 	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
-	//blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;
+	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;*/
 
-	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
-	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ZERO;
-	blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ONE;
+	blendDesc.RenderTarget[0].BlendEnable = true;
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;
 
 	// RasterizerState
 	D3D12_RASTERIZER_DESC rasterizerDesc{};
-	// 裏面（時計回り）を表示しな
-	rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	// 裏面（時計回り）
+	rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
 	// 三角形の中を塗りつぶす
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 

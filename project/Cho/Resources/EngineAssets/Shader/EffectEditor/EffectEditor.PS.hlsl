@@ -21,7 +21,6 @@ PSOutput main(VSOutput input) {
     EffectNode node = gEffectNode[particle.nodeID];
     float4 textureColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
     textureColor = gTextures[node.drawCommon.textureID].Sample(gSampler, input.texcoord);
-    textureColor = gTextures[0].Sample(gSampler, input.texcoord); 
     
     output.color = input.color * textureColor;
     

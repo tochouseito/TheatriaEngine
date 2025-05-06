@@ -175,7 +175,6 @@ enum class EFFECT_MESH_TYPE
 
 enum class COLOR_TYPE
 {
-	NONE = 0,       // 色タイプなし
 	CONSTANT,       // 固定色
 	RANDOM,         // ランダム色
 	EASING,         // イージング色
@@ -230,10 +229,10 @@ struct SpriteVertexColor
 
 struct SpriteVertexPosition
 {
-    Vector2 leftBottom;  // 左下座標
-    Vector2 rightBottom; // 右下座標
-    Vector2 leftTop;     // 左上座標
-    Vector2 rightTop;    // 右上座標
+    Vector2 leftBottom = { -0.5f,-0.5f };  // 左下座標
+    Vector2 rightBottom={ 0.5f,-0.5f }; // 右下座標
+    Vector2 leftTop = { -0.5f,0.5f };     // 左上座標
+    Vector2 rightTop = { 0.5f,0.5f };    // 右上座標
 };
 
 struct EffectSprite
@@ -243,9 +242,9 @@ struct EffectSprite
     RandColor randColor;                    // ランダム色
     EasingColor easingColor;                // イージング色
     uint32_t placement = 0;                         // 配置方法
-    uint32_t VertexColorType = 0;                   // 頂点色タイプ
+    uint32_t vertexColorType = 0;                   // 頂点色タイプ
     SpriteVertexColor vertexColor;          // 頂点色
-    uint32_t VertexPositionType = 0;                 // 頂点座標タイプ
+    uint32_t vertexPositionType = 0;                 // 頂点座標タイプ
     SpriteVertexPosition vertexPosition;    // 頂点座標
 };
 

@@ -129,6 +129,200 @@ void EffectEditor::Window()
             // End
 			ImGui::EndTabItem();
         }
+		// Rotation
+		if (ImGui::BeginTabItem("回転"))
+		{
+			// RotationType
+			static const char* rotationTypeStrings[] = {
+				"Standard",     // RotationStandard
+				"PVA",          // RotationPVA
+				//"Easing",       // RotationEasing
+				//"FCurve",       // RotationFCurve
+				//"NURBS",        // RotationNURBS
+				//"CameraOffset", // RotationCameraOffset
+			};
+			int rotationType = static_cast<int>(node.rotation.type);
+			if (ImGui::Combo("Rotation Type", &rotationType, rotationTypeStrings, IM_ARRAYSIZE(rotationTypeStrings)))
+			{
+				node.rotation.type = static_cast<uint32_t>(rotationType);
+			}
+			// Rotation
+			EFFECT_SRT_TYPE type = static_cast<EFFECT_SRT_TYPE>(node.rotation.type);
+			switch (type)
+			{
+			case EFFECT_SRT_TYPE::SRT_TYPE_STANDARD:
+				ImGui::DragFloat3("回転", &node.rotation.value.x, 0.1f);
+				break;
+			case EFFECT_SRT_TYPE::SRT_TYPE_PVA:
+				DragRandVector3("回転", &node.rotation.pva.value, 0.1f, 0.0f, 0.0f);
+				DragRandVector3("速度", &node.rotation.pva.velocity, 0.1f, 0.0f, 0.0f);
+				DragRandVector3("加速度", &node.rotation.pva.acceleration, 0.1f, 0.0f, 0.0f);
+				break;
+			case EFFECT_SRT_TYPE::SRT_TYPE_EASING:
+				break;
+			default:
+				break;
+			}
+			// End
+			ImGui::EndTabItem();
+		}
+        // Scale
+		if (ImGui::BeginTabItem("スケール"))
+		{
+			// ScaleType
+			static const char* scaleTypeStrings[] = {
+				"Standard",     // ScaleStandard
+				"PVA",          // ScalePVA
+				//"Easing",       // ScaleEasing
+				//"FCurve",       // ScaleFCurve
+				//"NURBS",        // ScaleNURBS
+				//"CameraOffset", // ScaleCameraOffset
+			};
+			int scaleType = static_cast<int>(node.scale.type);
+			if (ImGui::Combo("Scale Type", &scaleType, scaleTypeStrings, IM_ARRAYSIZE(scaleTypeStrings)))
+			{
+				node.scale.type = static_cast<uint32_t>(scaleType);
+			}
+			// Scale
+			EFFECT_SRT_TYPE type = static_cast<EFFECT_SRT_TYPE>(node.scale.type);
+			switch (type)
+			{
+			case EFFECT_SRT_TYPE::SRT_TYPE_STANDARD:
+				ImGui::DragFloat3("スケール", &node.scale.value.x, 0.1f);
+				break;
+			case EFFECT_SRT_TYPE::SRT_TYPE_PVA:
+				DragRandVector3("スケール", &node.scale.pva.value, 0.1f, 0.0f, 0.0f);
+				DragRandVector3("速度", &node.scale.pva.velocity, 0.1f, 0.0f, 0.0f);
+				DragRandVector3("加速度", &node.scale.pva.acceleration, 0.1f, 0.0f, 0.0f);
+				break;
+			case EFFECT_SRT_TYPE::SRT_TYPE_EASING:
+				break;
+			default:
+				break;
+			}
+			// End
+			ImGui::EndTabItem();
+		}
+        // DrawCommon
+        if (ImGui::BeginTabItem("描画共通"))
+        {
+			ImGui::Text("Drop Texture Here");
+            if (ImGui::BeginDragDropTarget())
+            {
+                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Texture"))
+                {
+                    // ドロップされたテクスチャのIDを取得
+                    const char* textureName = static_cast<const char*>(payload->Data);
+                    // テクスチャIDを取得
+                    node.drawCommon.textureID = m_EngineCommand->GetResourceManager()->GetTextureManager()->GetTextureID(ConvertString(textureName));
+                }
+                ImGui::EndDragDropTarget();
+            }
+
+            // End
+			ImGui::EndTabItem();
+        }
+		// Draw
+		if (ImGui::BeginTabItem("描画"))
+		{
+			// MeshType
+			static const char* meshTypeStrings[] = {
+				"Node",     // MeshNode
+				"Sprite",  // MeshSprite
+			};
+			int meshType = static_cast<int>(node.draw.meshType);
+			if (ImGui::Combo("Mesh Type", &meshType, meshTypeStrings, IM_ARRAYSIZE(meshTypeStrings)))
+			{
+				node.draw.meshType = static_cast<uint32_t>(meshType);
+			}
+			// Mesh
+			EFFECT_MESH_TYPE type = static_cast<EFFECT_MESH_TYPE>(node.draw.meshType);
+			switch (type)
+			{
+			case EFFECT_MESH_TYPE::NONE:
+				// 何もしない
+				break;
+			case EFFECT_MESH_TYPE::SPRITE:
+			{
+				// 全体色
+				static const char* colorTypeStrings[] = {
+					"Standard",     // ColorStandard
+					"Random",       // ColorRandom
+					"Easing",       // ColorEasing
+					//"FCurve",       // ColorFCurve
+					//"NURBS",        // ColorNURBS
+				};
+				int colorType = static_cast<int>(node.sprite.colorType);
+				if (ImGui::Combo("Color Type", &colorType, colorTypeStrings, IM_ARRAYSIZE(colorTypeStrings)))
+				{
+					node.sprite.colorType = static_cast<uint32_t>(colorType);
+				}
+				// 色
+				COLOR_TYPE e_type = static_cast<COLOR_TYPE>(node.sprite.colorType);
+				switch (e_type)
+				{
+				case COLOR_TYPE::CONSTANT:
+				{
+					ImGui::ColorEdit4("Color", &node.sprite.color.r);
+					// 描画順
+					// 配置方法
+					// 頂点色
+					// 頂点座標
+					static const char* vertexPositionTypeStrings[] = {
+						"Standard",     // VertexPositionStandard
+						"Constant",     // VertexPositionConstant
+					};
+					int vertexPositionType = static_cast<int>(node.sprite.vertexPositionType);
+					if (ImGui::Combo("Vertex Position Type", &vertexPositionType, vertexPositionTypeStrings, IM_ARRAYSIZE(vertexPositionTypeStrings)))
+					{
+						node.sprite.vertexPositionType = static_cast<uint32_t>(vertexPositionType);
+					}
+					// 頂点座標
+					VERTEX_POSITION_TYPE vpType = static_cast<VERTEX_POSITION_TYPE>(node.sprite.vertexPositionType);
+					switch (vpType)
+					{
+					case VERTEX_POSITION_TYPE::STANDARD:
+						// 何もしない
+						break;
+					case VERTEX_POSITION_TYPE::CONSTANT:
+						ImGui::DragFloat2("左下座標", &node.sprite.vertexPosition.leftBottom.x, 0.1f);
+						ImGui::DragFloat2("右下座標", &node.sprite.vertexPosition.rightBottom.x, 0.1f);
+						ImGui::DragFloat2("左上座標", &node.sprite.vertexPosition.leftTop.x, 0.1f);
+						ImGui::DragFloat2("右上座標", &node.sprite.vertexPosition.rightTop.x, 0.1f);
+						break;
+					default:
+						break;
+					}
+					break;
+				}
+				case COLOR_TYPE::RANDOM:
+					break;
+				case COLOR_TYPE::EASING:
+					break;
+				default:
+					break;
+				}
+				break;
+			}
+			case EFFECT_MESH_TYPE::RIBBON:
+				break;
+			case EFFECT_MESH_TYPE::TRAIL:
+				break;
+			case EFFECT_MESH_TYPE::RING:
+				break;
+			case EFFECT_MESH_TYPE::MODEL:
+				break;
+			case EFFECT_MESH_TYPE::CUBE:
+				break;
+			case EFFECT_MESH_TYPE::SPHERE:
+				break;
+			default:
+				break;
+			}
+			// End
+			ImGui::EndTabItem();
+		}
+
 
         // End
 		ImGui::EndTabBar();

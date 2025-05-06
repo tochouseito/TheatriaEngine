@@ -418,7 +418,7 @@ bool AddEffectObjectCommand::Execute(EngineCommand* edit)
 	EffectComponent* effect = edit->m_GameCore->GetECSManager()->AddComponent<EffectComponent>(entity);
 	if (!effect) { return false; }
 	effect->isRun = false;
-	effect->isLoop = false;
+	effect->isLoop = true;
 	edit->m_EffectEntity = entity;
 	return true;
 }

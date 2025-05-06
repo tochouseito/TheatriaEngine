@@ -294,9 +294,9 @@ void EffectEditorUpdateSystem::UpdateEffect(EffectComponent& effect)
 		sprite.randColor = effect.nodeData[i].sprite.randColor;
 		sprite.easingColor = effect.nodeData[i].sprite.easingColor;
 		sprite.placement = effect.nodeData[i].sprite.placement;
-		sprite.VertexColorType = effect.nodeData[i].sprite.VertexColorType;
+		sprite.vertexColorType = effect.nodeData[i].sprite.vertexColorType;
 		sprite.vertexColor = effect.nodeData[i].sprite.vertexColor;
-		sprite.VertexPositionType = effect.nodeData[i].sprite.VertexPositionType;
+		sprite.vertexPositionType = effect.nodeData[i].sprite.vertexPositionType;
 		sprite.vertexPosition = effect.nodeData[i].sprite.vertexPosition;
 		spriteBuffer->UpdateData(sprite, effect.nodeData[i].draw.meshDataIndex);
 	}

@@ -16,6 +16,8 @@ struct VertexData
 	Vector4 position = { 0.0f };
 	Vector2 texCoord = { 0.0f };
 	Vector3 normal = { 0.0f };
+	Color color = { 1.0f,1.0f,1.0f,1.0f };
+	uint32_t vertexID = 0;
 };
 struct Node
 {
