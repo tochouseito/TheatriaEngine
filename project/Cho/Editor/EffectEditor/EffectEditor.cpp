@@ -391,6 +391,10 @@ void EffectEditor::ControlWindow()
     {
 		effect->isReset = true;
     }
+	if (ImGui::Button("1Frame"))
+	{
+		effect->globalTime++;
+	}
 	ImGui::End();
 }
 

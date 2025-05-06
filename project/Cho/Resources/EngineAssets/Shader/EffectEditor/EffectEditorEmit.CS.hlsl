@@ -24,7 +24,7 @@ void main(uint3 DTid : SV_DispatchThreadID,uint3 Gid : SV_GroupID) {
     uint nodeIndex = gEffectRoot.nodeID[Gid.x];
     uint meshIndex = gEffectNode[nodeIndex].draw.meshDataIndex;
     // 発生処理
-    uint emitCount = 0; // 発生開始から、発生の間隔時間
+    int emitCount = 0; // 発生開始から、発生の間隔時間
     // 発生開始時間を設定
     float emitStartTime = GenerateRandomInRange(generator.Generate1d(), gEffectNode[nodeIndex].common.emitStartTime.median, gEffectNode[nodeIndex].common.emitStartTime.amplitude);
     // 経過時間が発生開始時間を超えたら発生開始
@@ -41,6 +41,12 @@ void main(uint3 DTid : SV_DispatchThreadID,uint3 Gid : SV_GroupID) {
             }
             else {
                 isEmit = emitCount % emitTime;
+                if (isEmit == 0) {
+                    isEmit = 1; 
+                }
+                else {
+                    isEmit = 0;
+                }
             }
         }
         if (isEmit != 0) {

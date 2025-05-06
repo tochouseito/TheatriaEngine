@@ -56,6 +56,7 @@ VSOutput main(VSInput input, uint instanceId : SV_InstanceID,uint vertexId : SV_
     
     // 頂点座標タイプで頂点座標を変更
     float4 vertexPosition = input.position;
+    
     if (gEffectMesh[particle.meshID].VertexPositionType == VERTEX_TYPE_CONSTANT) {
         switch (input.vertexID) {
             case 0:

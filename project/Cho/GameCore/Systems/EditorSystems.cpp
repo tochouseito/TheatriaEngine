@@ -219,7 +219,6 @@ void EffectEditorUpdateSystem::UpdateEffect(EffectComponent& effect)
 	{
 		// エフェクトの時間を更新
 		effect.deltaTime = Timer::GetDeltaTime();
-		effect.globalTime++;
 		if (!effect.isPreRun||effect.globalTime > effect.maxTime)
 		{
 			// 初期化
@@ -352,4 +351,6 @@ void EffectEditorUpdateSystem::UpdateEffect(EffectComponent& effect)
 	m_pEngineCommand->GetGraphicsEngine()->EndCommandContext(context, QueueType::Compute);
 	// 待機
 	m_pEngineCommand->GetGraphicsEngine()->WaitForGPU(QueueType::Compute);
+
+	effect.globalTime++;
 }
