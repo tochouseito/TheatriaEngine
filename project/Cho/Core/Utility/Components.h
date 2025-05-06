@@ -229,6 +229,23 @@ struct EffectComponent : public IComponentTag
 	std::vector<EffectNodeData> nodeData;	// ノードデータ
 
 };
+// スプライトコンポーネント
+struct UISpriteComponent : public IComponentTag
+{
+	Vector2 position{ 0.0f,0.0f };// 位置
+	float rotation = 0.0f;// Z軸回転
+	Vector2 scale = { 1.0f,1.0f };// スケール
+	Matrix4 matWorld = ChoMath::MakeIdentity4x4();
+	Vector2 uvPos = { 0.0f,0.0f };
+	float uvRot = 0.0f;
+	Vector2 uvScale = { 1.0f,1.0f };
+	Vector2 anchorPoint = { 0.0f,0.0f };// アンカーポイント
+	Vector2 size = { 64.0f,64.0f };// サイズ
+	Vector2 textureLeftTop = { 0.0f,0.0f };// テクスチャの左上座標
+	Vector2 textureSize = { 64.0f,64.0f };// テクスチャのサイズ
+
+	std::optional<uint32_t> mapID = std::nullopt;
+};
 
 // マルチコンポーネントを許可
 template<>

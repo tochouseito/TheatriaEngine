@@ -36,6 +36,7 @@ class EngineCommand
 	friend class AddEmitterComponent;
 	friend class AddParticleComponent;
 	friend class AddEffectObjectCommand;
+	friend class AddUIObjectCommand;
 	// Editor
 	friend class EffectEditorUpdateSystem;
 	friend class EffectEditor;

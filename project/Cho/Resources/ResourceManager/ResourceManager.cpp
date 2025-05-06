@@ -134,6 +134,9 @@ void ResourceManager::CreateIntegrationBuffers()
 	// Material統合バッファ
 	std::optional<uint32_t> materialIndex = CreateStructuredBuffer<BUFFER_DATA_MATERIAL>(kIntegrationMaterialBufferSize);
 	m_IntegrationData[IntegrationDataType::Material] = std::make_unique<IntegrationData<BUFFER_DATA_MATERIAL>>(materialIndex, kIntegrationMaterialBufferSize);
+	// UISprite統合バッファ
+	std::optional<uint32_t> uiSpriteIndex = CreateStructuredBuffer<BUFFER_DATA_UISPRITE>(kIntegrationUISpriteBufferSize);
+	m_IntegrationData[IntegrationDataType::UISprite] = std::make_unique<IntegrationData<BUFFER_DATA_UISPRITE>>(uiSpriteIndex, kIntegrationUISpriteBufferSize);
 }
 
 void ResourceManager::CreateHeap(ID3D12Device8* device)

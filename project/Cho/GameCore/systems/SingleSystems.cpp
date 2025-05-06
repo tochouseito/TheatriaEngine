@@ -451,3 +451,39 @@ void ParticleUpdateSystem::UpdateParticle(EmitterComponent& emitter, ParticleCom
 	m_pGraphicsEngine->WaitForGPU(QueueType::Compute);
 
 }
+
+void UIUpdateSystem::UpdateUI(UISpriteComponent& uiSprite)
+{
+	uiSprite;
+	//// UIの更新
+	//float left = 0.0f - uiSprite.anchorPoint.x;
+	//float right = uiSprite.size.x - uiSprite.anchorPoint.x;
+	//float top = 0.0f - uiSprite.anchorPoint.y;
+	//float bottom = uiSprite.size.y - uiSprite.anchorPoint.y;
+
+	//float tex_left = uiSprite.textureLeftTop.x / uiSprite.size.x;
+	//float tex_right = (uiSprite.textureLeftTop.x + uiSprite.size.x) / uiSprite.size.x;
+	//float tex_top = uiSprite.textureLeftTop.y / uiSprite.size.y;
+	//float tex_bottom = (uiSprite.textureLeftTop.y + uiSprite.size.y) / uiSprite.size.y;
+
+	//SetVertexData(uiSprite, left, right, top, bottom, tex_left, tex_right, tex_top, tex_bottom);
+
+	////uiSprite.scale = uiSprite.size;
+
+	//Matrix4 worldMatrixSprite = ChoMath::MakeAffineMatrix(Vector3(uiSprite.scale.x, uiSprite.scale.y, 1.0f), Vector3(0.0f, 0.0f, uiSprite.rotation), Vector3(uiSprite.position.x, uiSprite.position.y, 0.0f));
+
+	//Matrix4 viewMatrixSprite = ChoMath::MakeIdentity4x4();
+
+	//Matrix4 projectionMatrixSprite = ChoMath::MakeOrthographicMatrix(0.0f, 0.0f,
+	//	static_cast<float>(WindowWidth()), static_cast<float>(WindowHeight()),
+	//	0.0f, 100.0f
+	//);
+
+	//Matrix4 worldViewProjectionMatrixSprite = Multiply(worldMatrixSprite, Multiply(viewMatrixSprite, projectionMatrixSprite));
+
+	//uiSprite.matWorld = worldViewProjectionMatrixSprite;
+
+	//uiSprite.material.matUV = MakeAffineMatrix(Vector3(uiSprite.uvScale.x, uiSprite.uvScale.y, 1.0f), Vector3(0.0f, 0.0f, uiSprite.uvRot), Vector3(uiSprite.uvPos.x, uiSprite.uvPos.y, 0.0f));
+
+	//uiSprite.constData->matWorld = uiSprite.matWorld;
+}

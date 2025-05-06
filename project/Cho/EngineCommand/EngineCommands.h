@@ -53,7 +53,18 @@ public:
 private:
 	uint32_t m_Entity;
 };
-
+// UIオブジェクトを追加するコマンド
+class AddUIObjectCommand :public IEngineCommand
+{
+public:
+	AddUIObjectCommand()
+	{
+	}
+	bool Execute(EngineCommand* edit)override;
+	bool Undo(EngineCommand* edit)override;
+private:
+	uint32_t m_ObjectID;
+};
 // MeshFilterComponentを追加するコマンド
 class AddMeshFilterComponent :public IEngineCommand
 {

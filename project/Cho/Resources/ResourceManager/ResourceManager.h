@@ -22,6 +22,7 @@ enum IntegrationDataType
 	Transform=0,
 	Line,
 	Material,
+	UISprite,
 	kCount,
 };
 
@@ -137,6 +138,9 @@ public:
 		case IntegrationDataType::Material:
 			return GetBuffer<IStructuredBuffer>(m_IntegrationData[IntegrationDataType::Material]->GetBufferIndex());
 			break;
+		case IntegrationDataType::UISprite:
+			return GetBuffer<IStructuredBuffer>(m_IntegrationData[IntegrationDataType::UISprite]->GetBufferIndex());
+			break;
 		default:
 			break;
 		}
@@ -209,6 +213,9 @@ public:
 		case IntegrationDataType::Material:
 			return m_IntegrationData[IntegrationDataType::Material].get();
 			break;
+		case IntegrationDataType::UISprite:
+			return m_IntegrationData[IntegrationDataType::UISprite].get();
+			break;
 		default:
 			break;
 		}
@@ -276,6 +283,7 @@ private:
 	static const uint32_t kIntegrationTFBufferSize = 1024;// Transformの統合バッファのサイズ
 	static const uint32_t kIntegrationLineBufferSize = 1024;// Lineの統合バッファのサイズ
 	static const uint32_t kIntegrationMaterialBufferSize = 1024;// Materialの統合バッファのサイズ
+	static const uint32_t kIntegrationUISpriteBufferSize = 128;// UISpriteの統合バッファのサイズ
 	// Texture最大数
 	static const uint32_t kMaxTextureCount = 256;
 };

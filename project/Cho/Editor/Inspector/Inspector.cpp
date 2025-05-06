@@ -50,6 +50,7 @@ void Inspector::ComponentsView(GameObject* object)
 	MeshFilterComponentView(object);
 	MeshRendererComponentView(object);
 	CameraComponentView(object);
+	UISpriteComponentView(object);
 	MaterialComponentView(object);
 	ScriptComponentView(object);
 	LineRendererComponentView(object);
@@ -139,6 +140,21 @@ void Inspector::CameraComponentView(GameObject* object)
 	if (camera)
 	{
 		ImGui::Text("Camera Component");
+	}
+}
+
+void Inspector::UISpriteComponentView(GameObject* object)
+{
+	// UIオブジェクトじゃないならスキップ
+	if (object->GetType() != ObjectType::UI)
+	{
+		return;
+	}
+	// UISpriteComponentを取得
+	UISpriteComponent* sprite = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<UISpriteComponent>(object->GetEntity());
+	if (sprite)
+	{
+		ImGui::Text("Sprite Component");
 	}
 }
 
@@ -544,6 +560,32 @@ void Inspector::AddComponent(GameObject* object)
 					// ParticleComponentを追加
 					std::unique_ptr<AddParticleComponent> addParticleComp = std::make_unique<AddParticleComponent>(object->GetEntity());
 					m_EngineCommand->ExecuteCommand(std::move(addParticleComp));
+					isOpen = false;
+				}
+			}
+			break;
+		case ObjectType::UI:
+			// MaterialComponentがあるか
+			material = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<MaterialComponent>(object->GetEntity());
+			if (!material)
+			{
+				if (ImGui::Selectable("MaterialComponent"))
+				{
+					// MaterialComponentを追加
+					std::unique_ptr<AddMaterialComponent> addMaterialComp = std::make_unique<AddMaterialComponent>(object->GetEntity());
+					m_EngineCommand->ExecuteCommand(std::move(addMaterialComp));
+					isOpen = false;
+				}
+			}
+			// ScriptComponentがあるか
+			script = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<ScriptComponent>(object->GetEntity());
+			if (!script)
+			{
+				if (ImGui::Selectable("ScriptComponent"))
+				{
+					// ScriptComponentを追加
+					std::unique_ptr<AddScriptComponent> addScriptComp = std::make_unique<AddScriptComponent>(object->GetEntity(), object->GetID().value());
+					m_EngineCommand->ExecuteCommand(std::move(addScriptComp));
 					isOpen = false;
 				}
 			}

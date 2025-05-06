@@ -108,3 +108,8 @@ struct BUFFER_DATA_PARTICLE final
 	float currentTime;			// 4バイト
 	int isAlive;				// 4バイト
 };
+
+struct BUFFER_DATA_UISPRITE final
+{
+	Matrix4 matWorld;	// 64バイト
+};

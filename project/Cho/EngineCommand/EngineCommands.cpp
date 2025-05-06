@@ -428,3 +428,39 @@ bool AddEffectObjectCommand::Undo(EngineCommand* edit)
 	edit;
 	return false;
 }
+
+bool AddUIObjectCommand::Execute(EngineCommand* edit)
+{
+	// CurrentSceneがないなら失敗
+	if (!edit->m_GameCore->GetSceneManager()->GetCurrentScene())
+	{
+		Log::Write(LogLevel::Assert, "Current Scene is nullptr");
+		return false;
+	}
+	// 各IDの取得
+	// Entity
+	Entity entity = edit->m_GameCore->GetECSManager()->GenerateEntity();
+	// デフォルトの名前
+	std::wstring name = L"NewUI";
+	// 重複回避
+	name = GenerateUniqueName(name, edit->m_GameCore->GetObjectContainer()->GetNameToObjectID());
+	// UISprite統合バッファからmapIDを取得
+	uint32_t mapID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::UISprite)->GetMapID();
+	// SpriteComponentを追加
+	UISpriteComponent* uiSprite = edit->m_GameCore->GetECSManager()->AddComponent<UISpriteComponent>(entity);
+	uiSprite->mapID = mapID;
+	// GameObjectを追加
+	ObjectID objectID = edit->m_GameCore->GetObjectContainer()->AddGameObject(entity, name, ObjectType::UI);
+	m_ObjectID = objectID;
+	// シーンに追加
+	edit->m_GameCore->GetSceneManager()->GetCurrentScene()->AddUseObject(objectID);
+	// SelectedObjectを設定
+	edit->SetSelectedObject(&edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID));
+	return true;
+}
+
+bool AddUIObjectCommand::Undo(EngineCommand* edit)
+{
+	edit;
+	return false;
+}
