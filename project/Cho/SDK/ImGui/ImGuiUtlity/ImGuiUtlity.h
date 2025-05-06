@@ -12,5 +12,6 @@ namespace Cho
 			ImGuiIO& io = ImGui::GetIO();
 			io.DisplaySize = ImVec2(width, height);
 		}
+
 	};
 }

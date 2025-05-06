@@ -1,5 +1,6 @@
 #pragma once
 #include "Editor/BaseEditor/BaseEditor.h"
+#include "Core/Utility/EffectStruct.h"
 class EffectEditor : public BaseEditor
 {
 public:
@@ -15,5 +16,8 @@ public:
 	void Window() override;
 private:
 	void ControlWindow();
+
+	// RandValue用ImGui
+	bool DragRandVector3(const char* label, RandVector3* v, float v_speed, float v_min, float v_max);
 };
 

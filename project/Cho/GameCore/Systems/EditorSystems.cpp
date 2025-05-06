@@ -219,7 +219,7 @@ void EffectEditorUpdateSystem::UpdateEffect(EffectComponent& effect)
 	{
 		// エフェクトの時間を更新
 		effect.deltaTime = Timer::GetDeltaTime();
-		effect.globalTime += effect.deltaTime;
+		effect.globalTime++;
 		if (!effect.isPreRun||effect.globalTime > effect.maxTime)
 		{
 			// 初期化
@@ -256,12 +256,14 @@ void EffectEditorUpdateSystem::UpdateEffect(EffectComponent& effect)
 					effect.isRun = false;
 				}
 			}
+			effect.isPreRun = effect.isRun;
+			return;
 		}
-		effect.isPreRun = effect.isRun;
 	} else
 	{
 		return;
 	}
+	effect.isPreRun = effect.isRun;
 	// ノードがないならスキップ
 	if (effect.nodeID.empty()) { return; }
 	// Root
@@ -345,7 +347,7 @@ void EffectEditorUpdateSystem::UpdateEffect(EffectComponent& effect)
 	// ParticleListバッファをセット
 	context->SetComputeRootDescriptorTable(4, particleListBuffer->GetUAVGpuHandle());
 	// Dispatch
-	context->Dispatch(static_cast<UINT>(effect.nodeID.size()), 1, 1);
+	context->Dispatch(128, 1, 1);
 	// クローズ
 	m_pEngineCommand->GetGraphicsEngine()->EndCommandContext(context, QueueType::Compute);
 	// 待機

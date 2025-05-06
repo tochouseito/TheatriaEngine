@@ -81,7 +81,7 @@ void EffectEditor::Window()
 			// 親削除で削除フラグ
 			// 全ての子削除で削除フラグ
             // 生存時間
-			ImGui::DragFloat2("生存時間", &node.common.lifeTime.median, 0.1f, 0.0f, 0.0f);
+			ImGui::DragFloat2("生存時間", &node.common.lifeTime.median, 1.0f, 0.0f, 0.0f,"%.0f");
             // 生成時間
 			ImGui::DragFloat2("生成時間", &node.common.emitTime.median, 0.1f, 0.0f, 0.0f);
 			// 生成開始時間
@@ -116,6 +116,9 @@ void EffectEditor::Window()
                 break;
                 break;
             case EFFECT_SRT_TYPE::SRT_TYPE_PVA:
+				DragRandVector3("位置", &node.position.pva.value, 0.1f, 0.0f, 0.0f);
+				DragRandVector3("速度", &node.position.pva.velocity, 0.1f, 0.0f, 0.0f);
+				DragRandVector3("加速度", &node.position.pva.acceleration, 0.1f, 0.0f, 0.0f);
                 break;
             case EFFECT_SRT_TYPE::SRT_TYPE_EASING:
                 break;
@@ -156,6 +159,10 @@ void EffectEditor::ControlWindow()
 		return;
     }
 
+	ImGui::Text("%f", effect->globalTime);
+	ImGui::Text("%f", effect->deltaTime);
+	ImGui::Text("%f", effect->maxTime);
+
     // 中央に配置するための計算
     float toolbarWidth = 0.0f;
     float buttonSize = 28.0f; // ボタンサイズ
@@ -191,4 +198,55 @@ void EffectEditor::ControlWindow()
 		effect->isReset = true;
     }
 	ImGui::End();
+}
+
+bool EffectEditor::DragRandVector3(const char* label, RandVector3* v, float v_speed, float v_min, float v_max)
+{
+    ImGui::PushID(label); // 識別子をプッシュ（同じ名前のコントロールが競合しないようにする）
+
+	ImGui::Text("%s", label); // ラベルを表示
+
+    float item_width = ImGui::CalcItemWidth(); // 現在の項目幅を取得
+    float single_item_width = (item_width - ImGui::GetStyle().ItemSpacing.x * 2) / 3; // 3分割
+
+    //--中央値--//
+    // X
+    ImGui::PushItemWidth(single_item_width);
+	bool mx_changed = ImGui::DragFloat("X##MX", &v->x.median, v_speed, v_min, v_max,":%.3f");
+    ImGui::PopItemWidth();
+    ImGui::SameLine(); // 横並び
+	// Y
+	ImGui::PushItemWidth(single_item_width);
+	bool my_changed = ImGui::DragFloat("Y##MY", &v->y.median, v_speed, v_min, v_max, ":%.3f");
+	ImGui::PopItemWidth();
+	ImGui::SameLine(); // 横並び
+	// Z
+	ImGui::PushItemWidth(single_item_width);
+	bool mz_changed = ImGui::DragFloat("Z##MZ", &v->z.median, v_speed, v_min, v_max, ":%.3f");
+	ImGui::PopItemWidth();
+    ImGui::SameLine();        // ラベルとスライダーを横並びにする
+    ImGui::Text("中心"); // ラベルを表示
+
+    //--振幅--//
+	// X
+	ImGui::PushItemWidth(single_item_width);
+	bool ax_changed = ImGui::DragFloat("X##AX", &v->x.amplitude, v_speed, v_min, v_max, ":%.3f");
+	ImGui::PopItemWidth();
+	ImGui::SameLine(); // 横並び
+	// Y
+	ImGui::PushItemWidth(single_item_width);
+	bool ay_changed = ImGui::DragFloat("Y##AY", &v->y.amplitude, v_speed, v_min, v_max, ":%.3f");
+	ImGui::PopItemWidth();
+	ImGui::SameLine(); // 横並び
+	// Z
+	ImGui::PushItemWidth(single_item_width);
+	bool az_changed = ImGui::DragFloat("Z##AZ", &v->z.amplitude, v_speed, v_min, v_max, ":%.3f");
+	ImGui::PopItemWidth();
+	ImGui::SameLine();        // ラベルとスライダーを横並びにする
+	ImGui::Text("振幅"); // ラベルを表示
+
+    ImGui::PopID(); // 識別子をポップ
+
+	return mx_changed || my_changed || mz_changed ||
+		ax_changed || ay_changed || az_changed;
 }

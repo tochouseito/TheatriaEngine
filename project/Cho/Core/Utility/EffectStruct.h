@@ -72,9 +72,9 @@ struct EasingValue
 
 struct PVA
 {
-    RandVector3 value;          // 値
-    RandVector3 velocity;       // 速度
-    RandVector3 acceleration;   // 加速度
+    RandVector3 value = {};          // 値
+    RandVector3 velocity = {};       // 速度
+    RandVector3 acceleration = {};   // 加速度
 };
 
 enum class EFFECT_SRT_TYPE

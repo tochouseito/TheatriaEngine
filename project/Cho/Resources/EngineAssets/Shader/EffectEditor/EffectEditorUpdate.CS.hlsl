@@ -14,13 +14,13 @@ AppendStructuredBuffer<uint> gEffectParticleFreeList : register(u1);
 
 [numthreads(kMaxParticles, 1, 1)]
 void main(uint3 DTid : SV_DispatchThreadID, uint3 Gid : SV_GroupID) {
-    uint nodeIndex = gEffectRoot.nodeID[Gid.x];
-    uint meshIndex = gEffectNode[nodeIndex].draw.meshDataIndex;
     uint particleIndex = DTid.x;
     // パーティクルが死んでいるなら何もしない
     if (gEffectParticle[particleIndex].isAlive == 0) {
         return;
     }
+    uint nodeIndex = gEffectParticle[particleIndex].nodeID;
+    uint meshIndex = gEffectNode[nodeIndex].draw.meshDataIndex;
     if (gEffectParticle[particleIndex].nodeID != nodeIndex) {
         return;
     }
@@ -30,11 +30,12 @@ void main(uint3 DTid : SV_DispatchThreadID, uint3 Gid : SV_GroupID) {
         gEffectParticle[particleIndex].scale.value = float3(0, 0, 0);
         // パーティクルを死なせる
         gEffectParticle[particleIndex].isAlive = 0;
+        gEffectParticle[particleIndex].currentTime = 0;
         // フリーリストに追加
         gEffectParticleFreeList.Append(particleIndex);
         return;
     }
-    else { // 生きているパーティクルの更新
+    if (gEffectParticle[particleIndex].isAlive) { // 生きているパーティクルの更新
         // 位置
         gEffectParticle[particleIndex].position.value += gEffectParticle[particleIndex].position.velocity * gEffectRoot.timeManager.deltaTime;
         // 速度

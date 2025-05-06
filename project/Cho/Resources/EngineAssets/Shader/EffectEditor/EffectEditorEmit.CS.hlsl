@@ -35,7 +35,13 @@ void main(uint3 DTid : SV_DispatchThreadID,uint3 Gid : SV_GroupID) {
             isEmit = 1;
         }
         else {
-            isEmit = emitCount % GenerateRandomInRange(generator.Generate1d(), gEffectNode[nodeIndex].common.emitTime.median, gEffectNode[nodeIndex].common.emitTime.amplitude);
+            float emitTime = GenerateRandomInRange(generator.Generate1d(), gEffectNode[nodeIndex].common.emitTime.median, gEffectNode[nodeIndex].common.emitTime.amplitude);
+            if (emitTime == 0) {
+                isEmit = 1; // 発生間隔が0なら発生
+            }
+            else {
+                isEmit = emitCount % emitTime;
+            }
         }
         if (isEmit != 0) {
             // 発生
@@ -43,10 +49,10 @@ void main(uint3 DTid : SV_DispatchThreadID,uint3 Gid : SV_GroupID) {
                 // パーティクルごとにシードを変える
                 generator.seed = generator.Generate3d() + float3(countIndex, countIndex * 2, countIndex * 3);
                 // パーティクルインデックスを取得
-                uint particleIndex = gEffectParticleFreeList.Consume();
                 if (gEffectParticleFreeListCounter[0] == 0) {
                     break; // 空きなし
                 }
+                uint particleIndex = gEffectParticleFreeList.Consume();
                 // パーティクルの初期化
                 // Position
                 switch (gEffectNode[nodeIndex].position.type) {
@@ -54,17 +60,17 @@ void main(uint3 DTid : SV_DispatchThreadID,uint3 Gid : SV_GroupID) {
                         gEffectParticle[particleIndex].position.value = gEffectNode[nodeIndex].position.value;
                         break;
                     case SRT_TYPE_PVA:
-                        gEffectParticle[nodeIndex].position.value = float3(
+                        gEffectParticle[particleIndex].position.value = float3(
                             GenerateRandomInRange(generator.Generate1d(), gEffectNode[nodeIndex].position.pva.value.x.median, gEffectNode[nodeIndex].position.pva.value.x.amplitude),
                             GenerateRandomInRange(generator.Generate1d(), gEffectNode[nodeIndex].position.pva.value.y.median, gEffectNode[nodeIndex].position.pva.value.y.amplitude),
                             GenerateRandomInRange(generator.Generate1d(), gEffectNode[nodeIndex].position.pva.value.z.median, gEffectNode[nodeIndex].position.pva.value.z.amplitude)
                         );
-                        gEffectParticle[nodeIndex].position.velocity = float3(
+                        gEffectParticle[particleIndex].position.velocity = float3(
                             GenerateRandomInRange(generator.Generate1d(), gEffectNode[nodeIndex].position.pva.velocity.x.median, gEffectNode[nodeIndex].position.pva.velocity.x.amplitude),
                             GenerateRandomInRange(generator.Generate1d(), gEffectNode[nodeIndex].position.pva.velocity.y.median, gEffectNode[nodeIndex].position.pva.velocity.y.amplitude),
                             GenerateRandomInRange(generator.Generate1d(), gEffectNode[nodeIndex].position.pva.velocity.z.median, gEffectNode[nodeIndex].position.pva.velocity.z.amplitude)
                         );
-                        gEffectParticle[nodeIndex].position.acceleration = float3(
+                        gEffectParticle[particleIndex].position.acceleration = float3(
                             GenerateRandomInRange(generator.Generate1d(), gEffectNode[nodeIndex].position.pva.acceleration.x.median, gEffectNode[nodeIndex].position.pva.acceleration.x.amplitude),
                             GenerateRandomInRange(generator.Generate1d(), gEffectNode[nodeIndex].position.pva.acceleration.y.median, gEffectNode[nodeIndex].position.pva.acceleration.y.amplitude),
                             GenerateRandomInRange(generator.Generate1d(), gEffectNode[nodeIndex].position.pva.acceleration.z.median, gEffectNode[nodeIndex].position.pva.acceleration.z.amplitude)
@@ -136,10 +142,10 @@ void main(uint3 DTid : SV_DispatchThreadID,uint3 Gid : SV_GroupID) {
                         break;
                     case COLOR_TYPE_EASING:
                         gEffectParticle[particleIndex].color = float4(
-                            generator.GenerateInRange(gEffectMesh[meshIndex].easingColor.startMinColor.r, gEffectMesh[meshIndex].easingColor.startMinColor.r),
-                            generator.GenerateInRange(gEffectMesh[meshIndex].easingColor.startMinColor.g, gEffectMesh[meshIndex].easingColor.startMinColor.g),
-                            generator.GenerateInRange(gEffectMesh[meshIndex].easingColor.startMinColor.b, gEffectMesh[meshIndex].easingColor.startMinColor.b),
-                            generator.GenerateInRange(gEffectMesh[meshIndex].easingColor.startMinColor.a, gEffectMesh[meshIndex].easingColor.startMinColor.a)
+                            generator.GenerateInRange(gEffectMesh[meshIndex].easingColor.startMinColor.r, gEffectMesh[meshIndex].easingColor.startMaxColor.r),
+                            generator.GenerateInRange(gEffectMesh[meshIndex].easingColor.startMinColor.g, gEffectMesh[meshIndex].easingColor.startMaxColor.g),
+                            generator.GenerateInRange(gEffectMesh[meshIndex].easingColor.startMinColor.b, gEffectMesh[meshIndex].easingColor.startMaxColor.b),
+                            generator.GenerateInRange(gEffectMesh[meshIndex].easingColor.startMinColor.a, gEffectMesh[meshIndex].easingColor.startMaxColor.a)
                         );
                         break;
                 }
