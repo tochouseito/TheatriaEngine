@@ -155,6 +155,21 @@ void GameObject::InitializeRigidbody2DAPI()
 	}
 }
 
+void GameObject::InitializeBoxCollider2DAPI()
+{
+	if (!m_ECS || !m_ResourceManager)
+	{
+		boxCollider2D.data = nullptr;
+		return;
+	}
+	// BoxCollider2DComponent を取得
+	BoxCollider2DComponent* box = m_ECS->GetComponent<BoxCollider2DComponent>(m_Entity);
+	boxCollider2D.data = box;
+	if (box)
+	{
+	}
+}
+
 void GameObject::InitializeMaterialAPI()
 {
 	if (!m_ECS || !m_ResourceManager)
