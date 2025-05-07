@@ -3,7 +3,8 @@ struct Transform
     float4x4 matWorld;
     float4x4 worldInverse;
     float4x4 rootNode;
-    int materialID;
+    uint materialID;
+    float padding[3];
 };
 
 struct Material
@@ -32,7 +33,7 @@ struct VSOut
     float3 normal : NORMAL0;
     float3 worldPosition : POSITION0;
     float3 cameraPosition : CAMERAPOS0;
-    int materialID : MATERIALID0;
+    uint materialID : MATERIALID0;
 };
 
 struct ViewProjection

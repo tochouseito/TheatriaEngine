@@ -16,7 +16,7 @@ void PipelineManager::Initialize(ID3D12Device8* device)
 	CreatePipelineEffectEditorInit(device);
 	CreatePipelineEffectEditorUpdate(device);
 	CreatePipelineEffectEditorEmit(device);
-	CreatePipelineUI(device);
+	//CreatePipelineUI(device);
 }
 
 std::vector<std::pair<uint32_t, std::string>> PipelineManager::CreateRootParameters(ID3D12ShaderReflection* pReflector, std::vector<D3D12_ROOT_PARAMETER>& rootParameters, std::vector<D3D12_DESCRIPTOR_RANGE>& descriptorRanges, D3D12_SHADER_VISIBILITY VISIBILITY)
