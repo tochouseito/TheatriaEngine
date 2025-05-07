@@ -4,7 +4,7 @@
 #include "Platform/InputManager/InputManager.h"
 #include "GameCore/ObjectContainer/ObjectContainer.h"
 
-void GameObject::InitializeTransformAPI()
+void GameObject::InitializeTransformAPI(bool isParentReset)
 {
 	if (!m_ECS || !m_ResourceManager)
 	{
@@ -17,7 +17,10 @@ void GameObject::InitializeTransformAPI()
 	// TransformComponent を取得
 	TransformComponent* tf = m_ECS->GetComponent<TransformComponent>(m_Entity);
 	transform.data = tf;
-	tf->parent.reset();
+	if (isParentReset)
+	{
+		tf->parent.reset();
+	}
 
 	// 関数でのアクセスも一応用意（なくても良い場合は省略OK）
 	if (tf)

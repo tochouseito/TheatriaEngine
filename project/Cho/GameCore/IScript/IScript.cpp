@@ -9,6 +9,6 @@ GameObject& IScript::FindGameObjectByName(std::wstring_view name)
 	{
 		return result.m_ObjectContainer->GetDummyGameObject();
 	}
-	result.Initialize();
+	result.Initialize(false);
 	return result;
 }

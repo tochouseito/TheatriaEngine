@@ -97,9 +97,9 @@ private:
 	InputManager* m_InputManager = nullptr;			// InputManager
 	ObjectContainer* m_ObjectContainer = nullptr;	// ObjectContainer
 
-	void Initialize()
+	void Initialize(bool isParentReset = true)
 	{
-		InitializeTransformAPI();
+		InitializeTransformAPI(isParentReset);
 		InitializeCameraAPI();
 		InitializeLineRendererAPI();
 		InitializeRigidbody2DAPI();
@@ -107,7 +107,7 @@ private:
 		InitializeInputAPI();
 	}
 
-	void InitializeTransformAPI();
+	void InitializeTransformAPI(bool isParentReset = true);
 	void InitializeCameraAPI();
 	void InitializeLineRendererAPI();
 	void InitializeRigidbody2DAPI();
