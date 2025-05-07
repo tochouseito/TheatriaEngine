@@ -241,3 +241,17 @@ public:
 private:
 	uint32_t m_Entity;
 };
+// 物理エンジンの重力を設定するコマンド
+class SetGravityCommand : public IEngineCommand
+{
+public:
+	SetGravityCommand(const Vector3& gravity) :
+		m_Gravity(gravity)
+	{
+	}
+	bool Execute(EngineCommand* edit)override;
+	bool Undo(EngineCommand* edit)override;
+private:
+	Vector3 m_Gravity;
+	Vector3 m_PreGravity;
+};

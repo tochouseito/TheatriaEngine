@@ -40,6 +40,7 @@ public:
 	void AddGameGenerateObject(const ObjectID& id) { m_GameGenerateID.push_back(id); }
 	void InitializeGenerateObject();
 	void ClearGenerateObject();
+	b2World* GetPhysicsWorld() { return m_pPhysicsWorld.get(); }
 private:
 	void CreateSystems(InputManager* input, ResourceManager* resourceManager,GraphicsEngine* graphicsEngine);
 
