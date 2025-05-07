@@ -29,22 +29,17 @@ void ContactListener2D::CollisionEnter(ObjectID self, ObjectID other)
 	ScriptComponent* script = m_pECS->GetComponent<ScriptComponent>(selfObject.GetEntity());
 	if (script && script->isActive)
 	{
-		// スクリプトコンテキストを作成
-		//ScriptContext selfContext(m_pObjectContainer, m_pInputManager, m_pResourceManager, m_pECS, self);
-		//selfContext.Initialize();
 		Rigidbody2DComponent* selfRb = m_pECS->GetComponent<Rigidbody2DComponent>(selfObject.GetEntity());
-		selfRb->isCollisionStay = true;// 衝突中フラグオン
-		//selfRb->otherEntity = other;
-		selfRb->otherObjectID = other;
-		//ScriptContext otherContext(m_pObjectContainer, m_pInputManager, m_pResourceManager, m_pECS, other);
-		//otherContext.Initialize();
+		if (!selfRb) { return; }
 		// 相手のゲームオブジェクトを取得
 		GameObject& otherObject = m_pObjectContainer->GetGameObject(other);
 		if (!otherObject.IsActive()) { return; }
 		otherObject.Initialize();// 初期化
 		Rigidbody2DComponent* otherRb = m_pECS->GetComponent<Rigidbody2DComponent>(otherObject.GetEntity());
+		if (!otherRb) { return; }
+		selfRb->isCollisionStay = true;// 衝突中フラグオン
+		selfRb->otherObjectID = other;
 		otherRb->isCollisionStay = true;// 衝突中フラグオン
-		//script->onCollisionEnterFunc(selfContext, otherContext);
 		script->onCollisionEnterFunc(otherObject);
 	}
 }
@@ -56,22 +51,17 @@ void ContactListener2D::CollisionExit(ObjectID self, ObjectID other)
 	ScriptComponent* script = m_pECS->GetComponent<ScriptComponent>(selfObject.GetEntity());
 	if (script && script->isActive)
 	{
-		// スクリプトコンテキストを作成
-		//ScriptContext selfContext(m_pObjectContainer, m_pInputManager, m_pResourceManager, m_pECS, self);
-		//selfContext.Initialize();
 		Rigidbody2DComponent* selfRb = m_pECS->GetComponent<Rigidbody2DComponent>(self);
-		selfRb->isCollisionStay = false;// 衝突中フラグオフ
-		//selfRb->otherEntity.reset();
-		selfRb->otherObjectID = other;
-		//ScriptContext otherContext(m_pObjectContainer, m_pInputManager, m_pResourceManager, m_pECS, other);
-		//otherContext.Initialize();
+		if (!selfRb) { return; }
 		// 相手のゲームオブジェクトを取得
 		GameObject& otherObject = m_pObjectContainer->GetGameObject(other);
 		if (!otherObject.IsActive()) return;
 		otherObject.Initialize();// 初期化
 		Rigidbody2DComponent* otherRb = m_pECS->GetComponent<Rigidbody2DComponent>(other);
+		if (!otherRb) { return; }
+		selfRb->isCollisionStay = false;// 衝突中フラグオフ
+		selfRb->otherObjectID = other;
 		otherRb->isCollisionStay = false;// 衝突中フラグオフ
-		//script->onCollisionExitFunc(selfContext, otherContext);
 		script->onCollisionExitFunc(otherObject);
 	}
 }
