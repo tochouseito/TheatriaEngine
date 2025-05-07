@@ -159,7 +159,6 @@ void MainMenu::EditMenu()
 		case WorkSpaceType::EffectEdit:
             if (ImGui::MenuItem("新規作成"))
             {
-                m_EngineCommand->CreateNewEffect();
 				std::unique_ptr<AddEffectObjectCommand> addEffectObject = std::make_unique<AddEffectObjectCommand>();
 				m_EngineCommand->ExecuteCommand(std::move(addEffectObject));
             }

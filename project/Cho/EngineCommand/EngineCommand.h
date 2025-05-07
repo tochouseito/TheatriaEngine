@@ -44,12 +44,7 @@ class EngineCommand
 	friend class GraphicsEngine;
 public:
 	// Constructor
-	EngineCommand(GameCore* gameCore, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine) :
-		m_GameCore(gameCore),
-		m_ResourceManager(resourceManager),
-		m_GraphicsEngine(graphicsEngine)
-	{
-	}
+	EngineCommand(GameCore* gameCore, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine);
 	// Destructor
 	~EngineCommand()
 	{

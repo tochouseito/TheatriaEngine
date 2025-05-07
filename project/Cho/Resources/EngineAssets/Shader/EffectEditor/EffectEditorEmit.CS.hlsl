@@ -21,7 +21,8 @@ void main(uint3 DTid : SV_DispatchThreadID,uint3 Gid : SV_GroupID) {
     RandomGenerator generator;
     generator.seed = (DTid + gEffectRoot.timeManager.globalTime) * gEffectRoot.timeManager.globalTime;
     // 処理対象のNodeのインデックスを取得
-    uint nodeIndex = gEffectRoot.nodeID[Gid.x];
+    EffectRoot root = gEffectRoot;
+    uint nodeIndex = FetchEffectNodeID(root,DTid.x);
     uint meshIndex = gEffectNode[nodeIndex].draw.meshDataIndex;
     // 発生処理
     int emitCount = 0; // 発生開始から、発生の間隔時間

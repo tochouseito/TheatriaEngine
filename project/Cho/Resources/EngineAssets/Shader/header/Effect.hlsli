@@ -208,7 +208,7 @@ static const uint kMaxParticles = 1024;
 
 struct EffectRoot {
     TimeManager timeManager; 
-    uint nodeID[128];
+    uint4 nodeID[32];
 };
 
 struct EffectParticlePVA {
@@ -244,3 +244,10 @@ struct VSOutput {
     float4 color : COLOR0;
     uint instanceId : SV_InstanceID;
 };
+
+uint FetchEffectNodeID(EffectRoot root,uint idx)
+{
+    uint row = idx >> 2; // idx / 4
+    uint col = idx & 3; // idx % 4
+    return root.nodeID[row][col];
+}
