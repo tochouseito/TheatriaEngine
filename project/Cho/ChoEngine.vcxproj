@@ -747,6 +747,7 @@ xcopy "$(SolutionDir)Cho\Core\Utility\Color.h" "$(TargetDir)Cho\Core\Utility\" /
 xcopy "$(SolutionDir)Cho\Externals\box2d" "$(TargetDir)Cho\Externals\box2d" /E /I /Y
 xcopy "$(SolutionDir)Cho\Core\Utility\InputStruct.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Core\Utility\IDType.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
+xcopy "$(SolutionDir)Cho\Core\Utility\EffectStruct.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
 xcopy "$(SolutionDir)Cho\ChoEngineAPI.h" "$(TargetDir)Cho\" /E /I /Y
 xcopy "$(SolutionDir)Cho\APIExportsMacro.h" "$(TargetDir)Cho\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Engine\Engine.h" "$(TargetDir)Cho\Engine\" /E /I /Y
@@ -794,6 +795,7 @@ xcopy "$(SolutionDir)Cho\Core\Utility\Color.h" "$(TargetDir)Cho\Core\Utility\" /
 xcopy "$(SolutionDir)Cho\Externals\box2d" "$(TargetDir)Cho\Externals\box2d" /E /I /Y
 xcopy "$(SolutionDir)Cho\Core\Utility\InputStruct.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Core\Utility\IDType.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
+xcopy "$(SolutionDir)Cho\Core\Utility\EffectStruct.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
 xcopy "$(SolutionDir)Cho\ChoEngineAPI.h" "$(TargetDir)Cho\" /E /I /Y
 xcopy "$(SolutionDir)Cho\APIExportsMacro.h" "$(TargetDir)Cho\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Engine\Engine.h" "$(TargetDir)Cho\Engine\" /E /I /Y
