@@ -15,6 +15,9 @@ ConsumeStructuredBuffer<uint> gEffectParticleFreeList : register(u1);
 // UAV : ParticleFreeListCounter 1個
 RWStructuredBuffer<uint> gEffectParticleFreeListCounter : register(u2);
 
+// UAV : EffectParticleEmitCounter 128x1024個
+//RWStructuredBuffer<uint> gEffectParticleEmitCounter : register(u3);
+
 [numthreads(1, 1, 1)]
 void main(uint3 DTid : SV_DispatchThreadID,uint3 Gid : SV_GroupID) {
     // シード生成

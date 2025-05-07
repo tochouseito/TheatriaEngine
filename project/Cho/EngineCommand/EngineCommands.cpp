@@ -464,3 +464,21 @@ bool AddUIObjectCommand::Undo(EngineCommand* edit)
 	edit;
 	return false;
 }
+
+bool SetGravityCommand::Execute(EngineCommand* edit)
+{
+	b2World* world = edit->m_GameCore->GetPhysicsWorld();
+	if (!world) { return false; }
+	// 重力を取得
+	b2Vec2 gravity = world->GetGravity();
+	m_PreGravity = Vector3(gravity.x, gravity.y, 0.0f);
+	// 重力を設定
+	world->SetGravity(b2Vec2(m_Gravity.x, m_Gravity.y));
+	return true;
+}
+
+bool SetGravityCommand::Undo(EngineCommand* edit)
+{
+	edit;
+	return false;
+}

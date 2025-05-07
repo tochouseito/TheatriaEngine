@@ -19,6 +19,7 @@ void MainMenu::Update()
     {
         Window();
         PopupScriptName();
+        SettingWindow();
     }
 }
 
@@ -77,6 +78,9 @@ void MainMenu::MenuBar()
 
 		// Helpメニュー
 		HelpMenu();
+
+		// 設定メニュー
+		SettingMenu();
 
         // ワークスペース一覧
         //static const char* workspaces[] = { "Layout", "Scripting", "Modeling", "Animation", "Rendering" };
@@ -260,6 +264,19 @@ void MainMenu::HelpMenu()
     }
 }
 
+void MainMenu::SettingMenu()
+{
+	if (ImGui::BeginMenu("設定"))
+	{
+		if (ImGui::MenuItem("エディタ設定"))
+		{
+			// エディタ設定ウィンドウを開く
+			m_OpenSettingWindow = true;
+		}
+		ImGui::EndMenu();
+	}
+}
+
 void MainMenu::PopupScriptName()
 {
     // スクリプト名バッファ
@@ -298,4 +315,25 @@ void MainMenu::PopupScriptName()
 
         ImGui::EndPopup();
     }
+}
+
+void MainMenu::SettingWindow()
+{
+	// 設定ウィンドウ
+    if (!m_OpenSettingWindow) { return; }
+	ImGui::Begin("Setting##MainMenu", &m_OpenSettingWindow);
+	ImGui::Text("エディタ設定");
+
+    ImGui::Text("重力");
+    ImGui::SameLine();
+    b2Vec2 gravity = m_EngineCommand->GetGameCore()->GetPhysicsWorld()->GetGravity();
+    if (ImGui::InputFloat2("##Gravity", &gravity.x))
+    {
+		// 変更されたら重力を設定
+		Vector3 gravityVector3(gravity.x, gravity.y, 0.0f);
+		std::unique_ptr<SetGravityCommand> setGravity = std::make_unique<SetGravityCommand>(gravityVector3);
+		m_EngineCommand->ExecuteCommand(std::move(setGravity));
+    }
+
+    ImGui::End();
 }
