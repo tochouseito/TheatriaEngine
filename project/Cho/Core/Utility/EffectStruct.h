@@ -292,9 +292,6 @@ struct TimeManager
 struct EffectRoot
 {
     TimeManager timeManager;    // 時間管理
-    uint32_t isRun;
-    uint32_t isLoop;               // ループフラグ
-	float padding[2];
 	uint32_t nodeID[128];           // ノードID
 };
 

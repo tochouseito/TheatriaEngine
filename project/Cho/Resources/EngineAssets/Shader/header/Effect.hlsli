@@ -208,9 +208,6 @@ static const uint kMaxParticles = 1024;
 
 struct EffectRoot {
     TimeManager timeManager; 
-    uint isRun;
-    uint isLoop;
-    float padding[2];
     uint nodeID[128];
 };
 
