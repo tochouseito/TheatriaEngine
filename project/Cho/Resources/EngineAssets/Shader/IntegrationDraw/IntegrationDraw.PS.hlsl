@@ -2,11 +2,8 @@
 
 // マテリアル
 StructuredBuffer<Material> gIMaterial : register(t0);
-
 // テクスチャリソース(カラー)
 Texture2D<float4> gTextures[] : register(t1);
-//Texture2D<float4> gTexture : register(t1);
-
 // サンプラー
 SamplerState gSampler : register(s0);
 

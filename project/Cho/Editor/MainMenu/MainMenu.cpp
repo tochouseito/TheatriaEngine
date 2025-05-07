@@ -151,6 +151,11 @@ void MainMenu::EditMenu()
                 std::unique_ptr<AddParticleSystemObjectCommand> addParticleSystemObject = std::make_unique<AddParticleSystemObjectCommand>();
                 m_EngineCommand->ExecuteCommand(std::move(addParticleSystemObject));
             }
+            if (ImGui::MenuItem("UI"))
+            {
+				std::unique_ptr<AddUIObjectCommand> addUIObject = std::make_unique<AddUIObjectCommand>();
+				m_EngineCommand->ExecuteCommand(std::move(addUIObject));
+            }
             if (ImGui::MenuItem("スクリプト"))
             {
                 m_OpenScriptPopup = true;

@@ -112,4 +112,5 @@ struct BUFFER_DATA_PARTICLE final
 struct BUFFER_DATA_UISPRITE final
 {
 	Matrix4 matWorld;	// 64バイト
+	uint32_t materialID;	// 4バイト
 };
