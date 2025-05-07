@@ -153,6 +153,7 @@ struct BoxCollider2DComponent : public IComponentTag
 	float density = 1.0f;
 	float friction = 0.3f;
 	float restitution = 0.0f;
+	bool isSensor = false;
 	b2Fixture* runtimeFixture = nullptr;
 };
 // 2D円形コライダー

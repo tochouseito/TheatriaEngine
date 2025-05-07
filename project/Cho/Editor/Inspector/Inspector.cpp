@@ -361,6 +361,8 @@ void Inspector::BoxCollider2DComponentView(GameObject* object)
 			ImGui::DragFloat("Friction", &collider->friction, 0.05f, 0.0f, 1.0f);
 			ImGui::DragFloat("Restitution", &collider->restitution, 0.05f, 0.0f, 1.0f);
 
+			ImGui::Checkbox("Is Sensor", &collider->isSensor);
+
 			ImGui::TreePop();
 		}
 	}

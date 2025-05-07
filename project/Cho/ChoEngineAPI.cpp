@@ -91,11 +91,32 @@ CHO_API void ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vector3 gene
 	{
 		std::unique_ptr<AddRigidbody2DComponent> addRigidbodyCommand = std::make_unique<AddRigidbody2DComponent>(newObject.GetEntity(), newObject.GetID().value());
 		addRigidbodyCommand->Execute(engineCommand);
+		Rigidbody2DComponent* newRigidbody = engineCommand->GetGameCore()->GetECSManager()->GetComponent<Rigidbody2DComponent>(newObject.GetEntity());
+		if (newRigidbody)
+		{
+			newRigidbody->mass = rb->mass;
+			newRigidbody->gravityScale = rb->gravityScale;
+			newRigidbody->isKinematic = rb->isKinematic;
+			newRigidbody->fixedRotation = rb->fixedRotation;
+			newRigidbody->bodyType = rb->bodyType;
+		}
 	}
 	if (box)
 	{
 		std::unique_ptr<AddBoxCollider2DComponent> addBoxCommand = std::make_unique<AddBoxCollider2DComponent>(newObject.GetEntity());
 		addBoxCommand->Execute(engineCommand);
+		BoxCollider2DComponent* newBox = engineCommand->GetGameCore()->GetECSManager()->GetComponent<BoxCollider2DComponent>(newObject.GetEntity());
+		if (newBox)
+		{
+			newBox->offsetX = box->offsetX;
+			newBox->offsetY = box->offsetY;
+			newBox->width = box->width;
+			newBox->height = box->height;
+			newBox->density = box->density;
+			newBox->friction = box->friction;
+			newBox->restitution = box->restitution;
+			newBox->isSensor = box->isSensor;
+		}
 	}
 	// TransformComponentを取得
 	TransformComponent* transform = engineCommand->GetGameCore()->GetECSManager()->GetComponent<TransformComponent>(newObject.GetEntity());

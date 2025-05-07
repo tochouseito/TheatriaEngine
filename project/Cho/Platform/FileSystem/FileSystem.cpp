@@ -614,6 +614,7 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
                     b.density = jb.value("density", 1.0f);
                     b.friction = jb.value("friction", 0.5f);
                     b.restitution = jb.value("restitution", 0.0f);
+					b.isSensor = jb.value("isSensor", false);
 
                     BoxCollider2DComponent* box = ecs->AddComponent<BoxCollider2DComponent>(entity);
 					box->offsetX = b.offsetX;
@@ -623,6 +624,7 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
 					box->density = b.density;
 					box->friction = b.friction;
 					box->restitution = b.restitution;
+					box->isSensor = b.isSensor;
                 }
 
                 // Emitter
@@ -945,6 +947,7 @@ json Cho::Serialization::ToJson(const BoxCollider2DComponent& bc)
 	j["density"] = bc.density;
 	j["friction"] = bc.friction;   
 	j["restitution"] = bc.restitution;
+	j["isSensor"] = bc.isSensor;
 	return j;
 }
 
