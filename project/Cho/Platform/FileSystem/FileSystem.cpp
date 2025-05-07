@@ -445,7 +445,7 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
                 std::wstring name = std::filesystem::path(obj["name"].get<std::string>()).wstring();
                 ObjectType type = ObjectTypeFromString(obj["type"].get<std::string>());
                 Entity entity = ecs->GenerateEntity();
-                container->AddGameObject(entity, name, type);
+                ObjectID id = container->AddGameObject(entity, name, type);
                 GameObject& gameObj = container->GetGameObjectByName(name);
                 if (!gameObj.IsActive()) continue;
 
@@ -541,11 +541,11 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
                     {
                         std::string scriptNameStr = comps["Script"]["scriptName"].get<std::string>();
                         s.scriptName = scriptNameStr;
-						s.objectID = comps["Script"]["objectID"];
+						//s.objectID = comps["Script"]["objectID"];
                         //s.entity = entity;
                         ScriptComponent* script = ecs->AddComponent<ScriptComponent>(entity);
                         script->scriptName = s.scriptName;
-						script->objectID = s.objectID;
+                        script->objectID = id;
                     }
                 }
 
