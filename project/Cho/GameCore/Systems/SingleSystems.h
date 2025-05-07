@@ -3,6 +3,7 @@
 #include "SDK/DirectX/DirectX12/GpuBuffer/GpuBuffer.h"
 #include "Core/Utility/CompBufferData.h"
 #include "GameCore/ScriptAPI/ScriptAPI.h"
+#include "Platform/Timer/Timer.h"
 
 class ResourceManager;
 class GraphicsEngine;
@@ -230,6 +231,7 @@ private:
 		rb.runtimeBody = m_World->CreateBody(&bodyDef);
 		rb.runtimeBody->SetAwake(true);
 		rb.world = m_World;
+		rb.velocity.Initialize();
 
 		// Transformと同期（optional）
 		transform.translation.x = rb.runtimeBody->GetPosition().x;
@@ -266,7 +268,7 @@ public:
 private:
 	void StepSimulation()
 	{
-		constexpr float timeStep = 1.0f / 60.0f;
+		float timeStep = Timer::GetDeltaTime();
 		constexpr int velocityIterations = 6;
 		constexpr int positionIterations = 2;
 		m_World->Step(timeStep, velocityIterations, positionIterations);
