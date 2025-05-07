@@ -18,7 +18,6 @@ struct TransformAPI
 	std::function<Vector3(Entity)> GetPosition;
 	void SetParent(Entity parent) { data->parent = parent; }
 private:
-	//friend struct ScriptContext;
 	friend class GameObject;
 	TransformComponent* data = nullptr;
 };
@@ -31,7 +30,6 @@ struct CameraAPI
 	float& nearZ() { return data->nearZ; }
 	float& farZ() { return data->farZ; }
 private:
-	//friend struct ScriptContext;
 	friend class GameObject;
 	CameraComponent* data = nullptr;
 };
@@ -76,6 +74,7 @@ struct Rigidbody2DAPI
 	private:
 	};
 	Vector2& velocity() { return data->velocity; }
+	void SetBodyType(b2BodyType type) { data->bodyType = type; }
 
 	// 反射方向を計算
 	std::function<b2Vec2(const b2Vec2& incident, const b2Vec2& normal)> Reflect;
@@ -92,6 +91,19 @@ private:
 	Rigidbody2DComponent* data = nullptr;
 	// 最後の法線（内部的に保持、ただし状態は保持しないなら静的でもよい）
 	b2Vec2 m_LastHitNormal = b2Vec2(0.0f, 1.0f); // 一時的な用途
+};
+
+// BoxCollider2DAPI
+struct BoxCollider2DAPI
+{
+	// 関数
+	float& offsetX() { return data->offsetX; }
+	float& offsetY() { return data->offsetY; }
+	float& width() { return data->width; }
+	float& height() { return data->height; }
+private:
+	friend class GameObject;
+	BoxCollider2DComponent* data = nullptr;
 };
 
 // MaterialAPI
@@ -141,7 +153,6 @@ struct InputAPI
 	std::function<float(const LR& LorR, int32_t stickNo)> GetLRTrigger;
 	
 private:
-	//friend struct ScriptContext;
 	friend class GameObject;
 	InputManager* data = nullptr;
 };

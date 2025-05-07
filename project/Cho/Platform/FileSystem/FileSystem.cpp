@@ -587,7 +587,7 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
 					r.runtimeBody = nullptr;
 					r.world = nullptr;
 					r.otherObjectID = std::nullopt;
-                    r.selfObjectID = jr["selfObjectID"];
+                    r.selfObjectID = id;
 
                     Rigidbody2DComponent* rb = ecs->AddComponent<Rigidbody2DComponent>(entity);
 					rb->isKinematic = r.isKinematic;
