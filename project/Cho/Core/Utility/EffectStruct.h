@@ -100,7 +100,9 @@ enum class INFLUNCE_TYPE
 
 struct EffectCommon
 {
-    uint32_t emitCount = 1;                 // 生成数
+	uint32_t emitCountMax = 1;           // 最大生成数
+    uint32_t emitCount = 1;                 // 同時生成数
+    //uint32_t emitCounter;          // 生成カウンタ(CPU側では使わない)
     uint32_t isUnlimited = 0;                 // 無限生成フラグ
     uint32_t PosInfluenceType = 0;          // 位置影響タイプ
     uint32_t RotInfluenceType = 0;          // 回転影響タイプ

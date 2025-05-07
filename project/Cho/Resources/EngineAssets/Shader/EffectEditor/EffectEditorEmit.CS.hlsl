@@ -52,6 +52,11 @@ void main(uint3 DTid : SV_DispatchThreadID,uint3 Gid : SV_GroupID) {
         }
         if (isEmit != 0) {
             // 発生
+            //// カウンターが発生数を超えたら発生しない
+            //if (gEffectNode[nodeIndex].emitCounter >= gEffectNode[nodeIndex].emitCounter)
+            //{
+            //    return;
+            //}
             for (uint countIndex = 0; countIndex < gEffectNode[nodeIndex].common.emitCount; countIndex++) {
                 // パーティクルごとにシードを変える
                 generator.seed = generator.Generate3d() + float3(countIndex, countIndex * 2, countIndex * 3);

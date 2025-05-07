@@ -67,7 +67,9 @@ struct EffectSRT {
 };
 
 struct EffectCommon {
-    uint emitCount;                 
+    uint emitCountMax;    
+    uint emitCount;
+    //uint emitCounter;
     uint isUnlimit;                
     uint PosInfluenceType;        
     uint RotInfluenceType;        
