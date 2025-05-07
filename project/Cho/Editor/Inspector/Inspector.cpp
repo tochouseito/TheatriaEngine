@@ -313,6 +313,9 @@ void Inspector::Rigidbody2DComponentView(GameObject* object)
 	{
 		if (ImGui::TreeNode("Rigidbody2D"))
 		{
+			// Active
+			ImGui::Checkbox("Active", &rigidbody->isActive);
+
 			// Body Type Combo
 			const char* bodyTypeItems[] = { "Static", "Kinematic", "Dynamic" };
 			int currentType = static_cast<int>(rigidbody->bodyType);

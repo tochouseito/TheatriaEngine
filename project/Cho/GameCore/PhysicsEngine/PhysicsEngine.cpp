@@ -31,12 +31,14 @@ void ContactListener2D::CollisionEnter(ObjectID self, ObjectID other)
 	{
 		Rigidbody2DComponent* selfRb = m_pECS->GetComponent<Rigidbody2DComponent>(selfObject.GetEntity());
 		if (!selfRb) { return; }
+		if (!selfRb->isActive) { return; }
 		// 相手のゲームオブジェクトを取得
 		GameObject& otherObject = m_pObjectContainer->GetGameObject(other);
 		if (!otherObject.IsActive()) { return; }
 		otherObject.Initialize(false);// 初期化 これいる？？
 		Rigidbody2DComponent* otherRb = m_pECS->GetComponent<Rigidbody2DComponent>(otherObject.GetEntity());
 		if (!otherRb) { return; }
+		if (!otherRb->isActive) { return; }
 		selfRb->isCollisionStay = true;// 衝突中フラグオン
 		selfRb->otherObjectID = other;
 		otherRb->isCollisionStay = true;// 衝突中フラグオン
@@ -53,12 +55,14 @@ void ContactListener2D::CollisionExit(ObjectID self, ObjectID other)
 	{
 		Rigidbody2DComponent* selfRb = m_pECS->GetComponent<Rigidbody2DComponent>(self);
 		if (!selfRb) { return; }
+		if (!selfRb->isActive) { return; }
 		// 相手のゲームオブジェクトを取得
 		GameObject& otherObject = m_pObjectContainer->GetGameObject(other);
 		if (!otherObject.IsActive()) return;
 		otherObject.Initialize(false);// 初期化 これいる？？
 		Rigidbody2DComponent* otherRb = m_pECS->GetComponent<Rigidbody2DComponent>(other);
 		if (!otherRb) { return; }
+		if (!otherRb->isActive) { return; }
 		selfRb->isCollisionStay = false;// 衝突中フラグオフ
 		selfRb->otherObjectID = other;
 		otherRb->isCollisionStay = false;// 衝突中フラグオフ

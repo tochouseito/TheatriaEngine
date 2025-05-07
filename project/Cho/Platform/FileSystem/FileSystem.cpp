@@ -578,6 +578,7 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
                 {
                     Rigidbody2DComponent r{};
                     auto& jr = comps["Rigidbody2D"];
+					r.isActive = jr.value("isActive", true);
                     r.isKinematic = jr.value("isKinematic", false);
                     r.gravityScale = jr.value("gravityScale", 1.0f);
                     r.mass = jr.value("mass", 1.0f);
@@ -590,6 +591,7 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
                     r.selfObjectID = id;
 
                     Rigidbody2DComponent* rb = ecs->AddComponent<Rigidbody2DComponent>(entity);
+					rb->isActive = r.isActive;
 					rb->isKinematic = r.isKinematic;
 					rb->gravityScale = r.gravityScale;
 					rb->mass = r.mass;
@@ -925,6 +927,7 @@ json Cho::Serialization::ToJson(const std::vector<LineRendererComponent>& ls)
 json Cho::Serialization::ToJson(const Rigidbody2DComponent& rb)
 {
 	json j;
+	j["isActive"] = rb.isActive;
 	j["isKinematic"] = rb.isKinematic;
 	j["gravityScale"] = rb.gravityScale;
 	j["mass"] = rb.mass;
