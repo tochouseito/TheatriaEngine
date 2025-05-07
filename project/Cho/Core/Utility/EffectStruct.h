@@ -275,6 +275,7 @@ struct EffectNodeData
     EffectSRT rotation;             // 回転
     EffectSRT scale;                // スケール
     EffectDrawCommon drawCommon;    // 描画共通情報
+	std::wstring textureName;         // テクスチャ名
     EffectDraw draw;                // 描画情報
     uint32_t parentIndex;           // 親インデックス
 	uint32_t id;                // ノードID

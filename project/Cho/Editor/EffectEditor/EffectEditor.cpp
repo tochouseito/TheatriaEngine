@@ -215,10 +215,24 @@ void EffectEditor::Window()
                     const char* textureName = static_cast<const char*>(payload->Data);
                     // テクスチャIDを取得
                     node.drawCommon.textureID = m_EngineCommand->GetResourceManager()->GetTextureManager()->GetTextureID(ConvertString(textureName));
+					// テクスチャ名を取得
+					node.textureName = ConvertString(textureName);
                 }
                 ImGui::EndDragDropTarget();
             }
-
+			// テクスチャ表示
+			if (node.drawCommon.textureID != 0)
+			{
+				ImTextureID textureID = (ImTextureID)m_EngineCommand->GetTextureHandle(node.textureName).ptr;
+				ImGui::Image(textureID, ImVec2(64, 64));
+				std::string label = ConvertString(node.textureName);
+				ImGui::Text("%s", label.c_str());
+				if (ImGui::Button("Delete Texture"))
+				{
+					node.drawCommon.textureID = 0;
+					node.textureName = L"";
+				}
+			}
             // End
 			ImGui::EndTabItem();
         }
