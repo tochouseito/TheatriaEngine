@@ -543,6 +543,42 @@ void ModelManager::CreatePlane()
 	AddModelData(modelData);
 }
 
+void ModelManager::CreateSprite()
+{
+	// Sprite
+	std::wstring modelName = L"Sprite";
+	modelName = GenerateUniqueName(modelName, m_ModelNameContainer);
+	ModelData modelData;
+	modelData.name = modelName;
+	MeshData meshData;
+	meshData.name = modelName;
+	// 頂点数とインデックス数
+	uint32_t vertices = 4;// 頂点数
+	uint32_t indices = 6;// インデックス数
+	// メモリ確保
+	meshData.vertices.resize(vertices);
+	meshData.indices.resize(indices);
+	// 頂点データを設定
+#pragma region
+	// 頂点データ（重複なし）
+	meshData.vertices[0] = { { 1.0f,  1.0f, 0.0f, 1.0f }, { 1.0f, 0.0f }, { 0.0f, 0.0f, 1.0f },{1.0f,1.0f,1.0f,1.0f},{0} };  // 右上
+	meshData.vertices[1] = { {-1.0f,  1.0f, 0.0f, 1.0f }, { 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f } ,{1.0f,1.0f,1.0f,1.0f},{1} };  // 左上
+	meshData.vertices[2] = { { 1.0f, -1.0f, 0.0f, 1.0f }, { 1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f } ,{1.0f,1.0f,1.0f,1.0f},{2} };  // 右下
+	meshData.vertices[3] = { {-1.0f, -1.0f, 0.0f, 1.0f }, { 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f },{1.0f,1.0f,1.0f,1.0f},{3} };  // 左下
+	// インデックスデータ
+	meshData.indices[0] = 0;
+	meshData.indices[1] = 1;
+	meshData.indices[2] = 2;
+	meshData.indices[3] = 1;
+	meshData.indices[4] = 3;
+	meshData.indices[5] = 2;
+#pragma endregion
+	// コンテナに追加
+	modelData.meshes.push_back(meshData);
+	// modelDataを追加
+	AddModelData(modelData);
+}
+
 Node ModelManager::ReadNode(aiNode* node)
 {
 	Node result;

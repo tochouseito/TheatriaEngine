@@ -151,6 +151,11 @@ void MainMenu::EditMenu()
                 std::unique_ptr<AddParticleSystemObjectCommand> addParticleSystemObject = std::make_unique<AddParticleSystemObjectCommand>();
                 m_EngineCommand->ExecuteCommand(std::move(addParticleSystemObject));
             }
+            if (ImGui::MenuItem("UI"))
+            {
+				std::unique_ptr<AddUIObjectCommand> addUIObject = std::make_unique<AddUIObjectCommand>();
+				m_EngineCommand->ExecuteCommand(std::move(addUIObject));
+            }
             if (ImGui::MenuItem("スクリプト"))
             {
                 m_OpenScriptPopup = true;
@@ -159,7 +164,6 @@ void MainMenu::EditMenu()
 		case WorkSpaceType::EffectEdit:
             if (ImGui::MenuItem("新規作成"))
             {
-                m_EngineCommand->CreateNewEffect();
 				std::unique_ptr<AddEffectObjectCommand> addEffectObject = std::make_unique<AddEffectObjectCommand>();
 				m_EngineCommand->ExecuteCommand(std::move(addEffectObject));
             }

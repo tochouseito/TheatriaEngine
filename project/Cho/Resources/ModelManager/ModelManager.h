@@ -90,6 +90,9 @@ private:
 	void CreateSphere();
 	// Planeの生成
 	void CreatePlane();
+	// Spriteの生成
+	void CreateSprite();
+
 	// 
 	Node ReadNode(aiNode* node);
 	// モデルコンテナの要素数を取得する

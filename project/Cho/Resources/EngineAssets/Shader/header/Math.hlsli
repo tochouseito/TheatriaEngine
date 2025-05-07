@@ -59,3 +59,17 @@ float4x4 TranslateMatrix(float3 translate) {
         translate.x, translate.y, translate.z, 1
     );
 }
+
+float DegreeToRadian(const float degree)
+{
+    return degree * (PI / 180.0f);
+}
+
+float3 DegreesToRadians(const float3 degree)
+{
+    float3 result;
+    result.x = DegreeToRadian(degree.x);
+    result.y = DegreeToRadian(degree.y);
+    result.z = DegreeToRadian(degree.z);
+    return result;
+}

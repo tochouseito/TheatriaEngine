@@ -36,6 +36,7 @@ class EngineCommand
 	friend class AddEmitterComponent;
 	friend class AddParticleComponent;
 	friend class AddEffectObjectCommand;
+	friend class AddUIObjectCommand;
 	// Editor
 	friend class EffectEditorUpdateSystem;
 	friend class EffectEditor;
@@ -43,12 +44,7 @@ class EngineCommand
 	friend class GraphicsEngine;
 public:
 	// Constructor
-	EngineCommand(GameCore* gameCore, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine) :
-		m_GameCore(gameCore),
-		m_ResourceManager(resourceManager),
-		m_GraphicsEngine(graphicsEngine)
-	{
-	}
+	EngineCommand(GameCore* gameCore, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine);
 	// Destructor
 	~EngineCommand()
 	{

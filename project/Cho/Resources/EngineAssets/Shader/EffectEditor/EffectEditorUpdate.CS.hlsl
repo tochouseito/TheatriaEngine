@@ -31,6 +31,7 @@ void main(uint3 DTid : SV_DispatchThreadID, uint3 Gid : SV_GroupID) {
         // パーティクルを死なせる
         gEffectParticle[particleIndex].isAlive = 0;
         gEffectParticle[particleIndex].currentTime = 0;
+        gEffectParticle[particleIndex] = (EffectParticle) 0; // パーティクルを初期化
         // フリーリストに追加
         gEffectParticleFreeList.Append(particleIndex);
         return;

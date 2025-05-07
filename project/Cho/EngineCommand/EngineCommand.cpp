@@ -5,6 +5,15 @@
 #include "GameCore/GameCore.h"
 #include "Platform/FileSystem/FileSystem.h"
 #include "Core/Utility/EffectStruct.h"
+#include "EngineCommand/EngineCommands.h"
+
+EngineCommand::EngineCommand(GameCore* gameCore, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine):
+	m_GameCore(gameCore),
+	m_ResourceManager(resourceManager),
+	m_GraphicsEngine(graphicsEngine)
+{
+	CreateNewEffect();
+}
 
 D3D12_GPU_DESCRIPTOR_HANDLE EngineCommand::GetGameTextureHandle()
 {

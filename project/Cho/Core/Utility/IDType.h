@@ -15,6 +15,7 @@ enum class ObjectType
 	ParticleSystem,		// パーティクルシステムオブジェクト
 	Effect,				// エフェクトオブジェクト
 	//Light,			// ライトオブジェクト
+	UI,					// UIオブジェクト
 	Count,				// カウント
 };
 
@@ -26,6 +27,7 @@ inline const char* ObjectTypeToWString(ObjectType type)
 	case ObjectType::Camera:  return "Camera";
 	case ObjectType::ParticleSystem: return "ParticleSystem";
 	case ObjectType::Effect:  return "Effect";
+	case ObjectType::UI:     return "UI";
 	default:                  return "Unknown";
 	}
 }
@@ -36,5 +38,6 @@ inline ObjectType ObjectTypeFromString(const std::string& str)
 	if (str == "Camera") return ObjectType::Camera;
 	if (str == "ParticleSystem") return ObjectType::ParticleSystem;
 	if (str == "Effect") return ObjectType::Effect;
+	if (str == "UI") return ObjectType::UI;
 	return ObjectType::Count; // または Unknown があればそちら
 }

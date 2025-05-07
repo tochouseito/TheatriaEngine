@@ -100,7 +100,9 @@ enum class INFLUNCE_TYPE
 
 struct EffectCommon
 {
-    uint32_t emitCount = 1;                 // 生成数
+	uint32_t emitCountMax = 1;           // 最大生成数
+    uint32_t emitCount = 1;                 // 同時生成数
+    //uint32_t emitCounter;          // 生成カウンタ(CPU側では使わない)
     uint32_t isUnlimited = 0;                 // 無限生成フラグ
     uint32_t PosInfluenceType = 0;          // 位置影響タイプ
     uint32_t RotInfluenceType = 0;          // 回転影響タイプ
@@ -275,6 +277,7 @@ struct EffectNodeData
     EffectSRT rotation;             // 回転
     EffectSRT scale;                // スケール
     EffectDrawCommon drawCommon;    // 描画共通情報
+	std::wstring textureName;         // テクスチャ名
     EffectDraw draw;                // 描画情報
     uint32_t parentIndex;           // 親インデックス
 	uint32_t id;                // ノードID
@@ -292,9 +295,6 @@ struct TimeManager
 struct EffectRoot
 {
     TimeManager timeManager;    // 時間管理
-    uint32_t isRun;
-    uint32_t isLoop;               // ループフラグ
-	float padding[2];
 	uint32_t nodeID[128];           // ノードID
 };
 
