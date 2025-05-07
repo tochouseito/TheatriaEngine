@@ -129,6 +129,7 @@ struct LineRendererComponent : public IComponentTag
 // 2D物理挙動コンポーネント
 struct Rigidbody2DComponent : public IComponentTag
 {
+	bool isActive = true; // 有効フラグ
 	float mass = 1.0f;
 	float gravityScale = 1.0f;
 	bool isKinematic = false;
@@ -153,6 +154,8 @@ struct BoxCollider2DComponent : public IComponentTag
 	float density = 1.0f;
 	float friction = 0.3f;
 	float restitution = 0.0f;
+	bool isSensor = false;
+	bool isActive = true;
 	b2Fixture* runtimeFixture = nullptr;
 };
 // 2D円形コライダー

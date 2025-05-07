@@ -37,7 +37,7 @@ public:
 	bool IsRunning() const { return isRunning; }
 	void GameRun();
 	void GameStop();
-	void AddGameGenerateObject(const ObjectID& id) { m_GameGenerateID.push_back(id); }
+	void AddGameGenerateObject(const ObjectID& id) { m_GameGenerateID.push_back(id); m_pObjectContainer->GetGameObject(id).Initialize(); }
 	void InitializeGenerateObject();
 	void ClearGenerateObject();
 	b2World* GetPhysicsWorld() { return m_pPhysicsWorld.get(); }

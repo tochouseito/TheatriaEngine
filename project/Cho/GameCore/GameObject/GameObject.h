@@ -35,6 +35,7 @@ private:
 };
 class GameObject
 {
+	friend class GameCore;
 	friend class ObjectContainer;
 	friend class Add3DObjectCommand;
 	friend class AddCameraObjectCommand;

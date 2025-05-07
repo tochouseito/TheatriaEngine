@@ -420,6 +420,7 @@ private:
 		fixtureDef.density = box.density;
 		fixtureDef.friction = box.friction;
 		fixtureDef.restitution = box.restitution;
+		fixtureDef.isSensor = box.isSensor;
 
 		box.runtimeFixture = rb.runtimeBody->CreateFixture(&fixtureDef);
 	}

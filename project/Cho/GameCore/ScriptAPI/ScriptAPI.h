@@ -75,6 +75,8 @@ struct Rigidbody2DAPI
 	};
 	Vector2& velocity() { return data->velocity; }
 	void SetBodyType(b2BodyType type) { data->bodyType = type; }
+	void SetFixedRotation(bool fixed) { data->fixedRotation = fixed; }
+	void SetActive(bool active) { data->isActive = active; }
 
 	// 反射方向を計算
 	std::function<b2Vec2(const b2Vec2& incident, const b2Vec2& normal)> Reflect;

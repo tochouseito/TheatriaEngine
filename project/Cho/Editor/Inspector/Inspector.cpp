@@ -313,6 +313,9 @@ void Inspector::Rigidbody2DComponentView(GameObject* object)
 	{
 		if (ImGui::TreeNode("Rigidbody2D"))
 		{
+			// Active
+			ImGui::Checkbox("Active", &rigidbody->isActive);
+
 			// Body Type Combo
 			const char* bodyTypeItems[] = { "Static", "Kinematic", "Dynamic" };
 			int currentType = static_cast<int>(rigidbody->bodyType);
@@ -360,6 +363,8 @@ void Inspector::BoxCollider2DComponentView(GameObject* object)
 			ImGui::DragFloat("Density", &collider->density, 0.05f, 0.0f, 100.0f);
 			ImGui::DragFloat("Friction", &collider->friction, 0.05f, 0.0f, 1.0f);
 			ImGui::DragFloat("Restitution", &collider->restitution, 0.05f, 0.0f, 1.0f);
+
+			ImGui::Checkbox("Is Sensor", &collider->isSensor);
 
 			ImGui::TreePop();
 		}

@@ -578,6 +578,7 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
                 {
                     Rigidbody2DComponent r{};
                     auto& jr = comps["Rigidbody2D"];
+					r.isActive = jr.value("isActive", true);
                     r.isKinematic = jr.value("isKinematic", false);
                     r.gravityScale = jr.value("gravityScale", 1.0f);
                     r.mass = jr.value("mass", 1.0f);
@@ -590,6 +591,7 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
                     r.selfObjectID = id;
 
                     Rigidbody2DComponent* rb = ecs->AddComponent<Rigidbody2DComponent>(entity);
+					rb->isActive = r.isActive;
 					rb->isKinematic = r.isKinematic;
 					rb->gravityScale = r.gravityScale;
 					rb->mass = r.mass;
@@ -614,6 +616,7 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
                     b.density = jb.value("density", 1.0f);
                     b.friction = jb.value("friction", 0.5f);
                     b.restitution = jb.value("restitution", 0.0f);
+					b.isSensor = jb.value("isSensor", false);
 
                     BoxCollider2DComponent* box = ecs->AddComponent<BoxCollider2DComponent>(entity);
 					box->offsetX = b.offsetX;
@@ -623,6 +626,7 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
 					box->density = b.density;
 					box->friction = b.friction;
 					box->restitution = b.restitution;
+					box->isSensor = b.isSensor;
                 }
 
                 // Emitter
@@ -923,6 +927,7 @@ json Cho::Serialization::ToJson(const std::vector<LineRendererComponent>& ls)
 json Cho::Serialization::ToJson(const Rigidbody2DComponent& rb)
 {
 	json j;
+	j["isActive"] = rb.isActive;
 	j["isKinematic"] = rb.isKinematic;
 	j["gravityScale"] = rb.gravityScale;
 	j["mass"] = rb.mass;
@@ -945,6 +950,7 @@ json Cho::Serialization::ToJson(const BoxCollider2DComponent& bc)
 	j["density"] = bc.density;
 	j["friction"] = bc.friction;   
 	j["restitution"] = bc.restitution;
+	j["isSensor"] = bc.isSensor;
 	return j;
 }
 

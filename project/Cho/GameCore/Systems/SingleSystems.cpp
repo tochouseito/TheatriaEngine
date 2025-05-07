@@ -296,6 +296,7 @@ void CollisionSystem::CollisionStay(ScriptComponent& script, Rigidbody2DComponen
 		// 相手のゲームオブジェクトを取得
 		GameObject& otherObject = m_pObjectContainer->GetGameObject(rb.otherObjectID.value());
 		if (!otherObject.IsActive()) { return; }
+		if (!rb.isActive) { return; }
 		otherObject.Initialize(false);// これいる？？
 		script.onCollisionStayFunc(otherObject);
 	}
