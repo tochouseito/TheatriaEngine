@@ -236,6 +236,12 @@ void GraphicsEngine::SetRenderTargets(CommandContext* context, DrawPass pass, Re
 		} else if (mode == RenderMode::Editor)
 		{
 			renderTexType = RenderTextureType::EffectEditScreen;
+		} else if (mode == RenderMode::Release)
+		{
+			renderTexType = RenderTextureType::GameScreen;
+		} else
+		{
+			break;
 		}
 		// GBufferRenderTextureの状態遷移
 		targetTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_RenderTextures[renderTexType].m_BufferIndex);
@@ -262,6 +268,9 @@ void GraphicsEngine::SetRenderTargets(CommandContext* context, DrawPass pass, Re
 		} else if (mode == RenderMode::Editor)
 		{
 			renderTexType = RenderTextureType::EffectEditScreen;
+		} else
+		{
+			break;
 		}
 		// オフスクリーンレンダリングテクスチャの状態遷移
 		setTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_RenderTextures[renderTexType].m_BufferIndex);
@@ -282,6 +291,9 @@ void GraphicsEngine::SetRenderTargets(CommandContext* context, DrawPass pass, Re
 		{
 			renderTexType = RenderTextureType::ScenePostProcessScreen;
 		} else if (mode == RenderMode::Editor)
+		{
+			break;
+		} else
 		{
 			break;
 		}
@@ -309,12 +321,18 @@ void GraphicsEngine::SetRenderTargets(CommandContext* context, DrawPass pass, Re
 		if (mode == RenderMode::Release)
 		{
 			renderTexType = RenderTextureType::GameScreen;
+			setTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_RenderTextures[renderTexType].m_BufferIndex);
+			context->BarrierTransition(
+				setTex->GetResource(),
+				D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+				D3D12_RESOURCE_STATE_RENDER_TARGET
+			);
 			// パイプラインセット
 			context->SetGraphicsPipelineState(m_PipelineManager->GetScreenCopyPSO().pso.Get());
 			// ルートシグネチャセット
 			context->SetGraphicsRootSignature(m_PipelineManager->GetScreenCopyPSO().rootSignature.Get());
 			// オフスクリーンレンダリングテクスチャをセット
-			context->SetGraphicsRootDescriptorTable(0, m_ResourceManager->GetBuffer<ColorBuffer>(m_RenderTextures[renderTexType].m_BufferIndex)->GetSRVGpuHandle());
+			context->SetGraphicsRootDescriptorTable(0, setTex->GetSRVGpuHandle());
 			// DrawCall
 			context->DrawInstanced(3, 1, 0, 0);
 		}
@@ -394,7 +412,7 @@ void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& ga
 			if (!gameCore.GetSceneManager()->GetCurrentScene()) { continue; }
 			IConstantBuffer* cameraBuffer = nullptr;
 			// メインカメラを取得
-			if (mode == RenderMode::Game)
+			if (mode == RenderMode::Game||mode == RenderMode::Release)
 			{
 				// カメラオブジェクトのIDを取得
 				std::optional<uint32_t> cameraID = gameCore.GetSceneManager()->GetCurrentScene()->GetMainCameraID();
@@ -455,7 +473,7 @@ void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& ga
 			if (!gameCore.GetSceneManager()->GetCurrentScene()) { continue; }
 			IConstantBuffer* cameraBuffer = nullptr;
 			// メインカメラを取得
-			if (mode == RenderMode::Game)
+			if (mode == RenderMode::Game||mode==RenderMode::Release)
 			{
 				// カメラオブジェクトのIDを取得
 				std::optional<uint32_t> cameraID = gameCore.GetSceneManager()->GetCurrentScene()->GetMainCameraID();
@@ -527,7 +545,10 @@ void GraphicsEngine::DrawLighting(ResourceManager& resourceManager, GameCore& ga
 {
 	resourceManager;
 	gameCore;
-	mode;
+	if (mode == Release)
+	{
+		return;
+	}
 	// コンテキスト取得
 	CommandContext* context = GetCommandContext();
 	// コマンドリスト開始

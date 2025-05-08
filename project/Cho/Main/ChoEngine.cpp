@@ -62,7 +62,7 @@ void ChoEngine::Initialize()
 	editorManager->Initialize();
 
 	// HubManager初期化
-	hubManager = std::make_unique<HubManager>(platformLayer.get(),coreSystem.get(),engineCommand.get());
+	hubManager = std::make_unique<HubManager>(platformLayer.get(), coreSystem.get(), engineCommand.get(), runtimeMode == RuntimeMode::Game ? true : false);
 	hubManager->Initialize();
 }
 
@@ -122,8 +122,17 @@ void ChoEngine::Update()
 		hubManager->Update();
 	} else
 	{
-		// EditorManager更新
-		editorManager->Update();
+		if (runtimeMode == RuntimeMode::Editor)
+		{
+			// EditorManager更新
+			editorManager->Update();
+		}
+	}
+	static bool isGameRun = true;
+	if (runtimeMode == RuntimeMode::Game && isGameRun)
+	{
+		gameCore->GameRun();
+		isGameRun = false;
 	}
 	// GameCore更新
 	gameCore->Update(*resourceManager, *graphicsEngine);
@@ -135,14 +144,24 @@ void ChoEngine::Draw()
 {
 	//　描画準備
 	graphicsEngine->PreRender();
-	// 描画
-	graphicsEngine->Render(*resourceManager, *gameCore, RenderMode::Game);
-	// シーン描画
-	graphicsEngine->Render(*resourceManager, *gameCore, RenderMode::Debug);
-	// EffectEditView描画
-	graphicsEngine->Render(*resourceManager, *gameCore, RenderMode::Editor);
-	// 描画後片付け
-	graphicsEngine->PostRender(imGuiManager.get(), RenderMode::Game);
+	if (runtimeMode == RuntimeMode::Editor)
+	{
+		// 描画
+		graphicsEngine->Render(*resourceManager, *gameCore, RenderMode::Game);
+		// シーン描画
+		graphicsEngine->Render(*resourceManager, *gameCore, RenderMode::Debug);
+		// EffectEditView描画
+		graphicsEngine->Render(*resourceManager, *gameCore, RenderMode::Editor);
+		// 描画後片付け
+		graphicsEngine->PostRender(imGuiManager.get(), RenderMode::Game);
+	}
+	if (runtimeMode == RuntimeMode::Game)
+	{
+		// 描画
+		graphicsEngine->Render(*resourceManager, *gameCore, RenderMode::Release);
+		// 描画後片付け
+		graphicsEngine->PostRender(imGuiManager.get(), RenderMode::Release);
+	}
 	//graphicsEngine->PostRenderWithImGui(imGuiManager.get());
 }
 
@@ -199,10 +218,11 @@ void ChoEngine::Start()
 		editorManager = std::make_unique<EditorManager>(engineCommand.get(), platformLayer->GetInputManager());
 		editorManager->Initialize();
 		// HubManager初期化
-		hubManager = std::make_unique<HubManager>(platformLayer.get(), coreSystem.get(), engineCommand.get());
+		hubManager = std::make_unique<HubManager>(platformLayer.get(), coreSystem.get(), engineCommand.get(), runtimeMode == RuntimeMode::Game ? true : false);
 		hubManager->Initialize();
 		// プロジェクト読み込み
 		hubManager->ReloadProject();
+
 	}
 	// GameCore開始
 	//gameCore->Start(*resourceManager);
