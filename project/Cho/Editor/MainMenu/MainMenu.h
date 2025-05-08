@@ -24,12 +24,15 @@ private:
 	void EngineInfoMenu();
 	void HelpMenu();
 	void SettingMenu();
+	void BuildSettingMenu();
 	void PopupScriptName();
 
 	void SettingWindow();
+	void BuildSettingWindow();
 
 	Toolbar* m_Toolbar = nullptr;
 	bool m_OpenScriptPopup = false;
 	bool m_OpenSettingWindow = false;
+	bool m_OpenBuildSettingWindow = false;
 };
 
