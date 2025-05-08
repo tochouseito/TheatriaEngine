@@ -9,6 +9,7 @@
 #include <winsock.h>
 #include <wingdi.h>
 #include <shellapi.h>
+#include <shobjidl.h> 
 #include <ole2.h>
 #include <DbgHelp.h>
 #pragma comment(lib, "Dbghelp.lib")
@@ -1876,3 +1877,151 @@ bool Cho::FileSystem::AddFile(const path& filePath, FolderNode& folderNode, Engi
 
     return false;
 }
+
+std::wstring Cho::FileSystem::GameBuilder::SelectFolderDialog()
+{
+    std::wstring selectedPath;
+    HRESULT hr;
+
+    IFileDialog* pFileDialog = nullptr;
+
+    // IFileOpenDialogを作成
+    hr = CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER,
+        IID_PPV_ARGS(&pFileDialog));
+
+    if (SUCCEEDED(hr))
+    {
+        // フォルダ選択モードに設定
+        DWORD dwOptions;
+        pFileDialog->GetOptions(&dwOptions);
+        pFileDialog->SetOptions(dwOptions | FOS_PICKFOLDERS);
+
+        // ダイアログを表示
+        hr = pFileDialog->Show(NULL);
+
+        if (SUCCEEDED(hr))
+        {
+            IShellItem* pItem;
+            hr = pFileDialog->GetResult(&pItem);
+            if (SUCCEEDED(hr))
+            {
+                PWSTR pszFilePath;
+                hr = pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszFilePath);
+
+                if (SUCCEEDED(hr))
+                {
+                    selectedPath = pszFilePath;
+                    CoTaskMemFree(pszFilePath);
+                }
+                pItem->Release();
+            }
+        }
+        pFileDialog->Release();
+    }
+    return selectedPath;
+}
+
+void Cho::FileSystem::GameBuilder::CopyFilesToBuildFolder(const std::wstring& folderPath)
+{
+    namespace fs = std::filesystem;
+    fs::path buildRoot = fs::path(folderPath) / m_sProjectName;
+    try
+    {
+        if (!fs::exists(buildRoot))
+        {
+            fs::create_directories(buildRoot);
+        }
+
+        // コピーするパス一覧（構造維持したいパス）
+        std::vector<fs::path> sources = {
+            L"ChoEngine_GameRuntime.dll",
+            L"ChoEngine_GameRuntime.exp",
+            L"ChoEngine_GameRuntime.lib",
+            //L"ChoMath.lib",
+            L"dxcompiler_GameRuntime.dll",
+            L"dxil_GameRuntime.dll",
+            L"GameTemplate.exe",
+            L"imgui.ini", // 後で消す
+            fs::path(L"GameProjects") / m_sProjectName / fs::path(L"resourseData"),
+            fs::path(L"GameProjects") / m_sProjectName / fs::path(L"bin"),
+            fs::path(L"GameProjects") / m_sProjectName / fs::path(L"MainScene.json"),
+            fs::path(L"GameProjects") / m_sProjectName / fs::path(L"ScriptData.json"),
+            L"Cho/Engine",
+            L"Cho/Resources/EngineAssets",
+            L"Cho/Externals/ChoMath",
+            L"Cho/pch",
+            L"Cho/APIExportsMacro.h",
+            L"Cho/ChoEngineAPI.h",
+        };
+
+        for (const auto& src : sources)
+        {
+            fs::path sourcePath = fs::absolute(src);
+
+            if (!fs::exists(sourcePath))
+            {
+                Cho::Log::Write(LogLevel::Assert, "Source file or directory does not exist: " + sourcePath.string());
+                continue;
+            }
+
+            // 構造を維持するコピー先パスを決定
+            fs::path relativePath = fs::relative(sourcePath, fs::current_path());
+            fs::path destinationPath = buildRoot / relativePath;
+
+            // フォルダを作成
+            fs::create_directories(destinationPath.parent_path());
+
+            // コピー実行
+            if (fs::is_directory(sourcePath))
+            {
+                fs::copy(sourcePath, destinationPath, fs::copy_options::recursive | fs::copy_options::overwrite_existing);
+            } else if (fs::is_regular_file(sourcePath))
+            {
+                fs::copy_file(sourcePath, destinationPath, fs::copy_options::overwrite_existing);
+            }
+        }
+
+        Cho::Log::Write(LogLevel::Info, "CopyFilesToBuildFolder completed successfully.");
+    }
+    catch (const std::exception& e)
+    {
+        Cho::Log::Write(LogLevel::Assert, "CopyFilesToBuildFolder failed: " + std::string(e.what()));
+    }
+
+    std::vector<std::pair<fs::path, fs::path>> renameList = {
+    { buildRoot / L"ChoEngine_GameRuntime.dll",    buildRoot / L"ChoEngine.dll" },
+    { buildRoot / L"ChoEngine_GameRuntime.exp",    buildRoot / L"ChoEngine.exp" },
+    { buildRoot / L"ChoEngine_GameRuntime.lib",    buildRoot / L"ChoEngine.lib" },
+    { buildRoot / L"dxcompiler_GameRuntime.dll",   buildRoot / L"dxcompiler.dll" },
+    { buildRoot / L"dxil_GameRuntime.dll",         buildRoot / L"dxil.dll" },
+    { buildRoot / L"GameTemplate.exe",             buildRoot / L"RefLaser.exe" }, // 任意の最終ファイル名
+    };
+
+    for (const auto& [from, to] : renameList)
+    {
+        try
+        {
+            if (fs::exists(from))
+            {
+                fs::rename(from, to);
+            } else
+            {
+                Cho::Log::Write(LogLevel::Assert, "File not found to rename: " + from.string());
+            }
+        }
+        catch (const std::exception& e)
+        {
+            Cho::Log::Write(LogLevel::Assert, "Rename failed: " + from.string() + " → " + to.string() + " : " + e.what());
+        }
+    }
+
+}
+
+std::wstring Cho::FileSystem::GameBuilder::GetEnvVar(const wchar_t* name)
+{
+    wchar_t buffer[512];
+    size_t len = 0;
+    _wgetenv_s(&len, buffer, name);
+    return std::wstring(buffer, len - 1);
+}
+

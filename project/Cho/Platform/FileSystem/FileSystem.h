@@ -207,6 +207,15 @@ namespace Cho
             static HMODULE m_DllHandle;
 			static DWORD64 m_PDBBaseAddress;
         };
+
+        class GameBuilder
+        {
+        public:
+			static std::wstring SelectFolderDialog();
+			static void CopyFilesToBuildFolder(const std::wstring& folderPath);
+            static std::wstring GetEnvVar(const wchar_t* name);
+
+        };
     };
 }
 

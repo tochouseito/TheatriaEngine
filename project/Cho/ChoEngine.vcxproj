@@ -737,6 +737,11 @@
     <PostBuildEvent>
       <Command>copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxcompiler.dll" "$(TargetDir)dxcompiler.dll"
 copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dxil.dll"
+copy /Y "$(TargetDir)$(TargetName).dll" "$(TargetDir)$(TargetName)_GameRuntime.dll"
+copy /Y "$(TargetDir)$(TargetName).lib" "$(TargetDir)$(TargetName)_GameRuntime.lib"
+copy /Y "$(TargetDir)$(TargetName).exp" "$(TargetDir)$(TargetName)_GameRuntime.exp"
+copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxcompiler.dll" "$(TargetDir)dxcompiler_GameRuntime.dll"
+copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dxil_GameRuntime.dll"
 xcopy "$(SolutionDir)Cho\Resources\EngineAssets" "$(TargetDir)Cho\Resources\EngineAssets" /E /I /Y
 copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"
 xcopy "$(SolutionDir)Cho\GameCore\IScript" "$(TargetDir)Cho\GameCore\IScript" /E /I /Y
@@ -785,6 +790,11 @@ xcopy "$(SolutionDir)Cho\GameCore\ObjectContainer" "$(TargetDir)Cho\GameCore\Obj
     <PostBuildEvent>
       <Command>copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxcompiler.dll" "$(TargetDir)dxcompiler.dll"
 copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dxil.dll"
+copy /Y "$(TargetDir)$(TargetName).dll" "$(TargetDir)$(TargetName)_GameRuntime.dll"
+copy /Y "$(TargetDir)$(TargetName).lib" "$(TargetDir)$(TargetName)_GameRuntime.lib"
+copy /Y "$(TargetDir)$(TargetName).exp" "$(TargetDir)$(TargetName)_GameRuntime.exp"
+copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxcompiler.dll" "$(TargetDir)dxcompiler_GameRuntime.dll"
+copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dxil_GameRuntime.dll"
 xcopy "$(SolutionDir)Cho\Resources\EngineAssets" "$(TargetDir)Cho\Resources\EngineAssets" /E /I /Y
 copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"
 xcopy "$(SolutionDir)Cho\GameCore\IScript" "$(TargetDir)Cho\GameCore\IScript" /E /I /Y

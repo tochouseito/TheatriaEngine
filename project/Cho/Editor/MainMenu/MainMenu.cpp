@@ -20,6 +20,7 @@ void MainMenu::Update()
         Window();
         PopupScriptName();
         SettingWindow();
+		BuildSettingWindow();
     }
 }
 
@@ -81,6 +82,9 @@ void MainMenu::MenuBar()
 
 		// 設定メニュー
 		SettingMenu();
+
+		// ビルド設定メニュー
+		BuildSettingMenu();
 
         // ワークスペース一覧
         //static const char* workspaces[] = { "Layout", "Scripting", "Modeling", "Animation", "Rendering" };
@@ -277,6 +281,19 @@ void MainMenu::SettingMenu()
 	}
 }
 
+void MainMenu::BuildSettingMenu()
+{
+	if (ImGui::BeginMenu("ビルド設定"))
+	{
+		if (ImGui::MenuItem("ビルド設定"))
+		{
+			// ビルド設定ウィンドウを開く
+			m_OpenBuildSettingWindow = true;
+		}
+		ImGui::EndMenu();
+	}
+}
+
 void MainMenu::PopupScriptName()
 {
     // スクリプト名バッファ
@@ -321,7 +338,7 @@ void MainMenu::SettingWindow()
 {
 	// 設定ウィンドウ
     if (!m_OpenSettingWindow) { return; }
-	ImGui::Begin("Setting##MainMenu", &m_OpenSettingWindow);
+	ImGui::Begin("Setting##MainMenuSetting", &m_OpenSettingWindow);
 	ImGui::Text("エディタ設定");
 
     ImGui::Text("重力");
@@ -336,4 +353,25 @@ void MainMenu::SettingWindow()
     }
 
     ImGui::End();
+}
+
+void MainMenu::BuildSettingWindow()
+{
+	// ビルド設定ウィンドウ
+	if (!m_OpenBuildSettingWindow) { return; }
+	ImGui::Begin("BuildSetting##MainMenuBuildSetting", &m_OpenBuildSettingWindow);
+	ImGui::Text("ビルド設定");
+
+    if (ImGui::Button("フォルダを選択してビルド"))
+    {
+        std::wstring folderPath;
+        folderPath = Cho::FileSystem::GameBuilder::SelectFolderDialog();
+		if (!folderPath.empty())
+		{
+			// フォルダが選択された場合、ビルドを実行
+            FileSystem::GameBuilder::CopyFilesToBuildFolder(folderPath);
+        }
+    }
+	
+	ImGui::End();
 }

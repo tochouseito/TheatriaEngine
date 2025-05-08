@@ -20,6 +20,18 @@ void HubManager::Update()
     {
         Window();
     }
+    if (m_IsGameRuntime)
+    {
+        std::wstring selectedProjectName = L"RefLaser";
+        // プロジェクトの読み込み
+        FileSystem::LoadProjectFolder(selectedProjectName, m_pEngineCommand);
+        // プロジェクトのパスを保存
+        FileSystem::ScriptProject::LoadProjectPath(selectedProjectName);
+        // ブランチを取得
+        GetCurrentBranch();
+        // プロジェクト選択後、Hubを終了
+        m_IsRun = false; // プロジェクト選択後、Hubを終了
+    }
 }
 
 void HubManager::Window()

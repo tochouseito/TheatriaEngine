@@ -10,11 +10,12 @@ public:
 	HubManager(
 		PlatformLayer* platformLayer,
 		CoreSystem* coreSystem,
-		EngineCommand* engineCommand
-	) :
+		EngineCommand* engineCommand,
+		bool isGameRuntime) :
 		m_pPlatformLayer(platformLayer),
 		m_pCoreSystem(coreSystem),
-		m_pEngineCommand(engineCommand)
+			m_pEngineCommand(engineCommand),
+			m_IsGameRuntime(isGameRuntime)
 	{
 	}
 	// Destructor
@@ -70,5 +71,7 @@ private:
 	// 現在のブランチ
 	std::string m_LastBranch = "";
 	std::filesystem::path m_GitHeadPath = "";
+
+	bool m_IsGameRuntime = false;
 };
 
