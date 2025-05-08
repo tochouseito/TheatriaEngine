@@ -73,7 +73,10 @@ void ChoEngine::Finalize()
 	// GameCore終了処理
 	
 	// ファイルの保存
-	FileSystem::SaveProject(gameCore->GetSceneManager(), gameCore->GetObjectContainer(), gameCore->GetECSManager(), resourceManager.get());
+	if (runtimeMode == RuntimeMode::Editor)
+	{
+		FileSystem::SaveProject(gameCore->GetSceneManager(), gameCore->GetObjectContainer(), gameCore->GetECSManager(), resourceManager.get());
+	}
 	// ImGuiManager終了処理
 	imGuiManager->Finalize();
 	// PlatformLayer終了処理
@@ -177,7 +180,10 @@ void ChoEngine::Start()
 	// ウィンドウのフォーカスが外れたらプロジェクト保存
 	if (WinApp::IsKillfocusWindow()&&!hubManager->IsRun())
 	{
-		FileSystem::SaveProject(gameCore->GetSceneManager(), gameCore->GetObjectContainer(), gameCore->GetECSManager(), resourceManager.get());
+		if (runtimeMode == RuntimeMode::Editor)
+		{
+			FileSystem::SaveProject(gameCore->GetSceneManager(), gameCore->GetObjectContainer(), gameCore->GetECSManager(), resourceManager.get());
+		}
 	}
 	// ブランチが変更されたかどうか
 	if (hubManager->CheckBranchChanged())
