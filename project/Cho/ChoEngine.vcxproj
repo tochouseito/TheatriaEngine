@@ -332,6 +332,7 @@
     <ClInclude Include="Editor\EffectEditor\EffectEditor.h" />
     <ClInclude Include="Editor\EffectView\EffectView.h" />
     <ClInclude Include="Editor\EffectHierarchy\EffectHierarchy.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="Resources\EffectContainer\EffectContainer.h" />
     <ClInclude Include="EngineCommand\EngineCommand.h" />
     <ClInclude Include="EngineCommand\EngineCommands.h" />
@@ -615,6 +616,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="EngineResource.rc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
