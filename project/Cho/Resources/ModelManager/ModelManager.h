@@ -92,6 +92,8 @@ private:
 	void CreatePlane();
 	// Spriteの生成
 	void CreateSprite();
+	// Ringの生成
+	void CreateRing();
 
 	// 
 	Node ReadNode(aiNode* node);

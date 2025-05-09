@@ -1236,7 +1236,7 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
     vcxFile << "      <AdditionalIncludeDirectories>" << contextPath.string() << ";" << scriptPath.string() << ";" << mathLibPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
     vcxFile << "      <LanguageStandard>stdcpp20</LanguageStandard>\n";
     vcxFile << "      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>\n";
-    vcxFile << "      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>\n"; // MTd
+    vcxFile << "      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>\n"; // MDd
     vcxFile << "    </ClCompile>\n";
     vcxFile << "    <Link>\n";
     vcxFile << "      <SubSystem>Windows</SubSystem>\n";
@@ -1256,7 +1256,7 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
     vcxFile << "      <AdditionalIncludeDirectories>" << contextPath.string() << ";" << scriptPath.string() << ";" << mathLibPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
     vcxFile << "      <LanguageStandard>stdcpp20</LanguageStandard>\n";
     vcxFile << "      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>\n";
-    vcxFile << "      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>\n"; // MT
+    vcxFile << "      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>\n"; // MD
     vcxFile << "    </ClCompile>\n";
     vcxFile << "    <Link>\n";
     vcxFile << "      <SubSystem>Windows</SubSystem>\n";
