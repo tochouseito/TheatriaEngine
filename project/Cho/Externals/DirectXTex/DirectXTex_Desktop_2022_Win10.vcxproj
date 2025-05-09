@@ -216,7 +216,7 @@
     <ClCompile>
       <WarningLevel>EnableAllWarnings</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
       <FloatingPointModel>Fast</FloatingPointModel>
       <AdditionalOptions>/Zc:twoPhase- /Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
@@ -312,7 +312,7 @@
       <ExternalWarningLevel>Level4</ExternalWarningLevel>
       <GuardEHContMetadata>true</GuardEHContMetadata>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>

@@ -323,6 +323,10 @@ void ModelManager::CreateDefaultMesh()
 	CreateSphere();
 	// Plane
 	CreatePlane();
+	// Sprite
+	//CreateSprite();
+	// Ring
+	CreateRing();
 }
 
 void ModelManager::CreateCube()
@@ -572,6 +576,118 @@ void ModelManager::CreateSprite()
 	meshData.indices[3] = 1;
 	meshData.indices[4] = 3;
 	meshData.indices[5] = 2;
+#pragma endregion
+	// コンテナに追加
+	modelData.meshes.push_back(meshData);
+	// modelDataを追加
+	AddModelData(modelData);
+}
+
+void ModelManager::CreateRing()
+{
+	// Ring
+	std::wstring modelName = L"Ring";
+	modelName = GenerateUniqueName(modelName, m_ModelNameContainer);
+	ModelData modelData;
+	modelData.name = modelName;
+	MeshData meshData;
+	meshData.name = modelName;
+	// 頂点数とインデックス数
+	const uint32_t kRingDivide = 32; // 分割数
+	const float kOuterRadius = 1.0f; // 外半径
+	const float kInnerRadius = 0.2f; // 内半径
+	const float radianPerDivide = 2.0f * PiF / static_cast<float>(kRingDivide); // 分割あたりのラジアン
+	// 各分割セグメントは4つの頂点（外側2点、内側2点）を持つ
+	uint32_t vertices = kRingDivide * 4;
+	// 各分割セグメントは2つの三角形（6つのインデックス）で構成される
+	uint32_t indices = kRingDivide * 6;
+	// メモリ確保
+	meshData.vertices.resize(vertices);
+	meshData.indices.resize(indices);
+	// 頂点データを設定
+#pragma region
+	// 頂点データ（重複なし）
+	//for (uint32_t i = 0;i < kRingDivide;i++)
+	//{
+	//	float sin = std::sin(i * radianPerDivide);
+	//	float cos = std::cos(i * radianPerDivide);
+	//	float sinNext = std::sin((i + 1) * radianPerDivide);
+	//	float cosNext = std::cos((i + 1) * radianPerDivide);
+	//	float u = static_cast<float>(i) / static_cast<float>(kRingDivide);
+	//	float uNext = static_cast<float>(i + 1) / static_cast<float>(kRingDivide);
+	//	// positionとUV。normalは必要なら+Zを設定する
+	//	meshData.vertices[(i * 4)] = { {-sin * kOuterRadius,cos * kOuterRadius,0.0f,1.0f},{u,0.0f}, {0.0f,0.0f,1.0f},{1.0f,1.0f,1.0f,1.0f},{i * 4} };
+	//	meshData.vertices[(i * 4) + 1] = { {-sinNext * kOuterRadius,cosNext * kOuterRadius,0.0f,1.0f},{uNext,0.0f}, {0.0f,0.0f,1.0f},{1.0f,1.0f,1.0f,1.0f},{i * 4 + 1} };
+	//	meshData.vertices[(i * 4) + 2] = { {-sin * kInnerRadius,cos * kInnerRadius,0.0f,1.0f},{u,1.0f}, {0.0f,0.0f,1.0f},{1.0f,1.0f,1.0f,1.0f},{i * 4 + 2} };
+	//	meshData.vertices[(i * 4) + 3] = { {-sinNext * kInnerRadius,cosNext * kInnerRadius,0.0f,1.0f},{uNext,1.0f}, {0.0f,0.0f,1.0f},{1.0f,1.0f,1.0f,1.0f},{i * 4 + 3} };
+	//}
+	for (uint32_t i = 0; i < kRingDivide; ++i)
+	{
+		float currentAngle = i * radianPerDivide;
+		float nextAngle = (i + 1) * radianPerDivide; // 次の角度（最後のセグメントでは (kRingDivide * radianPerDivide) = 2*Pi となるが、sin/cos の周期性により問題ない）
+
+		float sinCurrent = std::sin(currentAngle);
+		float cosCurrent = std::cos(currentAngle);
+		float sinNext = std::sin(nextAngle);
+		float cosNext = std::cos(nextAngle);
+
+		// UV座標のU値
+		// リングをテクスチャで一周させる場合、i/kRingDivide は適切
+		// セグメントごとにテクスチャを貼る場合は調整が必要かもしれない
+		float uCurrent = static_cast<float>(i) / static_cast<float>(kRingDivide);
+		float uNext = static_cast<float>(i + 1) / static_cast<float>(kRingDivide);
+		if (i == kRingDivide - 1)
+		{ // 最後のセグメントのU座標を調整してシームレスにする場合
+			uNext = 1.0f; // または uCurrent + (1.0f / kRingDivide) を使うなど、設計による
+		}
+
+
+		// 現在のセグメントの4つの頂点のインデックス
+		uint32_t v0_outer_current = i * 4 + 0; // 外側、現在の角度
+		uint32_t v1_outer_next = i * 4 + 1; // 外側、次の角度
+		uint32_t v2_inner_current = i * 4 + 2; // 内側、現在の角度
+		uint32_t v3_inner_next = i * 4 + 3; // 内側、次の角度
+
+		// 頂点座標とUV座標、法線、色、カスタムインデックスを設定
+		// 外側の円周上の点 (現在の角度)
+		meshData.vertices[v0_outer_current] = { {cosCurrent * kOuterRadius, sinCurrent * kOuterRadius, 0.0f, 1.0f}, {uCurrent, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, {v0_outer_current} };
+		// 外側の円周上の点 (次の角度)
+		meshData.vertices[v1_outer_next] = { {cosNext * kOuterRadius,    sinNext * kOuterRadius,    0.0f, 1.0f}, {uNext,    0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, {v1_outer_next} };
+		// 内側の円周上の点 (現在の角度)
+		meshData.vertices[v2_inner_current] = { {cosCurrent * kInnerRadius, sinCurrent * kInnerRadius, 0.0f, 1.0f}, {uCurrent, 1.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, {v2_inner_current} };
+		// 内側の円周上の点 (次の角度)
+		meshData.vertices[v3_inner_next] = { {cosNext * kInnerRadius,    sinNext * kInnerRadius,    0.0f, 1.0f}, {uNext,    1.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, {v3_inner_next} };
+	}
+	
+	// インデックスデータ
+	for (uint32_t i = 0; i < kRingDivide; ++i)
+	{
+		// 現在のセグメントを構成する4つの頂点の開始インデックス
+		uint32_t baseVertexIndex = i * 4;
+		// 現在のセグメントのインデックスデータの書き込み開始位置
+		uint32_t baseIndex = i * 6;
+
+		// 頂点インデックス
+		// v0: 外側、現在の角度
+		// v1: 外側、次の角度
+		// v2: 内側、現在の角度
+		// v3: 内側、次の角度
+		uint32_t v0 = baseVertexIndex + 0;
+		uint32_t v1 = baseVertexIndex + 1;
+		uint32_t v2 = baseVertexIndex + 2;
+		uint32_t v3 = baseVertexIndex + 3;
+
+		// 1つ目の三角形 (外側現在、外側次、内側現在)
+		meshData.indices[baseIndex + 0] = v0;
+		meshData.indices[baseIndex + 1] = v1;
+		meshData.indices[baseIndex + 2] = v2;
+
+		// 2つ目の三角形 (外側次、内側次、内側現在)
+		meshData.indices[baseIndex + 3] = v1;
+		meshData.indices[baseIndex + 4] = v3;
+		meshData.indices[baseIndex + 5] = v2;
+	}
+	
 #pragma endregion
 	// コンテナに追加
 	modelData.meshes.push_back(meshData);
