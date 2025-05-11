@@ -324,8 +324,8 @@ void GraphicsEngine::SetRenderTargets(CommandContext* context, DrawPass pass, Re
 			setTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_RenderTextures[renderTexType].m_BufferIndex);
 			context->BarrierTransition(
 				setTex->GetResource(),
-				D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-				D3D12_RESOURCE_STATE_RENDER_TARGET
+				D3D12_RESOURCE_STATE_RENDER_TARGET,
+				D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
 			);
 			// パイプラインセット
 			context->SetGraphicsPipelineState(m_PipelineManager->GetScreenCopyPSO().pso.Get());
