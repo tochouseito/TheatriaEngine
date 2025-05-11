@@ -90,6 +90,7 @@ void Inspector::MeshFilterComponentView(GameObject* object)
 	if (mesh)
 	{
 		ImGui::Text("Mesh Component");
+		ImGui::Text("Mesh Name: %s", ConvertString(mesh->modelName).c_str());
 		if (ImGui::BeginMenu("MeshSelect"))
 		{
 			for (const auto& modelName : m_EngineCommand->GetResourceManager()->GetModelManager()->GetModelNameContainer())

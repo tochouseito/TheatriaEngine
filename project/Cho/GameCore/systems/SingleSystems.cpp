@@ -136,6 +136,28 @@ void TransformInitializeSystem::Start(TransformComponent& transform)
 	transform.startValue.rotation = transform.rotation;
 	transform.startValue.scale = transform.scale;
 	transform.startValue.degrees = transform.degrees;
+
+	// 度数からラジアンに変換
+	Vector3 radians = ChoMath::DegreesToRadians(transform.degrees);
+
+	// 各軸のクオータニオンを作成
+	Quaternion qx = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(1.0f, 0.0f, 0.0f), radians.x);
+	Quaternion qy = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0.0f, 1.0f, 0.0f), radians.y);
+	Quaternion qz = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0.0f, 0.0f, 1.0f), radians.z);
+
+	// 同時回転を累積
+	transform.rotation = qx * qy * qz;
+
+	// 精度を維持するための正規化
+	transform.rotation.Normalize();
+
+	// アフィン変換
+	transform.matWorld = ChoMath::MakeAffineMatrix(transform.scale, transform.rotation, transform.translation);
+
+	// 次のフレーム用に保存する
+	transform.prePos = transform.translation;
+	transform.preRot = radians;
+	transform.preScale = transform.scale;
 }
 
 void TransformFinalizeSystem::Finalize(Entity entity,TransformComponent& transform)
