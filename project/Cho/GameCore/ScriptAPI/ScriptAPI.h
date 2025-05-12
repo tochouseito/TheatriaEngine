@@ -49,30 +49,6 @@ private:
 struct Rigidbody2DAPI
 {
 	// 関数
-	class RayCastCallback : public b2RayCastCallback
-	{
-	public:
-		bool hit = false;
-		b2Vec2 point;
-		b2Vec2 normal;
-		float fraction = 1.0f;
-		b2Fixture* fixture = nullptr;
-		b2Body* body = nullptr;
-
-		float ReportFixture(b2Fixture* a_Fixture, const b2Vec2& a_Point,
-			const b2Vec2& a_Normal, float a_Fraction) override
-		{
-			a_Fixture;
-			this->hit = true;
-			this->point = a_Point;
-			this->normal = a_Normal;
-			this->fraction = a_Fraction;
-			this->fixture = a_Fixture;
-			this->body = a_Fixture->GetBody();
-			return a_Fraction; // 最も近いヒットのみ取得
-		}
-	private:
-	};
 	Vector2& velocity() { return data->velocity; }
 	void SetBodyType(b2BodyType type) { data->bodyType = type; }
 	void SetFixedRotation(bool fixed) { data->fixedRotation = fixed; }
@@ -81,13 +57,13 @@ struct Rigidbody2DAPI
 	// 反射方向を計算
 	std::function<b2Vec2(const b2Vec2& incident, const b2Vec2& normal)> Reflect;
 	// 反射Raycast（指定回数分反射する）
-	std::function<b2Vec2(const b2Vec2& start, const b2Vec2& dir,const int ReflectionCount, const float maxLength)> RaycastWithReflectionsOnce;
+	std::function<b2Vec2(const b2Vec2& start, const b2Vec2& dir,const int ReflectionCount, const float maxLength,const std::string hitTag)> RaycastWithReflectionsOnce;
 	// 法線取得（RaycastOnce の直後のみ有効）
 	b2Vec2 GetLastHitNormal() const { return m_LastHitNormal; }
 	// 瞬間移動
 	std::function<void(const Vector2& position)> MovePosition;
 	// ライン上の最初にヒットしたオブジェクトを取得
-	std::function<GameObject& (const Vector2& start, const Vector2& end)> Linecast;
+	std::function<GameObject& (const Vector2& start, const Vector2& end,const std::string hitTag)> Linecast;
 private:
 	friend class GameObject;
 	Rigidbody2DComponent* data = nullptr;

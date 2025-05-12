@@ -3,6 +3,7 @@
 #include "GameCore/ECS/ECSManager.h"
 #include "Platform/InputManager/InputManager.h"
 #include "GameCore/ObjectContainer/ObjectContainer.h"
+#include "GameCore/PhysicsEngine/PhysicsEngine.h"
 
 void GameObject::InitializeTransformAPI(bool isParentReset)
 {
@@ -97,7 +98,7 @@ void GameObject::InitializeRigidbody2DAPI()
 			}
 			return {};
 			};
-		rigidbody2D.RaycastWithReflectionsOnce = [this](const b2Vec2& start, const b2Vec2& dir, const int ReflectionCount, const float maxLength) -> b2Vec2 {
+		rigidbody2D.RaycastWithReflectionsOnce = [this](const b2Vec2& start, const b2Vec2& dir, const int ReflectionCount, const float maxLength,const std::string hitTag) -> b2Vec2 {
 			b2Vec2 resultPoint = {};
 			if (auto* t = m_ECS->GetComponent<Rigidbody2DComponent>(m_Entity))
 			{
@@ -107,7 +108,7 @@ void GameObject::InitializeRigidbody2DAPI()
 
 				for (int i = 0; i < ReflectionCount; ++i)
 				{
-					Rigidbody2DAPI::RayCastCallback callback;
+					RayCastCallback callback(m_ObjectContainer, hitTag);
 					b2Vec2 end = currentStart + remainingLength * currentDir;
 					rigidbody2D.data->world->RayCast(&callback, currentStart, end);
 
@@ -139,10 +140,10 @@ void GameObject::InitializeRigidbody2DAPI()
 				}
 			}
 			};
-		rigidbody2D.Linecast = [this](const Vector2& start, const Vector2& end) -> GameObject& {
+		rigidbody2D.Linecast = [this](const Vector2& start, const Vector2& end,const std::string hitTag) -> GameObject& {
 			if (auto* t = m_ECS->GetComponent<Rigidbody2DComponent>(m_Entity))
 			{
-				Rigidbody2DAPI::RayCastCallback callback;
+				RayCastCallback callback(m_ObjectContainer,hitTag);
 				t->world->RayCast(&callback, b2Vec2(start.x, start.y), b2Vec2(end.x, end.y));
 				if (callback.hit)
 				{
