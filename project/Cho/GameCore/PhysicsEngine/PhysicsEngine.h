@@ -33,3 +33,24 @@ private:
 	InputManager* m_pInputManager = nullptr;
 	ObjectContainer* m_pObjectContainer = nullptr;
 };
+class RayCastCallback : public b2RayCastCallback
+{
+public:
+	RayCastCallback(ObjectContainer* objectContainer, std::string tag) :
+		m_ObjectContainer(objectContainer), m_Tag(tag)
+	{
+	}
+
+	float ReportFixture(b2Fixture* a_Fixture, const b2Vec2& a_Point,
+		const b2Vec2& a_Normal, float a_Fraction) override;
+
+	bool hit = false;
+	b2Vec2 point;
+	b2Vec2 normal;
+	float fraction = 1.0f;
+	b2Fixture* fixture = nullptr;
+	b2Body* body = nullptr;
+private:
+	ObjectContainer* m_ObjectContainer = nullptr;
+	std::string m_Tag;
+};

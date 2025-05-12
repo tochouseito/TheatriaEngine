@@ -69,3 +69,22 @@ void ContactListener2D::CollisionExit(ObjectID self, ObjectID other)
 		script->onCollisionExitFunc(otherObject);
 	}
 }
+
+float RayCastCallback::ReportFixture(b2Fixture* a_Fixture, const b2Vec2& a_Point, const b2Vec2& a_Normal, float a_Fraction)
+{
+	ObjectID id = static_cast<ObjectID>(a_Fixture->GetBody()->GetUserData().pointer);
+	GameObject& hitObject = m_ObjectContainer->GetGameObject(id);
+	if (hitObject.GetTag() != m_Tag)
+	{
+		return -1.0f; // タグが一致しない場合は無視
+	}
+
+	a_Fixture;
+	this->hit = true;
+	this->point = a_Point;
+	this->normal = a_Normal;
+	this->fraction = a_Fraction;
+	this->fixture = a_Fixture;
+	this->body = a_Fixture->GetBody();
+	return a_Fraction; // 最も近いヒットのみ取得
+}
