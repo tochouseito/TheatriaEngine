@@ -489,7 +489,7 @@ void UIUpdateSystem::UpdateUI(Entity e, UISpriteComponent& uiSprite)
 	float tex_top = uiSprite.textureLeftTop.y / uiSprite.size.y;
 	float tex_bottom = (uiSprite.textureLeftTop.y + uiSprite.size.y) / uiSprite.size.y;
 
-	uiSprite.scale = uiSprite.size;
+	//uiSprite.scale = uiSprite.size;
 	Vector3 scale = Vector3(uiSprite.scale.x, uiSprite.scale.y, 1.0f);
 	Vector3 rotation = Vector3(0.0f, 0.0f, uiSprite.rotation);
 	Vector3 translation = Vector3(uiSprite.position.x, uiSprite.position.y, 0.0f);
