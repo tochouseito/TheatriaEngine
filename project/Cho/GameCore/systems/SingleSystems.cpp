@@ -510,3 +510,23 @@ void UIUpdateSystem::UpdateUI(UISpriteComponent& uiSprite)
 
 	//uiSprite.constData->matWorld = uiSprite.matWorld;
 }
+
+void BoxCollider2DUpdateSystem::UpdateFixture(const TransformComponent& transform, Rigidbody2DComponent& rb, BoxCollider2DComponent& box)
+{
+	transform;
+	// サイズの変更があった場合、フィクスチャを再作成
+	if (box.runtimeFixture == nullptr) { return; }
+	if (box.width != box.runtimeFixture->GetShape()->m_radius || box.height != box.runtimeFixture->GetShape()->m_radius)
+	{
+		rb.runtimeBody->DestroyFixture(box.runtimeFixture);
+		b2PolygonShape shape;
+		shape.SetAsBox(box.width / 2.0f, box.height / 2.0f, b2Vec2(box.offsetX, box.offsetY), 0.0f);
+		b2FixtureDef fixtureDef;
+		fixtureDef.shape = &shape;
+		fixtureDef.density = box.density;
+		fixtureDef.friction = box.friction;
+		fixtureDef.restitution = box.restitution;
+		fixtureDef.isSensor = box.isSensor;
+		box.runtimeFixture = rb.runtimeBody->CreateFixture(&fixtureDef);
+	}
+}

@@ -182,6 +182,8 @@ void GameCore::CreateSystems(InputManager* input, ResourceManager* resourceManag
 	m_pSingleSystemManager->RegisterSystem(std::move(emitterUpdateSystem), SystemState::Update);
 	std::unique_ptr<ECSManager::ISystem> particleUpdateSystem = std::make_unique<ParticleUpdateSystem>(m_pECSManager.get(), resourceManager,graphicsEngine);
 	m_pSingleSystemManager->RegisterSystem(std::move(particleUpdateSystem), SystemState::Update);
+	std::unique_ptr<ECSManager::ISystem> boxUpdateSystem = std::make_unique<BoxCollider2DUpdateSystem>(m_pECSManager.get(), m_pPhysicsWorld.get());
+	m_pSingleSystemManager->RegisterSystem(std::move(boxUpdateSystem), SystemState::Update);
 	std::unique_ptr<ECSManager::ISystem> collisionSystem = std::make_unique<CollisionSystem>(m_pECSManager.get(), resourceManager, input, m_pObjectContainer.get());
 	m_pSingleSystemManager->RegisterSystem(std::move(collisionSystem), SystemState::Update);
 	std::unique_ptr<ECSManager::ISystem> rbUpdateSystem = std::make_unique<Rigidbody2DUpdateSystem>(m_pECSManager.get(), m_pPhysicsWorld.get());

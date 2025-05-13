@@ -51,7 +51,7 @@ void ChoEngine::Initialize()
 	gameCore->Initialize(platformLayer->GetInputManager(), resourceManager.get(),graphicsEngine.get());
 
 	// EngineCommand初期化
-	engineCommand = std::make_unique<EngineCommand>(gameCore.get(), resourceManager.get(), graphicsEngine.get());
+	engineCommand = std::make_unique<EngineCommand>(gameCore.get(), resourceManager.get(), graphicsEngine.get(),platformLayer->GetInputManager());
 	// GameCoreにEngineCommandをセット
 	gameCore->SetEngineCommandPtr(engineCommand.get());
 	graphicsEngine->SetEngineCommand(engineCommand.get());
@@ -215,7 +215,7 @@ void ChoEngine::Start()
 		gameCore = std::make_unique<GameCore>();
 		gameCore->Initialize(platformLayer->GetInputManager(), resourceManager.get(),graphicsEngine.get());
 		// EngineCommand初期化
-		engineCommand = std::make_unique<EngineCommand>(gameCore.get(), resourceManager.get(), graphicsEngine.get());
+		engineCommand = std::make_unique<EngineCommand>(gameCore.get(), resourceManager.get(), graphicsEngine.get(),platformLayer->GetInputManager());
 		// GameCoreにEngineCommandをセット
 		gameCore->SetEngineCommandPtr(engineCommand.get());
 		graphicsEngine->SetEngineCommand(engineCommand.get());
