@@ -543,18 +543,17 @@ public:
 	UIUpdateSystem(ECSManager* ecs, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine,IStructuredBuffer* integrationBuffer)
 		: ECSManager::System<UISpriteComponent>([this](Entity e, UISpriteComponent& uiSprite)
 			{
-				e;
-				UpdateUI(uiSprite);
+				UpdateUI(e,uiSprite);
 			}),
 		m_pECS(ecs), m_pResourceManager(resourceManager), m_pGraphicsEngine(graphicsEngine)
 	{
-		m_pIntegrationBuffer = dynamic_cast<StructuredBuffer<BUFFER_DATA_TF>*>(integrationBuffer);
+		m_pIntegrationBuffer = dynamic_cast<StructuredBuffer<BUFFER_DATA_UISPRITE>*>(integrationBuffer);
 	}
 	~UIUpdateSystem() = default;
 private:
-	void UpdateUI(UISpriteComponent& uiSprite);
+	void UpdateUI(Entity e,UISpriteComponent& uiSprite);
 	ECSManager* m_pECS = nullptr;
 	ResourceManager* m_pResourceManager = nullptr;
 	GraphicsEngine* m_pGraphicsEngine = nullptr;
-	StructuredBuffer<BUFFER_DATA_TF>* m_pIntegrationBuffer = nullptr;
+	StructuredBuffer<BUFFER_DATA_UISPRITE>* m_pIntegrationBuffer = nullptr;
 };

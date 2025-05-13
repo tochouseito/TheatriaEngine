@@ -50,6 +50,8 @@ public:
 	PSO GetEffectEditorInitPSO() { return m_EffectEditorInitPSO; }
 	PSO GetEffectEditorUpdatePSO() { return m_EffectEditorUpdatePSO; }
 	PSO GetEffectEditorEmitPSO() { return m_EffectEditorEmitPSO; }
+	// UI
+	PSO GetUIPSO() { return m_UIPSO; }
 private:
 	std::vector<std::pair<uint32_t, std::string>> CreateRootParameters(
 		ID3D12ShaderReflection* pReflector,

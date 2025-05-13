@@ -449,6 +449,8 @@ bool AddUIObjectCommand::Execute(EngineCommand* edit)
 	// SpriteComponentを追加
 	UISpriteComponent* uiSprite = edit->m_GameCore->GetECSManager()->AddComponent<UISpriteComponent>(entity);
 	uiSprite->mapID = mapID;
+	// UseListに登録
+	edit->m_ResourceManager->GetUIContainer()->AddUI(mapID);
 	// GameObjectを追加
 	ObjectID objectID = edit->m_GameCore->GetObjectContainer()->AddGameObject(entity, name, ObjectType::UI);
 	m_ObjectID = objectID;

@@ -2,6 +2,15 @@
 #include "UIContainer.h"
 #include "Resources/ResourceManager/ResourceManager.h"
 
+UIContainer::UIContainer(ResourceManager* resourceManager)
+	:m_pResourceManager(resourceManager)
+{
+	// UIDataの追加
+	AddUIData();
+	// UseListBufferの作成
+	m_UseListBufferIndex = m_pResourceManager->CreateStructuredBuffer<uint32_t>(kUseListOffset);
+}
+
 uint32_t UIContainer::AddUIData()
 {
 	UIData uiData;
@@ -15,10 +24,10 @@ uint32_t UIContainer::AddUIData()
 	// 頂点データを設定
 #pragma region
 	// 頂点データ（重複なし）
-	uiData.vertices[0] = { { 0.0f, 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } ,{1.0f,1.0f,1.0f,1.0f} };  // 左上
-	uiData.vertices[1] = { { 640.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 0.0f },{1.0f,1.0f,1.0f,1.0f} };  // 右上
-	uiData.vertices[2] = { { 0.0f, 360.0f, 0.0f, 1.0f }, { 0.0f, 1.0f } ,{1.0f,1.0f,1.0f,1.0f} };  // 左下
-	uiData.vertices[3] = { { 640.0f, 360.0f, 0.0f, 1.0f }, { 1.0f, 1.0f },{1.0f,1.0f,1.0f,1.0f} };  // 右下
+	uiData.vertices[0] = { { 0.0f, 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } ,{1.0f,1.0f,1.0f,1.0f} ,{0} };  // 左上
+	uiData.vertices[1] = { { 640.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 0.0f },{1.0f,1.0f,1.0f,1.0f},{1} };  // 右上
+	uiData.vertices[2] = { { 0.0f, 360.0f, 0.0f, 1.0f }, { 0.0f, 1.0f } ,{1.0f,1.0f,1.0f,1.0f},{2} };  // 左下
+	uiData.vertices[3] = { { 640.0f, 360.0f, 0.0f, 1.0f }, { 1.0f, 1.0f },{1.0f,1.0f,1.0f,1.0f},{3} };  // 右下
 	// インデックスデータ
 	uiData.indices[0] = 0;
 	uiData.indices[1] = 1;
@@ -39,7 +48,16 @@ uint32_t UIContainer::AddUIData()
 	indexBuffer->MappedDataCopy(uiData.indices);
 
 	uint32_t index = static_cast<uint32_t>(m_UIDataContainer.push_back(std::move(uiData)));
-	// UseListに追加
-	m_UseList.push_back(index);
 	return index;
+}
+
+void UIContainer::UpdateUseListBuffer()
+{
+	StructuredBuffer<uint32_t>* useListBuffer = dynamic_cast<StructuredBuffer<uint32_t>*>(m_pResourceManager->GetBuffer<IStructuredBuffer>(m_UseListBufferIndex));
+	uint32_t i = 0;
+	for (uint32_t& index : m_UseList)
+	{
+		useListBuffer->UpdateData(index, i);
+		i++;
+	}
 }

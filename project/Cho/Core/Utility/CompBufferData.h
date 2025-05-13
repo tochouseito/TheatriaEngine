@@ -111,6 +111,14 @@ struct BUFFER_DATA_PARTICLE final
 
 struct BUFFER_DATA_UISPRITE final
 {
-	Matrix4 matWorld;	// 64バイト
+	Matrix4 matWorld;		// 64バイト
+	float left;				// 4バイト
+	float right;			// 4バイト
+	float top;				// 4バイト
+	float bottom;			// 4バイト
+	float tex_left;			// 4バイト
+	float tex_right;		// 4バイト
+	float tex_top;			// 4バイト
+	float tex_bottom;		// 4バイト
 	uint32_t materialID;	// 4バイト
 };
