@@ -565,10 +565,10 @@ void ModelManager::CreateSprite()
 	// 頂点データを設定
 #pragma region
 	// 頂点データ（重複なし）
-	meshData.vertices[0] = { { 1.0f,  1.0f, 0.0f, 1.0f }, { 1.0f, 0.0f }, { 0.0f, 0.0f, 1.0f },{1.0f,1.0f,1.0f,1.0f},{0} };  // 右上
-	meshData.vertices[1] = { {-1.0f,  1.0f, 0.0f, 1.0f }, { 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f } ,{1.0f,1.0f,1.0f,1.0f},{1} };  // 左上
-	meshData.vertices[2] = { { 1.0f, -1.0f, 0.0f, 1.0f }, { 1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f } ,{1.0f,1.0f,1.0f,1.0f},{2} };  // 右下
-	meshData.vertices[3] = { {-1.0f, -1.0f, 0.0f, 1.0f }, { 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f },{1.0f,1.0f,1.0f,1.0f},{3} };  // 左下
+	meshData.vertices[0] = { { 0.0f, 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f } };  // 左上
+	meshData.vertices[1] = { {640.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 0.0f }, { 0.0f, 0.0f, 1.0f } };  // 右上
+	meshData.vertices[2] = { { 0.0f, 360.0f, 0.0f, 1.0f }, { 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f } };  // 左下
+	meshData.vertices[3] = { {640.0f, 360.0f, 0.0f, 1.0f }, { 1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f } };  // 右下
 	// インデックスデータ
 	meshData.indices[0] = 0;
 	meshData.indices[1] = 1;

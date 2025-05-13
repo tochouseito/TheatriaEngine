@@ -325,6 +325,9 @@ void Inspector::Rigidbody2DComponentView(GameObject* object)
 				rigidbody->bodyType = static_cast<b2BodyType>(currentType);
 			}
 
+			// mass
+			ImGui::DragFloat("mass", &rigidbody->mass, 0.01f);
+
 			// Gravity Scale
 			ImGui::DragFloat("Gravity Scale", &rigidbody->gravityScale, 0.1f, 0.0f, 100.0f);
 
