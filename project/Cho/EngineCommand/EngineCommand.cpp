@@ -7,10 +7,11 @@
 #include "Core/Utility/EffectStruct.h"
 #include "EngineCommand/EngineCommands.h"
 
-EngineCommand::EngineCommand(GameCore* gameCore, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine):
+EngineCommand::EngineCommand(GameCore* gameCore, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine,InputManager* input):
 	m_GameCore(gameCore),
 	m_ResourceManager(resourceManager),
-	m_GraphicsEngine(graphicsEngine)
+	m_GraphicsEngine(graphicsEngine),
+	m_InputManager(input)
 {
 	CreateNewEffect();
 }

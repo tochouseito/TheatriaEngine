@@ -92,12 +92,12 @@ void InputManager::Update()
 					float leftThumbY = joystick.state.xInput.Gamepad.sThumbLY;
 
 					// 左スティックのデッドゾーン処理
-					if (std::abs(leftThumbX) < XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
+					if (std::abs(leftThumbX) < m_LeftStickDeadZone)
 					{
 						//leftThumbX = 0;
 						joystick.state.xInput.Gamepad.sThumbLX = 0;
 					}
-					if (std::abs(leftThumbY) < XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
+					if (std::abs(leftThumbY) < m_LeftStickDeadZone)
 					{
 						//leftThumbY = 0;
 						joystick.state.xInput.Gamepad.sThumbLY = 0;
@@ -108,12 +108,12 @@ void InputManager::Update()
 					float rightThumbY = joystick.state.xInput.Gamepad.sThumbRY;
 
 					// 右スティックのデッドゾーン処理
-					if (std::abs(rightThumbX) < XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
+					if (std::abs(rightThumbX) < m_RightStickDeadZone)
 					{
 						//rightThumbX = 0;
 						joystick.state.xInput.Gamepad.sThumbRX = 0;
 					}
-					if (std::abs(rightThumbY) < XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
+					if (std::abs(rightThumbY) < m_RightStickDeadZone)
 					{
 						//rightThumbY = 0;
 						joystick.state.xInput.Gamepad.sThumbRY = 0;
@@ -224,9 +224,8 @@ bool InputManager::GetJoystickStatePrevious(const int32_t& stickNo, XINPUT_STATE
 
 void InputManager::SetJoystickDeadZone(const int32_t& stickNo, const int32_t& deadZoneL, const int32_t& deadZoneR)
 {
-	stickNo;
-	deadZoneL;
-	deadZoneR;
+	m_LeftStickDeadZone = deadZoneL;
+	m_RightStickDeadZone = deadZoneR;
 }
 
 size_t InputManager::GetNumberOfJoysticks()
