@@ -16,6 +16,7 @@
 #include "Resources/ScriptContainer/ScriptContainer.h"
 #include "Resources/SoundManager/SoundManager.h"
 #include "Core/Utility/CompBufferData.h"
+#include "Resources/UIContainer/UIContainer.h"
 
 enum IntegrationDataType
 {
@@ -200,6 +201,8 @@ public:
 	TextureManager* GetTextureManager() const { return m_TextureManager.get(); }
 	ModelManager* GetModelManager() const { return m_ModelManager.get(); }
 	ScriptContainer* GetScriptContainer() const { return m_ScriptContainer.get(); }
+	SoundManager* GetSoundManager() const { return m_SoundManager.get(); }
+	UIContainer* GetUIContainer() const { return m_UIContainer.get(); }
 	IIntegrationData* GetIntegrationData(const IntegrationDataType& type) const
 	{
 		switch (type)
@@ -255,6 +258,8 @@ private:
 	std::unique_ptr<ScriptContainer> m_ScriptContainer = nullptr;
 	// サウンドマネージャ
 	std::unique_ptr<SoundManager> m_SoundManager = nullptr;
+	// UIコンテナ
+	std::unique_ptr<UIContainer> m_UIContainer = nullptr;
 	//// GPUResourceUpdate用のマッピングデータ
 	//FVector<BUFFER_DATA_TF*> m_MappedTF;
 	//FVector<BUFFER_DATA_VIEWPROJECTION*> m_MappedViewProjection;

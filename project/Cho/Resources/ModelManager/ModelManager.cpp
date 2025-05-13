@@ -323,8 +323,6 @@ void ModelManager::CreateDefaultMesh()
 	CreateSphere();
 	// Plane
 	CreatePlane();
-	// Sprite
-	//CreateSprite();
 	// Ring
 	CreateRing();
 }
@@ -547,42 +545,6 @@ void ModelManager::CreatePlane()
 	AddModelData(modelData);
 }
 
-void ModelManager::CreateSprite()
-{
-	// Sprite
-	std::wstring modelName = L"Sprite";
-	modelName = GenerateUniqueName(modelName, m_ModelNameContainer);
-	ModelData modelData;
-	modelData.name = modelName;
-	MeshData meshData;
-	meshData.name = modelName;
-	// 頂点数とインデックス数
-	uint32_t vertices = 4;// 頂点数
-	uint32_t indices = 6;// インデックス数
-	// メモリ確保
-	meshData.vertices.resize(vertices);
-	meshData.indices.resize(indices);
-	// 頂点データを設定
-#pragma region
-	// 頂点データ（重複なし）
-	meshData.vertices[0] = { { 0.0f, 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f } };  // 左上
-	meshData.vertices[1] = { {640.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 0.0f }, { 0.0f, 0.0f, 1.0f } };  // 右上
-	meshData.vertices[2] = { { 0.0f, 360.0f, 0.0f, 1.0f }, { 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f } };  // 左下
-	meshData.vertices[3] = { {640.0f, 360.0f, 0.0f, 1.0f }, { 1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f } };  // 右下
-	// インデックスデータ
-	meshData.indices[0] = 0;
-	meshData.indices[1] = 1;
-	meshData.indices[2] = 2;
-	meshData.indices[3] = 1;
-	meshData.indices[4] = 3;
-	meshData.indices[5] = 2;
-#pragma endregion
-	// コンテナに追加
-	modelData.meshes.push_back(meshData);
-	// modelDataを追加
-	AddModelData(modelData);
-}
-
 void ModelManager::CreateRing()
 {
 	// Ring
@@ -735,9 +697,6 @@ void ModelManager::AddModelData(ModelData& modelData)
 		mesh.indexBufferIndex = m_pResourceManager->CreateIndexBuffer<uint32_t>(static_cast<UINT>(mesh.indices.size()));
 		VertexBuffer<VertexData>* vertexBuffer = dynamic_cast<VertexBuffer<VertexData>*>(m_pResourceManager->GetBuffer<IVertexBuffer>(mesh.vertexBufferIndex));
 		IndexBuffer<uint32_t>* indexBuffer = dynamic_cast<IndexBuffer<uint32_t>*>(m_pResourceManager->GetBuffer<IIndexBuffer>(mesh.indexBufferIndex));
-		// VBV,IBV作成
-		vertexBuffer->CreateVBV();
-		indexBuffer->CreateIBV();
 		// コピー
 		vertexBuffer->MappedDataCopy(mesh.vertices);
 		indexBuffer->MappedDataCopy(mesh.indices);

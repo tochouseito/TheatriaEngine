@@ -839,14 +839,7 @@ void GraphicsEngine::DrawUI(CommandContext* context, ResourceManager& resourceMa
 	for (auto& object : gameCore.GetObjectContainer()->GetGameObjects().GetVector())
 	{
 		if (!object.IsActive()) { continue; }
-		if (object.GetType() != ObjectType::ParticleSystem) { continue; }
-		// EmitterComponentを取得
-		EmitterComponent* emitterComponent = gameCore.GetECSManager()->GetComponent<EmitterComponent>(object.GetEntity());
-		if (!emitterComponent) { continue; }
-		//if (!emitterComponent->particleID) { continue; }
-		// ParticleComponentを取得
-		ParticleComponent* particleComponent = gameCore.GetECSManager()->GetComponent<ParticleComponent>(object.GetEntity());
-		if (!particleComponent) { continue; }
+		if (object.GetType() != ObjectType::UI) { continue; }
 		// シーンがないならスキップ
 		if (!gameCore.GetSceneManager()->GetCurrentScene()) { continue; }
 		IConstantBuffer* cameraBuffer = nullptr;
@@ -873,24 +866,20 @@ void GraphicsEngine::DrawUI(CommandContext* context, ResourceManager& resourceMa
 			// カメラがないならスキップ
 			if (!cameraBuffer) { continue; }
 		}
-		// 板ポリ取得
-		ModelData* modelData = resourceManager.GetModelManager()->GetModelData(L"Plane");
-		if (!modelData) { break; }
-		// VBVをセット
-		D3D12_VERTEX_BUFFER_VIEW* vbv = resourceManager.GetBuffer<IVertexBuffer>(modelData->meshes[0].vertexBufferIndex)->GetVertexBufferView();
-		context->SetVertexBuffers(0, 1, vbv);
-		// IBVをセット
-		D3D12_INDEX_BUFFER_VIEW* ibv = resourceManager.GetBuffer<IIndexBuffer>(modelData->meshes[0].indexBufferIndex)->GetIndexBufferView();
-		context->SetIndexBuffer(ibv);
-		// カメラバッファをセット
-		context->SetGraphicsRootConstantBufferView(0, cameraBuffer->GetResource()->GetGPUVirtualAddress());
-		// パーティクルバッファをセット
-		IRWStructuredBuffer* particleBuffer = resourceManager.GetBuffer<IRWStructuredBuffer>(particleComponent->bufferIndex);
-		context->SetGraphicsRootDescriptorTable(1, particleBuffer->GetUAVGpuHandle());
-		// ダミーマテリアル
-		PixelBuffer* dummyTexture = resourceManager.GetTextureManager()->GetDummyTextureBuffer();
-		context->SetGraphicsRootDescriptorTable(2, dummyTexture->GetSRVGpuHandle());
-		// DrawCall
-		context->DrawIndexedInstanced(static_cast<UINT>(modelData->meshes[0].indices.size()), particleComponent->count, 0, 0, 0);
+		// 
+		////if (!modelData) { break; }
+		//// VBVをセット
+		//D3D12_VERTEX_BUFFER_VIEW* vbv = resourceManager.GetBuffer<IVertexBuffer>(modelData->meshes[0].vertexBufferIndex)->GetVertexBufferView();
+		//context->SetVertexBuffers(0, 1, vbv);
+		//// IBVをセット
+		//D3D12_INDEX_BUFFER_VIEW* ibv = resourceManager.GetBuffer<IIndexBuffer>(modelData->meshes[0].indexBufferIndex)->GetIndexBufferView();
+		//context->SetIndexBuffer(ibv);
+		//// マテリアル統合バッファをセット
+		//IStructuredBuffer* materialBuffer = resourceManager.GetIntegrationBuffer(IntegrationDataType::Material);
+		//context->SetGraphicsRootDescriptorTable(3, materialBuffer->GetSRVGpuHandle());
+		//// 配列テクスチャのためヒープをセット
+		//context->SetGraphicsRootDescriptorTable(4, resourceManager.GetSUVDHeap()->GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
+		//// DrawCall
+		//context->DrawIndexedInstanced(static_cast<UINT>(modelData->meshes[0].indices.size()), particleComponent->count, 0, 0, 0);
 	}
 }

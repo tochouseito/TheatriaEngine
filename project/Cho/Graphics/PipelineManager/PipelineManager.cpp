@@ -1686,25 +1686,25 @@ void PipelineManager::CreatePipelineUI(ID3D12Device8* device)
 	// ジェネリックに作成
 	D3D12_ROOT_PARAMETER rootParameters[4] = {};
 
-	// IntegrationTransform
-	D3D12_DESCRIPTOR_RANGE integrationTransformRange = {};
-	integrationTransformRange.BaseShaderRegister = 0;
-	integrationTransformRange.NumDescriptors = 1;
-	integrationTransformRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	integrationTransformRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	// World
+	D3D12_DESCRIPTOR_RANGE uiTransformRange = {};
+	uiTransformRange.BaseShaderRegister = 0;
+	uiTransformRange.NumDescriptors = 1;
+	uiTransformRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	uiTransformRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-	rootParameters[0].DescriptorTable.pDescriptorRanges = &integrationTransformRange;
+	rootParameters[0].DescriptorTable.pDescriptorRanges = &uiTransformRange;
 	rootParameters[0].DescriptorTable.NumDescriptorRanges = 1;
-	// UseTransformList
-	D3D12_DESCRIPTOR_RANGE useTransformListRange = {};
-	useTransformListRange.BaseShaderRegister = 1;
-	useTransformListRange.NumDescriptors = 1;
-	useTransformListRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	useTransformListRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	// UseList
+	D3D12_DESCRIPTOR_RANGE useListRange = {};
+	useListRange.BaseShaderRegister = 0;
+	useListRange.NumDescriptors = 1;
+	useListRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	useListRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-	rootParameters[1].DescriptorTable.pDescriptorRanges = &useTransformListRange;
+	rootParameters[1].DescriptorTable.pDescriptorRanges = &useListRange;
 	rootParameters[1].DescriptorTable.NumDescriptorRanges = 1;
 	// IntegrationMaterial
 	D3D12_DESCRIPTOR_RANGE integrationMaterialRange = {};
@@ -1797,11 +1797,11 @@ void PipelineManager::CreatePipelineUI(ID3D12Device8* device)
 	// DepthStencilState
 	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
 	// Depthの機能を有効化する
-	depthStencilDesc.DepthEnable = true;
-	// 書き込みをします
-	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-	// 比較関数はLessEqual。つまり、近ければ描画される
-	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	depthStencilDesc.DepthEnable = false;
+	//// 書き込みをします
+	//depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+	//// 比較関数はLessEqual。つまり、近ければ描画される
+	//depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 
 	// Create PSO
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc{};

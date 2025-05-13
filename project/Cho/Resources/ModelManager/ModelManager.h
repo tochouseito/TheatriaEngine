@@ -90,8 +90,6 @@ private:
 	void CreateSphere();
 	// Planeの生成
 	void CreatePlane();
-	// Spriteの生成
-	void CreateSprite();
 	// Ringの生成
 	void CreateRing();
 

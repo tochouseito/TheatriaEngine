@@ -224,6 +224,7 @@ bool InputManager::GetJoystickStatePrevious(const int32_t& stickNo, XINPUT_STATE
 
 void InputManager::SetJoystickDeadZone(const int32_t& stickNo, const int32_t& deadZoneL, const int32_t& deadZoneR)
 {
+	stickNo;
 	m_LeftStickDeadZone = deadZoneL;
 	m_RightStickDeadZone = deadZoneR;
 }
