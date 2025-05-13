@@ -290,6 +290,7 @@
     <ClCompile Include="SDK\DirectX\DXC\DXShaderCompiler.cpp" />
     <ClCompile Include="SDK\ImGui\ImGuiManager\ImGuiManager.cpp" />
     <ClCompile Include="Resources\SoundManager\SoundManager.cpp" />
+    <ClCompile Include="Resources\UIContainer\UIContainer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="APIExportsMacro.h" />
@@ -395,6 +396,7 @@
     <ClInclude Include="SDK\ImGui\ImGuiManager\ImGuiManager.h" />
     <ClInclude Include="SDK\ImGui\ImGuiUtlity\ImGuiUtlity.h" />
     <ClInclude Include="Resources\SoundManager\SoundManager.h" />
+    <ClInclude Include="Resources\UIContainer\UIContainer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\EngineAssets\Shader\header\Billboard.hlsli" />
