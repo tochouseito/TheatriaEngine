@@ -316,6 +316,8 @@ private:
 		//Quaternion qz = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0.0f, 0.0f, 1.0f), diff.z);
 		//transform.rotation = transform.rotation * qx * qy * qz;//;
 		//transform.rotation = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0, 0, 1), angle);
+
+
 	}
 
 	ECSManager* m_ECS = nullptr;
@@ -425,6 +427,27 @@ private:
 		box.runtimeFixture = rb.runtimeBody->CreateFixture(&fixtureDef);
 	}
 
+	ECSManager* m_ECS = nullptr;
+	b2World* m_World = nullptr;
+};
+
+// BoxCollider2D更新システム
+class BoxCollider2DUpdateSystem : public ECSManager::System<TransformComponent, Rigidbody2DComponent, BoxCollider2DComponent>
+{
+public:
+	BoxCollider2DUpdateSystem(ECSManager* ecs, b2World* world)
+		: ECSManager::System<TransformComponent, Rigidbody2DComponent, BoxCollider2DComponent>(
+			[this](Entity e, TransformComponent& transform, Rigidbody2DComponent& rb, BoxCollider2DComponent& box)
+			{
+				e;
+				UpdateFixture(transform, rb, box);
+			}),
+		m_ECS(ecs), m_World(world)
+	{
+	}
+	~BoxCollider2DUpdateSystem() = default;
+private:
+	void UpdateFixture(const TransformComponent& transform, Rigidbody2DComponent& rb, BoxCollider2DComponent& box);
 	ECSManager* m_ECS = nullptr;
 	b2World* m_World = nullptr;
 };
