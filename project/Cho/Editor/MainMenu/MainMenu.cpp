@@ -358,6 +358,7 @@ void MainMenu::SettingWindow()
     int rightDeadZone = m_EngineCommand->GetInputManager()->GetRightStickDeadZone();
 	ImGui::DragInt("LeftStickDeadZone", &leftDeadZone, 1, 0, 10000);
 	ImGui::DragInt("RightStickDeadZone", &rightDeadZone, 1, 0, 10000);
+	m_EngineCommand->GetInputManager()->SetJoystickDeadZone(0,leftDeadZone, rightDeadZone);
 
     ImGui::End();
 }
