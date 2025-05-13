@@ -7,6 +7,7 @@
 #include "EngineCommand/EngineCommands.h"
 #include "GameCore/GameObject/GameObject.h"
 #include "Platform/FileSystem/FileSystem.h"
+#include "Platform/InputManager/InputManager.h"
 
 void MainMenu::Initialize()
 {
@@ -351,6 +352,12 @@ void MainMenu::SettingWindow()
 		std::unique_ptr<SetGravityCommand> setGravity = std::make_unique<SetGravityCommand>(gravityVector3);
 		m_EngineCommand->ExecuteCommand(std::move(setGravity));
     }
+
+	ImGui::Text("コントローラー設定");
+    int leftDeadZone = m_EngineCommand->GetInputManager()->GetLeftStickDeadZone();
+    int rightDeadZone = m_EngineCommand->GetInputManager()->GetRightStickDeadZone();
+	ImGui::DragInt("LeftStickDeadZone", &leftDeadZone, 1, 0, 10000);
+	ImGui::DragInt("RightStickDeadZone", &rightDeadZone, 1, 0, 10000);
 
     ImGui::End();
 }

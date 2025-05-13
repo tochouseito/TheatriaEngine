@@ -5,6 +5,7 @@ class GameCore;
 class ResourceManager;
 class GraphicsEngine;
 class GameObject;
+class InputManager;
 class EngineCommand;
 // インタフェース
 class IEngineCommand
@@ -45,7 +46,7 @@ class EngineCommand
 	friend class GraphicsEngine;
 public:
 	// Constructor
-	EngineCommand(GameCore* gameCore, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine);
+	EngineCommand(GameCore* gameCore, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine,InputManager* input);
 	// Destructor
 	~EngineCommand()
 	{
@@ -86,6 +87,8 @@ public:
 	ResourceManager* GetResourceManager() { return m_ResourceManager; }
 	// グラフィックスエンジンを取得
 	GraphicsEngine* GetGraphicsEngine() { return m_GraphicsEngine; }
+	// 入力マネージャを取得
+	InputManager* GetInputManager() { return m_InputManager; }
 	// エディタの選択中オブジェクトを取得
 	GameObject* GetSelectedObject() { return m_SelectedObject; }
 	// エディタの選択中オブジェクトをセット
@@ -131,6 +134,7 @@ private:
 	GameCore* m_GameCore = nullptr;
 	ResourceManager* m_ResourceManager = nullptr;
 	GraphicsEngine* m_GraphicsEngine = nullptr;
+	InputManager* m_InputManager = nullptr;
 	std::vector<std::unique_ptr<IEngineCommand>> m_Commands;
 
 	// EffectEditor

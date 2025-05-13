@@ -40,6 +40,9 @@ public:
 	bool GetJoystickStatePrevious(const int32_t& stickNo, XINPUT_STATE& out) const;
 	// デッドゾーンを設定する
 	void SetJoystickDeadZone(const int32_t& stickNo, const int32_t& deadZoneL, const int32_t& deadZoneR);
+	// デッドゾーンを取得する
+	int32_t GetLeftStickDeadZone() const { return m_LeftStickDeadZone; }
+	int32_t GetRightStickDeadZone() const { return m_RightStickDeadZone; }
 
 	// 接続されているジョイスティック数を取得する
 	size_t GetNumberOfJoysticks();
@@ -62,5 +65,8 @@ public:
 	DIMOUSESTATE2 m_Mouse = {};
 	DIMOUSESTATE2 m_MousePre = {};
 	Vector2 m_MousePosition;
+	int32_t m_LeftStickDeadZone = XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE;
+	int32_t m_RightStickDeadZone = XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE;
+	int32_t m_TriggerDeadZone = XINPUT_GAMEPAD_TRIGGER_THRESHOLD;
 };
 
