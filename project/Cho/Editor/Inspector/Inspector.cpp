@@ -433,10 +433,19 @@ void Inspector::AddComponent(GameObject* object)
 	} else
 	{
 		ObjectType objectType = object->GetType();
-		switch (objectType)
+
+		bool canAddMeshFilter = IsComponentAllowedAtRuntime<MeshFilterComponent>(objectType);
+		bool canAddMeshRenderer = IsComponentAllowedAtRuntime<MeshRendererComponent>(objectType);
+		bool canAddMaterial = IsComponentAllowedAtRuntime<MaterialComponent>(objectType);
+		bool canAddScript = IsComponentAllowedAtRuntime<ScriptComponent>(objectType);
+		bool canAddLineRenderer = IsComponentAllowedAtRuntime<LineRendererComponent>(objectType);
+		bool canAddRigidbody2D = IsComponentAllowedAtRuntime<Rigidbody2DComponent>(objectType);
+		bool canAddBoxCollider2D = IsComponentAllowedAtRuntime<BoxCollider2DComponent>(objectType);
+		bool canAddEmitter = IsComponentAllowedAtRuntime<EmitterComponent>(objectType);
+		bool canAddParticle = IsComponentAllowedAtRuntime<ParticleComponent>(objectType);
+
+		if (canAddMeshFilter)
 		{
-		case ObjectType::MeshObject:
-			// MeshFilterComponentがあるか
 			mesh = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshFilterComponent>(object->GetEntity());
 			if (!mesh)
 			{
@@ -448,7 +457,9 @@ void Inspector::AddComponent(GameObject* object)
 					isOpen = false;
 				}
 			}
-			// MeshRendererComponentがあるか
+		}
+		if (canAddMeshRenderer)
+		{
 			render = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshRendererComponent>(object->GetEntity());
 			if (!render)
 			{
@@ -460,7 +471,9 @@ void Inspector::AddComponent(GameObject* object)
 					isOpen = false;
 				}
 			}
-			// MaterialComponentがあるか
+		}
+		if (canAddMaterial)
+		{
 			material = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<MaterialComponent>(object->GetEntity());
 			if (!material)
 			{
@@ -472,121 +485,9 @@ void Inspector::AddComponent(GameObject* object)
 					isOpen = false;
 				}
 			}
-			// ScriptComponentがあるか
-			script = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<ScriptComponent>(object->GetEntity());
-			if (!script)
-			{
-				if (ImGui::Selectable("ScriptComponent"))
-				{
-					// ScriptComponentを追加
-					std::unique_ptr<AddScriptComponent> addScriptComp = std::make_unique<AddScriptComponent>(object->GetEntity(),object->GetID().value());
-					m_EngineCommand->ExecuteCommand(std::move(addScriptComp));
-					isOpen = false;
-				}
-			}
-			// LineRendererComponentがあるか
-			//lines = m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr()->GetAllComponents<LineRendererComponent>(object->GetEntity());
-			//if (!lines || lines->empty())
-			//{
-			if (ImGui::Selectable("LineRendererComponent"))
-			{
-				// LineRendererComponentを追加
-				std::unique_ptr<AddLineRendererComponent> addLineComp = std::make_unique<AddLineRendererComponent>(object->GetEntity());
-				m_EngineCommand->ExecuteCommand(std::move(addLineComp));
-				isOpen = false;
-			}
-			//}
-			// Rigidbody2DComponentがあるか
-			rigidbody = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<Rigidbody2DComponent>(object->GetEntity());
-			if (!rigidbody)
-			{
-				if (ImGui::Selectable("Rigidbody2DComponent"))
-				{
-					// Rigidbody2DComponentを追加
-					std::unique_ptr<AddRigidbody2DComponent> addRigidBodyComp = std::make_unique<AddRigidbody2DComponent>(object->GetEntity(),object->GetID().value());
-					m_EngineCommand->ExecuteCommand(std::move(addRigidBodyComp));
-					isOpen = false;
-				}
-			}
-			// BoxCollider2DComponentがあるか
-			boxCollider2d = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<BoxCollider2DComponent>(object->GetEntity());
-			if (!boxCollider2d)
-			{
-				if (ImGui::Selectable("BoxCollider2DComponent"))
-				{
-					// BoxCollider2DComponentを追加
-					std::unique_ptr<AddBoxCollider2DComponent> addBoxColliderComp = std::make_unique<AddBoxCollider2DComponent>(object->GetEntity());
-					m_EngineCommand->ExecuteCommand(std::move(addBoxColliderComp));
-					isOpen = false;
-				}
-			}
-			break;
-		case ObjectType::Camera:
-			// ScriptComponentがあるか
-			script = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<ScriptComponent>(object->GetEntity());
-			if (!script)
-			{
-				if (ImGui::Selectable("ScriptComponent"))
-				{
-					// ScriptComponentを追加
-					std::unique_ptr<AddScriptComponent> addScriptComp = std::make_unique<AddScriptComponent>(object->GetEntity(),object->GetID().value());
-					m_EngineCommand->ExecuteCommand(std::move(addScriptComp));
-					isOpen = false;
-				}
-			}
-			// LineRendererComponentがあるか
-			//lines = m_EditorCommand->GetGameCoreCommandPtr()->GetECSManagerPtr()->GetAllComponents<LineRendererComponent>(object->GetEntity());
-			//if (!lines || lines->empty())
-			//{
-			if (ImGui::Selectable("LineRendererComponent"))
-			{
-				// LineRendererComponentを追加
-				std::unique_ptr<AddLineRendererComponent> addLineComp = std::make_unique<AddLineRendererComponent>(object->GetEntity());
-				m_EngineCommand->ExecuteCommand(std::move(addLineComp));
-				isOpen = false;
-			}
-			//}
-			break;
-		case ObjectType::ParticleSystem:
-			// EmitterComponentがあるか
-			emitter = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<EmitterComponent>(object->GetEntity());
-			if (!emitter)
-			{
-				if (ImGui::Selectable("EmitterComponent"))
-				{
-					// EmitterComponentを追加
-					std::unique_ptr<AddEmitterComponent> addEmitterComp = std::make_unique<AddEmitterComponent>(object->GetEntity());
-					m_EngineCommand->ExecuteCommand(std::move(addEmitterComp));
-					isOpen = false;
-				}
-			}
-			// ParticleComponentがあるか
-			particle = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<ParticleComponent>(object->GetEntity());
-			if (!particle)
-			{
-				if (ImGui::Selectable("ParticleComponent"))
-				{
-					// ParticleComponentを追加
-					std::unique_ptr<AddParticleComponent> addParticleComp = std::make_unique<AddParticleComponent>(object->GetEntity());
-					m_EngineCommand->ExecuteCommand(std::move(addParticleComp));
-					isOpen = false;
-				}
-			}
-			break;
-		case ObjectType::UI:
-			// MaterialComponentがあるか
-			material = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<MaterialComponent>(object->GetEntity());
-			if (!material)
-			{
-				if (ImGui::Selectable("MaterialComponent"))
-				{
-					// MaterialComponentを追加
-					std::unique_ptr<AddMaterialComponent> addMaterialComp = std::make_unique<AddMaterialComponent>(object->GetEntity());
-					m_EngineCommand->ExecuteCommand(std::move(addMaterialComp));
-					isOpen = false;
-				}
-			}
-			// ScriptComponentがあるか
+		}
+		if (canAddScript)
+		{
 			script = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<ScriptComponent>(object->GetEntity());
 			if (!script)
 			{
@@ -598,11 +499,72 @@ void Inspector::AddComponent(GameObject* object)
 					isOpen = false;
 				}
 			}
-			break;
-		case ObjectType::Count:
-			break;
-		default:
-			break;
+		}
+		if (canAddLineRenderer)
+		{
+			if (ImGui::Selectable("LineRendererComponent"))
+			{
+				// LineRendererComponentを追加
+				std::unique_ptr<AddLineRendererComponent> addLineComp = std::make_unique<AddLineRendererComponent>(object->GetEntity());
+				m_EngineCommand->ExecuteCommand(std::move(addLineComp));
+				isOpen = false;
+			}
+		}
+		if (canAddRigidbody2D)
+		{
+			rigidbody = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<Rigidbody2DComponent>(object->GetEntity());
+			if (!rigidbody)
+			{
+				if (ImGui::Selectable("Rigidbody2DComponent"))
+				{
+					// Rigidbody2DComponentを追加
+					std::unique_ptr<AddRigidbody2DComponent> addRigidBodyComp = std::make_unique<AddRigidbody2DComponent>(object->GetEntity(), object->GetID().value());
+					m_EngineCommand->ExecuteCommand(std::move(addRigidBodyComp));
+					isOpen = false;
+				}
+			}
+		}
+		if (canAddBoxCollider2D)
+		{
+			boxCollider2d = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<BoxCollider2DComponent>(object->GetEntity());
+			if (!boxCollider2d)
+			{
+				if (ImGui::Selectable("BoxCollider2DComponent"))
+				{
+					// BoxCollider2DComponentを追加
+					std::unique_ptr<AddBoxCollider2DComponent> addBoxColliderComp = std::make_unique<AddBoxCollider2DComponent>(object->GetEntity());
+					m_EngineCommand->ExecuteCommand(std::move(addBoxColliderComp));
+					isOpen = false;
+				}
+			}
+		}
+		if (canAddEmitter)
+		{
+			emitter = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<EmitterComponent>(object->GetEntity());
+			if (!emitter)
+			{
+				if (ImGui::Selectable("EmitterComponent"))
+				{
+					// EmitterComponentを追加
+					std::unique_ptr<AddEmitterComponent> addEmitterComp = std::make_unique<AddEmitterComponent>(object->GetEntity());
+					m_EngineCommand->ExecuteCommand(std::move(addEmitterComp));
+					isOpen = false;
+				}
+			}
+		}
+		if (canAddParticle)
+		{
+			particle = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<ParticleComponent>(object->GetEntity());
+			if (!particle)
+			{
+				if (ImGui::Selectable("ParticleComponent"))
+				{
+					// ParticleComponentを追加
+					std::unique_ptr<AddParticleComponent> addParticleComp = std::make_unique<AddParticleComponent>(object->GetEntity());
+					m_EngineCommand->ExecuteCommand(std::move(addParticleComp));
+					isOpen = false;
+				}
+			}
 		}
 	}
 }

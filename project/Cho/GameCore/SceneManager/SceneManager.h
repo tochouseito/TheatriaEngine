@@ -60,7 +60,6 @@ public:
 	SceneManager(ResourceManager* resourceManager):
 		m_pResourceManager(resourceManager)
 	{
-		CreateSystem();
 	}
 	// Destructor
 	~SceneManager()
@@ -80,9 +79,6 @@ public:
 	void AddScene(const std::wstring& sceneName);
 	// シーンを変更リクエスト
 	void ChangeSceneRequest(const SceneID& sceneID) noexcept { m_pNextScene = m_pScenes[sceneID].get(); }
-
-	// System
-	void CreateSystem() noexcept;
 
 	ScenePrefab* GetScene(const SceneID& index) const noexcept
 	{
