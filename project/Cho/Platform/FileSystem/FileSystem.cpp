@@ -280,7 +280,7 @@ std::optional<Cho::GameSettingsInfo> Cho::FileSystem::LoadGameSettings(const std
     }
 }
 
-bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory,BaseScene* scene, ObjectContainer* container, ECSManager* ecs)
+bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, BaseScene* scene, ObjectContainer* container, ECSManager* ecs)
 {
     std::filesystem::path path = std::filesystem::path(directory) / (scene->GetSceneName() + L".json");
 
@@ -304,80 +304,93 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory,BaseScene* sce
 
         Entity entity = obj.GetEntity();
         // マルチコンポーネント存在確認用
-		std::vector<LineRendererComponent>* lineRenderers;
-        switch (obj.GetType())
+        std::vector<LineRendererComponent>* lineRenderers;
+
+        // コンポーネントの保存
+        if (IsComponentAllowedAtRuntime<TransformComponent>(obj.GetType()))
         {
-        case ObjectType::MeshObject:
             if (const auto* t = ecs->GetComponent<TransformComponent>(entity))
             {
                 comps["Transform"] = Cho::Serialization::ToJson(*t);
             }
+        }
+        if (IsComponentAllowedAtRuntime<MeshFilterComponent>(obj.GetType()))
+        {
             if (const auto* m = ecs->GetComponent<MeshFilterComponent>(entity))
             {
                 comps["MeshFilter"] = Cho::Serialization::ToJson(*m);
             }
+        }
+        if (IsComponentAllowedAtRuntime<MeshRendererComponent>(obj.GetType()))
+        {
             if (const auto* r = ecs->GetComponent<MeshRendererComponent>(entity))
             {
                 comps["MeshRenderer"] = Cho::Serialization::ToJson(*r);
             }
-			if (const auto* m = ecs->GetComponent<MaterialComponent>(entity))
-			{
-				comps["Material"] = Cho::Serialization::ToJson(*m);
-			}
-			if (const auto* s = ecs->GetComponent<ScriptComponent>(entity))
-			{
-				comps["Script"] = Cho::Serialization::ToJson(*s);
-			}
-			lineRenderers = ecs->GetAllComponents<LineRendererComponent>(entity);
+        }
+        if (IsComponentAllowedAtRuntime<MaterialComponent>(obj.GetType()))
+        {
+            if (const auto* m = ecs->GetComponent<MaterialComponent>(entity))
+            {
+                comps["Material"] = Cho::Serialization::ToJson(*m);
+            }
+        }
+        if (IsComponentAllowedAtRuntime<ScriptComponent>(obj.GetType()))
+        {
+            if (const auto* s = ecs->GetComponent<ScriptComponent>(entity))
+            {
+                comps["Script"] = Cho::Serialization::ToJson(*s);
+            }
+        }
+        if (IsComponentAllowedAtRuntime<LineRendererComponent>(obj.GetType()))
+        {
+            lineRenderers = ecs->GetAllComponents<LineRendererComponent>(entity);
             if (lineRenderers)
             {
-				comps["LineRenderer"] = Cho::Serialization::ToJson(*lineRenderers);
+                comps["LineRenderer"] = Cho::Serialization::ToJson(*lineRenderers);
             }
-			if (const auto* rb = ecs->GetComponent<Rigidbody2DComponent>(entity))
-			{
-				comps["Rigidbody2D"] = Cho::Serialization::ToJson(*rb);
-			}
-			if (const auto* bc = ecs->GetComponent<BoxCollider2DComponent>(entity))
-			{
-				comps["BoxCollider2D"] = Cho::Serialization::ToJson(*bc);
-			}
-            break;
-
-        case ObjectType::Camera:
-            if (const auto* t = ecs->GetComponent<TransformComponent>(entity))
+        }
+        if (IsComponentAllowedAtRuntime<Rigidbody2DComponent>(obj.GetType()))
+        {
+            if (const auto* rb = ecs->GetComponent<Rigidbody2DComponent>(entity))
             {
-                comps["Transform"] = Cho::Serialization::ToJson(*t);
+                comps["Rigidbody2D"] = Cho::Serialization::ToJson(*rb);
             }
+        }
+        if (IsComponentAllowedAtRuntime<BoxCollider2DComponent>(obj.GetType()))
+        {
+            if (const auto* bc = ecs->GetComponent<BoxCollider2DComponent>(entity))
+            {
+                comps["BoxCollider2D"] = Cho::Serialization::ToJson(*bc);
+            }
+        }
+        if (IsComponentAllowedAtRuntime<CameraComponent>(obj.GetType()))
+        {
             if (const auto* c = ecs->GetComponent<CameraComponent>(entity))
             {
                 comps["Camera"] = Cho::Serialization::ToJson(*c);
             }
-			if (const auto* s = ecs->GetComponent<ScriptComponent>(entity))
-			{
-				comps["Script"] = Cho::Serialization::ToJson(*s);
-			}
-            lineRenderers = ecs->GetAllComponents<LineRendererComponent>(entity);
-			if (lineRenderers)
-			{
-				comps["LineRenderer"] = Cho::Serialization::ToJson(*lineRenderers);
-			}
-            break;
-		case ObjectType::ParticleSystem:
-			if (const auto* t = ecs->GetComponent<TransformComponent>(entity))
-			{
-				comps["Transform"] = Cho::Serialization::ToJson(*t);
-			}
-			if (const auto* p = ecs->GetComponent<ParticleComponent>(entity))
-			{
-				comps["Particle"] = Cho::Serialization::ToJson(*p);
-			}
-			if (const auto* e = ecs->GetComponent<EmitterComponent>(entity))
-			{
-				comps["Emitter"] = Cho::Serialization::ToJson(*e);
-			}
-            break;
-        default:
-            break;
+        }
+        if (IsComponentAllowedAtRuntime<ParticleComponent>(obj.GetType()))
+        {
+            if (const auto* p = ecs->GetComponent<ParticleComponent>(entity))
+            {
+                comps["Particle"] = Cho::Serialization::ToJson(*p);
+            }
+        }
+        if (IsComponentAllowedAtRuntime<EmitterComponent>(obj.GetType()))
+        {
+            if (const auto* e = ecs->GetComponent<EmitterComponent>(entity))
+            {
+                comps["Emitter"] = Cho::Serialization::ToJson(*e);
+            }
+        }
+        if (IsComponentAllowedAtRuntime<UISpriteComponent>(obj.GetType()))
+        {
+            if (const auto* ui = ecs->GetComponent<UISpriteComponent>(entity))
+            {
+                comps["UISprite"] = Cho::Serialization::ToJson(*ui);
+            }
         }
 
         objJson["components"] = comps;
@@ -657,6 +670,17 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
                     //particle->freeListIndexBufferIndex = resourceManager->CreateRWStructuredBuffer<int32_t>(1);
                     // FreeList
                     particle->freeListBufferIndex = resourceManager->CreateRWStructuredBuffer<uint32_t>(particle->count, true);
+                }
+				// UISprite
+                if (comps.contains("UISprite"))
+                {
+                    UISpriteComponent u{};
+                    auto& ju = comps["UISprite"];
+                    Deserialization::FromJson(ju, u);
+                    UISpriteComponent* ui = ecs->AddComponent<UISpriteComponent>(entity);
+                    *ui = u;
+                    ui->mapID = resourceManager->GetIntegrationData(IntegrationDataType::UISprite)->GetMapID();
+                    resourceManager->GetUIContainer()->AddUI(ui->mapID.value());
                 }
             }
         }
@@ -970,6 +994,19 @@ json Cho::Serialization::ToJson(const ParticleComponent& p)
 {
     json j;
 	j["count"] = p.count;
+	return j;
+}
+
+json Cho::Serialization::ToJson(const UISpriteComponent& ui)
+{
+    json j;
+	j["position"] = { ui.position.x, ui.position.y };
+    j["rotation"] = ui.rotation;
+	j["scale"] = { ui.scale.x, ui.scale.y };
+	j["anchorPoint"] = { ui.anchorPoint.x, ui.anchorPoint.y }; 
+	j["size"] = { ui.size.x, ui.size.y };
+	j["textureLeftTop"] = { ui.textureLeftTop.x, ui.textureLeftTop.y };
+	j["textureSize"] = { ui.textureSize.x, ui.textureSize.y };
 	return j;
 }
 
@@ -1683,6 +1720,17 @@ void Cho::Deserialization::FromJson(const json& j, EmitterComponent& e)
 void Cho::Deserialization::FromJson(const json& j, ParticleComponent& p)
 {
 	p.count = j.value("count", 1024);
+}
+
+void Cho::Deserialization::FromJson(const json& j, UISpriteComponent& ui)
+{
+	ui.position = { j["position"][0], j["position"][1] };
+	ui.rotation = j.value("rotation", 0.0f);
+	ui.scale = { j["scale"][0], j["scale"][1] };
+	ui.anchorPoint = { j["anchorPoint"][0], j["anchorPoint"][1] };
+	ui.size = { j["size"][0], j["size"][1] };
+	ui.textureLeftTop = { j["textureLeftTop"][0], j["textureLeftTop"][1] };
+	ui.textureSize = { j["textureSize"][0], j["textureSize"][1] };
 }
 
 void Cho::FileSystem::ScanFolder(const path& rootPath, EngineCommand* engineCommand)

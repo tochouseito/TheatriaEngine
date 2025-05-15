@@ -127,7 +127,7 @@ void Inspector::CameraComponentView(GameObject* object)
 void Inspector::UISpriteComponentView(GameObject* object)
 {
 	// 許可されているコンポーネントか確認
-	if (IsComponentAllowedAtRuntime<UISpriteComponent>(object->GetType())) { return; }
+	if (!IsComponentAllowedAtRuntime<UISpriteComponent>(object->GetType())) { return; }
 	// UISpriteComponentを取得
 	UISpriteComponent* sprite = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<UISpriteComponent>(object->GetEntity());
 	if (!sprite) { return; }
