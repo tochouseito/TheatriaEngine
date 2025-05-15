@@ -509,6 +509,8 @@ void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& ga
 		DrawParticles(context, resourceManager, gameCore, mode);
 		// EffectEditor
 		EffectEditorDraw(context, resourceManager, gameCore, mode);
+		// UI
+		DrawUI(context, resourceManager, gameCore, mode);
 	} else
 	{
 		// パイプラインセット
@@ -829,57 +831,65 @@ void GraphicsEngine::EffectEditorDraw(CommandContext* context, ResourceManager& 
 
 void GraphicsEngine::DrawUI(CommandContext* context, ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode)
 {
+	if (resourceManager.GetUIContainer()->GetUseList().empty())
+	{
+		return;
+	}
+
 	// プリミティブトポロジの設定
 	context->SetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	// パイプラインセット
-	context->SetGraphicsPipelineState(m_PipelineManager->GetParticlePSO().pso.Get());
+	context->SetGraphicsPipelineState(m_PipelineManager->GetUIPSO().pso.Get());
 	// ルートシグネチャセット
-	context->SetGraphicsRootSignature(m_PipelineManager->GetParticlePSO().rootSignature.Get());
+	context->SetGraphicsRootSignature(m_PipelineManager->GetUIPSO().rootSignature.Get());
 
-	for (auto& object : gameCore.GetObjectContainer()->GetGameObjects().GetVector())
+	// UIComponentを取得
+	// シーンがないならスキップ
+	if (!gameCore.GetSceneManager()->GetCurrentScene()) { return; }
+	IConstantBuffer* cameraBuffer = nullptr;
+	// メインカメラを取得
+	if (mode == RenderMode::Game)
 	{
-		if (!object.IsActive()) { continue; }
-		if (object.GetType() != ObjectType::UI) { continue; }
-		// シーンがないならスキップ
-		if (!gameCore.GetSceneManager()->GetCurrentScene()) { continue; }
-		IConstantBuffer* cameraBuffer = nullptr;
-		// メインカメラを取得
-		if (mode == RenderMode::Game)
-		{
-			// カメラオブジェクトのIDを取得
-			std::optional<uint32_t> cameraID = gameCore.GetSceneManager()->GetCurrentScene()->GetMainCameraID();
-			if (!cameraID) { continue; }
-			// カメラオブジェクトを取得
-			GameObject& cameraObject = gameCore.GetObjectContainer()->GetGameObject(cameraID.value());
-			if (!cameraObject.IsActive()) { continue; }
-			// カメラのバッファインデックスを取得
-			CameraComponent* cameraComponent = gameCore.GetECSManager()->GetComponent<CameraComponent>(cameraObject.GetEntity());
-			if (!cameraComponent) { continue; }
-			// カメラのバッファを取得
-			cameraBuffer = resourceManager.GetBuffer<IConstantBuffer>(cameraComponent->bufferIndex);
-			// カメラがないならスキップ
-			if (!cameraBuffer) { continue; }
-		} else// デバッグカメラ
-		{
-			// カメラのバッファを取得
-			cameraBuffer = resourceManager.GetDebugCameraBuffer();
-			// カメラがないならスキップ
-			if (!cameraBuffer) { continue; }
-		}
-		// 
-		////if (!modelData) { break; }
-		//// VBVをセット
-		//D3D12_VERTEX_BUFFER_VIEW* vbv = resourceManager.GetBuffer<IVertexBuffer>(modelData->meshes[0].vertexBufferIndex)->GetVertexBufferView();
-		//context->SetVertexBuffers(0, 1, vbv);
-		//// IBVをセット
-		//D3D12_INDEX_BUFFER_VIEW* ibv = resourceManager.GetBuffer<IIndexBuffer>(modelData->meshes[0].indexBufferIndex)->GetIndexBufferView();
-		//context->SetIndexBuffer(ibv);
-		//// マテリアル統合バッファをセット
-		//IStructuredBuffer* materialBuffer = resourceManager.GetIntegrationBuffer(IntegrationDataType::Material);
-		//context->SetGraphicsRootDescriptorTable(3, materialBuffer->GetSRVGpuHandle());
-		//// 配列テクスチャのためヒープをセット
-		//context->SetGraphicsRootDescriptorTable(4, resourceManager.GetSUVDHeap()->GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
-		//// DrawCall
-		//context->DrawIndexedInstanced(static_cast<UINT>(modelData->meshes[0].indices.size()), particleComponent->count, 0, 0, 0);
+		// カメラオブジェクトのIDを取得
+		std::optional<uint32_t> cameraID = gameCore.GetSceneManager()->GetCurrentScene()->GetMainCameraID();
+		if (!cameraID) { return; }
+		// カメラオブジェクトを取得
+		GameObject& cameraObject = gameCore.GetObjectContainer()->GetGameObject(cameraID.value());
+		if (!cameraObject.IsActive()) { return; }
+		// カメラのバッファインデックスを取得
+		CameraComponent* cameraComponent = gameCore.GetECSManager()->GetComponent<CameraComponent>(cameraObject.GetEntity());
+		if (!cameraComponent) { return; }
+		// カメラのバッファを取得
+		cameraBuffer = resourceManager.GetBuffer<IConstantBuffer>(cameraComponent->bufferIndex);
+		// カメラがないならスキップ
+		if (!cameraBuffer) { return; }
+	} else// デバッグカメラ
+	{
+		// カメラのバッファを取得
+		cameraBuffer = resourceManager.GetDebugCameraBuffer();
+		// カメラがないならスキップ
+		if (!cameraBuffer) { return; }
 	}
+	// UIの頂点バッファを取得
+	UIData& uiData = resourceManager.GetUIContainer()->GetUIData(0);
+	// VBVをセット
+	D3D12_VERTEX_BUFFER_VIEW* vbv = resourceManager.GetBuffer<IVertexBuffer>(uiData.vertexBufferIndex)->GetVertexBufferView();
+	context->SetVertexBuffers(0, 1, vbv);
+	// IBVをセット
+	D3D12_INDEX_BUFFER_VIEW* ibv = resourceManager.GetBuffer<IIndexBuffer>(uiData.indexBufferIndex)->GetIndexBufferView();
+	context->SetIndexBuffer(ibv);
+	// UI統合バッファをセット
+	IStructuredBuffer* uiBuffer = resourceManager.GetIntegrationBuffer(IntegrationDataType::UISprite);
+	context->SetGraphicsRootDescriptorTable(0, uiBuffer->GetSRVGpuHandle());
+	// UIUseListをセット
+	IStructuredBuffer* useUIBuffer = resourceManager.GetBuffer<IStructuredBuffer>(resourceManager.GetUIContainer()->GetUseListBufferIndex());
+	context->SetGraphicsRootDescriptorTable(1, useUIBuffer->GetSRVGpuHandle());
+	// マテリアル統合バッファをセット
+	IStructuredBuffer* materialBuffer = resourceManager.GetIntegrationBuffer(IntegrationDataType::Material);
+	context->SetGraphicsRootDescriptorTable(2, materialBuffer->GetSRVGpuHandle());
+	// 配列テクスチャのためヒープをセット
+	context->SetGraphicsRootDescriptorTable(3, resourceManager.GetSUVDHeap()->GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
+	// DrawCall
+	context->DrawIndexedInstanced(6, static_cast<UINT>(resourceManager.GetUIContainer()->GetUseList().size()), 0, 0, 0);
+
 }

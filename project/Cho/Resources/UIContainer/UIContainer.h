@@ -10,6 +10,7 @@ struct UIVertexData
 	Vector4 position;
 	Vector2 texCoord;
 	Vector4 color;
+	uint32_t vertexID;
 };
 
 struct UIData
@@ -24,21 +25,22 @@ class ResourceManager;
 class UIContainer
 {
 public:
-	UIContainer(ResourceManager* resourceManager)
-		:m_pResourceManager(resourceManager)
-	{
-	}
+	UIContainer(ResourceManager* resourceManager);
 	~UIContainer()
 	{
 
 	}
 	// UIDataの追加
 	uint32_t AddUIData();
-	// UIDataの削除
-	void RemoveUIData(uint32_t index)
+	// UIの追加
+	void AddUI(const uint32_t& mapID)
 	{
-		m_UIDataContainer.erase(index);
-		m_UseList.remove(index);
+		m_UseList.push_back(mapID);
+	}
+	// UIDataの削除
+	void RemoveUI(const uint32_t& mapID)
+	{
+		m_UseList.remove(mapID);
 	}
 	// UIDataの取得
 	UIData& GetUIData(uint32_t index)
@@ -55,6 +57,7 @@ public:
 	{
 		return m_UseListBufferIndex;
 	}
+	void UpdateUseListBuffer();
 private:
 
 	// UIDataのコンテナ
@@ -63,6 +66,8 @@ private:
 	std::list<uint32_t> m_UseList;
 	// UseListBufferIndex
 	uint32_t m_UseListBufferIndex = 0;
+	// UseListのオフセット
+	const uint32_t kUseListOffset = 128;
 
 	// ResourceManagerのポインタ
 	ResourceManager* m_pResourceManager = nullptr;

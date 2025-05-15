@@ -16,7 +16,7 @@ void PipelineManager::Initialize(ID3D12Device8* device)
 	CreatePipelineEffectEditorInit(device);
 	CreatePipelineEffectEditorUpdate(device);
 	CreatePipelineEffectEditorEmit(device);
-	//CreatePipelineUI(device);
+	CreatePipelineUI(device);
 }
 
 std::vector<std::pair<uint32_t, std::string>> PipelineManager::CreateRootParameters(ID3D12ShaderReflection* pReflector, std::vector<D3D12_ROOT_PARAMETER>& rootParameters, std::vector<D3D12_DESCRIPTOR_RANGE>& descriptorRanges, D3D12_SHADER_VISIBILITY VISIBILITY)
@@ -1698,7 +1698,7 @@ void PipelineManager::CreatePipelineUI(ID3D12Device8* device)
 	rootParameters[0].DescriptorTable.NumDescriptorRanges = 1;
 	// UseList
 	D3D12_DESCRIPTOR_RANGE useListRange = {};
-	useListRange.BaseShaderRegister = 0;
+	useListRange.BaseShaderRegister = 1;
 	useListRange.NumDescriptors = 1;
 	useListRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	useListRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
@@ -1764,7 +1764,7 @@ void PipelineManager::CreatePipelineUI(ID3D12Device8* device)
 	);
 	Log::Write(LogLevel::Assert, "Root signature created.", hr);
 	// InputLayout
-	D3D12_INPUT_ELEMENT_DESC inputElementDesc[3] = {};
+	D3D12_INPUT_ELEMENT_DESC inputElementDesc[4] = {};
 	inputElementDesc[0].SemanticName = "POSITION";
 	inputElementDesc[0].SemanticIndex = 0;
 	inputElementDesc[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
@@ -1777,6 +1777,10 @@ void PipelineManager::CreatePipelineUI(ID3D12Device8* device)
 	inputElementDesc[2].SemanticIndex = 0;
 	inputElementDesc[2].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	inputElementDesc[2].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	inputElementDesc[3].SemanticName = "VERTEXID";
+	inputElementDesc[3].SemanticIndex = 0;
+	inputElementDesc[3].Format = DXGI_FORMAT_R32_UINT;
+	inputElementDesc[3].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
 	inputLayoutDesc.pInputElementDescs = inputElementDesc;
 	inputLayoutDesc.NumElements = _countof(inputElementDesc);

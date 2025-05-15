@@ -22,7 +22,7 @@ public:
 	virtual inline std::vector<ObjectID>& GetUseObjects() noexcept { return useObjects; }
 	virtual inline void AddUseObject(const ObjectID& objectID) { useObjects.push_back(objectID); }
 	virtual inline void RemoveUseObject(const ObjectID& objectID) { useObjects.erase(std::remove(useObjects.begin(), useObjects.end(), objectID), useObjects.end()); }
-	virtual inline void SetMainCameraID(const ObjectID& cameraID) { m_MainCameraID = cameraID; }
+	virtual inline void SetMainCameraID(std::optional<ObjectID> cameraID) { m_MainCameraID = cameraID; }
 	virtual inline std::optional<ObjectID> GetMainCameraID() const noexcept { return m_MainCameraID; }
 	virtual void Start() = 0;
 	virtual void Update() = 0;
@@ -60,7 +60,6 @@ public:
 	SceneManager(ResourceManager* resourceManager):
 		m_pResourceManager(resourceManager)
 	{
-		CreateSystem();
 	}
 	// Destructor
 	~SceneManager()
@@ -80,9 +79,6 @@ public:
 	void AddScene(const std::wstring& sceneName);
 	// シーンを変更リクエスト
 	void ChangeSceneRequest(const SceneID& sceneID) noexcept { m_pNextScene = m_pScenes[sceneID].get(); }
-
-	// System
-	void CreateSystem() noexcept;
 
 	ScenePrefab* GetScene(const SceneID& index) const noexcept
 	{

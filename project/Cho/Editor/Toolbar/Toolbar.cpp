@@ -38,9 +38,12 @@ void Toolbar::Window()
     // 左側にプルダウン（Combo）
     ImGui::SetCursorPosX(8); // 左端に寄せる
     static ObjectID currentTool = 0;
-    //const char* toolItems[] = { "Hand", "Move", "Rotate", "Scale" };
+    std::wstring name = L"カメラがありません！";
+    if (m_EngineCommand->GetGameCore()->GetSceneManager()->GetCurrentScene()->GetMainCameraID().has_value())
+    {
+        currentTool = m_EngineCommand->GetGameCore()->GetSceneManager()->GetCurrentScene()->GetMainCameraID().value();
+    }
 	GameObject& currentToolObject = m_EngineCommand->GetGameCore()->GetObjectContainer()->GetGameObject(currentTool);
-	std::wstring name = L"カメラがありません！";
     if (currentToolObject.IsActive())
     {
 		if (currentToolObject.GetType() == ObjectType::Camera)

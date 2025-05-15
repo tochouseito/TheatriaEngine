@@ -41,11 +41,6 @@ void SceneManager::AddScene(const std::wstring& sceneName)
 	m_SceneNameToID[sceneName] = sceneID;
 }
 
-void SceneManager::CreateSystem() noexcept
-{
-	
-}
-
 void SceneManager::ChangeScene()
 {
 	if (!m_pCurrentScene)// 現在のシーンがない場合

@@ -253,3 +253,61 @@ struct UISpriteComponent : public IComponentTag
 // マルチコンポーネントを許可
 template<>
 struct IsMultiComponent<LineRendererComponent> : std::true_type {};
+
+// オブジェクトタイプによるコンポーネントの所持許可
+// デフォルト : すべてfalse
+template<ObjectType T,typename Component>
+constexpr bool IsComponentAllowed = false;
+
+// MeshObject
+template<> constexpr bool IsComponentAllowed<ObjectType::MeshObject, TransformComponent> = true;
+template<> constexpr bool IsComponentAllowed<ObjectType::MeshObject, MeshFilterComponent> = true;
+template<> constexpr bool IsComponentAllowed<ObjectType::MeshObject, MeshRendererComponent> = true;
+template<> constexpr bool IsComponentAllowed<ObjectType::MeshObject, ScriptComponent> = true;
+template<> constexpr bool IsComponentAllowed<ObjectType::MeshObject, MaterialComponent> = true;
+template<> constexpr bool IsComponentAllowed<ObjectType::MeshObject, LineRendererComponent> = true;
+template<> constexpr bool IsComponentAllowed<ObjectType::MeshObject, Rigidbody2DComponent> = true;
+template<> constexpr bool IsComponentAllowed<ObjectType::MeshObject, BoxCollider2DComponent> = true;
+
+// Camera
+template<> constexpr bool IsComponentAllowed<ObjectType::Camera, TransformComponent> = true;
+template<> constexpr bool IsComponentAllowed<ObjectType::Camera, CameraComponent> = true;
+template<> constexpr bool IsComponentAllowed<ObjectType::Camera, ScriptComponent> = true;
+
+// ParticleSystem
+template<> constexpr bool IsComponentAllowed<ObjectType::ParticleSystem, TransformComponent> = true;
+template<> constexpr bool IsComponentAllowed<ObjectType::ParticleSystem, EmitterComponent> = true;
+template<> constexpr bool IsComponentAllowed<ObjectType::ParticleSystem, ParticleComponent> = true;
+
+// Effect
+template<> constexpr bool IsComponentAllowed<ObjectType::Effect, TransformComponent> = true;
+template<> constexpr bool IsComponentAllowed<ObjectType::Effect, EffectComponent> = true;
+
+// UI
+template<> constexpr bool IsComponentAllowed<ObjectType::UI, TransformComponent> = true;
+template<> constexpr bool IsComponentAllowed<ObjectType::UI, UISpriteComponent> = true;
+template<> constexpr bool IsComponentAllowed<ObjectType::UI, ScriptComponent> = true;
+template<> constexpr bool IsComponentAllowed<ObjectType::UI, MaterialComponent> = true;
+
+// ランタイム対応
+template<typename Component>
+bool IsComponentAllowedAtRuntime(ObjectType type)
+{
+	switch (type)
+	{
+	case ObjectType::MeshObject:
+		return IsComponentAllowed<ObjectType::MeshObject, Component>;
+	case ObjectType::Camera:
+		return IsComponentAllowed<ObjectType::Camera, Component>;
+	case ObjectType::ParticleSystem:
+		return IsComponentAllowed<ObjectType::ParticleSystem, Component>;
+	case ObjectType::Effect:
+		return IsComponentAllowed<ObjectType::Effect, Component>;
+	case ObjectType::UI:
+		return IsComponentAllowed<ObjectType::UI, Component>;
+	case ObjectType::Count:
+		return false;
+	default:
+		return false;
+	}
+}
