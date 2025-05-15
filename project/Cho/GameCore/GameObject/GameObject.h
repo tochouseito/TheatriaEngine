@@ -110,7 +110,7 @@ private:
 		InitializeInputAPI();
 	}
 
-	void InitializeTransformAPI(bool isParentReset = true);
+	void InitializeTransformAPI(bool isParentReset);
 	void InitializeCameraAPI();
 	void InitializeLineRendererAPI();
 	void InitializeRigidbody2DAPI();
@@ -125,19 +125,37 @@ public:
 		m_Active = true;
 	}
 	// デフォルトコンストラクタ
-	GameObject()
-	{
-		m_Active = false;
-	}
+	GameObject(){m_Active = false;}
 	// デストラクタ
-	~GameObject()
-	{
-	}
+	~GameObject() {}
 	// コピー、代入禁止
 	GameObject(const GameObject&) = delete;
 	GameObject& operator=(const GameObject&) = delete;
 	// ムーブは許可する
 	GameObject(GameObject&&) noexcept = default;
 	GameObject& operator=(GameObject&&) noexcept = default;
+};
+
+// GameObjectを生成するためのDataクラス
+class GameObjectData
+{
+public:
+private:
+	std::wstring m_Name = L"";						// ゲームオブジェクト名
+	ObjectType m_Type;								// ゲームオブジェクトのタイプ
+	std::string m_Tag = "Default";					// タグ
+	// コンポーネント
+	std::optional<TransformComponent> m_Transform = std::nullopt;
+	std::optional<CameraComponent> m_Camera = std::nullopt;
+	std::optional<MeshFilterComponent> m_MeshFilter = std::nullopt;
+	std::optional<MeshRendererComponent> m_MeshRenderer = std::nullopt;
+	std::optional<ScriptComponent> m_Script = std::nullopt;
+	std::vector<LineRendererComponent> m_LineRenderer;
+	std::optional<MaterialComponent> m_Material = std::nullopt;
+	std::optional<Rigidbody2DComponent> m_Rigidbody2D = std::nullopt;
+	std::optional<BoxCollider2DComponent> m_BoxCollider2D = std::nullopt;
+	std::optional<EmitterComponent> m_Emitter = std::nullopt;
+	std::optional<ParticleComponent> m_Particle = std::nullopt;
+	std::optional<UISpriteComponent> m_UISprite = std::nullopt;
 };
 

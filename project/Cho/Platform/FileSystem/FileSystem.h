@@ -133,12 +133,7 @@ namespace Cho
 		// ゲーム設定ファイルを読み込む
         static std::optional<Cho::GameSettingsInfo> LoadGameSettings(const std::wstring& projectName);
 		// シーンファイルを保存
-        static bool SaveSceneFile(
-            const std::wstring& directory,
-            BaseScene* scene,
-            ObjectContainer* container,
-            ECSManager* ecs
-        );
+        static bool SaveSceneFile(const std::wstring& directory,BaseScene* scene,ObjectContainer* container, ECSManager* ecs );
 		// シーンファイルを読み込む
         static bool LoadSceneFile(const std::wstring& filePath,EngineCommand* engineCommand);
         // スクリプトのファイルを保存

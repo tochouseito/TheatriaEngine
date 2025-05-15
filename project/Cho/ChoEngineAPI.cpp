@@ -127,3 +127,15 @@ CHO_API void ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vector3 gene
 	}
 	engineCommand->GetGameCore()->AddGameGenerateObject(newObject.GetID().value());
 }
+
+CHO_API void ChoSystem::DestroyGameObject(std::optional<uint32_t> id)
+{
+	EngineCommand* engineCommand = g_Engine->GetEngineCommand();
+	if (!engineCommand) { return; }
+	GameCore* gameCore = engineCommand->GetGameCore();
+	if (!gameCore) { return; }
+	gameCore->RemoveGameInitializedID(id.value());
+	// 生成されたオブジェクトを削除
+	std::unique_ptr<DeleteObjectCommand> command = std::make_unique<DeleteObjectCommand>(id.value());
+	command->Execute(engineCommand);
+}

@@ -39,6 +39,7 @@ namespace ChoSystem
 		GameParameterVariant& outValue);
 	// ゲームオブジェクト複製
 	CHO_API void CloneGameObject(std::optional<uint32_t> id, Vector3 generatePosition);
-
+	// ゲームオブジェクト削除
+	CHO_API void DestroyGameObject(std::optional<uint32_t> id);
 #endif
 }

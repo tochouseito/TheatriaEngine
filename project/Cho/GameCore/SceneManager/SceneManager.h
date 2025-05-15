@@ -33,6 +33,7 @@ protected:
 	std::wstring m_SceneName = L"";
 	SceneManager* m_SceneManager = nullptr;
 	std::vector<ObjectID> useObjects;
+	std::vector<GameObjectData> m_GameObjectData;
 	std::optional<ObjectID> m_MainCameraID = std::nullopt;
 };
 
