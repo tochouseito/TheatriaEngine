@@ -20,6 +20,7 @@ void MainMenu::Update()
     {
         Window();
         PopupScriptName();
+        PopupNewSceneName();
         SettingWindow();
 		BuildSettingWindow();
     }
@@ -168,6 +169,11 @@ void MainMenu::EditMenu()
             if (ImGui::MenuItem("スクリプト"))
             {
                 m_OpenScriptPopup = true;
+            }
+            if (ImGui::MenuItem("シーン"))
+            {
+				// シーンを追加
+				m_OpenScenePopup = true;
             }
             break;
 		case WorkSpaceType::EffectEdit:
@@ -335,6 +341,44 @@ void MainMenu::PopupScriptName()
     }
 }
 
+void MainMenu::PopupNewSceneName()
+{
+	// シーン名バッファ
+	static char sceneNameBuffer[64] = "";
+	if (m_OpenScenePopup)
+	{
+		std::memset(sceneNameBuffer, 0, sizeof(sceneNameBuffer)); // 初期化
+		ImGui::OpenPopup("SceneNamePopup");
+		m_OpenScenePopup = false; // 一度だけ開くように
+	}
+	if (ImGui::BeginPopupModal("SceneNamePopup", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+	{
+		ImGui::Text("シーン名を入力してください（A-Z, a-z）:");
+		ImGui::InputText("##SceneName", sceneNameBuffer, IM_ARRAYSIZE(sceneNameBuffer),
+			ImGuiInputTextFlags_CallbackCharFilter,
+			[](ImGuiInputTextCallbackData* data) -> int {
+				if ((data->EventChar >= 'a' && data->EventChar <= 'z') ||
+					(data->EventChar >= 'A' && data->EventChar <= 'Z'))
+				{
+					return 0;
+				}
+				return 1;
+			});
+		if (ImGui::Button("OK"))
+		{
+			std::string sceneName = sceneNameBuffer;
+			m_EngineCommand->GetGameCore()->GetSceneManager()->AddScene(ConvertString(sceneName));
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("キャンセル"))
+		{
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndPopup();
+	}
+}
+
 void MainMenu::SettingWindow()
 {
 	// 設定ウィンドウ
@@ -361,7 +405,7 @@ void MainMenu::SettingWindow()
 	m_EngineCommand->GetInputManager()->SetJoystickDeadZone(0,leftDeadZone, rightDeadZone);
 
 	ImGui::Text("最初のシーン");
-    static std::wstring selectFirstScene=
+    static std::wstring selectFirstScene = Cho::FileSystem::g_GameSettings.startScene;
 	std::wstring startScene = L"シーンがありません";
     if (!selectFirstScene.empty())
     {
@@ -372,8 +416,14 @@ void MainMenu::SettingWindow()
     {
         for (const auto& scene : m_EngineCommand->GetGameCore()->GetSceneManager()->GetScenes().GetVector())
         {
-
+            if (ImGui::Selectable(ConvertString(scene->GetSceneName()).c_str()))
+            {
+                selectFirstScene = scene->GetSceneName();
+                // ゲーム設定に保存
+                Cho::FileSystem::g_GameSettings.startScene = selectFirstScene;
+            }
         }
+        ImGui::EndCombo();
     }
 
     ImGui::End();
