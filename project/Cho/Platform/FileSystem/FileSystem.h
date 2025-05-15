@@ -131,7 +131,7 @@ namespace Cho
 		// ゲーム設定ファイルを保存
         static bool SaveGameSettings(const std::wstring& projectName, const Cho::GameSettingsInfo& settings);
 		// ゲーム設定ファイルを読み込む
-        static std::optional<Cho::GameSettingsInfo> LoadGameSettings(const std::wstring& projectName);
+        static bool LoadGameSettings(const std::wstring& filePath);
 		// シーンファイルを保存
         static bool SaveSceneFile(const std::wstring& directory,BaseScene* scene,ObjectContainer* container, ECSManager* ecs );
 		// シーンファイルを読み込む
@@ -180,6 +180,7 @@ namespace Cho
         static std::string GenerateGUID();
         static std::wstring m_sProjectName;
         static inline FolderNode g_ProjectFiles;
+		static inline GameSettingsInfo g_GameSettings;
 
         class ScriptProject
         {

@@ -360,6 +360,22 @@ void MainMenu::SettingWindow()
 	ImGui::DragInt("RightStickDeadZone", &rightDeadZone, 1, 0, 10000);
 	m_EngineCommand->GetInputManager()->SetJoystickDeadZone(0,leftDeadZone, rightDeadZone);
 
+	ImGui::Text("最初のシーン");
+    static std::wstring selectFirstScene=
+	std::wstring startScene = L"シーンがありません";
+    if (!selectFirstScene.empty())
+    {
+		startScene = selectFirstScene;
+    }
+	
+    if (ImGui::BeginCombo("##firstSceneSelector", ConvertString(startScene).c_str()))
+    {
+        for (const auto& scene : m_EngineCommand->GetGameCore()->GetSceneManager()->GetScenes().GetVector())
+        {
+
+        }
+    }
+
     ImGui::End();
 }
 

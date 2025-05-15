@@ -249,21 +249,19 @@ bool Cho::FileSystem::SaveGameSettings(const std::wstring& projectName, const Ch
 }
 
 // ゲーム設定ファイルを読み込む
-std::optional<Cho::GameSettingsInfo> Cho::FileSystem::LoadGameSettings(const std::wstring& projectName)
+bool Cho::FileSystem::LoadGameSettings(const std::wstring& filePath)
 {
-    std::filesystem::path path = std::filesystem::path(projectName) / "GameSettings.json";
-
     try
     {
-        std::ifstream file(path.string());
-        if (!file.is_open()) return std::nullopt;
+        std::ifstream file(filePath);
+        if (!file.is_open()) { return false; }
 
         nlohmann::json j;
         file >> j;
 
         if (j.contains("fileType") && j["fileType"] != "GameSettings")
         {
-            return std::nullopt;
+            return false;
         }
 
         Cho::GameSettingsInfo settings;
@@ -271,12 +269,13 @@ std::optional<Cho::GameSettingsInfo> Cho::FileSystem::LoadGameSettings(const std
         settings.frameRate = j.value("frameRate", 60);
         settings.fixedDeltaTime = j.value("fixedDeltaTime", 1.0f / 60.0f);
         settings.debugMode = j.value("debugMode", false);
+		Cho::FileSystem::g_GameSettings = settings;
 
-        return settings;
+        return true;
     }
     catch (...)
     {
-        return std::nullopt;
+        return false;
     }
 }
 
@@ -1043,18 +1042,24 @@ void Cho::FileSystem::SaveProject(SceneManager* sceneManager, ObjectContainer* c
 {
     if (m_sProjectName.empty()) { return; }
     // セーブ
+	std::filesystem::path projectPath = std::filesystem::path(L"GameProjects") / m_sProjectName;
+	// GameSettingsFile
+    Cho::FileSystem::SaveGameSettings(projectPath, g_GameSettings);
+
+    // SceneFile
     for (auto& scene : sceneManager->GetScenes().GetVector())
     {
         // シーンファイルを保存
         Cho::FileSystem::SaveSceneFile(
-            L"GameProjects/" + m_sProjectName,
+            projectPath,
             scene.get(),
             container,
             ecs
         );
     }
+    // ScriptDataFile
 	Cho::FileSystem::SaveScriptFile(
-		L"GameProjects/" + m_sProjectName,
+        projectPath,
 		resourceManager
 	);
 }
@@ -1066,15 +1071,6 @@ bool Cho::FileSystem::LoadProjectFolder(const std::wstring& projectName, EngineC
     std::filesystem::path projectPath = std::filesystem::path(L"GameProjects") / projectName;
 
     // プロジェクトファイル類を読み込み
-    std::optional<ProjectInfo> projectInfo = LoadProjectFile(projectPath);
-    std::optional<EngineConfigInfo> engineConfig = LoadEngineConfig(projectPath);
-    std::optional<GameSettingsInfo> gameSettings = LoadGameSettings(projectPath);
-
-    /*if (!projectInfo || !engineConfig || !gameSettings)
-    {
-    return false;
-    }*/
-
     // 全ファイル走査（サブディレクトリ含む）
     ScanFolder(projectPath,engineCommand);
     return true;
@@ -1827,6 +1823,9 @@ bool Cho::FileSystem::ProcessFile(const path& filePath, EngineCommand* engineCom
         case Cho::EngineConfig:
             break;
         case Cho::GameSettings:
+        {
+            return LoadGameSettings(filePath);
+        }
             break;
         case Cho::SceneFile:// シーンファイル
         {
