@@ -287,6 +287,7 @@ template<> constexpr bool IsComponentAllowed<ObjectType::Effect, EffectComponent
 template<> constexpr bool IsComponentAllowed<ObjectType::UI, TransformComponent> = true;
 template<> constexpr bool IsComponentAllowed<ObjectType::UI, UISpriteComponent> = true;
 template<> constexpr bool IsComponentAllowed<ObjectType::UI, ScriptComponent> = true;
+template<> constexpr bool IsComponentAllowed<ObjectType::UI, MaterialComponent> = true;
 
 // ランタイム対応
 template<typename Component>
