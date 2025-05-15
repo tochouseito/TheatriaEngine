@@ -73,6 +73,7 @@ public:
 	Rigidbody2DAPI rigidbody2D;		// Rigidbody2DAPI
 	BoxCollider2DAPI boxCollider2D;	// BoxCollider2DAPI
 	MaterialAPI material;			// MaterialAPI
+	UISpriteAPI ui;					// UIAPI
 
 	InputAPI input;					// InputAPI
 
@@ -108,6 +109,7 @@ private:
 		InitializeBoxCollider2DAPI();
 		InitializeMaterialAPI();
 		InitializeInputAPI();
+		InitializeUIAPI();
 	}
 
 	void InitializeTransformAPI(bool isParentReset);
@@ -117,6 +119,7 @@ private:
 	void InitializeBoxCollider2DAPI();
 	void InitializeMaterialAPI();
 	void InitializeInputAPI();
+	void InitializeUIAPI();
 public:
 	// コンストラクタ
 	GameObject(ObjectContainer* objectContainer, InputManager* input, ResourceManager* resourceManager, ECSManager* ecs, const Entity& entity, const std::wstring& name, const ObjectType& type) :

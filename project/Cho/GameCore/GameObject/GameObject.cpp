@@ -244,3 +244,18 @@ void GameObject::InitializeInputAPI()
 		return m_InputManager->GetLRTrigger(LorR, stickNo);
 		};
 }
+
+void GameObject::InitializeUIAPI()
+{
+	if (!m_ECS || !m_ResourceManager)
+	{
+		ui.data = nullptr;
+		return;
+	}
+	// UIComponent を取得
+	UISpriteComponent* uiComp = m_ECS->GetComponent<UISpriteComponent>(m_Entity);
+	ui.data = uiComp;
+	if (uiComp)
+	{
+	}
+}

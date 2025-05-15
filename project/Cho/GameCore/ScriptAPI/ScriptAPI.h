@@ -134,3 +134,55 @@ private:
 	friend class GameObject;
 	InputManager* data = nullptr;
 };
+
+struct EmitterAPI
+{
+	// 関数
+	std::function<void(const Vector3& position)> SetPosition;
+	std::function<void(const Vector3& velocity)> SetVelocity;
+	std::function<void(const Vector3& acceleration)> SetAcceleration;
+	std::function<void(const Vector3& rotation)> SetRotation;
+	std::function<void(const Vector3& scale)> SetScale;
+	std::function<void(const Vector3& color)> SetColor;
+private:
+	friend class GameObject;
+	EmitterComponent* data = nullptr;
+};
+
+struct ParticleAPI
+{
+	// 関数
+	std::function<void(const Vector3& position)> SetPosition;
+	std::function<void(const Vector3& velocity)> SetVelocity;
+	std::function<void(const Vector3& acceleration)> SetAcceleration;
+	std::function<void(const Vector3& rotation)> SetRotation;
+	std::function<void(const Vector3& scale)> SetScale;
+	std::function<void(const Vector3& color)> SetColor;
+private:
+	friend class GameObject;
+	ParticleComponent* data = nullptr;
+};
+
+struct EffectAPI
+{
+	// 関数
+	std::function<void(const Vector3& position)> SetPosition;
+	std::function<void(const Vector3& rotation)> SetRotation;
+	std::function<void(const Vector3& scale)> SetScale;
+	std::function<void(const Vector3& color)> SetColor;
+private:
+	friend class GameObject;
+	EffectComponent* data = nullptr;
+};
+
+struct UISpriteAPI
+{
+	// 関数
+	Vector2& position() { return data->position; }
+	float& rotation() { return data->rotation; }
+	Vector2& scale() { return data->scale; }
+	Vector2& anchorPoint() { return data->anchorPoint; }
+private:
+	friend class GameObject;
+	UISpriteComponent* data = nullptr;
+};
