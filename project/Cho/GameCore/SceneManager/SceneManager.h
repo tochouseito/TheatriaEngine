@@ -23,10 +23,14 @@ public:
 	virtual inline std::vector<ObjectID>& GetUseObjects() noexcept { return m_UseObjects; }
 	virtual inline void AddUseObject(const ObjectID& objectID) { m_UseObjects.push_back(objectID); }
 	virtual inline void AddGameObjectData(const GameObjectData& data) { m_GameObjectData.push_back(data); }
+	virtual inline std::vector<GameObjectData>& GetGameObjectData() noexcept { return m_GameObjectData; }
 	virtual inline void RemoveUseObject(const ObjectID& objectID) { m_UseObjects.erase(std::remove(m_UseObjects.begin(), m_UseObjects.end(), objectID), m_UseObjects.end()); }
+	virtual inline void ClearUseObjects() { m_UseObjects.clear(); }
+	virtual inline void ClearGameObjectData() { m_GameObjectData.clear(); }
 	virtual inline void SetMainCameraID(std::optional<ObjectID> cameraID) { m_MainCameraID = cameraID; }
 	virtual inline std::optional<ObjectID> GetMainCameraID() const noexcept { return m_MainCameraID; }
 	virtual inline void SetStartCameraName(const std::wstring& cameraName) { m_StartCameraName = cameraName; }
+	virtual inline std::wstring GetStartCameraName() const noexcept { return m_StartCameraName; }
 	virtual void Start() = 0;
 	virtual void Update() = 0;
 	virtual void Finalize() = 0;

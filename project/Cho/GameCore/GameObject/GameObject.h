@@ -41,6 +41,7 @@ class GameObject
 	friend class AddCameraObjectCommand;
 	friend class RenameObjectCommand;
 	friend class IScript;
+	friend class GameObjectData;
 public:
 	std::optional<ObjectID> GetID() const noexcept { return m_ID; }
 	Entity GetEntity() const noexcept { return m_Entity; }
@@ -150,6 +151,13 @@ public:
 	{
 	}
 	~GameObjectData() {}
+	// GameObjectの代入
+	GameObjectData& operator=(const GameObject& other)
+	{
+		this->m_Name = other.m_Name;
+		this->m_Type = other.m_Type;
+		this->m_Tag = other.m_Tag;
+	}
 private:
 	std::wstring m_Name = L"";						// ゲームオブジェクト名
 	ObjectType m_Type;								// ゲームオブジェクトのタイプ

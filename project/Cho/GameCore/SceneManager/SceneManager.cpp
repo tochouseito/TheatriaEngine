@@ -125,6 +125,8 @@ void ScenePrefab::Start()
 	{
 		SetMainCameraID(mainCamera.GetID().value());
 	}
+	// GameObjectDataをクリア
+	m_GameObjectData.clear();
 }
 
 void ScenePrefab::Update()
@@ -138,6 +140,9 @@ void ScenePrefab::Finalize()
 	std::vector<ObjectID> useObjects = m_UseObjects;
 	for (const auto& objectID : useObjects)
 	{
+		// GameObjectを取得
+		GameObject& object = m_SceneManager->m_pGameCore->GetObjectContainer()->GetGameObject(objectID);
+		GameObjectData objectCopy = object;
 		std::unique_ptr<DeleteObjectCommand> deleteCommand = std::make_unique<DeleteObjectCommand>(objectID);
 		if (!deleteCommand->Execute(m_SceneManager->m_pGameCore->GetEngineCommand()))
 		{
