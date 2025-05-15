@@ -225,8 +225,19 @@ bool DeleteObjectCommand::Execute(EngineCommand* edit)
 		// Material統合バッファからmapIDを返却
 		edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::Material)->RemoveMapID(material->mapID.value());
 	}
+	// CameraComponentを取得
+	CameraComponent* camera = edit->m_GameCore->GetECSManager()->GetComponent<CameraComponent>(object.GetEntity());
+	if (camera)
+	{
+		// シーンのMainCamaraなら削除
+		if (edit->m_GameCore->GetSceneManager()->GetCurrentScene()->GetMainCameraID() == m_ObjectID)
+		{
+			edit->m_GameCore->GetSceneManager()->GetCurrentScene()->SetMainCameraID(std::nullopt);
+		}
+	}
 	// 削除前にComponentを記録する
 	m_Transform = *transform;
+	if (camera) { m_Camera = *camera; }
 	if (meshFilter) { m_MeshFilter = *meshFilter; }
 	MeshRendererComponent* meshRenderer = edit->m_GameCore->GetECSManager()->GetComponent<MeshRendererComponent>(object.GetEntity());
 	if (meshRenderer) { m_MeshRenderer = *meshRenderer; }
@@ -243,8 +254,11 @@ bool DeleteObjectCommand::Execute(EngineCommand* edit)
 	if (emitter) { m_Emitter = *emitter; }
 	ParticleComponent* particle = edit->m_GameCore->GetECSManager()->GetComponent<ParticleComponent>(object.GetEntity());
 	if (particle) { m_Particle = *particle; }
+	UISpriteComponent* uiSprite = edit->m_GameCore->GetECSManager()->GetComponent<UISpriteComponent>(object.GetEntity());
+	if (uiSprite) { m_UISprite = *uiSprite; }
 	// Componentの削除
 	edit->m_GameCore->GetECSManager()->RemoveComponent<TransformComponent>(object.GetEntity());
+	if (camera) { edit->m_GameCore->GetECSManager()->RemoveComponent<CameraComponent>(object.GetEntity()); }
 	if (meshFilter) { edit->m_GameCore->GetECSManager()->RemoveComponent<MeshFilterComponent>(object.GetEntity()); }
 	if (meshRenderer) { edit->m_GameCore->GetECSManager()->RemoveComponent<MeshRendererComponent>(object.GetEntity()); }
 	if (material) { edit->m_GameCore->GetECSManager()->RemoveComponent<MaterialComponent>(object.GetEntity()); }
@@ -254,6 +268,7 @@ bool DeleteObjectCommand::Execute(EngineCommand* edit)
 	if (box) { edit->m_GameCore->GetECSManager()->RemoveComponent<BoxCollider2DComponent>(object.GetEntity()); }
 	if (emitter) { edit->m_GameCore->GetECSManager()->RemoveComponent<EmitterComponent>(object.GetEntity()); }
 	if (particle) { edit->m_GameCore->GetECSManager()->RemoveComponent<ParticleComponent>(object.GetEntity()); }
+	if (uiSprite) { edit->m_GameCore->GetECSManager()->RemoveComponent<UISpriteComponent>(object.GetEntity()); }
 	// Entityの削除
 	edit->m_GameCore->GetECSManager()->RemoveEntity(object.GetEntity());
 	// CurrentSceneから削除

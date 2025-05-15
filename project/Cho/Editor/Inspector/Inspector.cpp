@@ -132,6 +132,20 @@ void Inspector::UISpriteComponentView(GameObject* object)
 	UISpriteComponent* sprite = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<UISpriteComponent>(object->GetEntity());
 	if (!sprite) { return; }
 	ImGui::Text("Sprite Component");
+	// position
+	ImGui::DragFloat2("Position", &sprite->position.x, 1.0f, 0.0f, 0.0f, "%.1f");
+	// rotation
+	ImGui::DragFloat("Rotation", &sprite->rotation, 0.1f, 0.0f, 0.0f, "%.1f°");
+	// scale
+	ImGui::DragFloat2("Scale", &sprite->scale.x, 0.01f, 0.0f, 0.0f, "%.1f");
+	// anchorpoint
+	ImGui::DragFloat2("AnchorPoint", &sprite->anchorPoint.x, 0.01f, 0.0f, 0.0f, "%.1f");
+	// size
+	ImGui::DragFloat2("Size", &sprite->size.x, 0.01f, 0.0f, 0.0f, "%.1f");
+	// texturelefttop
+	ImGui::DragFloat2("TextureLeftTop", &sprite->textureLeftTop.x, 0.01f, 0.0f, 0.0f, "%.1f");
+	// texturesize
+	ImGui::DragFloat2("TextureSize", &sprite->textureSize.x, 0.01f, 0.0f, 0.0f, "%.1f");
 }
 
 void Inspector::MaterialComponentView(GameObject* object)

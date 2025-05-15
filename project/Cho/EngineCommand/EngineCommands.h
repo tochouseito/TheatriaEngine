@@ -186,6 +186,7 @@ private:
 	std::optional<BoxCollider2DComponent> m_BoxCollider2D;
 	std::optional<EmitterComponent> m_Emitter;
 	std::optional<ParticleComponent> m_Particle;
+	std::optional<UISpriteComponent> m_UISprite;
 };
 // オブジェクトの名前を変更するコマンド
 class RenameObjectCommand : public IEngineCommand
