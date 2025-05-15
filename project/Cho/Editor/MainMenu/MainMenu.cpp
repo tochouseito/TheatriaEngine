@@ -367,7 +367,9 @@ void MainMenu::PopupNewSceneName()
 		if (ImGui::Button("OK"))
 		{
 			std::string sceneName = sceneNameBuffer;
-			m_EngineCommand->GetGameCore()->GetSceneManager()->AddScene(ConvertString(sceneName));
+			ScenePrefab scene(m_EngineCommand->GetGameCore()->GetSceneManager());
+			scene.SetSceneName(ConvertString(sceneName));
+			m_EngineCommand->GetGameCore()->GetSceneManager()->AddScene(scene);
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::SameLine();
@@ -411,7 +413,6 @@ void MainMenu::SettingWindow()
     {
 		startScene = selectFirstScene;
     }
-	
     if (ImGui::BeginCombo("##firstSceneSelector", ConvertString(startScene).c_str()))
     {
         for (const auto& scene : m_EngineCommand->GetGameCore()->GetSceneManager()->GetScenes().GetVector())
@@ -425,6 +426,19 @@ void MainMenu::SettingWindow()
         }
         ImGui::EndCombo();
     }
+    ImGui::Text("シーンを切り替え");
+    std::wstring sceneName = m_EngineCommand->GetGameCore()->GetSceneManager()->GetCurrentScene()->GetSceneName();
+	if (ImGui::BeginCombo("##SceneSelector", ConvertString(sceneName).c_str()))
+	{
+		for (const auto& scene : m_EngineCommand->GetGameCore()->GetSceneManager()->GetScenes().GetVector())
+		{
+			if (ImGui::Selectable(ConvertString(scene->GetSceneName()).c_str()))
+			{
+				m_EngineCommand->GetGameCore()->GetSceneManager()->ChangeSceneRequest(scene->GetSceneID());
+			}
+		}
+		ImGui::EndCombo();
+	}
 
     ImGui::End();
 }

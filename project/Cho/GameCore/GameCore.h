@@ -34,6 +34,7 @@ public:
 	SceneManager* GetSceneManager() { return m_pSceneManager.get(); }
 	ECSManager* GetECSManager() { return m_pECSManager.get(); }
 	ObjectContainer* GetObjectContainer() { return m_pObjectContainer.get(); }
+	EngineCommand* GetEngineCommand() { return m_EngineCommand; }
 	bool IsRunning() const { return isRunning; }
 	void GameRun();
 	void GameStop();

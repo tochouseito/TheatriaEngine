@@ -142,7 +142,14 @@ public:
 // GameObjectを生成するためのDataクラス
 class GameObjectData
 {
+	friend class FileSystem;
+	friend class ScenePrefab;
 public:
+	GameObjectData(const std::wstring& name, const ObjectType& type) :
+		m_Name(name), m_Type(type)
+	{
+	}
+	~GameObjectData() {}
 private:
 	std::wstring m_Name = L"";						// ゲームオブジェクト名
 	ObjectType m_Type;								// ゲームオブジェクトのタイプ

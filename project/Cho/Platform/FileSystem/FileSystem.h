@@ -55,7 +55,7 @@ namespace Cho
     };
     struct GameSettingsInfo
     {
-        std::wstring startScene = L"MainScene.json";
+        std::wstring startScene = L"MainScene";
         int frameRate = 60;
         float fixedDeltaTime = 1.0f / 60.0f;
         bool debugMode = false;

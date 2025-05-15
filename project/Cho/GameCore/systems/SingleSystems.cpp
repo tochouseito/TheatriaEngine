@@ -204,7 +204,7 @@ void ScriptGenerateInstanceSystem::InstanceGenerate(ScriptComponent& script)
 	funcName.erase(std::remove_if(funcName.begin(), funcName.end(), ::isspace), funcName.end());
 	// CreateScript関数を取得
 	typedef IScript* (*CreateScriptFunc)(GameObject&);
-	CreateScriptFunc createScript = (CreateScriptFunc)GetProcAddress(FileSystem::ScriptProject::m_DllHandle, funcName.c_str());
+	CreateScriptFunc createScript = (CreateScriptFunc)GetProcAddress(Cho::FileSystem::ScriptProject::m_DllHandle, funcName.c_str());
 	if (!createScript)
 	{
 		script.isActive = false;

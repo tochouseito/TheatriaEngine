@@ -61,9 +61,9 @@ void EngineCommand::SaveProjectFile(const std::wstring& projectName)
 
 void EngineCommand::GenerateScript(const std::string& scriptName)
 {
-	FileSystem::ScriptProject::GenerateScriptFiles(scriptName);
+	Cho::FileSystem::ScriptProject::GenerateScriptFiles(scriptName);
 	// プロジェクトファイルを更新
-	FileSystem::ScriptProject::UpdateVcxproj();
+	Cho::FileSystem::ScriptProject::UpdateVcxproj();
 	// スクリプトコンテナに追加
 	m_ResourceManager->GetScriptContainer()->AddScriptData(scriptName);
 }
