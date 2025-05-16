@@ -453,7 +453,8 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 	rootParameters[0].Descriptor.ShaderRegister = 0;
 	// IntegrationTransform
 	D3D12_DESCRIPTOR_RANGE integrationTransformRange = {};
-	integrationTransformRange.BaseShaderRegister = 0;
+	integrationTransformRange.BaseShaderRegister = 0;//t0
+	integrationTransformRange.RegisterSpace = 0;// space0
 	integrationTransformRange.NumDescriptors = 1;
 	integrationTransformRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	integrationTransformRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
@@ -463,7 +464,8 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 	rootParameters[1].DescriptorTable.NumDescriptorRanges = 1;
 	// UseTransformList
 	D3D12_DESCRIPTOR_RANGE useTransformListRange = {};
-	useTransformListRange.BaseShaderRegister = 1;
+	useTransformListRange.BaseShaderRegister = 1;//t1
+	useTransformListRange.RegisterSpace = 0;// space0
 	useTransformListRange.NumDescriptors = 1;
 	useTransformListRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	useTransformListRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
@@ -473,7 +475,8 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 	rootParameters[2].DescriptorTable.NumDescriptorRanges = 1;
 	// IntegrationMaterial
 	D3D12_DESCRIPTOR_RANGE integrationMaterialRange = {};
-	integrationMaterialRange.BaseShaderRegister = 0;
+	integrationMaterialRange.BaseShaderRegister = 0;//t0
+	integrationMaterialRange.RegisterSpace = 1;// space1
 	integrationMaterialRange.NumDescriptors = 1;
 	integrationMaterialRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	integrationMaterialRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
@@ -483,7 +486,8 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 	rootParameters[3].DescriptorTable.NumDescriptorRanges = 1;
 	// Texture
 	D3D12_DESCRIPTOR_RANGE textureRange = {};
-	textureRange.BaseShaderRegister = 1;
+	textureRange.BaseShaderRegister = 1;//t1
+	textureRange.RegisterSpace = 1;// space1
 	textureRange.NumDescriptors = 256;
 	textureRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	textureRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;

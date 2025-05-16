@@ -36,9 +36,9 @@ struct BUFFER_DATA_MATERIAL final
 	Color color;		// 16バイト
 	Matrix4 matUV;		// 64バイト
 	float shininess;	// 4バイト
-	int enableLighting;	// 4バイト
-	int enableTexture;	// 4バイト
-	int textureId;		// 4バイト
+	uint32_t enableLighting;	// 4バイト
+	uint32_t enableTexture;	// 4バイト
+	uint32_t textureId;		// 4バイト
 };
 // Emitter
 struct BUFFER_DATA_EMITTER final

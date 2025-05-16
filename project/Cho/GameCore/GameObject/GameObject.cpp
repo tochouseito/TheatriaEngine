@@ -259,3 +259,67 @@ void GameObject::InitializeUIAPI()
 	{
 	}
 }
+
+GameObjectData::GameObjectData(const GameObject& other)
+{
+	this->m_Name = other.m_Name;
+	this->m_Type = other.m_Type;
+	this->m_Tag = other.m_Tag;
+
+	Entity e = other.m_Entity;
+
+	if (auto* transform = other.m_ECS->GetComponent<TransformComponent>(e))
+	{
+		m_Transform = *transform;
+	}
+	if (auto* camera = other.m_ECS->GetComponent<CameraComponent>(e))
+	{
+		m_Camera = *camera;
+	}
+	if (auto* mesh = other.m_ECS->GetComponent<MeshFilterComponent>(e))
+	{
+		m_MeshFilter = *mesh;
+	}
+	if (auto* renderer = other.m_ECS->GetComponent<MeshRendererComponent>(e))
+	{
+		m_MeshRenderer = *renderer;
+	}
+	if (auto* script = other.m_ECS->GetComponent<ScriptComponent>(e))
+	{
+		m_Script = *script;
+	}
+	if (auto* material = other.m_ECS->GetComponent<MaterialComponent>(e))
+	{
+		m_Material = *material;
+	}
+	if (auto* rigidbody2D = other.m_ECS->GetComponent<Rigidbody2DComponent>(e))
+	{
+		m_Rigidbody2D = *rigidbody2D;
+	}
+	if (auto* boxCollider2D = other.m_ECS->GetComponent<BoxCollider2DComponent>(e))
+	{
+		m_BoxCollider2D = *boxCollider2D;
+	}
+	if (auto* emitter = other.m_ECS->GetComponent<EmitterComponent>(e))
+	{
+		m_Emitter = *emitter;
+	}
+	if (auto* particle = other.m_ECS->GetComponent<ParticleComponent>(e))
+	{
+		m_Particle = *particle;
+	}
+	if (auto* uiSprite = other.m_ECS->GetComponent<UISpriteComponent>(e))
+	{
+		m_UISprite = *uiSprite;
+	}
+
+	if (auto* lineRenderer = other.m_ECS->GetAllComponents<LineRendererComponent>(e))
+	{
+		m_LineRenderer.clear();
+		for (const auto& line : *lineRenderer)
+		{
+			m_LineRenderer.push_back(line);
+		}
+		std::reverse(m_LineRenderer.begin(), m_LineRenderer.end());
+	}
+}

@@ -432,10 +432,12 @@ void MainMenu::SettingWindow()
 	{
 		for (const auto& scene : m_EngineCommand->GetGameCore()->GetSceneManager()->GetScenes().GetVector())
 		{
-			if (ImGui::Selectable(ConvertString(scene->GetSceneName()).c_str()))
-			{
-				m_EngineCommand->GetGameCore()->GetSceneManager()->ChangeSceneRequest(scene->GetSceneID());
-			}
+            if (ImGui::Selectable(ConvertString(scene->GetSceneName()).c_str()))
+            {
+                if (m_EngineCommand->GetGameCore()->GetSceneManager()->GetCurrentScene()->GetSceneName() !=
+                    scene->GetSceneName())
+                    m_EngineCommand->GetGameCore()->GetSceneManager()->ChangeSceneRequest(scene->GetSceneID());
+            }
 		}
 		ImGui::EndCombo();
 	}

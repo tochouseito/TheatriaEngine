@@ -95,14 +95,14 @@ std::optional<uint32_t> SUVDescriptorHeap::TextureAllocate()
 		return result;
 	}
 	// 最大数を超えた場合はnullptrを返す
-	if (m_MaxTextureCount <= m_NextHandleIndex)
+	if (m_MaxTextureCount <= m_TexNextHandleIndex)
 	{
 		Log::Write(LogLevel::Warn, "DescriptorHeap is full");
 		return std::nullopt;
 	}
 	// 返却されたインデックスがなければ次のインデックスを使用
-	uint32_t result = m_NextHandleIndex;
-	m_NextHandleIndex++;
+	uint32_t result = m_TexNextHandleIndex;
+	m_TexNextHandleIndex++;
 	return result;
 }
 

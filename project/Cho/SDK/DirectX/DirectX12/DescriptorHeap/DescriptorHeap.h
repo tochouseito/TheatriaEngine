@@ -55,7 +55,7 @@ class SUVDescriptorHeap : public DescriptorHeap
 public:
 	// Constructor
 	SUVDescriptorHeap(ID3D12Device8* device, const uint32_t& maxDescriptor, D3D12_DESCRIPTOR_HEAP_TYPE heapType, const bool& shaderVisible,const uint32_t& maxTextureCount)
-		: DescriptorHeap(device, maxDescriptor, heapType, shaderVisible,maxTextureCount), m_MaxTextureCount(maxTextureCount),m_NextHandleIndex(0)
+		: DescriptorHeap(device, maxDescriptor, heapType, shaderVisible,maxTextureCount), m_MaxTextureCount(maxTextureCount),m_TexNextHandleIndex(0)
 	{
 	}
 	// Destructor
@@ -70,7 +70,7 @@ private:
 	// Texture最大数
 	uint32_t m_MaxTextureCount;
 	// 次の使用可能なインデックス
-	uint32_t m_NextHandleIndex;
+	uint32_t m_TexNextHandleIndex;
 	// 返却されたインデックス
 	std::vector<uint32_t> m_RemovedHandleIndex = {};
 };
