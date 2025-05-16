@@ -329,7 +329,7 @@ void MaterialUpdateSystem::TransferComponent(const MaterialComponent& material)
 {
 	BUFFER_DATA_MATERIAL data = {};
 	data.color = material.color;
-	/*data.enableLighting = material.enableLighting;
+	data.enableLighting = material.enableLighting;
 	if (material.enableTexture)
 	{
 		data.enableTexture = true;
@@ -352,7 +352,8 @@ void MaterialUpdateSystem::TransferComponent(const MaterialComponent& material)
 		data.textureId = 0;
 	}
 	data.matUV = material.matUV.Identity();
-	data.shininess = material.shininess;*/
+	data.shininess = material.shininess;
+	data.uvFlipY = material.uvFlipY;
 	m_pIntegrationBuffer->UpdateData(data, material.mapID.value());
 }
 

@@ -33,7 +33,6 @@ CHO_API bool ChoSystem::LoadGameParameter(const std::wstring& filePath, const st
 CHO_API GameObject& ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vector3 generatePosition)
 {
 	EngineCommand* engineCommand = g_Engine->GetEngineCommand();
-	if (!engineCommand) { return; }
 	std::unique_ptr<Add3DObjectCommand> command = std::make_unique<Add3DObjectCommand>();
 	command->Execute(engineCommand);
 	GameObject& object = engineCommand->GetGameCore()->GetObjectContainer()->GetGameObject(id.value());

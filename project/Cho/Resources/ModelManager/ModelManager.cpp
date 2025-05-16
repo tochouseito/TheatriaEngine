@@ -325,6 +325,8 @@ void ModelManager::CreateDefaultMesh()
 	CreatePlane();
 	// Ring
 	CreateRing();
+	// Cylinder
+	CreateCylinder();
 }
 
 void ModelManager::CreateCube()
@@ -569,20 +571,6 @@ void ModelManager::CreateRing()
 	// 頂点データを設定
 #pragma region
 	// 頂点データ（重複なし）
-	//for (uint32_t i = 0;i < kRingDivide;i++)
-	//{
-	//	float sin = std::sin(i * radianPerDivide);
-	//	float cos = std::cos(i * radianPerDivide);
-	//	float sinNext = std::sin((i + 1) * radianPerDivide);
-	//	float cosNext = std::cos((i + 1) * radianPerDivide);
-	//	float u = static_cast<float>(i) / static_cast<float>(kRingDivide);
-	//	float uNext = static_cast<float>(i + 1) / static_cast<float>(kRingDivide);
-	//	// positionとUV。normalは必要なら+Zを設定する
-	//	meshData.vertices[(i * 4)] = { {-sin * kOuterRadius,cos * kOuterRadius,0.0f,1.0f},{u,0.0f}, {0.0f,0.0f,1.0f},{1.0f,1.0f,1.0f,1.0f},{i * 4} };
-	//	meshData.vertices[(i * 4) + 1] = { {-sinNext * kOuterRadius,cosNext * kOuterRadius,0.0f,1.0f},{uNext,0.0f}, {0.0f,0.0f,1.0f},{1.0f,1.0f,1.0f,1.0f},{i * 4 + 1} };
-	//	meshData.vertices[(i * 4) + 2] = { {-sin * kInnerRadius,cos * kInnerRadius,0.0f,1.0f},{u,1.0f}, {0.0f,0.0f,1.0f},{1.0f,1.0f,1.0f,1.0f},{i * 4 + 2} };
-	//	meshData.vertices[(i * 4) + 3] = { {-sinNext * kInnerRadius,cosNext * kInnerRadius,0.0f,1.0f},{uNext,1.0f}, {0.0f,0.0f,1.0f},{1.0f,1.0f,1.0f,1.0f},{i * 4 + 3} };
-	//}
 	for (uint32_t i = 0; i < kRingDivide; ++i)
 	{
 		float currentAngle = i * radianPerDivide;
@@ -656,6 +644,72 @@ void ModelManager::CreateRing()
 	// modelDataを追加
 	AddModelData(modelData);
 }
+
+void ModelManager::CreateCylinder()
+{
+	// Cylinder
+	std::wstring modelName = L"Cylinder";
+	modelName = GenerateUniqueName(modelName, m_ModelNameContainer);
+	ModelData modelData;
+	modelData.name = modelName;
+	MeshData meshData;
+	meshData.name = modelName;
+
+	// パラメータ
+	const uint32_t kCylinderDivide = 32;     // 分割数
+	const float kTopRadius = 1.0f;           // 上部半径
+	const float kBottomRadius = 1.0f;        // 下部半径
+	const float kHeight = 3.0f;              // 高さ
+	const float radianPerDivide = 2.0f * PiF / static_cast<float>(kCylinderDivide);
+
+	// 頂点数とインデックス数（側面のみ）
+	const uint32_t vertices = kCylinderDivide * 4;
+	const uint32_t indices = kCylinderDivide * 6;
+
+	meshData.vertices.resize(vertices);
+	meshData.indices.resize(indices);
+
+	for (uint32_t i = 0; i < kCylinderDivide; ++i)
+	{
+		float angle = i * radianPerDivide;
+		float nextAngle = (i + 1) * radianPerDivide;
+
+		float sin = std::sin(angle);
+		float cos = std::cos(angle);
+		float sinNext = std::sin(nextAngle);
+		float cosNext = std::cos(nextAngle);
+
+		float u = static_cast<float>(i) / static_cast<float>(kCylinderDivide);
+		float uNext = static_cast<float>(i + 1) / static_cast<float>(kCylinderDivide);
+
+		// 頂点インデックス
+		uint32_t v0 = i * 4 + 0; // 上部現在
+		uint32_t v1 = i * 4 + 1; // 上部次
+		uint32_t v2 = i * 4 + 2; // 下部現在
+		uint32_t v3 = i * 4 + 3; // 下部次
+
+		// 頂点設定
+		meshData.vertices[v0] = { { -sin * kTopRadius,     kHeight, cos * kTopRadius,     1.0f }, { u,     0.0f }, { -sin, 0.0f, cos }, { 1,1,1,1 }, { v0 } };
+		meshData.vertices[v1] = { { -sinNext * kTopRadius, kHeight, cosNext * kTopRadius, 1.0f }, { uNext, 0.0f }, { -sinNext, 0.0f, cosNext }, { 1,1,1,1 }, { v1 } };
+		meshData.vertices[v2] = { { -sin * kBottomRadius,     0.0f, cos * kBottomRadius,     1.0f }, { u,     1.0f }, { -sin, 0.0f, cos }, { 1,1,1,1 }, { v2 } };
+		meshData.vertices[v3] = { { -sinNext * kBottomRadius, 0.0f, cosNext * kBottomRadius, 1.0f }, { uNext, 1.0f }, { -sinNext, 0.0f, cosNext }, { 1,1,1,1 }, { v3 } };
+
+		// インデックス設定（三角形2つ）
+		uint32_t indexBase = i * 6;
+		meshData.indices[indexBase + 0] = v0;
+		meshData.indices[indexBase + 1] = v1;
+		meshData.indices[indexBase + 2] = v2;
+
+		meshData.indices[indexBase + 3] = v1;
+		meshData.indices[indexBase + 4] = v3;
+		meshData.indices[indexBase + 5] = v2;
+	}
+
+	// メッシュ追加
+	modelData.meshes.push_back(meshData);
+	AddModelData(modelData);
+}
+
 
 Node ModelManager::ReadNode(aiNode* node)
 {

@@ -403,6 +403,7 @@
     <None Include="Resources\EngineAssets\Shader\header\Demo.hlsli" />
     <None Include="Resources\EngineAssets\Shader\header\Effect.hlsli" />
     <None Include="Resources\EngineAssets\Shader\header\LineDraw.hlsli" />
+    <None Include="Resources\EngineAssets\Shader\header\Material.hlsli" />
     <None Include="Resources\EngineAssets\Shader\header\Math.hlsli" />
     <None Include="Resources\EngineAssets\Shader\header\Particle.hlsli" />
     <None Include="Resources\EngineAssets\Shader\header\Random.hlsli" />

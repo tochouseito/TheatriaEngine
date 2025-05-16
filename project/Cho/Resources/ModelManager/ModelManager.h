@@ -92,6 +92,8 @@ private:
 	void CreatePlane();
 	// Ringの生成
 	void CreateRing();
+	// Cylinderの生成
+	void CreateCylinder();
 
 	// 
 	Node ReadNode(aiNode* node);
