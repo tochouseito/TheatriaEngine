@@ -30,7 +30,7 @@ CHO_API bool ChoSystem::LoadGameParameter(const std::wstring& filePath, const st
 	return Cho::FileSystem::LoadGameParameter(filePath, group, item, dataName, outValue);
 }
 
-CHO_API void ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vector3 generatePosition)
+CHO_API GameObject& ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vector3 generatePosition)
 {
 	EngineCommand* engineCommand = g_Engine->GetEngineCommand();
 	if (!engineCommand) { return; }
@@ -126,6 +126,7 @@ CHO_API void ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vector3 gene
 		transform->translation = generatePosition;
 	}
 	engineCommand->GetGameCore()->AddGameGenerateObject(newObject.GetID().value());
+	return newObject;
 }
 
 CHO_API void ChoSystem::DestroyGameObject(std::optional<uint32_t> id)
