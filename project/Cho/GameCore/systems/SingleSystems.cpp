@@ -120,7 +120,7 @@ void TransformUpdateSystem::TransferMatrix(TransformComponent& transform)
 	data.matWorld = transform.matWorld;
 	data.worldInverse = ChoMath::Transpose(Matrix4::Inverse(transform.matWorld));
 	data.rootMatrix = transform.rootMatrix;
-	if (transform.materialID)
+	if (transform.materialID.has_value())
 	{
 		data.materialID = transform.materialID.value();
 	} else
@@ -329,7 +329,7 @@ void MaterialUpdateSystem::TransferComponent(const MaterialComponent& material)
 {
 	BUFFER_DATA_MATERIAL data = {};
 	data.color = material.color;
-	data.enableLighting = material.enableLighting;
+	/*data.enableLighting = material.enableLighting;
 	if (material.enableTexture)
 	{
 		data.enableTexture = true;
@@ -352,7 +352,7 @@ void MaterialUpdateSystem::TransferComponent(const MaterialComponent& material)
 		data.textureId = 0;
 	}
 	data.matUV = material.matUV.Identity();
-	data.shininess = material.shininess;
+	data.shininess = material.shininess;*/
 	m_pIntegrationBuffer->UpdateData(data, material.mapID.value());
 }
 
