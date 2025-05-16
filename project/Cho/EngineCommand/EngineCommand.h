@@ -100,7 +100,7 @@ public:
 	// テクスチャを取得
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureHandle(const std::wstring& name);
 	// プロジェクトの保存
-	void SaveProjectFile(const std::wstring& projectName);
+	void SaveProjectFile();
 	// Test:スクリプト作成	
 	void GenerateScript(const std::string& scriptName);
 	// ゲーム再生

@@ -126,7 +126,7 @@ void MainMenu::FileMenu()
         // プロジェクトの保存
 		if (ImGui::MenuItem("プロジェクトの保存"))
 		{
-			m_EngineCommand->SaveProjectFile(FileSystem::m_sProjectName);
+			m_EngineCommand->SaveProjectFile();
 		}
         if (m_EditorManager->GetWorkSpaceType() == WorkSpaceType::EffectEdit)
         {

@@ -279,7 +279,7 @@ bool Cho::FileSystem::LoadGameSettings(const std::wstring& filePath)
     }
 }
 
-bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, BaseScene* scene, ObjectContainer* container, ECSManager* ecs)
+bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, SceneManager* sceneManager, BaseScene* scene, ObjectContainer* container, ECSManager* ecs)
 {
     std::filesystem::path path = std::filesystem::path(directory) / (scene->GetSceneName() + L".json");
 
@@ -289,111 +289,216 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, BaseScene* sc
 
     // 使用中のオブジェクトを保存
     nlohmann::ordered_json objArray = nlohmann::json::array();
-    for (ObjectID& id : scene->GetUseObjects())
+	// 選択中のシーンならUseListを使用。そうじゃないならObjectDataListを使用
+    if (scene->GetSceneName() == sceneManager->GetCurrentScene()->GetSceneName())
     {
-        const GameObject& obj = container->GetGameObject(id);
-        if (!obj.IsActive()) continue;
+        for (ObjectID& id : scene->GetUseObjects())
+        {
+            const GameObject& obj = container->GetGameObject(id);
+            if (!obj.IsActive()) continue;
 
-        nlohmann::ordered_json objJson;
-        objJson["name"] = std::filesystem::path(obj.GetName()).string();
-        objJson["type"] = ObjectTypeToWString(obj.GetType());
+            nlohmann::ordered_json objJson;
+            objJson["name"] = std::filesystem::path(obj.GetName()).string();
+            objJson["type"] = ObjectTypeToWString(obj.GetType());
 
-        // components
-        nlohmann::ordered_json comps;
+            // components
+            nlohmann::ordered_json comps;
 
-        Entity entity = obj.GetEntity();
-        // マルチコンポーネント存在確認用
-        std::vector<LineRendererComponent>* lineRenderers;
+            Entity entity = obj.GetEntity();
+            // マルチコンポーネント存在確認用
+            std::vector<LineRendererComponent>* lineRenderers;
 
-        // コンポーネントの保存
-        if (IsComponentAllowedAtRuntime<TransformComponent>(obj.GetType()))
-        {
-            if (const auto* t = ecs->GetComponent<TransformComponent>(entity))
+            // コンポーネントの保存
+            if (IsComponentAllowedAtRuntime<TransformComponent>(obj.GetType()))
             {
-                comps["Transform"] = Cho::Serialization::ToJson(*t);
+                if (const auto* t = ecs->GetComponent<TransformComponent>(entity))
+                {
+                    comps["Transform"] = Cho::Serialization::ToJson(*t);
+                }
             }
-        }
-        if (IsComponentAllowedAtRuntime<MeshFilterComponent>(obj.GetType()))
-        {
-            if (const auto* m = ecs->GetComponent<MeshFilterComponent>(entity))
+            if (IsComponentAllowedAtRuntime<MeshFilterComponent>(obj.GetType()))
             {
-                comps["MeshFilter"] = Cho::Serialization::ToJson(*m);
+                if (const auto* m = ecs->GetComponent<MeshFilterComponent>(entity))
+                {
+                    comps["MeshFilter"] = Cho::Serialization::ToJson(*m);
+                }
             }
-        }
-        if (IsComponentAllowedAtRuntime<MeshRendererComponent>(obj.GetType()))
-        {
-            if (const auto* r = ecs->GetComponent<MeshRendererComponent>(entity))
+            if (IsComponentAllowedAtRuntime<MeshRendererComponent>(obj.GetType()))
             {
-                comps["MeshRenderer"] = Cho::Serialization::ToJson(*r);
+                if (const auto* r = ecs->GetComponent<MeshRendererComponent>(entity))
+                {
+                    comps["MeshRenderer"] = Cho::Serialization::ToJson(*r);
+                }
             }
-        }
-        if (IsComponentAllowedAtRuntime<MaterialComponent>(obj.GetType()))
-        {
-            if (const auto* m = ecs->GetComponent<MaterialComponent>(entity))
+            if (IsComponentAllowedAtRuntime<MaterialComponent>(obj.GetType()))
             {
-                comps["Material"] = Cho::Serialization::ToJson(*m);
+                if (const auto* m = ecs->GetComponent<MaterialComponent>(entity))
+                {
+                    comps["Material"] = Cho::Serialization::ToJson(*m);
+                }
             }
-        }
-        if (IsComponentAllowedAtRuntime<ScriptComponent>(obj.GetType()))
-        {
-            if (const auto* s = ecs->GetComponent<ScriptComponent>(entity))
+            if (IsComponentAllowedAtRuntime<ScriptComponent>(obj.GetType()))
             {
-                comps["Script"] = Cho::Serialization::ToJson(*s);
+                if (const auto* s = ecs->GetComponent<ScriptComponent>(entity))
+                {
+                    comps["Script"] = Cho::Serialization::ToJson(*s);
+                }
             }
-        }
-        if (IsComponentAllowedAtRuntime<LineRendererComponent>(obj.GetType()))
-        {
-            lineRenderers = ecs->GetAllComponents<LineRendererComponent>(entity);
-            if (lineRenderers)
+            if (IsComponentAllowedAtRuntime<LineRendererComponent>(obj.GetType()))
             {
-                comps["LineRenderer"] = Cho::Serialization::ToJson(*lineRenderers);
+                lineRenderers = ecs->GetAllComponents<LineRendererComponent>(entity);
+                if (lineRenderers)
+                {
+                    comps["LineRenderer"] = Cho::Serialization::ToJson(*lineRenderers);
+                }
             }
-        }
-        if (IsComponentAllowedAtRuntime<Rigidbody2DComponent>(obj.GetType()))
-        {
-            if (const auto* rb = ecs->GetComponent<Rigidbody2DComponent>(entity))
+            if (IsComponentAllowedAtRuntime<Rigidbody2DComponent>(obj.GetType()))
             {
-                comps["Rigidbody2D"] = Cho::Serialization::ToJson(*rb);
+                if (const auto* rb = ecs->GetComponent<Rigidbody2DComponent>(entity))
+                {
+                    comps["Rigidbody2D"] = Cho::Serialization::ToJson(*rb);
+                }
             }
-        }
-        if (IsComponentAllowedAtRuntime<BoxCollider2DComponent>(obj.GetType()))
-        {
-            if (const auto* bc = ecs->GetComponent<BoxCollider2DComponent>(entity))
+            if (IsComponentAllowedAtRuntime<BoxCollider2DComponent>(obj.GetType()))
             {
-                comps["BoxCollider2D"] = Cho::Serialization::ToJson(*bc);
+                if (const auto* bc = ecs->GetComponent<BoxCollider2DComponent>(entity))
+                {
+                    comps["BoxCollider2D"] = Cho::Serialization::ToJson(*bc);
+                }
             }
-        }
-        if (IsComponentAllowedAtRuntime<CameraComponent>(obj.GetType()))
-        {
-            if (const auto* c = ecs->GetComponent<CameraComponent>(entity))
+            if (IsComponentAllowedAtRuntime<CameraComponent>(obj.GetType()))
             {
-                comps["Camera"] = Cho::Serialization::ToJson(*c);
+                if (const auto* c = ecs->GetComponent<CameraComponent>(entity))
+                {
+                    comps["Camera"] = Cho::Serialization::ToJson(*c);
+                }
             }
-        }
-        if (IsComponentAllowedAtRuntime<ParticleComponent>(obj.GetType()))
-        {
-            if (const auto* p = ecs->GetComponent<ParticleComponent>(entity))
+            if (IsComponentAllowedAtRuntime<ParticleComponent>(obj.GetType()))
             {
-                comps["Particle"] = Cho::Serialization::ToJson(*p);
+                if (const auto* p = ecs->GetComponent<ParticleComponent>(entity))
+                {
+                    comps["Particle"] = Cho::Serialization::ToJson(*p);
+                }
             }
-        }
-        if (IsComponentAllowedAtRuntime<EmitterComponent>(obj.GetType()))
-        {
-            if (const auto* e = ecs->GetComponent<EmitterComponent>(entity))
+            if (IsComponentAllowedAtRuntime<EmitterComponent>(obj.GetType()))
             {
-                comps["Emitter"] = Cho::Serialization::ToJson(*e);
+                if (const auto* e = ecs->GetComponent<EmitterComponent>(entity))
+                {
+                    comps["Emitter"] = Cho::Serialization::ToJson(*e);
+                }
             }
-        }
-        if (IsComponentAllowedAtRuntime<UISpriteComponent>(obj.GetType()))
-        {
-            if (const auto* ui = ecs->GetComponent<UISpriteComponent>(entity))
+            if (IsComponentAllowedAtRuntime<UISpriteComponent>(obj.GetType()))
             {
-                comps["UISprite"] = Cho::Serialization::ToJson(*ui);
+                if (const auto* ui = ecs->GetComponent<UISpriteComponent>(entity))
+                {
+                    comps["UISprite"] = Cho::Serialization::ToJson(*ui);
+                }
             }
-        }
 
-        objJson["components"] = comps;
-        objArray.push_back(objJson);
+            objJson["components"] = comps;
+            objArray.push_back(objJson);
+        }
+    } else
+    {
+        for (const GameObjectData& objData : scene->GetGameObjectData())
+        {
+            nlohmann::ordered_json objJson;
+            objJson["name"] = std::filesystem::path(objData.m_Name).string();
+            objJson["type"] = ObjectTypeToWString(objData.m_Type);
+
+            // components
+            nlohmann::ordered_json comps;
+
+            // コンポーネントの保存
+            if (IsComponentAllowedAtRuntime<TransformComponent>(objData.m_Type))
+            {
+                if (objData.m_Transform.has_value())
+                {
+                    comps["Transform"] = Cho::Serialization::ToJson(objData.m_Transform.value());
+                }
+            }
+            if (IsComponentAllowedAtRuntime<MeshFilterComponent>(objData.m_Type))
+            {
+                if (objData.m_MeshFilter.has_value())
+                {
+                    comps["MeshFilter"] = Cho::Serialization::ToJson(objData.m_MeshFilter.value());
+                }
+            }
+            if (IsComponentAllowedAtRuntime<MeshRendererComponent>(objData.m_Type))
+            {
+                if (objData.m_MeshRenderer.has_value())
+                {
+                    comps["MeshRenderer"] = Cho::Serialization::ToJson(objData.m_MeshRenderer.value());
+                }
+            }
+            if (IsComponentAllowedAtRuntime<MaterialComponent>(objData.m_Type))
+            {
+                if (objData.m_Material.has_value())
+                {
+                    comps["Material"] = Cho::Serialization::ToJson(objData.m_Material.value());
+                }
+            }
+            if (IsComponentAllowedAtRuntime<ScriptComponent>(objData.m_Type))
+            {
+                if (objData.m_Script.has_value())
+                {
+                    comps["Script"] = Cho::Serialization::ToJson(objData.m_Script.value());
+                }
+            }
+            if (IsComponentAllowedAtRuntime<LineRendererComponent>(objData.m_Type))
+            {
+                //lineRenderers = ecs->GetAllComponents<LineRendererComponent>(entity);
+                if (!objData.m_LineRenderer.empty())
+                {
+                    comps["LineRenderer"] = Cho::Serialization::ToJson(objData.m_LineRenderer);
+                }
+            }
+            if (IsComponentAllowedAtRuntime<Rigidbody2DComponent>(objData.m_Type))
+            {
+                if (objData.m_Rigidbody2D.has_value())
+                {
+                    comps["Rigidbody2D"] = Cho::Serialization::ToJson(objData.m_Rigidbody2D.value());
+                }
+            }
+            if (IsComponentAllowedAtRuntime<BoxCollider2DComponent>(objData.m_Type))
+            {
+                if (objData.m_BoxCollider2D.has_value())
+                {
+                    comps["BoxCollider2D"] = Cho::Serialization::ToJson(objData.m_BoxCollider2D.value());
+                }
+            }
+            if (IsComponentAllowedAtRuntime<CameraComponent>(objData.m_Type))
+            {
+                if (objData.m_Camera.has_value())
+                {
+                    comps["Camera"] = Cho::Serialization::ToJson(objData.m_Camera.value());
+                }
+            }
+            if (IsComponentAllowedAtRuntime<ParticleComponent>(objData.m_Type))
+            {
+                if (objData.m_Particle.has_value())
+                {
+                    comps["Particle"] = Cho::Serialization::ToJson(objData.m_Particle.value());
+                }
+            }
+            if (IsComponentAllowedAtRuntime<EmitterComponent>(objData.m_Type))
+            {
+                if (objData.m_Emitter.has_value())
+                {
+                    comps["Emitter"] = Cho::Serialization::ToJson(objData.m_Emitter.value());
+                }
+            }
+            if (IsComponentAllowedAtRuntime<UISpriteComponent>(objData.m_Type))
+            {
+                if (objData.m_UISprite.has_value())
+                {
+                    comps["UISprite"] = Cho::Serialization::ToJson(objData.m_UISprite.value());
+                }
+            }
+
+            objJson["components"] = comps;
+            objArray.push_back(objJson);
+        }
     }
     j["objects"] = objArray;
 
@@ -1070,6 +1175,7 @@ void Cho::FileSystem::SaveProject(SceneManager* sceneManager, ObjectContainer* c
         // シーンファイルを保存
         Cho::FileSystem::SaveSceneFile(
             projectPath,
+            sceneManager,
             scene.get(),
             container,
             ecs
