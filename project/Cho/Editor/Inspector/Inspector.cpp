@@ -168,6 +168,9 @@ void Inspector::MaterialComponentView(GameObject* object)
 		{
 			ImGui::Text("Texture Name: %s", ConvertString(material->textureName).c_str());
 		}
+		// フリップフラグ
+		ImGui::Checkbox("uvFlipY", &material->uvFlipY);
+		// ドロップターゲット
 		if (ImGui::BeginDragDropTarget())
 		{
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Texture"))

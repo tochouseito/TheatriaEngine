@@ -371,6 +371,7 @@ struct MaterialComponent : public IComponentTag
 	Color color;
 	bool enableLighting = true;
 	bool enableTexture = false;
+	bool uvFlipY = false;
 	Matrix4 matUV;
 	float shininess;
 	std::wstring textureName = L"";	// テクスチャ名
@@ -394,6 +395,7 @@ struct MaterialComponent : public IComponentTag
 		color.Initialize();
 		enableLighting = true;
 		enableTexture = false;
+		uvFlipY = false;
 		matUV = ChoMath::MakeIdentity4x4();
 		shininess = 0.0f;
 		textureName = L"";

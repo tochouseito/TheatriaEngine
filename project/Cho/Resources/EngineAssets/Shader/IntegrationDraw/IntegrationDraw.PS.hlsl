@@ -1,13 +1,6 @@
 #include "../header/Demo.hlsli"
-struct Material
-{
-    float4 color;
-    float4x4 matUV;
-    float shininess;
-    uint enableLighting;
-    uint enableTexture;
-    uint textureID;
-};
+#include "../header/Material.hlsli"
+
 // マテリアル
 StructuredBuffer<Material> gIMaterial : register(t0,space1);
 // テクスチャリソース(カラー)
@@ -26,8 +19,13 @@ PixelShaderOutput main(VSOut input) {
     float4 textureColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
     if (material.enableTexture != 0)// テクスチャが有効なら
     {
+        float2 texcoord = input.texcoord;
+        if (material.uvFlipY)
+        {
+            texcoord.y = 1.0f - texcoord.y;
+        }
         // テクスチャ
-        float4 transformedUV = mul(float4(input.texcoord, 0.0f, 1.0f), gIMaterial[input.materialID].matUV);
+        float4 transformedUV = mul(float4(texcoord, 0.0f, 1.0f), gIMaterial[input.materialID].matUV);
         textureColor = gTextures[material.textureID].Sample(gSampler, transformedUV.xy);
     }
     // 合計

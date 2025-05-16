@@ -39,6 +39,7 @@ struct BUFFER_DATA_MATERIAL final
 	uint32_t enableLighting;	// 4バイト
 	uint32_t enableTexture;	// 4バイト
 	uint32_t textureId;		// 4バイト
+	uint32_t uvFlipY;
 };
 // Emitter
 struct BUFFER_DATA_EMITTER final
