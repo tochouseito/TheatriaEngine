@@ -264,6 +264,25 @@ bool DeleteObjectCommand::Execute(EngineCommand* edit)
 	if (particle) { m_Particle = *particle; }
 	UISpriteComponent* uiSprite = edit->m_GameCore->GetECSManager()->GetComponent<UISpriteComponent>(object.GetEntity());
 	if (uiSprite) { m_UISprite = *uiSprite; }
+	// Componentの初期化
+	if (transform) { transform->Initialize(); }
+	if (camera) { camera->Initialize(); }
+	if (meshFilter) { meshFilter->Initialize(); }
+	if (meshRenderer) { meshRenderer->Initialize(); }
+	if (material) { material->Initialize(); }
+	if (script) { script->Initialize(); }
+	if (lineRenderer)
+	{
+		for (auto& line : *lineRenderer)
+		{
+			line.Initialize();
+		}
+	}
+	if (rb) { rb->Initialize(); }
+	if (box) { box->Initialize(); }
+	if (emitter) { emitter->Initialize(); }
+	if (particle) { particle->Initialize(); }
+	if (uiSprite) { uiSprite->Initialize(); }
 	// Componentの削除
 	edit->m_GameCore->GetECSManager()->RemoveComponent<TransformComponent>(object.GetEntity());
 	if (camera) { edit->m_GameCore->GetECSManager()->RemoveComponent<CameraComponent>(object.GetEntity()); }

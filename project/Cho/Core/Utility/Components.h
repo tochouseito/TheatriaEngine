@@ -83,6 +83,24 @@ struct TransformComponent : public IComponentTag
 
 		return *this;
 	}
+
+	// 初期化
+	void Initialize()
+	{
+		translation.Initialize();
+		rotation.Initialize();
+		scale.Initialize();
+		matWorld = ChoMath::MakeIdentity4x4();
+		rootMatrix = ChoMath::MakeIdentity4x4();
+		degrees.Initialize();
+		prePos.Initialize();
+		preRot.Initialize();
+		preScale.Initialize();
+		tickPriority = 0;
+		parent = std::nullopt;
+		mapID = std::nullopt;
+		materialID = std::nullopt;
+	}
 };
 // Node用Transform構造体
 struct NodeTransform
@@ -114,6 +132,14 @@ struct CameraComponent : public IComponentTag
 		farZ = other.farZ;
 		return *this;
 	}
+	// 初期化
+	void Initialize()
+	{
+		fovAngleY = 45.0f * std::numbers::pi_v<float> / 180.0f;
+		aspectRatio = 16.0f / 9.0f;
+		nearZ = 0.1f;
+		farZ = 1000.0f;
+	}
 };
 
 // メッシュコンポーネント
@@ -128,6 +154,13 @@ struct MeshFilterComponent : public IComponentTag
 		modelName = other.modelName;
 		return *this;
 	}
+
+	// 初期化
+	void Initialize()
+	{
+		modelName = L"";
+		modelID = std::nullopt;
+	}
 };
 
 // 描画コンポーネント
@@ -140,6 +173,12 @@ struct MeshRendererComponent : public IComponentTag
 		if (this == &other) return *this;
 		visible = other.visible;
 		return *this;
+	}
+
+	// 初期化
+	void Initialize()
+	{
+		visible = true;
 	}
 };
 
@@ -167,6 +206,20 @@ struct ScriptComponent : public IComponentTag
 		scriptName = other.scriptName;
 		return *this;
 	}
+
+	// 初期化
+	void Initialize()
+	{
+		scriptName = "";
+		objectID = std::nullopt;
+		startFunc = nullptr;
+		updateFunc = nullptr;
+		cleanupFunc = nullptr;
+		onCollisionEnterFunc = nullptr;
+		onCollisionStayFunc = nullptr;
+		onCollisionExitFunc = nullptr;
+		isActive = false;
+	}
 };
 
 // ライン描画コンポーネント
@@ -187,6 +240,15 @@ struct LineRendererComponent : public IComponentTag
 		if (this == &other) return *this;
 		line = other.line;
 		return *this;
+	}
+
+	// 初期化
+	void Initialize()
+	{
+		line.start.Initialize();
+		line.end.Initialize();
+		line.color.Initialize();
+		mapID = std::nullopt;
 	}
 };
 
@@ -221,6 +283,24 @@ struct Rigidbody2DComponent : public IComponentTag
 		bodyType = other.bodyType;
 		return *this;
 	}
+
+	// 初期化
+	void Initialize()
+	{
+		isActive = true;
+		mass = 1.0f;
+		gravityScale = 1.0f;
+		isKinematic = false;
+		fixedRotation = false;
+		bodyType = b2_dynamicBody;
+		runtimeBody = nullptr;
+		world = nullptr;
+		isCollisionStay = false;
+		otherObjectID = std::nullopt;
+		selfObjectID = std::nullopt;
+		requestedPosition = std::nullopt;
+		velocity.Initialize();
+	}
 };
 // 2D矩形コライダー
 struct BoxCollider2DComponent : public IComponentTag
@@ -248,6 +328,21 @@ struct BoxCollider2DComponent : public IComponentTag
 		restitution = other.restitution;
 		isSensor = other.isSensor;
 		return *this;
+	}
+
+	// 初期化
+	void Initialize()
+	{
+		offsetX = 0.0f;
+		offsetY = 0.0f;
+		width = 1.0f;
+		height = 1.0f;
+		density = 1.0f;
+		friction = 0.3f;
+		restitution = 0.0f;
+		isSensor = false;
+		isActive = true;
+		runtimeFixture = nullptr;
 	}
 };
 // 2D円形コライダー
@@ -292,6 +387,19 @@ struct MaterialComponent : public IComponentTag
 		textureName = other.textureName;
 		return *this;
 	}
+
+	// 初期化
+	void Initialize()
+	{
+		color.Initialize();
+		enableLighting = true;
+		enableTexture = false;
+		matUV = ChoMath::MakeIdentity4x4();
+		shininess = 0.0f;
+		textureName = L"";
+		textureID = std::nullopt;
+		mapID = std::nullopt;
+	}
 };
 // エミッターコンポーネント
 struct EmitterComponent : public IComponentTag
@@ -316,6 +424,19 @@ struct EmitterComponent : public IComponentTag
 		frequencyTime = other.frequencyTime;
 		return *this;
 	}
+
+	// 初期化
+	void Initialize()
+	{
+		position.Initialize();
+		radius = 1.0f;
+		count = 10;
+		frequency = 0.5f;
+		frequencyTime = 0.0f;
+		emit = 0;
+		particleID = std::nullopt;
+		bufferIndex = std::nullopt;
+	}
 };
 // パーティクルコンポーネント
 struct ParticleComponent : public IComponentTag
@@ -337,6 +458,19 @@ struct ParticleComponent : public IComponentTag
 		time = other.time;
 		deltaTime = other.deltaTime;
 		return *this;
+	}
+
+	// 初期化
+	void Initialize()
+	{
+		count = 1024;
+		matBillboard = ChoMath::MakeIdentity4x4();
+		time = 0.0f;
+		deltaTime = 0.0f;
+		bufferIndex = std::nullopt;
+		perFrameBufferIndex = std::nullopt;
+		freeListIndexBufferIndex = std::nullopt;
+		freeListBufferIndex = std::nullopt;
 	}
 };
 // エフェクトコンポーネント
@@ -386,6 +520,22 @@ struct UISpriteComponent : public IComponentTag
 		textureLeftTop = other.textureLeftTop;
 		textureSize = other.textureSize;
 		return *this;
+	}
+	// 初期化
+	void Initialize()
+	{
+		position.Initialize();
+		rotation = 0.0f;
+		scale.Initialize();
+		matWorld = ChoMath::MakeIdentity4x4();
+		uvPos.Initialize();
+		uvRot = 0.0f;
+		uvScale.Initialize();
+		anchorPoint.Initialize();
+		size.Initialize();
+		textureLeftTop.Initialize();
+		textureSize.Initialize();
+		mapID = std::nullopt;
 	}
 };
 

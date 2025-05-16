@@ -30,6 +30,15 @@ struct Color final {
         return { r / scalar, g / scalar, b / scalar, a / scalar };
     }
 
+    // 初期化
+	inline void Initialize()
+	{
+		r = 1.0f;
+		g = 1.0f;
+		b = 1.0f;
+		a = 1.0f;
+	}
+
     // カラー補間（Lerp）
     inline static Color Lerp(const Color& start, const Color& end, float t) {
         return {
