@@ -1,7 +1,10 @@
 #pragma once
+#define NOMINMAX // Windowのminmaxマクロを除外
 #include <xaudio2.h>
 #include <fstream>
 #include <wrl.h>
+#include "Core/Utility/FVector.h"
+#include <unordered_map>
 class ResourceManager;
 class AudioManager
 {
@@ -46,7 +49,7 @@ public:
 	};
 	void Initialize();
 
-	SoundData SoundLordWave(const char* filename);
+	void SoundLordWave(const char* filename);
 
 	/*音声データ解放*/
 	void SoundUnLord(SoundData* soundData);
@@ -60,7 +63,7 @@ public:
 	/// </summary>
 	void Finalize();
 
-	IXAudio2* GetXAudio2() { return xAudio2.Get(); }
+	IXAudio2* GetXAudio2() { return m_XAudio2.Get(); }
 
 	/// <summary>
 	/// ボリュームを変更する
@@ -71,7 +74,11 @@ public:
 private:
 	// ResourceManagerのポインタ
 	ResourceManager* m_pResourceManager = nullptr;
-	Microsoft::WRL::ComPtr<IXAudio2> xAudio2;
-	IXAudio2MasteringVoice* masterVoice_ = nullptr;
+	Microsoft::WRL::ComPtr<IXAudio2> m_XAudio2;
+	IXAudio2MasteringVoice* m_MasterVoice = nullptr;
+	// サウンドコンテナ
+	FVector<SoundData> m_SoundData;
+	// 名前検索用コンテナ
+	std::unordered_map<std::string, uint32_t> m_SoundDataToName;
 };
 

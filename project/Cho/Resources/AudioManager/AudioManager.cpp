@@ -7,14 +7,14 @@ void AudioManager::Initialize()
 {
 	HRESULT result;
 	/*xAudioエンジンのインスタンスを生成*/
-	result = XAudio2Create(&xAudio2, 0, XAUDIO2_DEFAULT_PROCESSOR);
+	result = XAudio2Create(&m_XAudio2, 0, XAUDIO2_DEFAULT_PROCESSOR);
 	assert(SUCCEEDED(result));
 	/*マスターボイスを生成*/
-	result = xAudio2->CreateMasteringVoice(&masterVoice_);
+	result = m_XAudio2->CreateMasteringVoice(&m_MasterVoice);
 	assert(SUCCEEDED(result));
 }
 
-AudioManager::SoundData AudioManager::SoundLordWave(const char* filename)
+void AudioManager::SoundLordWave(const char* filename)
 {
 	/*ファイルオープン*/
 	/*ファイル入力ストリームのインスタンス*/
@@ -122,7 +122,8 @@ AudioManager::SoundData AudioManager::SoundLordWave(const char* filename)
 	soundData.pBuffer = reinterpret_cast<BYTE*>(pBuffer);
 	soundData.bufferSize = data.size;
 
-	return soundData;
+	// 音声データをコンテナに追加
+	m_SoundData.push_back(std::move(soundData));
 }
 
 void AudioManager::SoundUnLord(SoundData* soundData)
@@ -163,7 +164,7 @@ void AudioManager::SoundPlayWave(SoundData& soundData, bool loop)
 	HRESULT result;
 	if (!soundData.pSourceVoice)
 	{
-		result = xAudio2->CreateSourceVoice(&soundData.pSourceVoice, &soundData.wfex);
+		result = m_XAudio2->CreateSourceVoice(&soundData.pSourceVoice, &soundData.wfex);
 		assert(SUCCEEDED(result));
 	}
 
@@ -235,7 +236,7 @@ void AudioManager::SoundStopFadeOut(SoundData& soundData, float duration)
 void AudioManager::Finalize()
 {
 	/*XAudio2解放*/
-	xAudio2.Reset();
+	m_XAudio2.Reset();
 }
 
 void AudioManager::SetVolume(SoundData& soundData, float volume)
