@@ -29,6 +29,8 @@ public:
 	// MapIDを取得
 	virtual uint32_t GetMapID()
 	{
+		// 有効数追加
+		m_ActiveCount++;
 		// 返却されたIDがあるなら取得
 		if (!m_RemoveMapID.empty())
 		{
@@ -47,11 +49,18 @@ public:
 	{
 		// 返却されたIDを保存
 		m_RemoveMapID.push_back(id);
+		// 有効数を減らす
+		m_ActiveCount--;
 	}
 	// 現在のIDを取得
 	virtual uint32_t GetCurrentMapID()
 	{
 		return m_NextMapID;
+	}
+	// 有効数を取得
+	virtual uint32_t GetActiveCount()
+	{
+		return m_ActiveCount;
 	}
 protected:
 	// リソースマネージャーのポインタ
@@ -64,7 +73,8 @@ protected:
 	uint32_t m_NextMapID = 0;
 	// 統合データの返却されたID
 	std::vector<uint32_t> m_RemoveMapID = {};
-
+	// 統合データの有効数
+	uint32_t m_ActiveCount = 0;
 	// 統合データのサイズオフセット
 	uint32_t m_SizeOffset = 64;
 };

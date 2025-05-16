@@ -496,7 +496,7 @@ void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& ga
 				if (!cameraBuffer) { continue; }
 			}
 			// MapIDが0（使われていない）ならスキップ
-			if (!resourceManager.GetIntegrationData(IntegrationDataType::Line)->GetCurrentMapID()) { continue; }
+			if (!resourceManager.GetIntegrationData(IntegrationDataType::Line)->GetActiveCount()) { continue; }
 			// 頂点バッファビューをセット
 			D3D12_VERTEX_BUFFER_VIEW* vbv = resourceManager.GetLineIntegrationBuffer()->GetVertexBufferView();
 			context->SetVertexBuffers(0, 1, vbv);
