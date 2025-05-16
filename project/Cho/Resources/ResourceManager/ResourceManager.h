@@ -14,7 +14,7 @@
 #include "Resources/ModelManager/ModelManager.h"
 #include "Resources/TextureManager/TextureManager.h"
 #include "Resources/ScriptContainer/ScriptContainer.h"
-#include "Resources/SoundManager/SoundManager.h"
+#include "Resources/AudioManager/AudioManager.h"
 #include "Core/Utility/CompBufferData.h"
 #include "Resources/UIContainer/UIContainer.h"
 
@@ -201,7 +201,7 @@ public:
 	TextureManager* GetTextureManager() const { return m_TextureManager.get(); }
 	ModelManager* GetModelManager() const { return m_ModelManager.get(); }
 	ScriptContainer* GetScriptContainer() const { return m_ScriptContainer.get(); }
-	SoundManager* GetSoundManager() const { return m_SoundManager.get(); }
+	AudioManager* GetAudioManager() const { return m_AudioManager.get(); }
 	UIContainer* GetUIContainer() const { return m_UIContainer.get(); }
 	IIntegrationData* GetIntegrationData(const IntegrationDataType& type) const
 	{
@@ -256,8 +256,8 @@ private:
 	std::unique_ptr<ModelManager> m_ModelManager = nullptr;
 	// スクリプトコンテナ
 	std::unique_ptr<ScriptContainer> m_ScriptContainer = nullptr;
-	// サウンドマネージャ
-	std::unique_ptr<SoundManager> m_SoundManager = nullptr;
+	// オーディオマネージャ
+	std::unique_ptr<AudioManager> m_AudioManager = nullptr;
 	// UIコンテナ
 	std::unique_ptr<UIContainer> m_UIContainer = nullptr;
 	//// GPUResourceUpdate用のマッピングデータ

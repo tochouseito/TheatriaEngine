@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Resources\AudioManager\AudioManager.cpp" />
     <ClCompile Include="ChoEngineAPI.cpp" />
     <ClCompile Include="Core\ChoLog\ChoLog.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
@@ -289,11 +290,11 @@
     <ClCompile Include="SDK\DirectX\DirectX12\VertexBuffer\VertexBuffer.cpp" />
     <ClCompile Include="SDK\DirectX\DXC\DXShaderCompiler.cpp" />
     <ClCompile Include="SDK\ImGui\ImGuiManager\ImGuiManager.cpp" />
-    <ClCompile Include="Resources\SoundManager\SoundManager.cpp" />
     <ClCompile Include="Resources\UIContainer\UIContainer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="APIExportsMacro.h" />
+    <ClInclude Include="Resources\AudioManager\AudioManager.h" />
     <ClInclude Include="ChoEngineAPI.h" />
     <ClInclude Include="Core\ChoLog\ChoLog.h" />
     <ClInclude Include="Core\CoreSystem\CoreSystem.h" />
@@ -395,7 +396,6 @@
     <ClInclude Include="SDK\DirectX\DXC\DXShaderCompiler.h" />
     <ClInclude Include="SDK\ImGui\ImGuiManager\ImGuiManager.h" />
     <ClInclude Include="SDK\ImGui\ImGuiUtlity\ImGuiUtlity.h" />
-    <ClInclude Include="Resources\SoundManager\SoundManager.h" />
     <ClInclude Include="Resources\UIContainer\UIContainer.h" />
   </ItemGroup>
   <ItemGroup>

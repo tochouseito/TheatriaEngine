@@ -44,7 +44,7 @@ void ResourceManager::GenerateManager(GraphicsEngine* graphicsEngine)
 {
 	m_TextureManager = std::make_unique<TextureManager>(this, graphicsEngine, m_Device);
 	m_ModelManager = std::make_unique<ModelManager>(this);
-	m_SoundManager = std::make_unique<SoundManager>(this);
+	m_AudioManager = std::make_unique<AudioManager>(this);
 	m_UIContainer = std::make_unique<UIContainer>(this);
 }
 
