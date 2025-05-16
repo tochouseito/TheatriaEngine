@@ -160,6 +160,8 @@ void Inspector::MaterialComponentView(GameObject* object)
 	ImGui::Checkbox("UseTexture", &material->enableTexture);
 	if (material->enableTexture)
 	{
+		// フリップフラグ
+		ImGui::Checkbox("uvFlipY", &material->uvFlipY);
 		// テクスチャ名を表示
 		if (material->textureName.empty())
 		{
@@ -168,8 +170,6 @@ void Inspector::MaterialComponentView(GameObject* object)
 		{
 			ImGui::Text("Texture Name: %s", ConvertString(material->textureName).c_str());
 		}
-		// フリップフラグ
-		ImGui::Checkbox("uvFlipY", &material->uvFlipY);
 		// ドロップターゲット
 		if (ImGui::BeginDragDropTarget())
 		{
