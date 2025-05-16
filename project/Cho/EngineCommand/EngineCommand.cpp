@@ -45,25 +45,16 @@ D3D12_GPU_DESCRIPTOR_HANDLE EngineCommand::GetTextureHandle(const std::wstring& 
 	return m_ResourceManager->GetBuffer<PixelBuffer>(m_ResourceManager->GetTextureManager()->GetTextureData(name)->bufferIndex)->GetSRVGpuHandle();
 }
 
-void EngineCommand::SaveProjectFile(const std::wstring& projectName)
+void EngineCommand::SaveProjectFile()
 {
-	for (auto& scene : m_GameCore->GetSceneManager()->GetScenes().GetVector())
-	{
-		// シーンファイルを保存
-		Cho::FileSystem::SaveSceneFile(
-			L"GameProjects/" + projectName,
-			scene.get(),
-			m_GameCore->GetObjectContainer(),
-			m_GameCore->GetECSManager()
-		);
-	}
+	Cho::FileSystem::SaveProject(m_GameCore->GetSceneManager(), m_GameCore->GetObjectContainer(), m_GameCore->GetECSManager(), m_ResourceManager);
 }
 
 void EngineCommand::GenerateScript(const std::string& scriptName)
 {
-	FileSystem::ScriptProject::GenerateScriptFiles(scriptName);
+	Cho::FileSystem::ScriptProject::GenerateScriptFiles(scriptName);
 	// プロジェクトファイルを更新
-	FileSystem::ScriptProject::UpdateVcxproj();
+	Cho::FileSystem::ScriptProject::UpdateVcxproj();
 	// スクリプトコンテナに追加
 	m_ResourceManager->GetScriptContainer()->AddScriptData(scriptName);
 }

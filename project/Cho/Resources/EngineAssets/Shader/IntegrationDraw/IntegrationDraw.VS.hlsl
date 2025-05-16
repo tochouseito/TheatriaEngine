@@ -3,9 +3,9 @@
 // ViewProjectionResource
 ConstantBuffer<ViewProjection> gVP : register(b0);
 // IntegrationTransformResource
-StructuredBuffer<Transform> gITF : register(t0);
+StructuredBuffer<Transform> gITF : register(t0, space0);
 // UseTransformMapIndexResource
-StructuredBuffer<uint> gUseIndex : register(t1);
+StructuredBuffer<uint> gUseIndex : register(t1, space0);
 
 struct VSIn {
     float4 position : POSITION;

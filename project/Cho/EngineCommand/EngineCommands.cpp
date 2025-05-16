@@ -225,6 +225,15 @@ bool DeleteObjectCommand::Execute(EngineCommand* edit)
 		// Material統合バッファからmapIDを返却
 		edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::Material)->RemoveMapID(material->mapID.value());
 	}
+	std::vector<LineRendererComponent>* lineRenderer = edit->m_GameCore->GetECSManager()->GetAllComponents<LineRendererComponent>(object.GetEntity());
+	if (lineRenderer)
+	{
+		for (auto& line : *lineRenderer)
+		{
+			// Line統合バッファからmapIDを返却
+			edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::Line)->RemoveMapID(line.mapID.value());
+		}
+	}
 	// CameraComponentを取得
 	CameraComponent* camera = edit->m_GameCore->GetECSManager()->GetComponent<CameraComponent>(object.GetEntity());
 	if (camera)
@@ -244,7 +253,6 @@ bool DeleteObjectCommand::Execute(EngineCommand* edit)
 	if (material) { m_Material = *material; }
 	ScriptComponent* script = edit->m_GameCore->GetECSManager()->GetComponent<ScriptComponent>(object.GetEntity());
 	if (script) { m_Script = *script; }
-	std::vector<LineRendererComponent>* lineRenderer = edit->m_GameCore->GetECSManager()->GetAllComponents<LineRendererComponent>(object.GetEntity());
 	if (lineRenderer) { m_LineRenderer = *lineRenderer; }
 	Rigidbody2DComponent* rb = edit->m_GameCore->GetECSManager()->GetComponent<Rigidbody2DComponent>(object.GetEntity());
 	if (rb) { m_Rigidbody2D = *rb; }
@@ -256,6 +264,25 @@ bool DeleteObjectCommand::Execute(EngineCommand* edit)
 	if (particle) { m_Particle = *particle; }
 	UISpriteComponent* uiSprite = edit->m_GameCore->GetECSManager()->GetComponent<UISpriteComponent>(object.GetEntity());
 	if (uiSprite) { m_UISprite = *uiSprite; }
+	// Componentの初期化
+	if (transform) { transform->Initialize(); }
+	if (camera) { camera->Initialize(); }
+	if (meshFilter) { meshFilter->Initialize(); }
+	if (meshRenderer) { meshRenderer->Initialize(); }
+	if (material) { material->Initialize(); }
+	if (script) { script->Initialize(); }
+	if (lineRenderer)
+	{
+		for (auto& line : *lineRenderer)
+		{
+			line.Initialize();
+		}
+	}
+	if (rb) { rb->Initialize(); }
+	if (box) { box->Initialize(); }
+	if (emitter) { emitter->Initialize(); }
+	if (particle) { particle->Initialize(); }
+	if (uiSprite) { uiSprite->Initialize(); }
 	// Componentの削除
 	edit->m_GameCore->GetECSManager()->RemoveComponent<TransformComponent>(object.GetEntity());
 	if (camera) { edit->m_GameCore->GetECSManager()->RemoveComponent<CameraComponent>(object.GetEntity()); }

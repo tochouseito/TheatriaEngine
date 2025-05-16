@@ -34,12 +34,14 @@ public:
 	SceneManager* GetSceneManager() { return m_pSceneManager.get(); }
 	ECSManager* GetECSManager() { return m_pECSManager.get(); }
 	ObjectContainer* GetObjectContainer() { return m_pObjectContainer.get(); }
+	EngineCommand* GetEngineCommand() { return m_EngineCommand; }
 	bool IsRunning() const { return isRunning; }
 	void GameRun();
 	void GameStop();
 	void AddGameGenerateObject(const ObjectID& id) { m_GameGenerateID.push_back(id); m_pObjectContainer->GetGameObject(id).Initialize(); }
 	void InitializeGenerateObject();
 	void ClearGenerateObject();
+	void RemoveGameInitializedID(const ObjectID& id) { m_GameInitializedID.remove(id); }
 	b2World* GetPhysicsWorld() { return m_pPhysicsWorld.get(); }
 private:
 	void CreateSystems(InputManager* input, ResourceManager* resourceManager,GraphicsEngine* graphicsEngine);
@@ -67,7 +69,7 @@ private:
 	// ゲーム更新中に生成されたidを保持するコンテナ
 	std::vector<ObjectID> m_GameGenerateID;
 	// ゲーム実行中に生成され初期化済みのidを保持するコンテナ
-	std::vector<ObjectID> m_GameInitializedID;
+	std::list<ObjectID> m_GameInitializedID;
 	std::unique_ptr<TransformInitializeSystem> tfOnceSystem;
 	std::unique_ptr<ScriptGenerateInstanceSystem> scriptGenerateOnceSystem;
 	std::unique_ptr<ScriptInitializeSystem> scriptInitializeOnceSystem;

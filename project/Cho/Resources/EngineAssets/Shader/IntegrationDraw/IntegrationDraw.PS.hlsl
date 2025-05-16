@@ -1,9 +1,17 @@
 #include "../header/Demo.hlsli"
-
+struct Material
+{
+    float4 color;
+    float4x4 matUV;
+    float shininess;
+    uint enableLighting;
+    uint enableTexture;
+    uint textureID;
+};
 // マテリアル
-StructuredBuffer<Material> gIMaterial : register(t0);
+StructuredBuffer<Material> gIMaterial : register(t0,space1);
 // テクスチャリソース(カラー)
-Texture2D<float4> gTextures[] : register(t1);
+Texture2D<float4> gTextures[] : register(t1, space1);
 // サンプラー
 SamplerState gSampler : register(s0);
 
@@ -22,7 +30,7 @@ PixelShaderOutput main(VSOut input) {
         float4 transformedUV = mul(float4(input.texcoord, 0.0f, 1.0f), gIMaterial[input.materialID].matUV);
         textureColor = gTextures[material.textureID].Sample(gSampler, transformedUV.xy);
     }
-        // 合計
+    // 合計
     output.color = material.color * textureColor;
 
     return output;

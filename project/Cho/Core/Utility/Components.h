@@ -55,6 +55,52 @@ struct TransformComponent : public IComponentTag
 	std::optional<uint32_t> mapID = std::nullopt;		// マップインデックス
 	TransformStartValue startValue;						// 初期値保存用
 	std::optional<uint32_t> materialID = std::nullopt;	// マテリアルID
+
+	TransformComponent& operator=(const TransformComponent& other)
+	{
+		if (this == &other) return *this;
+
+		translation = other.translation;
+		rotation = other.rotation;
+		scale = other.scale;
+		degrees = other.degrees;
+		prePos = other.prePos;
+		preRot = other.preRot;
+		preScale = other.preScale;
+		tickPriority = other.tickPriority;
+
+		// optionalな要素は、コピー可能な値として処理
+		parent = other.parent;
+		//mapID = other.mapID;
+		//materialID = other.materialID;
+
+		// ワールド行列やルート行列は差分として扱わない場合はコピーしない
+		// matWorld = other.matWorld;
+		// rootMatrix = other.rootMatrix;
+
+		// startValue も含めたい場合はこちらを有効に
+		//startValue = other.startValue;
+
+		return *this;
+	}
+
+	// 初期化
+	void Initialize()
+	{
+		translation.Initialize();
+		rotation.Initialize();
+		scale.Initialize();
+		matWorld = ChoMath::MakeIdentity4x4();
+		rootMatrix = ChoMath::MakeIdentity4x4();
+		degrees.Initialize();
+		prePos.Initialize();
+		preRot.Initialize();
+		preScale.Initialize();
+		tickPriority = 0;
+		parent = std::nullopt;
+		mapID = std::nullopt;
+		materialID = std::nullopt;
+	}
 };
 // Node用Transform構造体
 struct NodeTransform
@@ -76,6 +122,24 @@ struct CameraComponent : public IComponentTag
     float farZ = 1000.0f;
 	// バッファーインデックス
 	std::optional<uint32_t> bufferIndex = std::nullopt;
+
+	CameraComponent& operator=(const CameraComponent& other)
+	{
+		if (this == &other) return *this;
+		fovAngleY = other.fovAngleY;
+		aspectRatio = other.aspectRatio;
+		nearZ = other.nearZ;
+		farZ = other.farZ;
+		return *this;
+	}
+	// 初期化
+	void Initialize()
+	{
+		fovAngleY = 45.0f * std::numbers::pi_v<float> / 180.0f;
+		aspectRatio = 16.0f / 9.0f;
+		nearZ = 0.1f;
+		farZ = 1000.0f;
+	}
 };
 
 // メッシュコンポーネント
@@ -83,12 +147,39 @@ struct MeshFilterComponent : public IComponentTag
 {
 	std::wstring modelName = L"";// モデル名
 	std::optional<uint32_t> modelID = std::nullopt;// Model選択用ID
+
+	MeshFilterComponent& operator=(const MeshFilterComponent& other)
+	{
+		if (this == &other) return *this;
+		modelName = other.modelName;
+		return *this;
+	}
+
+	// 初期化
+	void Initialize()
+	{
+		modelName = L"";
+		modelID = std::nullopt;
+	}
 };
 
 // 描画コンポーネント
 struct MeshRendererComponent : public IComponentTag
 {
 	bool visible = true;// 描画フラグ
+
+	MeshRendererComponent& operator=(const MeshRendererComponent& other)
+	{
+		if (this == &other) return *this;
+		visible = other.visible;
+		return *this;
+	}
+
+	// 初期化
+	void Initialize()
+	{
+		visible = true;
+	}
 };
 
 // スクリプトコンポーネント
@@ -107,7 +198,28 @@ struct ScriptComponent : public IComponentTag
 	std::function<void(GameObject& other)> onCollisionStayFunc;	// 衝突中関数
 	std::function<void(GameObject& other)> onCollisionExitFunc;	// 衝突終了関数
 
-	bool isActive = false;										// スクリプト有効フラグ
+	bool isActive = false;				// スクリプト有効フラグ
+
+	ScriptComponent& operator=(const ScriptComponent& other)
+	{
+		if (this == &other) return *this;
+		scriptName = other.scriptName;
+		return *this;
+	}
+
+	// 初期化
+	void Initialize()
+	{
+		scriptName = "";
+		objectID = std::nullopt;
+		startFunc = nullptr;
+		updateFunc = nullptr;
+		cleanupFunc = nullptr;
+		onCollisionEnterFunc = nullptr;
+		onCollisionStayFunc = nullptr;
+		onCollisionExitFunc = nullptr;
+		isActive = false;
+	}
 };
 
 // ライン描画コンポーネント
@@ -122,6 +234,22 @@ struct LineRendererComponent : public IComponentTag
 {
 	LineData line;// ラインデータ
 	std::optional<uint32_t> mapID = std::nullopt;		// マップインデックス
+
+	LineRendererComponent& operator=(const LineRendererComponent& other)
+	{
+		if (this == &other) return *this;
+		line = other.line;
+		return *this;
+	}
+
+	// 初期化
+	void Initialize()
+	{
+		line.start.Initialize();
+		line.end.Initialize();
+		line.color.Initialize();
+		mapID = std::nullopt;
+	}
 };
 
 // 2D物理コンポーネント
@@ -143,6 +271,36 @@ struct Rigidbody2DComponent : public IComponentTag
 	std::optional<b2Vec2> requestedPosition = std::nullopt; // 位置リクエスト
 	//std::optional<b2Vec2> requestedVelocity = std::nullopt; // 速度リクエスト
 	Vector2 velocity = { 0.0f, 0.0f }; // 速度
+
+	Rigidbody2DComponent& operator=(const Rigidbody2DComponent& other)
+	{
+		if (this == &other) return *this;
+		isActive = other.isActive;
+		mass = other.mass;
+		gravityScale = other.gravityScale;
+		isKinematic = other.isKinematic;
+		fixedRotation = other.fixedRotation;
+		bodyType = other.bodyType;
+		return *this;
+	}
+
+	// 初期化
+	void Initialize()
+	{
+		isActive = true;
+		mass = 1.0f;
+		gravityScale = 1.0f;
+		isKinematic = false;
+		fixedRotation = false;
+		bodyType = b2_dynamicBody;
+		runtimeBody = nullptr;
+		world = nullptr;
+		isCollisionStay = false;
+		otherObjectID = std::nullopt;
+		selfObjectID = std::nullopt;
+		requestedPosition = std::nullopt;
+		velocity.Initialize();
+	}
 };
 // 2D矩形コライダー
 struct BoxCollider2DComponent : public IComponentTag
@@ -157,6 +315,35 @@ struct BoxCollider2DComponent : public IComponentTag
 	bool isSensor = false;
 	bool isActive = true;
 	b2Fixture* runtimeFixture = nullptr;
+
+	BoxCollider2DComponent& operator=(const BoxCollider2DComponent& other)
+	{
+		if (this == &other) return *this;
+		offsetX = other.offsetX;
+		offsetY = other.offsetY;
+		width = other.width;
+		height = other.height;
+		density = other.density;
+		friction = other.friction;
+		restitution = other.restitution;
+		isSensor = other.isSensor;
+		return *this;
+	}
+
+	// 初期化
+	void Initialize()
+	{
+		offsetX = 0.0f;
+		offsetY = 0.0f;
+		width = 1.0f;
+		height = 1.0f;
+		density = 1.0f;
+		friction = 0.3f;
+		restitution = 0.0f;
+		isSensor = false;
+		isActive = true;
+		runtimeFixture = nullptr;
+	}
 };
 // 2D円形コライダー
 struct CircleCollider2DComponent : public IComponentTag
@@ -189,6 +376,30 @@ struct MaterialComponent : public IComponentTag
 	std::wstring textureName = L"";	// テクスチャ名
 	std::optional<uint32_t> textureID = std::nullopt;	// テクスチャID
 	std::optional<uint32_t> mapID = std::nullopt;
+
+	MaterialComponent& operator=(const MaterialComponent& other)
+	{
+		if (this == &other) return *this;
+		color = other.color;
+		enableLighting = other.enableLighting;
+		enableTexture = other.enableTexture;
+		shininess = other.shininess;
+		textureName = other.textureName;
+		return *this;
+	}
+
+	// 初期化
+	void Initialize()
+	{
+		color.Initialize();
+		enableLighting = true;
+		enableTexture = false;
+		matUV = ChoMath::MakeIdentity4x4();
+		shininess = 0.0f;
+		textureName = L"";
+		textureID = std::nullopt;
+		mapID = std::nullopt;
+	}
 };
 // エミッターコンポーネント
 struct EmitterComponent : public IComponentTag
@@ -202,6 +413,30 @@ struct EmitterComponent : public IComponentTag
 	std::optional<uint32_t> particleID = std::nullopt;	// パーティクルID
 	// バッファインデックス
 	std::optional<uint32_t> bufferIndex = std::nullopt;
+
+	EmitterComponent& operator=(const EmitterComponent& other)
+	{
+		if (this == &other) return *this;
+		position = other.position;
+		radius = other.radius;
+		count = other.count;
+		frequency = other.frequency;
+		frequencyTime = other.frequencyTime;
+		return *this;
+	}
+
+	// 初期化
+	void Initialize()
+	{
+		position.Initialize();
+		radius = 1.0f;
+		count = 10;
+		frequency = 0.5f;
+		frequencyTime = 0.0f;
+		emit = 0;
+		particleID = std::nullopt;
+		bufferIndex = std::nullopt;
+	}
 };
 // パーティクルコンポーネント
 struct ParticleComponent : public IComponentTag
@@ -215,6 +450,28 @@ struct ParticleComponent : public IComponentTag
 	std::optional<uint32_t> perFrameBufferIndex = std::nullopt;
 	std::optional<uint32_t> freeListIndexBufferIndex = std::nullopt;
 	std::optional<uint32_t> freeListBufferIndex = std::nullopt;
+
+	ParticleComponent& operator=(const ParticleComponent& other)
+	{
+		if (this == &other) return *this;
+		count = other.count;
+		time = other.time;
+		deltaTime = other.deltaTime;
+		return *this;
+	}
+
+	// 初期化
+	void Initialize()
+	{
+		count = 1024;
+		matBillboard = ChoMath::MakeIdentity4x4();
+		time = 0.0f;
+		deltaTime = 0.0f;
+		bufferIndex = std::nullopt;
+		perFrameBufferIndex = std::nullopt;
+		freeListIndexBufferIndex = std::nullopt;
+		freeListBufferIndex = std::nullopt;
+	}
 };
 // エフェクトコンポーネント
 struct EffectComponent : public IComponentTag
@@ -248,6 +505,38 @@ struct UISpriteComponent : public IComponentTag
 	Vector2 textureSize = { 64.0f,64.0f };// テクスチャのサイズ
 
 	std::optional<uint32_t> mapID = std::nullopt;
+
+	UISpriteComponent& operator=(const UISpriteComponent& other)
+	{
+		if (this == &other) return *this;
+		position = other.position;
+		rotation = other.rotation;
+		scale = other.scale;
+		//uvPos = other.uvPos;
+		//uvRot = other.uvRot;
+		//uvScale = other.uvScale;
+		anchorPoint = other.anchorPoint;
+		size = other.size;
+		textureLeftTop = other.textureLeftTop;
+		textureSize = other.textureSize;
+		return *this;
+	}
+	// 初期化
+	void Initialize()
+	{
+		position.Initialize();
+		rotation = 0.0f;
+		scale.Initialize();
+		matWorld = ChoMath::MakeIdentity4x4();
+		uvPos.Initialize();
+		uvRot = 0.0f;
+		uvScale.Initialize();
+		anchorPoint.Initialize();
+		size.Initialize();
+		textureLeftTop.Initialize();
+		textureSize.Initialize();
+		mapID = std::nullopt;
+	}
 };
 
 // マルチコンポーネントを許可

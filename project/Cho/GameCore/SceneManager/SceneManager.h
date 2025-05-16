@@ -3,6 +3,7 @@
 #include <string>
 using SceneID = uint32_t;
 class SceneManager;
+class GameCore;
 class BaseScene {
 public:
 	// Constructor
@@ -19,11 +20,17 @@ public:
 	virtual inline SceneID GetSceneID() const noexcept { return m_SceneID;}
 	virtual inline const std::wstring& GetSceneName() const noexcept { return m_SceneName; }
 	virtual inline void SetSceneName(const std::wstring& sceneName) { m_SceneName = sceneName; }
-	virtual inline std::vector<ObjectID>& GetUseObjects() noexcept { return useObjects; }
-	virtual inline void AddUseObject(const ObjectID& objectID) { useObjects.push_back(objectID); }
-	virtual inline void RemoveUseObject(const ObjectID& objectID) { useObjects.erase(std::remove(useObjects.begin(), useObjects.end(), objectID), useObjects.end()); }
+	virtual inline std::vector<ObjectID>& GetUseObjects() noexcept { return m_UseObjects; }
+	virtual inline void AddUseObject(const ObjectID& objectID) { m_UseObjects.push_back(objectID); }
+	virtual inline void AddGameObjectData(const GameObjectData& data) { m_GameObjectData.push_back(data); }
+	virtual inline std::vector<GameObjectData>& GetGameObjectData() noexcept { return m_GameObjectData; }
+	virtual inline void RemoveUseObject(const ObjectID& objectID) { m_UseObjects.erase(std::remove(m_UseObjects.begin(), m_UseObjects.end(), objectID), m_UseObjects.end()); }
+	virtual inline void ClearUseObjects() { m_UseObjects.clear(); }
+	virtual inline void ClearGameObjectData() { m_GameObjectData.clear(); }
 	virtual inline void SetMainCameraID(std::optional<ObjectID> cameraID) { m_MainCameraID = cameraID; }
 	virtual inline std::optional<ObjectID> GetMainCameraID() const noexcept { return m_MainCameraID; }
+	virtual inline void SetStartCameraName(const std::wstring& cameraName) { m_StartCameraName = cameraName; }
+	virtual inline std::wstring GetStartCameraName() const noexcept { return m_StartCameraName; }
 	virtual void Start() = 0;
 	virtual void Update() = 0;
 	virtual void Finalize() = 0;
@@ -32,8 +39,10 @@ protected:
 	SceneID m_SceneID = 0;
 	std::wstring m_SceneName = L"";
 	SceneManager* m_SceneManager = nullptr;
-	std::vector<ObjectID> useObjects;
+	std::vector<ObjectID> m_UseObjects;
 	std::optional<ObjectID> m_MainCameraID = std::nullopt;
+	std::vector<GameObjectData> m_GameObjectData;
+	std::wstring m_StartCameraName = L"";
 };
 
 class ScenePrefab : public BaseScene {
@@ -55,10 +64,11 @@ private:
 class ResourceManager;
 class SceneManager
 {
+	friend class ScenePrefab;
 public:
 	// Constructor
-	SceneManager(ResourceManager* resourceManager):
-		m_pResourceManager(resourceManager)
+	SceneManager(GameCore* gameCore,ResourceManager* resourceManager):
+		m_pGameCore(gameCore),m_pResourceManager(resourceManager)
 	{
 	}
 	// Destructor
@@ -69,14 +79,16 @@ public:
 	// デフォルトのシーンを作成
 	void CreateDefaultScene()
 	{
-		AddScene(L"MainScene");
+		ScenePrefab scene(this);
+		scene.SetSceneName(L"MainScene");
+		AddScene(scene);
 		ChangeSceneRequest(m_SceneNameToID[L"MainScene"]);
 	}
 
 	// シーンを更新
 	void Update();
 	// シーンを追加
-	void AddScene(const std::wstring& sceneName);
+	void AddScene(const ScenePrefab& newScene);
 	// シーンを変更リクエスト
 	void ChangeSceneRequest(const SceneID& sceneID) noexcept { m_pNextScene = m_pScenes[sceneID].get(); }
 
@@ -111,7 +123,8 @@ public:
 private:
 	// シーンを変更
 	void ChangeScene();
-
+	// GameCore
+	GameCore* m_pGameCore = nullptr;
 	// ResourceManager
 	ResourceManager* m_pResourceManager = nullptr;
 	// 現在のシーン

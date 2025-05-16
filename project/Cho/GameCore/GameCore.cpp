@@ -11,7 +11,7 @@
 void GameCore::Initialize(InputManager* input, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine)
 {
 	// シーンマネージャーの生成
-	m_pSceneManager = std::make_unique<SceneManager>(resourceManager);
+	m_pSceneManager = std::make_unique<SceneManager>(this,resourceManager);
 	// ECSマネージャの生成
 	m_pECSManager = std::make_unique<ECSManager>();
 	// オブジェクトコンテナの生成
@@ -74,7 +74,7 @@ void GameCore::GameRun()
 	{
 		return;
 	}*/
-	FileSystem::ScriptProject::LoadScriptDLL();
+	Cho::FileSystem::ScriptProject::LoadScriptDLL();
 	isRunning = true;
 	// StartSystemの実行
 	m_pObjectContainer->InitializeAllGameObjects();
@@ -96,7 +96,7 @@ void GameCore::GameStop()
 	m_GameGenerateID.clear();
 	m_pObjectContainer->InitializeAllGameObjects();
 	// DLLのアンロード
-	FileSystem::ScriptProject::UnloadScriptDLL();
+	Cho::FileSystem::ScriptProject::UnloadScriptDLL();
 	isRunning = false;
 }
 
