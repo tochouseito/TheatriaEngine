@@ -557,3 +557,23 @@ private:
 	GraphicsEngine* m_pGraphicsEngine = nullptr;
 	StructuredBuffer<BUFFER_DATA_UISPRITE>* m_pIntegrationBuffer = nullptr;
 };
+
+// ライト更新システム
+class LightUpdateSystem : public ECSManager::System<LightComponent,TransformComponent>
+{
+public:
+	LightUpdateSystem(ECSManager* ecs, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine)
+		: ECSManager::System<LightComponent, TransformComponent>([this](Entity e, LightComponent& light,TransformComponent& transform)
+			{
+				UpdateLight(e, light, transform);
+			}),
+		m_pECS(ecs), m_pResourceManager(resourceManager), m_pGraphicsEngine(graphicsEngine)
+	{
+	}
+	~LightUpdateSystem() = default;
+private:
+	void UpdateLight(Entity e, LightComponent& light,TransformComponent& transform);
+	ECSManager* m_pECS = nullptr;
+	ResourceManager* m_pResourceManager = nullptr;
+	GraphicsEngine* m_pGraphicsEngine = nullptr;
+};

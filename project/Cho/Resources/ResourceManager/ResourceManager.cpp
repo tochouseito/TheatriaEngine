@@ -13,6 +13,10 @@ ResourceManager::ResourceManager(ID3D12Device8* device)
 	CreateIntegrationBuffers();
 	// ダミーマテリアルの作成
 	CreateDummyMaterial();
+	// ライトバッファの作成
+	CreateLightBuffer();
+	// 環境バッファの作成
+	CreateEnvironmentBuffer();
 	// スクリプトコンテナの作成
 	m_ScriptContainer = std::make_unique<ScriptContainer>();
 	// 初期化
@@ -138,6 +142,27 @@ void ResourceManager::CreateIntegrationBuffers()
 	// UISprite統合バッファ
 	std::optional<uint32_t> uiSpriteIndex = CreateStructuredBuffer<BUFFER_DATA_UISPRITE>(kIntegrationUISpriteBufferSize);
 	m_IntegrationData[IntegrationDataType::UISprite] = std::make_unique<IntegrationData<BUFFER_DATA_UISPRITE>>(uiSpriteIndex, kIntegrationUISpriteBufferSize);
+
+}
+
+void ResourceManager::CreateLightBuffer()
+{
+	// ライトバッファの作成
+	uint32_t index = CreateConstantBuffer<BUFFER_DATA_LIGHT>();
+	m_LightBuffer = dynamic_cast<ConstantBuffer<BUFFER_DATA_LIGHT>*>(GetBuffer<IConstantBuffer>(index));
+	// ライトバッファの初期化
+	BUFFER_DATA_LIGHT data = {};
+	for (uint32_t i = 0;i < kMaxLight;i++)
+	{
+		data.lightData[i].active = false;
+	}
+}
+
+void ResourceManager::CreateEnvironmentBuffer()
+{
+	// 環境バッファの作成
+	uint32_t index = CreateConstantBuffer<BUFFER_DATA_ENVIRONMENT>();
+	m_EnvironmentBuffer = dynamic_cast<ConstantBuffer<BUFFER_DATA_ENVIRONMENT>*>(GetBuffer<IConstantBuffer>(index));
 }
 
 void ResourceManager::CreateHeap(ID3D12Device8* device)

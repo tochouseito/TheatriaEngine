@@ -14,9 +14,18 @@ enum class ObjectType
 	Camera,				// カメラオブジェクト
 	ParticleSystem,		// パーティクルシステムオブジェクト
 	Effect,				// エフェクトオブジェクト
-	//Light,			// ライトオブジェクト
+	Light,			// ライトオブジェクト
 	UI,					// UIオブジェクト
 	Count,				// カウント
+};
+
+// ライトのタイプ
+enum class LightType : uint32_t
+{
+	Directional = 0,	// 平行光源
+	Point,				// 点光源
+	Spot,				// スポットライト
+	Count,
 };
 
 inline const char* ObjectTypeToWString(ObjectType type)

@@ -402,6 +402,8 @@
     <None Include="Resources\EngineAssets\Shader\header\Billboard.hlsli" />
     <None Include="Resources\EngineAssets\Shader\header\Demo.hlsli" />
     <None Include="Resources\EngineAssets\Shader\header\Effect.hlsli" />
+    <None Include="Resources\EngineAssets\Shader\header\Environment.hlsli" />
+    <None Include="Resources\EngineAssets\Shader\header\Light.hlsli" />
     <None Include="Resources\EngineAssets\Shader\header\LineDraw.hlsli" />
     <None Include="Resources\EngineAssets\Shader\header\Material.hlsli" />
     <None Include="Resources\EngineAssets\Shader\header\Math.hlsli" />

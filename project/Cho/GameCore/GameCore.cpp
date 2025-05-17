@@ -30,7 +30,7 @@ void GameCore::Initialize(InputManager* input, ResourceManager* resourceManager,
 	m_pPhysicsWorld->SetContactListener(m_pContactListener.get());
 	// システムの生成
 	input;resourceManager;graphicsEngine;
-	//CreateSystems(input,resourceManager,graphicsEngine);
+	m_EnvironmentData.ambientColor = { 0.01f,0.01f,0.01f,1.0f };
 }
 
 void GameCore::Start(ResourceManager& resourceManager)
@@ -45,6 +45,8 @@ void GameCore::Start(ResourceManager& resourceManager)
 void GameCore::Update(ResourceManager& resourceManager, GraphicsEngine& graphicsEngine)
 {
 	m_pSceneManager->Update();
+	// 環境設定の更新
+	UpdateEnvironmentSetting();
 	// ゲームが実行中でなければreturn
 	if (isRunning)
 	{
@@ -151,6 +153,13 @@ void GameCore::ClearGenerateObject()
 		command->Execute(m_EngineCommand);
 	}
 	m_GameInitializedID.clear();
+}
+
+void GameCore::UpdateEnvironmentSetting()
+{
+	// 環境情報バッファ
+	ConstantBuffer<BUFFER_DATA_ENVIRONMENT>* envBuffer = m_EngineCommand->GetResourceManager()->GetEnvironmentBuffer();
+	envBuffer->UpdateData(m_EnvironmentData);
 }
 
 void GameCore::CreateSystems(InputManager* input, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine)

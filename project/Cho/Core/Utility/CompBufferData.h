@@ -123,3 +123,84 @@ struct BUFFER_DATA_UISPRITE final
 	float tex_bottom;		// 4バイト
 	uint32_t materialID;	// 4バイト
 };
+
+// 平行光源の数
+static const uint32_t kDirLightNum = 10;
+// 点光源の数
+static const uint32_t kPointLightNum = 10;
+// スポットライトの数
+static const uint32_t kSpotLightNum = 10;
+
+struct BUFFER_DATA_DIRECTIONALLIGHT
+{
+	Vector3 color;    //!<ライトの色
+	float intensity;  //!<ライトの強さ
+	Vector3 direction;//!<ライトの向き
+	uint32_t active;  //!<ライトの有効無効
+};
+
+
+struct BUFFER_DATA_POINTLIGHT
+{
+	Vector3 color;    //!<ライトの色
+	float intensity;  //!<ライトの強さ
+	Vector3 position;//!<ライトの位置
+	float radius;//!<ライトの届く最大距離
+	float decay;//!<減衰率
+	uint32_t active;  //!<ライトの有効無効
+	float pad1[2];
+};
+
+struct BUFFER_DATA_SPOTLIGHT
+{
+	Vector3 color;    //!<ライトの色
+	float intensity;  //!<ライトの強さ
+	Vector3 direction;//!<ライトの向き
+	float distance;//!<ライトの届く最大距離
+	Vector3 position; //!<ライトの位置
+	float decay;//!<減衰率
+	float cosAngle;//!<スポットライトの余弦
+	float cosFalloffStart;//Falloff開始の角度
+	uint32_t active;  //!<ライトの有効無効
+	float pad1;
+};
+
+struct BUFFER_DATA_PUNCTUALLIGHT
+{
+	// 環境光
+	Vector3 ambientColor;
+	float pad1;
+	// 平行光源
+	std::array<BUFFER_DATA_DIRECTIONALLIGHT, kDirLightNum> dirLights;
+	// 点光源
+	std::array<BUFFER_DATA_POINTLIGHT, kPointLightNum> pointLights;
+	// スポットライト
+	std::array<BUFFER_DATA_SPOTLIGHT, kSpotLightNum> spotLights;
+};
+
+static const uint32_t kMaxLight = 30;// ライトの最大数
+
+struct LightData
+{
+	Color color;		// 色
+	Vector3 direction;	// 向き
+	float intensity;	// 強度
+	float range;		// 適用距離
+	float decay;		// 減衰率
+	float spotAngle;	// スポットライトの角度
+	float spotFalloffStart;
+	uint32_t type;		// ライトの種類
+	uint32_t active;	// ライトの有効無効
+	uint32_t transformMapID;
+	float pad[1];		// パディング
+};
+
+struct BUFFER_DATA_LIGHT final
+{
+	LightData lightData[kMaxLight];	// ライトデータ
+};
+
+struct BUFFER_DATA_ENVIRONMENT final
+{
+	Color ambientColor;	// 環境光の色
+};

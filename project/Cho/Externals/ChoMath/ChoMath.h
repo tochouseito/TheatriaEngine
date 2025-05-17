@@ -82,5 +82,6 @@ namespace ChoMath {
 	Matrix4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate);
 	Matrix4 MakeAffineMatrix(const Scale& scale, const Quaternion& rotate, const Vector3& translate);
 
+
 	float LerpShortAngle(float startAngle, float endAngle, float t);
 };

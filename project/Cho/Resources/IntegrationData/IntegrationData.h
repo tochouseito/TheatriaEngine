@@ -65,7 +65,7 @@ public:
 protected:
 	// リソースマネージャーのポインタ
 	ResourceManager* m_ResourceManager = nullptr;
-	// 構造化バッファのインデックス
+	// バッファのインデックス
 	std::optional<uint32_t> m_BufferIndex = std::nullopt;
 	// 統合データのサイズ
 	size_t m_Size = 0;

@@ -551,3 +551,11 @@ void BoxCollider2DUpdateSystem::UpdateFixture(const TransformComponent& transfor
 		box.runtimeFixture = rb.runtimeBody->CreateFixture(&fixtureDef);
 	}
 }
+
+void LightUpdateSystem::UpdateLight(Entity e, LightComponent& light, TransformComponent& transform)
+{
+	// ライトのワールド行列を転送
+	BUFFER_DATA_LIGHT& data = m_pResourceManager->GetLightBuffer()->GetData();
+	data.lightData[light.mapID.value()].color = light.color;
+	data.lightData[light.mapID.value()].direction = transform.
+}
