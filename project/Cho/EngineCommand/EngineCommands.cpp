@@ -244,6 +244,13 @@ bool DeleteObjectCommand::Execute(EngineCommand* edit)
 			edit->m_GameCore->GetSceneManager()->GetCurrentScene()->SetMainCameraID(std::nullopt);
 		}
 	}
+	// LightComponentを取得
+	LightComponent* light = edit->m_GameCore->GetECSManager()->GetComponent<LightComponent>(object.GetEntity());
+	if (light)
+	{
+		// Light統合バッファからmapIDを返却
+		edit->m_ResourceManager->RecycleLightIndex(light->mapID.value());
+	}
 	// 削除前にComponentを記録する
 	m_Transform = *transform;
 	if (camera) { m_Camera = *camera; }
@@ -264,6 +271,7 @@ bool DeleteObjectCommand::Execute(EngineCommand* edit)
 	if (particle) { m_Particle = *particle; }
 	UISpriteComponent* uiSprite = edit->m_GameCore->GetECSManager()->GetComponent<UISpriteComponent>(object.GetEntity());
 	if (uiSprite) { m_UISprite = *uiSprite; }
+	if (light) { m_Light = *light; }
 	// Componentの初期化
 	if (transform) { transform->Initialize(); }
 	if (camera) { camera->Initialize(); }
@@ -283,6 +291,7 @@ bool DeleteObjectCommand::Execute(EngineCommand* edit)
 	if (emitter) { emitter->Initialize(); }
 	if (particle) { particle->Initialize(); }
 	if (uiSprite) { uiSprite->Initialize(); }
+	if (light) { light->Initialize(); }
 	// Componentの削除
 	edit->m_GameCore->GetECSManager()->RemoveComponent<TransformComponent>(object.GetEntity());
 	if (camera) { edit->m_GameCore->GetECSManager()->RemoveComponent<CameraComponent>(object.GetEntity()); }
@@ -296,6 +305,7 @@ bool DeleteObjectCommand::Execute(EngineCommand* edit)
 	if (emitter) { edit->m_GameCore->GetECSManager()->RemoveComponent<EmitterComponent>(object.GetEntity()); }
 	if (particle) { edit->m_GameCore->GetECSManager()->RemoveComponent<ParticleComponent>(object.GetEntity()); }
 	if (uiSprite) { edit->m_GameCore->GetECSManager()->RemoveComponent<UISpriteComponent>(object.GetEntity()); }
+	if (light) { edit->m_GameCore->GetECSManager()->RemoveComponent<LightComponent>(object.GetEntity()); }
 	// Entityの削除
 	edit->m_GameCore->GetECSManager()->RemoveEntity(object.GetEntity());
 	// CurrentSceneから削除

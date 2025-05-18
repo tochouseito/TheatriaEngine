@@ -121,6 +121,13 @@ void ScenePrefab::Start()
 			uiSprite->mapID = m_SceneManager->m_pResourceManager->GetIntegrationData(IntegrationDataType::UISprite)->GetMapID();
 			m_SceneManager->m_pResourceManager->GetUIContainer()->AddUI(uiSprite->mapID.value());
 		}
+		// LightComponentの追加
+		if (objData.m_Light.has_value())
+		{
+			LightComponent* light = ecs->AddComponent<LightComponent>(entity);
+			*light = objData.m_Light.value();
+			light->mapID = m_SceneManager->m_pResourceManager->GetLightIndex();
+		}
 	}
 	// MainCameraの設定
 	GameObject& mainCamera = objectContainer->GetGameObjectByName(m_StartCameraName);

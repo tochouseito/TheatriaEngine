@@ -199,6 +199,7 @@ private:
 	std::optional<EmitterComponent> m_Emitter;
 	std::optional<ParticleComponent> m_Particle;
 	std::optional<UISpriteComponent> m_UISprite;
+	std::optional<LightComponent> m_Light;
 };
 // オブジェクトの名前を変更するコマンド
 class RenameObjectCommand : public IEngineCommand

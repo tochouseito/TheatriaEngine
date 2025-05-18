@@ -373,7 +373,7 @@ struct MaterialComponent : public IComponentTag
 	bool enableTexture = false;
 	bool uvFlipY = false;
 	Matrix4 matUV;
-	float shininess;
+	float shininess = 50.0f;
 	std::wstring textureName = L"";	// テクスチャ名
 	std::optional<uint32_t> textureID = std::nullopt;	// テクスチャID
 	std::optional<uint32_t> mapID = std::nullopt;

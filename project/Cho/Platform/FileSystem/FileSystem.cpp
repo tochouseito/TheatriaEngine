@@ -394,6 +394,13 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, SceneManager*
                     comps["UISprite"] = Cho::Serialization::ToJson(*ui);
                 }
             }
+			if (IsComponentAllowedAtRuntime<LightComponent>(obj.GetType()))
+			{
+				if (const auto* l = ecs->GetComponent<LightComponent>(entity))
+				{
+					comps["Light"] = Cho::Serialization::ToJson(*l);
+				}
+			}
 
             objJson["components"] = comps;
             objArray.push_back(objJson);
@@ -813,6 +820,15 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
                     //ui->mapID = resourceManager->GetIntegrationData(IntegrationDataType::UISprite)->GetMapID();
                     //resourceManager->GetUIContainer()->AddUI(ui->mapID.value());
                 }
+                // Light
+                if (comps.contains("Light"))
+                {
+                    LightComponent l{};
+                    auto& jl = comps["Light"];
+                    Deserialization::FromJson(jl, l);
+                    // LightComponentの保存
+                    objData.m_Light = l;
+                }
 				// GameObjectDataの追加
 				scene.AddGameObjectData(objData);
             }
@@ -1129,6 +1145,20 @@ json Cho::Serialization::ToJson(const UISpriteComponent& ui)
 	j["size"] = { ui.size.x, ui.size.y };
 	j["textureLeftTop"] = { ui.textureLeftTop.x, ui.textureLeftTop.y };
 	j["textureSize"] = { ui.textureSize.x, ui.textureSize.y };
+	return j;
+}
+
+json Cho::Serialization::ToJson(const LightComponent& l)
+{
+	json j;
+	j["color"] = { l.color.r, l.color.g, l.color.b, l.color.a };
+	j["intensity"] = l.intensity;
+	j["range"] = l.range;
+	j["decay"] = l.decay;
+	j["spotAngle"] = l.spotAngle;
+	j["spotFalloffStart"] = l.spotFalloffStart;
+	j["type"] = static_cast<int>(l.type);
+	j["active"] = l.active;
 	return j;
 }
 
@@ -1854,6 +1884,18 @@ void Cho::Deserialization::FromJson(const json& j, UISpriteComponent& ui)
 	ui.size = { j["size"][0], j["size"][1] };
 	ui.textureLeftTop = { j["textureLeftTop"][0], j["textureLeftTop"][1] };
 	ui.textureSize = { j["textureSize"][0], j["textureSize"][1] };
+}
+
+void Cho::Deserialization::FromJson(const json& j, LightComponent& l)
+{
+	l.color = { j["color"][0], j["color"][1], j["color"][2], j["color"][3] };
+	l.intensity = j.value("intensity", 1.0f);
+	l.range = j.value("range", 10.0f);
+	l.decay = j.value("decay", 1.0f);
+	l.spotAngle = j.value("spotAngle", 45.0f);
+	l.spotFalloffStart = j.value("spotFalloffStart", 0.0f);
+	l.type = static_cast<LightType>(j.value("type", 0));
+	l.active = j.value("active", true);
 }
 
 void Cho::FileSystem::ScanFolder(const path& rootPath, EngineCommand* engineCommand)

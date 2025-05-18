@@ -312,6 +312,10 @@ GameObjectData::GameObjectData(const GameObject& other)
 	{
 		m_UISprite = *uiSprite;
 	}
+	if (auto* light = other.m_ECS->GetComponent<LightComponent>(e))
+	{
+		m_Light = *light;
+	}
 
 	if (auto* lineRenderer = other.m_ECS->GetAllComponents<LineRendererComponent>(e))
 	{
