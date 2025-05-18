@@ -13,7 +13,6 @@ struct Light {
     uint type;
     uint active;
     uint transformMapID;
-    float padding[1];
 };
 struct Lights {
     Light lights[MAX_LIGHTS];

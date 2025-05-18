@@ -41,6 +41,8 @@ private:
 	void EmitterComponentView(GameObject* object);
 	// ParticleComponentの表示
 	void ParticleComponentView(GameObject* object);
+	// LightComponentの表示
+	void LightComponentView(GameObject* object);
 	// コンポーネントの追加
 	void AddComponent(GameObject* object);
 };

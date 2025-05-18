@@ -65,6 +65,18 @@ public:
 private:
 	uint32_t m_ObjectID;
 };
+// LightObjectを追加するコマンド
+class AddLightObjectCommand :public IEngineCommand
+{
+public:
+	AddLightObjectCommand()
+	{
+	}
+	bool Execute(EngineCommand* edit)override;
+	bool Undo(EngineCommand* edit)override;
+private:
+	uint32_t m_ObjectID;
+};
 // MeshFilterComponentを追加するコマンド
 class AddMeshFilterComponent :public IEngineCommand
 {

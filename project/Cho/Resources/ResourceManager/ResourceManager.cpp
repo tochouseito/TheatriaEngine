@@ -155,6 +155,7 @@ void ResourceManager::CreateLightBuffer()
 	for (uint32_t i = 0;i < kMaxLight;i++)
 	{
 		data.lightData[i].active = false;
+		data.lightData[i].type = static_cast<uint32_t>(LightType::Directional);
 	}
 }
 

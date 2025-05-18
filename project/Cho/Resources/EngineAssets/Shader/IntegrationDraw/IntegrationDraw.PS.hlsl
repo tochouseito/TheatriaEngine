@@ -31,8 +31,6 @@ PixelShaderOutput main(VSOut input) {
     Material material = gIMaterial[input.materialID];
     // テクスチャカラー
     float4 textureColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
-    // 全ライト
-    Light lights[MAX_LIGHTS] = gLights.lights;
     // ライティング結果
     float3 lig = float3(0.0f, 0.0f, 0.0f);
     // カメラへの方向
@@ -52,72 +50,80 @@ PixelShaderOutput main(VSOut input) {
         float4 transformedUV = mul(float4(texcoord, 0.0f, 1.0f), gIMaterial[input.materialID].matUV);
         textureColor = gTextures[material.textureID].Sample(gSampler, transformedUV.xy);
     }
-    
-    // ライトのタイプごとにライティング
-    for (int i = 0; i < MAX_LIGHTS; i++) {
-        switch (lights[i].type) {
-            case LIGHT_TYPE_DIRECTIONAL:{// 平行光源
-                    // ライトが無効ならスキップ
-                    if (lights[i].active == 0) {
-                        continue;
-                    }
-                    // ライトの位置を取得
-                    float3 position = {
-                        gITF[lights[i].transformMapID].matWorld[3][0],
-                        gITF[lights[i].transformMapID].matWorld[3][1],
-                        gITF[lights[i].transformMapID].matWorld[3][2]
-                    };
+    // ライティングが有効ならライティングを計算
+    if (material.enableLighting != 0) {
+        // ライトのタイプごとにライティング
+        for (int i = 0; i < MAX_LIGHTS; i++) {
+            Light light = gLights.lights[i];
+            switch (light.type) {
+                case LIGHT_TYPE_DIRECTIONAL:{// 平行光源
+                        // ライトが無効ならスキップ
+                        if (light.active == 0) {
+                            continue;
+                        }
+                        // ライトの位置を取得
+                        float3 position = {
+                            gITF[light.transformMapID].matWorld[3][0],
+                            gITF[light.transformMapID].matWorld[3][1],
+                            gITF[light.transformMapID].matWorld[3][2]
+                        };
                 
-                    float3 lightDir = -normalize(lights[i].direction);
-                    // 鏡面反射の強度を求める
-                    float3 halfVector = normalize(lightDir + toEye);
-                    float NDotH = saturate(dot(normal, halfVector)); // 鏡面反射強度
-                    float specularPow = pow(NDotH, material.shininess);
-                    // half lambert
-                    float NdotL = dot(normal, lightDir);
-                    // half lambertの計算
-                    float cos = pow(NdotL * 0.5f + 0.5f, 2.0f);
-                    // 拡散反射
-                    float3 diffuseDirLight = lights[i].color.rgb * cos * lights[i].intensity;
-                    // 鏡面反射
-                    float3 specularDirLight = lights[i].color.rgb * lights[i].intensity * specularPow * float3(1.0f, 1.0f, 1.0f);
-                    // 結果を加算
-                    lig += diffuseDirLight + specularDirLight;
-                    break;
-                }
-            case LIGHT_TYPE_POINT:{// 点光源
-                    // ライトが無効ならスキップ
-                    if (lights[i].active == 0) {
-                        continue;
+                        float3 lightDir = -normalize(light.direction);
+                        // 鏡面反射の強度を求める
+                        float3 halfVector = normalize(lightDir + toEye);
+                        float NDotH = saturate(dot(normal, halfVector)); // 鏡面反射強度
+                        float specularPow = pow(NDotH, material.shininess);
+                        // half lambert
+                        float NdotL = dot(normal, lightDir);
+                        // half lambertの計算
+                        float cos = pow(NdotL * 0.5f + 0.5f, 2.0f);
+                        // 拡散反射
+                        float3 diffuseDirLight = light.color.rgb * cos * light.intensity;
+                        // 鏡面反射
+                        float3 specularDirLight = light.color.rgb * light.intensity * specularPow * float3(1.0f, 1.0f, 1.0f);
+                        // 結果を加算
+                        lig += diffuseDirLight + specularDirLight;
+                        break;
                     }
-                    // ライトの位置を取得
-                    float3 position = {
-                        gITF[lights[i].transformMapID].matWorld[3][0],
-                        gITF[lights[i].transformMapID].matWorld[3][1],
-                        gITF[lights[i].transformMapID].matWorld[3][2]
-                    };
-                    break;
-                }
-            case LIGHT_TYPE_SPOT:{// スポットライト
-                    // ライトが無効ならスキップ
-                    if (lights[i].active == 0) {
-                        continue;
+                case LIGHT_TYPE_POINT:{// 点光源
+                        // ライトが無効ならスキップ
+                        if (light.active == 0) {
+                            continue;
+                        }
+                        // ライトの位置を取得
+                        float3 position = {
+                            gITF[light.transformMapID].matWorld[3][0],
+                        gITF[light.transformMapID].matWorld[3][1],
+                        gITF[light.transformMapID].matWorld[3][2]
+                        };
+                        break;
                     }
-                    // ライトの位置を取得
-                    float3 position = {
-                        gITF[lights[i].transformMapID].matWorld[3][0],
-                        gITF[lights[i].transformMapID].matWorld[3][1],
-                        gITF[lights[i].transformMapID].matWorld[3][2]
-                    };
-                    break;
-                }
+                case LIGHT_TYPE_SPOT:{// スポットライト
+                        // ライトが無効ならスキップ
+                        if (light.active == 0) {
+                            continue;
+                        }
+                        // ライトの位置を取得
+                        float3 position = {
+                            gITF[light.transformMapID].matWorld[3][0],
+                        gITF[light.transformMapID].matWorld[3][1],
+                        gITF[light.transformMapID].matWorld[3][2]
+                        };
+                        break;
+                    }
+            }
         }
+        // ライティング結果と環境光を加算
+        lig.rgb += ambientColor.rgb;
+        // 合計
+        finalColor.rgb = material.color.rgb * textureColor.rgb * lig.rgb;
+        finalColor.a = material.color.a * textureColor.a;
     }
-    // ライティング結果と環境光を加算
-    lig.rgb += ambientColor.rgb;
-    // 合計
-    finalColor.rgb = material.color.rgb * textureColor.rgb * lig.rgb;
-    finalColor.a = material.color.a * textureColor.a;
+    else {
+        // 合計
+        finalColor.rgb = material.color.rgb * textureColor.rgb;
+        finalColor.a = material.color.a * textureColor.a;
+    }
     // 最終出力
     output.color = finalColor;
 

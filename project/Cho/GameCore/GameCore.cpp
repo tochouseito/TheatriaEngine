@@ -195,6 +195,8 @@ void GameCore::CreateSystems(InputManager* input, ResourceManager* resourceManag
 	m_pSingleSystemManager->RegisterSystem(std::move(cameraSystem), SystemState::Update);
 	std::unique_ptr<ECSManager::ISystem> emitterUpdateSystem = std::make_unique<EmitterUpdateSystem>(m_pECSManager.get(), resourceManager, graphicsEngine);
 	m_pSingleSystemManager->RegisterSystem(std::move(emitterUpdateSystem), SystemState::Update);
+	std::unique_ptr<ECSManager::ISystem> lightUpdateSystem = std::make_unique<LightUpdateSystem>(m_pECSManager.get(), resourceManager,graphicsEngine);
+	m_pSingleSystemManager->RegisterSystem(std::move(lightUpdateSystem), SystemState::Update);
 	std::unique_ptr<ECSManager::ISystem> particleUpdateSystem = std::make_unique<ParticleUpdateSystem>(m_pECSManager.get(), resourceManager,graphicsEngine);
 	m_pSingleSystemManager->RegisterSystem(std::move(particleUpdateSystem), SystemState::Update);
 	std::unique_ptr<ECSManager::ISystem> boxUpdateSystem = std::make_unique<BoxCollider2DUpdateSystem>(m_pECSManager.get(), m_pPhysicsWorld.get());
@@ -229,6 +231,8 @@ void GameCore::CreateSystems(InputManager* input, ResourceManager* resourceManag
 	m_pEditorSingleSystem->RegisterSystem(std::move(transformEditorSystem), SystemState::Update);
 	std::unique_ptr<ECSManager::ISystem> cameraEditorSystem = std::make_unique<CameraEditorSystem>(m_pECSManager.get(), resourceManager, resourceManager->GetIntegrationBuffer(IntegrationDataType::Transform));
 	m_pEditorSingleSystem->RegisterSystem(std::move(cameraEditorSystem), SystemState::Update);
+	std::unique_ptr<ECSManager::ISystem> lightEditorSystem = std::make_unique<LightUpdateSystem>(m_pECSManager.get(), resourceManager, graphicsEngine);
+	m_pEditorSingleSystem->RegisterSystem(std::move(lightEditorSystem), SystemState::Update);
 	std::unique_ptr<ECSManager::ISystem> emitterEditorSystem = std::make_unique<EmitterEditorUpdateSystem>(m_pECSManager.get(), resourceManager, graphicsEngine);
 	m_pEditorSingleSystem->RegisterSystem(std::move(emitterEditorSystem), SystemState::Update);
 	std::unique_ptr<ECSManager::ISystem> effectEditorSystem = std::make_unique<EffectEditorUpdateSystem>(m_pECSManager.get(), m_EngineCommand);

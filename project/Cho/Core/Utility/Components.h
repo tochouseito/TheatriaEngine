@@ -640,6 +640,8 @@ bool IsComponentAllowedAtRuntime(ObjectType type)
 		return IsComponentAllowed<ObjectType::Effect, Component>;
 	case ObjectType::UI:
 		return IsComponentAllowed<ObjectType::UI, Component>;
+	case ObjectType::Light:
+		return IsComponentAllowed<ObjectType::Light, Component>;
 	case ObjectType::Count:
 		return false;
 	default:

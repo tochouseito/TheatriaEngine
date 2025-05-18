@@ -531,3 +531,44 @@ bool SetGravityCommand::Undo(EngineCommand* edit)
 	edit;
 	return false;
 }
+
+bool AddLightObjectCommand::Execute(EngineCommand* edit)
+{
+	// CurrentSceneがないなら失敗
+	if (!edit->m_GameCore->GetSceneManager()->GetCurrentScene())
+	{
+		Log::Write(LogLevel::Assert, "Current Scene is nullptr");
+		return false;
+	}
+	// 各IDの取得
+	// Entity
+	Entity entity = edit->m_GameCore->GetECSManager()->GenerateEntity();
+	// デフォルトの名前
+	std::wstring name = L"NewLight";
+	// 重複回避
+	name = GenerateUniqueName(name, edit->m_GameCore->GetObjectContainer()->GetNameToObjectID());
+	// Transform統合バッファからmapIDを取得
+	uint32_t tfMapID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::Transform)->GetMapID();
+	// TransformComponentを追加
+	TransformComponent* transform = edit->m_GameCore->GetECSManager()->AddComponent<TransformComponent>(entity);
+	transform->mapID = tfMapID;
+	// LightバッファからmapIDを取得
+	uint32_t mapID = edit->m_ResourceManager->GetLightIndex();
+	// LightComponentを追加
+	LightComponent* light = edit->m_GameCore->GetECSManager()->AddComponent<LightComponent>(entity);
+	light->mapID = mapID;
+	// GameObjectを追加
+	ObjectID objectID = edit->m_GameCore->GetObjectContainer()->AddGameObject(entity, name, ObjectType::Light);
+	m_ObjectID = objectID;
+	// シーンに追加
+	edit->m_GameCore->GetSceneManager()->GetCurrentScene()->AddUseObject(objectID);
+	// SelectedObjectを設定
+	edit->SetSelectedObject(&edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID));
+	return true;
+}
+
+bool AddLightObjectCommand::Undo(EngineCommand* edit)
+{
+	edit;
+	return false;
+}

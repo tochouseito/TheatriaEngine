@@ -450,11 +450,19 @@ void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& ga
 			// UseTransformBufferをセット
 			IStructuredBuffer* useTransformBuffer = resourceManager.GetBuffer<IStructuredBuffer>(modelData.useTransformBufferIndex);
 			context->SetGraphicsRootDescriptorTable(2, useTransformBuffer->GetSRVGpuHandle());
+			// ライトバッファをセット
+			IConstantBuffer* lightBuffer = resourceManager.GetLightBuffer();
+			context->SetGraphicsRootConstantBufferView(3, lightBuffer->GetResource()->GetGPUVirtualAddress());
+			// 環境情報バッファをセット
+			IConstantBuffer* envBuffer = resourceManager.GetEnvironmentBuffer();
+			context->SetGraphicsRootConstantBufferView(4, envBuffer->GetResource()->GetGPUVirtualAddress());
+			// PS用トランスフォーム統合バッファをセット
+			context->SetGraphicsRootDescriptorTable(5, transformBuffer->GetSRVGpuHandle());
 			// マテリアル統合バッファをセット
 			IStructuredBuffer* materialBuffer = resourceManager.GetIntegrationBuffer(IntegrationDataType::Material);
-			context->SetGraphicsRootDescriptorTable(3, materialBuffer->GetSRVGpuHandle());
+			context->SetGraphicsRootDescriptorTable(6, materialBuffer->GetSRVGpuHandle());
 			// 配列テクスチャのためヒープをセット
-			context->SetGraphicsRootDescriptorTable(4, resourceManager.GetSUVDHeap()->GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
+			context->SetGraphicsRootDescriptorTable(7, resourceManager.GetSUVDHeap()->GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
 			// インスタンス数を取得
 			UINT numInstance = static_cast<UINT>(modelData.useTransformList.size());
 			// DrawCall
