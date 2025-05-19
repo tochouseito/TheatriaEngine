@@ -56,14 +56,14 @@ void Toolbar::Window()
     if (ImGui::BeginCombo("##ToolSelector", ConvertString(name).c_str()))
     {
         ObjectID n = 0;
-        for (GameObject& object : m_EngineCommand->GetGameCore()->GetObjectContainer()->GetGameObjects().GetVector())
+        for (auto& object : m_EngineCommand->GetGameCore()->GetObjectContainer()->GetGameObjects().GetVector())
         {
-			if (object.GetType() != ObjectType::Camera) {
+			if (object->GetType() != ObjectType::Camera) {
 				n++;
                 continue;
             }
             bool is_selected = (currentTool == n);
-            if (ImGui::Selectable(ConvertString(object.GetName()).c_str(), is_selected))
+            if (ImGui::Selectable(ConvertString(object->GetName()).c_str(), is_selected))
             {
                 currentTool = n;
 				m_EngineCommand->GetGameCore()->GetSceneManager()->GetCurrentScene()->SetMainCameraID(n);

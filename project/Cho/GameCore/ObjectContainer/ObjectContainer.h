@@ -21,12 +21,12 @@ public:
 	}
 	// ゲームオブジェクトを追加
 	ObjectID AddGameObject(const Entity& entity,const std::wstring& name,const ObjectType& type)
-	{ 
-		ObjectID id = static_cast<ObjectID>(m_GameObjects.push_back(GameObject(this, m_InputManager, m_ResourceManager, m_ECS, entity, name, type)));
+	{
+		ObjectID id = static_cast<ObjectID>(m_GameObjects.push_back(std::make_unique<GameObject>(this, m_InputManager, m_ResourceManager, m_ECS, entity, name, type)));
 		//m_GameObjects[id].Initialize();
 		m_NameToObjectID[name] = id;
 		m_TypeToObjectIDs[type].push_back(id);
-		m_GameObjects[id].SetID(id);
+		m_GameObjects[id]->SetID(id);
 		return id;
 	}
 	// ゲームオブジェクトを削除
@@ -36,13 +36,13 @@ public:
 		{
 			return;
 		}
-		m_NameToObjectID.erase(m_GameObjects[id].GetName());
-		ObjectType type = m_GameObjects[id].GetType();
+		m_NameToObjectID.erase(m_GameObjects[id]->GetName());
+		ObjectType type = m_GameObjects[id]->GetType();
 		if (m_TypeToObjectIDs.contains(type))
 		{
 			m_TypeToObjectIDs[type].erase(std::remove(m_TypeToObjectIDs[type].begin(), m_TypeToObjectIDs[type].end(), id), m_TypeToObjectIDs[type].end());
 		}
-		m_GameObjects[id].SetInactive();
+		m_GameObjects[id]->SetInactive();
 		m_GameObjects.erase(id);
 	}
 	// プレハブを追加
@@ -83,7 +83,7 @@ public:
 		{
 			return m_DummyGameObject;
 		}
-		return m_GameObjects[index];
+		return *m_GameObjects[index];
 	}
 	// プレハブを取得
 	Prefab* GetPrefab(const ObjectID& index) {
@@ -94,7 +94,7 @@ public:
 		return &m_Prefabs[index];
 	}
 	// ゲームオブジェクトコンテナを取得
-	FVector<GameObject>& GetGameObjects() { return m_GameObjects; }
+	FVector<std::unique_ptr<GameObject>>& GetGameObjects() { return m_GameObjects; }
 	// プレハブコンテナを取得
 	FVector<Prefab>& GetPrefabs() { return m_Prefabs; }
 	// 名前検索用補助コンテナを取得
@@ -114,7 +114,7 @@ public:
 	{
 		if (m_NameToObjectID.contains(name))
 		{
-			return m_GameObjects[m_NameToObjectID[name]];
+			return *m_GameObjects[m_NameToObjectID[name]];
 		}
 		return m_DummyGameObject;
 	}
@@ -134,8 +134,8 @@ public:
 	{
 		for (auto& obj : m_GameObjects.GetVector())
 		{
-			if (!obj.IsActive()) continue;
-			obj.Initialize();
+			if (!obj->IsActive()) continue;
+			obj->Initialize();
 		}
 	}
 private:
@@ -144,7 +144,7 @@ private:
 	InputManager* m_InputManager = nullptr;	// InputManager
 
 	// ゲームオブジェクトコンテナ
-	FVector<GameObject> m_GameObjects;
+	FVector<std::unique_ptr<GameObject>> m_GameObjects;
 	// プレファブコンテナ
 	FVector<Prefab> m_Prefabs;
 	// 名前検索用補助コンテナ

@@ -32,6 +32,7 @@ CHO_API bool ChoSystem::LoadGameParameter(const std::wstring& filePath, const st
 
 CHO_API GameObject& ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vector3 generatePosition)
 {
+	generatePosition;id;
 	EngineCommand* engineCommand = g_Engine->GetEngineCommand();
 	std::unique_ptr<Add3DObjectCommand> command = std::make_unique<Add3DObjectCommand>();
 	command->Execute(engineCommand);
@@ -125,7 +126,6 @@ CHO_API GameObject& ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vecto
 		MaterialComponent* newMaterial = engineCommand->GetGameCore()->GetECSManager()->GetComponent<MaterialComponent>(newObject.GetEntity());
 		if (newMaterial)
 		{
-			newMaterial->mapID = engineCommand->GetResourceManager()->GetIntegrationData(IntegrationDataType::Material)->GetMapID();
 			newMaterial->color = material->color;
 			newMaterial->enableLighting = material->enableLighting;
 			newMaterial->enableTexture = material->enableTexture;

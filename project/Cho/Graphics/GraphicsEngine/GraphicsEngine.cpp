@@ -706,14 +706,14 @@ void GraphicsEngine::DrawParticles(CommandContext* context, ResourceManager& res
 
 	for (auto& object : gameCore.GetObjectContainer()->GetGameObjects().GetVector())
 	{
-		if (!object.IsActive()) { continue; }
-		if (object.GetType() != ObjectType::ParticleSystem) { continue; }
+		if (!object->IsActive()) { continue; }
+		if (object->GetType() != ObjectType::ParticleSystem) { continue; }
 		// EmitterComponentを取得
-		EmitterComponent* emitterComponent = gameCore.GetECSManager()->GetComponent<EmitterComponent>(object.GetEntity());
+		EmitterComponent* emitterComponent = gameCore.GetECSManager()->GetComponent<EmitterComponent>(object->GetEntity());
 		if (!emitterComponent) { continue; }
 		//if (!emitterComponent->particleID) { continue; }
 		// ParticleComponentを取得
-		ParticleComponent* particleComponent = gameCore.GetECSManager()->GetComponent<ParticleComponent>(object.GetEntity());
+		ParticleComponent* particleComponent = gameCore.GetECSManager()->GetComponent<ParticleComponent>(object->GetEntity());
 		if (!particleComponent) { continue; }
 		// シーンがないならスキップ
 		if (!gameCore.GetSceneManager()->GetCurrentScene()) { continue; }
