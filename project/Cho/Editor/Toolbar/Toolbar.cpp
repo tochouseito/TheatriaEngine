@@ -67,6 +67,7 @@ void Toolbar::Window()
             {
                 currentTool = n;
 				m_EngineCommand->GetGameCore()->GetSceneManager()->GetCurrentScene()->SetMainCameraID(n);
+				m_EngineCommand->GetGameCore()->GetSceneManager()->GetCurrentScene()->SetStartCameraName(object->GetName());
             }
             if (is_selected)
             {

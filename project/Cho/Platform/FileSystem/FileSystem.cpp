@@ -502,6 +502,13 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, SceneManager*
                     comps["UISprite"] = Cho::Serialization::ToJson(objData.m_UISprite.value());
                 }
             }
+            if (IsComponentAllowedAtRuntime<LightComponent>(objData.m_Type))
+            {
+                if (objData.m_Light.has_value())
+                {
+                    comps["Light"] = Cho::Serialization::ToJson(objData.m_Light.value());
+                }
+            }
 
             objJson["components"] = comps;
             objArray.push_back(objJson);
@@ -510,13 +517,10 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, SceneManager*
     j["objects"] = objArray;
 
     // メインカメラ
-    if (auto camID = scene->GetMainCameraID())
+    if (!scene->GetStartCameraName().empty())
     {
-        const GameObject& cam = container->GetGameObject(*camID);
-        if (cam.IsActive())
-        {
-            j["mainCamera"] = std::filesystem::path(cam.GetName()).string();
-        }
+        j["mainCamera"] = std::filesystem::path(scene->GetStartCameraName()).string();
+
     }
 
     try
