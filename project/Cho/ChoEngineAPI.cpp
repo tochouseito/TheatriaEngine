@@ -30,9 +30,21 @@ CHO_API bool ChoSystem::LoadGameParameter(const std::wstring& filePath, const st
 	return Cho::FileSystem::LoadGameParameter(filePath, group, item, dataName, outValue);
 }
 
+// ゲームオブジェクト取得
+//CHO_API GameObject& ChoSystem::FindGameObjectByName(std::wstring_view name)
+//{
+//	GameCore* gameCore = g_Engine->GetEngineCommand()->GetGameCore();
+//	GameObject& result = gameCore->GetObjectContainer()->GetGameObjectByName(name.data());
+//	if (!result.IsActive())
+//	{
+//		return gameCore->GetObjectContainer()->GetDummyGameObject();
+//	}
+//	result.Initialize(false);
+//	return result;
+//}
+
 CHO_API GameObject& ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vector3 generatePosition)
 {
-	generatePosition;id;
 	EngineCommand* engineCommand = g_Engine->GetEngineCommand();
 	std::unique_ptr<Add3DObjectCommand> command = std::make_unique<Add3DObjectCommand>();
 	command->Execute(engineCommand);

@@ -4,8 +4,70 @@
 
 #define REGISTER_SCRIPT_FACTORY(SCRIPTNAME) \
     extern "C" __declspec(dllexport) IScript* Create##SCRIPTNAME##Script(GameObject& object) { \
-        return new SCRIPTNAME(object); \
-    }
+        return new SCRIPTNAME(object);}
+//// メンバ登録マクロ
+//#define REFLECT_SCRIPT_MEMBER(CLASS, MEMBER) \
+//    { #MEMBER, \
+//      typeid(decltype(CLASS::MEMBER)), \
+//      [](void* obj) -> void* { return &static_cast<CLASS*>(obj)->MEMBER; }, \
+//      [](void* obj, void* value) { static_cast<CLASS*>(obj)->MEMBER = *static_cast<decltype(CLASS::MEMBER)*>(value); }}
+//// 関数登録マクロ
+//#define REFLECT_SCRIPT_FUNC(CLASS, FUNC) \
+//    { #FUNC, [](void* obj) { static_cast<CLASS*>(obj)->FUNC(); } }
+//#define REGISTER_SCRIPT_REFLECTION(SCRIPTNAME) \
+//    extern "C" __declspec(dllexport) IScript* Create##SCRIPTNAME##Script(GameObject& object) { \
+//        return new SCRIPTNAME(object); \
+//    } \
+//    extern "C" __declspec(dllexport) const ScriptTypeInfo* GetScriptTypeInfo##SCRIPTNAME() { \
+//        static ScriptTypeInfo info = { \
+//            #SCRIPTNAME, \
+//            SCRIPTNAME::GetReflectedMembers() \
+//        }; \
+//        return &info; \
+//    } \
+//    extern "C" __declspec(dllexport) const std::vector<ScriptFunction>* GetScriptFunctions##SCRIPTNAME() { \
+//        return &SCRIPTNAME::GetReflectedFunctions(); \
+//    }
+//#define BEGIN_SCRIPT_REFLECTION(CLASS) \
+//    static void RegisterMembers(std::vector<ScriptMember>& out) {
+//
+//#define ADD_MEMBER(CLASS, MEMBER) \
+//    out.emplace_back(REFLECT_SCRIPT_MEMBER(CLASS, MEMBER));
+//
+//#define END_SCRIPT_REFLECTION_MEMBERS }
+//
+//#define BEGIN_SCRIPT_FUNCTIONS(CLASS) \
+//    static void RegisterFunctions(std::vector<ScriptFunction>& out) {
+//
+//#define ADD_FUNCTION(FUNC) \
+//    out.emplace_back(REFLECT_SCRIPT_FUNC(CLASS, FUNC));
+//
+//#define END_SCRIPT_REFLECTION_FUNCTIONS }
+//
+//#define AUTO_REFLECT(CLASS) \
+//    static std::vector<ScriptMember> GetReflectedMembers() { return IScript::BuildReflectedMembers<CLASS>(); } \
+//    static std::vector<ScriptFunction> GetReflectedFunctions() { return IScript::BuildReflectedFunctions<CLASS>(); }
+//
+//struct ScriptMember
+//{
+//	const char* name;
+//	std::type_index type;
+//	std::function<void* (void*)> getter;
+//	std::function<void(void*, void*)> setter;
+//};
+//
+//struct ScriptFunction
+//{
+//	const char* name;
+//	std::function<void(void*)> invoker;
+//};
+//struct ScriptTypeInfo
+//{
+//	const char* className;
+//	std::vector<ScriptMember> members;
+//};
+//using GetTypeInfoFn = const ScriptTypeInfo* (*)();
+//using GetFuncListFn = const std::vector<ScriptFunction>* (*)();
 
 struct TransformAPI
 {
@@ -185,4 +247,16 @@ struct UISpriteAPI
 private:
 	friend class GameObject;
 	UISpriteComponent* data = nullptr;
+};
+
+struct EditorAPI
+{
+	// 関数
+	std::function<void()> Begin;
+	std::function<void()> End;
+	std::function<void(const char* label, float* v, float v_speed, float v_min, float v_max, const char* format)> DragFloat;
+	std::function<void(const char* label, float* v[2], float v_speed, float v_min, float v_max, const char* format)> DragFloat2;
+	std::function<void(const char* label, float* v[3], float v_speed, float v_min, float v_max, const char* format)> DragFloat3;
+private:
+	friend class GameObject;
 };
