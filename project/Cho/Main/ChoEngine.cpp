@@ -75,6 +75,11 @@ void ChoEngine::Finalize()
 	// ファイルの保存
 	if (runtimeMode == RuntimeMode::Editor)
 	{
+		// ゲーム実行中なら終了する
+		if (gameCore->IsRunning())
+		{
+			gameCore->GameStop();
+		}
 		FileSystem::SaveProject(gameCore->GetSceneManager(), gameCore->GetObjectContainer(), gameCore->GetECSManager(), resourceManager.get());
 	}
 	// ImGuiManager終了処理
@@ -180,7 +185,7 @@ void ChoEngine::Start()
 	// ウィンドウのフォーカスが外れたらプロジェクト保存
 	if (WinApp::IsKillfocusWindow()&&!hubManager->IsRun())
 	{
-		if (runtimeMode == RuntimeMode::Editor)
+		if (runtimeMode == RuntimeMode::Editor&&!gameCore->IsRunning())
 		{
 			FileSystem::SaveProject(gameCore->GetSceneManager(), gameCore->GetObjectContainer(), gameCore->GetECSManager(), resourceManager.get());
 		}
