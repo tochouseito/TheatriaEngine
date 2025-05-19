@@ -441,7 +441,10 @@ void MainMenu::SettingWindow()
             {
                 if (m_EngineCommand->GetGameCore()->GetSceneManager()->GetCurrentScene()->GetSceneName() !=
                     scene->GetSceneName())
+                {
                     m_EngineCommand->GetGameCore()->GetSceneManager()->ChangeSceneRequest(scene->GetSceneID());
+					m_EngineCommand->SetSelectedObject(nullptr);
+                }
             }
 		}
 		ImGui::EndCombo();
