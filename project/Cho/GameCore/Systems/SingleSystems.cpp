@@ -551,3 +551,24 @@ void BoxCollider2DUpdateSystem::UpdateFixture(const TransformComponent& transfor
 		box.runtimeFixture = rb.runtimeBody->CreateFixture(&fixtureDef);
 	}
 }
+
+void LightUpdateSystem::UpdateLight(Entity e, LightComponent& light, TransformComponent& transform)
+{
+	e;
+	Vector3 direction = ChoMath::TransformDirection(Vector3(0.0f, 0.0f, 1.0f), ChoMath::MakeRotateXYZMatrix(ChoMath::DegreesToRadians(transform.degrees)));
+	//direction.Normalize();
+	// ライトのワールド行列を転送
+	BUFFER_DATA_LIGHT& data = m_pResourceManager->GetLightBuffer()->GetData();
+	uint32_t i = light.mapID.value();
+	data.lightData[i].color = light.color;
+	data.lightData[i].direction = direction;
+	data.lightData[i].intensity = light.intensity;
+	data.lightData[i].range = light.range;
+	data.lightData[i].decay = light.decay;
+	data.lightData[i].spotAngle = light.spotAngle;
+	data.lightData[i].spotFalloffStart = light.spotFalloffStart;
+	data.lightData[i].type = static_cast<uint32_t>(light.type);
+	data.lightData[i].active = light.active;
+	data.lightData[i].transformMapID = transform.mapID.value();
+	// 参照に書き込んでいるので転送は不要
+}

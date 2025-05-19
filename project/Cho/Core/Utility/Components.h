@@ -373,7 +373,7 @@ struct MaterialComponent : public IComponentTag
 	bool enableTexture = false;
 	bool uvFlipY = false;
 	Matrix4 matUV;
-	float shininess;
+	float shininess = 50.0f;
 	std::wstring textureName = L"";	// テクスチャ名
 	std::optional<uint32_t> textureID = std::nullopt;	// テクスチャID
 	std::optional<uint32_t> mapID = std::nullopt;
@@ -541,6 +541,45 @@ struct UISpriteComponent : public IComponentTag
 	}
 };
 
+// ライトコンポーネント
+struct LightComponent : public IComponentTag
+{
+	Color color;		// 色
+	float intensity=1.0f;	// 強度
+	float range=10.0f;		// 適用距離
+	float decay=1.0f;		// 減衰率
+	float spotAngle = 45.0f;	// スポットライトの角度
+	float spotFalloffStart = 0.0f;
+	LightType type = LightType::Directional;		// ライトの種類
+	bool active = true;	// ライトの有効無効
+	std::optional<uint32_t> mapID = std::nullopt;	// マップインデックス
+
+	LightComponent& operator=(const LightComponent& other)
+	{
+		if (this == &other) return *this;
+		color = other.color;
+		intensity = other.intensity;
+		range = other.range;
+		decay = other.decay;
+		spotAngle = other.spotAngle;
+		type = other.type;
+		active = other.active;
+		return *this;
+	}
+	// 初期化
+	void Initialize()
+	{
+		color.Initialize();
+		intensity = 1.0f;
+		range = 10.0f;
+		decay = 1.0f;
+		spotAngle = 45.0f;
+		spotFalloffStart = 0.0f;
+		type = LightType::Directional;
+		active = true;
+	}
+};
+
 // マルチコンポーネントを許可
 template<>
 struct IsMultiComponent<LineRendererComponent> : std::true_type {};
@@ -580,6 +619,11 @@ template<> constexpr bool IsComponentAllowed<ObjectType::UI, UISpriteComponent> 
 template<> constexpr bool IsComponentAllowed<ObjectType::UI, ScriptComponent> = true;
 template<> constexpr bool IsComponentAllowed<ObjectType::UI, MaterialComponent> = true;
 
+// Light
+template<> constexpr bool IsComponentAllowed<ObjectType::Light, TransformComponent> = true;
+template<> constexpr bool IsComponentAllowed<ObjectType::Light, LightComponent> = true;
+template<> constexpr bool IsComponentAllowed<ObjectType::Light, ScriptComponent> = true;
+
 // ランタイム対応
 template<typename Component>
 bool IsComponentAllowedAtRuntime(ObjectType type)
@@ -596,6 +640,8 @@ bool IsComponentAllowedAtRuntime(ObjectType type)
 		return IsComponentAllowed<ObjectType::Effect, Component>;
 	case ObjectType::UI:
 		return IsComponentAllowed<ObjectType::UI, Component>;
+	case ObjectType::Light:
+		return IsComponentAllowed<ObjectType::Light, Component>;
 	case ObjectType::Count:
 		return false;
 	default:

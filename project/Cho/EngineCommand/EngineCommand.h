@@ -39,6 +39,7 @@ class EngineCommand
 	friend class AddEffectObjectCommand;
 	friend class AddUIObjectCommand;
 	friend class SetGravityCommand;
+	friend class AddLightObjectCommand;
 	// Editor
 	friend class EffectEditorUpdateSystem;
 	friend class EffectEditor;

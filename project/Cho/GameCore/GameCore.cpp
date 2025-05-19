@@ -30,7 +30,7 @@ void GameCore::Initialize(InputManager* input, ResourceManager* resourceManager,
 	m_pPhysicsWorld->SetContactListener(m_pContactListener.get());
 	// システムの生成
 	input;resourceManager;graphicsEngine;
-	//CreateSystems(input,resourceManager,graphicsEngine);
+	m_EnvironmentData.ambientColor = { 0.01f,0.01f,0.01f,1.0f };
 }
 
 void GameCore::Start(ResourceManager& resourceManager)
@@ -45,6 +45,8 @@ void GameCore::Start(ResourceManager& resourceManager)
 void GameCore::Update(ResourceManager& resourceManager, GraphicsEngine& graphicsEngine)
 {
 	m_pSceneManager->Update();
+	// 環境設定の更新
+	UpdateEnvironmentSetting();
 	// ゲームが実行中でなければreturn
 	if (isRunning)
 	{
@@ -153,6 +155,13 @@ void GameCore::ClearGenerateObject()
 	m_GameInitializedID.clear();
 }
 
+void GameCore::UpdateEnvironmentSetting()
+{
+	// 環境情報バッファ
+	ConstantBuffer<BUFFER_DATA_ENVIRONMENT>* envBuffer = m_EngineCommand->GetResourceManager()->GetEnvironmentBuffer();
+	envBuffer->UpdateData(m_EnvironmentData);
+}
+
 void GameCore::CreateSystems(InputManager* input, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine)
 {
 	// シングルシステム
@@ -186,6 +195,8 @@ void GameCore::CreateSystems(InputManager* input, ResourceManager* resourceManag
 	m_pSingleSystemManager->RegisterSystem(std::move(cameraSystem), SystemState::Update);
 	std::unique_ptr<ECSManager::ISystem> emitterUpdateSystem = std::make_unique<EmitterUpdateSystem>(m_pECSManager.get(), resourceManager, graphicsEngine);
 	m_pSingleSystemManager->RegisterSystem(std::move(emitterUpdateSystem), SystemState::Update);
+	std::unique_ptr<ECSManager::ISystem> lightUpdateSystem = std::make_unique<LightUpdateSystem>(m_pECSManager.get(), resourceManager,graphicsEngine);
+	m_pSingleSystemManager->RegisterSystem(std::move(lightUpdateSystem), SystemState::Update);
 	std::unique_ptr<ECSManager::ISystem> particleUpdateSystem = std::make_unique<ParticleUpdateSystem>(m_pECSManager.get(), resourceManager,graphicsEngine);
 	m_pSingleSystemManager->RegisterSystem(std::move(particleUpdateSystem), SystemState::Update);
 	std::unique_ptr<ECSManager::ISystem> boxUpdateSystem = std::make_unique<BoxCollider2DUpdateSystem>(m_pECSManager.get(), m_pPhysicsWorld.get());
@@ -220,6 +231,8 @@ void GameCore::CreateSystems(InputManager* input, ResourceManager* resourceManag
 	m_pEditorSingleSystem->RegisterSystem(std::move(transformEditorSystem), SystemState::Update);
 	std::unique_ptr<ECSManager::ISystem> cameraEditorSystem = std::make_unique<CameraEditorSystem>(m_pECSManager.get(), resourceManager, resourceManager->GetIntegrationBuffer(IntegrationDataType::Transform));
 	m_pEditorSingleSystem->RegisterSystem(std::move(cameraEditorSystem), SystemState::Update);
+	std::unique_ptr<ECSManager::ISystem> lightEditorSystem = std::make_unique<LightUpdateSystem>(m_pECSManager.get(), resourceManager, graphicsEngine);
+	m_pEditorSingleSystem->RegisterSystem(std::move(lightEditorSystem), SystemState::Update);
 	std::unique_ptr<ECSManager::ISystem> emitterEditorSystem = std::make_unique<EmitterEditorUpdateSystem>(m_pECSManager.get(), resourceManager, graphicsEngine);
 	m_pEditorSingleSystem->RegisterSystem(std::move(emitterEditorSystem), SystemState::Update);
 	std::unique_ptr<ECSManager::ISystem> effectEditorSystem = std::make_unique<EffectEditorUpdateSystem>(m_pECSManager.get(), m_EngineCommand);

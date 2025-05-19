@@ -625,6 +625,15 @@ Matrix4 ChoMath::MakeAffineMatrix(const Scale& scale, const Quaternion& rotate, 
 	return result;
 }
 
+Vector3 ChoMath::TransformDirection(const Vector3& v, const Matrix4& m)
+{
+	return {
+		m.m[0][0] * v.x + m.m[1][0] * v.y + m.m[2][0] * v.z,
+		m.m[0][1] * v.x + m.m[1][1] * v.y + m.m[2][1] * v.z,
+		m.m[0][2] * v.x + m.m[1][2] * v.y + m.m[2][2] * v.z
+	};
+}
+
 float ChoMath::LerpShortAngle(float startAngle, float endAngle, float t) {
 	// 角度の差を計算
 	float delta = std::fmod(endAngle - startAngle, 2 * std::numbers::pi_v<float>);

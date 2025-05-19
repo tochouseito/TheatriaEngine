@@ -166,6 +166,11 @@ void MainMenu::EditMenu()
 				std::unique_ptr<AddUIObjectCommand> addUIObject = std::make_unique<AddUIObjectCommand>();
 				m_EngineCommand->ExecuteCommand(std::move(addUIObject));
             }
+			if (ImGui::MenuItem("ライト"))
+			{
+				std::unique_ptr<AddLightObjectCommand> addLightObject = std::make_unique<AddLightObjectCommand>();
+				m_EngineCommand->ExecuteCommand(std::move(addLightObject));
+			}
             if (ImGui::MenuItem("スクリプト"))
             {
                 m_OpenScriptPopup = true;

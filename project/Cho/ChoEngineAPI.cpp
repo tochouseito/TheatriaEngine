@@ -32,6 +32,7 @@ CHO_API bool ChoSystem::LoadGameParameter(const std::wstring& filePath, const st
 
 CHO_API GameObject& ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vector3 generatePosition)
 {
+	generatePosition;id;
 	EngineCommand* engineCommand = g_Engine->GetEngineCommand();
 	std::unique_ptr<Add3DObjectCommand> command = std::make_unique<Add3DObjectCommand>();
 	command->Execute(engineCommand);
@@ -47,6 +48,7 @@ CHO_API GameObject& ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vecto
 	std::vector<LineRendererComponent>* lineRenderer = engineCommand->GetGameCore()->GetECSManager()->GetAllComponents<LineRendererComponent>(object.GetEntity());
 	Rigidbody2DComponent* rb = engineCommand->GetGameCore()->GetECSManager()->GetComponent<Rigidbody2DComponent>(object.GetEntity());
 	BoxCollider2DComponent* box = engineCommand->GetGameCore()->GetECSManager()->GetComponent<BoxCollider2DComponent>(object.GetEntity());
+	MaterialComponent* material = engineCommand->GetGameCore()->GetECSManager()->GetComponent<MaterialComponent>(object.GetEntity());
 	// あるやつをnewObjectに追加
 	if (meshFilter)
 	{
@@ -115,6 +117,21 @@ CHO_API GameObject& ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vecto
 			newBox->friction = box->friction;
 			newBox->restitution = box->restitution;
 			newBox->isSensor = box->isSensor;
+		}
+	}
+	if (material)
+	{
+		std::unique_ptr<AddMaterialComponent> addMaterialCommand = std::make_unique<AddMaterialComponent>(newObject.GetEntity());
+		addMaterialCommand->Execute(engineCommand);
+		MaterialComponent* newMaterial = engineCommand->GetGameCore()->GetECSManager()->GetComponent<MaterialComponent>(newObject.GetEntity());
+		if (newMaterial)
+		{
+			newMaterial->color = material->color;
+			newMaterial->enableLighting = material->enableLighting;
+			newMaterial->enableTexture = material->enableTexture;
+			newMaterial->uvFlipY = material->uvFlipY;
+			newMaterial->shininess = material->shininess;
+			newMaterial->textureName = material->textureName;
 		}
 	}
 	// TransformComponentを取得

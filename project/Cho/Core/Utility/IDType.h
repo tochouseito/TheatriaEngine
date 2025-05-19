@@ -14,9 +14,18 @@ enum class ObjectType
 	Camera,				// カメラオブジェクト
 	ParticleSystem,		// パーティクルシステムオブジェクト
 	Effect,				// エフェクトオブジェクト
-	//Light,			// ライトオブジェクト
+	Light,			// ライトオブジェクト
 	UI,					// UIオブジェクト
 	Count,				// カウント
+};
+
+// ライトのタイプ
+enum class LightType : uint32_t
+{
+	Directional = 0,	// 平行光源
+	Point,				// 点光源
+	Spot,				// スポットライト
+	Count,
 };
 
 inline const char* ObjectTypeToWString(ObjectType type)
@@ -27,6 +36,7 @@ inline const char* ObjectTypeToWString(ObjectType type)
 	case ObjectType::Camera:  return "Camera";
 	case ObjectType::ParticleSystem: return "ParticleSystem";
 	case ObjectType::Effect:  return "Effect";
+	case ObjectType::Light:  return "Light";
 	case ObjectType::UI:     return "UI";
 	default:                  return "Unknown";
 	}
@@ -38,6 +48,7 @@ inline ObjectType ObjectTypeFromString(const std::string& str)
 	if (str == "Camera") return ObjectType::Camera;
 	if (str == "ParticleSystem") return ObjectType::ParticleSystem;
 	if (str == "Effect") return ObjectType::Effect;
+	if (str == "Light") return ObjectType::Light;
 	if (str == "UI") return ObjectType::UI;
 	return ObjectType::Count; // または Unknown があればそちら
 }

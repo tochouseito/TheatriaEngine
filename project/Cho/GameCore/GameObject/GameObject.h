@@ -170,5 +170,6 @@ private:
 	std::optional<EmitterComponent> m_Emitter = std::nullopt;
 	std::optional<ParticleComponent> m_Particle = std::nullopt;
 	std::optional<UISpriteComponent> m_UISprite = std::nullopt;
+	std::optional<LightComponent> m_Light = std::nullopt;
 };
 

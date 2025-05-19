@@ -445,7 +445,7 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 	// ジェネリックに作成
-	D3D12_ROOT_PARAMETER rootParameters[5] = {};
+	D3D12_ROOT_PARAMETER rootParameters[8] = {};
 
 	// ViewProjection
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
@@ -473,28 +473,47 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 	rootParameters[2].DescriptorTable.pDescriptorRanges = &useTransformListRange;
 	rootParameters[2].DescriptorTable.NumDescriptorRanges = 1;
+	// Lights
+	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[3].Descriptor.ShaderRegister = 1;
+	// Environment
+	rootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[4].Descriptor.ShaderRegister = 2;
+	// IntegrationTransform
+	D3D12_DESCRIPTOR_RANGE integrationTransformRange2 = {};
+	integrationTransformRange2.BaseShaderRegister = 0;//t0
+	integrationTransformRange2.RegisterSpace = 1;// space1
+	integrationTransformRange2.NumDescriptors = 1;
+	integrationTransformRange2.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	integrationTransformRange2.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameters[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[5].DescriptorTable.pDescriptorRanges = &integrationTransformRange2;
+	rootParameters[5].DescriptorTable.NumDescriptorRanges = 1;
 	// IntegrationMaterial
 	D3D12_DESCRIPTOR_RANGE integrationMaterialRange = {};
-	integrationMaterialRange.BaseShaderRegister = 0;//t0
+	integrationMaterialRange.BaseShaderRegister = 1;//t1
 	integrationMaterialRange.RegisterSpace = 1;// space1
 	integrationMaterialRange.NumDescriptors = 1;
 	integrationMaterialRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	integrationMaterialRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	rootParameters[3].DescriptorTable.pDescriptorRanges = &integrationMaterialRange;
-	rootParameters[3].DescriptorTable.NumDescriptorRanges = 1;
+	rootParameters[6].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[6].DescriptorTable.pDescriptorRanges = &integrationMaterialRange;
+	rootParameters[6].DescriptorTable.NumDescriptorRanges = 1;
 	// Texture
 	D3D12_DESCRIPTOR_RANGE textureRange = {};
-	textureRange.BaseShaderRegister = 1;//t1
-	textureRange.RegisterSpace = 1;// space1
+	textureRange.BaseShaderRegister = 2;//t2
+	textureRange.RegisterSpace = 0;// space0
 	textureRange.NumDescriptors = 256;
 	textureRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	textureRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-	rootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	rootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	rootParameters[4].DescriptorTable.pDescriptorRanges = &textureRange;
-	rootParameters[4].DescriptorTable.NumDescriptorRanges = 1;
+	rootParameters[7].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[7].DescriptorTable.pDescriptorRanges = &textureRange;
+	rootParameters[7].DescriptorTable.NumDescriptorRanges = 1;
 
 	rootSignatureDesc.pParameters = rootParameters;
 	rootSignatureDesc.NumParameters = _countof(rootParameters);

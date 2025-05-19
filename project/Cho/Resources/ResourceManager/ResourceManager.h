@@ -14,7 +14,7 @@
 #include "Resources/ModelManager/ModelManager.h"
 #include "Resources/TextureManager/TextureManager.h"
 #include "Resources/ScriptContainer/ScriptContainer.h"
-#include "Resources/SoundManager/SoundManager.h"
+#include "Resources/AudioManager/AudioManager.h"
 #include "Core/Utility/CompBufferData.h"
 #include "Resources/UIContainer/UIContainer.h"
 
@@ -201,7 +201,7 @@ public:
 	TextureManager* GetTextureManager() const { return m_TextureManager.get(); }
 	ModelManager* GetModelManager() const { return m_ModelManager.get(); }
 	ScriptContainer* GetScriptContainer() const { return m_ScriptContainer.get(); }
-	SoundManager* GetSoundManager() const { return m_SoundManager.get(); }
+	AudioManager* GetAudioManager() const { return m_AudioManager.get(); }
 	UIContainer* GetUIContainer() const { return m_UIContainer.get(); }
 	IIntegrationData* GetIntegrationData(const IntegrationDataType& type) const
 	{
@@ -233,6 +233,34 @@ public:
 	{
 		return m_DebugCameraBuffer;
 	}
+
+	// LightBuffer
+	void CreateLightBuffer();
+	ConstantBuffer<BUFFER_DATA_LIGHT>* GetLightBuffer() const
+	{
+		return m_LightBuffer;
+	}
+	// LightIndex
+	uint32_t GetLightIndex()
+	{
+		if (m_LightIndexRecycle.empty())
+		{
+			return m_NextLightIndex++;
+		}
+		uint32_t index = m_LightIndexRecycle.back();
+		m_LightIndexRecycle.pop_back();
+		return index;
+	}
+	void RecycleLightIndex(const uint32_t& index)
+	{
+		m_LightIndexRecycle.push_back(index);
+	}
+	// EnvironmentBuffer
+	void CreateEnvironmentBuffer();
+	ConstantBuffer<BUFFER_DATA_ENVIRONMENT>* GetEnvironmentBuffer() const
+	{
+		return m_EnvironmentBuffer;
+	}
 private:
 	// Heap生成
 	void CreateHeap(ID3D12Device8* device);
@@ -256,8 +284,8 @@ private:
 	std::unique_ptr<ModelManager> m_ModelManager = nullptr;
 	// スクリプトコンテナ
 	std::unique_ptr<ScriptContainer> m_ScriptContainer = nullptr;
-	// サウンドマネージャ
-	std::unique_ptr<SoundManager> m_SoundManager = nullptr;
+	// オーディオマネージャ
+	std::unique_ptr<AudioManager> m_AudioManager = nullptr;
 	// UIコンテナ
 	std::unique_ptr<UIContainer> m_UIContainer = nullptr;
 	//// GPUResourceUpdate用のマッピングデータ
@@ -283,6 +311,13 @@ private:
 	std::array<std::unique_ptr<IIntegrationData>, IntegrationDataType::kCount> m_IntegrationData;
 	// デバッグカメラバッファ
 	ConstantBuffer<BUFFER_DATA_VIEWPROJECTION>* m_DebugCameraBuffer = nullptr;
+	// ライトバッファ
+	ConstantBuffer<BUFFER_DATA_LIGHT>* m_LightBuffer = nullptr;
+	// ライト用
+	uint32_t m_NextLightIndex = 0;
+	std::vector<uint32_t> m_LightIndexRecycle;
+	// 環境情報バッファ
+	ConstantBuffer<BUFFER_DATA_ENVIRONMENT>* m_EnvironmentBuffer = nullptr;
 
 	// static member
 	static const uint32_t kIntegrationTFBufferSize = 1024;// Transformの統合バッファのサイズ

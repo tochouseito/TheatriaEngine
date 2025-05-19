@@ -43,6 +43,8 @@ public:
 	void ClearGenerateObject();
 	void RemoveGameInitializedID(const ObjectID& id) { m_GameInitializedID.remove(id); }
 	b2World* GetPhysicsWorld() { return m_pPhysicsWorld.get(); }
+	// 環境設定更新
+	void UpdateEnvironmentSetting();
 private:
 	void CreateSystems(InputManager* input, ResourceManager* resourceManager,GraphicsEngine* graphicsEngine);
 
@@ -61,6 +63,8 @@ private:
 	std::unique_ptr<ObjectContainer> m_pObjectContainer = nullptr;
 	// ゲーム実行フラグ
 	bool isRunning = false;
+	// 環境情報
+	BUFFER_DATA_ENVIRONMENT m_EnvironmentData;
 
 	// box2d
 	std::unique_ptr<b2World> m_pPhysicsWorld = nullptr;

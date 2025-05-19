@@ -56,6 +56,7 @@ void Inspector::ComponentsView(GameObject* object)
 	LineRendererComponentView(object);
 	Rigidbody2DComponentView(object);
 	BoxCollider2DComponentView(object);
+	LightComponentView(object);
 }
 
 void Inspector::TransformComponentView(GameObject* object)
@@ -157,9 +158,13 @@ void Inspector::MaterialComponentView(GameObject* object)
 	if (!material) { return; }
 	ImGui::Text("Material Component");
 	ImGui::ColorEdit4("Color", &material->color.r);
+	ImGui::DragFloat("Shininess", &material->shininess, 0.1f, 0.0f, 0.0f, "%.1f");
+	ImGui::Checkbox("ライティング", &material->enableLighting);
 	ImGui::Checkbox("UseTexture", &material->enableTexture);
 	if (material->enableTexture)
 	{
+		// フリップフラグ
+		ImGui::Checkbox("uvFlipY", &material->uvFlipY);
 		// テクスチャ名を表示
 		if (material->textureName.empty())
 		{
@@ -168,8 +173,6 @@ void Inspector::MaterialComponentView(GameObject* object)
 		{
 			ImGui::Text("Texture Name: %s", ConvertString(material->textureName).c_str());
 		}
-		// フリップフラグ
-		ImGui::Checkbox("uvFlipY", &material->uvFlipY);
 		// ドロップターゲット
 		if (ImGui::BeginDragDropTarget())
 		{
@@ -395,6 +398,21 @@ void Inspector::ParticleComponentView(GameObject* object)
 		ImGui::DragFloat("gravity", &particle->gravity, 0.1f, -100.0f, 100.0f);
 		ImGui::TreePop();
 	}*/
+}
+
+void Inspector::LightComponentView(GameObject* object)
+{
+	// 許可されているコンポーネントか確認
+	if (!IsComponentAllowedAtRuntime<LightComponent>(object->GetType())) { return; }
+	LightComponent* light = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<LightComponent>(object->GetEntity());
+	if (!light) { return; }
+	ImGui::Text("Light Component");
+	ImGui::ColorEdit4("Color", &light->color.r);
+	ImGui::DragFloat("Intensity", &light->intensity, 0.01f, 0.0f, 1.0f);
+	ImGui::DragFloat("Range", &light->range, 0.1f, 0.0f, 100.0f);
+	ImGui::DragFloat("Decay", &light->decay, 0.1f, 0.0f, 100.0f);
+	ImGui::DragFloat("Spot Angle", &light->spotAngle, 0.1f, 0.0f, 100.0f);
+	ImGui::DragFloat("Spot Falloff Start", &light->spotFalloffStart, 0.1f, 0.0f, 100.0f);
 }
 
 
