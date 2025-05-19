@@ -352,7 +352,6 @@ private:
 			rb.runtimeBody = nullptr;
 		}
 		rb.isCollisionStay = false;
-		//rb.otherEntity.reset();
 		rb.otherObjectID.reset();
 	}
 	template<typename ColliderT>

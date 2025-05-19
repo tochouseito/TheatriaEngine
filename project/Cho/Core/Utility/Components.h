@@ -287,13 +287,17 @@ struct Rigidbody2DComponent : public IComponentTag
 	// 初期化
 	void Initialize()
 	{
+		if (runtimeBody)
+		{
+			world->DestroyBody(runtimeBody);
+			runtimeBody = nullptr;
+		}
 		isActive = true;
 		mass = 1.0f;
 		gravityScale = 1.0f;
 		isKinematic = false;
 		fixedRotation = false;
 		bodyType = b2_dynamicBody;
-		runtimeBody = nullptr;
 		world = nullptr;
 		isCollisionStay = false;
 		otherObjectID = std::nullopt;
