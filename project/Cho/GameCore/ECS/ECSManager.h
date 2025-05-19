@@ -388,7 +388,8 @@ public:
 			{
 				if ((arch & m_Required) == m_Required)
 				{
-					for (Entity e : container.GetEntities())
+					std::vector<Entity> copy = container.GetEntities();  // ← コピーを取得
+					for (Entity e : copy)
 					{
 						m_Func(e, *ecs->GetComponent<T>(e)...);
 					}

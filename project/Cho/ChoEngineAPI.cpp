@@ -47,6 +47,7 @@ CHO_API GameObject& ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vecto
 	std::vector<LineRendererComponent>* lineRenderer = engineCommand->GetGameCore()->GetECSManager()->GetAllComponents<LineRendererComponent>(object.GetEntity());
 	Rigidbody2DComponent* rb = engineCommand->GetGameCore()->GetECSManager()->GetComponent<Rigidbody2DComponent>(object.GetEntity());
 	BoxCollider2DComponent* box = engineCommand->GetGameCore()->GetECSManager()->GetComponent<BoxCollider2DComponent>(object.GetEntity());
+	MaterialComponent* material = engineCommand->GetGameCore()->GetECSManager()->GetComponent<MaterialComponent>(object.GetEntity());
 	// あるやつをnewObjectに追加
 	if (meshFilter)
 	{
@@ -115,6 +116,22 @@ CHO_API GameObject& ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vecto
 			newBox->friction = box->friction;
 			newBox->restitution = box->restitution;
 			newBox->isSensor = box->isSensor;
+		}
+	}
+	if (material)
+	{
+		std::unique_ptr<AddMaterialComponent> addMaterialCommand = std::make_unique<AddMaterialComponent>(newObject.GetEntity());
+		addMaterialCommand->Execute(engineCommand);
+		MaterialComponent* newMaterial = engineCommand->GetGameCore()->GetECSManager()->GetComponent<MaterialComponent>(newObject.GetEntity());
+		if (newMaterial)
+		{
+			newMaterial->mapID = engineCommand->GetResourceManager()->GetIntegrationData(IntegrationDataType::Material)->GetMapID();
+			newMaterial->color = material->color;
+			newMaterial->enableLighting = material->enableLighting;
+			newMaterial->enableTexture = material->enableTexture;
+			newMaterial->uvFlipY = material->uvFlipY;
+			newMaterial->shininess = material->shininess;
+			newMaterial->textureName = material->textureName;
 		}
 	}
 	// TransformComponentを取得
