@@ -154,6 +154,15 @@ void GameObject::InitializeRigidbody2DAPI()
 			}
 			return m_ObjectContainer->GetDummyGameObject();
 			};
+		rigidbody2D.SetAwake = [this](bool isAwake) {
+			if (auto* t = m_ECS->GetComponent<Rigidbody2DComponent>(m_Entity))
+			{
+				if (t->runtimeBody)
+				{
+					t->runtimeBody->SetAwake(isAwake);
+				}
+			}
+			};
 	}
 }
 

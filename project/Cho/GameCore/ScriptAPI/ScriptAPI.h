@@ -126,6 +126,8 @@ struct Rigidbody2DAPI
 	std::function<void(const Vector2& position)> MovePosition;
 	// ライン上の最初にヒットしたオブジェクトを取得
 	std::function<GameObject& (const Vector2& start, const Vector2& end,const std::string hitTag)> Linecast;
+	// 強制的に物理計算
+	std::function<void(bool isAwake)> SetAwake;
 private:
 	friend class GameObject;
 	Rigidbody2DComponent* data = nullptr;
