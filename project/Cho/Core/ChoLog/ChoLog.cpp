@@ -61,7 +61,7 @@ void Cho::Log::Write(LogLevel level,
                     OutputDebugStringA((logMessage + "\n").c_str());
 #endif
 #ifdef NDEBUG
-                    WriteToFile(logMessage);
+                    //WriteToFile(logMessage);
 #endif
                     CHO_ASSERT(false,logMessage.c_str()); // assert 発動
                     return;
@@ -85,7 +85,7 @@ void Cho::Log::Write(LogLevel level,
                     OutputDebugStringA((logMessage + "\n").c_str());
 #endif
 #ifdef NDEBUG
-                    WriteToFile(logMessage);
+                    //WriteToFile(logMessage);
 #endif
                     CHO_ASSERT(false,logMessage.c_str()); // assert 発動
                     return;
@@ -103,7 +103,7 @@ void Cho::Log::Write(LogLevel level,
             OutputDebugStringA((logMessage + "\n").c_str());
 #endif
 #ifdef NDEBUG
-            WriteToFile(logMessage);
+            //WriteToFile(logMessage);
 #endif
 			CHO_ASSERT(false,logMessage.c_str()); // assert 発動
             return;
@@ -117,7 +117,7 @@ void Cho::Log::Write(LogLevel level,
     OutputDebugStringA((fullMessage + "\n").c_str());
 #endif
 #ifdef NDEBUG
-    WriteToFile(fullMessage);
+    //WriteToFile(fullMessage);
 #endif
 }
 
