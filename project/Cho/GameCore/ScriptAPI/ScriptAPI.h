@@ -260,3 +260,14 @@ struct EditorAPI
 private:
 	friend class GameObject;
 };
+
+struct AudioAPI
+{
+	// 関数
+	void SetLoop(const bool& loop) { data->isLoop = loop; }
+	std::function<void()> Play;
+	std::function<void()> Stop;
+private:
+	friend class GameObject;
+	AudioComponent* data = nullptr;
+};

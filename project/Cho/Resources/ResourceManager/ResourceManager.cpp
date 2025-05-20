@@ -25,6 +25,7 @@ ResourceManager::ResourceManager(ID3D12Device8* device)
 
 ResourceManager::~ResourceManager()
 {
+	Finalize();
 }
 
 void ResourceManager::Initialize()
@@ -34,6 +35,11 @@ void ResourceManager::Initialize()
 
 void ResourceManager::Finalize()
 {
+	// AudioManagerの解放
+	if (m_AudioManager)
+	{
+		m_AudioManager->Finalize();
+	}
 }
 
 void ResourceManager::Update()

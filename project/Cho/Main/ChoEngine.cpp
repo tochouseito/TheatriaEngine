@@ -84,6 +84,8 @@ void ChoEngine::Finalize()
 	}
 	// ImGuiManager終了処理
 	imGuiManager->Finalize();
+	// ResourceManager終了処理
+	resourceManager->Finalize();
 	// PlatformLayer終了処理
 	platformLayer->Finalize();
 	// DirectX12終了処理

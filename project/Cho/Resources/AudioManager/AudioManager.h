@@ -49,15 +49,15 @@ public:
 	};
 	void Initialize();
 
-	void SoundLordWave(const char* filename);
+	bool SoundLordWave(const std::filesystem::path& filePath);
 
 	/*音声データ解放*/
-	void SoundUnLord(SoundData* soundData);
+	void SoundUnLord(const uint32_t& index);
 
 	/*音声再生*/
-	void SoundPlayWave(SoundData& soundData, bool loop = false); // ループフラグを追加
-	void SoundStop(SoundData& soundData); // Stop関数を追加
-	void SoundStopFadeOut(SoundData& soundData, float duration);
+	void SoundPlayWave(const uint32_t& index, bool loop = false); // ループフラグを追加
+	void SoundStop(const uint32_t& index); // Stop関数を追加
+	void SoundStopFadeOut(const uint32_t& index, float duration);
 	/// <summary>
 	/// 終了処理
 	/// </summary>
@@ -71,6 +71,28 @@ public:
 	/// <param name="soundData">音声データ</param>
 	/// <param name="volume">設定するボリューム（0.0～1.0）</param>
 	void SetVolume(SoundData& soundData, float volume);
+
+	// コンテナ取得
+	const SoundData& GetSoundData(const uint32_t& index) const
+	{
+		return m_SoundData[index];
+	}
+
+	// 名前で検索してインデックスを取得する
+	std::optional<uint32_t> GetSoundDataIndex(const std::string& name)
+	{
+		auto it = m_SoundDataToName.find(name);
+		if (it != m_SoundDataToName.end())
+		{
+			return it->second;
+		}
+		return std::nullopt;
+	}
+	// 名前コンテナ取得
+	const std::unordered_map<std::string, uint32_t>& GetSoundDataToName() const
+	{
+		return m_SoundDataToName;
+	}
 private:
 	// ResourceManagerのポインタ
 	ResourceManager* m_pResourceManager = nullptr;

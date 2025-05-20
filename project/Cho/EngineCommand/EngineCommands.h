@@ -200,6 +200,7 @@ private:
 	std::optional<ParticleComponent> m_Particle;
 	std::optional<UISpriteComponent> m_UISprite;
 	std::optional<LightComponent> m_Light;
+	std::optional<AudioComponent> m_Audio;
 };
 // オブジェクトの名前を変更するコマンド
 class RenameObjectCommand : public IEngineCommand
@@ -268,4 +269,17 @@ public:
 private:
 	Vector3 m_Gravity;
 	Vector3 m_PreGravity;
+};
+// Audioコンポーネント追加
+class AddAudioComponent :public IEngineCommand
+{
+public:
+	AddAudioComponent(const uint32_t& entity) :
+		m_Entity(entity)
+	{
+	}
+	bool Execute(EngineCommand* edit)override;
+	bool Undo(EngineCommand* edit)override;
+private:
+	uint32_t m_Entity;
 };

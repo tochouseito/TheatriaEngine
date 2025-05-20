@@ -40,6 +40,7 @@ class EngineCommand
 	friend class AddUIObjectCommand;
 	friend class SetGravityCommand;
 	friend class AddLightObjectCommand;
+	friend class AddAudioComponent;
 	// Editor
 	friend class EffectEditorUpdateSystem;
 	friend class EffectEditor;

@@ -84,6 +84,7 @@ namespace Cho
 		json ToJson(const ParticleComponent& p);
 		json ToJson(const UISpriteComponent& ui);
 		json ToJson(const LightComponent& l);
+		json ToJson(const AudioComponent& a);
     }
 	// ComponentsDeserializer
 	namespace Deserialization
@@ -102,6 +103,7 @@ namespace Cho
 		void FromJson(const json& j, ParticleComponent& p);
 		void FromJson(const json& j, UISpriteComponent& ui);
 		void FromJson(const json& j, LightComponent& l);
+		void FromJson(const json& j, AudioComponent& a);
 	}
 
     class FileSystem

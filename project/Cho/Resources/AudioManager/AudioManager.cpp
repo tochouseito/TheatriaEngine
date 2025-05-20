@@ -2,6 +2,7 @@
 #include "AudioManager.h"
 #include <thread>
 #include <chrono>
+#include <filesystem>
 
 void AudioManager::Initialize()
 {
@@ -14,13 +15,13 @@ void AudioManager::Initialize()
 	assert(SUCCEEDED(result));
 }
 
-void AudioManager::SoundLordWave(const char* filename)
+bool AudioManager::SoundLordWave(const std::filesystem::path& filePath)
 {
 	/*ファイルオープン*/
 	/*ファイル入力ストリームのインスタンス*/
 	std::ifstream file;
 	/*.wavファイルをバイナリモードで開く*/
-	file.open(filename, std::ios_base::binary);
+	file.open(filePath.c_str(), std::ios_base::binary);
 	/*ファイルオープン失敗を検出する*/
 	assert(file.is_open());
 
@@ -123,12 +124,17 @@ void AudioManager::SoundLordWave(const char* filename)
 	soundData.bufferSize = data.size;
 
 	// 音声データをコンテナに追加
-	m_SoundData.push_back(std::move(soundData));
+	uint32_t index = static_cast<uint32_t>(m_SoundData.push_back(std::move(soundData)));
+	// 名前をキーにして音声データのインデックスを保存
+	std::string name = filePath.stem().string();
+	m_SoundDataToName[name] = index;
+	return true;
 }
 
-void AudioManager::SoundUnLord(SoundData* soundData)
+void AudioManager::SoundUnLord(const uint32_t& index)
 {
-	if (!soundData)
+	SoundData* soundData = &m_SoundData[index];
+	if (!soundData||!soundData->pSourceVoice)
 	{
 		return; // nullptr の場合は何もしない
 	}
@@ -136,7 +142,7 @@ void AudioManager::SoundUnLord(SoundData* soundData)
 	/*再生中なら停止させる*/
 	if (soundData->isPlaying)
 	{
-		SoundStop(*soundData);
+		SoundStop(index);
 	}
 
 	/*バッファのメモリを解放*/
@@ -159,8 +165,9 @@ void AudioManager::SoundUnLord(SoundData* soundData)
 	memset(&soundData->wfex, 0, sizeof(WAVEFORMATEX));
 }
 
-void AudioManager::SoundPlayWave(SoundData& soundData, bool loop)
+void AudioManager::SoundPlayWave(const uint32_t& index, bool loop)
 {
+	SoundData& soundData = m_SoundData[index];
 	HRESULT result;
 	if (!soundData.pSourceVoice)
 	{
@@ -189,8 +196,9 @@ void AudioManager::SoundPlayWave(SoundData& soundData, bool loop)
 	soundData.isPlaying = true;
 }
 
-void AudioManager::SoundStop(SoundData& soundData)
+void AudioManager::SoundStop(const uint32_t& index)
 {
+	SoundData& soundData = m_SoundData[index];
 	if (soundData.pSourceVoice)
 	{
 		soundData.pSourceVoice->Stop(0);
@@ -199,8 +207,9 @@ void AudioManager::SoundStop(SoundData& soundData)
 	soundData.isPlaying = false;
 }
 
-void AudioManager::SoundStopFadeOut(SoundData& soundData, float duration)
+void AudioManager::SoundStopFadeOut(const uint32_t& index, float duration)
 {
+	SoundData& soundData = m_SoundData[index];
 	if (!soundData.pSourceVoice)
 	{
 		return;
@@ -230,11 +239,16 @@ void AudioManager::SoundStopFadeOut(SoundData& soundData, float duration)
 	}
 
 	// 音声を停止
-	SoundStop(soundData);
+	SoundStop(index);
 }
 
 void AudioManager::Finalize()
 {
+	/*全ての音声データを解放*/
+	for (uint32_t i = 0; i < m_SoundData.GetVector().size(); ++i)
+	{
+		SoundUnLord(i);
+	}
 	/*XAudio2解放*/
 	m_XAudio2.Reset();
 }

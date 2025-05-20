@@ -43,6 +43,8 @@ private:
 	void ParticleComponentView(GameObject* object);
 	// LightComponentの表示
 	void LightComponentView(GameObject* object);
+	// AudioComponentの表示
+	void AudioComponentView(GameObject* object);
 	// コンポーネントの追加
 	void AddComponent(GameObject* object);
 };

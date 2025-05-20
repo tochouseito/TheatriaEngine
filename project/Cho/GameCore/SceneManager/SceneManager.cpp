@@ -128,6 +128,16 @@ void ScenePrefab::Start()
 			*light = objData.m_Light.value();
 			light->mapID = m_SceneManager->m_pResourceManager->GetLightIndex();
 		}
+		// AudioComponentの追加
+		if (objData.m_Audio.has_value())
+		{
+			AudioComponent* audio = ecs->AddComponent<AudioComponent>(entity);
+			*audio = objData.m_Audio.value();
+			if (!audio->audioName.empty())
+			{
+				audio->audioID = m_SceneManager->m_pResourceManager->GetAudioManager()->GetSoundDataIndex(audio->audioName);
+			}
+		}
 	}
 	// MainCameraの設定
 	GameObject& mainCamera = objectContainer->GetGameObjectByName(m_StartCameraName);
