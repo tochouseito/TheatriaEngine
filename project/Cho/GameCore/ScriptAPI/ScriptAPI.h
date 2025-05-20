@@ -143,6 +143,9 @@ struct BoxCollider2DAPI
 	float& offsetY() { return data->offsetY; }
 	float& width() { return data->width; }
 	float& height() { return data->height; }
+
+	std::function<bool()> IsSensor;
+	std::function<void(bool isSensor)> SetSensor;
 private:
 	friend class GameObject;
 	BoxCollider2DComponent* data = nullptr;

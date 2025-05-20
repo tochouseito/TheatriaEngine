@@ -178,6 +178,19 @@ void GameObject::InitializeBoxCollider2DAPI()
 	boxCollider2D.data = box;
 	if (box)
 	{
+		boxCollider2D.IsSensor = [this]() -> bool {
+			if (auto* t = m_ECS->GetComponent<BoxCollider2DComponent>(m_Entity))
+			{
+				return t->isSensor;
+			}
+			return false;
+			};
+		boxCollider2D.SetSensor = [this](bool isSensor) {
+			if (auto* t = m_ECS->GetComponent<BoxCollider2DComponent>(m_Entity))
+			{
+				t->isSensor = isSensor;
+			}
+			};
 	}
 }
 
