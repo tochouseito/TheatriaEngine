@@ -75,7 +75,7 @@ public:
 	BoxCollider2DAPI boxCollider2D;	// BoxCollider2DAPI
 	MaterialAPI material;			// MaterialAPI
 	UISpriteAPI ui;					// UIAPI
-	AudioAPI audio;					// AudioAPI
+	//AudioAPI audio;					// AudioAPI
 
 	InputAPI input;					// InputAPI
 

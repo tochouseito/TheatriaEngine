@@ -17,8 +17,8 @@ bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 	std::string filePathString = filePath.string();
 	ModelData modelData;
 	// 頂点数とインデックス数
-	uint32_t vertices=0;// 頂点数
-	uint32_t indices=0;// インデックス数
+	uint32_t vertices = 0;// 頂点数
+	uint32_t indices = 0;// インデックス数
 
 	// ここからファイルを開く
 	Log::Write(LogLevel::Info, "Start ReadFile");

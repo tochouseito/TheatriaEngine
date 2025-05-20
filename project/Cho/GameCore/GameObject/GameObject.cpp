@@ -154,6 +154,15 @@ void GameObject::InitializeRigidbody2DAPI()
 			}
 			return m_ObjectContainer->GetDummyGameObject();
 			};
+		rigidbody2D.SetAwake = [this](bool isAwake) {
+			if (auto* t = m_ECS->GetComponent<Rigidbody2DComponent>(m_Entity))
+			{
+				if (t->runtimeBody)
+				{
+					t->runtimeBody->SetAwake(isAwake);
+				}
+			}
+			};
 	}
 }
 
@@ -265,15 +274,15 @@ void GameObject::InitializeAudioAPI()
 {
 	if (!m_ECS || !m_ResourceManager)
 	{
-		audio.data = nullptr;
+		//audio.data = nullptr;
 		return;
 	}
 	// AudioComponent を取得
 	AudioComponent* audioComp = m_ECS->GetComponent<AudioComponent>(m_Entity);
-	audio.data = audioComp;
+	//audio.data = audioComp;
 	if (audioComp)
 	{
-		audio.Play = [this]() {
+		/*audio.Play = [this]() {
 			if (auto* a = m_ECS->GetComponent<AudioComponent>(m_Entity))
 			{
 				m_ResourceManager->GetAudioManager()->SoundPlayWave(a->audioID.value(), a->isLoop);
@@ -286,7 +295,7 @@ void GameObject::InitializeAudioAPI()
 				m_ResourceManager->GetAudioManager()->SoundStop(a->audioID.value());
 				a->isPlay = false;
 			}
-			};
+			};*/
 	}
 }
 
