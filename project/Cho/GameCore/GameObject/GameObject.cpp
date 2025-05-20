@@ -4,6 +4,7 @@
 #include "Platform/InputManager/InputManager.h"
 #include "GameCore/ObjectContainer/ObjectContainer.h"
 #include "GameCore/PhysicsEngine/PhysicsEngine.h"
+#include "Resources/ResourceManager/ResourceManager.h"
 
 void GameObject::InitializeTransformAPI(bool isParentReset)
 {
@@ -260,6 +261,35 @@ void GameObject::InitializeUIAPI()
 	}
 }
 
+void GameObject::InitializeAudioAPI()
+{
+	if (!m_ECS || !m_ResourceManager)
+	{
+		audio.data = nullptr;
+		return;
+	}
+	// AudioComponent を取得
+	AudioComponent* audioComp = m_ECS->GetComponent<AudioComponent>(m_Entity);
+	audio.data = audioComp;
+	if (audioComp)
+	{
+		audio.Play = [this]() {
+			if (auto* a = m_ECS->GetComponent<AudioComponent>(m_Entity))
+			{
+				m_ResourceManager->GetAudioManager()->SoundPlayWave(a->audioID.value(), a->isLoop);
+				a->isPlay = true;
+			}
+			};
+		audio.Stop = [this]() {
+			if (auto* a = m_ECS->GetComponent<AudioComponent>(m_Entity))
+			{
+				m_ResourceManager->GetAudioManager()->SoundStop(a->audioID.value());
+				a->isPlay = false;
+			}
+			};
+	}
+}
+
 GameObjectData::GameObjectData(const GameObject& other)
 {
 	this->m_Name = other.m_Name;
@@ -315,6 +345,10 @@ GameObjectData::GameObjectData(const GameObject& other)
 	if (auto* light = other.m_ECS->GetComponent<LightComponent>(e))
 	{
 		m_Light = *light;
+	}
+	if (auto* audio = other.m_ECS->GetComponent<AudioComponent>(e))
+	{
+		m_Audio = *audio;
 	}
 
 	if (auto* lineRenderer = other.m_ECS->GetAllComponents<LineRendererComponent>(e))

@@ -218,6 +218,45 @@ void ScriptGenerateInstanceSystem::InstanceGenerate(ScriptComponent& script)
 		script.isActive = false;
 		return;
 	}
+	//// スクリプトのメンバ情報をリフレクション
+	//auto typeFn = (GetTypeInfoFn)GetProcAddress(Cho::FileSystem::ScriptProject::m_DllHandle, ("GetScriptTypeInfo" + script.scriptName).c_str());
+	//if (typeFn)
+	//{
+	//	const ScriptTypeInfo* info = typeFn();
+	//	info;
+	//}
+	//auto funcFn = (GetFuncListFn)GetProcAddress(Cho::FileSystem::ScriptProject::m_DllHandle, ("GetScriptFunctions" + script.scriptName).c_str());
+	//if (funcFn)
+	//{
+	//	const auto& functions = *funcFn();
+	//	functions;
+	//}
+	//for (const auto& member : info->members)
+	//{
+	//	std::cout << "Name: " << member.name << ", Type: " << member.type.name() << "\n";
+
+	//	if (member.type == typeid(int))
+	//	{
+	//		int* value = static_cast<int*>(member.getter(scriptInstance));
+	//		std::cout << "Value = " << *value << std::endl;
+	//		int newValue = 200;
+	//		member.setter(static_cast<void*>(scriptInstance), static_cast<void*>(&newValue));
+	//	}
+	//}
+	//GetScriptFunctionsFn getFuncs = (GetScriptFunctionsFn)GetProcAddress(Cho::FileSystem::ScriptProject::m_DllHandle, "GetScriptFunctions");
+	//if (getFuncs)
+	//{
+	//	const std::vector<ScriptFunction>& funcs = *getFuncs(); // ← ここで関数呼び出し
+
+	//	for (const auto& func : funcs)
+	//	{
+	//		std::cout << "Call Function: " << func.name << std::endl;
+	//		func.invoker(static_cast<void*>(scriptInstance)); // 実行
+	//	}
+	//} else
+	//{
+	//	std::cerr << "GetScriptFunctions not found in DLL!" << std::endl;
+	//}
 	// スクリプトのStart関数とUpdate関数をラップ
 	script.startFunc = [scriptInstance]() {
 		scriptInstance->Start();

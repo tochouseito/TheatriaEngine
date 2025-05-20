@@ -75,6 +75,7 @@ public:
 	BoxCollider2DAPI boxCollider2D;	// BoxCollider2DAPI
 	MaterialAPI material;			// MaterialAPI
 	UISpriteAPI ui;					// UIAPI
+	AudioAPI audio;					// AudioAPI
 
 	InputAPI input;					// InputAPI
 
@@ -111,6 +112,7 @@ private:
 		InitializeMaterialAPI();
 		InitializeInputAPI();
 		InitializeUIAPI();
+		InitializeAudioAPI();
 	}
 
 	void InitializeTransformAPI(bool isParentReset);
@@ -121,6 +123,7 @@ private:
 	void InitializeMaterialAPI();
 	void InitializeInputAPI();
 	void InitializeUIAPI();
+	void InitializeAudioAPI();
 public:
 	// コンストラクタ
 	GameObject(ObjectContainer* objectContainer, InputManager* input, ResourceManager* resourceManager, ECSManager* ecs, const Entity& entity, const std::wstring& name, const ObjectType& type) :
@@ -171,5 +174,6 @@ private:
 	std::optional<ParticleComponent> m_Particle = std::nullopt;
 	std::optional<UISpriteComponent> m_UISprite = std::nullopt;
 	std::optional<LightComponent> m_Light = std::nullopt;
+	std::optional<AudioComponent> m_Audio = std::nullopt;
 };
 

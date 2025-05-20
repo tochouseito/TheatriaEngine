@@ -584,6 +584,38 @@ struct LightComponent : public IComponentTag
 	}
 };
 
+// Audioコンポーネント
+struct AudioComponent : public IComponentTag
+{
+	std::string audioName = "";	// オーディオ名
+	std::optional<uint32_t> audioID = std::nullopt;	// オーディオID
+	bool isLoop = false;	// ループフラグ
+	bool isPlay = false;	// 再生フラグ
+	bool isPause = false;	// 一時停止フラグ
+	bool isStop = false;	// 停止フラグ
+	//bool is3D = false;	// 3Dフラグ
+	AudioComponent& operator=(const AudioComponent& other)
+	{
+		if (this == &other) return *this;
+		audioName = other.audioName;
+		isLoop = other.isLoop;
+		isPlay = other.isPlay;
+		isPause = other.isPause;
+		isStop = other.isStop;
+		return *this;
+	}
+	// 初期化
+	void Initialize()
+	{
+		audioName = "";
+		audioID = std::nullopt;
+		isLoop = false;
+		isPlay = false;
+		isPause = false;
+		isStop = false;
+	}
+};
+
 // マルチコンポーネントを許可
 template<>
 struct IsMultiComponent<LineRendererComponent> : std::true_type {};
@@ -602,6 +634,7 @@ template<> constexpr bool IsComponentAllowed<ObjectType::MeshObject, MaterialCom
 template<> constexpr bool IsComponentAllowed<ObjectType::MeshObject, LineRendererComponent> = true;
 template<> constexpr bool IsComponentAllowed<ObjectType::MeshObject, Rigidbody2DComponent> = true;
 template<> constexpr bool IsComponentAllowed<ObjectType::MeshObject, BoxCollider2DComponent> = true;
+template<> constexpr bool IsComponentAllowed<ObjectType::MeshObject, AudioComponent> = true;
 
 // Camera
 template<> constexpr bool IsComponentAllowed<ObjectType::Camera, TransformComponent> = true;

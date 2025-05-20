@@ -251,6 +251,16 @@ bool DeleteObjectCommand::Execute(EngineCommand* edit)
 		// Light統合バッファからmapIDを返却
 		edit->m_ResourceManager->RecycleLightIndex(light->mapID.value());
 	}
+	// AudioComponentを取得
+	AudioComponent* audio = edit->m_GameCore->GetECSManager()->GetComponent<AudioComponent>(object.GetEntity());
+	if (audio)
+	{
+		// 再生中なら止める
+		if (audio->isPlay)
+		{
+			edit->m_ResourceManager->GetAudioManager()->SoundStop(audio->audioID.value());
+		}
+	}
 	// 削除前にComponentを記録する
 	m_Transform = *transform;
 	if (camera) { m_Camera = *camera; }
@@ -578,6 +588,20 @@ bool AddLightObjectCommand::Execute(EngineCommand* edit)
 }
 
 bool AddLightObjectCommand::Undo(EngineCommand* edit)
+{
+	edit;
+	return false;
+}
+
+bool AddAudioComponent::Execute(EngineCommand* edit)
+{
+	// AudioComponentを追加
+	AudioComponent* audio = edit->m_GameCore->GetECSManager()->AddComponent<AudioComponent>(m_Entity);
+	if (!audio) { return false; }
+	return true;
+}
+
+bool AddAudioComponent::Undo(EngineCommand* edit)
 {
 	edit;
 	return false;

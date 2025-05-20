@@ -401,6 +401,13 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, SceneManager*
 					comps["Light"] = Cho::Serialization::ToJson(*l);
 				}
 			}
+			if (IsComponentAllowedAtRuntime<AudioComponent>(obj.GetType()))
+			{
+				if (const auto* a = ecs->GetComponent<AudioComponent>(entity))
+				{
+					comps["Audio"] = Cho::Serialization::ToJson(*a);
+				}
+			}
 
             objJson["components"] = comps;
             objArray.push_back(objJson);
@@ -509,6 +516,13 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, SceneManager*
                     comps["Light"] = Cho::Serialization::ToJson(objData.m_Light.value());
                 }
             }
+			if (IsComponentAllowedAtRuntime<AudioComponent>(objData.m_Type))
+			{
+				if (objData.m_Audio.has_value())
+				{
+					comps["Audio"] = Cho::Serialization::ToJson(objData.m_Audio.value());
+				}
+			}
 
             objJson["components"] = comps;
             objArray.push_back(objJson);
@@ -833,6 +847,15 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
                     // LightComponentの保存
                     objData.m_Light = l;
                 }
+				// Audio
+				if (comps.contains("Audio"))
+				{
+					AudioComponent a{};
+					auto& ja = comps["Audio"];
+					Deserialization::FromJson(ja, a);
+					// AudioComponentの保存
+					objData.m_Audio = a;
+				}
 				// GameObjectDataの追加
 				scene.AddGameObjectData(objData);
             }
@@ -1163,6 +1186,14 @@ json Cho::Serialization::ToJson(const LightComponent& l)
 	j["spotFalloffStart"] = l.spotFalloffStart;
 	j["type"] = static_cast<int>(l.type);
 	j["active"] = l.active;
+	return j;
+}
+
+json Cho::Serialization::ToJson(const AudioComponent& a)
+{
+    json j;
+	j["audioName"] = a.audioName;
+	j["isLoop"] = a.isLoop;
 	return j;
 }
 
@@ -1902,6 +1933,12 @@ void Cho::Deserialization::FromJson(const json& j, LightComponent& l)
 	l.active = j.value("active", true);
 }
 
+void Cho::Deserialization::FromJson(const json& j, AudioComponent& a)
+{
+	a.audioName = j.value("audioName", "");
+	a.isLoop = j.value("isLoop", false);
+}
+
 void Cho::FileSystem::ScanFolder(const path& rootPath, EngineCommand* engineCommand)
 {
     g_ProjectFiles = ScanRecursive(rootPath,engineCommand);
@@ -1975,7 +2012,7 @@ bool Cho::FileSystem::ProcessFile(const path& filePath, EngineCommand* engineCom
 	if (wFileName.ends_with(L".wav") || wFileName.ends_with(L".mp3"))
 	{
 		// 音声の処理
-        return false;
+        return engineCommand->GetResourceManager()->GetAudioManager()->SoundLordWave(filePath.c_str());
 	}
 	// スクリプトファイル
 	if (wFileName.ends_with(L".cpp") || wFileName.ends_with(L".h"))

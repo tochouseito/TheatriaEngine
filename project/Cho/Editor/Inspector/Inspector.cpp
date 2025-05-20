@@ -57,6 +57,7 @@ void Inspector::ComponentsView(GameObject* object)
 	Rigidbody2DComponentView(object);
 	BoxCollider2DComponentView(object);
 	LightComponentView(object);
+	AudioComponentView(object);
 }
 
 void Inspector::TransformComponentView(GameObject* object)
@@ -415,6 +416,30 @@ void Inspector::LightComponentView(GameObject* object)
 	ImGui::DragFloat("Spot Falloff Start", &light->spotFalloffStart, 0.1f, 0.0f, 100.0f);
 }
 
+void Inspector::AudioComponentView(GameObject* object)
+{
+	// 許可されているコンポーネントか確認
+	if (!IsComponentAllowedAtRuntime<AudioComponent>(object->GetType())) { return; }
+	AudioComponent* audio = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<AudioComponent>(object->GetEntity());
+	if (!audio) { return; }
+	ImGui::Text("Audio Component");
+	ImGui::Text("Audio Name: %s", ConvertString(audio->audioName).c_str());
+	std::unordered_map<std::string, uint32_t> audioNameMap = m_EngineCommand->GetResourceManager()->GetAudioManager()->GetSoundDataToName();
+	// オーディオを選択するためのドロップダウンメニュー
+	if (ImGui::BeginCombo("Audio", audio->audioName.empty() ? "None" : audio->audioName.c_str()))
+	{
+		for (const auto& pair : audioNameMap)
+		{
+			if (ImGui::Selectable(pair.first.c_str(), audio->audioName == pair.first))
+			{
+				audio->audioName = pair.first;
+				audio->audioID = pair.second;
+			}
+		}
+		ImGui::EndCombo();
+	}
+}
+
 
 void Inspector::AddComponent(GameObject* object)
 {
@@ -449,6 +474,7 @@ void Inspector::AddComponent(GameObject* object)
 		bool canAddBoxCollider2D = IsComponentAllowedAtRuntime<BoxCollider2DComponent>(objectType);
 		bool canAddEmitter = IsComponentAllowedAtRuntime<EmitterComponent>(objectType);
 		bool canAddParticle = IsComponentAllowedAtRuntime<ParticleComponent>(objectType);
+		bool canAddAudio = IsComponentAllowedAtRuntime<AudioComponent>(objectType);
 
 		if (canAddMeshFilter)
 		{
@@ -570,6 +596,16 @@ void Inspector::AddComponent(GameObject* object)
 					m_EngineCommand->ExecuteCommand(std::move(addParticleComp));
 					isOpen = false;
 				}
+			}
+		}
+		if (canAddAudio)
+		{
+			if (ImGui::Selectable("AudioComponent"))
+			{
+				// AudioComponentを追加
+				std::unique_ptr<AddAudioComponent> addAudioComp = std::make_unique<AddAudioComponent>(object->GetEntity());
+				m_EngineCommand->ExecuteCommand(std::move(addAudioComp));
+				isOpen = false;
 			}
 		}
 	}

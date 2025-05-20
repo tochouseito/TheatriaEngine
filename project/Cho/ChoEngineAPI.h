@@ -4,7 +4,6 @@
 #include "Externals/ChoMath/ChoMath.h"
 #include <variant>
 using GameParameterVariant = std::variant<int, float, bool, Vector3>;
-//struct ScriptContext;
 class GameObject;
 class ChoEngine;
 namespace Cho
@@ -37,6 +36,8 @@ namespace ChoSystem
 		const std::string& item,
 		const std::string& dataName,
 		GameParameterVariant& outValue);
+	// ゲームオブジェクト取得
+	//CHO_API GameObject& FindGameObjectByName(std::wstring_view name);
 	// ゲームオブジェクト複製
 	CHO_API GameObject& CloneGameObject(std::optional<uint32_t> id, Vector3 generatePosition);
 	// ゲームオブジェクト削除
