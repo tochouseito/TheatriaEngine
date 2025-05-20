@@ -127,7 +127,7 @@ struct Rigidbody2DAPI
 	// ライン上の最初にヒットしたオブジェクトを取得
 	std::function<GameObject& (const Vector2& start, const Vector2& end,const std::string hitTag)> Linecast;
 	// 強制的に物理計算
-	std::function<void(bool isAwake)> SetAwake;
+	//std::function<void(bool isAwake)> SetAwake;
 private:
 	friend class GameObject;
 	Rigidbody2DComponent* data = nullptr;
@@ -144,8 +144,8 @@ struct BoxCollider2DAPI
 	float& width() { return data->width; }
 	float& height() { return data->height; }
 
-	std::function<bool()> IsSensor;
-	std::function<void(bool isSensor)> SetSensor;
+	//std::function<bool()> IsSensor;
+	//std::function<void(bool isSensor)> SetSensor;
 private:
 	friend class GameObject;
 	BoxCollider2DComponent* data = nullptr;

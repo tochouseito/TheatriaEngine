@@ -2,6 +2,8 @@
 #include <string>
 #include "Core/Utility/IDType.h"
 #include "GameCore/ScriptAPI/ScriptAPI.h"
+#define USE_CHOENGINE_SCRIPT
+#include "ChoEngineAPI.h"
 
 using ObjectParameter = std::variant<int, float, bool, Vector3>;
 class ECSManager;
@@ -33,7 +35,7 @@ private:
 	std::wstring m_Name = L"";	// プレハブ名
 	ObjectType m_Type;			// プレハブのタイプ
 };
-class GameObject
+class CHO_API GameObject
 {
 	friend class GameCore;
 	friend class ObjectContainer;
@@ -76,6 +78,7 @@ public:
 	MaterialAPI material;			// MaterialAPI
 	UISpriteAPI ui;					// UIAPI
 	//AudioAPI audio;					// AudioAPI
+	int i;
 
 	InputAPI input;					// InputAPI
 

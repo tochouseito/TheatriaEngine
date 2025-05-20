@@ -1,7 +1,5 @@
 #pragma once
 #include "GameCore/GameObject/GameObject.h"
-#define USE_CHOENGINE_SCRIPT
-#include "ChoEngineAPI.h"
 class CHO_API IScript
 {
 public:

@@ -154,7 +154,7 @@ void GameObject::InitializeRigidbody2DAPI()
 			}
 			return m_ObjectContainer->GetDummyGameObject();
 			};
-		rigidbody2D.SetAwake = [this](bool isAwake) {
+		/*rigidbody2D.SetAwake = [this](bool isAwake) {
 			if (auto* t = m_ECS->GetComponent<Rigidbody2DComponent>(m_Entity))
 			{
 				if (t->runtimeBody)
@@ -162,7 +162,7 @@ void GameObject::InitializeRigidbody2DAPI()
 					t->runtimeBody->SetAwake(isAwake);
 				}
 			}
-			};
+			};*/
 	}
 }
 
@@ -178,7 +178,7 @@ void GameObject::InitializeBoxCollider2DAPI()
 	boxCollider2D.data = box;
 	if (box)
 	{
-		boxCollider2D.IsSensor = [this]() -> bool {
+		/*boxCollider2D.IsSensor = [this]() -> bool {
 			if (auto* t = m_ECS->GetComponent<BoxCollider2DComponent>(m_Entity))
 			{
 				return t->isSensor;
@@ -190,7 +190,7 @@ void GameObject::InitializeBoxCollider2DAPI()
 			{
 				t->isSensor = isSensor;
 			}
-			};
+			};*/
 	}
 }
 
