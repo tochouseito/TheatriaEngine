@@ -2,7 +2,7 @@
 //
 
 #include "pch.h"
-#include "framework.h"
+#include "ChoFileSystem.h"
 
 // TODO: これは、ライブラリ関数の例です
 void fnChoFileSystem()
