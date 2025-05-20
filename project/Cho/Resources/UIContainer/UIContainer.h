@@ -36,11 +36,13 @@ public:
 	void AddUI(const uint32_t& mapID)
 	{
 		m_UseList.push_back(mapID);
+		UpdateUseListBuffer();
 	}
 	// UIDataの削除
 	void RemoveUI(const uint32_t& mapID)
 	{
 		m_UseList.remove(mapID);
+		UpdateUseListBuffer();
 	}
 	// UIDataの取得
 	UIData& GetUIData(uint32_t index)
