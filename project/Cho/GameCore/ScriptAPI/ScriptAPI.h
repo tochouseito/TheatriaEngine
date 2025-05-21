@@ -148,9 +148,8 @@ public:
 	void MovePosition(const Vector2& position);
 	// ライン上の最初にヒットしたオブジェクトを取得
 	GameObject& Linecast(const Vector2& start, const Vector2& end, const std::string hitTag);
-	
 	// 強制的に物理計算
-	//std::function<void(bool isAwake)> SetAwake;
+	void SetAwake(bool isAwake);
 private:
 	friend class GameObject;
 	void Initialize(const Entity& entity,ECSManager* ecs,ObjectContainer* objectContainer,ResourceManager* resourceManager);
@@ -173,9 +172,8 @@ struct CHO_API BoxCollider2DAPI
 	float& offsetY() { return data->offsetY; }
 	float& width() { return data->width; }
 	float& height() { return data->height; }
-
-	//std::function<bool()> IsSensor;
-	//std::function<void(bool isSensor)> SetSensor;
+	bool IsSensor() const { return data->isSensor; }
+	void SetSensor(bool isSensor) { data->isSensor = isSensor; }
 private:
 	friend class GameObject;
 	void Initialize(const Entity& entity, ECSManager* ecs, ObjectContainer* objectContainer, ResourceManager* resourceManager);

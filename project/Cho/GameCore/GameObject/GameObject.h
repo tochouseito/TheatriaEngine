@@ -71,8 +71,7 @@ public:
 	BoxCollider2DAPI boxCollider2D;	// BoxCollider2DAPI
 	MaterialAPI material;			// MaterialAPI
 	UISpriteAPI ui;					// UIAPI
-	//AudioAPI audio;					// AudioAPI
-	//int i;
+	AudioAPI audio;					// AudioAPI
 	InputAPI input;					// InputAPI
 
 	// パラメータを取得
