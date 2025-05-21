@@ -1,6 +1,7 @@
 #pragma once
 #include "Core/Utility/Components.h"
 #include "Core/Utility/InputStruct.h"
+#include "APIExportsMacro.h"
 
 #define REGISTER_SCRIPT_FACTORY(SCRIPTNAME) \
     extern "C" __declspec(dllexport) IScript* Create##SCRIPTNAME##Script(GameObject& object) { \
@@ -69,22 +70,30 @@
 //using GetTypeInfoFn = const ScriptTypeInfo* (*)();
 //using GetFuncListFn = const std::vector<ScriptFunction>* (*)();
 
-struct TransformAPI
+class ECSManager;
+class ResourceManager;
+class ObjectContainer;
+
+struct CHO_API TransformAPI
 {
 	// 関数
 	Vector3& position() { return data->translation; }
 	Vector3& rotation() { return data->degrees; }
 	Quaternion& quaternion() { return data->rotation; }
 	Scale& scale() { return data->scale; }
-	std::function<void(Entity, const Vector3&)> SetPosition;
-	std::function<Vector3(Entity)> GetPosition;
 	void SetParent(Entity parent) { data->parent = parent; }
+
 private:
 	friend class GameObject;
+	void Initialize(const Entity& entity, ECSManager* ecs, ObjectContainer* objectContainer, ResourceManager* resourceManager, bool isParentReset = false);
+	ECSManager* m_ECS = nullptr; // ECSManager
+	ObjectContainer* m_ObjectContainer = nullptr; // ObjectContainer
+	ResourceManager* m_ResourceManager = nullptr; // ResourceManager
+	Entity m_Entity; // Entity
 	TransformComponent* data = nullptr;
 };
 
-struct CameraAPI
+struct CHO_API CameraAPI
 {
 	// 関数
 	float& fovAngleY() { return data->fovAngleY; }
@@ -93,50 +102,71 @@ struct CameraAPI
 	float& farZ() { return data->farZ; }
 private:
 	friend class GameObject;
+	void Initialize(const Entity& entity, ECSManager* ecs, ObjectContainer* objectContainer, ResourceManager* resourceManager);
+	ECSManager* m_ECS = nullptr; // ECSManager
+	ObjectContainer* m_ObjectContainer = nullptr; // ObjectContainer
+	ResourceManager* m_ResourceManager = nullptr; // ResourceManager
+	Entity m_Entity; // Entity
 	CameraComponent* data = nullptr;
 };
 
-struct LineRendererAPI
+struct CHO_API LineRendererAPI
 {
 	// 関数
 	Vector3& start(uint32_t index) { return (*data)[index].line.start; }
 	Vector3& end(uint32_t index) { return (*data)[index].line.end; }
 	Color& color(uint32_t index) { return (*data)[index].line.color; }
 private:
-	//friend struct ScriptContext;
 	friend class GameObject;
+	void Initialize(const Entity& entity, ECSManager* ecs, ObjectContainer* objectContainer, ResourceManager* resourceManager);
+	ECSManager* m_ECS = nullptr; // ECSManager
+	ObjectContainer* m_ObjectContainer = nullptr; // ObjectContainer
+	ResourceManager* m_ResourceManager = nullptr; // ResourceManager
+	Entity m_Entity; // Entity
 	std::vector<LineRendererComponent>* data = nullptr;
 };
 
-struct Rigidbody2DAPI
+struct CHO_API Rigidbody2DAPI
 {
+public:
+	Rigidbody2DAPI();
+	~Rigidbody2DAPI();
 	// 関数
 	Vector2& velocity() { return data->velocity; }
 	void SetBodyType(b2BodyType type) { data->bodyType = type; }
 	void SetFixedRotation(bool fixed) { data->fixedRotation = fixed; }
 	void SetActive(bool active) { data->isActive = active; }
 
-	// 反射方向を計算
-	std::function<b2Vec2(const b2Vec2& incident, const b2Vec2& normal)> Reflect;
-	// 反射Raycast（指定回数分反射する）
-	std::function<b2Vec2(const b2Vec2& start, const b2Vec2& dir,const int ReflectionCount, const float maxLength,const std::string hitTag)> RaycastWithReflectionsOnce;
+	// 関数ポインタのラッパー
 	// 法線取得（RaycastOnce の直後のみ有効）
-	b2Vec2 GetLastHitNormal() const { return m_LastHitNormal; }
+	Vector2 GetLastHitNormal() const;
+	// 反射ベクトルを計算
+	void Reflect(const b2Vec2& incident, const b2Vec2& normal);
+	// 反射Raycast（指定回数分反射する）
+	b2Vec2 RaycastWithReflectionsOnce(const b2Vec2& start, const b2Vec2& dir, const int ReflectionCount, const float maxLength, const std::string hitTag);
 	// 瞬間移動
-	std::function<void(const Vector2& position)> MovePosition;
+	void MovePosition(const Vector2& position);
 	// ライン上の最初にヒットしたオブジェクトを取得
-	std::function<GameObject& (const Vector2& start, const Vector2& end,const std::string hitTag)> Linecast;
+	GameObject& Linecast(const Vector2& start, const Vector2& end, const std::string hitTag);
+	
 	// 強制的に物理計算
 	//std::function<void(bool isAwake)> SetAwake;
 private:
 	friend class GameObject;
+	void Initialize(const Entity& entity,ECSManager* ecs,ObjectContainer* objectContainer,ResourceManager* resourceManager);
+	// 実装隠蔽クラス
+	class ImplRigidbody2DAPI;
+	ImplRigidbody2DAPI* implRigidbody2DAPI = nullptr;
+	friend class GameObject;
 	Rigidbody2DComponent* data = nullptr;
-	// 最後の法線（内部的に保持、ただし状態は保持しないなら静的でもよい）
-	b2Vec2 m_LastHitNormal = b2Vec2(0.0f, 1.0f); // 一時的な用途
+	ECSManager* m_ECS = nullptr; // ECSManager
+	ObjectContainer* m_ObjectContainer = nullptr; // ObjectContainer
+	ResourceManager* m_ResourceManager = nullptr; // ResourceManager
+	Entity m_Entity; // Entity
 };
 
 // BoxCollider2DAPI
-struct BoxCollider2DAPI
+struct CHO_API BoxCollider2DAPI
 {
 	// 関数
 	float& offsetX() { return data->offsetX; }
@@ -148,101 +178,155 @@ struct BoxCollider2DAPI
 	//std::function<void(bool isSensor)> SetSensor;
 private:
 	friend class GameObject;
+	void Initialize(const Entity& entity, ECSManager* ecs, ObjectContainer* objectContainer, ResourceManager* resourceManager);
+	ECSManager* m_ECS = nullptr; // ECSManager
+	ObjectContainer* m_ObjectContainer = nullptr; // ObjectContainer
+	ResourceManager* m_ResourceManager = nullptr; // ResourceManager
+	Entity m_Entity; // Entity
 	BoxCollider2DComponent* data = nullptr;
 };
 
 // MaterialAPI
-struct MaterialAPI
+struct CHO_API MaterialAPI
 {
 	// 関数
 	Color& color() { return data->color; }
 	std::wstring& textureName() { return data->textureName; }
 private:
 	friend class GameObject;
+	void Initialize(const Entity& entity, ECSManager* ecs, ObjectContainer* objectContainer, ResourceManager* resourceManager);
+	ECSManager* m_ECS = nullptr; // ECSManager
+	ObjectContainer* m_ObjectContainer = nullptr; // ObjectContainer
+	ResourceManager* m_ResourceManager = nullptr; // ResourceManager
+	Entity m_Entity; // Entity
 	MaterialComponent* data = nullptr;
 };
 
 //InputAPI
 class InputManager;
-struct InputAPI
+struct CHO_API InputAPI
 {
-	// 関数
+public:
+	InputAPI();
+	~InputAPI();
+	// 関数ポインタのラッパー
 	// キーの押下をチェック
-	std::function<bool(const uint8_t& keyNumber)> PushKey;
+	bool PushKey(const uint8_t& keyNumber);
 	// キーのトリガーをチェック
-	std::function<bool(const uint8_t& keyNumber)> TriggerKey;
+	bool TriggerKey(const uint8_t& keyNumber);
 	// 全マウス情報取得
-	std::function<const DIMOUSESTATE2& ()> GetAllMouse;
+	const DIMOUSESTATE2& GetAllMouse();
 	// マウス移動量を取得
-	std::function<MouseMove()> GetMouseMove;
+	MouseMove GetMouseMove();
 	// マウスの押下をチェック
-	std::function<bool(const int32_t& mouseNumber)> IsPressMouse;
+	bool IsPressMouse(const int32_t& mouseNumber);
 	// マウスのトリガーをチェック。押した瞬間だけtrueになる
-	std::function<bool(const int32_t& buttonNumber)> IsTriggerMouse;
+	bool IsTriggerMouse(const int32_t& buttonNumber);
 	// マウスの位置を取得する（ウィンドウ座標系）
-	std::function<const Vector2& ()> GetMouseWindowPosition;
-	// マウスの位置を取得する（スクリーン座標系）
-	std::function<Vector2()> GetMouseScreenPosition;
+	const Vector2& GetMouseWindowPosition();
+	// マウスの位置を取得する（ウィンドウ座標系）
+	Vector2 GetMouseScreenPosition();
 	// 現在のジョイスティック状態を取得する
-	std::function<bool(const int32_t& stickNo, XINPUT_STATE& out)> GetJoystickState;
+	bool GetJoystickState(const int32_t& stickNo, XINPUT_STATE& out);
 	// 前回のジョイスティック状態を取得する
-	std::function<bool(const int32_t& stickNo, XINPUT_STATE& out)> GetJoystickStatePrevious;
+	bool GetJoystickStatePrevious(const int32_t& stickNo, XINPUT_STATE& out);
 	// デッドゾーンを設定する
-	std::function<void(const int32_t& stickNo, const int32_t& deadZoneL, const int32_t& deadZoneR)> SetJoystickDeadZone;
+	void SetJoystickDeadZone(const int32_t& stickNo, const int32_t& deadZoneL, const int32_t& deadZoneR);
+	// デッドゾーンを取得する
+	size_t GetNumberOfJoysticks();
 	// 接続されているジョイスティック数を取得する
-	std::function<size_t()> GetNumberOfJoysticks;
-	// パッドの押されているボタン、スティックの値を取得
-	std::function<bool(const PadButton& button, int32_t stickNo)> IsTriggerPadButton;
-	std::function<bool(const PadButton& button, int32_t stickNo)> IsPressPadButton;
-	std::function<Vector2(const LR& padStick, int32_t stickNo)> GetStickValue;
-	std::function<float(const LR& LorR, int32_t stickNo)> GetLRTrigger;
-	
+	bool IsTriggerPadButton(const PadButton& button, int32_t stickNo);
+	// 接続されているジョイスティック数を取得する
+	bool IsPressPadButton(const PadButton& button, int32_t stickNo);
+	// 接続されているジョイスティック数を取得する
+	Vector2 GetStickValue(const LR& padStick, int32_t stickNo);
+	// 接続されているジョイスティック数を取得する
+	float GetLRTrigger(const LR& LorR, int32_t stickNo);
 private:
+	friend class GameObject;
+	void Intialize(InputManager* input);
+	// 実装隠蔽クラス
+	class ImplInputAPI;
+	ImplInputAPI* implInputAPI = nullptr;
 	friend class GameObject;
 	InputManager* data = nullptr;
 };
 
-struct EmitterAPI
+struct CHO_API EmitterAPI
 {
-	// 関数
-	std::function<void(const Vector3& position)> SetPosition;
-	std::function<void(const Vector3& velocity)> SetVelocity;
-	std::function<void(const Vector3& acceleration)> SetAcceleration;
-	std::function<void(const Vector3& rotation)> SetRotation;
-	std::function<void(const Vector3& scale)> SetScale;
-	std::function<void(const Vector3& color)> SetColor;
+public:
+	EmitterAPI();
+	~EmitterAPI();
+	// 関数ポインタのラッパー
+	void SetPosition(const Vector3& position);
+	void SetVelocity(const Vector3& velocity);
+	void SetAcceleration(const Vector3& acceleration);
+	void SetRotation(const Vector3& rotation);
+	void SetScale(const Vector3& scale);
+	void SetColor(const Vector3& color);
+	
 private:
 	friend class GameObject;
+	void Initialize(const Entity& entity, ECSManager* ecs, ObjectContainer* objectContainer, ResourceManager* resourceManager);
+	ECSManager* m_ECS = nullptr; // ECSManager
+	ObjectContainer* m_ObjectContainer = nullptr; // ObjectContainer
+	ResourceManager* m_ResourceManager = nullptr; // ResourceManager
+	Entity m_Entity; // Entity
+	// 実装隠蔽クラス
+	class ImplEmitterAPI;
+	ImplEmitterAPI* implEmitterAPI = nullptr;
 	EmitterComponent* data = nullptr;
 };
 
-struct ParticleAPI
+struct CHO_API ParticleAPI
 {
-	// 関数
-	std::function<void(const Vector3& position)> SetPosition;
-	std::function<void(const Vector3& velocity)> SetVelocity;
-	std::function<void(const Vector3& acceleration)> SetAcceleration;
-	std::function<void(const Vector3& rotation)> SetRotation;
-	std::function<void(const Vector3& scale)> SetScale;
-	std::function<void(const Vector3& color)> SetColor;
+public:
+	ParticleAPI();
+	~ParticleAPI();
+	// 関数ポインタのラッパー
+	void SetPosition(const Vector3& position);
+	void SetVelocity(const Vector3& velocity);
+	void SetAcceleration(const Vector3& acceleration);
+	void SetRotation(const Vector3& rotation);
+	void SetScale(const Vector3& scale);
+	void SetColor(const Vector3& color);
 private:
 	friend class GameObject;
+	void Initialize(const Entity& entity, ECSManager* ecs, ObjectContainer* objectContainer, ResourceManager* resourceManager);
+	ECSManager* m_ECS = nullptr; // ECSManager
+	ObjectContainer* m_ObjectContainer = nullptr; // ObjectContainer
+	ResourceManager* m_ResourceManager = nullptr; // ResourceManager
+	Entity m_Entity; // Entity
+	// 実装隠蔽クラス
+	class ImplParticleAPI;
+	ImplParticleAPI* implParticleAPI = nullptr;
 	ParticleComponent* data = nullptr;
 };
 
-struct EffectAPI
+struct CHO_API EffectAPI
 {
-	// 関数
-	std::function<void(const Vector3& position)> SetPosition;
-	std::function<void(const Vector3& rotation)> SetRotation;
-	std::function<void(const Vector3& scale)> SetScale;
-	std::function<void(const Vector3& color)> SetColor;
+public:
+	EffectAPI();
+	~EffectAPI();
+	// 関数ポインタのラッパー
+	void SetPosition(const Vector3& position);
+	void SetRotation(const Vector3& rotation);
+	void SetScale(const Vector3& scale);
+	void SetColor(const Vector3& color);
 private:
 	friend class GameObject;
+	void Initialize(const Entity& entity, ECSManager* ecs, ObjectContainer* objectContainer, ResourceManager* resourceManager);
+	ECSManager* m_ECS = nullptr; // ECSManager
+	ObjectContainer* m_ObjectContainer = nullptr; // ObjectContainer
+	ResourceManager* m_ResourceManager = nullptr; // ResourceManager
+	Entity m_Entity; // Entity
+	// 実装隠蔽クラス
+	class ImplEffectAPI;
+	ImplEffectAPI* implEffectAPI = nullptr;
 	EffectComponent* data = nullptr;
 };
 
-struct UISpriteAPI
+struct CHO_API UISpriteAPI
 {
 	// 関数
 	Vector2& position() { return data->position; }
@@ -251,28 +335,56 @@ struct UISpriteAPI
 	Vector2& anchorPoint() { return data->anchorPoint; }
 private:
 	friend class GameObject;
+	void Initialize(const Entity& entity, ECSManager* ecs, ObjectContainer* objectContainer, ResourceManager* resourceManager);
+	ECSManager* m_ECS = nullptr; // ECSManager
+	ObjectContainer* m_ObjectContainer = nullptr; // ObjectContainer
+	ResourceManager* m_ResourceManager = nullptr; // ResourceManager
+	Entity m_Entity; // Entity
 	UISpriteComponent* data = nullptr;
 };
 
-struct EditorAPI
+struct CHO_API EditorAPI
 {
-	// 関数
-	std::function<void()> Begin;
-	std::function<void()> End;
-	std::function<void(const char* label, float* v, float v_speed, float v_min, float v_max, const char* format)> DragFloat;
-	std::function<void(const char* label, float* v[2], float v_speed, float v_min, float v_max, const char* format)> DragFloat2;
-	std::function<void(const char* label, float* v[3], float v_speed, float v_min, float v_max, const char* format)> DragFloat3;
+public:
+	EditorAPI();
+	~EditorAPI();
+	// 関数ポインタのラッパー
+	void Begin(const char* name);
+	void End();
+	void DragFloat(const char* label, float* v, float v_speed, float v_min, float v_max, const char* format = "%.3f");
+	void DragFloat2(const char* label, float* v[2], float v_speed, float v_min, float v_max, const char* format = "%.3f");
+	void DragFloat3(const char* label, float* v[3], float v_speed, float v_min, float v_max, const char* format = "%.3f");
 private:
 	friend class GameObject;
+	// 実装隠蔽クラス
+	class ImplEditorAPI;
+	ImplEditorAPI* implEditorAPI = nullptr;
+	void Initialize(const Entity& entity, ECSManager* ecs, ObjectContainer* objectContainer, ResourceManager* resourceManager);
+	ECSManager* m_ECS = nullptr; // ECSManager
+	ObjectContainer* m_ObjectContainer = nullptr; // ObjectContainer
+	ResourceManager* m_ResourceManager = nullptr; // ResourceManager
+	Entity m_Entity; // Entity
 };
 
-struct AudioAPI
+struct CHO_API AudioAPI
 {
+public:
+	AudioAPI();
+	~AudioAPI();
 	// 関数
 	void SetLoop(const bool& loop) { data->isLoop = loop; }
-	std::function<void()> Play;
-	std::function<void()> Stop;
+	// 関数ポインタのラッパー
+	void Play();
+	void Stop();
 private:
 	friend class GameObject;
+	// 実装隠蔽クラス
+	class ImplAudioAPI;
+	ImplAudioAPI* implAudioAPI = nullptr;
+	void Initialize(const Entity& entity, ECSManager* ecs, ObjectContainer* objectContainer, ResourceManager* resourceManager);
+	ECSManager* m_ECS = nullptr; // ECSManager
+	ObjectContainer* m_ObjectContainer = nullptr; // ObjectContainer
+	ResourceManager* m_ResourceManager = nullptr; // ResourceManager
+	Entity m_Entity; // Entity
 	AudioComponent* data = nullptr;
 };

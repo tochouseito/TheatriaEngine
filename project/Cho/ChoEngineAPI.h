@@ -3,6 +3,7 @@
 #include "APIExportsMacro.h"
 #include "Externals/ChoMath/ChoMath.h"
 #include <variant>
+#include <optional>
 using GameParameterVariant = std::variant<int, float, bool, Vector3>;
 class GameObject;
 class ChoEngine;

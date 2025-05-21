@@ -34,7 +34,8 @@ private:
 	std::wstring m_Name = L"";	// プレハブ名
 	ObjectType m_Type;			// プレハブのタイプ
 };
-class GameObject
+// GameObjectクラス
+class CHO_API GameObject
 {
 	friend class GameCore;
 	friend class ObjectContainer;
@@ -43,31 +44,25 @@ class GameObject
 	friend class RenameObjectCommand;
 	friend class IScript;
 	friend class GameObjectData;
+	friend class ScriptGenerateInstanceSystem;
+	friend class ScriptInitializeSystem;
+	friend class ScriptUpdateSystem;
+	friend class ScirptFinalizeSystem;
+	friend class CollisionSystem;
+	friend class ContactListener2D;
 public:
-	std::optional<ObjectID> GetID() const noexcept { return m_ID; }
+	std::optional<ObjectID> GetID() const noexcept;
 	Entity GetEntity() const noexcept { return m_Entity; }
-	std::wstring GetName() const noexcept { return m_Name; }
+	std::wstring GetName() const noexcept;
 	ObjectType GetType() const noexcept { return m_Type; }
-	std::string GetTag() const noexcept { return m_Tag; }
-	void SetTag(std::string_view tag) noexcept { m_Tag = tag.data(); }// この関数はEditorに移す予定
+	std::string GetTag() const noexcept;
+	void SetTag(std::string_view tag) noexcept;// この関数はEditorに移す予定
 	// オブジェクトが有効かどうか
-	bool IsActive() const noexcept
-	{
-		if (!m_ID) { return false; }
-		return m_Active;
-	}
+	bool IsActive() const noexcept;
 	// オブジェクトを有効にする
-	void SetActive(bool active) noexcept
-	{
-		if (!m_ID) { return; }
-		m_Active = active;
-	}
+	void SetActive(bool active) noexcept;
 	// オブジェクトを無効にする
-	void SetInactive() noexcept
-	{
-		if (!m_ID) { return; }
-		m_Active = false;
-	}
+	void SetInactive() noexcept;
 
 	TransformAPI transform;			// TransformAPI
 	CameraAPI camera;				// CameraAPI
@@ -78,65 +73,50 @@ public:
 	UISpriteAPI ui;					// UIAPI
 	//AudioAPI audio;					// AudioAPI
 	//int i;
-
 	InputAPI input;					// InputAPI
 
-	std::unordered_map<std::string, ObjectParameter> parameters;	// スクリプト用パラメータ
+	// パラメータを取得
+	ObjectParameter GetParameter(const std::string& name) const;
+	// パラメータを設定
+	void SetParameter(const std::string& name, const ObjectParameter& value);
 private:
-	friend class ScriptGenerateInstanceSystem;
-	friend class ScriptInitializeSystem;
-	friend class ScriptUpdateSystem;
-	friend class ScirptFinalizeSystem;
-	friend class CollisionSystem;
-	friend class ContactListener2D;
 
-	void SetID(const ObjectID& id) noexcept { m_ID = id; }
-	void SetName(const std::wstring& name) noexcept { m_Name = name; }
+	void SetID(const ObjectID& id) noexcept;
+	void SetName(const std::wstring& name) noexcept;
 
-	std::optional<ObjectID> m_ID = std::nullopt;	// オブジェクトID
+	
 	Entity m_Entity;								// エンティティ
-	std::wstring m_Name = L"";						// ゲームオブジェクト名
+	
 	ObjectType m_Type;								// ゲームオブジェクトのタイプ
 	bool m_Active = false;							// アクティブフラグ
-	std::string m_Tag = "Default";					// タグ
+	
 	ECSManager* m_ECS = nullptr;					// ECSManager
 	ResourceManager* m_ResourceManager = nullptr;	// ResourceManager
 	InputManager* m_InputManager = nullptr;			// InputManager
 	ObjectContainer* m_ObjectContainer = nullptr;	// ObjectContainer
 
+	// 実装隠蔽クラス
+	class ImplGameObject;
+	ImplGameObject* implGameObject = nullptr;
+
 	void Initialize(bool isParentReset = true)
 	{
-		InitializeTransformAPI(isParentReset);
-		InitializeCameraAPI();
-		InitializeLineRendererAPI();
-		InitializeRigidbody2DAPI();
-		InitializeBoxCollider2DAPI();
-		InitializeMaterialAPI();
-		InitializeInputAPI();
-		InitializeUIAPI();
-		InitializeAudioAPI();
+		transform.Initialize(m_Entity, m_ECS, m_ObjectContainer, m_ResourceManager, isParentReset);
+		camera.Initialize(m_Entity, m_ECS, m_ObjectContainer, m_ResourceManager);
+		lineRenderer.Initialize(m_Entity, m_ECS, m_ObjectContainer, m_ResourceManager);
+		rigidbody2D.Initialize(m_Entity, m_ECS, m_ObjectContainer, m_ResourceManager);
+		boxCollider2D.Initialize(m_Entity, m_ECS, m_ObjectContainer, m_ResourceManager);
+		material.Initialize(m_Entity, m_ECS, m_ObjectContainer, m_ResourceManager);
+		ui.Initialize(m_Entity, m_ECS, m_ObjectContainer, m_ResourceManager);
+		input.Intialize(m_InputManager);
 	}
-
-	void InitializeTransformAPI(bool isParentReset);
-	void InitializeCameraAPI();
-	void InitializeLineRendererAPI();
-	void InitializeRigidbody2DAPI();
-	void InitializeBoxCollider2DAPI();
-	void InitializeMaterialAPI();
-	void InitializeInputAPI();
-	void InitializeUIAPI();
-	void InitializeAudioAPI();
 public:
 	// コンストラクタ
-	GameObject(ObjectContainer* objectContainer, InputManager* input, ResourceManager* resourceManager, ECSManager* ecs, const Entity& entity, const std::wstring& name, const ObjectType& type) :
-		m_ObjectContainer(objectContainer), m_InputManager(input), m_ResourceManager(resourceManager), m_ECS(ecs), m_Entity(entity), m_Name(name), m_Type(type)
-	{
-		m_Active = true;
-	}
+	GameObject(ObjectContainer* objectContainer, InputManager* input, ResourceManager* resourceManager, ECSManager* ecs, const Entity& entity, const std::wstring& name, const ObjectType& type);
 	// デフォルトコンストラクタ
 	GameObject(){m_Active = false;}
 	// デストラクタ
-	~GameObject() {}
+	~GameObject();
 	// コピー、代入禁止
 	GameObject(const GameObject&) = delete;
 	GameObject& operator=(const GameObject&) = delete;

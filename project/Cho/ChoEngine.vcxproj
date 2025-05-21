@@ -755,7 +755,7 @@ xcopy "$(SolutionDir)Cho\Resources\EngineAssets" "$(TargetDir)Cho\Resources\Engi
 copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"
 xcopy "$(SolutionDir)Cho\GameCore\IScript" "$(TargetDir)Cho\GameCore\IScript" /E /I /Y
 xcopy "$(SolutionDir)Cho\Externals\ChoMath" "$(TargetDir)Cho\Externals\ChoMath" /E /I /Y
-xcopy "$(SolutionDir)Cho\GameCore\ScriptAPI" "$(TargetDir)Cho\GameCore\ScriptAPI" /E /I /Y
+xcopy "$(SolutionDir)Cho\GameCore\ScriptAPI.h" "$(TargetDir)Cho\GameCore\ScriptAPI" /E /I /Y
 xcopy "$(SolutionDir)Cho\Core\Utility\Components.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Core\Utility\Color.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Externals\box2d" "$(TargetDir)Cho\Externals\box2d" /E /I /Y
@@ -765,7 +765,7 @@ xcopy "$(SolutionDir)Cho\Core\Utility\EffectStruct.h" "$(TargetDir)Cho\Core\Util
 xcopy "$(SolutionDir)Cho\ChoEngineAPI.h" "$(TargetDir)Cho\" /E /I /Y
 xcopy "$(SolutionDir)Cho\APIExportsMacro.h" "$(TargetDir)Cho\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Engine\Engine.h" "$(TargetDir)Cho\Engine\" /E /I /Y
-xcopy "$(SolutionDir)Cho\GameCore\GameObject" "$(TargetDir)Cho\GameCore\GameObject" /E /I /Y
+xcopy "$(SolutionDir)Cho\GameCore\GameObject\GameObject.h" "$(TargetDir)Cho\GameCore\GameObject" /E /I /Y
 xcopy "$(SolutionDir)Cho\GameCore\ObjectContainer" "$(TargetDir)Cho\GameCore\ObjectContainer" /E /I /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -808,7 +808,7 @@ xcopy "$(SolutionDir)Cho\Resources\EngineAssets" "$(TargetDir)Cho\Resources\Engi
 copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"
 xcopy "$(SolutionDir)Cho\GameCore\IScript" "$(TargetDir)Cho\GameCore\IScript" /E /I /Y
 xcopy "$(SolutionDir)Cho\Externals\ChoMath" "$(TargetDir)Cho\Externals\ChoMath" /E /I /Y
-xcopy "$(SolutionDir)Cho\GameCore\ScriptAPI" "$(TargetDir)Cho\GameCore\ScriptAPI" /E /I /Y
+xcopy "$(SolutionDir)Cho\GameCore\ScriptAPI.h" "$(TargetDir)Cho\GameCore\ScriptAPI" /E /I /Y
 xcopy "$(SolutionDir)Cho\Core\Utility\Components.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Core\Utility\Color.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Externals\box2d" "$(TargetDir)Cho\Externals\box2d" /E /I /Y
@@ -818,7 +818,7 @@ xcopy "$(SolutionDir)Cho\Core\Utility\EffectStruct.h" "$(TargetDir)Cho\Core\Util
 xcopy "$(SolutionDir)Cho\ChoEngineAPI.h" "$(TargetDir)Cho\" /E /I /Y
 xcopy "$(SolutionDir)Cho\APIExportsMacro.h" "$(TargetDir)Cho\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Engine\Engine.h" "$(TargetDir)Cho\Engine\" /E /I /Y
-xcopy "$(SolutionDir)Cho\GameCore\GameObject" "$(TargetDir)Cho\GameCore\GameObject" /E /I /Y
+xcopy "$(SolutionDir)Cho\GameCore\GameObject\GameObject.h" "$(TargetDir)Cho\GameCore\GameObject" /E /I /Y
 xcopy "$(SolutionDir)Cho\GameCore\ObjectContainer" "$(TargetDir)Cho\GameCore\ObjectContainer" /E /I /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
