@@ -58,11 +58,11 @@ public:
 	std::string GetTag() const noexcept;
 	void SetTag(std::string_view tag) noexcept;// この関数はEditorに移す予定
 	// オブジェクトが有効かどうか
-	bool IsActive() const noexcept;
+	bool IsActive() const noexcept { return m_Active; }
 	// オブジェクトを有効にする
-	void SetActive(bool active) noexcept;
+	void SetActive(bool active) noexcept { m_Active = active; }
 	// オブジェクトを無効にする
-	void SetInactive() noexcept;
+	void SetInactive() noexcept { m_Active = false; }
 
 	TransformAPI transform;			// TransformAPI
 	CameraAPI camera;				// CameraAPI

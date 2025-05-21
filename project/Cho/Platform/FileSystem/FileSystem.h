@@ -1,4 +1,6 @@
 #pragma once
+#define NOMINMAX // Windowのminmaxマクロを除外
+#include <Windows.h>
 #include <sstream>
 #include <regex>
 #include <string>

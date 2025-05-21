@@ -65,39 +65,6 @@ void GameObject::SetTag(std::string_view tag) noexcept
 	return;
 }
 
-bool GameObject::IsActive() const noexcept
-{
-	if (!implGameObject->GetIDFunc())
-	{
-		return false;
-	} else
-	{
-		return m_Active;
-	}
-}
-
-void GameObject::SetActive(bool active) noexcept
-{
-	if (implGameObject->GetIDFunc())
-	{
-		return;
-	} else
-	{
-		m_Active = active;
-	}
-}
-
-void GameObject::SetInactive() noexcept
-{
-	if (!implGameObject->GetIDFunc())
-	{
-		return;
-	} else
-	{
-		m_Active = false;
-	}
-}
-
 ObjectParameter GameObject::GetParameter(const std::string& name) const
 {
 	if (implGameObject->GetParameterFunc)
