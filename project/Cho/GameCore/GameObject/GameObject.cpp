@@ -31,7 +31,7 @@ public:
 
 std::optional<ObjectID> GameObject::GetID() const noexcept
 {
-	if (implGameObject->GetIDFunc)
+	if (implGameObject&&implGameObject->GetIDFunc)
 	{
 		return implGameObject->GetIDFunc();
 	}
@@ -40,7 +40,7 @@ std::optional<ObjectID> GameObject::GetID() const noexcept
 
 std::wstring GameObject::GetName() const noexcept
 {
-	if (implGameObject->GetNameFunc)
+	if (implGameObject && implGameObject->GetNameFunc)
 	{
 		return implGameObject->GetNameFunc();
 	}
@@ -49,7 +49,7 @@ std::wstring GameObject::GetName() const noexcept
 
 std::string GameObject::GetTag() const noexcept
 {
-	if (implGameObject->GetTagFunc)
+	if (implGameObject && implGameObject->GetTagFunc)
 	{
 		return implGameObject->GetTagFunc();
 	}
@@ -58,7 +58,7 @@ std::string GameObject::GetTag() const noexcept
 
 void GameObject::SetTag(std::string_view tag) noexcept
 {
-	if (implGameObject->SetTagFunc)
+	if (implGameObject && implGameObject->SetTagFunc)
 	{
 		implGameObject->SetTagFunc(tag.data());
 	}
@@ -67,7 +67,7 @@ void GameObject::SetTag(std::string_view tag) noexcept
 
 ObjectParameter GameObject::GetParameter(const std::string& name) const
 {
-	if (implGameObject->GetParameterFunc)
+	if (implGameObject && implGameObject->GetParameterFunc)
 	{
 		return implGameObject->GetParameterFunc(name);
 	}
@@ -76,7 +76,7 @@ ObjectParameter GameObject::GetParameter(const std::string& name) const
 
 void GameObject::SetParameter(const std::string& name, const ObjectParameter& value)
 {
-	if (implGameObject->SetParameterFunc)
+	if (implGameObject && implGameObject->SetParameterFunc)
 	{
 		implGameObject->SetParameterFunc(name, value);
 	}
@@ -84,12 +84,18 @@ void GameObject::SetParameter(const std::string& name, const ObjectParameter& va
 
 void GameObject::SetID(const ObjectID& id) noexcept
 {
-	implGameObject->SetIDFunc(id);
+	if (implGameObject)
+	{
+		implGameObject->SetIDFunc(id);
+	}
 }
 
 void GameObject::SetName(const std::wstring& name) noexcept
 {
-	implGameObject->SetNameFunc(name);
+	if (implGameObject)
+	{
+		implGameObject->SetNameFunc(name);
+	}
 }
 
 GameObject::GameObject(ObjectContainer* objectContainer, InputManager* input, ResourceManager* resourceManager, ECSManager* ecs, const Entity& entity, const std::wstring& name, const ObjectType& type) :
@@ -129,7 +135,10 @@ GameObject::GameObject(ObjectContainer* objectContainer, InputManager* input, Re
 
 GameObject::~GameObject()
 {
-	delete implGameObject;
+	if (implGameObject)
+	{
+		delete implGameObject;
+	}
 }
 
 GameObjectData::GameObjectData(const GameObject& other)
