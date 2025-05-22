@@ -740,7 +740,7 @@
       <EnableUAC>false</EnableUAC>
       <AdditionalLibraryDirectories>$(SolutionDir)..\..\generated\outputs\$(Configuration)\;$(ProjectDir)Externals\assimp\lib\Debug</AdditionalLibraryDirectories>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
-      <AdditionalDependencies>dxcompiler.lib;d3dcompiler.lib;dxguid.lib;d3d12.lib;dxgi.lib;ChoMath.lib;dinput8.lib;xinput.lib;xaudio2.lib;assimp-vc143-mdd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>dxcompiler.lib;d3dcompiler.lib;dxguid.lib;d3d12.lib;dxgi.lib;ChoMath.lib;dinput8.lib;xinput.lib;xaudio2.lib;assimp-vc143-mdd.lib;zlibstaticd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/ignore:4049 /ignore:4048 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
@@ -793,7 +793,7 @@ xcopy "$(SolutionDir)Cho\GameCore\ObjectContainer" "$(TargetDir)Cho\GameCore\Obj
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <AdditionalLibraryDirectories>$(SolutionDir)..\..\generated\outputs\$(Configuration)\;$(ProjectDir)Externals\assimp\lib\Release</AdditionalLibraryDirectories>
-      <AdditionalDependencies>dxcompiler.lib;d3dcompiler.lib;dxguid.lib;d3d12.lib;dxgi.lib;ChoMath.lib;dinput8.lib;xinput.lib;xaudio2.lib;assimp-vc143-md.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>dxcompiler.lib;d3dcompiler.lib;dxguid.lib;d3d12.lib;dxgi.lib;ChoMath.lib;dinput8.lib;xinput.lib;xaudio2.lib;assimp-vc143-md.lib;zlibstatic.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/ignore:4049 /ignore:4048 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
