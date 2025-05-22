@@ -7,9 +7,11 @@
 #include <filesystem>
 #include <list>
 // assimp
-#include<assimp/Importer.hpp>
-#include<assimp/scene.h>
-#include<assimp/postprocess.h>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/version.h>
 // 頂点データ構造体
 struct VertexData
 {
@@ -52,6 +54,8 @@ public:
 	ModelManager(ResourceManager* resourceManager)
 		:m_pResourceManager(resourceManager)
 	{
+		// Assimpのオプションチェック
+		CheckAssimpOption();
 		CreateDefaultMesh();
 	}
 	~ModelManager()
@@ -82,6 +86,8 @@ public:
 	// モデルのUseListから削除する
 	void RemoveModelUseList(const std::variant<uint32_t, std::wstring>& key, const uint32_t& transformMapID);
 private:
+	// Assimpのオプションチェック
+	void CheckAssimpOption();
 	// デフォルトメッシュの生成
 	void CreateDefaultMesh();
 	// Cubeの生成

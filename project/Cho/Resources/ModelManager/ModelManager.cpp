@@ -315,6 +315,21 @@ void ModelManager::RemoveModelUseList(const std::variant<uint32_t, std::wstring>
 	}
 }
 
+void ModelManager::CheckAssimpOption()
+{
+	Assimp::Importer importer;
+
+	std::string extensions;
+	importer.GetExtensionList(extensions);
+
+	Log::Write(LogLevel::Info, "Assimp Format List" + extensions);
+
+	Log::Write(LogLevel::Info, "Assimp Version: "
+		+ std::to_string(aiGetVersionMajor()) + "."
+		+ std::to_string(aiGetVersionMinor()) + "."
+		+ std::to_string(aiGetVersionRevision()));
+}
+
 void ModelManager::CreateDefaultMesh()
 {
 	// Cube
