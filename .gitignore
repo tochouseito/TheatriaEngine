@@ -21,6 +21,7 @@ generated/
 project/ChoEngineLog.txt
 project/Cho/Externals/DirectXTex/Shaders/Compiled/
 GameProjects/
+project/Cho/Externals/assimp/lib/
 .cache/
 .nuget/
 .dotnet/
