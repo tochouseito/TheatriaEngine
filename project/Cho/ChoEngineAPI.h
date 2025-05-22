@@ -43,5 +43,7 @@ namespace ChoSystem
 	CHO_API GameObject& CloneGameObject(std::optional<uint32_t> id, Vector3 generatePosition);
 	// ゲームオブジェクト削除
 	CHO_API void DestroyGameObject(std::optional<uint32_t> id);
+	// デルタタイム取得
+	CHO_API float DeltaTime();
 #endif
 }

@@ -658,4 +658,25 @@ float ChoMath::LerpShortAngle(float startAngle, float endAngle, float t) {
 	return result;
 }
 
+Quaternion ChoMath::MakeLookRotation(const Vector3& forward, const Vector3& up)
+{
+	Vector3 f = forward;
+	f.Normalize();
+
+	Vector3 r = Vector3::Cross(up, f); // 右ベクトル = 上 × 前
+	r.Normalize();
+
+	Vector3 u = Vector3::Cross(f, r); // 上ベクトル = 前 × 右
+
+	// 回転行列を構築（右・上・前）
+	Matrix4 rotMat = {
+		r.x, u.x, f.x, 0.0f,
+		r.y, u.y, f.y, 0.0f,
+		r.z, u.z, f.z, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f
+	};
+
+	return Quaternion::FromMatrix(rotMat); // 回転行列 → クォータニオン変換
+}
+
 

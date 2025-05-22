@@ -168,3 +168,8 @@ CHO_API void ChoSystem::DestroyGameObject(std::optional<uint32_t> id)
 	std::unique_ptr<DeleteObjectCommand> command = std::make_unique<DeleteObjectCommand>(id.value());
 	command->Execute(engineCommand);
 }
+
+CHO_API float ChoSystem::DeltaTime()
+{
+	return Timer::GetDeltaTime();
+}
