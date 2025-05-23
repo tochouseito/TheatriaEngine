@@ -130,7 +130,7 @@ public:
 	// コンストラクタ
 	GameObject(ObjectContainer* objectContainer, InputManager* input, ResourceManager* resourceManager, ECSManager* ecs, const Entity& entity, const std::wstring& name, const ObjectType& type);
 	// デフォルトコンストラクタ
-	GameObject(){m_Active = false;}
+	GameObject() { m_Active = false; }
 	// デストラクタ
 	~GameObject();
 	// コピー、代入禁止

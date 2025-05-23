@@ -29,8 +29,6 @@ void ScenePrefab::Start()
 			TransformComponent* transform = ecs->AddComponent<TransformComponent>(entity);
 			*transform = objData.m_Transform.value();
 			transform->mapID = m_SceneManager->m_pResourceManager->GetIntegrationData(IntegrationDataType::Transform)->GetMapID();
-			uint32_t i = transform->mapID.value();
-			i;
 		}
 		// CameraComponentの追加
 		if (objData.m_Camera.has_value())

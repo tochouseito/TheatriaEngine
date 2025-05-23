@@ -574,9 +574,6 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
         {
 			std::wstring sceneName = std::filesystem::path(j["sceneName"].get<std::string>()).wstring();
 			scene.SetSceneName(sceneName);
-            //sceneManager->AddScene(sceneName);
-            //sceneManager->ChangeSceneRequest(sceneManager->GetSceneID(sceneName));
-			//scene = sceneManager->GetSceneToName(sceneName);
 		}
 
         // オブジェクト読み込み
@@ -588,12 +585,6 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
                 ObjectType type = ObjectTypeFromString(obj["type"].get<std::string>());
                 // GameObjectData
 				GameObjectData objData(name, type);
-                //Entity entity = ecs->GenerateEntity();
-                //ObjectID id = container->AddGameObject(entity, name, type);
-                //GameObject& gameObj = container->GetGameObjectByName(name);
-                
-
-                //scene->AddUseObject(gameObj.GetID().value());
 
                 if (!obj.contains("components")) continue;
                 const auto& comps = obj["components"];
@@ -606,17 +597,6 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
 					Deserialization::FromJson(jt,t);
                     // TransformComponentの保存
                     objData.m_Transform = t;
-                    /*t.translation = Vector3{ jt["translation"][0], jt["translation"][1], jt["translation"][2] };
-                    t.rotation = Quaternion{ jt["rotation"][0], jt["rotation"][1], jt["rotation"][2], jt["rotation"][3] };
-                    t.scale = Scale{ jt["scale"][0], jt["scale"][1], jt["scale"][2] };
-					t.degrees = Vector3{ jt["degrees"][0], jt["degrees"][1], jt["degrees"][2] };*/
-                    //TransformComponent* transform = ecs->AddComponent<TransformComponent>(entity);
-					/*transform->translation = t.translation;
-					transform->rotation = t.rotation;
-					transform->scale = t.scale;
-					transform->degrees = t.degrees;*/
-                    //*transform = t;
-                    //transform->mapID = resourceManager->GetIntegrationData(IntegrationDataType::Transform)->GetMapID();
                 }
 
                 if (comps.contains("Camera"))
@@ -627,17 +607,6 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
 					Deserialization::FromJson(jc, c);
 					// CameraComponentの保存
 					objData.m_Camera = c;
-                    /*c.fovAngleY = jc["fovAngleY"];
-                    c.aspectRatio = jc["aspectRatio"];
-                    c.nearZ = jc["nearZ"];
-                    c.farZ = jc["farZ"];*/
-                    //CameraComponent* camera = ecs->AddComponent<CameraComponent>(entity);
-					/*camera->fovAngleY = c.fovAngleY;
-					camera->aspectRatio = c.aspectRatio;
-					camera->nearZ = c.nearZ;
-					camera->farZ = c.farZ;*/
-					//*camera = c;
-					//camera->bufferIndex = resourceManager->CreateConstantBuffer<BUFFER_DATA_VIEWPROJECTION>();
                 }
 
                 if (comps.contains("MeshFilter"))
@@ -654,13 +623,6 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
                     }
                     // MeshFilterComponentの保存
 					objData.m_MeshFilter = m;
-                    //MeshFilterComponent* filter = ecs->AddComponent<MeshFilterComponent>(entity);
-					//TransformComponent* transform = ecs->GetComponent<TransformComponent>(entity);
-                    //filter->modelName = m.modelName;
-					// モデル名からIDを取得
-                    //filter->modelID = resourceManager->GetModelManager()->GetModelDataIndex(filter->modelName);
-					// モデルのUseListに登録
-                    //resourceManager->GetModelManager()->RegisterModelUseList(filter->modelID.value(), transform->mapID.value());
                 }
 
                 if (comps.contains("MeshRenderer"))
