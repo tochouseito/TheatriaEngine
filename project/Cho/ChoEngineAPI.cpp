@@ -5,6 +5,12 @@
 #include "Main/ChoEngine.h"
 #include "EngineCommand/EngineCommands.h"
 
+// メンバ定義
+namespace ChoSystem
+{
+	SceneManagerAPI sceneManager;
+}
+
 CHO_API Engine* Cho::CreateEngine(RuntimeMode mode)
 {
     return new ChoEngine(mode);
@@ -167,4 +173,14 @@ CHO_API void ChoSystem::DestroyGameObject(std::optional<uint32_t> id)
 	// 生成されたオブジェクトを削除
 	std::unique_ptr<DeleteObjectCommand> command = std::make_unique<DeleteObjectCommand>(id.value());
 	command->Execute(engineCommand);
+}
+
+CHO_API float ChoSystem::DeltaTime()
+{
+	return Timer::GetDeltaTime();
+}
+
+void ChoSystem::SceneManagerAPI::LoadScene(const std::string& sceneName)
+{
+	sceneName;
 }

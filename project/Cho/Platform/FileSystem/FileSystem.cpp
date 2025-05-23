@@ -1385,6 +1385,7 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
     fs::path mathLibPath = includeBase / "Cho/Externals/ChoMath";
     fs::path scriptPath = includeBase / "Cho/GameCore/IScript";
 	fs::path contextPath = includeBase / "Cho/GameCore/ScriptAPI";
+    fs::path projectDirPath = "$(ProjectDir)";
 
     // ライブラリディレクトリ
     //fs::path libraryPath = currentPath / "../generated/outputs/$(Configuration)/";
@@ -1458,7 +1459,7 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
     vcxFile << "      <WarningLevel>Level3</WarningLevel>\n";
     vcxFile << "      <Optimization>Disabled</Optimization>\n";
     vcxFile << "      <PreprocessorDefinitions>_DEBUG;EXPORT_SCRIPT_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>\n";
-    vcxFile << "      <AdditionalIncludeDirectories>" << contextPath.string() << ";" << scriptPath.string() << ";" << mathLibPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
+    vcxFile << "      <AdditionalIncludeDirectories>" << projectDirPath.string() << ";" << contextPath.string() << ";" << scriptPath.string() << ";" << mathLibPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
     vcxFile << "      <LanguageStandard>stdcpp20</LanguageStandard>\n";
     vcxFile << "      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>\n";
     vcxFile << "      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>\n"; // MDd
@@ -1478,7 +1479,7 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
     //vcxFile << "      <Optimization>MaxSpeed</Optimization>\n";
     vcxFile << "      <Optimization>Disabled</Optimization>\n";
     vcxFile << "      <PreprocessorDefinitions>NDEBUG;EXPORT_SCRIPT_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>\n";
-    vcxFile << "      <AdditionalIncludeDirectories>" << contextPath.string() << ";" << scriptPath.string() << ";" << mathLibPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
+    vcxFile << "      <AdditionalIncludeDirectories>" << projectDirPath.string() << ";" << contextPath.string() << ";" << scriptPath.string() << ";" << mathLibPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
     vcxFile << "      <LanguageStandard>stdcpp20</LanguageStandard>\n";
     vcxFile << "      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>\n";
     vcxFile << "      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>\n"; // MD
@@ -1583,11 +1584,11 @@ void Cho::FileSystem::ScriptProject::GenerateScriptFiles(const std::string& scri
     std::filesystem::path outputDir = "GameProjects/" + ConvertString(m_sProjectName);
 
     // テンプレートファイルのパス
-    //std::filesystem::path templateHeader = "Cho/Resources/EngineAssets/TemplateScript/TemplateScript.h";
+    std::filesystem::path templateHeader = "Cho/Resources/EngineAssets/TemplateScript/TemplateScript.h";
     std::filesystem::path templateCpp = "Cho/Resources/EngineAssets/TemplateScript/TemplateScript.cpp";
 
     // 出力ファイル名
-    //std::string headerFileName = scriptName + ".h";
+    std::string headerFileName = scriptName + ".h";
     std::string cppFileName = scriptName + ".cpp";
 
     // ヘルパー関数：テンプレートの置換
@@ -1598,7 +1599,7 @@ void Cho::FileSystem::ScriptProject::GenerateScriptFiles(const std::string& scri
         };
 
     // ヘッダーファイル生成
-    /*{
+    {
         std::ifstream in(templateHeader);
         if (!in)
         {
@@ -1610,7 +1611,7 @@ void Cho::FileSystem::ScriptProject::GenerateScriptFiles(const std::string& scri
 
         std::ofstream out(outputDir / headerFileName);
         out << replaced;
-    }*/
+    }
 
     // CPPファイル生成
     {

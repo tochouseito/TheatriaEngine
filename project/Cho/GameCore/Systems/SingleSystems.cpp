@@ -59,17 +59,6 @@ void TransformUpdateSystem::UpdateComponent(Entity e, TransformComponent& transf
 	// 度数からラジアンに変換
 	Vector3 radians = ChoMath::DegreesToRadians(transform.degrees);
 
-	//// 変更がなければreturn
-	//if (transform.translation == transform.prePos &&
-	//	radians == transform.preRot &&
-	//	transform.scale == transform.preScale)
-	//{
-	//	if (transform.parent && *transform.parent == transform.preParent)
-	//	{
-	//		return;
-	//	}
-	//}
-
 	// 差分計算
 	Vector3 diff = radians - transform.preRot;
 
@@ -91,13 +80,9 @@ void TransformUpdateSystem::UpdateComponent(Entity e, TransformComponent& transf
 	transform.prePos = transform.translation;
 	transform.preRot = radians;
 	transform.preScale = transform.scale;
-	/*if (transform.parent)
-	{
-		transform.preParent = *transform.parent;
-	}*/
 
 	// 親があれば親のワールド行列を掛ける
-	if (transform.parent)
+	if (transform.parent.has_value())
 	{
 		transform.matWorld = ChoMath::Multiply(transform.matWorld, m_pECS->GetComponent<TransformComponent>(transform.parent.value())->matWorld);
 	}
@@ -173,9 +158,6 @@ void TransformFinalizeSystem::Finalize(Entity entity,TransformComponent& transfo
 
 void CameraUpdateSystem::UpdateMatrix(TransformComponent& transform, CameraComponent& camera)
 { 
-	// アフィン変換
-	transform.matWorld = ChoMath::MakeAffineMatrix(transform.scale, transform.rotation, transform.translation);
-
 	TransferMatrix(transform, camera);
 }
 
@@ -278,6 +260,7 @@ void ScriptGenerateInstanceSystem::InstanceGenerate(ScriptComponent& script)
 	script.onCollisionExitFunc = [scriptInstance](GameObject& other) {
 		scriptInstance->OnCollisionExit(other);
 		};
+	script.scriptInstance = scriptInstance;
 	script.isActive = true;
 	Log::Write(LogLevel::Info, "Script loaded: " + script.scriptName);
 }
@@ -337,6 +320,7 @@ void ScriptFinalizeSystem::FinalizeScript(ScriptComponent& script)
 	{
 		// スクリプトのCleanup関数を呼び出す
 		script.cleanupFunc();
+		script.scriptInstance = nullptr;
 	}
 	catch (const std::exception& e)
 	{

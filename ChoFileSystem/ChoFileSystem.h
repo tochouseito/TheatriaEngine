@@ -1,6 +1,6 @@
-#pragma once
+ï»¿#pragma once
 
-#define WIN32_LEAN_AND_MEAN             // Windows ƒwƒbƒ_[‚©‚ç‚Ù‚Æ‚ñ‚Çg—p‚³‚ê‚Ä‚¢‚È‚¢•”•ª‚ğœŠO‚·‚é
+#define WIN32_LEAN_AND_MEAN             // Windows ãƒ˜ãƒƒãƒ€ãƒ¼ã‹ã‚‰ã»ã¨ã‚“ã©ä½¿ç”¨ã•ã‚Œã¦ã„ãªã„éƒ¨åˆ†ã‚’é™¤å¤–ã™ã‚‹
 #define NOMINMAX
 
 #include <string>
@@ -12,25 +12,25 @@
 //{
 //    namespace FileSystem
 //    {
-//        // ƒeƒLƒXƒgƒtƒ@ƒCƒ‹“Ç‚İ‚İ
+//        // ãƒ†ã‚­ã‚¹ãƒˆãƒ•ã‚¡ã‚¤ãƒ«èª­ã¿è¾¼ã¿
 //        std::optional<std::string> ReadText(const std::filesystem::path& path);
 //
-//        // ƒeƒLƒXƒgƒtƒ@ƒCƒ‹•Û‘¶
+//        // ãƒ†ã‚­ã‚¹ãƒˆãƒ•ã‚¡ã‚¤ãƒ«ä¿å­˜
 //        bool WriteText(const std::filesystem::path& path, const std::string& text);
 //
-//        // ƒoƒCƒiƒŠ“Ç‚İ‚İ
+//        // ãƒã‚¤ãƒŠãƒªèª­ã¿è¾¼ã¿
 //        std::optional<std::vector<uint8_t>> ReadBinary(const std::filesystem::path& path);
 //
-//        // ƒoƒCƒiƒŠ•Û‘¶
+//        // ãƒã‚¤ãƒŠãƒªä¿å­˜
 //        bool WriteBinary(const std::filesystem::path& path, const std::vector<uint8_t>& data);
 //
-//        // ƒtƒ@ƒCƒ‹‘¶İŠm”F
+//        // ãƒ•ã‚¡ã‚¤ãƒ«å­˜åœ¨ç¢ºèª
 //        bool Exists(const std::filesystem::path& path);
 //
-//        // ƒtƒHƒ‹ƒ_ì¬ie‚àŠÜ‚ß‚Äì‚éj
+//        // ãƒ•ã‚©ãƒ«ãƒ€ä½œæˆï¼ˆè¦ªã‚‚å«ã‚ã¦ä½œã‚‹ï¼‰
 //        bool CreateDirectory(const std::filesystem::path& path);
 //
-//        // ƒfƒBƒŒƒNƒgƒŠ“à‚Ìƒtƒ@ƒCƒ‹—ñ‹“
+//        // ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªå†…ã®ãƒ•ã‚¡ã‚¤ãƒ«åˆ—æŒ™
 //        std::vector<std::filesystem::path> ListFiles(const std::filesystem::path& directory, bool recursive = false);
 //    }
 //}

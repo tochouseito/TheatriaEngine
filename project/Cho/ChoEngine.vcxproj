@@ -740,8 +740,8 @@
       <EnableUAC>false</EnableUAC>
       <AdditionalLibraryDirectories>$(SolutionDir)..\..\generated\outputs\$(Configuration)\;$(ProjectDir)Externals\assimp\lib\Debug</AdditionalLibraryDirectories>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
-      <AdditionalDependencies>dxcompiler.lib;d3dcompiler.lib;dxguid.lib;d3d12.lib;dxgi.lib;ChoMath.lib;dinput8.lib;xinput.lib;xaudio2.lib;assimp-vc143-mdd.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalOptions>/ignore:4049 /ignore:4048 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>dxcompiler.lib;d3dcompiler.lib;dxguid.lib;d3d12.lib;dxgi.lib;ChoMath.lib;dinput8.lib;xinput.lib;xaudio2.lib;assimp-vc143-mtd.lib;zlibstaticd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4049 /ignore:4048 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxcompiler.dll" "$(TargetDir)dxcompiler.dll"
@@ -765,7 +765,7 @@ xcopy "$(SolutionDir)Cho\Core\Utility\EffectStruct.h" "$(TargetDir)Cho\Core\Util
 xcopy "$(SolutionDir)Cho\ChoEngineAPI.h" "$(TargetDir)Cho\" /E /I /Y
 xcopy "$(SolutionDir)Cho\APIExportsMacro.h" "$(TargetDir)Cho\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Engine\Engine.h" "$(TargetDir)Cho\Engine\" /E /I /Y
-xcopy "$(SolutionDir)Cho\GameCore\GameObject" "$(TargetDir)Cho\GameCore\GameObject" /E /I /Y
+xcopy "$(SolutionDir)Cho\GameCore\GameObject\GameObject.h" "$(TargetDir)Cho\GameCore\GameObject" /E /I /Y
 xcopy "$(SolutionDir)Cho\GameCore\ObjectContainer" "$(TargetDir)Cho\GameCore\ObjectContainer" /E /I /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -793,8 +793,8 @@ xcopy "$(SolutionDir)Cho\GameCore\ObjectContainer" "$(TargetDir)Cho\GameCore\Obj
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <AdditionalLibraryDirectories>$(SolutionDir)..\..\generated\outputs\$(Configuration)\;$(ProjectDir)Externals\assimp\lib\Release</AdditionalLibraryDirectories>
-      <AdditionalDependencies>dxcompiler.lib;d3dcompiler.lib;dxguid.lib;d3d12.lib;dxgi.lib;ChoMath.lib;dinput8.lib;xinput.lib;xaudio2.lib;assimp-vc143-md.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalOptions>/ignore:4049 /ignore:4048 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>dxcompiler.lib;d3dcompiler.lib;dxguid.lib;d3d12.lib;dxgi.lib;ChoMath.lib;dinput8.lib;xinput.lib;xaudio2.lib;assimp-vc143-mt.lib;zlibstatic.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4049 /ignore:4048 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxcompiler.dll" "$(TargetDir)dxcompiler.dll"
@@ -818,7 +818,7 @@ xcopy "$(SolutionDir)Cho\Core\Utility\EffectStruct.h" "$(TargetDir)Cho\Core\Util
 xcopy "$(SolutionDir)Cho\ChoEngineAPI.h" "$(TargetDir)Cho\" /E /I /Y
 xcopy "$(SolutionDir)Cho\APIExportsMacro.h" "$(TargetDir)Cho\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Engine\Engine.h" "$(TargetDir)Cho\Engine\" /E /I /Y
-xcopy "$(SolutionDir)Cho\GameCore\GameObject" "$(TargetDir)Cho\GameCore\GameObject" /E /I /Y
+xcopy "$(SolutionDir)Cho\GameCore\GameObject\GameObject.h" "$(TargetDir)Cho\GameCore\GameObject" /E /I /Y
 xcopy "$(SolutionDir)Cho\GameCore\ObjectContainer" "$(TargetDir)Cho\GameCore\ObjectContainer" /E /I /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>

@@ -3,6 +3,7 @@
 #include "APIExportsMacro.h"
 #include "Externals/ChoMath/ChoMath.h"
 #include <variant>
+#include <optional>
 using GameParameterVariant = std::variant<int, float, bool, Vector3>;
 class GameObject;
 class ChoEngine;
@@ -42,5 +43,14 @@ namespace ChoSystem
 	CHO_API GameObject& CloneGameObject(std::optional<uint32_t> id, Vector3 generatePosition);
 	// ゲームオブジェクト削除
 	CHO_API void DestroyGameObject(std::optional<uint32_t> id);
+	// デルタタイム取得
+	CHO_API float DeltaTime();
+
+	// SceneManager
+	struct SceneManagerAPI
+	{
+		void LoadScene(const std::string& sceneName);
+	};
+	CHO_API extern SceneManagerAPI sceneManager;
 #endif
 }

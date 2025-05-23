@@ -1,5 +1,6 @@
 #pragma once
 #include <cmath>
+#include "Matrix4.h"
 
 /// <summary>
 /// クォータニオン構造体
@@ -195,4 +196,43 @@ public:// 静的メンバ
         }
         return result;
     }
+
+	// 回転行列からクォータニオンを生成
+	static Quaternion FromMatrix(const Matrix4& m)
+	{
+        Quaternion q;
+        float trace = m.m[0][0] + m.m[1][1] + m.m[2][2]; // 行列のトレース（対角和）
+
+        if (trace > 0.0f)
+        {
+            float s = sqrtf(trace + 1.0f) * 2.0f; // s = 4 * qw
+            q.w = 0.25f * s;
+            q.x = (m.m[2][1] - m.m[1][2]) / s;
+            q.y = (m.m[0][2] - m.m[2][0]) / s;
+            q.z = (m.m[1][0] - m.m[0][1]) / s;
+        }else if (m.m[0][0] > m.m[1][1] && m.m[0][0] > m.m[2][2])
+        {
+            float s = sqrtf(1.0f + m.m[0][0] - m.m[1][1] - m.m[2][2]) * 2.0f; // s = 4 * qx
+        q.w = (m.m[2][1] - m.m[1][2]) / s;
+        q.x = 0.25f * s;
+        q.y = (m.m[0][1] + m.m[1][0]) / s;
+        q.z = (m.m[0][2] + m.m[2][0]) / s;
+        } else if (m.m[1][1] > m.m[2][2])
+        {
+        float s = sqrtf(1.0f + m.m[1][1] - m.m[0][0] - m.m[2][2]) * 2.0f; // s = 4 * qy
+        q.w = (m.m[0][2] - m.m[2][0]) / s;
+        q.x = (m.m[0][1] + m.m[1][0]) / s;
+        q.y = 0.25f * s;
+        q.z = (m.m[1][2] + m.m[2][1]) / s;
+        } else
+        {
+        float s = sqrtf(1.0f + m.m[2][2] - m.m[0][0] - m.m[1][1]) * 2.0f; // s = 4 * qz
+        q.w = (m.m[1][0] - m.m[0][1]) / s;
+        q.x = (m.m[0][2] + m.m[2][0]) / s;
+        q.y = (m.m[1][2] + m.m[2][1]) / s;
+        q.z = 0.25f * s;
+        }
+        q.Normalize();
+        return q;
+	}
 };

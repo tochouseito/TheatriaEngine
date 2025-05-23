@@ -183,18 +183,19 @@ struct MeshRendererComponent : public IComponentTag
 };
 
 // スクリプトコンポーネント
+class IScript;
 struct ScriptComponent : public IComponentTag
 {
 	std::string scriptName = "";								// スクリプト名
-	std::optional<ObjectID> objectID = std::nullopt;	// スクリプトのオブジェクトID
-	//std::optional<Entity> entity = std::nullopt;				// スクリプトのエンティティ
-	using ScriptFunc = std::function<void()>; // スクリプト関数型
+	std::optional<ObjectID> objectID = std::nullopt;			// スクリプトのオブジェクトID
+	using ScriptFunc = std::function<void()>;					// スクリプト関数型
 
+	IScript* scriptInstance = nullptr;							// スクリプトインスタンス
 	ScriptFunc startFunc;										// Start関数
 	ScriptFunc updateFunc;										// Update関数
 	std::function<void()> cleanupFunc;							// 解放関数
 
-	std::function<void(GameObject& other)> onCollisionEnterFunc;	// 衝突開始関数
+	std::function<void(GameObject& other)> onCollisionEnterFunc;// 衝突開始関数
 	std::function<void(GameObject& other)> onCollisionStayFunc;	// 衝突中関数
 	std::function<void(GameObject& other)> onCollisionExitFunc;	// 衝突終了関数
 
