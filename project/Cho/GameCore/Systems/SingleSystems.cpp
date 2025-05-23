@@ -260,6 +260,7 @@ void ScriptGenerateInstanceSystem::InstanceGenerate(ScriptComponent& script)
 	script.onCollisionExitFunc = [scriptInstance](GameObject& other) {
 		scriptInstance->OnCollisionExit(other);
 		};
+	script.scriptInstance = scriptInstance;
 	script.isActive = true;
 	Log::Write(LogLevel::Info, "Script loaded: " + script.scriptName);
 }
@@ -319,6 +320,7 @@ void ScriptFinalizeSystem::FinalizeScript(ScriptComponent& script)
 	{
 		// スクリプトのCleanup関数を呼び出す
 		script.cleanupFunc();
+		script.scriptInstance = nullptr;
 	}
 	catch (const std::exception& e)
 	{

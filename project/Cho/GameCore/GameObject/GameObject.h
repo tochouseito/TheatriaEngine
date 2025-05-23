@@ -63,6 +63,21 @@ public:
 	void SetActive(bool active) noexcept { m_Active = active; }
 	// オブジェクトを無効にする
 	void SetInactive() noexcept { m_Active = false; }
+	// スクリプトのインスタンスを取得
+	template<typename T>
+	T* GetScriptInstance() const noexcept
+	{
+		// TがIScriptを継承しているか確認
+		static_assert(std::is_base_of<IScript, T>::value, "T must be derived from IScript");
+		if (m_ECS)
+		{
+			if (ScriptComponent* script = GetScriptComponent())
+			{
+				return static_cast<T*>(script->scriptInstance);
+			}
+		}
+		return nullptr;
+	}
 
 	TransformAPI transform;			// TransformAPI
 	CameraAPI camera;				// CameraAPI
@@ -109,6 +124,8 @@ private:
 		ui.Initialize(m_Entity, m_ECS, m_ObjectContainer, m_ResourceManager);
 		input.Intialize(m_InputManager);
 	}
+	// スクリプトインスタンス取得関数補助
+	ScriptComponent* GetScriptComponent() const noexcept;
 public:
 	// コンストラクタ
 	GameObject(ObjectContainer* objectContainer, InputManager* input, ResourceManager* resourceManager, ECSManager* ecs, const Entity& entity, const std::wstring& name, const ObjectType& type);

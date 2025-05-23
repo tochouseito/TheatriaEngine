@@ -98,6 +98,11 @@ void GameObject::SetName(const std::wstring& name) noexcept
 	}
 }
 
+ScriptComponent* GameObject::GetScriptComponent() const noexcept
+{
+	return m_ECS->GetComponent<ScriptComponent>(m_Entity);
+}
+
 GameObject::GameObject(ObjectContainer* objectContainer, InputManager* input, ResourceManager* resourceManager, ECSManager* ecs, const Entity& entity, const std::wstring& name, const ObjectType& type) :
 	m_ObjectContainer(objectContainer), m_InputManager(input), m_ResourceManager(resourceManager), m_ECS(ecs), m_Entity(entity), m_Type(type)
 {

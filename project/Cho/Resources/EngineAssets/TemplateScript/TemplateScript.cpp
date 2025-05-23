@@ -1,24 +1,14 @@
-#include "IScript.h"
+#include "{ SCRIPT_NAME }.h"
 using namespace ChoSystem;
 
-class { SCRIPT_NAME } : public IScript
+void { SCRIPT_NAME }::Start()
 {
-public:
+    // 初期化処理
+}
 
-    { SCRIPT_NAME }(GameObject& object) : IScript(object)
-    {
-	    // コンストラクタ
-    }
-
-    void Start() override
-    {
-        // 初期化処理
-    }
-
-    void Update() override
-    {
-        // 毎フレーム処理
-    }
-};
+void { SCRIPT_NAME }::Update()
+{
+    // 毎フレーム処理
+}
 
 REGISTER_SCRIPT_FACTORY({ SCRIPT_NAME });

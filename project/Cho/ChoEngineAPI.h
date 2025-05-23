@@ -45,5 +45,12 @@ namespace ChoSystem
 	CHO_API void DestroyGameObject(std::optional<uint32_t> id);
 	// デルタタイム取得
 	CHO_API float DeltaTime();
+
+	// SceneManager
+	struct SceneManagerAPI
+	{
+		void LoadScene(const std::string& sceneName);
+	};
+	CHO_API extern SceneManagerAPI sceneManager;
 #endif
 }
