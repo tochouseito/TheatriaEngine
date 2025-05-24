@@ -8,13 +8,14 @@ using namespace Cho;
 void TextureManager::LoadTextureFile(const fs::path& filePath)
 {
     // ファイル名部分のみ取得（ディレクトリパスを除去）
-    std::wstring fileName = filePath.stem().wstring();
+    std::wstring fileName = filePath.filename().wstring();
+	std::wstring textureName = filePath.stem().wstring();
 
     // テクスチャファイルの形式をチェック（.dds, .png, .jpg など）
     if (fileName.ends_with(L".dds") || fileName.ends_with(L".png") || fileName.ends_with(L".jpg"))
     {
         // 読み込み済みテクスチャを検索
-        if (m_TextureNameContainer.contains(fileName))
+        if (m_TextureNameContainer.contains(textureName))
         {
             return; // 既に読み込み済みならスキップ
         }
@@ -67,7 +68,7 @@ void TextureManager::LoadTextureFile(const fs::path& filePath)
 
         // TextureData作成
         TextureData texData;
-        texData.name = fileName;// テクスチャ名
+        texData.name = textureName;// テクスチャ名
         texData.metadata = metadata;// メタデータ
         // テクスチャバッファの作成
         D3D12_RESOURCE_DESC resourceDesc = {};
@@ -85,7 +86,7 @@ void TextureManager::LoadTextureFile(const fs::path& filePath)
             mipImages
         );
         // テクスチャデータを追加
-        m_TextureNameContainer[fileName] = static_cast<uint32_t>(m_Textures.push_back(std::move(texData)));
+        m_TextureNameContainer[textureName] = static_cast<uint32_t>(m_Textures.push_back(std::move(texData)));
     }
 }
 

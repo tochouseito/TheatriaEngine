@@ -96,13 +96,35 @@ public:
 		return index;
 	}
 	template<typename T>
-	uint32_t CreateVertexBuffer(const UINT& numElements)
+	uint32_t CreateVertexBuffer(const UINT& numElements,bool isSkinning = false)
 	{
 		// 頂点バッファの生成
 		std::unique_ptr<VertexBuffer<T>> buffer = std::make_unique<VertexBuffer<T>>();
-		buffer->CreateVertexBufferResource(m_Device, numElements);
+		buffer->CreateVertexBufferResource(m_Device, numElements,isSkinning);
 		// CreateVBV
 		buffer->CreateVBV();
+		if (isSkinning)
+		{
+			// スキニング用SRVを作成
+			D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+			srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+			srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+			srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+			srvDesc.Buffer.FirstElement = 0;
+			srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+			srvDesc.Buffer.NumElements = buffer->GetNumElements();
+			srvDesc.Buffer.StructureByteStride = buffer->GetStructureByteStride();
+			buffer->CreateSRV(m_Device, srvDesc, m_SUVDescriptorHeap.get());
+			// スキニング用UAVを作成
+			D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
+			uavDesc.Format = DXGI_FORMAT_UNKNOWN;
+			uavDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
+			uavDesc.Buffer.FirstElement = 0;
+			uavDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
+			uavDesc.Buffer.NumElements = buffer->GetNumElements();
+			uavDesc.Buffer.StructureByteStride = buffer->GetStructureByteStride();
+			buffer->CreateUAV(m_Device, uavDesc, m_SUVDescriptorHeap.get());
+		}
 		uint32_t index = static_cast<uint32_t>(m_VertexBuffers.push_back(std::move(buffer)));
 		return index;
 	}

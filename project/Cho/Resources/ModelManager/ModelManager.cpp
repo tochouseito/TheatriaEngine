@@ -40,7 +40,7 @@ bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 		Log::Write(LogLevel::Assert, "No Meshes");// メッシュがないのは対応しない
 	}
 	// SceneのRootNodeを読んでシーン全体の階層構造を作り上げる
-	modelData.rootNode = ReadNode(scene->mRootNode);
+	modelData.rootNode = ReadNode(scene->mRootNode,"");
 	// 名前取得
 	modelData.name = filePath.stem().wstring();
 	modelData.name = GenerateUniqueName(modelData.name, m_ModelNameContainer);
@@ -123,7 +123,7 @@ bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 				{
 					std::filesystem::path texturePath{ path.C_Str() };
 					// ディレクトリパス、拡張子を除去
-					materialData.diffuseTexPath = texturePath.stem().string();
+					materialData.textureName = texturePath.stem().string();
 				}
 			}
 			// MaterialDataを追加
@@ -209,12 +209,13 @@ bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 			/*InverseBindPoseMatrixの保存領域を作成*/
 			skinCluster.inverseBindPoseMatrices.resize(modelData.skeleton.joints.size());
 			std::generate(skinCluster.inverseBindPoseMatrices.begin(), skinCluster.inverseBindPoseMatrices.end(), []() { return ChoMath::MakeIdentity4x4(); });
+			modelData.skinCluster = skinCluster;
 
 			for (uint32_t boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex)
 			{
 				aiBone* bone = mesh->mBones[boneIndex];// AssimpではJointをBoneと呼んでいる
 				std::string jointName = bone->mName.C_Str();
-				JointWeightData& jointWeightData = modelData.meshes[meshIndex].skinClusterData[jointName];
+				JointWeightData& jointWeightData = meshData.skinClusterData[jointName];
 
 				aiMatrix4x4 bindPoseMatrixAssimp = bone->mOffsetMatrix.Inverse();// BindPoseMatrixに戻す
 				aiVector3D scale, translate;
@@ -233,7 +234,7 @@ bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 			}
 			// Influence作成
 			/*ModelDataのSkinCluster情報を解析してInfluenceの中身を埋める*/
-			for (const auto& jointWeight : modelData.meshes[meshIndex].skinClusterData)
+			for (const auto& jointWeight : meshData.skinClusterData)
 			{
 				// ModelのSkinClusterの情報を解析
 				auto it = modelData.skeleton.jointMap.find(jointWeight.first);// jointWeight.firstはjoint名なので、skeletonに対象となるjointが含まれているか判断
@@ -821,7 +822,7 @@ void ModelManager::CreateCylinder()
 }
 
 
-Node ModelManager::ReadNode(aiNode* node)
+Node ModelManager::ReadNode(aiNode* node,const std::string& parentName)
 {
 	Node result;
 	Node result2;
@@ -842,11 +843,12 @@ Node ModelManager::ReadNode(aiNode* node)
 	result.transform.translation = { -translate.x,translate.y,translate.z };// x軸を反転
 	result.localMatrix = ChoMath::MakeAffineMatrix(result.transform.scale, result.transform.rotation, result.transform.translation);
 	result.name = node->mName.C_Str();// Node名を格納
+	result.parentName = parentName;// 親Node名を格納
 	result.children.resize(node->mNumChildren);// 子供の数だけ確保
 	for (uint32_t childIndex = 0; childIndex < node->mNumChildren; ++childIndex)
 	{
 		// 再帰的に読んで階層構造を作っていく
-		result.children[childIndex] = ReadNode(node->mChildren[childIndex]);
+		result.children[childIndex] = ReadNode(node->mChildren[childIndex],result.name);
 	}
 	return result;
 }
@@ -887,6 +889,16 @@ void ModelManager::AddModelData(ModelData& modelData)
 		// コピー
 		vertexBuffer->MappedDataCopy(mesh.vertices);
 		indexBuffer->MappedDataCopy(mesh.indices);
+
+		if (modelData.isBone)
+		{
+			mesh.skinInfoBufferIndex = m_pResourceManager->CreateConstantBuffer<uint32_t>();
+			ConstantBuffer<uint32_t>* skinInfoBuffer = dynamic_cast<ConstantBuffer<uint32_t>*>(m_pResourceManager->GetBuffer<IConstantBuffer>(mesh.skinInfoBufferIndex));
+			// SkinningInformationの初期化
+			uint32_t skinInfo;
+			skinInfo = static_cast<uint32_t>(mesh.vertices.size());
+			skinInfoBuffer->UpdateData(skinInfo);
+		}
 	}
 	// UseTransformのリソースを作成
 	modelData.useTransformBufferIndex = m_pResourceManager->CreateStructuredBuffer<uint32_t>(kUseTransformOffset);

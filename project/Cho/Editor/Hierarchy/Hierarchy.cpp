@@ -3,6 +3,7 @@
 #include "Editor/EditorManager/EditorManager.h"
 #include "EngineCommand/EngineCommand.h"
 #include "EngineCommand/EngineCommands.h"
+#include "Resources/ResourceManager/ResourceManager.h"
 #include "GameCore/GameCore.h"
 #include "Core/ChoLog/ChoLog.h"
 #include <wchar.h>
@@ -21,7 +22,58 @@ void Hierarchy::Window()
 	// 移動を無効にするフラグ
 	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove;
 	ImGui::Begin("Hierarchy", nullptr, windowFlags);
-
+	// ドロップターゲット
+	if (ImGui::BeginDragDropTarget())
+	{
+		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ModelData"))
+		{
+			// ドロップされたModelDataの名前を取得
+			const char* ModelName = static_cast<const char*>(payload->Data);
+			ModelData* modelData = m_EngineCommand->GetResourceManager()->GetModelManager()->GetModelData(ConvertString(ModelName));
+			// メッシュの数分生成
+			for (auto& meshData : modelData->meshes)
+			{
+				// モデルデータからオブジェクトを生成
+				std::unique_ptr<Add3DObjectCommand> add3DObject = std::make_unique<Add3DObjectCommand>();
+				add3DObject->Execute(m_EngineCommand);
+				// 生成したオブジェクト
+				GameObject* object = &m_EngineCommand->GetGameCore()->GetObjectContainer()->GetGameObject(add3DObject->GetObjectID());
+				TransformComponent* transform = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<TransformComponent>(object->GetEntity());
+				// 必要なコンポーネントを付与
+				// メッシュ
+				std::unique_ptr<AddMeshFilterComponent> addMeshComp = std::make_unique<AddMeshFilterComponent>(object->GetEntity());
+				addMeshComp->Execute(m_EngineCommand);
+				MeshFilterComponent* meshFilter = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshFilterComponent>(object->GetEntity());
+				meshFilter->modelName = modelData->name;
+				meshFilter->modelID = m_EngineCommand->GetResourceManager()->GetModelManager()->GetModelDataIndex(meshFilter->modelName);
+				m_EngineCommand->GetResourceManager()->GetModelManager()->RegisterModelUseList(meshFilter->modelID.value(), transform->mapID.value());
+				std::unique_ptr<AddMeshRendererComponent> addRenderComp = std::make_unique<AddMeshRendererComponent>(object->GetEntity());
+				addRenderComp->Execute(m_EngineCommand);
+				//MeshRendererComponent* meshRenderer = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshRendererComponent>(object->GetEntity());
+				// マテリアル
+				if (!meshData.materials.empty())
+				{
+					std::unique_ptr<AddMaterialComponent> addMaterialComp = std::make_unique<AddMaterialComponent>(object->GetEntity());
+					addMaterialComp->Execute(m_EngineCommand);
+					MaterialComponent* material = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<MaterialComponent>(object->GetEntity());
+					if (!meshData.materials[0].textureName.empty())
+					{
+						material->enableTexture = true;
+						material->textureName = ConvertString(meshData.materials[0].textureName);
+						material->textureID = m_EngineCommand->GetResourceManager()->GetTextureManager()->GetTextureID(material->textureName);
+					}
+				}
+				// アニメーション
+				if (!modelData->animations.empty())
+				{
+					std::unique_ptr<AddAnimationComponent> addAnimationComp = std::make_unique<AddAnimationComponent>(object->GetEntity());
+					addAnimationComp->Execute(m_EngineCommand);
+					//AnimationComponent* animation = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<AnimationComponent>(object->GetEntity());
+				}
+			}
+		}
+		ImGui::EndDragDropTarget();
+	}
 	// 現在のシーンのオブジェクトリストを取得
 	// シーンを取得
 	ScenePrefab* currentScene = m_EngineCommand->GetGameCore()->GetSceneManager()->GetCurrentScene();

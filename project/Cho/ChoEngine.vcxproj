@@ -294,6 +294,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="APIExportsMacro.h" />
+    <ClInclude Include="Core\Utility\AnimationStruct.h" />
     <ClInclude Include="Resources\AudioManager\AudioManager.h" />
     <ClInclude Include="ChoEngineAPI.h" />
     <ClInclude Include="Core\ChoLog\ChoLog.h" />

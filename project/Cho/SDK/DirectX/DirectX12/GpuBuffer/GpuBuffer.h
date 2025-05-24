@@ -272,6 +272,10 @@ public:
 			return m_MappedData[0];
 		}
 	}
+	std::span<T> GetMappedData() const
+	{
+		return m_MappedData;
+	}
 	// ディスクリプタハンドルを取得
 	D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCpuHandle() const override { return m_SRVCpuHandle; }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGpuHandle() const override { return m_SRVGpuHandle; }

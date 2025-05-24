@@ -613,3 +613,37 @@ bool AddAudioComponent::Undo(EngineCommand* edit)
 	edit;
 	return false;
 }
+
+bool AddAnimationComponent::Execute(EngineCommand* edit)
+{
+	// AnimationComponentを追加
+	MeshFilterComponent* meshFilter = edit->m_GameCore->GetECSManager()->GetComponent<MeshFilterComponent>(m_Entity);
+	if (!meshFilter) { return false; }
+	ModelData* model = edit->m_ResourceManager->GetModelManager()->GetModelData(meshFilter->modelID.value());
+	if (!model) { return false; }
+	if (model->animations.empty()) { return false; }
+	AnimationComponent* animation = edit->m_GameCore->GetECSManager()->AddComponent<AnimationComponent>(m_Entity);
+	if (!animation) { return false; }
+	if (model->isBone)
+	{
+		animation->skeleton = model->skeleton;
+		animation->skinCluster = model->skinCluster;
+		// Resourceの生成
+		animation->paletteBufferIndex = edit->m_ResourceManager->CreateStructuredBuffer<ConstBufferDataWell>(static_cast<UINT>(animation->skeleton->joints.size()));
+		//StructuredBuffer<ConstBufferDataWell>* paletteBuffer = dynamic_cast<StructuredBuffer<ConstBufferDataWell>*>(edit->m_ResourceManager->GetBuffer<IStructuredBuffer>(animation->paletteBufferIndex));
+		animation->influenceBufferIndex = edit->m_ResourceManager->CreateStructuredBuffer<ConstBufferDataVertexInfluence>(static_cast<UINT>(model->meshes[0].vertices.size()));
+		StructuredBuffer<ConstBufferDataVertexInfluence>* influenceBuffer = dynamic_cast<StructuredBuffer<ConstBufferDataVertexInfluence>*>(edit->m_ResourceManager->GetBuffer<IStructuredBuffer>(animation->influenceBufferIndex));
+		std::span<ConstBufferDataVertexInfluence> influenceSpan = influenceBuffer->GetMappedData();
+		std::memset(influenceSpan.data(), 0, sizeof(ConstBufferDataVertexInfluence) * influenceSpan.size());
+		// OutputVertexBufferを生成
+		animation->skinningBufferIndex = edit->m_ResourceManager->CreateVertexBuffer<VertexData>(static_cast<UINT>(model->meshes[0].vertices.size()),true);
+	}
+	
+	return true;
+}
+
+bool AddAnimationComponent::Undo(EngineCommand* edit)
+{
+	edit;
+	return false;
+}

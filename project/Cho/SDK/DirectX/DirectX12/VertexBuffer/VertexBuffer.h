@@ -17,17 +17,36 @@ public:
 	// Destructor
 	virtual ~IVertexBuffer() = default;
 	// リソース作成
-	virtual void CreateVertexBufferResource(ID3D12Device* device, const UINT& numElements) = 0;
+	virtual void CreateVertexBufferResource(ID3D12Device* device, const UINT& numElements, bool isSkinningVertex) = 0;
 	// View作成
 	virtual bool CreateVBV() = 0;
 	// SRV作成
-	virtual bool CreateSRV() = 0;
+	virtual bool CreateSRV(ID3D12Device8* device, D3D12_SHADER_RESOURCE_VIEW_DESC& srvDesc, DescriptorHeap* pDescriptorHeap) = 0;
 	// UAV作成
-	virtual bool CreateUAV() = 0;
+	virtual bool CreateUAV(ID3D12Device8* device, D3D12_UNORDERED_ACCESS_VIEW_DESC& uavDesc, DescriptorHeap* pDescriptorHeap, bool useCounter = false) = 0;
 	// 頂点バッファビューを取得
 	virtual D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() = 0;
+	// ディスクリプタハンドルを取得
+	D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCpuHandle() const { return m_SRVCpuHandle; }
+	D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGpuHandle() const { return m_SRVGpuHandle; }
+	// ディスクリプタハンドルインデックスを取得
+	std::optional<uint32_t> GetSRVHandleIndex() const { return m_SRVHandleIndex; }
+	// UAVディスクリプタハンドルを取得
+	D3D12_CPU_DESCRIPTOR_HANDLE GetUAVCpuHandle() const { return m_UAVCpuHandle; }
+	D3D12_GPU_DESCRIPTOR_HANDLE GetUAVGpuHandle() const { return m_UAVGpuHandle; }
+	// UAVディスクリプタハンドルインデックスを取得
+	std::optional<uint32_t> GetUAVHandleIndex() const { return m_UAVHandleIndex; }
 protected:
-
+	// ディスクリプタハンドル
+	D3D12_CPU_DESCRIPTOR_HANDLE m_SRVCpuHandle = {};
+	D3D12_GPU_DESCRIPTOR_HANDLE m_SRVGpuHandle = {};
+	// ディスクリプタハンドルインデックス
+	std::optional<uint32_t> m_SRVHandleIndex = std::nullopt;
+	// UAVディスクリプタハンドル
+	D3D12_CPU_DESCRIPTOR_HANDLE m_UAVCpuHandle = {};
+	D3D12_GPU_DESCRIPTOR_HANDLE m_UAVGpuHandle = {};
+	// UAVディスクリプタハンドルインデックス
+	std::optional<uint32_t> m_UAVHandleIndex = std::nullopt;
 };
 
 template<typename T>
@@ -50,23 +69,29 @@ public:
 		m_MappedData = std::span<T>{};
 	}
 	// リソースを作成
-	void CreateVertexBufferResource(ID3D12Device* device, const UINT& numElements) override
+	void CreateVertexBufferResource(ID3D12Device* device, const UINT& numElements,bool isSkinningVertex) override
 	{
+		D3D12_HEAP_TYPE heapType = isSkinningVertex ? D3D12_HEAP_TYPE_DEFAULT : D3D12_HEAP_TYPE_UPLOAD;
+		D3D12_RESOURCE_STATES resourceState = isSkinningVertex ? D3D12_RESOURCE_STATE_COMMON : D3D12_RESOURCE_STATE_GENERIC_READ;
+		D3D12_RESOURCE_FLAGS resourceFlag = isSkinningVertex ? D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS : D3D12_RESOURCE_FLAG_NONE;
 		// リソースのサイズ
 		UINT structureByteStride = static_cast<UINT>(sizeof(T));
 		// リソース用のヒープの設定
 		D3D12_HEAP_PROPERTIES heapProperties{};
-		heapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;// UploadHeapを使う
+		heapProperties.Type = heapType;
 		GpuBuffer::CreateBuffer(
 			device, heapProperties, D3D12_HEAP_FLAG_NONE,
-			D3D12_RESOURCE_STATE_GENERIC_READ,
-			D3D12_RESOURCE_FLAG_NONE,
+			resourceState,
+			resourceFlag,
 			numElements, structureByteStride);
-		// マッピング
-		T* mappedData = nullptr;// 一時マップ用
-		GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&mappedData));
-		// マップしたデータをspanに変換
-		m_MappedData = std::span<T>(mappedData, static_cast<size_t>(numElements));
+		if (!isSkinningVertex)
+		{
+			// マッピング
+			T* mappedData = nullptr;// 一時マップ用
+			GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&mappedData));
+			// マップしたデータをspanに変換
+			m_MappedData = std::span<T>(mappedData, static_cast<size_t>(numElements));
+		}
 	}
 	bool CreateVBV() override
 	{
@@ -86,13 +111,84 @@ public:
 		return true;
 	}
 	// スキニング用SRV
-	bool CreateSRV() override
+	bool CreateSRV(ID3D12Device8* device, D3D12_SHADER_RESOURCE_VIEW_DESC& srvDesc, DescriptorHeap* pDescriptorHeap) override
 	{
+		// ヒープがSRVタイプかどうか確認
+		if (pDescriptorHeap->GetType() != D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV)
+		{
+			Log::Write(LogLevel::Assert, "DescriptorHeap is not SRV type");
+			return false;
+		}
+		// リソースがあるかどうか確認
+		if (!GetResource())
+		{
+			Log::Write(LogLevel::Assert, "Resource is null");
+			return false;
+		}
+		// 新しいディスクリプタのインデックスとハンドルを取得
+		// すでにSRVが作成されている場合はインデックスを取得しない
+		if (!m_SRVHandleIndex.has_value())
+		{
+			m_SRVHandleIndex = pDescriptorHeap->Allocate();
+		}
+		// ディスクリプタヒープがいっぱいの場合は警告を出して終了
+		if (!m_SRVHandleIndex.has_value())
+		{
+			Log::Write(LogLevel::Warn, "DescriptorHeap is full");
+			return false;
+		}
+		// CPUハンドルを取得
+		m_SRVCpuHandle = pDescriptorHeap->GetCPUDescriptorHandle(m_SRVHandleIndex.value());
+		// GPUハンドルを取得
+		m_SRVGpuHandle = pDescriptorHeap->GetGPUDescriptorHandle(m_SRVHandleIndex.value());
+		// Viewの生成
+		device->CreateShaderResourceView(
+			GetResource(),
+			&srvDesc,
+			m_SRVCpuHandle
+		);
 		return true;
 	}
 	// スキニング用UAV
-	bool CreateUAV() override
+	bool CreateUAV(ID3D12Device8* device, D3D12_UNORDERED_ACCESS_VIEW_DESC& uavDesc, DescriptorHeap* pDescriptorHeap, bool useCounter = false) override
 	{
+		// ヒープがUAVタイプかどうか確認
+		if (pDescriptorHeap->GetType() != D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV)
+		{
+			Log::Write(LogLevel::Assert, "DescriptorHeap is not UAV type");
+			return false;
+		}
+		// リソースがあるかどうか確認
+		if (!GetResource())
+		{
+			Log::Write(LogLevel::Assert, "Resource is null");
+			return false;
+		}
+		// 新しいディスクリプタのインデックスとハンドルを取得
+		if (!m_UAVHandleIndex.has_value())
+		{
+			m_UAVHandleIndex = pDescriptorHeap->Allocate();
+		}
+		if (!m_UAVHandleIndex.has_value())
+		{
+			Log::Write(LogLevel::Warn, "DescriptorHeap is full");
+			return false;
+		}
+		m_UAVCpuHandle = pDescriptorHeap->GetCPUDescriptorHandle(m_UAVHandleIndex.value());
+		m_UAVGpuHandle = pDescriptorHeap->GetGPUDescriptorHandle(m_UAVHandleIndex.value());
+
+		if (useCounter)
+		{
+			// カウンターを使用する場合はカウンターリソースを作成
+		} else
+		{
+			device->CreateUnorderedAccessView(
+				GetResource(),
+				nullptr,
+				&uavDesc,
+				m_UAVCpuHandle
+			);
+		}
 		return true;
 	}
 	void UpdateData(const T& data,const uint32_t& index)
@@ -109,7 +205,7 @@ public:
 	{
 		if (!m_MappedData.empty())
 		{
-			memcpy(m_MappedData.data(), data.data(), sizeof(T) * GetNumElements());
+			std::memcpy(m_MappedData.data(), data.data(), sizeof(T) * GetNumElements());
 		} else
 		{
 			Log::Write(LogLevel::Assert, "MappedData is null");
