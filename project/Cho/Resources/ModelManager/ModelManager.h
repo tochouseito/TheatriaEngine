@@ -102,7 +102,7 @@ struct ConstBufferDataVertexInfluence
 struct InfluenceData
 {
 	std::vector<ConstBufferDataVertexInfluence> data;
-	uint32_t bufferIndex = 0;
+	//uint32_t bufferIndex = 0;
 };
 struct ConstBufferDataWell
 {
@@ -112,14 +112,14 @@ struct ConstBufferDataWell
 struct PaletteData
 {
 	std::vector<ConstBufferDataWell> data;
-	uint32_t bufferIndex = 0;
+	//uint32_t bufferIndex = 0;
 };
 struct SkinCluster
 {
 	std::vector<Matrix4> inverseBindPoseMatrices;
 	PaletteData paletteData;
 	InfluenceData influenceData;
-	uint32_t skinningBufferIndex = 0;
+	//uint32_t skinningBufferIndex = 0;
 };
 
 // アニメーションデータ構造体
