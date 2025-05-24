@@ -6,10 +6,13 @@
 #include "ChoMath.h"
 #include "Core/ChoLog/ChoLog.h"
 #include "Core/Utility/GenerateUnique.h"
+#include <filesystem>
 using namespace Cho;
 
 bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 {
+	// 対応フォーマット:.fbx, .obj, .gltf, .blend, .mmd
+	// blend, mmdは未対応
 	Log::Write(LogLevel::Info, "LoadModelFile");
 	// 変数の宣言
 	std::string line;// ファイルから読んだ1行を格納するもの
@@ -91,6 +94,172 @@ bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 		}
 		// チェック
 		Log::Write(LogLevel::Assert, "MeshData IndexCount Check", idx == indexCount);
+
+		// マテリアル解析
+		if (scene->HasMaterials())
+		{
+			uint32_t materialIndex = mesh->mMaterialIndex;
+			Log::Write(LogLevel::Assert, "MeshData MaterialIndex Check", materialIndex < scene->mNumMaterials);
+			aiMaterial* aiMat = scene->mMaterials[materialIndex];
+			MaterialData materialData;
+
+			// 拡散色(diffuse Color)の取得
+			aiColor4D diffuseColor;
+			if (AI_SUCCESS == aiMat->Get(AI_MATKEY_COLOR_DIFFUSE, diffuseColor))
+			{
+				materialData.color = { diffuseColor.r, diffuseColor.g, diffuseColor.b, diffuseColor.a };
+			} else
+			{
+				// デフォルトの色を設定
+				materialData.color = { 1.0f, 1.0f, 1.0f, 1.0f }; // 白色
+				Log::Write(LogLevel::Warn, "Material has no diffuse color, using default white.");
+			}
+
+			// 拡散テクスチャ(diffuse Texture)の取得
+			if (aiMat->GetTextureCount(aiTextureType_DIFFUSE) > 0)
+			{
+				aiString path;
+				if (AI_SUCCESS == aiMat->GetTexture(aiTextureType_DIFFUSE, 0, &path))
+				{
+					std::filesystem::path texturePath{ path.C_Str() };
+					// ディレクトリパス、拡張子を除去
+					materialData.diffuseTexPath = texturePath.stem().string();
+				}
+			}
+			// MaterialDataを追加
+			meshData.materials.push_back(materialData);
+		}
+
+		// アニメーション解析
+		if (scene->HasAnimations())
+		{
+			// アニメーションを読み込む
+			for (uint32_t animationIndex = 0; animationIndex < scene->mNumAnimations; ++animationIndex)
+			{
+				AnimationData animation; // 今回作成するアニメーションデータ
+				aiAnimation* animationAssimp = scene->mAnimations[animationIndex];
+				animation.duration = float(animationAssimp->mDuration / animationAssimp->mTicksPerSecond); // アニメーションの時間を秒単位に変換
+
+				// チャネル（ノードのアニメーション情報）の解析
+				for (uint32_t channelIndex = 0; channelIndex < animationAssimp->mNumChannels; ++channelIndex)
+				{
+					aiNodeAnim* nodeAnimationAssimp = animationAssimp->mChannels[channelIndex];
+
+					// ノードのアニメーション情報を取得
+					NodeAnimation& nodeAnimation = animation.nodeAnimations[nodeAnimationAssimp->mNodeName.C_Str()];
+
+					// 平行移動（Translate）のキーフレームを解析
+					for (uint32_t keyIndex = 0; keyIndex < nodeAnimationAssimp->mNumPositionKeys; ++keyIndex)
+					{
+						aiVectorKey& keyAssimp = nodeAnimationAssimp->mPositionKeys[keyIndex];
+						KeyframeVector3 keyframe;
+						keyframe.time = float(keyAssimp.mTime / animationAssimp->mTicksPerSecond); // 時間を秒単位に変換
+						keyframe.value = { -keyAssimp.mValue.x, keyAssimp.mValue.y, keyAssimp.mValue.z }; // 右手座標系を左手座標系に変換
+						nodeAnimation.translate.keyframes.push_back(keyframe);
+					}
+
+					// 回転（Rotate）のキーフレームを解析
+					for (uint32_t keyIndex = 0; keyIndex < nodeAnimationAssimp->mNumRotationKeys; ++keyIndex)
+					{
+						aiQuatKey& keyAssimp = nodeAnimationAssimp->mRotationKeys[keyIndex];
+						KeyframeQuaternion keyframe;
+						keyframe.time = float(keyAssimp.mTime / animationAssimp->mTicksPerSecond); // 時間を秒単位に変換
+						keyframe.value = { keyAssimp.mValue.x, -keyAssimp.mValue.y, -keyAssimp.mValue.z, keyAssimp.mValue.w }; // 右手座標系を左手座標系に変換（y と z を反転）
+						nodeAnimation.rotate.keyframes.push_back(keyframe);
+					}
+
+					// スケール（Scale）のキーフレームを解析
+					for (uint32_t keyIndex = 0; keyIndex < nodeAnimationAssimp->mNumScalingKeys; ++keyIndex)
+					{
+						aiVectorKey& keyAssimp = nodeAnimationAssimp->mScalingKeys[keyIndex];
+						KeyframeScale keyframe;
+						keyframe.time = float(keyAssimp.mTime / animationAssimp->mTicksPerSecond); // 時間を秒単位に変換
+						keyframe.value = { keyAssimp.mValue.x, keyAssimp.mValue.y, keyAssimp.mValue.z }; // スケールはそのまま変換なし
+						nodeAnimation.scale.keyframes.push_back(keyframe);
+					}
+				}
+
+				// アニメーション解析完了後、ModelData に追加
+				modelData.animations.push_back(animation);
+			}
+		}
+		// ボーン解析
+		if (mesh->mNumBones)
+		{
+			modelData.isBone = true;
+			if (scene->mNumMeshes > 1)
+			{
+				// 複数メッシュのボーンは非対応
+				Log::Write(LogLevel::Assert, "Multiple meshes with bones are not supported.");
+			}
+			// ボーンの情報を取得
+			Skeleton skeleton;
+			skeleton.root = CreateJoint(modelData.rootNode, {}, skeleton.joints);
+			// 名前とindexのマッピングを行いアクセスしやすくする
+			for (const Joint& joint : skeleton.joints)
+			{
+				skeleton.jointMap.emplace(joint.name, joint.index);
+			}
+			modelData.skeleton = skeleton;
+			// スキンクラスタの情報を取得
+			SkinCluster skinCluster;
+			skinCluster.paletteData.data.resize(modelData.skeleton.joints.size());
+			skinCluster.influenceData.data.resize(vertexCount);
+			std::memset(skinCluster.influenceData.data.data(), 0, sizeof(ConstBufferDataVertexInfluence) * vertexCount);// Influenceの初期化
+			/*InverseBindPoseMatrixの保存領域を作成*/
+			skinCluster.inverseBindPoseMatrices.resize(modelData.skeleton.joints.size());
+			std::generate(skinCluster.inverseBindPoseMatrices.begin(), skinCluster.inverseBindPoseMatrices.end(), []() { return ChoMath::MakeIdentity4x4(); });
+
+			for (uint32_t boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex)
+			{
+				aiBone* bone = mesh->mBones[boneIndex];// AssimpではJointをBoneと呼んでいる
+				std::string jointName = bone->mName.C_Str();
+				JointWeightData& jointWeightData = modelData.meshes[meshIndex].skinClusterData[jointName];
+
+				aiMatrix4x4 bindPoseMatrixAssimp = bone->mOffsetMatrix.Inverse();// BindPoseMatrixに戻す
+				aiVector3D scale, translate;
+				aiQuaternion rotate;
+				bindPoseMatrixAssimp.Decompose(scale, rotate, translate);// 成分を抽出
+				/*左手系のBindPoseMatrixを作る*/
+				Matrix4 bindPoseMatrix = ChoMath::MakeAffineMatrix(
+					{ scale.x,scale.y,scale.z }, { rotate.x,-rotate.y,-rotate.z,rotate.w }, { -translate.x,translate.y,translate.z });
+				/*InverseBindPoseMatrixにする*/
+				jointWeightData.inverseBindPoseMatrix = Matrix4::Inverse(bindPoseMatrix);
+
+				for (uint32_t weightIndex = 0; weightIndex < bone->mNumWeights; ++weightIndex)
+				{
+					jointWeightData.vertexWeights.push_back({ bone->mWeights[weightIndex].mWeight,bone->mWeights[weightIndex].mVertexId });
+				}
+			}
+			// Influence作成
+			/*ModelDataのSkinCluster情報を解析してInfluenceの中身を埋める*/
+			for (const auto& jointWeight : modelData.meshes[meshIndex].skinClusterData)
+			{
+				// ModelのSkinClusterの情報を解析
+				auto it = modelData.skeleton.jointMap.find(jointWeight.first);// jointWeight.firstはjoint名なので、skeletonに対象となるjointが含まれているか判断
+				if (it == modelData.skeleton.jointMap.end())
+				{
+					// そんな名前のjointは存在しない、なので次に回す
+					continue;
+				}
+				/*(*it).secondにはJointのIndexが入っているので、該当のindexのInverseBindPoseMatrixを代入*/
+				modelData.skinCluster.inverseBindPoseMatrices[(*it).second] = jointWeight.second.inverseBindPoseMatrix;
+				for (const auto& vertexWeight : jointWeight.second.vertexWeights)
+				{
+					auto& currentInfluence = modelData.skinCluster.influenceData.data[vertexWeight.vertexIndex];// 該当のvertexIndexのinfluence情報を参照しておく
+					for (uint32_t index = 0; index < kNumMaxInfluence; ++index)
+					{
+						// 空いてるところに入れる
+						if (currentInfluence.weights[index] == 0.0f)
+						{// weight==0が空いてる状態なので、その場所にweightとjointのIndexを代入
+							currentInfluence.weights[index] = vertexWeight.weight;
+							currentInfluence.jointIndices[index] = (*it).second;
+							break;
+						}
+					}
+				}
+			}
+		}
 		// メッシュデータをモデルデータに追加
 		modelData.meshes.push_back(meshData);
 	}
@@ -680,6 +849,29 @@ Node ModelManager::ReadNode(aiNode* node)
 		result.children[childIndex] = ReadNode(node->mChildren[childIndex]);
 	}
 	return result;
+}
+
+int32_t ModelManager::CreateJoint(const Node& node, const std::optional<int32_t>& parent, std::vector<Joint>& joints)
+{
+	Joint joint;
+	joint.name = node.name;
+	joint.localMatrix = node.localMatrix;
+	joint.skeletonSpaceMatrix = ChoMath::MakeIdentity4x4();
+	joint.transform = node.transform;
+	joint.index = static_cast<int32_t>(joints.size());// 現在登録されている数をIndexに
+	joint.parent = parent;
+	joints.push_back(joint);// SkeletonのJoint列に追加
+	for (const Node& child : node.children)
+	{
+		// 子Jointを作成し、そのIndexを登録
+		int32_t childIndex = CreateJoint(child, joint.index, joints);
+		joints[joint.index].children.push_back(childIndex);
+	}
+	// 自身のIndexを返す
+	return joint.index;
+	/*
+	本来はanimationするNodeのみを対象にしたほうがいいが今は全Nodeを対象にしている
+	*/
 }
 
 // ModelDataの追加

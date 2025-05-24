@@ -8,7 +8,7 @@ using namespace Cho;
 void TextureManager::LoadTextureFile(const fs::path& filePath)
 {
     // ファイル名部分のみ取得（ディレクトリパスを除去）
-    std::wstring fileName = filePath.filename().wstring();
+    std::wstring fileName = filePath.stem().wstring();
 
     // テクスチャファイルの形式をチェック（.dds, .png, .jpg など）
     if (fileName.ends_with(L".dds") || fileName.ends_with(L".png") || fileName.ends_with(L".jpg"))
