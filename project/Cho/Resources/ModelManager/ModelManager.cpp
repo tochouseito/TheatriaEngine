@@ -16,13 +16,18 @@ bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 	Assimp::Importer importer;
 	std::string filePathString = filePath.string();
 	ModelData modelData;
-	// 頂点数とインデックス数
-	uint32_t vertices = 0;// 頂点数
-	uint32_t indices = 0;// インデックス数
 
 	// ここからファイルを開く
 	Log::Write(LogLevel::Info, "Start ReadFile");
-	const aiScene* scene = importer.ReadFile(filePathString.c_str(), aiProcess_FlipWindingOrder | aiProcess_FlipUVs);
+	const aiScene* scene = importer.ReadFile(
+		filePathString.c_str(),
+		aiProcess_FlipWindingOrder |
+		aiProcess_FlipUVs |
+		aiProcess_Triangulate);// 三角形化
+	if (!scene)
+	{
+		Log::Write(LogLevel::Assert, "Assimp ReadFile Error");
+	}
 	Log::Write(LogLevel::Info, "End ReadFile");
 	std::string err = importer.GetErrorString();
 	err = "ErrorString:" + err;
@@ -33,140 +38,61 @@ bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 	}
 	// SceneのRootNodeを読んでシーン全体の階層構造を作り上げる
 	modelData.rootNode = ReadNode(scene->mRootNode);
-	// 
+	// 名前取得
 	modelData.name = filePath.stem().wstring();
 	modelData.name = GenerateUniqueName(modelData.name, m_ModelNameContainer);
-	// メッシュのデータを保存
+
+	// メッシュ解析
 	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex)
 	{
 		MeshData meshData;
 		aiMesh* mesh = scene->mMeshes[meshIndex];
 		meshData.name = ConvertString(mesh->mName.C_Str());
-		vertices = mesh->mNumVertices;
-		for (uint32_t faceIndex = 0; faceIndex < mesh->mNumFaces; ++faceIndex)
-		{
-			aiFace& face = mesh->mFaces[faceIndex];
-			// 三角形の処理
-			if (face.mNumIndices == 3)
-			{
-				for (uint32_t element = 0; element < face.mNumIndices; ++element)
-				{
-					indices++;
-				}
-			}
-			// 四角形の処理（四角形の2つの三角形に分割）
-			else if (face.mNumIndices == 4)
-			{
-				// 四角形の1つ目の三角形(0,1,2)
-				indices++;
-				indices++;
-				indices++;
-
-				// 四角形の2つ目の三角形(0,1,2)
-				indices++;
-				indices++;
-				indices++;
-			}
-			// サポート外のポリゴン数の場合のエラーチェック
-			else
-			{
-				assert(false && "Unsupported polygon type");
-			}
-		}
-
+		// 頂点数とインデックス数を取得
+		uint32_t vertexCount = mesh->mNumVertices;// 頂点数
+		uint32_t indexCount = mesh->mNumFaces * 3;// インデックス数(三角形化されているので3倍)
 		// メモリ確保
-		meshData.vertices.resize(vertices);
-		meshData.indices.resize(indices);
-
-		modelData.meshes.push_back(meshData);
-	}
-
-	// Meshの解析
-	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex)
-	{
-		aiMesh* mesh = scene->mMeshes[meshIndex];
-		assert(mesh->HasNormals());// 法線がないMeshは非対応
-		std::string meshName = mesh->mName.C_Str();
-		std::wstring meshName2 = ConvertString(mesh->mName.C_Str());
-		//modelData->objects[meshName].material.isTexture = mesh->HasTextureCoords(0);
-
-		for (uint32_t vertexIndex = 0; vertexIndex < mesh->mNumVertices; ++vertexIndex)
+		meshData.vertices.resize(vertexCount);
+		meshData.indices.resize(indexCount);
+		// 頂点情報のコピー
+		if (!mesh->HasNormals())
 		{
-			//VertexData vertex;
-			aiVector3D& position = mesh->mVertices[vertexIndex];
-			aiVector3D& normal = mesh->mNormals[vertexIndex];
-			// UV座標のチェックと設定
+			// 法線がないメッシュは非対応
+			Log::Write(LogLevel::Assert, "Mesh has no normals. This is not supported.");
+		}
+		for (uint32_t vi = 0;vi < vertexCount; ++vi)
+		{
+			VertexData& dst = meshData.vertices[vi];
+			const aiVector3D& p = mesh->mVertices[vi];
+			const aiVector3D& n = mesh->mNormals[vi];
+			dst.position = { -p.x, p.y, p.z, 1.0f };// X軸反転
+			dst.normal = { -n.x, n.y, n.z };// X軸反転
 			if (mesh->HasTextureCoords(0))
 			{
-				aiVector3D& texcoord = mesh->mTextureCoords[0][vertexIndex];
-				modelData.meshes[meshIndex].vertices[vertexIndex].texCoord = { texcoord.x,texcoord.y };
+				const aiVector3D& t = mesh->mTextureCoords[0][vi];
+				dst.texCoord = { t.x, t.y };
 			} else
 			{
-				modelData.meshes[meshIndex].vertices[vertexIndex].texCoord = { 0.0f,0.0f };// ダミーのUV座標
+				dst.texCoord = { 0.0f, 0.0f };// UV座標がない場合はダミー
 			}
-			modelData.meshes[meshIndex].vertices[vertexIndex].position = { position.x,position.y,position.z,1.0f };
-			modelData.meshes[meshIndex].vertices[vertexIndex].normal = { normal.x,normal.y,normal.z };
-			modelData.meshes[meshIndex].vertices[vertexIndex].position.x *= -1.0f;
-			modelData.meshes[meshIndex].vertices[vertexIndex].normal.x *= -1.0f;
-			modelData.meshes[meshIndex].vertices[vertexIndex].color = { 1.0f,1.0f,1.0f,1.0f };
-			modelData.meshes[meshIndex].vertices[vertexIndex].vertexID = vertexIndex;
+			dst.color = { 1.0f, 1.0f, 1.0f, 1.0f };// 色は白
+			dst.vertexID = vi;// 頂点ID
 		}
-		// Index解析
-		uint32_t indexCount = 0;
-		for (uint32_t faceIndex = 0; faceIndex < mesh->mNumFaces; ++faceIndex)
+		// インデックス情報のコピー
+		uint32_t idx = 0;
+		for (uint32_t fi = 0;fi < mesh->mNumFaces;++fi)
 		{
-			aiFace& face = mesh->mFaces[faceIndex];
-			// 三角形の処理
-			if (face.mNumIndices == 3)
+			const aiFace& face = mesh->mFaces[fi];
+			// aiProcess_Triangulate を使っているので常に face.mNumIndices == 3
+			for (uint32_t e = 0;e < 3;++e)
 			{
-				for (uint32_t element = 0; element < face.mNumIndices; ++element)
-				{
-					uint32_t vertexIndex = face.mIndices[element];
-					modelData.meshes[meshIndex].indices[indexCount] = vertexIndex;
-					indexCount++;
-				}
-			}
-			// 四角形の処理（四角形の2つの三角形に分割）
-			else if (face.mNumIndices == 4)
-			{
-				// 四角形の1つ目の三角形(0,1,2)
-				modelData.meshes[meshIndex].indices[indexCount] = face.mIndices[0];
-				indexCount++;
-				modelData.meshes[meshIndex].indices[indexCount] = face.mIndices[1];
-				indexCount++;
-				modelData.meshes[meshIndex].indices[indexCount] = face.mIndices[2];
-				indexCount++;
-
-				// 四角形の2つ目の三角形(0,1,2)
-				modelData.meshes[meshIndex].indices[indexCount] = face.mIndices[0];
-				indexCount++;
-				modelData.meshes[meshIndex].indices[indexCount] = face.mIndices[2];
-				indexCount++;
-				modelData.meshes[meshIndex].indices[indexCount] = face.mIndices[3];
-			}
-			// サポート外のポリゴン数の場合のエラーチェック
-			else
-			{
-				assert(false && "Unsupported polygon type");
+				meshData.indices[idx++] = face.mIndices[e];
 			}
 		}
-
-		//// マテリアル解析
-		//uint32_t materialIndex = mesh->mMaterialIndex;
-		//aiMaterial* material = scene->mMaterials[materialIndex];
-		//if (material->GetTextureCount(aiTextureType_DIFFUSE) != 0)
-		//{
-		//	aiString textureFilePath;
-		//	material->GetTexture(aiTextureType_DIFFUSE, 0, &textureFilePath);
-		//	// 画像テクスチャの読み込み処理
-		//	texLoader_->Load(textureFilePath.C_Str());
-
-		//	modelData->objects[meshName].material.textureName = fs::path(textureFilePath.C_Str()).filename().string();
-		//	modelData->objects[meshName].material.isTexture = true;
-		//} else
-		//{
-		//	modelData->objects[meshName].material.isTexture = false;
-		//}
+		// チェック
+		Log::Write(LogLevel::Assert, "MeshData IndexCount Check", idx == indexCount);
+		// メッシュデータをモデルデータに追加
+		modelData.meshes.push_back(meshData);
 	}
 	// modelDataを追加
 	AddModelData(modelData);

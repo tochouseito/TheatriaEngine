@@ -617,6 +617,29 @@ struct AudioComponent : public IComponentTag
 	}
 };
 
+// アニメーションコンポーネント
+struct AnimationComponent : public IComponentTag
+{
+	std::string animationName = "";	// アニメーション名
+	std::optional<uint32_t> animationID = std::nullopt;	// アニメーションID
+	float time = 0.0f;	// 時間
+	float deltaTime = 0.0f;	// デルタ時間
+	bool isRun = false;	// 実行フラグ
+	bool isLoop = true;	// ループフラグ
+	bool isReset = false;	// リセットフラグ
+	AnimationComponent& operator=(const AnimationComponent& other)
+	{
+		if (this == &other) return *this;
+		animationName = other.animationName;
+		time = other.time;
+		deltaTime = other.deltaTime;
+		isRun = other.isRun;
+		isLoop = other.isLoop;
+		isReset = other.isReset;
+		return *this;
+	}
+};
+
 // マルチコンポーネントを許可
 template<>
 struct IsMultiComponent<LineRendererComponent> : std::true_type {};
