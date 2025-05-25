@@ -17,6 +17,7 @@ void PipelineManager::Initialize(ID3D12Device8* device)
 	CreatePipelineEffectEditorUpdate(device);
 	CreatePipelineEffectEditorEmit(device);
 	CreatePipelineUI(device);
+	CreatePipelineSkinningCS(device);
 }
 
 std::vector<std::pair<uint32_t, std::string>> PipelineManager::CreateRootParameters(ID3D12ShaderReflection* pReflector, std::vector<D3D12_ROOT_PARAMETER>& rootParameters, std::vector<D3D12_DESCRIPTOR_RANGE>& descriptorRanges, D3D12_SHADER_VISIBILITY VISIBILITY)
@@ -1851,4 +1852,98 @@ void PipelineManager::CreatePipelineUI(ID3D12Device8* device)
 		IID_PPV_ARGS(&m_UIPSO.pso)
 	);
 	Log::Write(LogLevel::Assert, "Pipeline state created.", hr);
+}
+
+void PipelineManager::CreatePipelineSkinningCS(ID3D12Device8* device)
+{
+	HRESULT hr;
+
+	// Shaderをコンパイルする
+	Microsoft::WRL::ComPtr < IDxcBlob> computeShaderBlob =
+		m_pShaderCompiler->CompileShader(
+			L"Cho/Resources/EngineAssets/Shader/Skinning/Skinning.CS.hlsl",
+			L"cs_6_5"
+		);
+	assert(computeShaderBlob);
+
+	// RootSignature作成
+	D3D12_ROOT_SIGNATURE_DESC descriptionRooTSignature{};
+	descriptionRooTSignature.Flags =
+		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+	// RootParameter作成。PixelShaderのMaterialとVertexShaderのTransform
+	D3D12_ROOT_PARAMETER rootParameter[5] = {};
+
+	D3D12_DESCRIPTOR_RANGE paletteRange = {};
+	paletteRange.BaseShaderRegister = 0;
+	paletteRange.NumDescriptors = 1;
+	paletteRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	paletteRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	// SRV:Palette
+	rootParameter[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameter[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	rootParameter[0].DescriptorTable.pDescriptorRanges = &paletteRange;// Tableの中身の配列を指定
+	rootParameter[0].DescriptorTable.NumDescriptorRanges = 1;// Tableで利用する数
+
+	D3D12_DESCRIPTOR_RANGE inputVertexRange = {};
+	inputVertexRange.BaseShaderRegister = 1;
+	inputVertexRange.NumDescriptors = 1;
+	inputVertexRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	inputVertexRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	// SRV:InputVertex
+	rootParameter[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameter[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	rootParameter[1].DescriptorTable.pDescriptorRanges = &inputVertexRange;// Tableの中身の配列を指定
+	rootParameter[1].DescriptorTable.NumDescriptorRanges = 1;// Tableで利用する数
+
+	D3D12_DESCRIPTOR_RANGE influenceRange = {};
+	influenceRange.BaseShaderRegister = 2;
+	influenceRange.NumDescriptors = 1;
+	influenceRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	influenceRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	// SRV:Influence
+	rootParameter[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameter[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	rootParameter[2].DescriptorTable.pDescriptorRanges = &influenceRange;// Tableの中身の配列を指定
+	rootParameter[2].DescriptorTable.NumDescriptorRanges = 1;// Tableで利用する数
+
+	D3D12_DESCRIPTOR_RANGE outputVertexRange = {};
+	outputVertexRange.BaseShaderRegister = 0;
+	outputVertexRange.NumDescriptors = 1;
+	outputVertexRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+	outputVertexRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	// UAV:OutputVertex
+	rootParameter[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameter[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	rootParameter[3].DescriptorTable.pDescriptorRanges = &outputVertexRange;// Tableの中身の配列を指定
+	rootParameter[3].DescriptorTable.NumDescriptorRanges = 1;// Tableで利用する数
+
+	D3D12_DESCRIPTOR_RANGE skinningInfoRange = {};
+	rootParameter[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;// CBVを使う
+	rootParameter[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;// ComputeShaderを使う
+	rootParameter[4].Descriptor.ShaderRegister = 0;// レジスタ番号0とバインド
+
+	descriptionRooTSignature.pParameters = rootParameter;// ルートパラメータ配列へのポインタ
+	descriptionRooTSignature.NumParameters = _countof(rootParameter);// 配列の長さ
+
+	// シリアライズしてバイナリにする
+	Microsoft::WRL::ComPtr<ID3DBlob> signatureBlob = nullptr;
+	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;
+	hr = D3D12SerializeRootSignature(&descriptionRooTSignature,
+		D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
+	assert(SUCCEEDED(hr));
+	// バイナリをもとに生成
+	hr = device->CreateRootSignature(0, signatureBlob->GetBufferPointer(),
+		signatureBlob->GetBufferSize(), IID_PPV_ARGS(&m_Skinning.rootSignature));
+	assert(SUCCEEDED(hr));
+
+	D3D12_COMPUTE_PIPELINE_STATE_DESC computePipelineStateDesc{};
+	computePipelineStateDesc.CS = {
+	.pShaderBytecode = computeShaderBlob->GetBufferPointer(),
+	.BytecodeLength = computeShaderBlob->GetBufferSize() };
+	computePipelineStateDesc.pRootSignature = m_Skinning.rootSignature.Get();
+	// 実際に生成
+	hr = device->CreateComputePipelineState(&computePipelineStateDesc,
+		IID_PPV_ARGS(&m_Skinning.pso));
+	assert(SUCCEEDED(hr));
 }

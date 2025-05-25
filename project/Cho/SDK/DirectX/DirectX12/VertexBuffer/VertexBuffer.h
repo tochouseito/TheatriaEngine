@@ -72,7 +72,7 @@ public:
 	void CreateVertexBufferResource(ID3D12Device* device, const UINT& numElements,bool isSkinningVertex) override
 	{
 		D3D12_HEAP_TYPE heapType = isSkinningVertex ? D3D12_HEAP_TYPE_DEFAULT : D3D12_HEAP_TYPE_UPLOAD;
-		D3D12_RESOURCE_STATES resourceState = isSkinningVertex ? D3D12_RESOURCE_STATE_COMMON : D3D12_RESOURCE_STATE_GENERIC_READ;
+		D3D12_RESOURCE_STATES resourceState = isSkinningVertex ? D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER : D3D12_RESOURCE_STATE_GENERIC_READ;
 		D3D12_RESOURCE_FLAGS resourceFlag = isSkinningVertex ? D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS : D3D12_RESOURCE_FLAG_NONE;
 		// リソースのサイズ
 		UINT structureByteStride = static_cast<UINT>(sizeof(T));

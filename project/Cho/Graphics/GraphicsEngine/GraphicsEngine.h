@@ -62,6 +62,7 @@ class GraphicsEngine : public Engine
 	friend class ParticleInitializeSystem;
 	friend class ParticleUpdateSystem;
 	friend class EffectEditorUpdateSystem;
+	friend class AnimationUpdateSystem;
 public:
 	// Constructor
 	GraphicsEngine(ID3D12Device8* device,ResourceManager* resourceManager,RuntimeMode mode) : 
