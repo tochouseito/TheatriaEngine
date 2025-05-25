@@ -20,6 +20,11 @@ public:
 	// スクリプトデータを追加する関数
 	void AddScriptData(const std::string& scriptName)
 	{
+		// すでに同じ名前のスクリプトが存在する場合は何もしない
+		if (m_ScriptNameToIndex.contains(scriptName))
+		{
+			return; // 既に存在する場合は何もしない
+		}
 		std::string name = scriptName;
 		uint32_t index = static_cast<uint32_t>(m_ScriptNameContainer.push_back(std::move(name))); // スクリプト名をコンテナに追加
 		m_ScriptNameToIndex[scriptName] = index; // スクリプト名とインデックスをマップに追加
