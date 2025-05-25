@@ -629,14 +629,17 @@ bool AddAnimationComponent::Execute(EngineCommand* edit)
 		animation->skeleton = model->skeleton;
 		animation->skinCluster = model->skinCluster;
 		// Resourceの生成
-		animation->paletteBufferIndex = edit->m_ResourceManager->CreateStructuredBuffer<ConstBufferDataWell>(static_cast<UINT>(animation->skeleton->joints.size()));
+		//animation->paletteBufferIndex = edit->m_ResourceManager->CreateStructuredBuffer<ConstBufferDataWell>(static_cast<UINT>(animation->skeleton->joints.size()));
 		//StructuredBuffer<ConstBufferDataWell>* paletteBuffer = dynamic_cast<StructuredBuffer<ConstBufferDataWell>*>(edit->m_ResourceManager->GetBuffer<IStructuredBuffer>(animation->paletteBufferIndex));
-		animation->influenceBufferIndex = edit->m_ResourceManager->CreateStructuredBuffer<ConstBufferDataVertexInfluence>(static_cast<UINT>(model->meshes[0].vertices.size()));
+		/*animation->influenceBufferIndex = edit->m_ResourceManager->CreateStructuredBuffer<ConstBufferDataVertexInfluence>(static_cast<UINT>(model->meshes[0].vertices.size()));
 		StructuredBuffer<ConstBufferDataVertexInfluence>* influenceBuffer = dynamic_cast<StructuredBuffer<ConstBufferDataVertexInfluence>*>(edit->m_ResourceManager->GetBuffer<IStructuredBuffer>(animation->influenceBufferIndex));
 		std::span<ConstBufferDataVertexInfluence> influenceSpan = influenceBuffer->GetMappedData();
-		std::memset(influenceSpan.data(), 0, sizeof(ConstBufferDataVertexInfluence) * influenceSpan.size());
+		std::memset(influenceSpan.data(), 0, sizeof(ConstBufferDataVertexInfluence) * influenceSpan.size());*/
 		// OutputVertexBufferを生成
-		animation->skinningBufferIndex = edit->m_ResourceManager->CreateVertexBuffer<VertexData>(static_cast<UINT>(model->meshes[0].vertices.size()),true);
+		//animation->skinningBufferIndex = edit->m_ResourceManager->CreateVertexBuffer<VertexData>(static_cast<UINT>(model->meshes[0].vertices.size()),true);
+		animation->modelName = model->name;
+		animation->boneOffsetID = model->nextBoneOffsetIndex;
+		model->nextBoneOffsetIndex++;
 	}
 	
 	return true;

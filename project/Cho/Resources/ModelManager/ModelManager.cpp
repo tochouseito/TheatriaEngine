@@ -890,18 +890,47 @@ void ModelManager::AddModelData(ModelData& modelData)
 		vertexBuffer->MappedDataCopy(mesh.vertices);
 		indexBuffer->MappedDataCopy(mesh.indices);
 
+		//if (modelData.isBone)
+		//{
+		modelData.skinInfoBufferIndex = m_pResourceManager->CreateConstantBuffer<SkinningInformation>();
+		ConstantBuffer<SkinningInformation>* skinInfoBuffer = dynamic_cast<ConstantBuffer<SkinningInformation>*>(m_pResourceManager->GetBuffer<IConstantBuffer>(modelData.skinInfoBufferIndex));
+		// SkinningInformationの初期化
+		SkinningInformation skinInfo;
+		skinInfo.numVertices = static_cast<uint32_t>(mesh.vertices.size());
 		if (modelData.isBone)
 		{
-			mesh.skinInfoBufferIndex = m_pResourceManager->CreateConstantBuffer<uint32_t>();
-			ConstantBuffer<uint32_t>* skinInfoBuffer = dynamic_cast<ConstantBuffer<uint32_t>*>(m_pResourceManager->GetBuffer<IConstantBuffer>(mesh.skinInfoBufferIndex));
-			// SkinningInformationの初期化
-			uint32_t skinInfo;
-			skinInfo = static_cast<uint32_t>(mesh.vertices.size());
+			skinInfo.boneCount = static_cast<uint32_t>(modelData.skeleton.joints.size());
+			skinInfo.isSkinned = 1; // スキニングを有効にする
 			skinInfoBuffer->UpdateData(skinInfo);
+		}
+		else {
+			skinInfo.boneCount = 0; // ボーンがない場合は0
+			skinInfo.isSkinned = 0; // スキニングを無効にする
+			skinInfoBuffer->UpdateData(skinInfo);
+		}
+		//}
+		modelData.influenceBufferIndex = m_pResourceManager->CreateStructuredBuffer<ConstBufferDataVertexInfluence>(static_cast<UINT>(mesh.vertices.size())); // 影響度バッファを作成（最大4つのボーン影響を持つと仮定）
+		if (modelData.isBone)
+		{
+			StructuredBuffer<ConstBufferDataVertexInfluence>* influenceBuffer = dynamic_cast<StructuredBuffer<ConstBufferDataVertexInfluence>*>(m_pResourceManager->GetBuffer<IStructuredBuffer>(modelData.influenceBufferIndex));
+			// 影響度バッファの初期化
+			std::span<ConstBufferDataVertexInfluence> influences = influenceBuffer->GetMappedData();
+			std::memcpy(influences.data(), modelData.skinCluster.influenceData.data.data(), sizeof(ConstBufferDataVertexInfluence) * influences.size());
 		}
 	}
 	// UseTransformのリソースを作成
 	modelData.useTransformBufferIndex = m_pResourceManager->CreateStructuredBuffer<uint32_t>(kUseTransformOffset);
+	// ボーン行列統合バッファ
+	UINT jointCount = 0;
+	if (modelData.skeleton.joints.empty())
+	{
+		jointCount = 1;
+	}
+	else
+	{
+		jointCount = static_cast<UINT>(modelData.skeleton.joints.size() * 100);
+	}
+	modelData.boneMatrixBufferIndex = m_pResourceManager->CreateStructuredBuffer<ConstBufferDataWell>(jointCount);
 	// 名前が重複していたら、エラー
 	// ここに処理を追加する
 

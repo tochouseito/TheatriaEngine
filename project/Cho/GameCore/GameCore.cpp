@@ -191,6 +191,8 @@ void GameCore::CreateSystems(InputManager* input, ResourceManager* resourceManag
 	m_pSingleSystemManager->RegisterSystem(std::move(materialUpdateSystem), SystemState::Update);
 	std::unique_ptr<ECSManager::ISystem> tfUpdateSystem = std::make_unique<TransformUpdateSystem>(m_pECSManager.get(), resourceManager, resourceManager->GetIntegrationBuffer(IntegrationDataType::Transform));
 	m_pSingleSystemManager->RegisterSystem(std::move(tfUpdateSystem), SystemState::Update);
+	std::unique_ptr<ECSManager::ISystem> animationUpdateSystem = std::make_unique<AnimationUpdateSystem>(m_pECSManager.get(), resourceManager,graphicsEngine);
+	m_pSingleSystemManager->RegisterSystem(std::move(animationUpdateSystem), SystemState::Update);
 	std::unique_ptr<ECSManager::ISystem> cameraSystem = std::make_unique<CameraUpdateSystem>(m_pECSManager.get(), resourceManager, resourceManager->GetIntegrationBuffer(IntegrationDataType::Transform));
 	m_pSingleSystemManager->RegisterSystem(std::move(cameraSystem), SystemState::Update);
 	std::unique_ptr<ECSManager::ISystem> emitterUpdateSystem = std::make_unique<EmitterUpdateSystem>(m_pECSManager.get(), resourceManager, graphicsEngine);

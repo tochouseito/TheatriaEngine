@@ -4,7 +4,9 @@ struct Transform
     float4x4 worldInverse;
     float4x4 rootNode;
     uint materialID;
-    float padding[3];
+    uint isAnimated;
+    uint isBoneOffsetStartIndex;
+    float padding[1];
 };
 
 struct VertexShaderOutput

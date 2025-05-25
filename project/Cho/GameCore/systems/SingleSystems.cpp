@@ -94,6 +94,12 @@ void TransformUpdateSystem::UpdateComponent(Entity e, TransformComponent& transf
 		rb->runtimeBody->SetLinearVelocity(b2Vec2(rb->velocity.x, rb->velocity.y));
 	}
 
+	// アニメーションコンポーネントがあればスキニングの確認
+	AnimationComponent* anim = m_pECS->GetComponent<AnimationComponent>(e);
+	if (anim && anim->boneOffsetID.has_value()) {
+		transform.boneOffsetID = anim->boneOffsetID.value();
+	}
+
 	// 行列の転送
 	TransferMatrix(transform);
 }
@@ -111,6 +117,14 @@ void TransformUpdateSystem::TransferMatrix(TransformComponent& transform)
 	} else
 	{
 		data.materialID = 0;
+	}
+	if(transform.boneOffsetID.has_value()){
+		data.isAnimated = 1;
+		data.boneOffsetStartIndex = transform.boneOffsetID.value();
+	} else
+	{
+		data.isAnimated = 0;
+		data.boneOffsetStartIndex = 0;
 	}
 	m_pIntegrationBuffer->UpdateData(data, transform.mapID.value());
 }
@@ -598,10 +612,13 @@ void LightUpdateSystem::UpdateLight(Entity e, LightComponent& light, TransformCo
 
 void AnimationInitializeSystem::InitializeAnimation(AnimationComponent& animation)
 {
+	animation;
 }
 
 void AnimationUpdateSystem::UpdateAnimation(AnimationComponent& animation)
 {
+	ModelData* model = m_pResourceManager->GetModelManager()->GetModelData(animation.modelName);
+	timeUpdate(animation, model);
 }
 
 Vector3 AnimationUpdateSystem::CalculateValue(const std::vector<KeyframeVector3>& keyframes, const float& time)
@@ -713,15 +730,14 @@ void AnimationUpdateSystem::timeUpdate(AnimationComponent& animation, ModelData*
 	if (model->isBone) {
 		SkeletonUpdate(animation, model);
 		SkinClusterUpdate(animation, model);
-		ApplySkinning(animation, model);
+		//ApplySkinning(animation, model);
 	}
-
 	animation.prevAnimationIndex = animation.animationIndex;
 }
 
 void AnimationUpdateSystem::ApplyAnimation(AnimationComponent& animation, ModelData* model)
 {
-	for (Joint& joint : model->skeleton.joints) {
+	for (Joint& joint : animation.skeleton->joints) {
 		// 対象のJointのAnimationがあれば、値の適用を行う。下記のif文はC++17から可能になった初期化付きif文
 		if (auto it = model->animations[animation.animationIndex].nodeAnimations.find(joint.name); it != model->animations[animation.animationIndex].nodeAnimations.end()) {
 			const NodeAnimation& rootNodeAnimation = (*it).second;
@@ -765,54 +781,58 @@ void AnimationUpdateSystem::SkeletonUpdate(AnimationComponent& animation, ModelD
 
 void AnimationUpdateSystem::SkinClusterUpdate(AnimationComponent& animation, ModelData* model)
 {
-	StructuredBuffer<ConstBufferDataWell>* paletteBuffer = dynamic_cast<StructuredBuffer<ConstBufferDataWell>*>(m_pResourceManager->GetBuffer<IStructuredBuffer>(animation.paletteBufferIndex));
-	for (size_t jointIndex = 0; jointIndex < model->skeleton.joints.size(); ++jointIndex) {
+	StructuredBuffer<ConstBufferDataWell>* paletteBuffer = dynamic_cast<StructuredBuffer<ConstBufferDataWell>*>(m_pResourceManager->GetBuffer<IStructuredBuffer>(model->boneMatrixBufferIndex));
+	for (uint32_t jointIndex = 0; jointIndex < model->skeleton.joints.size(); ++jointIndex) {
 		assert(jointIndex < model->skinCluster.inverseBindPoseMatrices.size());
+		uint32_t offset = static_cast<uint32_t>(model->skeleton.joints.size() * animation.boneOffsetID.value());
 		ConstBufferDataWell data = {};
 		data.skeletonSpaceMatrix = 
 			animation.skinCluster->inverseBindPoseMatrices[jointIndex] * animation.skeleton->joints[jointIndex].skeletonSpaceMatrix;
 		data.skeletonSpaceInverseTransposeMatrix =
 			ChoMath::Transpose(Matrix4::Inverse(data.skeletonSpaceMatrix));
-		paletteBuffer->UpdateData(data, jointIndex);
+		paletteBuffer->UpdateData(data, jointIndex + offset);
 	}
 }
 
 void AnimationUpdateSystem::ApplySkinning(AnimationComponent& animation, ModelData* model)
 {
-	// コマンドリストの取得
-	CommandContext* context = m_pGraphicsEngine->GetCommandContext();
-	m_pGraphicsEngine->BeginCommandContext(context);
-	// スキニングOutputリソースを遷移
-	IVertexBuffer* skinningBuffer = m_pResourceManager->GetBuffer<IVertexBuffer>(animation.skinningBufferIndex);
-	context->BarrierTransition(skinningBuffer->GetResource(), D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-	// パイプラインセット
-	context->SetComputePipelineState(m_pGraphicsEngine->GetPipelineManager()->GetSkinningPSO().pso.Get());
-	// ルートシグネチャセット
-	context->SetComputeRootSignature(m_pGraphicsEngine->GetPipelineManager()->GetSkinningPSO().rootSignature.Get());
-	// パレットデータをセット
-	IStructuredBuffer* paletteBuffer = m_pResourceManager->GetBuffer<IStructuredBuffer>(animation.paletteBufferIndex);
-	context->SetComputeRootDescriptorTable(0, paletteBuffer->GetSRVGpuHandle());
-	// メッシュデータをセット
-	IVertexBuffer* vertexBuffer = m_pResourceManager->GetBuffer<IVertexBuffer>(model->meshes[0].vertexBufferIndex);
-	context->SetComputeRootDescriptorTable(1, vertexBuffer->GetSRVGpuHandle());
-	// 影響データをセット
-	IStructuredBuffer* influenceBuffer = m_pResourceManager->GetBuffer<IStructuredBuffer>(animation.influenceBufferIndex);
-	context->SetComputeRootDescriptorTable(2, influenceBuffer->GetSRVGpuHandle());
-	// スキニングデータをセット
-	context->SetComputeRootDescriptorTable(3, skinningBuffer->GetUAVGpuHandle());
-	// Skinning用情報
-	IConstantBuffer* infoBuffer = m_pResourceManager->GetBuffer<IConstantBuffer>(model->meshes[0].skinInfoBufferIndex);
-	context->SetComputeRootConstantBufferView(4, infoBuffer->GetResource()->GetGPUVirtualAddress());
-	// Dispatch
-	context->Dispatch(static_cast<UINT>(model->meshes[0].vertices.size() + 1023) / 1024, 1, 1);
-	// スキニングOutputリソースを元に戻す
-	context->BarrierTransition(skinningBuffer->GetResource(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
-	// クローズ
-	m_pGraphicsEngine->EndCommandContext(context, QueueType::Compute);
-	// GPUの処理が終わるまで待機
-	m_pGraphicsEngine->WaitForGPU(QueueType::Compute);
+	animation;
+	model;
+	//// コマンドリストの取得
+	//CommandContext* context = m_pGraphicsEngine->GetCommandContext();
+	//m_pGraphicsEngine->BeginCommandContext(context);
+	//// スキニングOutputリソースを遷移
+	//IVertexBuffer* skinningBuffer = m_pResourceManager->GetBuffer<IVertexBuffer>(animation.skinningBufferIndex);
+	//context->BarrierTransition(skinningBuffer->GetResource(), D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	//// パイプラインセット
+	//context->SetComputePipelineState(m_pGraphicsEngine->GetPipelineManager()->GetSkinningPSO().pso.Get());
+	//// ルートシグネチャセット
+	//context->SetComputeRootSignature(m_pGraphicsEngine->GetPipelineManager()->GetSkinningPSO().rootSignature.Get());
+	//// パレットデータをセット
+	//IStructuredBuffer* paletteBuffer = m_pResourceManager->GetBuffer<IStructuredBuffer>(animation.paletteBufferIndex);
+	//context->SetComputeRootDescriptorTable(0, paletteBuffer->GetSRVGpuHandle());
+	//// メッシュデータをセット
+	//IVertexBuffer* vertexBuffer = m_pResourceManager->GetBuffer<IVertexBuffer>(model->meshes[0].vertexBufferIndex);
+	//context->SetComputeRootDescriptorTable(1, vertexBuffer->GetSRVGpuHandle());
+	//// 影響データをセット
+	//IStructuredBuffer* influenceBuffer = m_pResourceManager->GetBuffer<IStructuredBuffer>(animation.influenceBufferIndex);
+	//context->SetComputeRootDescriptorTable(2, influenceBuffer->GetSRVGpuHandle());
+	//// スキニングデータをセット
+	//context->SetComputeRootDescriptorTable(3, skinningBuffer->GetUAVGpuHandle());
+	//// Skinning用情報
+	//IConstantBuffer* infoBuffer = m_pResourceManager->GetBuffer<IConstantBuffer>(model->meshes[0].skinInfoBufferIndex);
+	//context->SetComputeRootConstantBufferView(4, infoBuffer->GetResource()->GetGPUVirtualAddress());
+	//// Dispatch
+	//context->Dispatch(static_cast<UINT>(model->meshes[0].vertices.size() + 1023) / 1024, 1, 1);
+	//// スキニングOutputリソースを元に戻す
+	//context->BarrierTransition(skinningBuffer->GetResource(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+	//// クローズ
+	//m_pGraphicsEngine->EndCommandContext(context, QueueType::Compute);
+	//// GPUの処理が終わるまで待機
+	//m_pGraphicsEngine->WaitForGPU(QueueType::Compute);
 }
 
 void AnimationFinalizeSystem::FinalizeAnimation(AnimationComponent& animation)
 {
+	animation;
 }

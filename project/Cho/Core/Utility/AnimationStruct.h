@@ -68,10 +68,12 @@ struct JointWeightData
 	std::vector<VertexWeightData> vertexWeights;
 };
 // skinning
-//struct SkinningInformation
-//{
-//	uint32_t numVertices;
-//};
+struct SkinningInformation
+{
+	uint32_t numVertices;
+	uint32_t boneCount;
+	uint32_t isSkinned = 0; // 0: スキニングなし, 1: スキニングあり
+};
 struct ConstBufferDataVertexInfluence
 {
 	std::array<float, kNumMaxInfluence>weights;

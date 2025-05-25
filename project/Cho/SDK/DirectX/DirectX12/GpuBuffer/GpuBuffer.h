@@ -82,15 +82,15 @@ public:
 	void CreateConstantBufferResource(ID3D12Device* device) override
 	{
 		// 構造体のサイズを確認
-		if constexpr (std::is_class_v<T>)// クラス、構造体用
-		{
-			size_t size = sizeof(T);
-			bool isValid = size % 16 != 0;
-			if (isValid)
-			{
-				Log::Write(LogLevel::Assert, "Structure size must be multiple of 16 bytes");
-			}
-		}
+		//if constexpr (std::is_class_v<T>)// クラス、構造体用
+		//{
+		//	size_t size = sizeof(T);
+		//	bool isValid = size % 16 != 0;
+		//	if (isValid)
+		//	{
+		//		Log::Write(LogLevel::Assert, "Structure size must be multiple of 16 bytes");
+		//	}
+		//}
 		// リソースのサイズ
 		UINT structureByteStride = static_cast<UINT>(sizeof(T));
 		// リソース用のヒープの設定

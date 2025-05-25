@@ -4,15 +4,15 @@
 #include "../header/Environment.hlsli"
 
 // ライト
-ConstantBuffer<Lights> gLights : register(b1);
+ConstantBuffer<Lights> gLights : register(b2);
 // 環境
-ConstantBuffer<Environment> gEnvironment : register(b2);
+ConstantBuffer<Environment> gEnvironment : register(b3);
 // IntegrationTransformResource
 StructuredBuffer<Transform> gITF : register(t0, space1);
 // マテリアル
 StructuredBuffer<Material> gIMaterial : register(t1,space1);
 // テクスチャリソース(カラー)
-Texture2D<float4> gTextures[] : register(t2, space0);
+Texture2D<float4> gTextures[] : register(t2, space1);
 // サンプラー
 SamplerState gSampler : register(s0);
 

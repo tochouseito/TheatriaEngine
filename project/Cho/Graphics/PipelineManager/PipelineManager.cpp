@@ -446,7 +446,7 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 	// ジェネリックに作成
-	D3D12_ROOT_PARAMETER rootParameters[8] = {};
+	D3D12_ROOT_PARAMETER rootParameters[11] = {};
 
 	// ViewProjection
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
@@ -474,14 +474,40 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 	rootParameters[2].DescriptorTable.pDescriptorRanges = &useTransformListRange;
 	rootParameters[2].DescriptorTable.NumDescriptorRanges = 1;
+	// BoneMatrix
+	D3D12_DESCRIPTOR_RANGE boneMatrixRange = {};
+	boneMatrixRange.BaseShaderRegister = 2;//t2
+	boneMatrixRange.RegisterSpace = 0;// space0
+	boneMatrixRange.NumDescriptors = 1;
+	boneMatrixRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	boneMatrixRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	rootParameters[3].DescriptorTable.pDescriptorRanges = &boneMatrixRange;
+	rootParameters[3].DescriptorTable.NumDescriptorRanges = 1;
+	// SkinningInfluence
+	D3D12_DESCRIPTOR_RANGE skinningInfluenceRange = {};
+	skinningInfluenceRange.BaseShaderRegister = 3;//t3
+	skinningInfluenceRange.RegisterSpace = 0;// space0
+	skinningInfluenceRange.NumDescriptors = 1;
+	skinningInfluenceRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	skinningInfluenceRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	rootParameters[4].DescriptorTable.pDescriptorRanges = &skinningInfluenceRange;
+	rootParameters[4].DescriptorTable.NumDescriptorRanges = 1;
+	// SkinningInfo
+	rootParameters[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	rootParameters[5].Descriptor.ShaderRegister = 1;
 	// Lights
-	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	rootParameters[3].Descriptor.ShaderRegister = 1;
+	rootParameters[6].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[6].Descriptor.ShaderRegister = 2;
 	// Environment
-	rootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	rootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	rootParameters[4].Descriptor.ShaderRegister = 2;
+	rootParameters[7].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[7].Descriptor.ShaderRegister = 3;
 	// IntegrationTransform
 	D3D12_DESCRIPTOR_RANGE integrationTransformRange2 = {};
 	integrationTransformRange2.BaseShaderRegister = 0;//t0
@@ -489,10 +515,10 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 	integrationTransformRange2.NumDescriptors = 1;
 	integrationTransformRange2.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	integrationTransformRange2.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-	rootParameters[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	rootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	rootParameters[5].DescriptorTable.pDescriptorRanges = &integrationTransformRange2;
-	rootParameters[5].DescriptorTable.NumDescriptorRanges = 1;
+	rootParameters[8].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[8].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[8].DescriptorTable.pDescriptorRanges = &integrationTransformRange2;
+	rootParameters[8].DescriptorTable.NumDescriptorRanges = 1;
 	// IntegrationMaterial
 	D3D12_DESCRIPTOR_RANGE integrationMaterialRange = {};
 	integrationMaterialRange.BaseShaderRegister = 1;//t1
@@ -500,21 +526,21 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 	integrationMaterialRange.NumDescriptors = 1;
 	integrationMaterialRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	integrationMaterialRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-	rootParameters[6].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	rootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	rootParameters[6].DescriptorTable.pDescriptorRanges = &integrationMaterialRange;
-	rootParameters[6].DescriptorTable.NumDescriptorRanges = 1;
+	rootParameters[9].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[9].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[9].DescriptorTable.pDescriptorRanges = &integrationMaterialRange;
+	rootParameters[9].DescriptorTable.NumDescriptorRanges = 1;
 	// Texture
 	D3D12_DESCRIPTOR_RANGE textureRange = {};
 	textureRange.BaseShaderRegister = 2;//t2
-	textureRange.RegisterSpace = 0;// space0
+	textureRange.RegisterSpace = 1;// space1
 	textureRange.NumDescriptors = 256;
 	textureRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	textureRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-	rootParameters[7].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	rootParameters[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	rootParameters[7].DescriptorTable.pDescriptorRanges = &textureRange;
-	rootParameters[7].DescriptorTable.NumDescriptorRanges = 1;
+	rootParameters[10].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[10].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[10].DescriptorTable.pDescriptorRanges = &textureRange;
+	rootParameters[10].DescriptorTable.NumDescriptorRanges = 1;
 
 	rootSignatureDesc.pParameters = rootParameters;
 	rootSignatureDesc.NumParameters = _countof(rootParameters);
@@ -1859,7 +1885,7 @@ void PipelineManager::CreatePipelineSkinningCS(ID3D12Device8* device)
 	HRESULT hr;
 
 	// Shaderをコンパイルする
-	Microsoft::WRL::ComPtr < IDxcBlob> computeShaderBlob =
+	Microsoft::WRL::ComPtr<IDxcBlob> computeShaderBlob =
 		m_pShaderCompiler->CompileShader(
 			L"Cho/Resources/EngineAssets/Shader/Skinning/Skinning.CS.hlsl",
 			L"cs_6_5"

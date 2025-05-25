@@ -93,7 +93,7 @@ void AssetBrowser::FileGrid(FolderNode& root)
                 ImGui::SetDragDropPayload("Texture", fileName, strlen(fileName) + 1);
                 ImGui::EndDragDropSource();
             }
-        } else if (ext == ".fbx" || ext ==".obj")
+        } else if (ext == ".fbx" || ext ==".obj"||ext ==".gltf")
         {
             ImGui::Button(uniqueId.c_str(), ImVec2(iconSize, iconSize));
             if (ImGui::BeginDragDropSource())

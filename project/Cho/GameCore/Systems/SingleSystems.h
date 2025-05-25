@@ -576,7 +576,7 @@ private:
 	ResourceManager* m_pResourceManager = nullptr;
 	GraphicsEngine* m_pGraphicsEngine = nullptr;
 };
-
+struct ModelData;
 // アニメーション初期化システム
 class AnimationInitializeSystem : public ECSManager::System<AnimationComponent>
 {

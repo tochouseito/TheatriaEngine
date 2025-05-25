@@ -1,18 +1,10 @@
+#include "../header/Skinning.hlsli"
 struct Vertex {
     float4 position;
     float2 texcoord;
     float3 normal;
-};
-struct VertexInfluence {
-    float4 weight;
-    int4 index;
-};
-struct SkinningInformation {
-    uint numVertices;
-};
-struct Well {
-    float4x4 skeletonSpaceMatrix;
-    float4x4 skeletonSpaceInverseTransposeMatrix;
+    float4 color;
+    uint vertexID;
 };
 // Skinning.VS.hlslで作ったものと同じPalette
 StructuredBuffer<Well> gMatrixPalette : register(t0);
@@ -36,7 +28,7 @@ void main(uint3 DTid : SV_DispatchThreadID) {
         VertexInfluence influence = gInfluences[vertexIndex];
         
         // Skinning後の頂点を計算
-        Vertex skinned;
+        Vertex skinned = (Vertex) 0; // 初期化
         skinned.texcoord = input.texcoord;
         
         // 計算方法はSkinningObject3d.VSと同じ
@@ -57,5 +49,4 @@ void main(uint3 DTid : SV_DispatchThreadID) {
         // Skinning後の頂点データを格納、書き込む
         gOutputVertices[vertexIndex] = skinned;
     }
-    
 }

@@ -11,7 +11,9 @@ struct BUFFER_DATA_TF final
 	// モデルのRootMatrix
     Matrix4 rootMatrix;		// 64バイト
 	uint32_t materialID;	// 4バイト
-	float padding[3];	// 12バイト
+	uint32_t isAnimated;	// 4バイト
+	uint32_t boneOffsetStartIndex; // 4バイト
+	float padding[1];	// 4バイト
 };
 // ViewProjection
 struct BUFFER_DATA_VIEWPROJECTION final

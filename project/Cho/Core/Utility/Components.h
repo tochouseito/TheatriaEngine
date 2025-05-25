@@ -58,6 +58,7 @@ struct TransformComponent : public IComponentTag
 	std::optional<uint32_t> mapID = std::nullopt;		// マップインデックス
 	TransformStartValue startValue;						// 初期値保存用
 	std::optional<uint32_t> materialID = std::nullopt;	// マテリアルID
+	std::optional<uint32_t> boneOffsetID = std::nullopt;	// ボーンオフセットID
 
 	TransformComponent& operator=(const TransformComponent& other)
 	{
@@ -630,13 +631,15 @@ struct AnimationComponent : public IComponentTag
 	uint32_t transitionIndex = 0;// 遷移スタートのアニメーションのIndex
 	uint32_t nowFrame = 0;// 現在のフレーム
 	uint32_t allFrame = 0;// 全フレーム数
+	std::wstring modelName = L"";	// モデル名
+	std::optional<uint32_t> boneOffsetID = std::nullopt;	// ボーンオフセットID
 
 	std::optional<Skeleton> skeleton = std::nullopt;	// スケルトンデータ
 	std::optional<SkinCluster> skinCluster = std::nullopt;	// スキンクラスター
 
-	std::optional<uint32_t> paletteBufferIndex = std::nullopt;	// パレットバッファーインデックス
-	std::optional<uint32_t> influenceBufferIndex = std::nullopt;// インフルエンスバッファーインデックス
-	std::optional<uint32_t> skinningBufferIndex = std::nullopt;	// スキニングバッファーインデックス
+	//std::optional<uint32_t> paletteBufferIndex = std::nullopt;	// パレットバッファーインデックス
+	//std::optional<uint32_t> influenceBufferIndex = std::nullopt;// インフルエンスバッファーインデックス
+	//std::optional<uint32_t> skinningBufferIndex = std::nullopt;	// スキニングバッファーインデックス
 };
 
 // マルチコンポーネントを許可
