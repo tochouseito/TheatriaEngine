@@ -296,3 +296,17 @@ public:
 private:
 	uint32_t m_Entity;
 };
+// GameObjectを複製するコマンド
+class CopyGameObjectCommand : public IEngineCommand
+{
+	public:
+	CopyGameObjectCommand(const uint32_t& objectID) :
+		m_ObjectID(objectID)
+	{
+	}
+	bool Execute(EngineCommand* edit)override;
+	bool Undo(EngineCommand* edit)override;
+private:
+	uint32_t m_ObjectID;
+	uint32_t m_CopyObjectID;
+};

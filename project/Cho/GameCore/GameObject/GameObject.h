@@ -146,6 +146,7 @@ class GameObjectData
 {
 	friend class FileSystem;
 	friend class ScenePrefab;
+	friend class CopyGameObjectCommand;
 public:
 	GameObjectData(const std::wstring& name, const ObjectType& type) :
 		m_Name(name), m_Type(type)

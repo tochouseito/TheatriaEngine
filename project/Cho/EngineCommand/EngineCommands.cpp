@@ -650,3 +650,146 @@ bool AddAnimationComponent::Undo(EngineCommand* edit)
 	edit;
 	return false;
 }
+
+bool CopyGameObjectCommand::Execute(EngineCommand* edit)
+{
+	//ObjectContainer* objectContainer = edit->m_GameCore->GetObjectContainer();
+	ECSManager* ecs = edit->m_GameCore->GetECSManager();
+	//SceneManager* sceneManager = edit->m_GameCore->GetSceneManager();
+	// GameObjectを取得
+	GameObject& object = edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID);
+	if (!object.IsActive()) { return false; }
+	GameObjectData objData = object;
+	// オブジェクト名とタイプを取得
+	std::wstring name = objData.m_Name;
+	name = GenerateUniqueName(name, edit->m_GameCore->GetObjectContainer()->GetNameToObjectID());
+	ObjectType type = objData.m_Type;
+	// Entityを生成
+	Entity entity = edit->m_GameCore->GetECSManager()->GenerateEntity();
+	// GameObjectを追加
+	ObjectID objectID = edit->m_GameCore->GetObjectContainer()->AddGameObject(entity, name, type);
+	GameObject& newObj = edit->m_GameCore->GetObjectContainer()->GetGameObjectByName(name);
+	// SceneUseListに登録
+	edit->m_GameCore->GetSceneManager()->GetCurrentScene()->AddUseObject(newObj.GetID().value());
+	// コンポーネントの追加
+	// TransformComponentの追加
+	if (objData.m_Transform.has_value())
+	{
+		TransformComponent* transform = ecs->AddComponent<TransformComponent>(entity);
+		*transform = objData.m_Transform.value();
+		transform->mapID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::Transform)->GetMapID();
+	}
+	// CameraComponentの追加
+	if (objData.m_Camera.has_value())
+	{
+		CameraComponent* camera = ecs->AddComponent<CameraComponent>(entity);
+		*camera = objData.m_Camera.value();
+		camera->bufferIndex = edit->m_ResourceManager->CreateConstantBuffer<BUFFER_DATA_VIEWPROJECTION>();
+	}
+	// MeshFilterComponentの追加
+	if (objData.m_MeshFilter.has_value())
+	{
+		MeshFilterComponent* mesh = ecs->AddComponent<MeshFilterComponent>(entity);
+		*mesh = objData.m_MeshFilter.value();
+		mesh->modelID = edit->m_ResourceManager->GetModelManager()->GetModelDataIndex(mesh->modelName);
+		// モデルのUseListに登録
+		TransformComponent* transform = ecs->GetComponent<TransformComponent>(entity);
+		edit->m_ResourceManager->GetModelManager()->RegisterModelUseList(mesh->modelID.value(), transform->mapID.value());
+
+	}
+	// MeshRendererComponentの追加
+	if (objData.m_MeshRenderer.has_value())
+	{
+		MeshRendererComponent* renderer = ecs->AddComponent<MeshRendererComponent>(entity);
+		*renderer = objData.m_MeshRenderer.value();
+	}
+	// MaterialComponentの追加
+	if (objData.m_Material.has_value())
+	{
+		MaterialComponent* material = ecs->AddComponent<MaterialComponent>(entity);
+		*material = objData.m_Material.value();
+		material->mapID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::Material)->GetMapID();
+		TransformComponent* transform = ecs->GetComponent<TransformComponent>(entity);
+		transform->materialID = material->mapID;
+	}
+	// ScriptComponentの追加
+	if (objData.m_Script.has_value())
+	{
+		ScriptComponent* script = ecs->AddComponent<ScriptComponent>(entity);
+		*script = objData.m_Script.value();
+		script->objectID = objectID;
+	}
+	// LineRendererComponentの追加
+	for (const auto& line : objData.m_LineRenderer)
+	{
+		LineRendererComponent* lineRenderer = ecs->AddComponent<LineRendererComponent>(entity);
+		*lineRenderer = line;
+		lineRenderer->mapID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::Line)->GetMapID();
+	}
+	// Rigidbody2DComponentの追加
+	if (objData.m_Rigidbody2D.has_value())
+	{
+		Rigidbody2DComponent* rb = ecs->AddComponent<Rigidbody2DComponent>(entity);
+		*rb = objData.m_Rigidbody2D.value();
+		rb->selfObjectID = objectID;
+	}
+	// BoxCollider2DComponentの追加
+	if (objData.m_BoxCollider2D.has_value())
+	{
+		BoxCollider2DComponent* box = ecs->AddComponent<BoxCollider2DComponent>(entity);
+		*box = objData.m_BoxCollider2D.value();
+	}
+	// EmitterComponentの追加
+	if (objData.m_Emitter.has_value())
+	{
+		EmitterComponent* emitter = ecs->AddComponent<EmitterComponent>(entity);
+		*emitter = objData.m_Emitter.value();
+		emitter->bufferIndex = edit->m_ResourceManager->CreateConstantBuffer<BUFFER_DATA_EMITTER>();
+	}
+	// ParticleComponentの追加
+	if (objData.m_Particle.has_value())
+	{
+		ParticleComponent* particle = ecs->AddComponent<ParticleComponent>(entity);
+		*particle = objData.m_Particle.value();
+		// パーティクル
+		particle->bufferIndex = edit->m_ResourceManager->CreateRWStructuredBuffer<BUFFER_DATA_PARTICLE>(particle->count);
+		// PerFrame
+		particle->perFrameBufferIndex = edit->m_ResourceManager->CreateConstantBuffer<BUFFER_DATA_PARTICLE_PERFRAME>();
+		// FreeListIndex
+		particle->freeListIndexBufferIndex = edit->m_ResourceManager->CreateRWStructuredBuffer<int32_t>(1);
+		// FreeList
+		particle->freeListBufferIndex = edit->m_ResourceManager->CreateRWStructuredBuffer<uint32_t>(particle->count, true);
+	}
+	// UISpriteComponentの追加
+	if (objData.m_UISprite.has_value())
+	{
+		UISpriteComponent* uiSprite = ecs->AddComponent<UISpriteComponent>(entity);
+		*uiSprite = objData.m_UISprite.value();
+		uiSprite->mapID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::UISprite)->GetMapID();
+		edit->m_ResourceManager->GetUIContainer()->AddUI(uiSprite->mapID.value());
+	}
+	// LightComponentの追加
+	if (objData.m_Light.has_value())
+	{
+		LightComponent* light = ecs->AddComponent<LightComponent>(entity);
+		*light = objData.m_Light.value();
+		light->mapID = edit->m_ResourceManager->GetLightIndex();
+	}
+	// AudioComponentの追加
+	if (objData.m_Audio.has_value())
+	{
+		AudioComponent* audio = ecs->AddComponent<AudioComponent>(entity);
+		*audio = objData.m_Audio.value();
+		if (!audio->audioName.empty())
+		{
+			audio->audioID = edit->m_ResourceManager->GetAudioManager()->GetSoundDataIndex(audio->audioName);
+		}
+	}
+	return true;
+}
+
+bool CopyGameObjectCommand::Undo(EngineCommand* edit)
+{
+	edit;
+	return false;
+}

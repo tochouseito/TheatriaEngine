@@ -173,6 +173,14 @@ void Hierarchy::Window()
 			// ポップアップメニューを閉じる
 			ImGui::CloseCurrentPopup();
 		}
+		if (ImGui::MenuItem("複製"))
+		{
+			// 選択中のオブジェクトを複製
+			std::unique_ptr<CopyGameObjectCommand> copyCommand = std::make_unique<CopyGameObjectCommand>(m_EngineCommand->GetSelectedObject()->GetID().value());
+			m_EngineCommand->ExecuteCommand(std::move(copyCommand));
+			// ポップアップメニューを閉じる
+			ImGui::CloseCurrentPopup();
+		}
 		ImGui::EndPopup();
 	}
 

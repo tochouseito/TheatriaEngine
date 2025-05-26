@@ -153,7 +153,7 @@ void TextureManager::UploadTextureDataEx(ID3D12Resource* resource, const DirectX
 // ダミーテクスチャバッファを取得
 PixelBuffer* TextureManager::GetDummyTextureBuffer()
 {
-    std::wstring fileName = L"Dummy202411181622.png";
+    std::wstring fileName = L"Dummy202411181622";
     if (!m_TextureNameContainer.contains(fileName))
     {
 		Log::Write(LogLevel::Assert, "DummyTexture is not found");
