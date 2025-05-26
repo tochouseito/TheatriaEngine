@@ -754,3 +754,27 @@ void UISpriteAPI::Initialize(const Entity& entity, ECSManager* ecs, ObjectContai
 	auto* ui = m_ECS->GetComponent<UISpriteComponent>(m_Entity);
 	data = ui;
 }
+
+class AnimationAPI::ImplAnimationAPI
+{
+	public:
+	ImplAnimationAPI() = default;
+	~ImplAnimationAPI() = default;
+};
+AnimationAPI::AnimationAPI() : implAnimationAPI(new AnimationAPI::ImplAnimationAPI) {}
+AnimationAPI::~AnimationAPI() { delete implAnimationAPI; }
+void AnimationAPI::Initialize(const Entity& entity, ECSManager* ecs, ObjectContainer* objectContainer, ResourceManager* resourceManager)
+{
+	m_ECS = ecs;
+	m_ObjectContainer = objectContainer;
+	m_ResourceManager = resourceManager;
+	m_Entity = entity;
+	if (!m_ECS || !m_ResourceManager)
+	{
+		data = nullptr;
+		return;
+	}
+	// AnimationComponent を取得
+	auto* animation = m_ECS->GetComponent<AnimationComponent>(m_Entity);
+	data = animation;
+}

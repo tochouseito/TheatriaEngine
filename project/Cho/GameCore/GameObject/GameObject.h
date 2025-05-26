@@ -88,6 +88,7 @@ public:
 	UISpriteAPI ui;					// UIAPI
 	AudioAPI audio;					// AudioAPI
 	InputAPI input;					// InputAPI
+	AnimationAPI animation;			// AnimationAPI
 
 	// パラメータを取得
 	ObjectParameter GetParameter(const std::string& name) const;
@@ -123,6 +124,8 @@ private:
 		material.Initialize(m_Entity, m_ECS, m_ObjectContainer, m_ResourceManager);
 		ui.Initialize(m_Entity, m_ECS, m_ObjectContainer, m_ResourceManager);
 		input.Intialize(m_InputManager);
+		audio.Initialize(m_Entity, m_ECS, m_ObjectContainer, m_ResourceManager);
+		animation.Initialize(m_Entity, m_ECS, m_ObjectContainer, m_ResourceManager);
 	}
 	// スクリプトインスタンス取得関数補助
 	ScriptComponent* GetScriptComponent() const noexcept;
