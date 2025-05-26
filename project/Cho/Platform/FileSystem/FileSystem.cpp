@@ -574,9 +574,6 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
         {
 			std::wstring sceneName = std::filesystem::path(j["sceneName"].get<std::string>()).wstring();
 			scene.SetSceneName(sceneName);
-            //sceneManager->AddScene(sceneName);
-            //sceneManager->ChangeSceneRequest(sceneManager->GetSceneID(sceneName));
-			//scene = sceneManager->GetSceneToName(sceneName);
 		}
 
         // オブジェクト読み込み
@@ -588,12 +585,6 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
                 ObjectType type = ObjectTypeFromString(obj["type"].get<std::string>());
                 // GameObjectData
 				GameObjectData objData(name, type);
-                //Entity entity = ecs->GenerateEntity();
-                //ObjectID id = container->AddGameObject(entity, name, type);
-                //GameObject& gameObj = container->GetGameObjectByName(name);
-                
-
-                //scene->AddUseObject(gameObj.GetID().value());
 
                 if (!obj.contains("components")) continue;
                 const auto& comps = obj["components"];
@@ -606,17 +597,6 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
 					Deserialization::FromJson(jt,t);
                     // TransformComponentの保存
                     objData.m_Transform = t;
-                    /*t.translation = Vector3{ jt["translation"][0], jt["translation"][1], jt["translation"][2] };
-                    t.rotation = Quaternion{ jt["rotation"][0], jt["rotation"][1], jt["rotation"][2], jt["rotation"][3] };
-                    t.scale = Scale{ jt["scale"][0], jt["scale"][1], jt["scale"][2] };
-					t.degrees = Vector3{ jt["degrees"][0], jt["degrees"][1], jt["degrees"][2] };*/
-                    //TransformComponent* transform = ecs->AddComponent<TransformComponent>(entity);
-					/*transform->translation = t.translation;
-					transform->rotation = t.rotation;
-					transform->scale = t.scale;
-					transform->degrees = t.degrees;*/
-                    //*transform = t;
-                    //transform->mapID = resourceManager->GetIntegrationData(IntegrationDataType::Transform)->GetMapID();
                 }
 
                 if (comps.contains("Camera"))
@@ -627,17 +607,6 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
 					Deserialization::FromJson(jc, c);
 					// CameraComponentの保存
 					objData.m_Camera = c;
-                    /*c.fovAngleY = jc["fovAngleY"];
-                    c.aspectRatio = jc["aspectRatio"];
-                    c.nearZ = jc["nearZ"];
-                    c.farZ = jc["farZ"];*/
-                    //CameraComponent* camera = ecs->AddComponent<CameraComponent>(entity);
-					/*camera->fovAngleY = c.fovAngleY;
-					camera->aspectRatio = c.aspectRatio;
-					camera->nearZ = c.nearZ;
-					camera->farZ = c.farZ;*/
-					//*camera = c;
-					//camera->bufferIndex = resourceManager->CreateConstantBuffer<BUFFER_DATA_VIEWPROJECTION>();
                 }
 
                 if (comps.contains("MeshFilter"))
@@ -654,13 +623,6 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
                     }
                     // MeshFilterComponentの保存
 					objData.m_MeshFilter = m;
-                    //MeshFilterComponent* filter = ecs->AddComponent<MeshFilterComponent>(entity);
-					//TransformComponent* transform = ecs->GetComponent<TransformComponent>(entity);
-                    //filter->modelName = m.modelName;
-					// モデル名からIDを取得
-                    //filter->modelID = resourceManager->GetModelManager()->GetModelDataIndex(filter->modelName);
-					// モデルのUseListに登録
-                    //resourceManager->GetModelManager()->RegisterModelUseList(filter->modelID.value(), transform->mapID.value());
                 }
 
                 if (comps.contains("MeshRenderer"))
@@ -669,8 +631,6 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
                     r.visible = comps["MeshRenderer"].value("visible", true);
 					// MeshRendererComponentの保存
 					objData.m_MeshRenderer = r;
-                    //MeshRendererComponent* renderer = ecs->AddComponent<MeshRendererComponent>(entity);
-					//renderer->visible = r.visible;
                 }
 
 				if (comps.contains("Material"))
@@ -681,11 +641,6 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
 					Deserialization::FromJson(jm, m);
 					// MaterialComponentの保存
 					objData.m_Material = m;
-					//MaterialComponent* material = ecs->AddComponent<MaterialComponent>(entity);
-					//*material = m;
-					//TransformComponent* transform = ecs->GetComponent<TransformComponent>(entity);
-					//transform->materialID = resourceManager->GetIntegrationData(IntegrationDataType::Material)->GetMapID();
-					//material->mapID = transform->materialID;
 				}
 
                 if (comps.contains("Script"))
@@ -696,11 +651,6 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
                         std::string scriptNameStr = comps["Script"]["scriptName"].get<std::string>();
                         s.scriptName = scriptNameStr;
 						objData.m_Script = s;
-						//s.objectID = comps["Script"]["objectID"];
-                        //s.entity = entity;
-                        //ScriptComponent* script = ecs->AddComponent<ScriptComponent>(entity);
-                        //script->scriptName = s.scriptName;
-                        //script->objectID = id;
                     }
                 }
 
@@ -720,14 +670,6 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
 
 						// LineRendererComponentの保存
 						objData.m_LineRenderer.push_back(l);
-
-						// LineRendererComponentを追加
-						//uint32 mapID = resourceManager->GetIntegrationData(IntegrationDataType::Line)->GetMapID();
-                        //LineRendererComponent* comp = ecs->AddComponent<LineRendererComponent>(entity);
-						//comp->line.start = l.line.start;
-						//comp->line.end = l.line.end;
-						//comp->line.color = l.line.color;
-						//comp->mapID = mapID;
                     }
                 }
 
@@ -746,23 +688,9 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
 					r.runtimeBody = nullptr;
 					r.world = nullptr;
 					r.otherObjectID = std::nullopt;
-                    //r.selfObjectID = id;
 
 					// Rigidbody2DComponentの保存
 					objData.m_Rigidbody2D = r;
-
-                    /*Rigidbody2DComponent* rb = ecs->AddComponent<Rigidbody2DComponent>(entity);
-					rb->isActive = r.isActive;
-					rb->isKinematic = r.isKinematic;
-					rb->gravityScale = r.gravityScale;
-					rb->mass = r.mass;
-					rb->bodyType = r.bodyType;
-					rb->fixedRotation = r.fixedRotation;
-					rb->isCollisionStay = r.isCollisionStay;
-					rb->runtimeBody = r.runtimeBody;
-					rb->world = r.world;
-					rb->otherObjectID = r.otherObjectID;
-					rb->selfObjectID = r.selfObjectID;*/
                 }
 
                 // BoxCollider2D
@@ -781,16 +709,6 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
 
 					// BoxCollider2DComponentの保存
 					objData.m_BoxCollider2D = b;
-
-                    /*BoxCollider2DComponent* box = ecs->AddComponent<BoxCollider2DComponent>(entity);
-					box->offsetX = b.offsetX;
-					box->offsetY = b.offsetY;
-					box->width = b.width;
-					box->height = b.height;
-					box->density = b.density;
-					box->friction = b.friction;
-					box->restitution = b.restitution;
-					box->isSensor = b.isSensor;*/
                 }
 
                 // Emitter
@@ -801,9 +719,6 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
 					Deserialization::FromJson(je, e);
 					// EmitterComponentの保存
 					objData.m_Emitter = e;
-					//EmitterComponent* emitter = ecs->AddComponent<EmitterComponent>(entity);
-					//*emitter = e;
-					//emitter->bufferIndex = resourceManager->CreateConstantBuffer<BUFFER_DATA_EMITTER>();
                 }
 
 				// Particle
@@ -814,16 +729,6 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
                     Deserialization::FromJson(jp, p);
 					// ParticleComponentの保存
 					objData.m_Particle = p;
-                    //ParticleComponent* particle = ecs->AddComponent<ParticleComponent>(entity);
-                    //*particle = p;
-                    // パーティクル
-                    //particle->bufferIndex = resourceManager->CreateRWStructuredBuffer<BUFFER_DATA_PARTICLE>(particle->count);
-                    // PerFrame
-                    //particle->perFrameBufferIndex = resourceManager->CreateConstantBuffer<BUFFER_DATA_PARTICLE_PERFRAME>();
-                    // FreeListIndex
-                    //particle->freeListIndexBufferIndex = resourceManager->CreateRWStructuredBuffer<int32_t>(1);
-                    // FreeList
-                    //particle->freeListBufferIndex = resourceManager->CreateRWStructuredBuffer<uint32_t>(particle->count, true);
                 }
 				// UISprite
                 if (comps.contains("UISprite"))
@@ -833,10 +738,6 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
                     Deserialization::FromJson(ju, u);
 					// UISpriteComponentの保存
 					objData.m_UISprite = u;
-                    //UISpriteComponent* ui = ecs->AddComponent<UISpriteComponent>(entity);
-                    //*ui = u;
-                    //ui->mapID = resourceManager->GetIntegrationData(IntegrationDataType::UISprite)->GetMapID();
-                    //resourceManager->GetUIContainer()->AddUI(ui->mapID.value());
                 }
                 // Light
                 if (comps.contains("Light"))
@@ -866,11 +767,6 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
         {
             std::wstring camName = std::filesystem::path(j["mainCamera"].get<std::string>()).wstring();
 			scene.SetStartCameraName(camName);
-            //GameObject& camObj = container->GetGameObjectByName(camName);
-            //if (camObj.IsActive())
-            //{
-            //    scene->SetMainCameraID(camObj.GetID().value());
-            //}
         }
 		sceneManager->AddScene(scene);
         return true;

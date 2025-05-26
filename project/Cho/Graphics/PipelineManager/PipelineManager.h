@@ -52,6 +52,8 @@ public:
 	PSO GetEffectEditorEmitPSO() { return m_EffectEditorEmitPSO; }
 	// UI
 	PSO GetUIPSO() { return m_UIPSO; }
+	// SkinningCS
+	PSO GetSkinningPSO() { return m_Skinning; }
 private:
 	std::vector<std::pair<uint32_t, std::string>> CreateRootParameters(
 		ID3D12ShaderReflection* pReflector,
@@ -79,6 +81,9 @@ private:
 	// UI
 	void CreatePipelineUI(ID3D12Device8* device);
 
+	// SkinningCS
+	void CreatePipelineSkinningCS(ID3D12Device8* device);
+
 	std::unique_ptr<DXShaderCompiler> m_pShaderCompiler = nullptr;
 	PSO m_DemoPSO;
 	PSO m_ScreenCopyPSO;
@@ -99,5 +104,8 @@ private:
 
 	// UI
 	PSO m_UIPSO;
+
+	// SkinningCS
+	PSO m_Skinning;
 };
 

@@ -82,15 +82,15 @@ public:
 	void CreateConstantBufferResource(ID3D12Device* device) override
 	{
 		// 構造体のサイズを確認
-		if constexpr (std::is_class_v<T>)// クラス、構造体用
-		{
-			size_t size = sizeof(T);
-			bool isValid = size % 16 != 0;
-			if (isValid)
-			{
-				Log::Write(LogLevel::Assert, "Structure size must be multiple of 16 bytes");
-			}
-		}
+		//if constexpr (std::is_class_v<T>)// クラス、構造体用
+		//{
+		//	size_t size = sizeof(T);
+		//	bool isValid = size % 16 != 0;
+		//	if (isValid)
+		//	{
+		//		Log::Write(LogLevel::Assert, "Structure size must be multiple of 16 bytes");
+		//	}
+		//}
 		// リソースのサイズ
 		UINT structureByteStride = static_cast<UINT>(sizeof(T));
 		// リソース用のヒープの設定
@@ -271,6 +271,10 @@ public:
 			Log::Write(LogLevel::Assert, "Index out of range");
 			return m_MappedData[0];
 		}
+	}
+	std::span<T> GetMappedData() const
+	{
+		return m_MappedData;
 	}
 	// ディスクリプタハンドルを取得
 	D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCpuHandle() const override { return m_SRVCpuHandle; }

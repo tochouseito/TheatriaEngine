@@ -479,15 +479,14 @@ public:
 	EmitterUpdateSystem(ECSManager* ecs, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine)
 		: ECSManager::System<EmitterComponent>([this](Entity e, EmitterComponent& emitter)
 			{
-				e;
-				UpdateEmitter(emitter);
+				UpdateEmitter(e,emitter);
 			}),
 		m_pECS(ecs), m_pResourceManager(resourceManager), m_pGraphicsEngine(graphicsEngine)
 	{
 	}
 	~EmitterUpdateSystem() = default;
 private:
-	void UpdateEmitter(EmitterComponent& emitter);
+	void UpdateEmitter(Entity e,EmitterComponent& emitter);
 	ECSManager* m_pECS = nullptr;
 	ResourceManager* m_pResourceManager = nullptr;
 	GraphicsEngine* m_pGraphicsEngine = nullptr;
@@ -572,6 +571,76 @@ public:
 	~LightUpdateSystem() = default;
 private:
 	void UpdateLight(Entity e, LightComponent& light,TransformComponent& transform);
+	ECSManager* m_pECS = nullptr;
+	ResourceManager* m_pResourceManager = nullptr;
+	GraphicsEngine* m_pGraphicsEngine = nullptr;
+};
+struct ModelData;
+// アニメーション初期化システム
+class AnimationInitializeSystem : public ECSManager::System<AnimationComponent>
+{
+	public:
+	AnimationInitializeSystem(ECSManager* ecs, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine)
+		: ECSManager::System<AnimationComponent>([this](Entity e, AnimationComponent& animation)
+			{
+				e;
+				InitializeAnimation(animation);
+			}),
+		m_pECS(ecs), m_pResourceManager(resourceManager), m_pGraphicsEngine(graphicsEngine)
+	{
+	}
+	~AnimationInitializeSystem() = default;
+private:
+	void InitializeAnimation(AnimationComponent& animation);
+	ECSManager* m_pECS = nullptr;
+	ResourceManager* m_pResourceManager = nullptr;
+	GraphicsEngine* m_pGraphicsEngine = nullptr;
+};
+// アニメーション更新システム
+class AnimationUpdateSystem : public ECSManager::System<AnimationComponent>
+{
+	public:
+	AnimationUpdateSystem(ECSManager* ecs, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine)
+		: ECSManager::System<AnimationComponent>([this](Entity e, AnimationComponent& animation)
+			{
+				e;
+				UpdateAnimation(animation);
+			}),
+		m_pECS(ecs), m_pResourceManager(resourceManager), m_pGraphicsEngine(graphicsEngine)
+	{
+	}
+	~AnimationUpdateSystem() = default;
+private:
+	void UpdateAnimation(AnimationComponent& animation);
+
+	Vector3 CalculateValue(const std::vector<KeyframeVector3>& keyframes, const float& time);
+	Quaternion CalculateValue(const std::vector<KeyframeQuaternion>& keyframes, const float& time);
+	Scale CalculateValue(const std::vector<KeyframeScale>& keyframes, const float& time);
+	void timeUpdate(AnimationComponent& animation, ModelData* model);
+	void ApplyAnimation(AnimationComponent& animation, ModelData* model);
+	void SkeletonUpdate(AnimationComponent& animation, ModelData* model);
+	void SkinClusterUpdate(AnimationComponent& animation, ModelData* model);
+	void ApplySkinning(AnimationComponent& animation, ModelData* model);
+	ECSManager* m_pECS = nullptr;
+	ResourceManager* m_pResourceManager = nullptr;
+	GraphicsEngine* m_pGraphicsEngine = nullptr;
+};	
+// アニメーション終了システム
+class AnimationFinalizeSystem : public ECSManager::System<AnimationComponent>
+{
+	public:
+	AnimationFinalizeSystem(ECSManager* ecs, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine)
+		: ECSManager::System<AnimationComponent>([this](Entity e, AnimationComponent& animation)
+			{
+				e;
+				FinalizeAnimation(animation);
+			}),
+		m_pECS(ecs), m_pResourceManager(resourceManager), m_pGraphicsEngine(graphicsEngine)
+	{
+	}
+	~AnimationFinalizeSystem() = default;
+private:
+	void FinalizeAnimation(AnimationComponent& animation);
 	ECSManager* m_pECS = nullptr;
 	ResourceManager* m_pResourceManager = nullptr;
 	GraphicsEngine* m_pGraphicsEngine = nullptr;

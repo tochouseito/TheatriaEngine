@@ -74,7 +74,7 @@ void AssetBrowser::FileGrid(FolderNode& root)
 
     for (const auto& filePath : target->files)
     {
-        std::wstring wname = filePath.filename().wstring();
+        std::wstring wname = filePath.stem().wstring();
         std::wstring wext = filePath.extension().wstring();
 		std::string name = ConvertString(wname);
 		std::string ext = ConvertString(wext);
@@ -93,7 +93,16 @@ void AssetBrowser::FileGrid(FolderNode& root)
                 ImGui::SetDragDropPayload("Texture", fileName, strlen(fileName) + 1);
                 ImGui::EndDragDropSource();
             }
-        } else
+        } else if (ext == ".fbx" || ext ==".obj"||ext ==".gltf")
+        {
+            ImGui::Button(uniqueId.c_str(), ImVec2(iconSize, iconSize));
+            if (ImGui::BeginDragDropSource())
+            {
+                const char* fileName = name.c_str();
+                ImGui::SetDragDropPayload("ModelData", fileName, strlen(fileName) + 1);
+                ImGui::EndDragDropSource();
+            }
+        }else
         {
             ImGui::Button(uniqueId.c_str(), ImVec2(iconSize, iconSize));
         }

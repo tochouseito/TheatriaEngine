@@ -4,6 +4,7 @@
 #include "Core/Utility/Color.h"
 #include "Core/Utility/IDType.h"
 #include "Core/Utility/EffectStruct.h"
+#include "Core/Utility/AnimationStruct.h"
 #include <vector>         // C++98
 #include <array>          // C++11
 #include <functional>     // C++98
@@ -49,12 +50,15 @@ struct TransformComponent : public IComponentTag
 	Vector3 prePos = { 0.0f,0.0f,0.0f };				// 位置差分計算用
 	Vector3 preRot = { 0.0f,0.0f,0.0f };				// 回転差分計算用
 	Scale preScale = { 1.0f,1.0f,1.0f };				// スケール差分計算用
+	std::wstring parentName = L"";						// 親の名前
+	std::vector<std::wstring> childNames;				// 子供の名前
 	std::optional<uint32_t> parent = std::nullopt;		// 親のEntity
 	int tickPriority = 0;								// Tick優先度
 	//uint32_t bufferIndex = UINT32_MAX;				// バッファーインデックス
 	std::optional<uint32_t> mapID = std::nullopt;		// マップインデックス
 	TransformStartValue startValue;						// 初期値保存用
 	std::optional<uint32_t> materialID = std::nullopt;	// マテリアルID
+	std::optional<uint32_t> boneOffsetID = std::nullopt;	// ボーンオフセットID
 
 	TransformComponent& operator=(const TransformComponent& other)
 	{
@@ -101,13 +105,6 @@ struct TransformComponent : public IComponentTag
 		mapID = std::nullopt;
 		materialID = std::nullopt;
 	}
-};
-// Node用Transform構造体
-struct NodeTransform
-{
-    Vector3 translation = { 0.0f, 0.0f, 0.0f };
-    Quaternion rotation = { 0.0f, 0.0f, 0.0f,1.0f };
-    Scale scale = { 1.0f, 1.0f, 1.0f };
 };
 
 struct CameraComponent : public IComponentTag
@@ -617,6 +614,34 @@ struct AudioComponent : public IComponentTag
 	}
 };
 
+// アニメーションコンポーネント
+struct AnimationComponent : public IComponentTag
+{
+	float time = 0.0f;// 現在のアニメーションの時間
+	float transitionTime = 0.0f;// 遷移中経過時間
+	float transitionDuration = 0.1f;// 遷移にかける時間
+	float lerpTime = 0.0f;// 線形補間の時間
+	bool transition = false;
+	bool isEnd = false;// ループするかどうか
+	bool isRun = true;// アニメーションを再生するかどうか
+	bool isRestart = true;// アニメーションを再生するかどうか
+	uint32_t numAnimation = 0;// アニメーションの数
+	uint32_t animationIndex = 0;// アニメーションのIndex
+	uint32_t prevAnimationIndex = 0;// 1つ前のアニメーションのIndex
+	uint32_t transitionIndex = 0;// 遷移スタートのアニメーションのIndex
+	uint32_t nowFrame = 0;// 現在のフレーム
+	uint32_t allFrame = 0;// 全フレーム数
+	std::wstring modelName = L"";	// モデル名
+	std::optional<uint32_t> boneOffsetID = std::nullopt;	// ボーンオフセットID
+
+	std::optional<Skeleton> skeleton = std::nullopt;	// スケルトンデータ
+	std::optional<SkinCluster> skinCluster = std::nullopt;	// スキンクラスター
+
+	//std::optional<uint32_t> paletteBufferIndex = std::nullopt;	// パレットバッファーインデックス
+	//std::optional<uint32_t> influenceBufferIndex = std::nullopt;// インフルエンスバッファーインデックス
+	//std::optional<uint32_t> skinningBufferIndex = std::nullopt;	// スキニングバッファーインデックス
+};
+
 // マルチコンポーネントを許可
 template<>
 struct IsMultiComponent<LineRendererComponent> : std::true_type {};
@@ -636,6 +661,7 @@ template<> constexpr bool IsComponentAllowed<ObjectType::MeshObject, LineRendere
 template<> constexpr bool IsComponentAllowed<ObjectType::MeshObject, Rigidbody2DComponent> = true;
 template<> constexpr bool IsComponentAllowed<ObjectType::MeshObject, BoxCollider2DComponent> = true;
 template<> constexpr bool IsComponentAllowed<ObjectType::MeshObject, AudioComponent> = true;
+template<> constexpr bool IsComponentAllowed<ObjectType::MeshObject, AnimationComponent> = true;
 
 // Camera
 template<> constexpr bool IsComponentAllowed<ObjectType::Camera, TransformComponent> = true;

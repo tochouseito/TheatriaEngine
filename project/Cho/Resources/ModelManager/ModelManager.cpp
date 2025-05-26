@@ -6,23 +6,31 @@
 #include "ChoMath.h"
 #include "Core/ChoLog/ChoLog.h"
 #include "Core/Utility/GenerateUnique.h"
+#include <filesystem>
 using namespace Cho;
 
 bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 {
+	// 対応フォーマット:.fbx, .obj, .gltf, .blend, .mmd
+	// blend, mmdは未対応
 	Log::Write(LogLevel::Info, "LoadModelFile");
 	// 変数の宣言
 	std::string line;// ファイルから読んだ1行を格納するもの
 	Assimp::Importer importer;
 	std::string filePathString = filePath.string();
 	ModelData modelData;
-	// 頂点数とインデックス数
-	uint32_t vertices = 0;// 頂点数
-	uint32_t indices = 0;// インデックス数
 
 	// ここからファイルを開く
 	Log::Write(LogLevel::Info, "Start ReadFile");
-	const aiScene* scene = importer.ReadFile(filePathString.c_str(), aiProcess_FlipWindingOrder | aiProcess_FlipUVs);
+	const aiScene* scene = importer.ReadFile(
+		filePathString.c_str(),
+		aiProcess_FlipWindingOrder |
+		aiProcess_FlipUVs |
+		aiProcess_Triangulate);// 三角形化
+	if (!scene)
+	{
+		Log::Write(LogLevel::Assert, "Assimp ReadFile Error");
+	}
 	Log::Write(LogLevel::Info, "End ReadFile");
 	std::string err = importer.GetErrorString();
 	err = "ErrorString:" + err;
@@ -32,141 +40,229 @@ bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 		Log::Write(LogLevel::Assert, "No Meshes");// メッシュがないのは対応しない
 	}
 	// SceneのRootNodeを読んでシーン全体の階層構造を作り上げる
-	modelData.rootNode = ReadNode(scene->mRootNode);
-	// 
+	modelData.rootNode = ReadNode(scene->mRootNode,"");
+	// 名前取得
 	modelData.name = filePath.stem().wstring();
 	modelData.name = GenerateUniqueName(modelData.name, m_ModelNameContainer);
-	// メッシュのデータを保存
+
+	// メッシュ解析
 	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex)
 	{
 		MeshData meshData;
 		aiMesh* mesh = scene->mMeshes[meshIndex];
 		meshData.name = ConvertString(mesh->mName.C_Str());
-		vertices = mesh->mNumVertices;
-		for (uint32_t faceIndex = 0; faceIndex < mesh->mNumFaces; ++faceIndex)
-		{
-			aiFace& face = mesh->mFaces[faceIndex];
-			// 三角形の処理
-			if (face.mNumIndices == 3)
-			{
-				for (uint32_t element = 0; element < face.mNumIndices; ++element)
-				{
-					indices++;
-				}
-			}
-			// 四角形の処理（四角形の2つの三角形に分割）
-			else if (face.mNumIndices == 4)
-			{
-				// 四角形の1つ目の三角形(0,1,2)
-				indices++;
-				indices++;
-				indices++;
-
-				// 四角形の2つ目の三角形(0,1,2)
-				indices++;
-				indices++;
-				indices++;
-			}
-			// サポート外のポリゴン数の場合のエラーチェック
-			else
-			{
-				assert(false && "Unsupported polygon type");
-			}
-		}
-
+		// 頂点数とインデックス数を取得
+		uint32_t vertexCount = mesh->mNumVertices;// 頂点数
+		uint32_t indexCount = mesh->mNumFaces * 3;// インデックス数(三角形化されているので3倍)
 		// メモリ確保
-		meshData.vertices.resize(vertices);
-		meshData.indices.resize(indices);
-
-		modelData.meshes.push_back(meshData);
-	}
-
-	// Meshの解析
-	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex)
-	{
-		aiMesh* mesh = scene->mMeshes[meshIndex];
-		assert(mesh->HasNormals());// 法線がないMeshは非対応
-		std::string meshName = mesh->mName.C_Str();
-		std::wstring meshName2 = ConvertString(mesh->mName.C_Str());
-		//modelData->objects[meshName].material.isTexture = mesh->HasTextureCoords(0);
-
-		for (uint32_t vertexIndex = 0; vertexIndex < mesh->mNumVertices; ++vertexIndex)
+		meshData.vertices.resize(vertexCount);
+		meshData.indices.resize(indexCount);
+		// 頂点情報のコピー
+		if (!mesh->HasNormals())
 		{
-			//VertexData vertex;
-			aiVector3D& position = mesh->mVertices[vertexIndex];
-			aiVector3D& normal = mesh->mNormals[vertexIndex];
-			// UV座標のチェックと設定
+			// 法線がないメッシュは非対応
+			Log::Write(LogLevel::Assert, "Mesh has no normals. This is not supported.");
+		}
+		for (uint32_t vi = 0;vi < vertexCount; ++vi)
+		{
+			VertexData& dst = meshData.vertices[vi];
+			const aiVector3D& p = mesh->mVertices[vi];
+			const aiVector3D& n = mesh->mNormals[vi];
+			dst.position = { -p.x, p.y, p.z, 1.0f };// X軸反転
+			dst.normal = { -n.x, n.y, n.z };// X軸反転
 			if (mesh->HasTextureCoords(0))
 			{
-				aiVector3D& texcoord = mesh->mTextureCoords[0][vertexIndex];
-				modelData.meshes[meshIndex].vertices[vertexIndex].texCoord = { texcoord.x,texcoord.y };
+				const aiVector3D& t = mesh->mTextureCoords[0][vi];
+				dst.texCoord = { t.x, t.y };
 			} else
 			{
-				modelData.meshes[meshIndex].vertices[vertexIndex].texCoord = { 0.0f,0.0f };// ダミーのUV座標
+				dst.texCoord = { 0.0f, 0.0f };// UV座標がない場合はダミー
 			}
-			modelData.meshes[meshIndex].vertices[vertexIndex].position = { position.x,position.y,position.z,1.0f };
-			modelData.meshes[meshIndex].vertices[vertexIndex].normal = { normal.x,normal.y,normal.z };
-			modelData.meshes[meshIndex].vertices[vertexIndex].position.x *= -1.0f;
-			modelData.meshes[meshIndex].vertices[vertexIndex].normal.x *= -1.0f;
-			modelData.meshes[meshIndex].vertices[vertexIndex].color = { 1.0f,1.0f,1.0f,1.0f };
-			modelData.meshes[meshIndex].vertices[vertexIndex].vertexID = vertexIndex;
+			dst.color = { 1.0f, 1.0f, 1.0f, 1.0f };// 色は白
+			dst.vertexID = vi;// 頂点ID
 		}
-		// Index解析
-		uint32_t indexCount = 0;
-		for (uint32_t faceIndex = 0; faceIndex < mesh->mNumFaces; ++faceIndex)
+		// インデックス情報のコピー
+		uint32_t idx = 0;
+		for (uint32_t fi = 0;fi < mesh->mNumFaces;++fi)
 		{
-			aiFace& face = mesh->mFaces[faceIndex];
-			// 三角形の処理
-			if (face.mNumIndices == 3)
+			const aiFace& face = mesh->mFaces[fi];
+			// aiProcess_Triangulate を使っているので常に face.mNumIndices == 3
+			for (uint32_t e = 0;e < 3;++e)
 			{
-				for (uint32_t element = 0; element < face.mNumIndices; ++element)
+				meshData.indices[idx++] = face.mIndices[e];
+			}
+		}
+		// チェック
+		Log::Write(LogLevel::Assert, "MeshData IndexCount Check", idx == indexCount);
+
+		// マテリアル解析
+		if (scene->HasMaterials())
+		{
+			uint32_t materialIndex = mesh->mMaterialIndex;
+			Log::Write(LogLevel::Assert, "MeshData MaterialIndex Check", materialIndex < scene->mNumMaterials);
+			aiMaterial* aiMat = scene->mMaterials[materialIndex];
+			MaterialData materialData;
+
+			// 拡散色(diffuse Color)の取得
+			aiColor4D diffuseColor;
+			if (AI_SUCCESS == aiMat->Get(AI_MATKEY_COLOR_DIFFUSE, diffuseColor))
+			{
+				materialData.color = { diffuseColor.r, diffuseColor.g, diffuseColor.b, diffuseColor.a };
+			} else
+			{
+				// デフォルトの色を設定
+				materialData.color = { 1.0f, 1.0f, 1.0f, 1.0f }; // 白色
+				Log::Write(LogLevel::Warn, "Material has no diffuse color, using default white.");
+			}
+
+			// 拡散テクスチャ(diffuse Texture)の取得
+			if (aiMat->GetTextureCount(aiTextureType_DIFFUSE) > 0)
+			{
+				aiString path;
+				if (AI_SUCCESS == aiMat->GetTexture(aiTextureType_DIFFUSE, 0, &path))
 				{
-					uint32_t vertexIndex = face.mIndices[element];
-					modelData.meshes[meshIndex].indices[indexCount] = vertexIndex;
-					indexCount++;
+					std::filesystem::path texturePath{ path.C_Str() };
+					// ディレクトリパス、拡張子を除去
+					materialData.textureName = texturePath.stem().string();
 				}
 			}
-			// 四角形の処理（四角形の2つの三角形に分割）
-			else if (face.mNumIndices == 4)
-			{
-				// 四角形の1つ目の三角形(0,1,2)
-				modelData.meshes[meshIndex].indices[indexCount] = face.mIndices[0];
-				indexCount++;
-				modelData.meshes[meshIndex].indices[indexCount] = face.mIndices[1];
-				indexCount++;
-				modelData.meshes[meshIndex].indices[indexCount] = face.mIndices[2];
-				indexCount++;
-
-				// 四角形の2つ目の三角形(0,1,2)
-				modelData.meshes[meshIndex].indices[indexCount] = face.mIndices[0];
-				indexCount++;
-				modelData.meshes[meshIndex].indices[indexCount] = face.mIndices[2];
-				indexCount++;
-				modelData.meshes[meshIndex].indices[indexCount] = face.mIndices[3];
-			}
-			// サポート外のポリゴン数の場合のエラーチェック
-			else
-			{
-				assert(false && "Unsupported polygon type");
-			}
+			// MaterialDataを追加
+			meshData.materials.push_back(materialData);
 		}
 
-		//// マテリアル解析
-		//uint32_t materialIndex = mesh->mMaterialIndex;
-		//aiMaterial* material = scene->mMaterials[materialIndex];
-		//if (material->GetTextureCount(aiTextureType_DIFFUSE) != 0)
-		//{
-		//	aiString textureFilePath;
-		//	material->GetTexture(aiTextureType_DIFFUSE, 0, &textureFilePath);
-		//	// 画像テクスチャの読み込み処理
-		//	texLoader_->Load(textureFilePath.C_Str());
+		// アニメーション解析
+		if (scene->HasAnimations())
+		{
+			// アニメーションを読み込む
+			for (uint32_t animationIndex = 0; animationIndex < scene->mNumAnimations; ++animationIndex)
+			{
+				AnimationData animation; // 今回作成するアニメーションデータ
+				aiAnimation* animationAssimp = scene->mAnimations[animationIndex];
+				animation.duration = float(animationAssimp->mDuration / animationAssimp->mTicksPerSecond); // アニメーションの時間を秒単位に変換
 
-		//	modelData->objects[meshName].material.textureName = fs::path(textureFilePath.C_Str()).filename().string();
-		//	modelData->objects[meshName].material.isTexture = true;
-		//} else
-		//{
-		//	modelData->objects[meshName].material.isTexture = false;
-		//}
+				// チャネル（ノードのアニメーション情報）の解析
+				for (uint32_t channelIndex = 0; channelIndex < animationAssimp->mNumChannels; ++channelIndex)
+				{
+					aiNodeAnim* nodeAnimationAssimp = animationAssimp->mChannels[channelIndex];
+
+					// ノードのアニメーション情報を取得
+					NodeAnimation& nodeAnimation = animation.nodeAnimations[nodeAnimationAssimp->mNodeName.C_Str()];
+
+					// 平行移動（Translate）のキーフレームを解析
+					for (uint32_t keyIndex = 0; keyIndex < nodeAnimationAssimp->mNumPositionKeys; ++keyIndex)
+					{
+						aiVectorKey& keyAssimp = nodeAnimationAssimp->mPositionKeys[keyIndex];
+						KeyframeVector3 keyframe;
+						keyframe.time = float(keyAssimp.mTime / animationAssimp->mTicksPerSecond); // 時間を秒単位に変換
+						keyframe.value = { -keyAssimp.mValue.x, keyAssimp.mValue.y, keyAssimp.mValue.z }; // 右手座標系を左手座標系に変換
+						nodeAnimation.translate.keyframes.push_back(keyframe);
+					}
+
+					// 回転（Rotate）のキーフレームを解析
+					for (uint32_t keyIndex = 0; keyIndex < nodeAnimationAssimp->mNumRotationKeys; ++keyIndex)
+					{
+						aiQuatKey& keyAssimp = nodeAnimationAssimp->mRotationKeys[keyIndex];
+						KeyframeQuaternion keyframe;
+						keyframe.time = float(keyAssimp.mTime / animationAssimp->mTicksPerSecond); // 時間を秒単位に変換
+						keyframe.value = { keyAssimp.mValue.x, -keyAssimp.mValue.y, -keyAssimp.mValue.z, keyAssimp.mValue.w }; // 右手座標系を左手座標系に変換（y と z を反転）
+						nodeAnimation.rotate.keyframes.push_back(keyframe);
+					}
+
+					// スケール（Scale）のキーフレームを解析
+					for (uint32_t keyIndex = 0; keyIndex < nodeAnimationAssimp->mNumScalingKeys; ++keyIndex)
+					{
+						aiVectorKey& keyAssimp = nodeAnimationAssimp->mScalingKeys[keyIndex];
+						KeyframeScale keyframe;
+						keyframe.time = float(keyAssimp.mTime / animationAssimp->mTicksPerSecond); // 時間を秒単位に変換
+						keyframe.value = { keyAssimp.mValue.x, keyAssimp.mValue.y, keyAssimp.mValue.z }; // スケールはそのまま変換なし
+						nodeAnimation.scale.keyframes.push_back(keyframe);
+					}
+				}
+
+				// アニメーション解析完了後、ModelData に追加
+				modelData.animations.push_back(animation);
+			}
+		}
+		// ボーン解析
+		if (mesh->mNumBones)
+		{
+			modelData.isBone = true;
+			if (scene->mNumMeshes > 1)
+			{
+				// 複数メッシュのボーンは非対応
+				Log::Write(LogLevel::Assert, "Multiple meshes with bones are not supported.");
+			}
+			// ボーンの情報を取得
+			Skeleton skeleton;
+			skeleton.root = CreateJoint(modelData.rootNode, {}, skeleton.joints);
+			// 名前とindexのマッピングを行いアクセスしやすくする
+			for (const Joint& joint : skeleton.joints)
+			{
+				skeleton.jointMap.emplace(joint.name, joint.index);
+			}
+			modelData.skeleton = skeleton;
+			// スキンクラスタの情報を取得
+			SkinCluster skinCluster;
+			skinCluster.paletteData.data.resize(modelData.skeleton.joints.size());
+			skinCluster.influenceData.data.resize(vertexCount);
+			std::memset(skinCluster.influenceData.data.data(), 0, sizeof(ConstBufferDataVertexInfluence) * vertexCount);// Influenceの初期化
+			/*InverseBindPoseMatrixの保存領域を作成*/
+			skinCluster.inverseBindPoseMatrices.resize(modelData.skeleton.joints.size());
+			std::generate(skinCluster.inverseBindPoseMatrices.begin(), skinCluster.inverseBindPoseMatrices.end(), []() { return ChoMath::MakeIdentity4x4(); });
+			modelData.skinCluster = skinCluster;
+
+			for (uint32_t boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex)
+			{
+				aiBone* bone = mesh->mBones[boneIndex];// AssimpではJointをBoneと呼んでいる
+				std::string jointName = bone->mName.C_Str();
+				JointWeightData& jointWeightData = meshData.skinClusterData[jointName];
+
+				aiMatrix4x4 bindPoseMatrixAssimp = bone->mOffsetMatrix.Inverse();// BindPoseMatrixに戻す
+				aiVector3D scale, translate;
+				aiQuaternion rotate;
+				bindPoseMatrixAssimp.Decompose(scale, rotate, translate);// 成分を抽出
+				/*左手系のBindPoseMatrixを作る*/
+				Matrix4 bindPoseMatrix = ChoMath::MakeAffineMatrix(
+					{ scale.x,scale.y,scale.z }, { rotate.x,-rotate.y,-rotate.z,rotate.w }, { -translate.x,translate.y,translate.z });
+				/*InverseBindPoseMatrixにする*/
+				jointWeightData.inverseBindPoseMatrix = Matrix4::Inverse(bindPoseMatrix);
+
+				for (uint32_t weightIndex = 0; weightIndex < bone->mNumWeights; ++weightIndex)
+				{
+					jointWeightData.vertexWeights.push_back({ bone->mWeights[weightIndex].mWeight,bone->mWeights[weightIndex].mVertexId });
+				}
+			}
+			// Influence作成
+			/*ModelDataのSkinCluster情報を解析してInfluenceの中身を埋める*/
+			for (const auto& jointWeight : meshData.skinClusterData)
+			{
+				// ModelのSkinClusterの情報を解析
+				auto it = modelData.skeleton.jointMap.find(jointWeight.first);// jointWeight.firstはjoint名なので、skeletonに対象となるjointが含まれているか判断
+				if (it == modelData.skeleton.jointMap.end())
+				{
+					// そんな名前のjointは存在しない、なので次に回す
+					continue;
+				}
+				/*(*it).secondにはJointのIndexが入っているので、該当のindexのInverseBindPoseMatrixを代入*/
+				modelData.skinCluster.inverseBindPoseMatrices[(*it).second] = jointWeight.second.inverseBindPoseMatrix;
+				for (const auto& vertexWeight : jointWeight.second.vertexWeights)
+				{
+					auto& currentInfluence = modelData.skinCluster.influenceData.data[vertexWeight.vertexIndex];// 該当のvertexIndexのinfluence情報を参照しておく
+					for (uint32_t index = 0; index < kNumMaxInfluence; ++index)
+					{
+						// 空いてるところに入れる
+						if (currentInfluence.weights[index] == 0.0f)
+						{// weight==0が空いてる状態なので、その場所にweightとjointのIndexを代入
+							currentInfluence.weights[index] = vertexWeight.weight;
+							currentInfluence.jointIndices[index] = (*it).second;
+							break;
+						}
+					}
+				}
+			}
+		}
+		// メッシュデータをモデルデータに追加
+		modelData.meshes.push_back(meshData);
 	}
 	// modelDataを追加
 	AddModelData(modelData);
@@ -726,7 +822,7 @@ void ModelManager::CreateCylinder()
 }
 
 
-Node ModelManager::ReadNode(aiNode* node)
+Node ModelManager::ReadNode(aiNode* node,const std::string& parentName)
 {
 	Node result;
 	Node result2;
@@ -747,13 +843,37 @@ Node ModelManager::ReadNode(aiNode* node)
 	result.transform.translation = { -translate.x,translate.y,translate.z };// x軸を反転
 	result.localMatrix = ChoMath::MakeAffineMatrix(result.transform.scale, result.transform.rotation, result.transform.translation);
 	result.name = node->mName.C_Str();// Node名を格納
+	result.parentName = parentName;// 親Node名を格納
 	result.children.resize(node->mNumChildren);// 子供の数だけ確保
 	for (uint32_t childIndex = 0; childIndex < node->mNumChildren; ++childIndex)
 	{
 		// 再帰的に読んで階層構造を作っていく
-		result.children[childIndex] = ReadNode(node->mChildren[childIndex]);
+		result.children[childIndex] = ReadNode(node->mChildren[childIndex],result.name);
 	}
 	return result;
+}
+
+int32_t ModelManager::CreateJoint(const Node& node, const std::optional<int32_t>& parent, std::vector<Joint>& joints)
+{
+	Joint joint;
+	joint.name = node.name;
+	joint.localMatrix = node.localMatrix;
+	joint.skeletonSpaceMatrix = ChoMath::MakeIdentity4x4();
+	joint.transform = node.transform;
+	joint.index = static_cast<int32_t>(joints.size());// 現在登録されている数をIndexに
+	joint.parent = parent;
+	joints.push_back(joint);// SkeletonのJoint列に追加
+	for (const Node& child : node.children)
+	{
+		// 子Jointを作成し、そのIndexを登録
+		int32_t childIndex = CreateJoint(child, joint.index, joints);
+		joints[joint.index].children.push_back(childIndex);
+	}
+	// 自身のIndexを返す
+	return joint.index;
+	/*
+	本来はanimationするNodeのみを対象にしたほうがいいが今は全Nodeを対象にしている
+	*/
 }
 
 // ModelDataの追加
@@ -769,9 +889,48 @@ void ModelManager::AddModelData(ModelData& modelData)
 		// コピー
 		vertexBuffer->MappedDataCopy(mesh.vertices);
 		indexBuffer->MappedDataCopy(mesh.indices);
+
+		//if (modelData.isBone)
+		//{
+		modelData.skinInfoBufferIndex = m_pResourceManager->CreateConstantBuffer<SkinningInformation>();
+		ConstantBuffer<SkinningInformation>* skinInfoBuffer = dynamic_cast<ConstantBuffer<SkinningInformation>*>(m_pResourceManager->GetBuffer<IConstantBuffer>(modelData.skinInfoBufferIndex));
+		// SkinningInformationの初期化
+		SkinningInformation skinInfo;
+		skinInfo.numVertices = static_cast<uint32_t>(mesh.vertices.size());
+		if (modelData.isBone)
+		{
+			skinInfo.boneCount = static_cast<uint32_t>(modelData.skeleton.joints.size());
+			skinInfo.isSkinned = 1; // スキニングを有効にする
+			skinInfoBuffer->UpdateData(skinInfo);
+		}
+		else {
+			skinInfo.boneCount = 0; // ボーンがない場合は0
+			skinInfo.isSkinned = 0; // スキニングを無効にする
+			skinInfoBuffer->UpdateData(skinInfo);
+		}
+		//}
+		modelData.influenceBufferIndex = m_pResourceManager->CreateStructuredBuffer<ConstBufferDataVertexInfluence>(static_cast<UINT>(mesh.vertices.size())); // 影響度バッファを作成（最大4つのボーン影響を持つと仮定）
+		if (modelData.isBone)
+		{
+			StructuredBuffer<ConstBufferDataVertexInfluence>* influenceBuffer = dynamic_cast<StructuredBuffer<ConstBufferDataVertexInfluence>*>(m_pResourceManager->GetBuffer<IStructuredBuffer>(modelData.influenceBufferIndex));
+			// 影響度バッファの初期化
+			std::span<ConstBufferDataVertexInfluence> influences = influenceBuffer->GetMappedData();
+			std::memcpy(influences.data(), modelData.skinCluster.influenceData.data.data(), sizeof(ConstBufferDataVertexInfluence) * influences.size());
+		}
 	}
 	// UseTransformのリソースを作成
 	modelData.useTransformBufferIndex = m_pResourceManager->CreateStructuredBuffer<uint32_t>(kUseTransformOffset);
+	// ボーン行列統合バッファ
+	UINT jointCount = 0;
+	if (modelData.skeleton.joints.empty())
+	{
+		jointCount = 1;
+	}
+	else
+	{
+		jointCount = static_cast<UINT>(modelData.skeleton.joints.size() * 100);
+	}
+	modelData.boneMatrixBufferIndex = m_pResourceManager->CreateStructuredBuffer<ConstBufferDataWell>(jointCount);
 	// 名前が重複していたら、エラー
 	// ここに処理を追加する
 

@@ -262,4 +262,24 @@ void DirectX12Common::CheckD3D12Features()
 			}
 		}
 	}
+
+	//// Neural Network Acceleration (NNA)
+	//{
+	//	D3D12_FEATURE_DATA_D3D12_OPTIONS9 options9 = {};
+	//	if (SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS9, &options9, sizeof(options9))))
+	//	{
+	//		if (options9.NNAccelerationTier != D3D12_NN_ACCELERATION_TIER_NOT_SUPPORTED)
+	//		{
+	//			Log::Write(LogLevel::Info, std::format("NN Acceleration Tier: {}", (int)options9.NNAccelerationTier));
+	//		} else
+	//		{
+	//			Log::Write(LogLevel::Assert, "NN Acceleration: Not Supported");
+	//		}
+	//	}
+	//}
+
+	// Neural Shader
+	{
+		//D3D12_FEATURE_DATA_D3D12_OPTIONS15
+	}
 }

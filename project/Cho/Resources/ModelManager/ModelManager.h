@@ -2,10 +2,12 @@
 #include "ChoMath.h"
 #include "Core/Utility/FVector.h"
 #include "SDK/DirectX/DirectX12/stdafx/stdafx.h"
-#include "Core/Utility/Components.h"
+#include "Core/Utility/Color.h"
+#include "Core/Utility/AnimationStruct.h"
 #include <unordered_map>
 #include <filesystem>
 #include <list>
+#include <map>
 // assimp
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -26,13 +28,31 @@ struct Node
 	NodeTransform transform;
 	Matrix4 localMatrix;
 	std::string name;
+	std::string parentName;
 	std::vector<Node> children;
+};
+struct MaterialData
+{
+	Color color = { 1.0f,1.0f,1.0f,1.0f };
+	std::string textureName = "";
+};
+
+// アニメーションデータ構造体
+struct AnimationData
+{
+	float duration = 0.0f;// アニメーション全体の尺（単位は秒）
+	uint32_t allFrame = 0;// アニメーション全体のフレーム数
+	std::map<std::string, NodeAnimation> nodeAnimations;
 };
 struct MeshData
 {
 	std::wstring name;
 	std::vector<VertexData> vertices;
 	std::vector<uint32_t> indices;
+	std::vector<MaterialData> materials;
+	std::map<std::string, JointWeightData>skinClusterData;
+	//std::optional<uint32_t> influenceBufferIndex = std::nullopt; // スキニング情報のバッファインデックス
+	//std::optional<uint32_t> skinInfoBufferIndex = std::nullopt;	// スキニング情報バッファーインデックス
 	std::optional<uint32_t> vertexBufferIndex = std::nullopt;
 	std::optional<uint32_t> indexBufferIndex = std::nullopt;
 };
@@ -45,6 +65,15 @@ struct ModelData
 	std::list<uint32_t> useTransformList;
 	// このモデルを使用しているTFリストのバッファインデックス
 	std::optional<uint32_t> useTransformBufferIndex = std::nullopt;
+	bool isBone = false;
+	std::vector<AnimationData> animations;
+	Skeleton skeleton;
+	SkinCluster skinCluster;
+	// ボーン行列統合バッファインデックス
+	std::optional<uint32_t> boneMatrixBufferIndex = std::nullopt;
+	uint32_t nextBoneOffsetIndex = 0; // 次のボーンオフセットインデックス
+	std::optional<uint32_t> influenceBufferIndex = std::nullopt; // スキニング情報のバッファインデックス
+	std::optional<uint32_t> skinInfoBufferIndex = std::nullopt;	// スキニング情報バッファーインデックス
 };
 
 class ResourceManager;
@@ -102,7 +131,9 @@ private:
 	void CreateCylinder();
 
 	// 
-	Node ReadNode(aiNode* node);
+	Node ReadNode(aiNode* node, const std::string& parentName);
+	// ジョイントの生成
+	int32_t CreateJoint(const Node& node, const std::optional<int32_t>& parent, std::vector<Joint>& joints);
 	// モデルコンテナの要素数を取得する
 	//uint32_t GetModelDataSize() { return static_cast<uint32_t>(m_Models.size()); }
 	// ModelDataの追加
