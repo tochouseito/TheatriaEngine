@@ -387,3 +387,24 @@ private:
 	Entity m_Entity; // Entity
 	AudioComponent* data = nullptr;
 };
+
+struct CHO_API AnimationAPI
+{
+public:
+	AnimationAPI();
+	~AnimationAPI();
+	// 関数
+	void SetAnimationIndex(const int32_t& index) { data->animationIndex = index; }
+	// 関数ポインタのラッパー
+private:
+	friend class GameObject;
+	// 実装隠蔽クラス
+	class ImplAnimationAPI;
+	ImplAnimationAPI* implAnimationAPI = nullptr;
+	void Initialize(const Entity& entity, ECSManager* ecs, ObjectContainer* objectContainer, ResourceManager* resourceManager);
+	ECSManager* m_ECS = nullptr; // ECSManager
+	ObjectContainer* m_ObjectContainer = nullptr; // ObjectContainer
+	ResourceManager* m_ResourceManager = nullptr; // ResourceManager
+	Entity m_Entity; // Entity
+	AnimationComponent* data = nullptr;
+};
