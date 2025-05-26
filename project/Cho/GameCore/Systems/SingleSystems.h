@@ -479,15 +479,14 @@ public:
 	EmitterUpdateSystem(ECSManager* ecs, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine)
 		: ECSManager::System<EmitterComponent>([this](Entity e, EmitterComponent& emitter)
 			{
-				e;
-				UpdateEmitter(emitter);
+				UpdateEmitter(e,emitter);
 			}),
 		m_pECS(ecs), m_pResourceManager(resourceManager), m_pGraphicsEngine(graphicsEngine)
 	{
 	}
 	~EmitterUpdateSystem() = default;
 private:
-	void UpdateEmitter(EmitterComponent& emitter);
+	void UpdateEmitter(Entity e,EmitterComponent& emitter);
 	ECSManager* m_pECS = nullptr;
 	ResourceManager* m_pResourceManager = nullptr;
 	GraphicsEngine* m_pGraphicsEngine = nullptr;

@@ -394,8 +394,9 @@ void MaterialUpdateSystem::TransferComponent(const MaterialComponent& material)
 	m_pIntegrationBuffer->UpdateData(data, material.mapID.value());
 }
 
-void EmitterUpdateSystem::UpdateEmitter(EmitterComponent& emitter)
+void EmitterUpdateSystem::UpdateEmitter(Entity e, EmitterComponent& emitter)
 {
+	TransformComponent* transform = m_pECS->GetComponent<TransformComponent>(e);
 	emitter.frequencyTime += DeltaTime();
 
 	// 射出間隔を上回ったら射出許可を出して時間を調整
@@ -410,7 +411,7 @@ void EmitterUpdateSystem::UpdateEmitter(EmitterComponent& emitter)
 	}
 
 	BUFFER_DATA_EMITTER data = {};
-	data.position = emitter.position;
+	data.position = transform->translation;
 	data.radius = emitter.radius;
 	data.count = emitter.count;
 	data.frequency = emitter.frequency;
