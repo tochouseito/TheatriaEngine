@@ -433,8 +433,7 @@ bool AddEmitterComponent::Execute(EngineCommand* edit)
 	// EmitterComponentを追加
 	EmitterComponent* emitter = edit->m_GameCore->GetECSManager()->AddComponent<EmitterComponent>(m_Entity);
 	if (!emitter) { return false; }
-	emitter->bufferIndex = edit->m_ResourceManager->CreateConstantBuffer<BUFFER_DATA_EMITTER>();
-
+	emitter->bufferIndex = edit->m_ResourceManager->CreateStructuredBuffer<BUFFER_DATA_EMITTER>(1);
 	return true;
 }
 

@@ -724,6 +724,10 @@ void GraphicsEngine::DrawParticles(CommandContext* context, ResourceManager& res
 		// ParticleComponentを取得
 		ParticleComponent* particleComponent = gameCore.GetECSManager()->GetComponent<ParticleComponent>(object->GetEntity());
 		if (!particleComponent) { continue; }
+		MeshFilterComponent* meshFilterComponent = gameCore.GetECSManager()->GetComponent<MeshFilterComponent>(object->GetEntity());
+		if (!meshFilterComponent) { continue; }
+		MeshRendererComponent* meshRendererComponent = gameCore.GetECSManager()->GetComponent<MeshRendererComponent>(object->GetEntity());
+		if (!meshRendererComponent) { continue; }
 		// シーンがないならスキップ
 		if (!gameCore.GetSceneManager()->GetCurrentScene()) { continue; }
 		IConstantBuffer* cameraBuffer = nullptr;
@@ -750,8 +754,8 @@ void GraphicsEngine::DrawParticles(CommandContext* context, ResourceManager& res
 			// カメラがないならスキップ
 			if (!cameraBuffer) { continue; }
 		}
-		// 板ポリ取得
-		ModelData* modelData = resourceManager.GetModelManager()->GetModelData(L"Plane");
+		// 
+		ModelData* modelData = resourceManager.GetModelManager()->GetModelData(meshFilterComponent->modelName);
 		if (!modelData) { break; }
 		// VBVをセット
 		D3D12_VERTEX_BUFFER_VIEW* vbv = resourceManager.GetBuffer<IVertexBuffer>(modelData->meshes[0].vertexBufferIndex)->GetVertexBufferView();
@@ -764,9 +768,11 @@ void GraphicsEngine::DrawParticles(CommandContext* context, ResourceManager& res
 		// パーティクルバッファをセット
 		IRWStructuredBuffer* particleBuffer = resourceManager.GetBuffer<IRWStructuredBuffer>(particleComponent->bufferIndex);
 		context->SetGraphicsRootDescriptorTable(1, particleBuffer->GetUAVGpuHandle());
-		// ダミーマテリアル
-		PixelBuffer* dummyTexture = resourceManager.GetTextureManager()->GetDummyTextureBuffer();
-		context->SetGraphicsRootDescriptorTable(2, dummyTexture->GetSRVGpuHandle());
+		// マテリアル統合バッファをセット
+		IStructuredBuffer* materialBuffer = resourceManager.GetIntegrationBuffer(IntegrationDataType::Material);
+		context->SetGraphicsRootDescriptorTable(2, materialBuffer->GetSRVGpuHandle());
+		// 配列テクスチャのためヒープをセット
+		context->SetGraphicsRootDescriptorTable(3, resourceManager.GetSUVDHeap()->GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
 		// DrawCall
 		context->DrawIndexedInstanced(static_cast<UINT>(modelData->meshes[0].indices.size()), particleComponent->count, 0, 0, 0);
 	}

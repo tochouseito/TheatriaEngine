@@ -822,7 +822,7 @@ void PipelineManager::CreatePipelineParticle(ID3D12Device8* device)
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 	// ジェネリックに作成
-	D3D12_ROOT_PARAMETER rootParameters[3] = {};
+	D3D12_ROOT_PARAMETER rootParameters[4] = {};
 
 	// ViewProjection
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
@@ -838,16 +838,28 @@ void PipelineManager::CreatePipelineParticle(ID3D12Device8* device)
 	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 	rootParameters[1].DescriptorTable.pDescriptorRanges = &ParticleRange;
 	rootParameters[1].DescriptorTable.NumDescriptorRanges = 1;
-	// Texture
-	D3D12_DESCRIPTOR_RANGE textureRange = {};
-	textureRange.BaseShaderRegister = 0;
-	textureRange.NumDescriptors = 1;
-	textureRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	textureRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	// IntegrationMaterial
+	D3D12_DESCRIPTOR_RANGE integrationMaterialRange = {};
+	integrationMaterialRange.BaseShaderRegister = 0;//t0
+	integrationMaterialRange.RegisterSpace = 0;// space0
+	integrationMaterialRange.NumDescriptors = 1;
+	integrationMaterialRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	integrationMaterialRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	rootParameters[2].DescriptorTable.pDescriptorRanges = &textureRange;
+	rootParameters[2].DescriptorTable.pDescriptorRanges = &integrationMaterialRange;
 	rootParameters[2].DescriptorTable.NumDescriptorRanges = 1;
+	// Texture
+	D3D12_DESCRIPTOR_RANGE textureRange = {};
+	textureRange.BaseShaderRegister = 1;//t1
+	textureRange.RegisterSpace = 0;// space0
+	textureRange.NumDescriptors = 256;
+	textureRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	textureRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[3].DescriptorTable.pDescriptorRanges = &textureRange;
+	rootParameters[3].DescriptorTable.NumDescriptorRanges = 1;
 
 	rootSignatureDesc.pParameters = rootParameters;
 	rootSignatureDesc.NumParameters = _countof(rootParameters);
@@ -1166,10 +1178,16 @@ void PipelineManager::CreatePipelineParticleEmit(ID3D12Device8* device)
 	rootParameter[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 	rootParameter[0].DescriptorTable.pDescriptorRanges = &descriptorUAVRange;// Tableの中身の配列を指定
 	rootParameter[0].DescriptorTable.NumDescriptorRanges = 1;// Tableで利用する数
-	// CBV:Emitter
-	rootParameter[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;// CBVを使う
-	rootParameter[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;// PixelShaderを使う
-	rootParameter[1].Descriptor.ShaderRegister = 0;// レジスタ番号0とバインド
+	// SRV:Emitter
+	D3D12_DESCRIPTOR_RANGE descriptorSRVRange = {};
+	descriptorSRVRange.BaseShaderRegister = 0;
+	descriptorSRVRange.NumDescriptors = 1;
+	descriptorSRVRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	descriptorSRVRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameter[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameter[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	rootParameter[1].DescriptorTable.pDescriptorRanges = &descriptorSRVRange;// Tableの中身の配列を指定
+	rootParameter[1].DescriptorTable.NumDescriptorRanges = 1;// Tableで利用する数
 	// CBV:PerFrame
 	rootParameter[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;// CBVを使う
 	rootParameter[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;// PixelShaderを使う

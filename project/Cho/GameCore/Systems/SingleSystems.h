@@ -416,14 +416,31 @@ private:
 		b2PolygonShape shape;
 		shape.SetAsBox(box.width / 2.0f, box.height / 2.0f, b2Vec2(box.offsetX, box.offsetY), 0.0f);
 
+		// 面積を計算
+		float area = ComputePolygonArea(&shape);
+
 		b2FixtureDef fixtureDef;
 		fixtureDef.shape = &shape;
-		fixtureDef.density = box.density;
+		fixtureDef.density = rb.mass / area;
 		fixtureDef.friction = box.friction;
 		fixtureDef.restitution = box.restitution;
 		fixtureDef.isSensor = box.isSensor;
 
 		box.runtimeFixture = rb.runtimeBody->CreateFixture(&fixtureDef);
+	}
+	float ComputePolygonArea(const b2PolygonShape* shape)
+	{
+		float area = 0.0f;
+		const int count = shape->m_count;
+		const b2Vec2* verts = shape->m_vertices;
+
+		for (int i = 0; i < count; ++i)
+		{
+			const b2Vec2& a = verts[i];
+			const b2Vec2& b = verts[(i + 1) % count];
+			area += a.x * b.y - a.y * b.x;
+		}
+		return 0.5f * std::abs(area);
 	}
 
 	ECSManager* m_ECS = nullptr;
