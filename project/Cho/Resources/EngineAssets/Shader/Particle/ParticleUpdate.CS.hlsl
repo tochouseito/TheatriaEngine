@@ -41,7 +41,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
     gParticles[particleIndex].scale.velocity += gParticles[particleIndex].scale.acceleration * gPerFrame.deltaTime;
     // 色
     // フェードアウトフラグがオンなら、アルファでフェードアウト
-    if (gParticles[particleIndex].isFadeOut)
+    if (gParticles[particleIndex].isFadeOut != 0)
     {
         float alpha = 1.0f - (gParticles[particleIndex].currentTime / gParticles[particleIndex].lifeTime);
         gParticles[particleIndex].color.a = saturate(alpha);

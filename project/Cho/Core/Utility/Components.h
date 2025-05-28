@@ -414,13 +414,15 @@ struct EmitterComponent : public IComponentTag
 	PVA scale;                // スケール
 	float frequency;	// 射出間隔
 	float frequencyTime;// 射出間隔調整用時間
-	bool emit;
-	uint32_t emitCount = 10; // 射出数
+	bool emit = false;
+	int32_t emitCount = 10; // 射出数
 	bool isFadeOut;
 	bool isBillboard;	// 4バイト
 	std::optional<uint32_t> particleID = std::nullopt;	// パーティクルID
 	// バッファインデックス
 	std::optional<uint32_t> bufferIndex = std::nullopt;
+
+	std::optional<uint32_t> materalID = std::nullopt;	// マテリアルID
 
 	EmitterComponent& operator=(const EmitterComponent& other)
 	{

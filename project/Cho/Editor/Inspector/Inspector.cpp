@@ -57,6 +57,8 @@ void Inspector::ComponentsView(GameObject* object)
 	Rigidbody2DComponentView(object);
 	BoxCollider2DComponentView(object);
 	LightComponentView(object);
+	EmitterComponentView(object);
+	ParticleComponentView(object);
 	AudioComponentView(object);
 }
 
@@ -373,13 +375,47 @@ void Inspector::EmitterComponentView(GameObject* object)
 	if (!IsComponentAllowedAtRuntime<EmitterComponent>(object->GetType())) { return; }
 	EmitterComponent* emitter = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<EmitterComponent>(object->GetEntity());
 	if (!emitter) { return; }
-	if (ImGui::TreeNode("Emitter"))
+	if (ImGui::Button("発生"))
 	{
-		ImGui::DragFloat3("Position", &emitter->position.x, 0.1f);
-		ImGui::DragFloat("radius", &emitter->radius, 0.1f, 0.0f, 100.0f);
-		ImGui::DragFloat("Emit Frequency", &emitter->frequency, 0.1f, 0.0f, 100.0f);
-		ImGui::DragFloat("Emit frequencyTime", &emitter->frequencyTime, 0.1f, 0.0f, 100.0f);
+		emitter->emit = true;
 	}
+	ImGui::SeparatorText("生存時間");
+	ImGui::DragFloat("中央値", &emitter->lifeTime.median, 0.1f, 0.0f, 120.0f);
+	ImGui::DragFloat("振幅", &emitter->lifeTime.amplitude, 0.1f, 0.0f, 120.0f);
+	ImGui::Separator();
+	ImGui::DragInt("発生数", &emitter->emitCount, 1, 0, 1024);
+	ImGui::Checkbox("フェードアウト", &emitter->isFadeOut);
+	ImGui::Checkbox("ビルボード", &emitter->isBillboard);
+	if (ImGui::BeginTabBar("Emitter Settings"))
+	{
+		// position
+		if(ImGui::BeginTabItem("Position"))
+		{
+			EffectEditor::DragRandVector3("位置", &emitter->position.value, 0.1f, 0.0f, 0.0f);
+			EffectEditor::DragRandVector3("速度", &emitter->position.velocity, 0.1f, 0.0f, 0.0f);
+			EffectEditor::DragRandVector3("加速度", &emitter->position.acceleration, 0.1f, 0.0f, 0.0f);
+			ImGui::EndTabItem();
+		}
+		// rotation
+		if (ImGui::BeginTabItem("Rotation"))
+		{
+			EffectEditor::DragRandVector3("回転", &emitter->rotation.value, 0.1f, 0.0f, 0.0f);
+			EffectEditor::DragRandVector3("速度", &emitter->rotation.velocity, 0.1f, 0.0f, 0.0f);
+			EffectEditor::DragRandVector3("加速度", &emitter->rotation.acceleration, 0.1f, 0.0f, 0.0f);
+			ImGui::EndTabItem();
+		}
+		// scale
+		if (ImGui::BeginTabItem("Scale"))
+		{
+			EffectEditor::DragRandVector3("スケール", &emitter->scale.value, 0.1f, 0.0f, 0.0f);
+			EffectEditor::DragRandVector3("速度", &emitter->scale.velocity, 0.1f, 0.0f, 0.0f);
+			EffectEditor::DragRandVector3("加速度", &emitter->scale.acceleration, 0.1f, 0.0f, 0.0f);
+			ImGui::EndTabItem();
+		}
+		ImGui::EndTabBar();
+	}
+	//ImGui::DragFloat("Emit Frequency", &emitter->frequency, 0.1f, 0.0f, 100.0f);
+	//ImGui::DragFloat("Emit frequencyTime", &emitter->frequencyTime, 0.1f, 0.0f, 100.0f);
 }
 
 void Inspector::ParticleComponentView(GameObject* object)

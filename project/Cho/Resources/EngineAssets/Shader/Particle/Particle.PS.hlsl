@@ -35,8 +35,8 @@ PixelShaderOutput main(VSOutput input) {
         textureColor = gTextures[material.textureID].Sample(gSampler, transformedUV.xy);
     }
     // 合計
-    finalColor.rgb = material.color.rgb * textureColor.rgb;
-    finalColor.a = material.color.a * textureColor.a;
+    finalColor.rgb =input.color.rgb * material.color.rgb * textureColor.rgb;
+    finalColor.a = input.color.a * material.color.a * textureColor.a;
     // 最終出力
     output.color = finalColor;
 

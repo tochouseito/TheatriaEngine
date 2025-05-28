@@ -19,7 +19,6 @@ struct PerFrame {
     float time;
     float deltaTime;
 };
-static const float PI = 3.14159265359;
 struct RandValue
 {
     float median;

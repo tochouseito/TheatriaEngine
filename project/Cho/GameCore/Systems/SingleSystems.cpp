@@ -400,25 +400,38 @@ void EmitterUpdateSystem::UpdateEmitter(Entity e, EmitterComponent& emitter)
 	emitter.frequencyTime += DeltaTime();
 
 	// 射出間隔を上回ったら射出許可を出して時間を調整
-	if (emitter.frequency <= emitter.frequencyTime)
-	{
-		emitter.frequencyTime = 0.0f;
-		emitter.emit = 1;
-	} else
-	{
-		// 射出間隔を上回ってないので、許可は出せない
-		emitter.emit = 1;
-	}
-
+	//if (emitter.frequency <= emitter.frequencyTime)
+	//{
+	//	emitter.frequencyTime = 0.0f;
+	//	emitter.emit = 1;
+	//} else
+	//{
+	//	// 射出間隔を上回ってないので、許可は出せない
+	//	emitter.emit = 1;
+	//}
+	transform;
 	BUFFER_DATA_EMITTER data = {};
-	data.position = transform->translation;
-	data.radius = emitter.radius;
-	data.count = emitter.count;
+	data.lifeTime = emitter.lifeTime;
+	data.position = emitter.position;
+	data.rotation = emitter.rotation;
+	data.scale = emitter.scale;
 	data.frequency = emitter.frequency;
 	data.frequencyTime = emitter.frequencyTime;
 	data.emit = emitter.emit;
-	ConstantBuffer<BUFFER_DATA_EMITTER>* buffer = dynamic_cast<ConstantBuffer<BUFFER_DATA_EMITTER>*>(m_pResourceManager->GetBuffer<IConstantBuffer>(emitter.bufferIndex));
-	buffer->UpdateData(data);
+	data.emitCount = emitter.emitCount;
+	data.isFadeOut = emitter.isFadeOut;
+	data.isBillboard = emitter.isBillboard;
+	if (transform->materialID.has_value())
+	{
+		data.materialID = transform->materialID.value();
+	}
+	else
+	{
+		data.materialID = 0;
+	}
+	StructuredBuffer<BUFFER_DATA_EMITTER>* buffer = dynamic_cast<StructuredBuffer<BUFFER_DATA_EMITTER>*>(m_pResourceManager->GetBuffer<IStructuredBuffer>(emitter.bufferIndex));
+	buffer->UpdateData(data, 0);
+	emitter.emit = false;
 }
 
 void ParticleInitializeSystem::InitializeParticle(ParticleComponent& particle)
@@ -473,8 +486,8 @@ void ParticleUpdateSystem::UpdateParticle(EmitterComponent& emitter, ParticleCom
 	IRWStructuredBuffer* particleBuffer = m_pResourceManager->GetBuffer<IRWStructuredBuffer>(particle.bufferIndex);
 	context->SetComputeRootDescriptorTable(0, particleBuffer->GetUAVGpuHandle());
 	// エミッターバッファをセット
-	IConstantBuffer* emitterBuffer = m_pResourceManager->GetBuffer<IConstantBuffer>(emitter.bufferIndex);
-	context->SetComputeRootConstantBufferView(1, emitterBuffer->GetResource()->GetGPUVirtualAddress());
+	IStructuredBuffer* emitterBuffer = m_pResourceManager->GetBuffer<IStructuredBuffer>(emitter.bufferIndex);
+	context->SetComputeRootDescriptorTable(1, emitterBuffer->GetSRVGpuHandle());
 	// PerFrameバッファをセット
 	IConstantBuffer* perFrameBuffer = m_pResourceManager->GetBuffer<IConstantBuffer>(particle.perFrameBufferIndex);
 	context->SetComputeRootConstantBufferView(2, perFrameBuffer->GetResource()->GetGPUVirtualAddress());

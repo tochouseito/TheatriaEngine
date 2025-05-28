@@ -30,7 +30,7 @@ VSOutput main(VSInput input, uint instanceId : SV_InstanceID) {
     float4x4 translateMatrix = TranslateMatrix(particle.position.value);
     // ビルボードがオンなら行列を作成する
     float4x4 rotateMatrix = (float4x4) 0;
-    if (particle.isBillboard)
+    if (particle.isBillboard !=0)
     {
         rotateMatrix = BillboardMatrix(cameraMatrix);
     }

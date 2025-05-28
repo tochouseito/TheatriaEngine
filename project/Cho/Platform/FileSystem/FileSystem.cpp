@@ -1042,10 +1042,34 @@ json Cho::Serialization::ToJson(const BoxCollider2DComponent& bc)
 
 json Cho::Serialization::ToJson(const EmitterComponent& e)
 {
-	json j;
-	j["position"] = { e.position.x, e.position.y, e.position.z };
-	j["radius"] = e.radius;
-	j["count"] = e.count;
+    json j;
+    j["lifeTime"] = { e.lifeTime.median,e.lifeTime.amplitude };
+    {
+        // position
+        {// value
+            json x; json y; json z;
+            x["x"] = { e.position.value.x.median, e.position.value.x.amplitude};
+			y["y"] = { e.position.value.y.median, e.position.value.y.amplitude };
+            z["z"] = { e.position.value.z.median, e.position.value.z.amplitude };
+			j["position"]["value"] = { x, y, z };
+        }
+        {// velocity
+            json x; json y; json z;
+			x["x"] = { e.position.velocity.x.median, e.position.velocity.x.amplitude };
+			y["y"] = { e.position.velocity.y.median, e.position.velocity.y.amplitude };
+			z["z"] = { e.position.velocity.z.median, e.position.velocity.z.amplitude };
+            j["position"]["velocity"] = { x, y, z };
+        }
+        {// acceleration
+			json x; json y; json z;
+			x["x"] = { e.position.acceleration.x.median, e.position.acceleration.x.amplitude };
+			y["y"] = { e.position.acceleration.y.median, e.position.acceleration.y.amplitude };
+			z["z"] = { e.position.acceleration.z.median, e.position.acceleration.z.amplitude };
+            j["position"]["acceleration"] = { x, y, z };
+        }
+        // rotation
+       
+    }
 	j["frequency"] = e.frequency;
 	j["frequencyTime"] = e.frequencyTime;
 	return j;
@@ -1796,8 +1820,8 @@ void Cho::Deserialization::FromJson(const json& j, BoxCollider2DComponent& bc)
 void Cho::Deserialization::FromJson(const json& j, EmitterComponent& e)
 {
 	e.position = { j["position"][0], j["position"][1], j["position"][2] };
-	e.radius = j.value("radius", 1.0f);
-	e.count = j.value("count", 100);
+	/*e.radius = j.value("radius", 1.0f);
+	e.count = j.value("count", 100);*/
 	e.frequency = j.value("frequency", 0.1f);
 	e.frequencyTime = j.value("frequencyTime", 0.1f);
 }

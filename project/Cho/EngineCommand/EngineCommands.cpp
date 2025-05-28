@@ -419,6 +419,27 @@ bool AddParticleSystemObjectCommand::Execute(EngineCommand* edit)
 	edit->m_GameCore->GetSceneManager()->GetCurrentScene()->AddUseObject(objectID);
 	// SelectedObjectを設定
 	edit->SetSelectedObject(&edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID));
+	transform->scale.Zero();
+	// MeshFilterComponentを追加
+	std::unique_ptr<AddMeshFilterComponent> addMeshFilter = std::make_unique<AddMeshFilterComponent>(entity);
+	addMeshFilter->Execute(edit);
+	// MeshRendererComponentを追加
+	std::unique_ptr<AddMeshRendererComponent> addMeshRenderer = std::make_unique<AddMeshRendererComponent>(entity);
+	addMeshRenderer->Execute(edit);
+	// MaterialComponentを追加
+	std::unique_ptr<AddMaterialComponent> addMaterial = std::make_unique<AddMaterialComponent>(entity);
+	addMaterial->Execute(edit);
+	// EmitterComponentを追加
+	std::unique_ptr<AddEmitterComponent> addEmitter = std::make_unique<AddEmitterComponent>(entity);
+	addEmitter->Execute(edit);
+	EmitterComponent* emitter = edit->m_GameCore->GetECSManager()->GetComponent<EmitterComponent>(entity);
+	emitter->scale.value.x.median = 1.0f;
+	emitter->scale.value.y.median = 1.0f;
+	emitter->scale.value.z.median = 1.0f;
+	emitter->lifeTime.median = 20.0f;
+	// ParticleComponentを追加
+	std::unique_ptr<AddParticleComponent> addParticle = std::make_unique<AddParticleComponent>(entity);
+	addParticle->Execute(edit);
 	return true;
 }
 

@@ -174,13 +174,13 @@ void EmitterEditorUpdateSystem::UpdateEmitter(EmitterComponent& emitter)
 
 	BUFFER_DATA_EMITTER data = {};
 	data.position = emitter.position;
-	data.radius = emitter.radius;
-	data.count = emitter.count;
+	/*data.radius = emitter.radius;
+	data.count = emitter.count;*/
 	data.frequency = emitter.frequency;
 	data.frequencyTime = emitter.frequencyTime;
 	data.emit = emitter.emit;
-	ConstantBuffer<BUFFER_DATA_EMITTER>* buffer = dynamic_cast<ConstantBuffer<BUFFER_DATA_EMITTER>*>(m_pResourceManager->GetBuffer<IConstantBuffer>(emitter.bufferIndex));
-	buffer->UpdateData(data);
+	//ConstantBuffer<BUFFER_DATA_EMITTER>* buffer = dynamic_cast<ConstantBuffer<BUFFER_DATA_EMITTER>*>(m_pResourceManager->GetBuffer<IConstantBuffer>(emitter.bufferIndex));
+	//buffer->UpdateData(data);
 }
 
 void EffectEditorUpdateSystem::UpdateEffect(EffectComponent& effect)

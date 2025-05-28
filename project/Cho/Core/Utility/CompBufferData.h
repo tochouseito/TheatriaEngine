@@ -57,7 +57,7 @@ struct BUFFER_DATA_EMITTER final
 	uint32_t emitCount;
 	uint32_t isFadeOut;
 	uint32_t isBillboard;	// 4バイト
-
+	uint32_t materialID;	// 4バイト
 };
 // Particle
 // PerFrame
