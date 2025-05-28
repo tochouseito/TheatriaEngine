@@ -817,6 +817,26 @@ bool CopyGameObjectCommand::Execute(EngineCommand* edit)
 			audio->audioID = edit->m_ResourceManager->GetAudioManager()->GetSoundDataIndex(audio->audioName);
 		}
 	}
+	// AnimationComponentの追加
+	if (objData.m_Animation.has_value())
+	{
+		AnimationComponent* animation = ecs->AddComponent<AnimationComponent>(entity);
+		*animation = objData.m_Animation.value();
+		if (!animation->modelName.empty())
+		{
+			ModelData* model = edit->m_ResourceManager->GetModelManager()->GetModelData(animation->modelName);
+			if (model)
+			{
+				animation->boneOffsetID = model->nextBoneOffsetIndex;
+				model->nextBoneOffsetIndex++;
+				if (model->isBone)
+				{
+					animation->skeleton = model->skeleton;
+					animation->skinCluster = model->skinCluster;
+				}
+			}
+		}
+	}
 	return true;
 }
 

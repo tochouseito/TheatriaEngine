@@ -177,5 +177,6 @@ private:
 	std::optional<UISpriteComponent> m_UISprite = std::nullopt;
 	std::optional<LightComponent> m_Light = std::nullopt;
 	std::optional<AudioComponent> m_Audio = std::nullopt;
+	std::optional<AnimationComponent> m_Animation = std::nullopt;
 };
 

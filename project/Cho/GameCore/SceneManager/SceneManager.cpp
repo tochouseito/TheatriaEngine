@@ -136,6 +136,20 @@ void ScenePrefab::Start()
 				audio->audioID = m_SceneManager->m_pResourceManager->GetAudioManager()->GetSoundDataIndex(audio->audioName);
 			}
 		}
+		// AnimationComponentの追加
+		if(objData.m_Animation.has_value())
+		{
+			AnimationComponent* animation = ecs->AddComponent<AnimationComponent>(entity);
+			*animation = objData.m_Animation.value();
+			ModelData* modelData = m_SceneManager->m_pResourceManager->GetModelManager()->GetModelData(animation->modelName);
+			if (modelData)
+			{
+				animation->skeleton = modelData->skeleton;
+				animation->skinCluster = modelData->skinCluster;
+				animation->boneOffsetID = modelData->nextBoneOffsetIndex;
+				modelData->nextBoneOffsetIndex++;
+			}
+		}
 	}
 	// MainCameraの設定
 	GameObject& mainCamera = objectContainer->GetGameObjectByName(m_StartCameraName);

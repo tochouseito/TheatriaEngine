@@ -408,6 +408,13 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, SceneManager*
 					comps["Audio"] = Cho::Serialization::ToJson(*a);
 				}
 			}
+            if (IsComponentAllowedAtRuntime<AnimationComponent>(obj.GetType()))
+            {
+                if (const auto* anim = ecs->GetComponent<AnimationComponent>(entity))
+                {
+                    comps["Animation"] = Cho::Serialization::ToJson(*anim);
+                }
+			}
 
             objJson["components"] = comps;
             objArray.push_back(objJson);
@@ -522,6 +529,13 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, SceneManager*
 				{
 					comps["Audio"] = Cho::Serialization::ToJson(objData.m_Audio.value());
 				}
+			}
+			if (IsComponentAllowedAtRuntime<AnimationComponent>(objData.m_Type))
+                {
+                if (objData.m_Animation.has_value())
+                {
+                    comps["Animation"] = Cho::Serialization::ToJson(objData.m_Animation.value());
+                }
 			}
 
             objJson["components"] = comps;
@@ -757,6 +771,15 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
 					// AudioComponentの保存
 					objData.m_Audio = a;
 				}
+				// Animation
+                if (comps.contains("Animation"))
+                {
+                    AnimationComponent anim{};
+                    auto& jan = comps["Animation"];
+                    Deserialization::FromJson(jan, anim);
+                    // AnimationComponentの保存
+                    objData.m_Animation = anim;
+                }
 				// GameObjectDataの追加
 				scene.AddGameObjectData(objData);
             }
@@ -1165,8 +1188,10 @@ json Cho::Serialization::ToJson(const AudioComponent& a)
 json Cho::Serialization::ToJson(const AnimationComponent& a)
 {
 	json j;
-	j["time"] = a.time;
     j["transitionDuration"] = a.transitionDuration;
+	j["animationIndex"] = a.animationIndex;
+	std::string modelNameStr = ConvertString(a.modelName);
+    j["modelName"] = modelNameStr;
 
 	return j;
 }
@@ -1207,7 +1232,6 @@ void Cho::FileSystem::SaveProject(SceneManager* sceneManager, ObjectContainer* c
 	std::filesystem::path projectPath = std::filesystem::path(L"GameProjects") / m_sProjectName;
 	// GameSettingsFile
     Cho::FileSystem::SaveGameSettings(projectPath, g_GameSettings);
-
     // SceneFile
     for (auto& scene : sceneManager->GetScenes().GetVector())
     {
@@ -1955,6 +1979,14 @@ void Cho::Deserialization::FromJson(const json& j, AudioComponent& a)
 {
 	a.audioName = j.value("audioName", "");
 	a.isLoop = j.value("isLoop", false);
+}
+
+void Cho::Deserialization::FromJson(const json& j, AnimationComponent& a)
+{
+	a.transitionDuration = j.value("transitionDuration", 0.2f);
+	a.animationIndex = j.value("animationIndex", 0);
+	std::string modelName = j.value("modelName", "");
+	a.modelName = ConvertString(modelName);
 }
 
 void Cho::FileSystem::ScanFolder(const path& rootPath, EngineCommand* engineCommand)
