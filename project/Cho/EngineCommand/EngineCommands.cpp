@@ -389,7 +389,7 @@ bool AddMaterialComponent::Execute(EngineCommand* edit)
 	material->color = color.From255(200, 200, 200);
 	material->enableLighting = true;
 	material->matUV = Matrix4::Identity();
-	material->shininess = 0.0f;
+	material->shininess = 50.0f;
 	// Material統合バッファからmapIDを取得
 	uint32_t mapID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::Material)->GetMapID();
 	TransformComponent* transform = edit->m_GameCore->GetECSManager()->GetComponent<TransformComponent>(m_Entity);
