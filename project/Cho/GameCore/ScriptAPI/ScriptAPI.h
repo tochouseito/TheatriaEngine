@@ -372,9 +372,11 @@ public:
 	~AudioAPI();
 	// 関数
 	void SetLoop(const bool& loop) { data->isLoop = loop; }
+	bool GetIsPlay()const { return data->isPlay; }
 	// 関数ポインタのラッパー
 	void Play();
 	void Stop();
+	void SetSource(const std::string& sourceName);
 private:
 	friend class GameObject;
 	// 実装隠蔽クラス

@@ -79,6 +79,14 @@ public:
 		return nullptr;
 	}
 
+	// 使用禁止
+	template<typename T>
+	std::vector<T> GetValues()
+	{
+		std::vector<T> values;
+		return values;
+	}
+
 	TransformAPI transform;			// TransformAPI
 	CameraAPI camera;				// CameraAPI
 	LineRendererAPI lineRenderer;	// LineRendererAPI
@@ -98,7 +106,6 @@ private:
 
 	void SetID(const ObjectID& id) noexcept;
 	void SetName(const std::wstring& name) noexcept;
-
 	
 	Entity m_Entity;								// エンティティ
 	

@@ -609,6 +609,7 @@ public:
 	~ImplAudioAPI() = default;
 	std::function<void()> PlayFunc;
 	std::function<void()> StopFunc;
+	std::function<void(const std::string& sourceName)> SetSourceFunc;
 };
 AudioAPI::AudioAPI() : implAudioAPI(new AudioAPI::ImplAudioAPI) {}
 AudioAPI::~AudioAPI() { delete implAudioAPI; }
@@ -620,6 +621,11 @@ void AudioAPI::Play()
 void AudioAPI::Stop()
 {
 	if (implAudioAPI->StopFunc) { implAudioAPI->StopFunc(); }
+}
+
+void AudioAPI::SetSource(const std::string& sourceName)
+{
+	if (implAudioAPI->SetSourceFunc) { implAudioAPI->SetSourceFunc(sourceName); }
 }
 
 void AudioAPI::Initialize(const Entity& entity, ECSManager* ecs, ObjectContainer* objectContainer, ResourceManager* resourceManager)
@@ -650,6 +656,17 @@ void AudioAPI::Initialize(const Entity& entity, ECSManager* ecs, ObjectContainer
 			{
 				m_ResourceManager->GetAudioManager()->SoundStop(a->audioID.value());
 				a->isPlay = false;
+			}
+			};
+		implAudioAPI->SetSourceFunc = [this](const std::string& sourceName) {
+			if (auto* a = m_ECS->GetComponent<AudioComponent>(m_Entity))
+			{
+				if (a->audioID.has_value()&&a->isPlay)
+				{
+					m_ResourceManager->GetAudioManager()->SoundStop(a->audioID.value());
+				}
+				a->audioID = m_ResourceManager->GetAudioManager()->GetSoundDataIndex(sourceName);
+				a->isPlay = false; // ソースを変更したら再生状態をリセット
 			}
 			};
 	}
