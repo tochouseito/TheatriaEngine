@@ -510,6 +510,7 @@ void Inspector::AddComponent(GameObject* object)
 		bool canAddBoxCollider2D = IsComponentAllowedAtRuntime<BoxCollider2DComponent>(objectType);
 		bool canAddEmitter = IsComponentAllowedAtRuntime<EmitterComponent>(objectType);
 		bool canAddParticle = IsComponentAllowedAtRuntime<ParticleComponent>(objectType);
+		bool canAddAnimation = IsComponentAllowedAtRuntime<AnimationComponent>(objectType);
 		bool canAddAudio = IsComponentAllowedAtRuntime<AudioComponent>(objectType);
 
 		if (canAddMeshFilter)
@@ -634,14 +635,33 @@ void Inspector::AddComponent(GameObject* object)
 				}
 			}
 		}
+		if(canAddAnimation)
+		{
+			// AnimationComponentを取得
+			AnimationComponent* animation = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<AnimationComponent>(object->GetEntity());
+			if (!animation)
+			{
+				if (ImGui::Selectable("AnimationComponent"))
+				{
+					// AnimationComponentを追加
+					std::unique_ptr<AddAnimationComponent> addAnimationComp = std::make_unique<AddAnimationComponent>(object->GetEntity());
+					m_EngineCommand->ExecuteCommand(std::move(addAnimationComp));
+					isOpen = false;
+				}
+			}
+		}
 		if (canAddAudio)
 		{
-			if (ImGui::Selectable("AudioComponent"))
+			AudioComponent* audio = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<AudioComponent>(object->GetEntity());
+			if (!audio)
 			{
-				// AudioComponentを追加
-				std::unique_ptr<AddAudioComponent> addAudioComp = std::make_unique<AddAudioComponent>(object->GetEntity());
-				m_EngineCommand->ExecuteCommand(std::move(addAudioComp));
-				isOpen = false;
+				if (ImGui::Selectable("AudioComponent"))
+				{
+					// AudioComponentを追加
+					std::unique_ptr<AddAudioComponent> addAudioComp = std::make_unique<AddAudioComponent>(object->GetEntity());
+					m_EngineCommand->ExecuteCommand(std::move(addAudioComp));
+					isOpen = false;
+				}
 			}
 		}
 	}
