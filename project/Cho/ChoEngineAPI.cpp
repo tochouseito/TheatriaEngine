@@ -157,7 +157,7 @@ CHO_API GameObject& ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vecto
 	// 初期位置を設定
 	if (transform)
 	{
-		transform->translation = generatePosition;
+		transform->position = generatePosition;
 	}
 	engineCommand->GetGameCore()->AddGameGenerateObject(newObject.GetID().value());
 	return newObject;

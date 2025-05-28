@@ -72,10 +72,10 @@ void TransformEditorSystem::UpdateComponent(Entity e, TransformComponent& transf
 	transform.rotation.Normalize();
 
 	// アフィン変換
-	transform.matWorld = ChoMath::MakeAffineMatrix(transform.scale, transform.rotation, transform.translation);
+	transform.matWorld = ChoMath::MakeAffineMatrix(transform.scale, transform.rotation, transform.position);
 
 	// 次のフレーム用に保存する
-	transform.prePos = transform.translation;
+	transform.prePos = transform.position;
 	transform.preRot = radians;
 	transform.preScale = transform.scale;
 
@@ -109,7 +109,7 @@ void TransformEditorSystem::TransferMatrix(TransformComponent& transform)
 void CameraEditorSystem::UpdateMatrix(TransformComponent& transform, CameraComponent& camera)
 {
 	// アフィン変換
-	transform.matWorld = ChoMath::MakeAffineMatrix(transform.scale, transform.rotation, transform.translation);
+	transform.matWorld = ChoMath::MakeAffineMatrix(transform.scale, transform.rotation, transform.position);
 	TransferMatrix(transform, camera);
 }
 
@@ -120,7 +120,7 @@ void CameraEditorSystem::TransferMatrix(TransformComponent& transform, CameraCom
 	data.view = Matrix4::Inverse(transform.matWorld);
 	data.projection = ChoMath::MakePerspectiveFovMatrix(camera.fovAngleY, camera.aspectRatio, camera.nearZ, camera.farZ);
 	data.projectionInverse = Matrix4::Inverse(data.projection);
-	data.cameraPosition = transform.translation;
+	data.cameraPosition = transform.position;
 	ConstantBuffer<BUFFER_DATA_VIEWPROJECTION>* buffer = dynamic_cast<ConstantBuffer<BUFFER_DATA_VIEWPROJECTION>*>(m_pResourceManager->GetBuffer<IConstantBuffer>(camera.bufferIndex));
 	buffer->UpdateData(data);
 }

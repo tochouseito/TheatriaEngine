@@ -41,7 +41,7 @@ struct TransformStartValue
 
 struct TransformComponent : public IComponentTag
 {
-	Vector3 translation = { 0.0f, 0.0f, 0.0f };			// 位置
+	Vector3 position = { 0.0f, 0.0f, 0.0f };			// 位置
 	Quaternion rotation = { 0.0f, 0.0f, 0.0f,1.0f };	// 回転
 	Scale scale = { 1.0f, 1.0f, 1.0f };					// スケール
 	Matrix4 matWorld = ChoMath::MakeIdentity4x4();		// ワールド行列
@@ -64,7 +64,7 @@ struct TransformComponent : public IComponentTag
 	{
 		if (this == &other) return *this;
 
-		translation = other.translation;
+		position = other.position;
 		rotation = other.rotation;
 		scale = other.scale;
 		degrees = other.degrees;
@@ -91,7 +91,7 @@ struct TransformComponent : public IComponentTag
 	// 初期化
 	void Initialize()
 	{
-		translation.Initialize();
+		position.Initialize();
 		rotation.Initialize();
 		scale.Initialize();
 		matWorld = ChoMath::MakeIdentity4x4();

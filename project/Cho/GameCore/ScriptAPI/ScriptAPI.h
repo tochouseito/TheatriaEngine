@@ -77,7 +77,7 @@ class ObjectContainer;
 struct CHO_API TransformAPI
 {
 	// 関数
-	Vector3& position() { return data->translation; }
+	Vector3& position() { return data->position; }
 	Vector3& rotation() { return data->degrees; }
 	Quaternion& quaternion() { return data->rotation; }
 	Scale& scale() { return data->scale; }
@@ -283,12 +283,7 @@ public:
 	ParticleAPI();
 	~ParticleAPI();
 	// 関数ポインタのラッパー
-	void SetPosition(const Vector3& position);
-	void SetVelocity(const Vector3& velocity);
-	void SetAcceleration(const Vector3& acceleration);
-	void SetRotation(const Vector3& rotation);
-	void SetScale(const Vector3& scale);
-	void SetColor(const Vector3& color);
+	void Emit(const Vector3& position);
 private:
 	friend class GameObject;
 	void Initialize(const Entity& entity, ECSManager* ecs, ObjectContainer* objectContainer, ResourceManager* resourceManager);
@@ -299,7 +294,8 @@ private:
 	// 実装隠蔽クラス
 	class ImplParticleAPI;
 	ImplParticleAPI* implParticleAPI = nullptr;
-	ParticleComponent* data = nullptr;
+	//ParticleComponent* data = nullptr;
+	EmitterComponent* data = nullptr; 
 };
 
 struct CHO_API EffectAPI
@@ -410,3 +406,4 @@ private:
 	Entity m_Entity; // Entity
 	AnimationComponent* data = nullptr;
 };
+

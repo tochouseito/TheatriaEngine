@@ -97,6 +97,7 @@ public:
 	AudioAPI audio;					// AudioAPI
 	InputAPI input;					// InputAPI
 	AnimationAPI animation;			// AnimationAPI
+	ParticleAPI particle;		// ParticleAPI
 
 	// パラメータを取得
 	ObjectParameter GetParameter(const std::string& name) const;
@@ -131,6 +132,7 @@ private:
 		material.Initialize(m_Entity, m_ECS, m_ObjectContainer, m_ResourceManager);
 		ui.Initialize(m_Entity, m_ECS, m_ObjectContainer, m_ResourceManager);
 		input.Intialize(m_InputManager);
+		particle.Initialize(m_Entity, m_ECS, m_ObjectContainer, m_ResourceManager);
 		audio.Initialize(m_Entity, m_ECS, m_ObjectContainer, m_ResourceManager);
 		animation.Initialize(m_Entity, m_ECS, m_ObjectContainer, m_ResourceManager);
 	}

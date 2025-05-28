@@ -410,44 +410,14 @@ class ParticleAPI::ImplParticleAPI
 public:
 	ImplParticleAPI() = default;
 	~ImplParticleAPI() = default;
-	std::function<void(const Vector3& position)> SetPositionFunc;
-	std::function<void(const Vector3& velocity)> SetVelocityFunc;
-	std::function<void(const Vector3& acceleration)> SetAccelerationFunc;
-	std::function<void(const Vector3& rotation)> SetRotationFunc;
-	std::function<void(const Vector3& scale)> SetScaleFunc;
-	std::function<void(const Vector3& color)> SetColorFunc;
+	std::function<void(const Vector3& position)> EmitFunc;
 };
 ParticleAPI::ParticleAPI() : implParticleAPI(new ParticleAPI::ImplParticleAPI) {}
 ParticleAPI::~ParticleAPI() { delete implParticleAPI; }
 
-void ParticleAPI::SetPosition(const Vector3& position)
+void ParticleAPI::Emit(const Vector3& position)
 {
-	if (implParticleAPI->SetPositionFunc) { implParticleAPI->SetPositionFunc(position); }
-}
-
-void ParticleAPI::SetVelocity(const Vector3& velocity)
-{
-	if (implParticleAPI->SetVelocityFunc) { implParticleAPI->SetVelocityFunc(velocity); }
-}
-
-void ParticleAPI::SetAcceleration(const Vector3& acceleration)
-{
-	if (implParticleAPI->SetAccelerationFunc) { implParticleAPI->SetAccelerationFunc(acceleration); }
-}
-
-void ParticleAPI::SetRotation(const Vector3& rotation)
-{
-	if (implParticleAPI->SetRotationFunc) { implParticleAPI->SetRotationFunc(rotation); }
-}
-
-void ParticleAPI::SetScale(const Vector3& scale)
-{
-	if (implParticleAPI->SetScaleFunc) { implParticleAPI->SetScaleFunc(scale); }
-}
-
-void ParticleAPI::SetColor(const Vector3& color)
-{
-	if (implParticleAPI->SetColorFunc) { implParticleAPI->SetColorFunc(color); }
+	if (implParticleAPI->EmitFunc) { implParticleAPI->EmitFunc(position); }
 }
 
 void ParticleAPI::Initialize(const Entity& entity, ECSManager* ecs, ObjectContainer* objectContainer, ResourceManager* resourceManager)
@@ -461,17 +431,22 @@ void ParticleAPI::Initialize(const Entity& entity, ECSManager* ecs, ObjectContai
 		data = nullptr;
 		return;
 	}
-	// ParticleComponent を取得
-	ParticleComponent* particle = m_ECS->GetComponent<ParticleComponent>(m_Entity);
+	// EmitterComponent を取得
+	EmitterComponent* particle = m_ECS->GetComponent<EmitterComponent>(m_Entity);
 	data = particle;
 	if (particle)
 	{
-		/*implParticleAPI->SetPositionFunc = [this](const Vector3& position) {
-			if (auto* t = m_ECS->GetComponent<ParticleComponent>(m_Entity))
+		implParticleAPI->EmitFunc = [this](const Vector3& position) {
+			if (auto* t = m_ECS->GetComponent<EmitterComponent>(m_Entity))
 			{
-				t->position = position;
+				TransformComponent* transform = m_ECS->GetComponent<TransformComponent>(m_Entity);
+				if (transform)
+				{
+					transform->position.x = position.x;
+					data->emit = true; // パーティクルを発生させる
+				}
 			}
-			};*/
+			};
 	}
 }
 

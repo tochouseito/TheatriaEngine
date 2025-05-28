@@ -225,7 +225,7 @@ private:
 		bodyDef.type = rb.bodyType;
 		bodyDef.gravityScale = rb.gravityScale;
 		bodyDef.fixedRotation = rb.fixedRotation;
-		bodyDef.position = b2Vec2(transform.translation.x, transform.translation.y);
+		bodyDef.position = b2Vec2(transform.position.x, transform.position.y);
 		float angleZ = ChoMath::DegreesToRadians(transform.degrees).z;
 		bodyDef.angle = angleZ;
 		rb.runtimeBody = m_World->CreateBody(&bodyDef);
@@ -234,8 +234,8 @@ private:
 		rb.velocity.Initialize();
 
 		// Transformと同期（optional）
-		transform.translation.x = rb.runtimeBody->GetPosition().x;
-		transform.translation.y = rb.runtimeBody->GetPosition().y;
+		transform.position.x = rb.runtimeBody->GetPosition().x;
+		transform.position.y = rb.runtimeBody->GetPosition().y;
 	}
 	ECSManager* m_ECS = nullptr;
 	b2World* m_World = nullptr;
@@ -290,8 +290,8 @@ private:
 			rb.requestedPosition.reset();
 		}
 		const b2Vec2& pos = rb.runtimeBody->GetPosition();
-		transform.translation.x = pos.x;
-		transform.translation.y = pos.y;
+		transform.position.x = pos.x;
+		transform.position.y = pos.y;
 
 		b2Vec2 velocity = rb.runtimeBody->GetLinearVelocity();
 		rb.velocity.x = velocity.x;

@@ -71,7 +71,7 @@ void Inspector::TransformComponentView(GameObject* object)
 	// Transformを表示
 	ImGui::SeparatorText("Transform"); // ラインとテキスト表示
 	// 平行移動の操作
-	ImGuiEx::ColoredDragFloat3("Translation", &transform->translation.x, 0.01f, 0.0f, 0.0f, "%.1f");
+	ImGuiEx::ColoredDragFloat3("Translation", &transform->position.x, 0.01f, 0.0f, 0.0f, "%.1f");
 	// 回転の操作
 	ImGuiEx::ColoredDragFloat3("Rotation", &transform->degrees.x, 0.1f, 0.0f, 0.0f, "%.1f°");
 	// スケールの操作

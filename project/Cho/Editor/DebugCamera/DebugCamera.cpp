@@ -15,7 +15,7 @@ void DebugCamera::Initialize()
 	m_pCameraBuffer = dynamic_cast<ConstantBuffer<BUFFER_DATA_VIEWPROJECTION>*>(resourceManager->GetBuffer<IConstantBuffer>(m_CameraComponent.bufferIndex));
 	resourceManager->SetDebugCameraBuffer(m_pCameraBuffer);
 	// 初期値
-	m_TransformComponent.translation = Vector3(0.0f, 0.0f, -30.0f);
+	m_TransformComponent.position = Vector3(0.0f, 0.0f, -30.0f);
 }
 
 void DebugCamera::Update()
@@ -81,14 +81,14 @@ void DebugCamera::Update()
 		deltaMousePos.y = inputManager->GetMouseWindowPosition().y - preMousePos.y;
 		preMousePos = inputManager->GetMouseWindowPosition();
 		// カメラ回転を更新
-		m_TransformComponent.translation -= rotatedX * deltaMousePos.x * mouseSensitivity;
-		m_TransformComponent.translation += rotatedY * deltaMousePos.y * mouseSensitivity;
+		m_TransformComponent.position -= rotatedX * deltaMousePos.x * mouseSensitivity;
+		m_TransformComponent.position += rotatedY * deltaMousePos.y * mouseSensitivity;
 	}
 	// 前後移動
 	// マウスホイールの移動量を取得する
 	int32_t wheelDelta = -inputManager->GetWheel();
 	// マウスホイールの移動量に応じてカメラの移動を更新する
-	m_TransformComponent.translation += rotatedZ * float(wheelDelta) * moveSpeed;
+	m_TransformComponent.position += rotatedZ * float(wheelDelta) * moveSpeed;
 	// デルタマウス位置を初期化
 	deltaMousePos.Initialize();
 	UpdateMatrix();
@@ -117,10 +117,10 @@ void DebugCamera::UpdateMatrix()
 	m_TransformComponent.rotation = m_TransformComponent.rotation * qx * qy * qz;//*compo.rotation;
 
 	// アフィン変換
-	m_TransformComponent.matWorld = ChoMath::MakeAffineMatrix(Scale(1.0f, 1.0f, 1.0f), m_TransformComponent.rotation, m_TransformComponent.translation);
+	m_TransformComponent.matWorld = ChoMath::MakeAffineMatrix(Scale(1.0f, 1.0f, 1.0f), m_TransformComponent.rotation, m_TransformComponent.position);
 
 	// 次のフレーム用に保存する
-	m_TransformComponent.prePos = m_TransformComponent.translation;
+	m_TransformComponent.prePos = m_TransformComponent.position;
 	m_TransformComponent.preRot = radians;
 
 	TransferMatrix();
@@ -134,7 +134,7 @@ void DebugCamera::TransferMatrix()
 	m_ViewProjectionData.projection = ChoMath::MakePerspectiveFovMatrix(
 		m_CameraComponent.fovAngleY, m_CameraComponent.aspectRatio, m_CameraComponent.nearZ, m_CameraComponent.farZ);
 	m_ViewProjectionData.projectionInverse = Matrix4::Inverse(m_ViewProjectionData.projection);
-	m_ViewProjectionData.cameraPosition = m_TransformComponent.translation;
+	m_ViewProjectionData.cameraPosition = m_TransformComponent.position;
 	// 転送
 	m_pCameraBuffer->UpdateData(m_ViewProjectionData);
 }

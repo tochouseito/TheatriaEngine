@@ -74,10 +74,10 @@ void TransformUpdateSystem::UpdateComponent(Entity e, TransformComponent& transf
 	transform.rotation.Normalize();
 
 	// アフィン変換
-	transform.matWorld = ChoMath::MakeAffineMatrix(transform.scale, transform.rotation, transform.translation);
+	transform.matWorld = ChoMath::MakeAffineMatrix(transform.scale, transform.rotation, transform.position);
 
 	// 次のフレーム用に保存する
-	transform.prePos = transform.translation;
+	transform.prePos = transform.position;
 	transform.preRot = radians;
 	transform.preScale = transform.scale;
 
@@ -132,7 +132,7 @@ void TransformUpdateSystem::TransferMatrix(TransformComponent& transform)
 void TransformInitializeSystem::Start(TransformComponent& transform)
 {
 	// 初期値保存
-	transform.startValue.translation = transform.translation;
+	transform.startValue.translation = transform.position;
 	transform.startValue.rotation = transform.rotation;
 	transform.startValue.scale = transform.scale;
 	transform.startValue.degrees = transform.degrees;
@@ -152,10 +152,10 @@ void TransformInitializeSystem::Start(TransformComponent& transform)
 	transform.rotation.Normalize();
 
 	// アフィン変換
-	transform.matWorld = ChoMath::MakeAffineMatrix(transform.scale, transform.rotation, transform.translation);
+	transform.matWorld = ChoMath::MakeAffineMatrix(transform.scale, transform.rotation, transform.position);
 
 	// 次のフレーム用に保存する
-	transform.prePos = transform.translation;
+	transform.prePos = transform.position;
 	transform.preRot = radians;
 	transform.preScale = transform.scale;
 }
@@ -164,7 +164,7 @@ void TransformFinalizeSystem::Finalize(Entity entity,TransformComponent& transfo
 {
 	entity;
 	// 初期値に戻す
-	transform.translation = transform.startValue.translation;
+	transform.position = transform.startValue.translation;
 	transform.rotation = transform.startValue.rotation;
 	transform.scale = transform.startValue.scale;
 	transform.degrees = transform.startValue.degrees;
@@ -182,7 +182,7 @@ void CameraUpdateSystem::TransferMatrix(TransformComponent& transform, CameraCom
 	data.view = Matrix4::Inverse(transform.matWorld);
 	data.projection = ChoMath::MakePerspectiveFovMatrix(camera.fovAngleY, camera.aspectRatio, camera.nearZ, camera.farZ);
 	data.projectionInverse = Matrix4::Inverse(data.projection);
-	data.cameraPosition = transform.translation;
+	data.cameraPosition = transform.position;
 	ConstantBuffer<BUFFER_DATA_VIEWPROJECTION>* buffer = dynamic_cast<ConstantBuffer<BUFFER_DATA_VIEWPROJECTION>*>(m_pResourceManager->GetBuffer<IConstantBuffer>(camera.bufferIndex));
 	buffer->UpdateData(data);
 }

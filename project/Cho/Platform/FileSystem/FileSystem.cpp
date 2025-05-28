@@ -969,7 +969,7 @@ bool Cho::FileSystem::LoadGameParameter(const std::wstring& filePath, const std:
 json Cho::Serialization::ToJson(const TransformComponent& t)
 {
     json j;
-    j["translation"] = { t.translation.x, t.translation.y, t.translation.z };
+    j["translation"] = { t.position.x, t.position.y, t.position.z };
     j["rotation"] = { t.rotation.x, t.rotation.y, t.rotation.z, t.rotation.w };
     j["scale"] = { t.scale.x, t.scale.y, t.scale.z };
 	j["degrees"] = { t.degrees.x, t.degrees.y, t.degrees.z };
@@ -1797,7 +1797,7 @@ void Cho::FileSystem::ScriptProject::UnloadPDB()
 
 void Cho::Deserialization::FromJson(const json& j, TransformComponent& t)
 {
-	t.translation = { j["translation"][0], j["translation"][1], j["translation"][2] };
+	t.position = { j["translation"][0], j["translation"][1], j["translation"][2] };
 	t.rotation = { j["rotation"][0], j["rotation"][1], j["rotation"][2], j["rotation"][3] };
 	t.scale = { j["scale"][0], j["scale"][1], j["scale"][2] };
 	t.degrees = { j["degrees"][0], j["degrees"][1], j["degrees"][2] };
