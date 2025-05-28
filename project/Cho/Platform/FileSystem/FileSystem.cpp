@@ -1013,6 +1013,7 @@ json Cho::Serialization::ToJson(const MaterialComponent& m)
 	j["shininess"] = m.shininess;
 	std::string textureName = ConvertString(m.textureName);
 	j["textureName"] = textureName;
+    j["uvFlipY"] = m.uvFlipY;
 	return j;
 }
 
@@ -1835,7 +1836,8 @@ void Cho::Deserialization::FromJson(const json& j, MaterialComponent& m)
 	m.textureName = ConvertString(j.value("textureName",""));
 	m.enableLighting = j.value("enableLighting", true);
 	m.enableTexture = j.value("enableTexture",false);
-	m.shininess = j.value("shininess", 32.0f);
+	m.shininess = j.value("shininess", 50.0f);
+	m.uvFlipY = j.value("uvFlipY", false);
 }
 
 void Cho::Deserialization::FromJson(const json& j, ScriptComponent& s)
