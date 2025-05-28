@@ -644,8 +644,8 @@ struct AnimationComponent : public IComponentTag
 	uint32_t animationIndex = 0;// アニメーションのIndex
 	uint32_t prevAnimationIndex = 0;// 1つ前のアニメーションのIndex
 	uint32_t transitionIndex = 0;// 遷移スタートのアニメーションのIndex
-	uint32_t nowFrame = 0;// 現在のフレーム
-	uint32_t allFrame = 0;// 全フレーム数
+	//uint32_t nowFrame = 0;// 現在のフレーム
+	//uint32_t allFrame = 0;// 全フレーム数
 	std::wstring modelName = L"";	// モデル名
 	std::optional<uint32_t> boneOffsetID = std::nullopt;	// ボーンオフセットID
 

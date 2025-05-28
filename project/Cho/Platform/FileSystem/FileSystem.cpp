@@ -1162,6 +1162,15 @@ json Cho::Serialization::ToJson(const AudioComponent& a)
 	return j;
 }
 
+json Cho::Serialization::ToJson(const AnimationComponent& a)
+{
+	json j;
+	j["time"] = a.time;
+    j["transitionDuration"] = a.transitionDuration;
+
+	return j;
+}
+
 FileType Cho::FileSystem::GetJsonFileType(const std::filesystem::path& path)
 {
     try
