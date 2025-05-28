@@ -41,7 +41,7 @@ struct TransformStartValue
 
 struct TransformComponent : public IComponentTag
 {
-	Vector3 translation = { 0.0f, 0.0f, 0.0f };			// 位置
+	Vector3 position = { 0.0f, 0.0f, 0.0f };			// 位置
 	Quaternion rotation = { 0.0f, 0.0f, 0.0f,1.0f };	// 回転
 	Scale scale = { 1.0f, 1.0f, 1.0f };					// スケール
 	Matrix4 matWorld = ChoMath::MakeIdentity4x4();		// ワールド行列
@@ -64,7 +64,7 @@ struct TransformComponent : public IComponentTag
 	{
 		if (this == &other) return *this;
 
-		translation = other.translation;
+		position = other.position;
 		rotation = other.rotation;
 		scale = other.scale;
 		degrees = other.degrees;
@@ -91,7 +91,7 @@ struct TransformComponent : public IComponentTag
 	// 初期化
 	void Initialize()
 	{
-		translation.Initialize();
+		position.Initialize();
 		rotation.Initialize();
 		scale.Initialize();
 		matWorld = ChoMath::MakeIdentity4x4();
@@ -408,36 +408,51 @@ struct MaterialComponent : public IComponentTag
 // エミッターコンポーネント
 struct EmitterComponent : public IComponentTag
 {
-	Vector3 position = { 0.0f,0.0f,0.0f };	// 位置
-	float radius = 1.0f;					// 射出半径
-	uint32_t count = 10;					// 射出数
-	float frequency = 0.5f;					// 射出間隔
-	float frequencyTime = 0.0f;				// 射出間隔調整用時間
-	uint32_t emit = 0;						// 射出許可
+	RandValue lifeTime;
+	PVA position;             // 位置
+	PVA rotation;             // 回転
+	PVA scale;                // スケール
+	float frequency;	// 射出間隔
+	float frequencyTime;// 射出間隔調整用時間
+	bool emit = false;
+	int32_t emitCount = 10; // 射出数
+	bool isFadeOut;
+	bool isBillboard;	// 4バイト
 	std::optional<uint32_t> particleID = std::nullopt;	// パーティクルID
 	// バッファインデックス
 	std::optional<uint32_t> bufferIndex = std::nullopt;
 
+	std::optional<uint32_t> materalID = std::nullopt;	// マテリアルID
+
 	EmitterComponent& operator=(const EmitterComponent& other)
 	{
 		if (this == &other) return *this;
+		lifeTime = other.lifeTime;
 		position = other.position;
-		radius = other.radius;
-		count = other.count;
+		rotation = other.rotation;
+		scale = other.scale;
 		frequency = other.frequency;
 		frequencyTime = other.frequencyTime;
+		emit = other.emit;
+		emitCount = other.emitCount;
+		isFadeOut = other.isFadeOut;
+		isBillboard = other.isBillboard;
 		return *this;
 	}
 
 	// 初期化
 	void Initialize()
 	{
-		position.Initialize();
-		radius = 1.0f;
-		count = 10;
-		frequency = 0.5f;
+		lifeTime = {};
+		position = {};
+		rotation = {};
+		scale = {};
+		frequency = 0.0f;
 		frequencyTime = 0.0f;
-		emit = 0;
+		emit = false;
+		emitCount = 10;
+		isFadeOut = false;
+		isBillboard = false;
 		particleID = std::nullopt;
 		bufferIndex = std::nullopt;
 	}
@@ -629,8 +644,8 @@ struct AnimationComponent : public IComponentTag
 	uint32_t animationIndex = 0;// アニメーションのIndex
 	uint32_t prevAnimationIndex = 0;// 1つ前のアニメーションのIndex
 	uint32_t transitionIndex = 0;// 遷移スタートのアニメーションのIndex
-	uint32_t nowFrame = 0;// 現在のフレーム
-	uint32_t allFrame = 0;// 全フレーム数
+	//uint32_t nowFrame = 0;// 現在のフレーム
+	//uint32_t allFrame = 0;// 全フレーム数
 	std::wstring modelName = L"";	// モデル名
 	std::optional<uint32_t> boneOffsetID = std::nullopt;	// ボーンオフセットID
 
@@ -670,6 +685,9 @@ template<> constexpr bool IsComponentAllowed<ObjectType::Camera, ScriptComponent
 
 // ParticleSystem
 template<> constexpr bool IsComponentAllowed<ObjectType::ParticleSystem, TransformComponent> = true;
+template<> constexpr bool IsComponentAllowed<ObjectType::ParticleSystem, MeshFilterComponent> = true;
+template<> constexpr bool IsComponentAllowed<ObjectType::ParticleSystem, MeshRendererComponent> = true;
+template<> constexpr bool IsComponentAllowed<ObjectType::ParticleSystem, MaterialComponent> = true;
 template<> constexpr bool IsComponentAllowed<ObjectType::ParticleSystem, EmitterComponent> = true;
 template<> constexpr bool IsComponentAllowed<ObjectType::ParticleSystem, ParticleComponent> = true;
 

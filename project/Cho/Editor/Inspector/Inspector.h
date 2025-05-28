@@ -45,6 +45,8 @@ private:
 	void LightComponentView(GameObject* object);
 	// AudioComponentの表示
 	void AudioComponentView(GameObject* object);
+	// AnimtationComponentの表示
+	void AnimationComponentView(GameObject* object);
 	// コンポーネントの追加
 	void AddComponent(GameObject* object);
 };

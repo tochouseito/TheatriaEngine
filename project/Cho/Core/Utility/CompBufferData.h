@@ -1,6 +1,7 @@
 #pragma once
 #include "ChoMath.h"
 #include "Core/Utility/Color.h"
+#include "EffectStruct.h"
 // 定数バッファ用データ構造体
 // Transform
 struct BUFFER_DATA_TF final
@@ -46,12 +47,17 @@ struct BUFFER_DATA_MATERIAL final
 // Emitter
 struct BUFFER_DATA_EMITTER final
 {
-	Vector3 position;	// 12バイト
-	float radius;		// 4バイト
-	uint32_t count;		// 4バイト
+	RandValue lifeTime;
+	PVA position;             // 位置
+	PVA rotation;             // 回転
+	PVA scale;                // スケール
 	float frequency;	// 4バイト
 	float frequencyTime;// 4バイト
-	uint32_t emit;		// 4バイト
+	uint32_t emit;
+	uint32_t emitCount;
+	uint32_t isFadeOut;
+	uint32_t isBillboard;	// 4バイト
+	uint32_t materialID;	// 4バイト
 };
 // Particle
 // PerFrame
@@ -109,7 +115,10 @@ struct BUFFER_DATA_PARTICLE final
 	Color color;				// 16バイト
 	float lifeTime;				// 4バイト
 	float currentTime;			// 4バイト
-	int isAlive;				// 4バイト
+	uint32_t isFadeOut;		// 4バイト
+	uint32_t isBillboard;
+	uint32_t isAlive;				// 4バイト
+	uint32_t materialID;	// 4バイト
 };
 
 struct BUFFER_DATA_UISPRITE final

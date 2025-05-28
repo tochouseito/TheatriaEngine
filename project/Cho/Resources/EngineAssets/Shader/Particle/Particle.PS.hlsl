@@ -1,9 +1,11 @@
 #include "../header/Particle.hlsli"
+#include "../header/Material.hlsli"
 
-// テクスチャリソース(カラー)
-Texture2D<float4> gTexture : register(t0);
-
-// サンプラー
+// マテリアル
+StructuredBuffer<Material> gIMaterial : register(t0, space0);
+// Textures
+Texture2D<float4> gTextures[] : register(t1, space0);
+// Samplers
 SamplerState gSampler : register(s0);
 
 struct PixelShaderOutput {
@@ -13,20 +15,30 @@ struct PixelShaderOutput {
 PixelShaderOutput main(VSOutput input) {
     PixelShaderOutput output;
     
-    // テクスチャ
-    //float4 transformedUV = mul(float4(input.texcoord, 0.0f, 1.0f), uvTransform);
-    float4 textureColor = gTexture.Sample(gSampler, input.texcoord.xy);
-    output.color = textureColor * input.color;
-    // textureのa値が0のときにPixelを棄却
-    //if (textureColor.a <= 0.5) {
-    //    discard;
-    //}
-    if (textureColor.a == 0.0) {
-        discard;
+    // 最終出力
+    float4 finalColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+    // Material
+    Material material = gIMaterial[input.materialID];
+    // テクスチャカラー
+    float4 textureColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
+    
+    // テクスチャが有効ならテクスチャカラーを取得
+    if (material.enableTexture != 0)
+    {
+        float2 texCoord = input.texcoord;
+        if (material.uvFlipY)
+        {
+            texCoord.y = 1.0f - texCoord.y; // Y軸反転
+        }
+        // UV変換行列を適用
+        float4 transformedUV = mul(float4(texCoord, 0.0f, 1.0f), material.matUV);
+        textureColor = gTextures[material.textureID].Sample(gSampler, transformedUV.xy);
     }
-    if (output.color.a == 0.0) {
-        discard;
-    }
+    // 合計
+    finalColor.rgb =input.color.rgb * material.color.rgb * textureColor.rgb;
+    finalColor.a = input.color.a * material.color.a * textureColor.a;
+    // 最終出力
+    output.color = finalColor;
 
     return output;
 }

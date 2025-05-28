@@ -79,6 +79,14 @@ public:
 		return nullptr;
 	}
 
+	// 使用禁止
+	template<typename T>
+	std::vector<T> GetValues()
+	{
+		std::vector<T> values;
+		return values;
+	}
+
 	TransformAPI transform;			// TransformAPI
 	CameraAPI camera;				// CameraAPI
 	LineRendererAPI lineRenderer;	// LineRendererAPI
@@ -89,6 +97,7 @@ public:
 	AudioAPI audio;					// AudioAPI
 	InputAPI input;					// InputAPI
 	AnimationAPI animation;			// AnimationAPI
+	ParticleAPI particle;		// ParticleAPI
 
 	// パラメータを取得
 	ObjectParameter GetParameter(const std::string& name) const;
@@ -98,7 +107,6 @@ private:
 
 	void SetID(const ObjectID& id) noexcept;
 	void SetName(const std::wstring& name) noexcept;
-
 	
 	Entity m_Entity;								// エンティティ
 	
@@ -124,6 +132,7 @@ private:
 		material.Initialize(m_Entity, m_ECS, m_ObjectContainer, m_ResourceManager);
 		ui.Initialize(m_Entity, m_ECS, m_ObjectContainer, m_ResourceManager);
 		input.Intialize(m_InputManager);
+		particle.Initialize(m_Entity, m_ECS, m_ObjectContainer, m_ResourceManager);
 		audio.Initialize(m_Entity, m_ECS, m_ObjectContainer, m_ResourceManager);
 		animation.Initialize(m_Entity, m_ECS, m_ObjectContainer, m_ResourceManager);
 	}
@@ -177,5 +186,6 @@ private:
 	std::optional<UISpriteComponent> m_UISprite = std::nullopt;
 	std::optional<LightComponent> m_Light = std::nullopt;
 	std::optional<AudioComponent> m_Audio = std::nullopt;
+	std::optional<AnimationComponent> m_Animation = std::nullopt;
 };
 

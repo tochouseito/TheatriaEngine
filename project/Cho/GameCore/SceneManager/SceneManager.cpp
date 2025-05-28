@@ -95,7 +95,7 @@ void ScenePrefab::Start()
 		{
 			EmitterComponent* emitter = ecs->AddComponent<EmitterComponent>(entity);
 			*emitter = objData.m_Emitter.value();
-			emitter->bufferIndex = m_SceneManager->m_pResourceManager->CreateConstantBuffer<BUFFER_DATA_EMITTER>();
+			emitter->bufferIndex = m_SceneManager->m_pResourceManager->CreateStructuredBuffer<BUFFER_DATA_EMITTER>(1);
 		}
 		// ParticleComponentの追加
 		if (objData.m_Particle.has_value())
@@ -134,6 +134,20 @@ void ScenePrefab::Start()
 			if (!audio->audioName.empty())
 			{
 				audio->audioID = m_SceneManager->m_pResourceManager->GetAudioManager()->GetSoundDataIndex(audio->audioName);
+			}
+		}
+		// AnimationComponentの追加
+		if(objData.m_Animation.has_value())
+		{
+			AnimationComponent* animation = ecs->AddComponent<AnimationComponent>(entity);
+			*animation = objData.m_Animation.value();
+			ModelData* modelData = m_SceneManager->m_pResourceManager->GetModelManager()->GetModelData(animation->modelName);
+			if (modelData)
+			{
+				animation->skeleton = modelData->skeleton;
+				animation->skinCluster = modelData->skinCluster;
+				animation->boneOffsetID = modelData->nextBoneOffsetIndex;
+				modelData->nextBoneOffsetIndex++;
 			}
 		}
 	}

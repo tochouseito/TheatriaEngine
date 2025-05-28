@@ -72,10 +72,10 @@ void TransformEditorSystem::UpdateComponent(Entity e, TransformComponent& transf
 	transform.rotation.Normalize();
 
 	// アフィン変換
-	transform.matWorld = ChoMath::MakeAffineMatrix(transform.scale, transform.rotation, transform.translation);
+	transform.matWorld = ChoMath::MakeAffineMatrix(transform.scale, transform.rotation, transform.position);
 
 	// 次のフレーム用に保存する
-	transform.prePos = transform.translation;
+	transform.prePos = transform.position;
 	transform.preRot = radians;
 	transform.preScale = transform.scale;
 
@@ -109,7 +109,7 @@ void TransformEditorSystem::TransferMatrix(TransformComponent& transform)
 void CameraEditorSystem::UpdateMatrix(TransformComponent& transform, CameraComponent& camera)
 {
 	// アフィン変換
-	transform.matWorld = ChoMath::MakeAffineMatrix(transform.scale, transform.rotation, transform.translation);
+	transform.matWorld = ChoMath::MakeAffineMatrix(transform.scale, transform.rotation, transform.position);
 	TransferMatrix(transform, camera);
 }
 
@@ -120,7 +120,7 @@ void CameraEditorSystem::TransferMatrix(TransformComponent& transform, CameraCom
 	data.view = Matrix4::Inverse(transform.matWorld);
 	data.projection = ChoMath::MakePerspectiveFovMatrix(camera.fovAngleY, camera.aspectRatio, camera.nearZ, camera.farZ);
 	data.projectionInverse = Matrix4::Inverse(data.projection);
-	data.cameraPosition = transform.translation;
+	data.cameraPosition = transform.position;
 	ConstantBuffer<BUFFER_DATA_VIEWPROJECTION>* buffer = dynamic_cast<ConstantBuffer<BUFFER_DATA_VIEWPROJECTION>*>(m_pResourceManager->GetBuffer<IConstantBuffer>(camera.bufferIndex));
 	buffer->UpdateData(data);
 }
@@ -161,26 +161,26 @@ void EmitterEditorUpdateSystem::UpdateEmitter(EmitterComponent& emitter)
 {
 	emitter.frequencyTime += DeltaTime();
 
-	// 射出間隔を上回ったら射出許可を出して時間を調整
-	if (emitter.frequency <= emitter.frequencyTime)
-	{
-		emitter.frequencyTime = 0.0f;
-		emitter.emit = 1;
-	} else
-	{
-		// 射出間隔を上回ってないので、許可は出せない
-		emitter.emit = 0;
-	}
+	//// 射出間隔を上回ったら射出許可を出して時間を調整
+	//if (emitter.frequency <= emitter.frequencyTime)
+	//{
+	//	emitter.frequencyTime = 0.0f;
+	//	emitter.emit = 1;
+	//} else
+	//{
+	//	// 射出間隔を上回ってないので、許可は出せない
+	//	emitter.emit = 0;
+	//}
 
 	BUFFER_DATA_EMITTER data = {};
 	data.position = emitter.position;
-	data.radius = emitter.radius;
-	data.count = emitter.count;
+	/*data.radius = emitter.radius;
+	data.count = emitter.count;*/
 	data.frequency = emitter.frequency;
 	data.frequencyTime = emitter.frequencyTime;
 	data.emit = emitter.emit;
-	ConstantBuffer<BUFFER_DATA_EMITTER>* buffer = dynamic_cast<ConstantBuffer<BUFFER_DATA_EMITTER>*>(m_pResourceManager->GetBuffer<IConstantBuffer>(emitter.bufferIndex));
-	buffer->UpdateData(data);
+	//ConstantBuffer<BUFFER_DATA_EMITTER>* buffer = dynamic_cast<ConstantBuffer<BUFFER_DATA_EMITTER>*>(m_pResourceManager->GetBuffer<IConstantBuffer>(emitter.bufferIndex));
+	//buffer->UpdateData(data);
 }
 
 void EffectEditorUpdateSystem::UpdateEffect(EffectComponent& effect)
