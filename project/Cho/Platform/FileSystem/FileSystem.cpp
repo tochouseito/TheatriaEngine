@@ -1068,10 +1068,55 @@ json Cho::Serialization::ToJson(const EmitterComponent& e)
             j["position"]["acceleration"] = { x, y, z };
         }
         // rotation
-       
+        {// value
+            json x; json y; json z;
+            x["x"] = { e.rotation.value.x.median, e.rotation.value.x.amplitude };
+            y["y"] = { e.rotation.value.y.median, e.rotation.value.y.amplitude };
+            z["z"] = { e.rotation.value.z.median, e.rotation.value.z.amplitude };
+            j["rotation"]["value"] = { x, y, z };
+        }
+        {// velocity
+            json x; json y; json z;
+            x["x"] = { e.rotation.velocity.x.median, e.rotation.velocity.x.amplitude };
+            y["y"] = { e.rotation.velocity.y.median, e.rotation.velocity.y.amplitude };
+            z["z"] = { e.rotation.velocity.z.median, e.rotation.velocity.z.amplitude };
+            j["rotation"]["velocity"] = { x, y, z };
+        }
+        {// acceleration
+            json x; json y; json z;
+            x["x"] = { e.rotation.acceleration.x.median, e.rotation.acceleration.x.amplitude };
+            y["y"] = { e.rotation.acceleration.y.median, e.rotation.acceleration.y.amplitude };
+            z["z"] = { e.rotation.acceleration.z.median, e.rotation.acceleration.z.amplitude };
+            j["rotation"]["acceleration"] = { x, y, z };
+        }
+        // scale
+        {// value
+            json x; json y; json z;
+            x["x"] = { e.scale.value.x.median, e.scale.value.x.amplitude };
+            y["y"] = { e.scale.value.y.median, e.scale.value.y.amplitude };
+            z["z"] = { e.scale.value.z.median, e.scale.value.z.amplitude };
+            j["scale"]["value"] = { x, y, z };
+        }
+        {// velocity
+            json x; json y; json z;
+            x["x"] = { e.scale.velocity.x.median, e.scale.velocity.x.amplitude };
+            y["y"] = { e.scale.velocity.y.median, e.scale.velocity.y.amplitude };
+            z["z"] = { e.scale.velocity.z.median, e.scale.velocity.z.amplitude };
+            j["scale"]["velocity"] = { x, y, z };
+        }
+        {// acceleration
+            json x; json y; json z;
+            x["x"] = { e.scale.acceleration.x.median, e.scale.acceleration.x.amplitude };
+            y["y"] = { e.scale.acceleration.y.median, e.scale.acceleration.y.amplitude };
+            z["z"] = { e.scale.acceleration.z.median, e.scale.acceleration.z.amplitude };
+            j["scale"]["acceleration"] = { x, y, z };
+		}
     }
 	j["frequency"] = e.frequency;
 	j["frequencyTime"] = e.frequencyTime;
+	j["emitCount"] = e.emitCount;
+	j["isFadeOut"] = e.isFadeOut;
+	j["isBillboard"] = e.isBillboard;
 	return j;
 }
 
@@ -1819,11 +1864,54 @@ void Cho::Deserialization::FromJson(const json& j, BoxCollider2DComponent& bc)
 
 void Cho::Deserialization::FromJson(const json& j, EmitterComponent& e)
 {
-	e.position = { j["position"][0], j["position"][1], j["position"][2] };
-	/*e.radius = j.value("radius", 1.0f);
-	e.count = j.value("count", 100);*/
-	e.frequency = j.value("frequency", 0.1f);
-	e.frequencyTime = j.value("frequencyTime", 0.1f);
+    // lifeTime
+    if (j.contains("lifeTime") && j["lifeTime"].is_array() && j["lifeTime"].size() == 2)
+    {
+        e.lifeTime.median = j["lifeTime"][0].get<float>();
+        e.lifeTime.amplitude = j["lifeTime"][1].get<float>();
+    }
+
+    auto ReadRandValue = [](const json& jv, RandValue& out) {
+        if (jv.is_array() && jv.size() == 2)
+        {
+            out.median = jv[0].get<float>();
+            out.amplitude = jv[1].get<float>();
+        }
+        };
+
+    auto ReadRandVector3Array = [&](const json& jarr, RandVector3& out) {
+        if (jarr.is_array() && jarr.size() == 3)
+        {
+            if (jarr[0].contains("x")) ReadRandValue(jarr[0]["x"], out.x);
+            if (jarr[1].contains("y")) ReadRandValue(jarr[1]["y"], out.y);
+            if (jarr[2].contains("z")) ReadRandValue(jarr[2]["z"], out.z);
+        }
+        };
+
+    auto ReadPVAArray = [&](const json& jpva, PVA& out) {
+        if (jpva.contains("value")) ReadRandVector3Array(jpva["value"], out.value);
+        if (jpva.contains("velocity")) ReadRandVector3Array(jpva["velocity"], out.velocity);
+        if (jpva.contains("acceleration")) ReadRandVector3Array(jpva["acceleration"], out.acceleration);
+        };
+
+    if (j.contains("position"))
+    {
+        ReadPVAArray(j["position"], e.position);
+    }
+    if (j.contains("rotation"))
+    {
+        ReadPVAArray(j["rotation"], e.rotation);
+    }
+    if (j.contains("scale"))
+    {
+        ReadPVAArray(j["scale"], e.scale);
+    }
+
+    e.frequency = j.value("frequency", 0.1f);
+    e.frequencyTime = j.value("frequencyTime", 0.1f);
+    e.emitCount = j.value("emitCount", 1);
+    e.isFadeOut = j.value("isFadeOut", false);
+    e.isBillboard = j.value("isBillboard", true);
 }
 
 void Cho::Deserialization::FromJson(const json& j, ParticleComponent& p)

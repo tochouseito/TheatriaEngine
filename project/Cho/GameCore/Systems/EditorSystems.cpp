@@ -161,16 +161,16 @@ void EmitterEditorUpdateSystem::UpdateEmitter(EmitterComponent& emitter)
 {
 	emitter.frequencyTime += DeltaTime();
 
-	// 射出間隔を上回ったら射出許可を出して時間を調整
-	if (emitter.frequency <= emitter.frequencyTime)
-	{
-		emitter.frequencyTime = 0.0f;
-		emitter.emit = 1;
-	} else
-	{
-		// 射出間隔を上回ってないので、許可は出せない
-		emitter.emit = 0;
-	}
+	//// 射出間隔を上回ったら射出許可を出して時間を調整
+	//if (emitter.frequency <= emitter.frequencyTime)
+	//{
+	//	emitter.frequencyTime = 0.0f;
+	//	emitter.emit = 1;
+	//} else
+	//{
+	//	// 射出間隔を上回ってないので、許可は出せない
+	//	emitter.emit = 0;
+	//}
 
 	BUFFER_DATA_EMITTER data = {};
 	data.position = emitter.position;

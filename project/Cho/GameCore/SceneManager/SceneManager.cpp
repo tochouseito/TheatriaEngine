@@ -95,7 +95,7 @@ void ScenePrefab::Start()
 		{
 			EmitterComponent* emitter = ecs->AddComponent<EmitterComponent>(entity);
 			*emitter = objData.m_Emitter.value();
-			emitter->bufferIndex = m_SceneManager->m_pResourceManager->CreateConstantBuffer<BUFFER_DATA_EMITTER>();
+			emitter->bufferIndex = m_SceneManager->m_pResourceManager->CreateStructuredBuffer<BUFFER_DATA_EMITTER>(1);
 		}
 		// ParticleComponentの追加
 		if (objData.m_Particle.has_value())
