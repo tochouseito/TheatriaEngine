@@ -200,6 +200,7 @@ private:
 	std::optional<ParticleComponent> m_Particle;
 	std::optional<UISpriteComponent> m_UISprite;
 	std::optional<LightComponent> m_Light;
+	std::optional<AnimationComponent> m_Animation;
 	std::optional<AudioComponent> m_Audio;
 };
 // オブジェクトの名前を変更するコマンド

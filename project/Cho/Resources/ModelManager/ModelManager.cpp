@@ -137,6 +137,7 @@ bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 			for (uint32_t animationIndex = 0; animationIndex < scene->mNumAnimations; ++animationIndex)
 			{
 				AnimationData animation; // 今回作成するアニメーションデータ
+				animation.name = scene->mAnimations[animationIndex]->mName.C_Str(); // アニメーション名を取得
 				aiAnimation* animationAssimp = scene->mAnimations[animationIndex];
 				animation.duration = float(animationAssimp->mDuration / animationAssimp->mTicksPerSecond); // アニメーションの時間を秒単位に変換
 

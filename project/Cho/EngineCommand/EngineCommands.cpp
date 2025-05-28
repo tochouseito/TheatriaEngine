@@ -269,6 +269,12 @@ bool DeleteObjectCommand::Execute(EngineCommand* edit)
 			edit->m_ResourceManager->GetAudioManager()->SoundStop(audio->audioID.value());
 		}
 	}
+	// AnimationComponentを取得
+	AnimationComponent* animation = edit->m_GameCore->GetECSManager()->GetComponent<AnimationComponent>(object.GetEntity());
+	if (animation)
+	{
+		
+	}
 	// 削除前にComponentを記録する
 	m_Transform = *transform;
 	if (camera) { m_Camera = *camera; }
@@ -289,6 +295,8 @@ bool DeleteObjectCommand::Execute(EngineCommand* edit)
 	if (particle) { m_Particle = *particle; }
 	if (uiSprite) { m_UISprite = *uiSprite; }
 	if (light) { m_Light = *light; }
+	if (audio) { m_Audio = *audio; }
+	if (animation) { m_Animation = *animation; }
 	// Componentの初期化
 	if (transform) { transform->Initialize(); }
 	if (camera) { camera->Initialize(); }
@@ -309,6 +317,8 @@ bool DeleteObjectCommand::Execute(EngineCommand* edit)
 	if (particle) { particle->Initialize(); }
 	if (uiSprite) { uiSprite->Initialize(); }
 	if (light) { light->Initialize(); }
+	if (audio) { audio->Initialize(); }
+	//if (animation) { animation->Initialize(); }
 	// Componentの削除
 	edit->m_GameCore->GetECSManager()->RemoveComponent<TransformComponent>(object.GetEntity());
 	if (camera) { edit->m_GameCore->GetECSManager()->RemoveComponent<CameraComponent>(object.GetEntity()); }
@@ -323,6 +333,8 @@ bool DeleteObjectCommand::Execute(EngineCommand* edit)
 	if (particle) { edit->m_GameCore->GetECSManager()->RemoveComponent<ParticleComponent>(object.GetEntity()); }
 	if (uiSprite) { edit->m_GameCore->GetECSManager()->RemoveComponent<UISpriteComponent>(object.GetEntity()); }
 	if (light) { edit->m_GameCore->GetECSManager()->RemoveComponent<LightComponent>(object.GetEntity()); }
+	if (audio) { edit->m_GameCore->GetECSManager()->RemoveComponent<AudioComponent>(object.GetEntity()); }
+	if (animation) { edit->m_GameCore->GetECSManager()->RemoveComponent<AnimationComponent>(object.GetEntity()); }
 	// Entityの削除
 	edit->m_GameCore->GetECSManager()->RemoveEntity(object.GetEntity());
 	// CurrentSceneから削除

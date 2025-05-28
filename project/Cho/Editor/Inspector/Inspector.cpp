@@ -60,6 +60,7 @@ void Inspector::ComponentsView(GameObject* object)
 	EmitterComponentView(object);
 	ParticleComponentView(object);
 	AudioComponentView(object);
+	AnimationComponentView(object);
 }
 
 void Inspector::TransformComponentView(GameObject* object)
@@ -470,6 +471,43 @@ void Inspector::AudioComponentView(GameObject* object)
 			{
 				audio->audioName = pair.first;
 				audio->audioID = pair.second;
+			}
+		}
+		ImGui::EndCombo();
+	}
+}
+
+void Inspector::AnimationComponentView(GameObject* object)
+{
+	// 許可されているコンポーネントか確認
+	if (!IsComponentAllowedAtRuntime<AnimationComponent>(object->GetType())) { return; }
+	AnimationComponent* animation = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<AnimationComponent>(object->GetEntity());
+	if (!animation) { return; }
+	ImGui::Text("Animation Component");
+	ModelData* modelData = m_EngineCommand->GetResourceManager()->GetModelManager()->GetModelData(animation->modelName);
+	std::vector<AnimationData>& animations = modelData->animations;
+	if (animations.empty()) { return; }
+	// アニメーション名のリストを作成
+	std::vector<std::string> animationNames;
+	for (const auto& anim : animations)
+	{
+		animationNames.push_back(anim.name);
+	}
+	// 現在のアニメーション名を取得
+	AnimationData& nowAnimation = modelData->animations[animation->animationIndex];
+	if (ImGui::BeginCombo("Animation", nowAnimation.name.c_str()))
+	{
+		for (size_t i = 0; i < animationNames.size(); ++i)
+		{
+			bool isSelected = (i == animation->animationIndex);
+			if (ImGui::Selectable(animationNames[i].c_str(), isSelected))
+			{
+				// アニメーションインデックスを更新
+				animation->animationIndex = static_cast<uint32_t>(i);
+			}
+			if (isSelected)
+			{
+				ImGui::SetItemDefaultFocus();
 			}
 		}
 		ImGui::EndCombo();
