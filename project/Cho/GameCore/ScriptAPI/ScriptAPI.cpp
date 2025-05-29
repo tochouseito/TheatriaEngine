@@ -586,6 +586,7 @@ public:
 	std::function<void(const std::string&, const bool&)> PlayFunc;
 	std::function<void(const std::string&)> StopFunc;
 	std::function<bool(const std::string&)> IsPlayingFunc;
+	std::function<void(const std::string&, const float&)> SetVolumeFunc;
 };
 AudioAPI::AudioAPI() : implAudioAPI(new AudioAPI::ImplAudioAPI) {}
 AudioAPI::~AudioAPI() { delete implAudioAPI; }
@@ -603,6 +604,11 @@ bool AudioAPI::IsPlaying(const std::string& name)
 {
 	if (implAudioAPI->IsPlayingFunc) { return implAudioAPI->IsPlayingFunc(name); }
 	return false;
+}
+
+void AudioAPI::SetVolume(const std::string& name, const float& volume)
+{
+	if (implAudioAPI->SetVolumeFunc) { implAudioAPI->SetVolumeFunc(name, volume); }
 }
 
 //void AudioAPI::SetSource(const std::string& sourceName)
@@ -676,6 +682,20 @@ void AudioAPI::Initialize(const Entity& entity, ECSManager* ecs, ObjectContainer
 				}
 			}
 			return false;
+			};
+		implAudioAPI->SetVolumeFunc = [this](const std::string& name, const float& volume) {
+			if (auto* a = m_ECS->GetComponent<AudioComponent>(m_Entity))
+			{
+				for (SoundData& soundData : data->soundData)
+				{
+					if (soundData.name == name)
+					{
+						soundData.currentVolume = volume;
+						m_ResourceManager->GetAudioManager()->SetVolume(soundData, volume);
+						return;
+					}
+				}
+			}
 			};
 		//implAudioAPI->SetSourceFunc = [this](const std::string& sourceName) {
 		//	if (auto* a = m_ECS->GetComponent<AudioComponent>(m_Entity))
