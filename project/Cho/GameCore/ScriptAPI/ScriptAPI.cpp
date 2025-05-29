@@ -583,15 +583,15 @@ class AudioAPI::ImplAudioAPI
 public:
 	ImplAudioAPI() = default;
 	~ImplAudioAPI() = default;
-	std::function<void(const std::string&)> PlayFunc;
+	std::function<void(const std::string&, const bool&)> PlayFunc;
 	std::function<void(const std::string&)> StopFunc;
 	std::function<void(const std::string&)> SetSourceFunc;
 };
 AudioAPI::AudioAPI() : implAudioAPI(new AudioAPI::ImplAudioAPI) {}
 AudioAPI::~AudioAPI() { delete implAudioAPI; }
-void AudioAPI::Play(const std::string& name)
+void AudioAPI::Play(const std::string& name, const bool& isLoop)
 {
-	if (implAudioAPI->PlayFunc) { implAudioAPI->PlayFunc(name); }
+	if (implAudioAPI->PlayFunc) { implAudioAPI->PlayFunc(name,isLoop); }
 }
 
 void AudioAPI::Stop(const std::string& name)
@@ -620,7 +620,7 @@ void AudioAPI::Initialize(const Entity& entity, ECSManager* ecs, ObjectContainer
 	data = audio;
 	if (audio)
 	{
-		implAudioAPI->PlayFunc = [this](const std::string& name) {
+		implAudioAPI->PlayFunc = [this](const std::string& name, const bool& isLoop) {
 			if (auto* a = m_ECS->GetComponent<AudioComponent>(m_Entity))
 			{
 				/*m_ResourceManager->GetAudioManager()->SoundPlayWave(a->audioID.value(), a->isLoop);
@@ -629,7 +629,7 @@ void AudioAPI::Initialize(const Entity& entity, ECSManager* ecs, ObjectContainer
 				{
 					if (soundData.name == name && !soundData.isPlaying)
 					{
-						m_ResourceManager->GetAudioManager()->SoundPlayWave(soundData);
+						m_ResourceManager->GetAudioManager()->SoundPlayWave(soundData,isLoop);
 						return;
 					}
 				}
@@ -637,7 +637,7 @@ void AudioAPI::Initialize(const Entity& entity, ECSManager* ecs, ObjectContainer
 				SoundData newSoundData = m_ResourceManager->GetAudioManager()->CreateSoundData(name);
 				if (!newSoundData.name.empty())
 				{
-					m_ResourceManager->GetAudioManager()->SoundPlayWave(newSoundData);
+					m_ResourceManager->GetAudioManager()->SoundPlayWave(newSoundData,isLoop);
 					data->soundData.push_back(std::move(newSoundData));
 				}
 				return;
