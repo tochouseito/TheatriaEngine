@@ -358,7 +358,7 @@ void Inspector::BoxCollider2DComponentView(GameObject* object)
 	if (ImGui::TreeNode("BoxCollider2D"))
 	{
 		ImGui::DragFloat2("Offset", reinterpret_cast<float*>(&collider->offsetX), 0.1f);
-		ImGui::DragFloat2("Size", reinterpret_cast<float*>(&collider->width), 0.1f, 0.01f, 100.0f);
+		ImGui::DragFloat2("Size", reinterpret_cast<float*>(&collider->width), 0.1f, 0.01f, 1000.0f);
 
 		ImGui::DragFloat("Density", &collider->density, 0.05f, 0.0f, 100.0f);
 		ImGui::DragFloat("Friction", &collider->friction, 0.05f, 0.0f, 1.0f);
