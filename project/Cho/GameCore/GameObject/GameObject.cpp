@@ -216,6 +216,10 @@ GameObjectData::GameObjectData(const GameObject& other)
 		}
 		std::reverse(m_LineRenderer.begin(), m_LineRenderer.end());
 	}
+	if(auto* animation = other.m_ECS->GetComponent<AnimationComponent>(e))
+	{
+		m_Animation = *animation;
+	}
 }
 
 
