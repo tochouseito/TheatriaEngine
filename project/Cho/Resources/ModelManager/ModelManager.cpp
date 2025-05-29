@@ -191,7 +191,7 @@ bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 			if (scene->mNumMeshes > 1)
 			{
 				// 複数メッシュのボーンは非対応
-				Log::Write(LogLevel::Assert, "Multiple meshes with bones are not supported.");
+				Log::Write(LogLevel::Assert, std::format("Model {} has multiple meshes with bones, which is not supported.", ConvertString(modelData.name)).c_str());
 			}
 			// ボーンの情報を取得
 			Skeleton skeleton;
