@@ -71,6 +71,7 @@ public:
 			result.pBuffer = existingData.pBuffer;
 			result.bufferSize = existingData.bufferSize;
 			result.isPlaying = false;
+			result.pSourceVoice = nullptr;
 		}
 		else
 		{
