@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="GameCore\GameWorld\GameWorld.cpp" />
     <ClCompile Include="Resources\AudioManager\AudioManager.cpp" />
     <ClCompile Include="ChoEngineAPI.cpp" />
     <ClCompile Include="Core\ChoLog\ChoLog.cpp">
@@ -295,6 +296,8 @@
   <ItemGroup>
     <ClInclude Include="APIExportsMacro.h" />
     <ClInclude Include="Core\Utility\AnimationStruct.h" />
+    <ClInclude Include="Core\Utility\SoundData.h" />
+    <ClInclude Include="GameCore\GameWorld\GameWorld.h" />
     <ClInclude Include="Resources\AudioManager\AudioManager.h" />
     <ClInclude Include="ChoEngineAPI.h" />
     <ClInclude Include="Core\ChoLog\ChoLog.h" />
@@ -781,7 +784,8 @@ xcopy "$(SolutionDir)Cho\APIExportsMacro.h" "$(TargetDir)Cho\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Engine\Engine.h" "$(TargetDir)Cho\Engine\" /E /I /Y
 xcopy "$(SolutionDir)Cho\GameCore\GameObject\GameObject.h" "$(TargetDir)Cho\GameCore\GameObject" /E /I /Y
 xcopy "$(SolutionDir)Cho\GameCore\ObjectContainer" "$(TargetDir)Cho\GameCore\ObjectContainer" /E /I /Y
-xcopy "$(SolutionDir)Cho\Core\Utility\AnimationStruct.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y</Command>
+xcopy "$(SolutionDir)Cho\Core\Utility\AnimationStruct.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
+xcopy "$(SolutionDir)Cho\Core\Utility\SoundData.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -835,7 +839,8 @@ xcopy "$(SolutionDir)Cho\APIExportsMacro.h" "$(TargetDir)Cho\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Engine\Engine.h" "$(TargetDir)Cho\Engine\" /E /I /Y
 xcopy "$(SolutionDir)Cho\GameCore\GameObject\GameObject.h" "$(TargetDir)Cho\GameCore\GameObject" /E /I /Y
 xcopy "$(SolutionDir)Cho\GameCore\ObjectContainer" "$(TargetDir)Cho\GameCore\ObjectContainer" /E /I /Y
-xcopy "$(SolutionDir)Cho\Core\Utility\AnimationStruct.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y</Command>
+xcopy "$(SolutionDir)Cho\Core\Utility\AnimationStruct.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
+xcopy "$(SolutionDir)Cho\Core\Utility\SoundData.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

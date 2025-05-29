@@ -131,10 +131,10 @@ void ScenePrefab::Start()
 		{
 			AudioComponent* audio = ecs->AddComponent<AudioComponent>(entity);
 			*audio = objData.m_Audio.value();
-			if (!audio->audioName.empty())
+			/*if (!audio->audioName.empty())
 			{
 				audio->audioID = m_SceneManager->m_pResourceManager->GetAudioManager()->GetSoundDataIndex(audio->audioName);
-			}
+			}*/
 		}
 		// AnimationComponentの追加
 		if(objData.m_Animation.has_value())

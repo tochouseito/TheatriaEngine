@@ -5,6 +5,7 @@
 #include "Core/Utility/IDType.h"
 #include "Core/Utility/EffectStruct.h"
 #include "Core/Utility/AnimationStruct.h"
+#include "Core/Utility/SoundData.h"
 #include <vector>         // C++98
 #include <array>          // C++11
 #include <functional>     // C++98
@@ -598,10 +599,12 @@ struct LightComponent : public IComponentTag
 };
 
 // Audioコンポーネント
+struct SoundData;
 struct AudioComponent : public IComponentTag
 {
-	std::string audioName = "";	// オーディオ名
-	std::optional<uint32_t> audioID = std::nullopt;	// オーディオID
+	//std::string audioName = "";	// オーディオ名
+	//std::optional<uint32_t> audioID = std::nullopt;	// オーディオID
+	std::vector<SoundData> soundData;	// サウンドデータ
 	bool isLoop = false;	// ループフラグ
 	bool isPlay = false;	// 再生フラグ
 	bool isPause = false;	// 一時停止フラグ
@@ -610,7 +613,7 @@ struct AudioComponent : public IComponentTag
 	AudioComponent& operator=(const AudioComponent& other)
 	{
 		if (this == &other) return *this;
-		audioName = other.audioName;
+		//audioName = other.audioName;
 		isLoop = other.isLoop;
 		isPlay = other.isPlay;
 		isPause = other.isPause;
@@ -620,8 +623,8 @@ struct AudioComponent : public IComponentTag
 	// 初期化
 	void Initialize()
 	{
-		audioName = "";
-		audioID = std::nullopt;
+		//audioName = "";
+		//audioID = std::nullopt;
 		isLoop = false;
 		isPlay = false;
 		isPause = false;

@@ -157,13 +157,3 @@ private:
 	// ダミーGameObject
 	GameObject m_DummyGameObject;
 };
-
-class Test
-{
-public:
-	Test() = default;
-	~Test() = default;
-	
-private:
-	GameObject object;
-};

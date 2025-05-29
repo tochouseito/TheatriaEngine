@@ -264,9 +264,17 @@ bool DeleteObjectCommand::Execute(EngineCommand* edit)
 	if (audio)
 	{
 		// 再生中なら止める
-		if (audio->isPlay)
+		/*if (audio->isPlay)
 		{
 			edit->m_ResourceManager->GetAudioManager()->SoundStop(audio->audioID.value());
+		}*/
+		for(auto& sound : audio->soundData)
+		{
+			// Sound統合バッファからmapIDを返却
+			if (sound.isPlaying)
+			{
+				edit->m_ResourceManager->GetAudioManager()->SoundStop(sound);
+			}
 		}
 	}
 	// AnimationComponentを取得
@@ -812,10 +820,10 @@ bool CopyGameObjectCommand::Execute(EngineCommand* edit)
 	{
 		AudioComponent* audio = ecs->AddComponent<AudioComponent>(entity);
 		*audio = objData.m_Audio.value();
-		if (!audio->audioName.empty())
+		/*if (!audio->audioName.empty())
 		{
 			audio->audioID = edit->m_ResourceManager->GetAudioManager()->GetSoundDataIndex(audio->audioName);
-		}
+		}*/
 	}
 	// AnimationComponentの追加
 	if (objData.m_Animation.has_value())

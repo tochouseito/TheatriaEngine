@@ -1181,7 +1181,7 @@ json Cho::Serialization::ToJson(const LightComponent& l)
 json Cho::Serialization::ToJson(const AudioComponent& a)
 {
     json j;
-	j["audioName"] = a.audioName;
+	//j["audioName"] = a.audioName;
 	j["isLoop"] = a.isLoop;
 	return j;
 }
@@ -1979,7 +1979,7 @@ void Cho::Deserialization::FromJson(const json& j, LightComponent& l)
 
 void Cho::Deserialization::FromJson(const json& j, AudioComponent& a)
 {
-	a.audioName = j.value("audioName", "");
+	//a.audioName = j.value("audioName", "");
 	a.isLoop = j.value("isLoop", false);
 }
 

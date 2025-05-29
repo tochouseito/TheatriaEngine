@@ -460,21 +460,21 @@ void Inspector::AudioComponentView(GameObject* object)
 	AudioComponent* audio = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<AudioComponent>(object->GetEntity());
 	if (!audio) { return; }
 	ImGui::Text("Audio Component");
-	ImGui::Text("Audio Name: %s", ConvertString(audio->audioName).c_str());
-	std::unordered_map<std::string, uint32_t> audioNameMap = m_EngineCommand->GetResourceManager()->GetAudioManager()->GetSoundDataToName();
-	// オーディオを選択するためのドロップダウンメニュー
-	if (ImGui::BeginCombo("Audio", audio->audioName.empty() ? "None" : audio->audioName.c_str()))
-	{
-		for (const auto& pair : audioNameMap)
-		{
-			if (ImGui::Selectable(pair.first.c_str(), audio->audioName == pair.first))
-			{
-				audio->audioName = pair.first;
-				audio->audioID = pair.second;
-			}
-		}
-		ImGui::EndCombo();
-	}
+	//ImGui::Text("Audio Name: %s", ConvertString(audio->audioName).c_str());
+	//std::unordered_map<std::string, uint32_t> audioNameMap = m_EngineCommand->GetResourceManager()->GetAudioManager()->GetSoundDataToName();
+	//// オーディオを選択するためのドロップダウンメニュー
+	//if (ImGui::BeginCombo("Audio", audio->audioName.empty() ? "None" : audio->audioName.c_str()))
+	//{
+	//	for (const auto& pair : audioNameMap)
+	//	{
+	//		if (ImGui::Selectable(pair.first.c_str(), audio->audioName == pair.first))
+	//		{
+	//			audio->audioName = pair.first;
+	//			audio->audioID = pair.second;
+	//		}
+	//	}
+	//	ImGui::EndCombo();
+	//}
 }
 
 void Inspector::AnimationComponentView(GameObject* object)
