@@ -370,7 +370,7 @@ public:
 	//void SetLoop(const bool& loop) { data->isLoop = loop; }
 	//bool GetIsPlay()const { return data->isPlay; }
 	// 関数ポインタのラッパー
-	void Play(const std::string& name);
+	void Play(const std::string& name, const bool& isLoop);
 	void Stop(const std::string& name);
 	//void SetSource(const std::string& sourceName);
 private:
