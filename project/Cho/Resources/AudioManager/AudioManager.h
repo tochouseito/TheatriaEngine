@@ -72,7 +72,10 @@ public:
 			result.bufferSize = existingData.bufferSize;
 			result.isPlaying = false;
 		}
-		result.name = "";
+		else
+		{
+			result.name = "";
+		}
 		return result;
 	}
 
