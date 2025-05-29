@@ -189,3 +189,9 @@ private:
 	std::optional<AnimationComponent> m_Animation = std::nullopt;
 };
 
+// IDと生成したSceneと紐づけるハンドル
+struct GameObjectHandle
+{
+	uint32_t id{};
+	std::optional<uint32_t> generation{};
+};
