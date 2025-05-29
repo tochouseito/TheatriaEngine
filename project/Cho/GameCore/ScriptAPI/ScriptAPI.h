@@ -373,6 +373,7 @@ public:
 	void Play(const std::string& name, const bool& isLoop = false);
 	void Stop(const std::string& name);
 	bool IsPlaying(const std::string& name); // 再生中かどうかをチェック
+	void SetVolume(const std::string& name, const float& volume); // 音量を設定
 	//void SetSource(const std::string& sourceName);
 private:
 	friend class GameObject;
