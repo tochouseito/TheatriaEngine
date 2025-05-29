@@ -122,11 +122,11 @@ bool AudioManager::SoundLordWave(const std::filesystem::path& filePath)
 	soundData.wfex = format.fmt;
 	soundData.pBuffer = reinterpret_cast<BYTE*>(pBuffer);
 	soundData.bufferSize = data.size;
-
+	std::string name = filePath.stem().string();
+	soundData.name = name;
 	// 音声データをコンテナに追加
 	uint32_t index = static_cast<uint32_t>(m_SoundData.push_back(std::move(soundData)));
 	// 名前をキーにして音声データのインデックスを保存
-	std::string name = filePath.stem().string();
 	m_SoundDataToName[name] = index;
 	return true;
 }
@@ -240,6 +240,46 @@ void AudioManager::SoundStopFadeOut(const uint32_t& index, float duration)
 
 	// 音声を停止
 	SoundStop(index);
+}
+
+void AudioManager::SoundPlayWave(SoundData& soundData, bool loop)
+{
+	HRESULT result;
+	if (!soundData.pSourceVoice)
+	{
+		result = m_XAudio2->CreateSourceVoice(&soundData.pSourceVoice, &soundData.wfex);
+		assert(SUCCEEDED(result));
+	}
+
+	XAUDIO2_BUFFER buf{};
+	buf.pAudioData = soundData.pBuffer;
+	buf.AudioBytes = soundData.bufferSize;
+	buf.Flags = XAUDIO2_END_OF_STREAM;
+
+	if (loop)
+	{
+		buf.LoopBegin = 0;
+		buf.LoopLength = 0; // 無限ループ設定
+		buf.LoopCount = XAUDIO2_LOOP_INFINITE;
+	}
+	soundData.pSourceVoice->FlushSourceBuffers();
+	result = soundData.pSourceVoice->SubmitSourceBuffer(&buf);
+	assert(SUCCEEDED(result));
+
+	result = soundData.pSourceVoice->Start();
+	assert(SUCCEEDED(result));
+
+	soundData.isPlaying = true;
+}
+
+void AudioManager::SoundStop(SoundData& soundData)
+{
+	if (soundData.pSourceVoice)
+	{
+		soundData.pSourceVoice->Stop(0);
+		soundData.pSourceVoice->FlushSourceBuffers();
+	}
+	soundData.isPlaying = false;
 }
 
 void AudioManager::Finalize()

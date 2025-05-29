@@ -1,10 +1,9 @@
 #pragma once
-#define NOMINMAX // Windowのminmaxマクロを除外
-#include <xaudio2.h>
-#include <fstream>
+#include "Core/Utility/SoundData.h"
 #include <wrl.h>
 #include "Core/Utility/FVector.h"
 #include <unordered_map>
+
 class ResourceManager;
 class AudioManager
 {
@@ -18,35 +17,6 @@ public:
 	{
 		Finalize();
 	};
-	/*ファイル構造体*/
-	/*チャンクヘッダ*/
-	struct ChunkHeader
-	{
-		char id[4];/*チャンク毎のID*/
-		int32_t size;/*チャンクのサイズ*/
-	};
-	/*RIFFヘッダチャンク*/
-	struct RiffHeader
-	{
-		ChunkHeader chunk;/*”RIFF"*/
-		char type[4];/*"WAVE"*/
-	};
-	/*FMTチャンク*/
-	struct FormatChunk
-	{
-		ChunkHeader chunk;/*"fmt"*/
-		WAVEFORMATEX fmt;/*波形フォーマット*/
-	};
-	/*音声データ*/
-	struct SoundData
-	{
-		WAVEFORMATEX wfex;     /*波形フォーマット*/
-		BYTE* pBuffer;         /*バッファの先頭アドレス*/
-		unsigned int bufferSize;/*バッファのサイズ*/
-		IXAudio2SourceVoice* pSourceVoice; /* SourceVoice を保持 */
-		float currentVolume = 1.0f;    /* 現在のボリューム */
-		bool isPlaying = false; /* 再生中かどうか */
-	};
 	void Initialize();
 
 	bool SoundLordWave(const std::filesystem::path& filePath);
@@ -58,6 +28,8 @@ public:
 	void SoundPlayWave(const uint32_t& index, bool loop = false); // ループフラグを追加
 	void SoundStop(const uint32_t& index); // Stop関数を追加
 	void SoundStopFadeOut(const uint32_t& index, float duration);
+	void SoundPlayWave(SoundData& soundData, bool loop = false); // ループフラグを追加
+	void SoundStop(SoundData& soundData); // Stop関数を追加
 	/// <summary>
 	/// 終了処理
 	/// </summary>
@@ -76,6 +48,32 @@ public:
 	const SoundData& GetSoundData(const uint32_t& index) const
 	{
 		return m_SoundData[index];
+	}
+
+	const SoundData& GetSoundData(const std::string& name) const
+	{
+		auto it = m_SoundDataToName.find(name);
+		if (it != m_SoundDataToName.end())
+		{
+			return m_SoundData[it->second];
+		}
+		//throw std::runtime_error("Sound data not found: " + name);
+	}
+
+	SoundData CreateSoundData(const std::string& name)
+	{
+		SoundData result;
+		if (m_SoundDataToName.contains(name))
+		{
+			SoundData& existingData = m_SoundData[m_SoundDataToName[name]];
+			result.name = existingData.name;
+			result.wfex = existingData.wfex;
+			result.pBuffer = existingData.pBuffer;
+			result.bufferSize = existingData.bufferSize;
+			result.isPlaying = false;
+		}
+		result.name = "";
+		return result;
 	}
 
 	// 名前で検索してインデックスを取得する

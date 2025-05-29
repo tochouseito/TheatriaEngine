@@ -5,6 +5,7 @@
 #include "GameCore/ObjectContainer/ObjectContainer.h"
 #include "GameCore/PhysicsEngine/PhysicsEngine.h"
 #include "Resources/ResourceManager/ResourceManager.h"
+#include "Resources/AudioManager/AudioManager.h"
 
 class Rigidbody2DAPI::ImplRigidbody2DAPI
 {
@@ -582,26 +583,26 @@ class AudioAPI::ImplAudioAPI
 public:
 	ImplAudioAPI() = default;
 	~ImplAudioAPI() = default;
-	std::function<void()> PlayFunc;
-	std::function<void()> StopFunc;
-	std::function<void(const std::string& sourceName)> SetSourceFunc;
+	std::function<void(const std::string&)> PlayFunc;
+	std::function<void(const std::string&)> StopFunc;
+	std::function<void(const std::string&)> SetSourceFunc;
 };
 AudioAPI::AudioAPI() : implAudioAPI(new AudioAPI::ImplAudioAPI) {}
 AudioAPI::~AudioAPI() { delete implAudioAPI; }
-void AudioAPI::Play()
+void AudioAPI::Play(const std::string& name)
 {
-	if (implAudioAPI->PlayFunc) { implAudioAPI->PlayFunc(); }
+	if (implAudioAPI->PlayFunc) { implAudioAPI->PlayFunc(name); }
 }
 
-void AudioAPI::Stop()
+void AudioAPI::Stop(const std::string& name)
 {
-	if (implAudioAPI->StopFunc) { implAudioAPI->StopFunc(); }
+	if (implAudioAPI->StopFunc) { implAudioAPI->StopFunc(name); }
 }
 
-void AudioAPI::SetSource(const std::string& sourceName)
-{
-	if (implAudioAPI->SetSourceFunc) { implAudioAPI->SetSourceFunc(sourceName); }
-}
+//void AudioAPI::SetSource(const std::string& sourceName)
+//{
+//	if (implAudioAPI->SetSourceFunc) { implAudioAPI->SetSourceFunc(sourceName); }
+//}
 
 void AudioAPI::Initialize(const Entity& entity, ECSManager* ecs, ObjectContainer* objectContainer, ResourceManager* resourceManager)
 {
@@ -619,31 +620,55 @@ void AudioAPI::Initialize(const Entity& entity, ECSManager* ecs, ObjectContainer
 	data = audio;
 	if (audio)
 	{
-		implAudioAPI->PlayFunc = [this]() {
+		implAudioAPI->PlayFunc = [this](const std::string& name) {
 			if (auto* a = m_ECS->GetComponent<AudioComponent>(m_Entity))
 			{
-				m_ResourceManager->GetAudioManager()->SoundPlayWave(a->audioID.value(), a->isLoop);
-				a->isPlay = true;
-			}
-			};
-		implAudioAPI->StopFunc = [this]() {
-			if (auto* a = m_ECS->GetComponent<AudioComponent>(m_Entity))
-			{
-				m_ResourceManager->GetAudioManager()->SoundStop(a->audioID.value());
-				a->isPlay = false;
-			}
-			};
-		implAudioAPI->SetSourceFunc = [this](const std::string& sourceName) {
-			if (auto* a = m_ECS->GetComponent<AudioComponent>(m_Entity))
-			{
-				if (a->audioID.has_value()&&a->isPlay)
+				/*m_ResourceManager->GetAudioManager()->SoundPlayWave(a->audioID.value(), a->isLoop);
+				a->isPlay = true;*/
+				for (SoundData& soundData : data->soundData)
 				{
-					m_ResourceManager->GetAudioManager()->SoundStop(a->audioID.value());
+					if (soundData.name == name && !soundData.isPlaying)
+					{
+						m_ResourceManager->GetAudioManager()->SoundPlayWave(soundData);
+						return;
+					}
 				}
-				a->audioID = m_ResourceManager->GetAudioManager()->GetSoundDataIndex(sourceName);
-				a->isPlay = false; // ソースを変更したら再生状態をリセット
+				// もし指定された名前のサウンドが見つからなかった場合
+				SoundData newSoundData = m_ResourceManager->GetAudioManager()->CreateSoundData(name);
+				if (!newSoundData.name.empty())
+				{
+					m_ResourceManager->GetAudioManager()->SoundPlayWave(newSoundData);
+					data->soundData.push_back(std::move(newSoundData));
+				}
+				return;
 			}
 			};
+		implAudioAPI->StopFunc = [this](const std::string& name) {
+			if (auto* a = m_ECS->GetComponent<AudioComponent>(m_Entity))
+			{
+				/*m_ResourceManager->GetAudioManager()->SoundStop(a->audioID.value());
+				a->isPlay = false;*/
+				for (SoundData& soundData : data->soundData)
+				{
+					if (soundData.name == name && soundData.isPlaying)
+					{
+						m_ResourceManager->GetAudioManager()->SoundStop(soundData);
+						return;
+					}
+				}
+			}
+			};
+		//implAudioAPI->SetSourceFunc = [this](const std::string& sourceName) {
+		//	if (auto* a = m_ECS->GetComponent<AudioComponent>(m_Entity))
+		//	{
+		//		if (a->audioID.has_value()&&a->isPlay)
+		//		{
+		//			m_ResourceManager->GetAudioManager()->SoundStop(a->audioID.value());
+		//		}
+		//		a->audioID = m_ResourceManager->GetAudioManager()->GetSoundDataIndex(sourceName);
+		//		a->isPlay = false; // ソースを変更したら再生状態をリセット
+		//	}
+		//	};
 	}
 }
 
