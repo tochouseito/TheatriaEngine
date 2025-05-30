@@ -13,6 +13,9 @@ struct EffectParticle
     float lifeTime;
     float spawnTime;
     uint isAlive;
+    uint rootID;
     uint nodeID;
+    uint meshType;
+    uint meshID;
 };
 static const uint kMaxParticles = 1024;

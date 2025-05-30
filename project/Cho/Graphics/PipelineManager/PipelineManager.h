@@ -50,6 +50,14 @@ public:
 	PSO GetEffectEditorInitPSO() { return m_EffectEditorInitPSO; }
 	PSO GetEffectEditorUpdatePSO() { return m_EffectEditorUpdatePSO; }
 	PSO GetEffectEditorEmitPSO() { return m_EffectEditorEmitPSO; }
+	// Effect
+	PSO GetEffectInitPSO() { return m_EffectInitPSO; }
+	// EffectTimeBase
+	PSO GetEffectTimeBaseEmitPSO() { return m_EffectTimeBaseEmitPSO; }
+	PSO GetEffectTimeBaseUpdatePSO() { return m_EffectTimeBaseUpdatePSO; }
+	// EffectSprite
+	PSO GetEffectSpritePSO() { return m_EffectSpritePSO; }
+
 	// UI
 	PSO GetUIPSO() { return m_UIPSO; }
 	// SkinningCS
@@ -78,6 +86,14 @@ private:
 	void CreatePipelineEffectEditorUpdate(ID3D12Device8* device);
 	void CreatePipelineEffectEditorEmit(ID3D12Device8* device);
 
+	// Effect
+	void CreatePipelineEffectInit(ID3D12Device8* device);
+	// EffectTimeBase
+	void CreatePipelineEffectTimeBaseEmit(ID3D12Device8* device);
+	void CreatePipelineEffectTimeBaseUpdate(ID3D12Device8* device);
+	// EffectSprite
+	void CreatePipelineEffectSprite(ID3D12Device8* device);
+
 	// UI
 	void CreatePipelineUI(ID3D12Device8* device);
 
@@ -89,7 +105,7 @@ private:
 	PSO m_ScreenCopyPSO;
 	PSO m_IntegratePSO;
 	PSO m_LinePSO;
-	ID3D12PipelineLibrary
+
 	// Particle
 	PSO m_ParticlePSO;
 	PSO m_ParticleInitPSO;
@@ -101,6 +117,16 @@ private:
 	PSO m_EffectEditorInitPSO;
 	PSO m_EffectEditorUpdatePSO;
 	PSO m_EffectEditorEmitPSO;
+
+	// Effect
+	PSO m_EffectInitPSO;
+
+	// EffectTimeBase
+	PSO m_EffectTimeBaseEmitPSO;
+	PSO m_EffectTimeBaseUpdatePSO;
+
+	// EffectSprite
+	PSO m_EffectSpritePSO;
 
 	// UI
 	PSO m_UIPSO;
