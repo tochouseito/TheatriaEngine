@@ -89,7 +89,7 @@ private:
 	PSO m_ScreenCopyPSO;
 	PSO m_IntegratePSO;
 	PSO m_LinePSO;
-
+	ID3D12PipelineLibrary
 	// Particle
 	PSO m_ParticlePSO;
 	PSO m_ParticleInitPSO;

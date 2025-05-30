@@ -405,7 +405,14 @@
   <ItemGroup>
     <None Include="Resources\EngineAssets\Shader\header\Billboard.hlsli" />
     <None Include="Resources\EngineAssets\Shader\header\Demo.hlsli" />
+    <None Include="Resources\EngineAssets\Shader\header\EasingType.hlsli" />
     <None Include="Resources\EngineAssets\Shader\header\Effect.hlsli" />
+    <None Include="Resources\EngineAssets\Shader\header\EffectMeshCommon.hlsli" />
+    <None Include="Resources\EngineAssets\Shader\header\EffectNode.hlsli" />
+    <None Include="Resources\EngineAssets\Shader\header\EffectParticle.hlsli" />
+    <None Include="Resources\EngineAssets\Shader\header\EffectRoot.hlsli" />
+    <None Include="Resources\EngineAssets\Shader\header\EffectSprite.hlsli" />
+    <None Include="Resources\EngineAssets\Shader\header\EffectSRT.hlsli" />
     <None Include="Resources\EngineAssets\Shader\header\Environment.hlsli" />
     <None Include="Resources\EngineAssets\Shader\header\Light.hlsli" />
     <None Include="Resources\EngineAssets\Shader\header\LineDraw.hlsli" />
@@ -522,7 +529,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="Resources\EngineAssets\Shader\Effect\EffectInit.CS.hlsl">
+    <FxCompile Include="Resources\EngineAssets\Shader\Effect\EffectParticleInit.CS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
