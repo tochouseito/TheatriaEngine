@@ -269,8 +269,8 @@ void EffectEditorUpdateSystem::UpdateEffect(EffectComponent& effect)
 	// Root
 	ConstantBuffer<EffectRoot>* buffer = dynamic_cast<ConstantBuffer<EffectRoot>*>(m_pEngineCommand->GetResourceManager()->GetBuffer<IConstantBuffer>(m_pEngineCommand->m_EffectRootIndex));
 	EffectRoot root = {};
-	root.timeManager.globalTime = effect.globalTime;
-	root.timeManager.maxTime = effect.maxTime;
+	root.timeManager.elapsedTime = effect.globalTime;
+	root.timeManager.duration = effect.maxTime;
 	root.timeManager.deltaTime = effect.deltaTime;
 	StructuredBuffer<EffectNode>* nodeBuffer = dynamic_cast<StructuredBuffer<EffectNode>*>(m_pEngineCommand->GetResourceManager()->GetBuffer<IStructuredBuffer>(m_pEngineCommand->m_EffectNodeIndex));
 	StructuredBuffer<EffectSprite>* spriteBuffer = dynamic_cast<StructuredBuffer<EffectSprite>*>(m_pEngineCommand->GetResourceManager()->GetBuffer<IStructuredBuffer>(m_pEngineCommand->m_EffectSpriteIndex));

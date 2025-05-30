@@ -111,7 +111,7 @@ struct EffectCommon
     uint32_t deleteParentDeleted = 0;       // 親削除で削除
     uint32_t deleteAllChildrenDeleted = 0;  // 全ての子削除で削除
     RandValue lifeTime = {};             // 生存時間
-    RandValue emitTime = {};             // 生成時間
+    RandValue emitInterval = {};             // 生成時間
     RandValue emitStartTime = {};        // 生成開始時間
 };
 
@@ -286,8 +286,8 @@ struct EffectNodeData
 
 struct TimeManager
 {
-    float globalTime;
-    float maxTime;
+    float elapsedTime;
+    float duration;
     float deltaTime;
     float padding[1];
 };
@@ -295,6 +295,8 @@ struct TimeManager
 struct EffectRoot
 {
     TimeManager timeManager;    // 時間管理
+    uint32_t globalSeed;
+	uint32_t nodeCount;              // ノード数
 	uint32_t nodeID[128];           // ノードID
 };
 
@@ -320,9 +322,10 @@ struct EffectParticle
 	EffectParticlePVA scale;            // スケール
 	Color color;               // 色
 	float lifeTime;             // 寿命
-	float currentTime;         // 現在時間
+	float spawnTime;         // 現在時間
 	uint32_t isAlive;            // 生存フラグ
     uint32_t rootID;
 	uint32_t nodeID;
+	uint32_t meshType;          // メッシュタイプ
     uint32_t meshID;
 };

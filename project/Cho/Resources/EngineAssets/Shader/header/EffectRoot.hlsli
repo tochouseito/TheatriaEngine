@@ -11,7 +11,6 @@ struct EffectRoot
     TimeManager time;
     uint globalSeed;
     uint nodeCount;
-    uint2 padding;
     uint4 nodeIDs[32];
 };
 static const uint kMaxRoot = 128;

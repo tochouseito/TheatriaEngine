@@ -83,7 +83,7 @@ void EffectEditor::Window()
             // 生存時間
 			ImGui::DragFloat2("生存時間", &node.common.lifeTime.median, 1.0f, 0.0f, 0.0f,"%.0f");
             // 生成時間
-			ImGui::DragFloat2("生成時間", &node.common.emitTime.median, 0.1f, 0.0f, 0.0f);
+			ImGui::DragFloat2("生成時間", &node.common.emitInterval.median, 0.1f, 0.0f, 0.0f);
 			// 生成開始時間
 			ImGui::DragFloat2("生成開始時間", &node.common.emitStartTime.median, 0.1f, 0.0f, 0.0f);
 

@@ -17,6 +17,10 @@ ResourceManager::ResourceManager(ID3D12Device8* device)
 	CreateLightBuffer();
 	// 環境バッファの作成
 	CreateEnvironmentBuffer();
+	// エフェクトパーティクルバッファの作成
+	CreateEffectParticleBuffer();
+	// EffectRootUseListバッファの作成
+	CreateEffectRootUseListBuffer();
 	// スクリプトコンテナの作成
 	m_ScriptContainer = std::make_unique<ScriptContainer>();
 	// 初期化
@@ -148,7 +152,15 @@ void ResourceManager::CreateIntegrationBuffers()
 	// UISprite統合バッファ
 	std::optional<uint32_t> uiSpriteIndex = CreateStructuredBuffer<BUFFER_DATA_UISPRITE>(kIntegrationUISpriteBufferSize);
 	m_IntegrationData[IntegrationDataType::UISprite] = std::make_unique<IntegrationData<BUFFER_DATA_UISPRITE>>(uiSpriteIndex, kIntegrationUISpriteBufferSize);
-
+	// EffectRoot統合バッファ
+	std::optional<uint32_t> effectRootIndex = CreateStructuredBuffer<EffectRoot>(kIntegrationEffectRootBufferSize);
+	m_IntegrationData[IntegrationDataType::EffectRootInt] = std::make_unique<IntegrationData<EffectRoot>>(effectRootIndex, kIntegrationEffectRootBufferSize);
+	// EffectNode統合バッファ
+	std::optional<uint32_t> effectNodeIndex = CreateStructuredBuffer<EffectNode>(kIntegrationEffectNodeBufferSize);
+	m_IntegrationData[IntegrationDataType::EffectNodeInt] = std::make_unique<IntegrationData<EffectNode>>(effectNodeIndex, kIntegrationEffectNodeBufferSize);
+	// EffectSprite統合バッファ
+	std::optional<uint32_t> effectSpriteIndex = CreateStructuredBuffer<EffectSprite>(kIntegrationEffectSpriteBufferSize);
+	m_IntegrationData[IntegrationDataType::EffectSpriteInt] = std::make_unique<IntegrationData<EffectSprite>>(effectSpriteIndex, kIntegrationEffectSpriteBufferSize);
 }
 
 void ResourceManager::CreateLightBuffer()
@@ -170,6 +182,24 @@ void ResourceManager::CreateEnvironmentBuffer()
 	// 環境バッファの作成
 	uint32_t index = CreateConstantBuffer<BUFFER_DATA_ENVIRONMENT>();
 	m_EnvironmentBuffer = dynamic_cast<ConstantBuffer<BUFFER_DATA_ENVIRONMENT>*>(GetBuffer<IConstantBuffer>(index));
+}
+
+// EffectParticleBuffer
+void ResourceManager::CreateEffectParticleBuffer()
+{
+	// エフェクトパーティクルバッファの作成
+	uint32_t index = CreateRWStructuredBuffer<EffectParticle>(128 * 1024);
+	m_EffectParticleBuffer = dynamic_cast<RWStructuredBuffer<EffectParticle>*>(GetBuffer<IRWStructuredBuffer>(index));
+	// FreeList
+	uint32_t freeListIndex = CreateRWStructuredBuffer<uint32_t>(128 * 1024,true);
+	m_EffectParticleFreeList = dynamic_cast<RWStructuredBuffer<uint32_t>*>(GetBuffer<IRWStructuredBuffer>(freeListIndex));
+}
+
+void ResourceManager::CreateEffectRootUseListBuffer()
+{
+	// EffectRootUseListバッファの作成
+	uint32_t index = CreateStructuredBuffer<uint32_t>(128);
+	m_EffectRootUseListBuffer = dynamic_cast<StructuredBuffer<uint32_t>*>(GetBuffer<IStructuredBuffer>(index));
 }
 
 void ResourceManager::CreateHeap(ID3D12Device8* device)
