@@ -64,6 +64,7 @@ struct EffectNode
     EffectSRT scale;
     EffectDrawCommon drawCommon;
     EffectDraw draw;
+    uint isRootParent;
     uint parentNodeID;
 };
 static const uint kMaxNode = 1024;

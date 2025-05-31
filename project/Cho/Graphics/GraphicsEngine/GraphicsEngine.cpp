@@ -783,6 +783,8 @@ void GraphicsEngine::EffectEditorDraw(CommandContext* context, ResourceManager& 
 	resourceManager;
 	gameCore;
 	mode;
+	// GPU待機
+	WaitForGPU(Compute);
 	// レンダーターゲットの設定
 	//SetRenderTargets(context, DrawPass::GBuffers, RenderMode::Editor);
 	// 描画設定
@@ -790,9 +792,9 @@ void GraphicsEngine::EffectEditorDraw(CommandContext* context, ResourceManager& 
 	// プリミティブトポロジの設定
 	context->SetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	// パイプラインセット
-	context->SetGraphicsPipelineState(m_PipelineManager->GetEffectEditorPSO().pso.Get());
+	context->SetGraphicsPipelineState(m_PipelineManager->GetEffectSpritePSO().pso.Get());
 	// ルートシグネチャセット
-	context->SetGraphicsRootSignature(m_PipelineManager->GetEffectEditorPSO().rootSignature.Get());
+	context->SetGraphicsRootSignature(m_PipelineManager->GetEffectSpritePSO().rootSignature.Get());
 	// シーンがないならスキップ
 	if (!gameCore.GetSceneManager()->GetCurrentScene()) { return; }
 	IConstantBuffer* cameraBuffer = nullptr;
@@ -831,21 +833,21 @@ void GraphicsEngine::EffectEditorDraw(CommandContext* context, ResourceManager& 
 	// カメラバッファをセット
 	context->SetGraphicsRootConstantBufferView(0, cameraBuffer->GetResource()->GetGPUVirtualAddress());
 	// RootBufferをセット
-	IConstantBuffer* rootBuffer = resourceManager.GetBuffer<IConstantBuffer>(m_EngineCommand->m_EffectRootIndex);
-	context->SetGraphicsRootConstantBufferView(1, rootBuffer->GetResource()->GetGPUVirtualAddress());
+	IStructuredBuffer* rootBuffer = resourceManager.GetIntegrationBuffer(IntegrationDataType::EffectRootInt);
+	context->SetGraphicsRootDescriptorTable(1, rootBuffer->GetSRVGpuHandle());
 	// NodeBufferをセット
-	IStructuredBuffer* nodeBuffer = resourceManager.GetBuffer<IStructuredBuffer>(m_EngineCommand->m_EffectNodeIndex);
+	IStructuredBuffer* nodeBuffer = resourceManager.GetIntegrationBuffer(IntegrationDataType::EffectNodeInt);
 	context->SetGraphicsRootDescriptorTable(2, nodeBuffer->GetSRVGpuHandle());
-	// EffectSpriteBufferをセット
-	IStructuredBuffer* effectSpriteBuffer = resourceManager.GetBuffer<IStructuredBuffer>(m_EngineCommand->m_EffectSpriteIndex);
-	context->SetGraphicsRootDescriptorTable(3, effectSpriteBuffer->GetSRVGpuHandle());
+	// SpriteBufferをセット
+	IStructuredBuffer* spriteBuffer = resourceManager.GetIntegrationBuffer(IntegrationDataType::EffectSpriteInt);
+	context->SetGraphicsRootDescriptorTable(3, spriteBuffer->GetSRVGpuHandle());
 	// EffectParticleBufferをセット
-	IRWStructuredBuffer* effectParticleBuffer = resourceManager.GetBuffer<IRWStructuredBuffer>(m_EngineCommand->m_EffectParticleIndex);
+	IRWStructuredBuffer* effectParticleBuffer = resourceManager.GetEffectParticleBuffer();
 	context->SetGraphicsRootDescriptorTable(4, effectParticleBuffer->GetUAVGpuHandle());
-	// EffectNodeBufferをセット
+	// NodeBufferをセット
 	context->SetGraphicsRootDescriptorTable(5, nodeBuffer->GetSRVGpuHandle());
-	// ParticleBufferをセット
-	context->SetGraphicsRootDescriptorTable(6, effectParticleBuffer->GetUAVGpuHandle());
+	// EffectParticleBufferをセット
+	context->SetGraphicsRootDescriptorTable(6, spriteBuffer->GetSRVGpuHandle());
 	// TextureBufferをセット
 	context->SetGraphicsRootDescriptorTable(7, resourceManager.GetSUVDHeap()->GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
 	// DrawCall

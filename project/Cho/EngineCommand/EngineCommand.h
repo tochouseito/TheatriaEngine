@@ -43,6 +43,8 @@ class EngineCommand
 	friend class AddAudioComponent;
 	friend class AddAnimationComponent;
 	friend class CopyGameObjectCommand;
+	friend class CreateEffectCommand;
+	friend class AddEffectNodeCommand;
 	// Editor
 	friend class EffectEditorUpdateSystem;
 	friend class EffectEditor;
@@ -116,38 +118,23 @@ public:
 	// ゲームの解像度を取得
 	UINT64 GetGameResolutionX() const;
 	UINT GetGameResolutionY() const;
-	// 新たに編集用のエフェクトを作成
-	void CreateNewEffect();
-	// エフェクトのEntityを取得
+	// EffectEditor
 	std::optional<uint32_t> GetEffectEntity() const { return m_EffectEntity; }
-	// 選択中のNodeをセット
-	void SetEffectNode(uint32_t nodeID) { m_EffectNode = nodeID; }
-	// エフェクトのノードを取得
-	std::optional<uint32_t> GetEffectNode() const { return m_EffectNode; }
-	// 統合バッファ
-	IIntegrationData* GetNodeIntegrationData() { return m_NodeIntegrationData.get(); }
-	IIntegrationData* GetSpriteIntegrationData() { return m_SpriteIntegrationData.get(); }
+	void SetEffectEntity(std::optional<uint32_t> entity) { m_EffectEntity = entity; }
+	std::optional<uint32_t> GetEffectNodeID() const { return m_EffectNodeID; }
+	void SetEffectNodeIndex(std::optional<uint32_t> nodeID) { m_EffectNodeID = nodeID; }
 private:
 	// 選択中のオブジェクト
 	GameObject* m_SelectedObject = nullptr;
 	// 編集中のエフェクトEntity
 	std::optional<uint32_t> m_EffectEntity = std::nullopt;
 	// 選択中のEffectNode
-	std::optional<uint32_t> m_EffectNode = std::nullopt;
+	std::optional<uint32_t> m_EffectNodeID = std::nullopt;
 
 	GameCore* m_GameCore = nullptr;
 	ResourceManager* m_ResourceManager = nullptr;
 	GraphicsEngine* m_GraphicsEngine = nullptr;
 	InputManager* m_InputManager = nullptr;
 	std::vector<std::unique_ptr<IEngineCommand>> m_Commands;
-
-	// EffectEditor
-	std::optional<uint32_t> m_EffectRootIndex = 0;
-	std::optional<uint32_t> m_EffectNodeIndex = 0;
-	std::unique_ptr<IIntegrationData> m_NodeIntegrationData = nullptr;
-	std::optional<uint32_t> m_EffectSpriteIndex = 0;
-	std::unique_ptr<IIntegrationData> m_SpriteIntegrationData = nullptr;
-	std::optional<uint32_t> m_EffectParticleIndex = 0;
-	std::optional<uint32_t> m_EffectParticleFreeListIndex = 0;
 };
 

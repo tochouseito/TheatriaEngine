@@ -253,6 +253,15 @@ public:
 		case IntegrationDataType::UISprite:
 			return m_IntegrationData[IntegrationDataType::UISprite].get();
 			break;
+		case IntegrationDataType::EffectRootInt:
+			return m_IntegrationData[IntegrationDataType::EffectRootInt].get();
+			break;
+		case IntegrationDataType::EffectNodeInt:
+			return m_IntegrationData[IntegrationDataType::EffectNodeInt].get();
+			break;
+		case IntegrationDataType::EffectSpriteInt:
+			return m_IntegrationData[IntegrationDataType::EffectSpriteInt].get();
+			break;
 		default:
 			break;
 		}
@@ -327,6 +336,30 @@ public:
 	{
 		m_EffectRootUseListRecycle.push_back(index);
 	}
+	size_t GetEffectRootUseListCount() const
+	{
+		return m_EffectRootUseList.size();
+	}
+	void AddEffectRootUseList(const uint32_t& index)
+	{
+		m_EffectRootUseList.push_back(index);
+		// 更新
+		uint32_t a = 0;
+		for(const auto& i : m_EffectRootUseList)
+		{
+			m_EffectRootUseListBuffer->UpdateData(i, a);
+		}
+	}
+	void RemoveEffectRootUseList(const uint32_t& index)
+	{
+		m_EffectRootUseList.remove(index);
+		// 更新
+		uint32_t a = 0;
+		for (const auto& i : m_EffectRootUseList)
+		{
+			m_EffectRootUseListBuffer->UpdateData(i, a);
+		}
+	}
 private:
 	// Heap生成
 	void CreateHeap(ID3D12Device8* device);
@@ -390,6 +423,8 @@ private:
 	RWStructuredBuffer<uint32_t>* m_EffectParticleFreeList = nullptr;
 	// EffectRootUseListBuffer
 	StructuredBuffer<uint32_t>* m_EffectRootUseListBuffer = nullptr;
+	// RootUseList
+	std::list<uint32_t> m_EffectRootUseList;
 	// RootUseList用
 	uint32_t m_NextEffectRootUseListIndex = 0;
 	// EffectRootUseListのリサイクル用

@@ -116,8 +116,19 @@ public:
 	{
 	}
 	~EffectEditorUpdateSystem() = default;
+	void Update(ECSManager* ecs) override
+	{
+		// いつもの処理
+		ECSManager::System<EffectComponent>::Update(ecs);
+		// エフェクトの初期化
+		InitEffectParticle();
+		// シェーダーの更新
+		UpdateShader();
+	}
 private:
 	void UpdateEffect(EffectComponent& effect);
+	void InitEffectParticle();
+	void UpdateShader();
 	ECSManager* m_pECS = nullptr;
 	EngineCommand* m_pEngineCommand = nullptr;
 };

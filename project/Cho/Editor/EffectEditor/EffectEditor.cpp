@@ -39,9 +39,9 @@ void EffectEditor::Window()
 
     // nodeが選択されているか
 	uint32_t nodeIndex = 0;
-    if (m_EngineCommand->GetEffectNode().has_value())
+    if (m_EngineCommand->GetEffectNodeID().has_value())
     {
-		nodeIndex = m_EngineCommand->GetEffectNode().value();
+		nodeIndex = m_EngineCommand->GetEffectNodeID().value();
     } else
     {
 		ImGui::Text("No Node");
@@ -49,7 +49,7 @@ void EffectEditor::Window()
         return;
     }
 	// nodeの情報を取得
-	EffectNodeData& node = effect->nodeData[nodeIndex];
+	EffectNodeData& node = effect->root.second.nodes[nodeIndex];
 
     ImGui::Separator();
     if (ImGui::BeginTabBar("Node"))
@@ -266,18 +266,19 @@ void EffectEditor::Window()
 					//"FCurve",       // ColorFCurve
 					//"NURBS",        // ColorNURBS
 				};
-				int colorType = static_cast<int>(node.sprite.colorType);
+				EffectSprite* sprite = std::get_if<EffectSprite>(&node.drawMesh);
+				int colorType = static_cast<int>(sprite->colorType);
 				if (ImGui::Combo("Color Type", &colorType, colorTypeStrings, IM_ARRAYSIZE(colorTypeStrings)))
 				{
-					node.sprite.colorType = static_cast<uint32_t>(colorType);
+					sprite->colorType = static_cast<uint32_t>(colorType);
 				}
 				// 色
-				COLOR_TYPE e_type = static_cast<COLOR_TYPE>(node.sprite.colorType);
+				COLOR_TYPE e_type = static_cast<COLOR_TYPE>(sprite->colorType);
 				switch (e_type)
 				{
 				case COLOR_TYPE::CONSTANT:
 				{
-					ImGui::ColorEdit4("Color", &node.sprite.color.r);
+					ImGui::ColorEdit4("Color", &sprite->color.r);
 					// 描画順
 					// 配置方法
 					static const char* placementStrings[] = {
@@ -286,10 +287,10 @@ void EffectEditor::Window()
 						"Z軸回転ビルボード", // BillboardZ
 						"固定", // Fixed
 					};
-					int placement = static_cast<int>(node.sprite.placement);
+					int placement = static_cast<int>(sprite->placement);
 					if (ImGui::Combo("Placement", &placement, placementStrings, IM_ARRAYSIZE(placementStrings)))
 					{
-						node.sprite.placement = static_cast<uint32_t>(placement);
+						sprite->placement = static_cast<uint32_t>(placement);
 					}
 					// 頂点色
 					// 頂点座標
@@ -297,23 +298,23 @@ void EffectEditor::Window()
 						"Standard",     // VertexPositionStandard
 						"Constant",     // VertexPositionConstant
 					};
-					int vertexPositionType = static_cast<int>(node.sprite.vertexPositionType);
+					int vertexPositionType = static_cast<int>(sprite->vertexPositionType);
 					if (ImGui::Combo("Vertex Position Type", &vertexPositionType, vertexPositionTypeStrings, IM_ARRAYSIZE(vertexPositionTypeStrings)))
 					{
-						node.sprite.vertexPositionType = static_cast<uint32_t>(vertexPositionType);
+						sprite->vertexPositionType = static_cast<uint32_t>(vertexPositionType);
 					}
 					// 頂点座標
-					VERTEX_POSITION_TYPE vpType = static_cast<VERTEX_POSITION_TYPE>(node.sprite.vertexPositionType);
+					VERTEX_POSITION_TYPE vpType = static_cast<VERTEX_POSITION_TYPE>(sprite->vertexPositionType);
 					switch (vpType)
 					{
 					case VERTEX_POSITION_TYPE::STANDARD:
 						// 何もしない
 						break;
 					case VERTEX_POSITION_TYPE::CONSTANT:
-						ImGui::DragFloat2("左下座標", &node.sprite.vertexPosition.leftBottom.x, 0.1f);
-						ImGui::DragFloat2("右下座標", &node.sprite.vertexPosition.rightBottom.x, 0.1f);
-						ImGui::DragFloat2("左上座標", &node.sprite.vertexPosition.leftTop.x, 0.1f);
-						ImGui::DragFloat2("右上座標", &node.sprite.vertexPosition.rightTop.x, 0.1f);
+						ImGui::DragFloat2("左下座標", &sprite->vertexPosition.leftBottom.x, 0.1f);
+						ImGui::DragFloat2("右下座標", &sprite->vertexPosition.rightBottom.x, 0.1f);
+						ImGui::DragFloat2("左上座標", &sprite->vertexPosition.leftTop.x, 0.1f);
+						ImGui::DragFloat2("右上座標", &sprite->vertexPosition.rightTop.x, 0.1f);
 						break;
 					default:
 						break;
@@ -378,9 +379,8 @@ void EffectEditor::ControlWindow()
 		return;
     }
 
-	ImGui::Text("%f", effect->globalTime);
-	ImGui::Text("%f", effect->deltaTime);
-	ImGui::Text("%f", effect->maxTime);
+	ImGui::Text("%f", effect->root.second.time.elapsedTime);
+	ImGui::Text("%f", effect->root.second.time.duration);
 
     // 中央に配置するための計算
     float toolbarWidth = 0.0f;
@@ -412,13 +412,9 @@ void EffectEditor::ControlWindow()
             effect->isRun = true;
         }
     }
-    if (ImGui::Button("Reset"))
-    {
-		effect->isReset = true;
-    }
 	if (ImGui::Button("1Frame"))
 	{
-		effect->globalTime++;
+		effect->root.second.time.elapsedTime++;
 	}
 	ImGui::End();
 }

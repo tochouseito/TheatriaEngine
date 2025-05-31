@@ -14,7 +14,7 @@ enum class ObjectType
 	Camera,				// カメラオブジェクト
 	ParticleSystem,		// パーティクルシステムオブジェクト
 	Effect,				// エフェクトオブジェクト
-	Light,			// ライトオブジェクト
+	Light,				// ライトオブジェクト
 	UI,					// UIオブジェクト
 	Count,				// カウント
 };
