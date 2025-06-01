@@ -2231,7 +2231,7 @@ std::wstring Cho::FileSystem::GameBuilder::SelectFolderDialog()
     return selectedPath;
 }
 
-void Cho::FileSystem::GameBuilder::CopyFilesToBuildFolder(const std::wstring& folderPath)
+void Cho::FileSystem::GameBuilder::CopyFilesToBuildFolder(EngineCommand* engineCommand, const std::wstring& folderPath)
 {
     namespace fs = std::filesystem;
     fs::path buildRoot = fs::path(folderPath) / m_sProjectName;
@@ -2254,7 +2254,7 @@ void Cho::FileSystem::GameBuilder::CopyFilesToBuildFolder(const std::wstring& fo
             L"imgui.ini", // 後で消す
             fs::path(L"GameProjects") / m_sProjectName / fs::path(L"resourseData"),
             fs::path(L"GameProjects") / m_sProjectName / fs::path(L"bin"),
-            fs::path(L"GameProjects") / m_sProjectName / fs::path(L"MainScene.json"),
+            //fs::path(L"GameProjects") / m_sProjectName / fs::path(L"MainScene.json"),
             fs::path(L"GameProjects") / m_sProjectName / fs::path(L"ScriptData.json"),
             L"Cho/Engine",
             L"Cho/Resources/EngineAssets",
@@ -2263,6 +2263,11 @@ void Cho::FileSystem::GameBuilder::CopyFilesToBuildFolder(const std::wstring& fo
             L"Cho/APIExportsMacro.h",
             L"Cho/ChoEngineAPI.h",
         };
+
+        for (const auto& scene : engineCommand->GetGameCore()->GetSceneManager()->GetScenes().GetVector())
+        {
+			sources.push_back(fs::path(L"GameProjects") / m_sProjectName / fs::path(scene->GetSceneName()).replace_extension(L".json"));
+        }
 
         for (const auto& src : sources)
         {

@@ -218,7 +218,7 @@ namespace Cho
         {
         public:
 			static std::wstring SelectFolderDialog();
-			static void CopyFilesToBuildFolder(const std::wstring& folderPath);
+			static void CopyFilesToBuildFolder(EngineCommand* engineCommand, const std::wstring& folderPath);
             static std::wstring GetEnvVar(const wchar_t* name);
 
         };

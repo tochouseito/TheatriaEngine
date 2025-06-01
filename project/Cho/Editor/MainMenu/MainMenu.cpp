@@ -468,7 +468,7 @@ void MainMenu::BuildSettingWindow()
 		if (!folderPath.empty())
 		{
 			// フォルダが選択された場合、ビルドを実行
-            FileSystem::GameBuilder::CopyFilesToBuildFolder(folderPath);
+            FileSystem::GameBuilder::CopyFilesToBuildFolder(m_EngineCommand,folderPath);
         }
     }
 	
