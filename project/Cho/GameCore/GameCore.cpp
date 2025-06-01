@@ -98,11 +98,11 @@ void GameCore::GameStop()
 	// 生成されたオブジェクトを削除
 	ClearGenerateObject();
 	m_GameGenerateID.clear();
+	// SceneManager
+	m_pSceneManager->EditorReLoad(m_MainSceneID);
 	m_pObjectContainer->InitializeAllGameObjects();
 	// DLLのアンロード
 	Cho::FileSystem::ScriptProject::UnloadScriptDLL();
-	// SceneManager
-	m_pSceneManager->EditorReLoad(m_MainSceneID);
 	isRunning = false;
 }
 
@@ -146,6 +146,55 @@ void GameCore::InitializeGenerateObject()
 	}
 	// 初期化済みのIDをクリア
 	m_GameGenerateID.clear();
+	
+	for(const auto& sceneID : m_GameLoadSceneID)
+	{
+		for(const ObjectID& id : m_pSceneManager->GetScene(sceneID)->GetUseObjects())
+		{
+			GameObject& object = m_pObjectContainer->GetGameObject(id);
+			if (!object.IsActive()) { continue; }
+			// オブジェクトの初期化
+			Entity entity = object.GetEntity();
+			// TransformComponentを取得
+			TransformComponent* transform = m_pECSManager->GetComponent<TransformComponent>(entity);
+			if (!transform) { continue; }
+			// TransformComponentの初期化
+			tfOnceSystem->Start(*transform);
+			// スクリプトの取得
+			ScriptComponent* script = m_pECSManager->GetComponent<ScriptComponent>(entity);
+			if (script)
+			{
+				// スクリプトの初期化
+				scriptGenerateOnceSystem->InstanceGenerate(*script);
+				scriptInitializeOnceSystem->StartScript(*script);
+			}
+			// Rigidbody2DComponentの取得
+			Rigidbody2DComponent* rb = m_pECSManager->GetComponent<Rigidbody2DComponent>(entity);
+			if (rb)
+			{
+				// Rigidbody2DComponentの初期化
+				physicsOnceSystem->CreateBody(entity, *transform, *rb);
+			}
+			// BoxCollider2DComponentの取得
+			BoxCollider2DComponent* box = m_pECSManager->GetComponent<BoxCollider2DComponent>(entity);
+			if (box)
+			{
+				// BoxCollider2DComponentの初期化
+				boxInitOnceSystem->CreateFixture(*transform, *rb, *box);
+			}
+		}
+	}
+	m_GameLoadSceneID.clear();
+
+	for (const auto& sceneID : m_GameUnloadSceneID)
+	{
+		for(const ObjectID& id : m_pSceneManager->GetScene(sceneID)->GetUseObjects())
+		{
+			id;
+		}
+	}
+
+	m_GameUnloadSceneID.clear();
 }
 
 void GameCore::ClearGenerateObject()
@@ -256,5 +305,10 @@ void GameCore::CreateSystems(InputManager* input, ResourceManager* resourceManag
 	scriptInitializeOnceSystem = std::make_unique<ScriptInitializeSystem>(m_pObjectContainer.get(), input, m_pECSManager.get(), resourceManager);
 	physicsOnceSystem = std::make_unique<Rigidbody2DInitSystem>(m_pECSManager.get(), m_pPhysicsWorld.get());
 	boxInitOnceSystem = std::make_unique<BoxCollider2DInitSystem>(m_pECSManager.get(), m_pPhysicsWorld.get());
+
+	tfFinalizeOnceSystem = std::make_unique<TransformFinalizeSystem>(m_pECSManager.get());
+	scriptFinalizeOnceSystem = std::make_unique<ScriptFinalizeSystem>(m_pECSManager.get());
+	physicsResetOnceSystem = std::make_unique<Rigidbody2DResetSystem>(m_pECSManager.get(), m_pPhysicsWorld.get());
+	particleFinaOnceSystem = std::make_unique<ParticleInitializeSystem>(m_pECSManager.get(), resourceManager, graphicsEngine);
 }
 

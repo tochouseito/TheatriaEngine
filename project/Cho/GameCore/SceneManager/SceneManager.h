@@ -176,5 +176,10 @@ private:
 	FVector<std::unique_ptr<ScenePrefab>> m_pScenes;
 	// 名前検索用補助コンテナ
 	std::unordered_map<std::wstring, SceneID> m_SceneNameToID;
+
+	// 読み込まれたScene
+	std::vector<SceneID> m_LoadedScenesIDs;
+	// 解除されたScene
+	std::vector<SceneID> m_UnloadedScenesIDs;
 };
 
