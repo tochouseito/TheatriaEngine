@@ -409,10 +409,12 @@ void EmitterUpdateSystem::UpdateEmitter(Entity e, EmitterComponent& emitter)
 	//	// 射出間隔を上回ってないので、許可は出せない
 	//	emitter.emit = 1;
 	//}
-	transform;
 	BUFFER_DATA_EMITTER data = {};
 	data.lifeTime = emitter.lifeTime;
 	data.position = emitter.position;
+	data.position.value.x.median = transform->position.x;
+	data.position.value.y.median = transform->position.y;
+	data.position.value.z.median = transform->position.z;
 	data.rotation = emitter.rotation;
 	data.scale = emitter.scale;
 	data.frequency = emitter.frequency;

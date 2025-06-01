@@ -97,9 +97,9 @@ public:
 	// 入力マネージャを取得
 	InputManager* GetInputManager() { return m_InputManager; }
 	// エディタの選択中オブジェクトを取得
-	GameObject* GetSelectedObject() { return m_SelectedObject; }
+	GameObject* GetSelectedObject();
 	// エディタの選択中オブジェクトをセット
-	void SetSelectedObject(GameObject* object) { m_SelectedObject = object; }
+	void SetSelectedObject(const std::wstring& name) { m_SelectedObjectName = name; }
 	// レンダリングテクスチャのハンドルを取得
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGameTextureHandle();
 	D3D12_GPU_DESCRIPTOR_HANDLE GetSceneTextureHandle();
@@ -126,7 +126,7 @@ public:
 	void SetEffectNodeIndex(std::optional<uint32_t> nodeID) { m_EffectNodeID = nodeID; }
 private:
 	// 選択中のオブジェクト
-	GameObject* m_SelectedObject = nullptr;
+	std::optional<std::wstring> m_SelectedObjectName = std::nullopt;
 	// 編集中のエフェクトEntity
 	std::optional<uint32_t> m_EffectEntity = std::nullopt;
 	// 選択中のEffectNode
