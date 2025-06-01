@@ -16,6 +16,15 @@ EngineCommand::EngineCommand(GameCore* gameCore, ResourceManager* resourceManage
 	
 }
 
+GameObject* EngineCommand::GetSelectedObject()
+{
+	if (!m_SelectedObjectName.has_value())
+	{
+		return nullptr;
+	}
+	return &m_GameCore->GetObjectContainer()->GetGameObjectByName(m_SelectedObjectName.value());
+}
+
 D3D12_GPU_DESCRIPTOR_HANDLE EngineCommand::GetGameTextureHandle()
 {
 	// ゲームレンダリングテクスチャのバッファインデックスを取得

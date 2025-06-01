@@ -136,13 +136,13 @@ void Hierarchy::Window()
 			if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
 			{
 				// 選択中のオブジェクトを更新
-				m_EngineCommand->SetSelectedObject(&object);
+				m_EngineCommand->SetSelectedObject(objectName);
 			}
 			// 右クリックされた場合の処理
 			if (ImGui::IsItemClicked(ImGuiMouseButton_Right))
 			{
 				// 選択中のオブジェクトを更新
-				m_EngineCommand->SetSelectedObject(&object);
+				m_EngineCommand->SetSelectedObject(objectName);
 				ImGui::OpenPopup("HierarchyPopupMenu");
 			}
 			// ダブルクリックで編集モードに切り替え

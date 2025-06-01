@@ -71,6 +71,8 @@ CHO_API GameObject& ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vecto
 	Rigidbody2DComponent* rb = engineCommand->GetGameCore()->GetECSManager()->GetComponent<Rigidbody2DComponent>(object.GetEntity());
 	BoxCollider2DComponent* box = engineCommand->GetGameCore()->GetECSManager()->GetComponent<BoxCollider2DComponent>(object.GetEntity());
 	MaterialComponent* material = engineCommand->GetGameCore()->GetECSManager()->GetComponent<MaterialComponent>(object.GetEntity());
+	AudioComponent* audio = engineCommand->GetGameCore()->GetECSManager()->GetComponent<AudioComponent>(object.GetEntity());
+	AnimationComponent* animation = engineCommand->GetGameCore()->GetECSManager()->GetComponent<AnimationComponent>(object.GetEntity());
 	// あるやつをnewObjectに追加
 	if (meshFilter)
 	{
@@ -156,6 +158,38 @@ CHO_API GameObject& ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vecto
 			newMaterial->textureName = material->textureName;
 		}
 	}
+	if(audio)
+	{
+		std::unique_ptr<AddAudioComponent> addAudioCommand = std::make_unique<AddAudioComponent>(newObject.GetEntity());
+		addAudioCommand->Execute(engineCommand);
+		AudioComponent* newAudio = engineCommand->GetGameCore()->GetECSManager()->GetComponent<AudioComponent>(newObject.GetEntity());
+		if (newAudio)
+		{
+			for (const auto& sound : audio->soundData)
+			{
+				SoundData newSound = g_Engine->GetEngineCommand()->GetResourceManager()->GetAudioManager()->CreateSoundData(sound.name);
+				if(!newSound.name.empty())
+				{
+					newAudio->soundData.push_back(std::move(newSound));
+				}
+			}
+			newAudio->isLoop = audio->isLoop;
+			newAudio->isPlay = audio->isPlay;
+			newAudio->isPause = audio->isPause;
+			newAudio->isStop = audio->isStop;
+		}
+	}
+	if(animation)
+	{
+		std::unique_ptr<AddAnimationComponent> addAnimationCommand = std::make_unique<AddAnimationComponent>(newObject.GetEntity());
+		addAnimationCommand->Execute(engineCommand);
+		AnimationComponent* newAnimation = engineCommand->GetGameCore()->GetECSManager()->GetComponent<AnimationComponent>(newObject.GetEntity());
+		if (newAnimation)
+		{
+			//new
+		}
+	}
+	
 	// TransformComponentを取得
 	TransformComponent* transform = engineCommand->GetGameCore()->GetECSManager()->GetComponent<TransformComponent>(newObject.GetEntity());
 	// 初期位置を設定

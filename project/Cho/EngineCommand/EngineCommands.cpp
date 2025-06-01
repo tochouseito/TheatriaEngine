@@ -34,7 +34,7 @@ bool Add3DObjectCommand::Execute(EngineCommand* edit)
 	// シーンに追加
 	edit->m_GameCore->GetSceneManager()->GetMainScene()->AddUseObject(objectID);
 	// SelectedObjectを設定
-	edit->SetSelectedObject(&edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID));
+	edit->SetSelectedObject(edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID).GetName());
 	return true;
 }
 
@@ -74,7 +74,7 @@ bool AddCameraObjectCommand::Execute(EngineCommand* edit)
 	// シーンに追加
 	edit->m_GameCore->GetSceneManager()->GetMainScene()->AddUseObject(objectID);
 	// SelectedObjectを設定
-	edit->SetSelectedObject(&edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID));
+	edit->SetSelectedObject(edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID).GetName());
 	return true;
 }
 
@@ -439,7 +439,7 @@ bool AddParticleSystemObjectCommand::Execute(EngineCommand* edit)
 	// シーンに追加
 	edit->m_GameCore->GetSceneManager()->GetMainScene()->AddUseObject(objectID);
 	// SelectedObjectを設定
-	edit->SetSelectedObject(&edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID));
+	edit->SetSelectedObject(edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID).GetName());
 	transform->scale.Zero();
 	// MeshFilterComponentを追加
 	std::unique_ptr<AddMeshFilterComponent> addMeshFilter = std::make_unique<AddMeshFilterComponent>(entity);
@@ -571,7 +571,7 @@ bool AddUIObjectCommand::Execute(EngineCommand* edit)
 	// シーンに追加
 	edit->m_GameCore->GetSceneManager()->GetMainScene()->AddUseObject(objectID);
 	// SelectedObjectを設定
-	edit->SetSelectedObject(&edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID));
+	edit->SetSelectedObject(edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID).GetName());
 	return true;
 }
 
@@ -630,7 +630,7 @@ bool AddLightObjectCommand::Execute(EngineCommand* edit)
 	// シーンに追加
 	edit->m_GameCore->GetSceneManager()->GetMainScene()->AddUseObject(objectID);
 	// SelectedObjectを設定
-	edit->SetSelectedObject(&edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID));
+	edit->SetSelectedObject(edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID).GetName());
 	return true;
 }
 
