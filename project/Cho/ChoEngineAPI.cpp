@@ -63,7 +63,8 @@ CHO_API GameObject& ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vecto
 	newObject.SetTag(object.GetTag());
 	// CurrendSceneのコピー
 	newObject.SetCurrentSceneName(object.GetCurrentSceneName());
-	// Transform以外のComponentを取得
+	// Componentを取得
+	TransformComponent* transform = engineCommand->GetGameCore()->GetECSManager()->GetComponent<TransformComponent>(object.GetEntity());
 	MeshFilterComponent* meshFilter = engineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshFilterComponent>(object.GetEntity());
 	MeshRendererComponent* meshRenderer = engineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshRendererComponent>(object.GetEntity());
 	ScriptComponent* script = engineCommand->GetGameCore()->GetECSManager()->GetComponent<ScriptComponent>(object.GetEntity());
@@ -82,8 +83,10 @@ CHO_API GameObject& ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vecto
 		MeshFilterComponent* newMeshFilter = engineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshFilterComponent>(newObject.GetEntity());
 		if (newMeshFilter)
 		{
-			newMeshFilter->modelID = meshFilter->modelID;
+			newMeshFilter->modelID = g_Engine->GetEngineCommand()->GetResourceManager()->GetModelManager()->GetModelDataIndex(meshFilter->modelName);
+			g_Engine->GetEngineCommand()->GetResourceManager()->GetModelManager()->RemoveModelUseList(newMeshFilter->modelName, transform->mapID.value());
 			newMeshFilter->modelName = meshFilter->modelName;
+			g_Engine->GetEngineCommand()->GetResourceManager()->GetModelManager()->RegisterModelUseList(meshFilter->modelID.value(), transform->mapID.value());
 		}
 	}
 	if (meshRenderer)
@@ -186,7 +189,17 @@ CHO_API GameObject& ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vecto
 		AnimationComponent* newAnimation = engineCommand->GetGameCore()->GetECSManager()->GetComponent<AnimationComponent>(newObject.GetEntity());
 		if (newAnimation)
 		{
-			//new
+			newAnimation->modelName = animation->modelName;
+			newAnimation->numAnimation = animation->numAnimation;
+			newAnimation->transitionDuration = animation->transitionDuration;
+			ModelData* model = g_Engine->GetEngineCommand()->GetResourceManager()->GetModelManager()->GetModelData(meshFilter->modelID.value());
+			if (model->isBone)
+			{
+				newAnimation->skeleton = model->skeleton;
+				newAnimation->skinCluster = model->skinCluster;
+				newAnimation->boneOffsetID = model->nextBoneOffsetIndex;
+				model->nextBoneOffsetIndex++;
+			}
 		}
 	}
 	
