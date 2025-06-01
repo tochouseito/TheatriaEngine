@@ -197,8 +197,8 @@ struct EffectNode {
 };
 
 struct TimeManager {
-    float globalTime;
-    float maxTime;
+    float elapasedTime;
+    float duration;
     float deltaTime;
     float padding;
 };
@@ -209,8 +209,11 @@ static const uint kMaxMeshData = 1024;
 static const uint kMaxParticles = 1024;
 
 struct EffectRoot {
-    TimeManager timeManager; 
-    uint4 nodeID[32];
+    TimeManager time; 
+    uint globalSeed;
+    uint nodeCount;
+    uint2 padding;
+    uint4 nodeIDs[32];
 };
 
 struct EffectParticlePVA {
@@ -251,5 +254,5 @@ uint FetchEffectNodeID(EffectRoot root,uint idx)
 {
     uint row = idx >> 2; // idx / 4
     uint col = idx & 3; // idx % 4
-    return root.nodeID[row][col];
+    return root.nodeIDs[row][col];
 }

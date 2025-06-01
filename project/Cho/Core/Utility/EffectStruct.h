@@ -6,6 +6,8 @@
 #include "Core/Utility/Color.h"
 #include <cstdint>
 #include <vector>
+#include <string>
+#include <variant>
 
 struct RandValue
 {
@@ -111,7 +113,7 @@ struct EffectCommon
     uint32_t deleteParentDeleted = 0;       // 親削除で削除
     uint32_t deleteAllChildrenDeleted = 0;  // 全ての子削除で削除
     RandValue lifeTime = {};             // 生存時間
-    RandValue emitTime = {};             // 生成時間
+    RandValue emitInterval = {};             // 生成時間
     RandValue emitStartTime = {};        // 生成開始時間
 };
 
@@ -265,46 +267,48 @@ struct EffectNode
     EffectSRT scale;                // スケール
     EffectDrawCommon drawCommon;    // 描画共通情報
     EffectDraw draw;                // 描画情報
+	uint32_t isRootParent;           // ルート親フラグ
     uint32_t parentIndex;           // 親インデックス
 };
 
 struct EffectNodeData
 {
-	EffectNodeData(const uint32_t& id,const std::string& newName) : id(id),name(newName) {}
-    std::string name;               // ノード名
     EffectCommon common;            // 共通情報
     EffectSRT position;             // 位置
     EffectSRT rotation;             // 回転
     EffectSRT scale;                // スケール
     EffectDrawCommon drawCommon;    // 描画共通情報
-	std::wstring textureName;         // テクスチャ名
     EffectDraw draw;                // 描画情報
+    uint32_t isRootParent;           // ルート親フラグ
     uint32_t parentIndex;           // 親インデックス
-	uint32_t id;                // ノードID
-	EffectSprite sprite;              // スプライト情報
+	std::string name;           // ノード名
+	std::wstring textureName; // テクスチャ名
+    std::variant<std::monostate, EffectSprite> drawMesh;
+    uint32_t nodeID;
 };
 
 struct TimeManager
 {
-    float globalTime;
-    float maxTime;
-    float deltaTime;
+    float elapsedTime = 0.0f;
+    float duration = 120.0f;
+    float deltaTime = 0.0f;
     float padding[1];
 };
 
 struct EffectRoot
 {
-    TimeManager timeManager;    // 時間管理
+    TimeManager time;    // 時間管理
+    uint32_t globalSeed = 0;
+	uint32_t nodeCount = 0;              // ノード数
 	uint32_t nodeID[128];           // ノードID
 };
 
-struct EffectData
+struct EffectRootData
 {
-    std::string name;           // エフェクト名
-    TimeManager timeManager;    // 時間管理
-    uint32_t isRun;
-    uint32_t isLoop;               // ループフラグ
-	std::vector<uint32_t> nodeID;           // ノードID
+    TimeManager time;    // 時間管理
+    uint32_t globalSeed;
+    uint32_t nodeCount;              // ノード数
+	std::vector<EffectNodeData> nodes; // ノードデータ
 };
 
 struct EffectParticlePVA
@@ -320,9 +324,10 @@ struct EffectParticle
 	EffectParticlePVA scale;            // スケール
 	Color color;               // 色
 	float lifeTime;             // 寿命
-	float currentTime;         // 現在時間
+	float spawnTime;         // 現在時間
 	uint32_t isAlive;            // 生存フラグ
     uint32_t rootID;
 	uint32_t nodeID;
+	uint32_t meshType;          // メッシュタイプ
     uint32_t meshID;
 };

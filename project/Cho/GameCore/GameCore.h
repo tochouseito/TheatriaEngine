@@ -45,6 +45,10 @@ public:
 	b2World* GetPhysicsWorld() { return m_pPhysicsWorld.get(); }
 	// 環境設定更新
 	void UpdateEnvironmentSetting();
+
+	// 
+	void AddGameLoadSceneID(const SceneID& id) { m_GameLoadSceneID.push_back(id); }
+	void AddGameUnloadSceneID(const SceneID& id) { m_GameUnloadSceneID.push_back(id); }
 private:
 	void CreateSystems(InputManager* input, ResourceManager* resourceManager,GraphicsEngine* graphicsEngine);
 
@@ -70,6 +74,11 @@ private:
 	std::unique_ptr<b2World> m_pPhysicsWorld = nullptr;
 	std::unique_ptr<ContactListener2D> m_pContactListener = nullptr;
 
+	// ゲーム更新中にロードされたシーンのIDを保持するコンテナ
+	std::vector<SceneID> m_GameLoadSceneID;
+	// ゲーム実行中にアンロードされたシーンのIDを保持するコンテナ
+	std::vector<SceneID> m_GameUnloadSceneID;
+	
 	// ゲーム更新中に生成されたidを保持するコンテナ
 	std::vector<ObjectID> m_GameGenerateID;
 	// ゲーム実行中に生成され初期化済みのidを保持するコンテナ
@@ -80,5 +89,13 @@ private:
 	std::unique_ptr<Rigidbody2DInitSystem> physicsOnceSystem;
 	std::unique_ptr<BoxCollider2DInitSystem> boxInitOnceSystem;
 	EngineCommand* m_EngineCommand = nullptr;
+
+	std::unique_ptr<TransformFinalizeSystem> tfFinalizeOnceSystem;
+	std::unique_ptr<ScriptFinalizeSystem> scriptFinalizeOnceSystem;
+	std::unique_ptr<Rigidbody2DResetSystem> physicsResetOnceSystem;
+	std::unique_ptr<ParticleInitializeSystem> particleFinaOnceSystem;
+
+	// 最初のメインシーン保存用
+	SceneID m_MainSceneID = 0;
 };
 

@@ -76,7 +76,7 @@ void Hierarchy::Window()
 	}
 	// 現在のシーンのオブジェクトリストを取得
 	// シーンを取得
-	ScenePrefab* currentScene = m_EngineCommand->GetGameCore()->GetSceneManager()->GetCurrentScene();
+	ScenePrefab* currentScene = m_EngineCommand->GetGameCore()->GetSceneManager()->GetMainScene();
 	// シーンが存在しない場合は終了
 	if (!currentScene)
 	{

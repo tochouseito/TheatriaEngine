@@ -73,3 +73,11 @@ float3 DegreesToRadians(const float3 degree)
     result.z = DegreeToRadian(degree.z);
     return result;
 }
+
+float3x3 Take3x3(float4x4 m) {
+    return float3x3(
+        m[0].xyz,
+        m[1].xyz,
+        m[2].xyz
+    );
+}

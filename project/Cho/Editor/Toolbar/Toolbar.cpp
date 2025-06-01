@@ -39,9 +39,9 @@ void Toolbar::Window()
     ImGui::SetCursorPosX(8); // 左端に寄せる
     static ObjectID currentTool = 0;
     std::wstring name = L"カメラがありません！";
-    if (m_EngineCommand->GetGameCore()->GetSceneManager()->GetCurrentScene()->GetMainCameraID().has_value())
+    if (m_EngineCommand->GetGameCore()->GetSceneManager()->GetMainScene()->GetMainCameraID().has_value())
     {
-        currentTool = m_EngineCommand->GetGameCore()->GetSceneManager()->GetCurrentScene()->GetMainCameraID().value();
+        currentTool = m_EngineCommand->GetGameCore()->GetSceneManager()->GetMainScene()->GetMainCameraID().value();
     }
 	GameObject& currentToolObject = m_EngineCommand->GetGameCore()->GetObjectContainer()->GetGameObject(currentTool);
     if (currentToolObject.IsActive())
@@ -66,8 +66,8 @@ void Toolbar::Window()
             if (ImGui::Selectable(ConvertString(object->GetName()).c_str(), is_selected))
             {
                 currentTool = n;
-				m_EngineCommand->GetGameCore()->GetSceneManager()->GetCurrentScene()->SetMainCameraID(n);
-				m_EngineCommand->GetGameCore()->GetSceneManager()->GetCurrentScene()->SetStartCameraName(object->GetName());
+				m_EngineCommand->GetGameCore()->GetSceneManager()->GetMainScene()->SetMainCameraID(n);
+				m_EngineCommand->GetGameCore()->GetSceneManager()->GetMainScene()->SetStartCameraName(object->GetName());
             }
             if (is_selected)
             {

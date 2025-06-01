@@ -13,7 +13,7 @@ EngineCommand::EngineCommand(GameCore* gameCore, ResourceManager* resourceManage
 	m_GraphicsEngine(graphicsEngine),
 	m_InputManager(input)
 {
-	CreateNewEffect();
+	
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE EngineCommand::GetGameTextureHandle()
@@ -79,20 +79,4 @@ UINT64 EngineCommand::GetGameResolutionX() const
 UINT EngineCommand::GetGameResolutionY() const
 {
 	return m_GraphicsEngine->m_ResolutionHeight;
-}
-
-void EngineCommand::CreateNewEffect()
-{
-	// EfectRootのバッファを作成
-	m_EffectRootIndex = m_ResourceManager->CreateConstantBuffer<EffectRoot>();
-	// EffectNodeの統合バッファを作成
-	m_EffectNodeIndex = m_ResourceManager->CreateStructuredBuffer<EffectNode>(128);
-	m_NodeIntegrationData = std::make_unique<IntegrationData<EffectNode>>(m_EffectNodeIndex, 128);
-	// EffectSpriteの統合バッファを作成
-	m_EffectSpriteIndex = m_ResourceManager->CreateStructuredBuffer<EffectSprite>(128);
-	m_SpriteIntegrationData = std::make_unique<IntegrationData<EffectSprite>>(m_EffectSpriteIndex, 128);
-	// EffectParticleのバッファを
-	m_EffectParticleIndex = m_ResourceManager->CreateRWStructuredBuffer<EffectParticle>(128 * 1024);
-	// FreeListバッファ
-	m_EffectParticleFreeListIndex = m_ResourceManager->CreateRWStructuredBuffer<uint32_t>(128 * 1024, true);
 }
