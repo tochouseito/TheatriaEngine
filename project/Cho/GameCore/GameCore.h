@@ -31,6 +31,7 @@ public:
 	void SetEngineCommandPtr(EngineCommand* engineCommand) { m_EngineCommand = engineCommand; }
 	void Start(ResourceManager& resourceManager);
 	void Update(ResourceManager& resourceManager, GraphicsEngine& graphicsEngine);
+	void SceneUpdate();
 	SceneManager* GetSceneManager() { return m_pSceneManager.get(); }
 	ECSManager* GetECSManager() { return m_pECSManager.get(); }
 	ObjectContainer* GetObjectContainer() { return m_pObjectContainer.get(); }

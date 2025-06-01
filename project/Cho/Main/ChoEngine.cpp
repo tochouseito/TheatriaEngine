@@ -139,6 +139,7 @@ void ChoEngine::Update()
 			editorManager->Update();
 		}
 	}
+	gameCore->SceneUpdate();
 	static bool isGameRun = true;
 	if (runtimeMode == RuntimeMode::Game && isGameRun)
 	{

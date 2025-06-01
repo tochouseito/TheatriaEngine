@@ -44,7 +44,7 @@ void GameCore::Start(ResourceManager& resourceManager)
 
 void GameCore::Update(ResourceManager& resourceManager, GraphicsEngine& graphicsEngine)
 {
-	m_pSceneManager->Update();
+	//m_pSceneManager->Update();
 	// 環境設定の更新
 	UpdateEnvironmentSetting();
 	// ゲームが実行中でなければreturn
@@ -62,6 +62,11 @@ void GameCore::Update(ResourceManager& resourceManager, GraphicsEngine& graphics
 	}
 	resourceManager;
 	graphicsEngine;
+}
+
+void GameCore::SceneUpdate()
+{
+	m_pSceneManager->Update();
 }
 
 void GameCore::GameRun()
