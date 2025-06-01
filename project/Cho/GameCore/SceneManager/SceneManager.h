@@ -43,6 +43,7 @@ protected:
 	std::optional<ObjectID> m_MainCameraID = std::nullopt;
 	std::vector<GameObjectData> m_GameObjectData;
 	std::wstring m_StartCameraName = L"";
+	
 };
 
 class ScenePrefab : public BaseScene {
@@ -82,7 +83,8 @@ public:
 		ScenePrefab scene(this);
 		scene.SetSceneName(L"MainScene");
 		AddScene(scene);
-		ChangeSceneRequest(m_SceneNameToID[L"MainScene"]);
+		//ChangeSceneRequest(m_SceneNameToID[L"MainScene"]);
+		ChangeMainScene(L"MainScene");
 	}
 
 	// シーンを更新
@@ -90,7 +92,13 @@ public:
 	// シーンを追加
 	void AddScene(const ScenePrefab& newScene);
 	// シーンを変更リクエスト
-	void ChangeSceneRequest(const SceneID& sceneID) noexcept { m_pNextScene = m_pScenes[sceneID].get(); }
+	//void ChangeSceneRequest(const SceneID& sceneID) noexcept { m_pNextScene = m_pScenes[sceneID].get(); }
+	// シーンを追加ロード
+	void LoadScene(const std::wstring& sceneName);
+	// シーンの解除
+	void UnLoadScene(const std::wstring& sceneName);
+	// メインシーンの変更
+	void ChangeMainScene(const std::wstring& sceneName);
 
 	ScenePrefab* GetScene(const SceneID& index) const noexcept
 	{
@@ -119,18 +127,51 @@ public:
 		}
 		return nullptr;
 	}
-	ScenePrefab* GetCurrentScene() const noexcept { return m_pCurrentScene; }
+	//ScenePrefab* GetCurrentScene() const noexcept { return m_pCurrentScene; }
+	// メインシーンを取得
+	ScenePrefab* GetMainScene() const noexcept
+	{
+		if (!m_MainSceneID.has_value())
+		{
+			return nullptr;
+		}
+		return m_pScenes[m_MainSceneID.value()].get();
+	}
+	// シーンをクリア
+	void ClearScenes() noexcept
+	{
+		/*m_pScenes.clear();
+		m_SceneNameToID.clear();*/
+		for (auto& scene : m_SceneNameToScene)
+		{
+			scene.second->Finalize();
+		}
+		m_SceneNameToScene.clear();
+		m_MainSceneID = std::nullopt;
+	}
+	void EditorReLoad(const SceneID& sceneID)
+	{
+		// 最初のシーンに戻す
+		ClearScenes();
+		std::wstring sceneName = m_pScenes[sceneID]->GetSceneName();
+		ChangeMainScene(sceneName);
+	}
 private:
 	// シーンを変更
-	void ChangeScene();
+	//void ChangeScene();
 	// GameCore
 	GameCore* m_pGameCore = nullptr;
 	// ResourceManager
 	ResourceManager* m_pResourceManager = nullptr;
 	// 現在のシーン
-	ScenePrefab* m_pCurrentScene = nullptr;
+	//ScenePrefab* m_pCurrentScene = nullptr;
 	// 次のシーン
-	ScenePrefab* m_pNextScene = nullptr;
+	//ScenePrefab* m_pNextScene = nullptr;
+	std::wstring m_NextSceneName = L"";
+	// メインシーンID
+	std::optional<SceneID> m_MainSceneID = std::nullopt;
+	// 有効なシーン
+	std::unordered_map<std::wstring, ScenePrefab*> m_SceneNameToScene;
 	// シーンコンテナ（フリーリスト付き）
 	FVector<std::unique_ptr<ScenePrefab>> m_pScenes;
 	// 名前検索用補助コンテナ

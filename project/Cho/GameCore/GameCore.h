@@ -80,5 +80,8 @@ private:
 	std::unique_ptr<Rigidbody2DInitSystem> physicsOnceSystem;
 	std::unique_ptr<BoxCollider2DInitSystem> boxInitOnceSystem;
 	EngineCommand* m_EngineCommand = nullptr;
+
+	// 最初のメインシーン保存用
+	SceneID m_MainSceneID = 0;
 };
 

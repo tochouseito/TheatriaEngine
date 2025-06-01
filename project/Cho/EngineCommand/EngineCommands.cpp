@@ -11,7 +11,7 @@ using namespace Cho;
 bool Add3DObjectCommand::Execute(EngineCommand* edit)
 {
 	// CurrentSceneがないなら失敗
-	if (!edit->m_GameCore->GetSceneManager()->GetCurrentScene())
+	if (!edit->m_GameCore->GetSceneManager()->GetMainScene())
 	{
 		Log::Write(LogLevel::Assert, "Current Scene is nullptr");
 		return false;
@@ -32,7 +32,7 @@ bool Add3DObjectCommand::Execute(EngineCommand* edit)
 	ObjectID objectID = edit->m_GameCore->GetObjectContainer()->AddGameObject(entity, name, ObjectType::MeshObject);
 	m_ObjectID = objectID;
 	// シーンに追加
-	edit->m_GameCore->GetSceneManager()->GetCurrentScene()->AddUseObject(objectID);
+	edit->m_GameCore->GetSceneManager()->GetMainScene()->AddUseObject(objectID);
 	// SelectedObjectを設定
 	edit->SetSelectedObject(&edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID));
 	return true;
@@ -47,7 +47,7 @@ bool Add3DObjectCommand::Undo(EngineCommand* edit)
 bool AddCameraObjectCommand::Execute(EngineCommand* edit)
 {
 	// CurrentSceneがないなら失敗
-	if (!edit->m_GameCore->GetSceneManager()->GetCurrentScene())
+	if (!edit->m_GameCore->GetSceneManager()->GetMainScene())
 	{
 		Log::Write(LogLevel::Assert, "Current Scene is nullptr");
 		return false;
@@ -72,7 +72,7 @@ bool AddCameraObjectCommand::Execute(EngineCommand* edit)
 	ObjectID objectID = edit->m_GameCore->GetObjectContainer()->AddGameObject(entity, name, ObjectType::Camera);
 	m_ObjectID = objectID;
 	// シーンに追加
-	edit->m_GameCore->GetSceneManager()->GetCurrentScene()->AddUseObject(objectID);
+	edit->m_GameCore->GetSceneManager()->GetMainScene()->AddUseObject(objectID);
 	// SelectedObjectを設定
 	edit->SetSelectedObject(&edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID));
 	return true;
@@ -124,15 +124,15 @@ bool SetMainCamera::Execute(EngineCommand* edit)
 {
 	// MainCameraを設定
 	// シーンがないなら失敗
-	if (!edit->m_GameCore->GetSceneManager()->GetCurrentScene())
+	if (!edit->m_GameCore->GetSceneManager()->GetMainScene())
 	{
 		Log::Write(LogLevel::Assert, "Current Scene is nullptr");
 		return false;
 	}
 	// 現在のMainCameraIDを取得
-	m_PreCameraID = edit->m_GameCore->GetSceneManager()->GetCurrentScene()->GetMainCameraID();
+	m_PreCameraID = edit->m_GameCore->GetSceneManager()->GetMainScene()->GetMainCameraID();
 	// MainCameraを設定
-	edit->m_GameCore->GetSceneManager()->GetCurrentScene()->SetMainCameraID(m_SetCameraID.value());
+	edit->m_GameCore->GetSceneManager()->GetMainScene()->SetMainCameraID(m_SetCameraID.value());
 
 	return true;
 }
@@ -240,9 +240,9 @@ bool DeleteObjectCommand::Execute(EngineCommand* edit)
 	if (camera)
 	{
 		// シーンのMainCamaraなら削除
-		if (edit->m_GameCore->GetSceneManager()->GetCurrentScene()->GetMainCameraID() == m_ObjectID)
+		if (edit->m_GameCore->GetSceneManager()->GetMainScene()->GetMainCameraID() == m_ObjectID)
 		{
-			edit->m_GameCore->GetSceneManager()->GetCurrentScene()->SetMainCameraID(std::nullopt);
+			edit->m_GameCore->GetSceneManager()->GetMainScene()->SetMainCameraID(std::nullopt);
 		}
 	}
 	UISpriteComponent* uiSprite = edit->m_GameCore->GetECSManager()->GetComponent<UISpriteComponent>(object.GetEntity());
@@ -347,7 +347,7 @@ bool DeleteObjectCommand::Execute(EngineCommand* edit)
 	// Entityの削除
 	edit->m_GameCore->GetECSManager()->RemoveEntity(object.GetEntity());
 	// CurrentSceneから削除
-	edit->m_GameCore->GetSceneManager()->GetCurrentScene()->RemoveUseObject(m_ObjectID);
+	edit->m_GameCore->GetSceneManager()->GetMainScene()->RemoveUseObject(m_ObjectID);
 	// GameObjectの削除
 	edit->m_GameCore->GetObjectContainer()->DeleteGameObject(object.GetID().value());
 	return true;
@@ -416,7 +416,7 @@ bool AddMaterialComponent::Undo(EngineCommand* edit)
 bool AddParticleSystemObjectCommand::Execute(EngineCommand* edit)
 {
 	// CurrentSceneがないなら失敗
-	if (!edit->m_GameCore->GetSceneManager()->GetCurrentScene())
+	if (!edit->m_GameCore->GetSceneManager()->GetMainScene())
 	{
 		Log::Write(LogLevel::Assert, "Current Scene is nullptr");
 		return false;
@@ -437,7 +437,7 @@ bool AddParticleSystemObjectCommand::Execute(EngineCommand* edit)
 	ObjectID objectID = edit->m_GameCore->GetObjectContainer()->AddGameObject(entity, name, ObjectType::ParticleSystem);
 	m_ObjectID = objectID;
 	// シーンに追加
-	edit->m_GameCore->GetSceneManager()->GetCurrentScene()->AddUseObject(objectID);
+	edit->m_GameCore->GetSceneManager()->GetMainScene()->AddUseObject(objectID);
 	// SelectedObjectを設定
 	edit->SetSelectedObject(&edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID));
 	transform->scale.Zero();
@@ -511,7 +511,7 @@ bool AddParticleComponent::Undo(EngineCommand* edit)
 bool AddEffectObjectCommand::Execute(EngineCommand* edit)
 {
 	// CurrentSceneがないなら失敗
-	if (!edit->m_GameCore->GetSceneManager()->GetCurrentScene())
+	if (!edit->m_GameCore->GetSceneManager()->GetMainScene())
 	{
 		Log::Write(LogLevel::Assert, "Current Scene is nullptr");
 		return false;
@@ -541,7 +541,7 @@ bool AddEffectObjectCommand::Undo(EngineCommand* edit)
 bool AddUIObjectCommand::Execute(EngineCommand* edit)
 {
 	// CurrentSceneがないなら失敗
-	if (!edit->m_GameCore->GetSceneManager()->GetCurrentScene())
+	if (!edit->m_GameCore->GetSceneManager()->GetMainScene())
 	{
 		Log::Write(LogLevel::Assert, "Current Scene is nullptr");
 		return false;
@@ -569,7 +569,7 @@ bool AddUIObjectCommand::Execute(EngineCommand* edit)
 	ObjectID objectID = edit->m_GameCore->GetObjectContainer()->AddGameObject(entity, name, ObjectType::UI);
 	m_ObjectID = objectID;
 	// シーンに追加
-	edit->m_GameCore->GetSceneManager()->GetCurrentScene()->AddUseObject(objectID);
+	edit->m_GameCore->GetSceneManager()->GetMainScene()->AddUseObject(objectID);
 	// SelectedObjectを設定
 	edit->SetSelectedObject(&edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID));
 	return true;
@@ -602,7 +602,7 @@ bool SetGravityCommand::Undo(EngineCommand* edit)
 bool AddLightObjectCommand::Execute(EngineCommand* edit)
 {
 	// CurrentSceneがないなら失敗
-	if (!edit->m_GameCore->GetSceneManager()->GetCurrentScene())
+	if (!edit->m_GameCore->GetSceneManager()->GetMainScene())
 	{
 		Log::Write(LogLevel::Assert, "Current Scene is nullptr");
 		return false;
@@ -628,7 +628,7 @@ bool AddLightObjectCommand::Execute(EngineCommand* edit)
 	ObjectID objectID = edit->m_GameCore->GetObjectContainer()->AddGameObject(entity, name, ObjectType::Light);
 	m_ObjectID = objectID;
 	// シーンに追加
-	edit->m_GameCore->GetSceneManager()->GetCurrentScene()->AddUseObject(objectID);
+	edit->m_GameCore->GetSceneManager()->GetMainScene()->AddUseObject(objectID);
 	// SelectedObjectを設定
 	edit->SetSelectedObject(&edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID));
 	return true;
@@ -710,7 +710,7 @@ bool CopyGameObjectCommand::Execute(EngineCommand* edit)
 	ObjectID objectID = edit->m_GameCore->GetObjectContainer()->AddGameObject(entity, name, type);
 	GameObject& newObj = edit->m_GameCore->GetObjectContainer()->GetGameObjectByName(name);
 	// SceneUseListに登録
-	edit->m_GameCore->GetSceneManager()->GetCurrentScene()->AddUseObject(newObj.GetID().value());
+	edit->m_GameCore->GetSceneManager()->GetMainScene()->AddUseObject(newObj.GetID().value());
 	// コンポーネントの追加
 	// TransformComponentの追加
 	if (objData.m_Transform.has_value())
@@ -857,7 +857,7 @@ bool CopyGameObjectCommand::Undo(EngineCommand* edit)
 bool CreateEffectCommand::Execute(EngineCommand* edit)
 {
 	// CurrentSceneがないなら失敗
-	if (!edit->m_GameCore->GetSceneManager()->GetCurrentScene())
+	if (!edit->m_GameCore->GetSceneManager()->GetMainScene())
 	{
 		Log::Write(LogLevel::Assert, "Current Scene is nullptr");
 		return false;
@@ -918,7 +918,7 @@ bool CreateEffectCommand::Undo(EngineCommand* edit)
 bool AddEffectNodeCommand::Execute(EngineCommand* edit)
 {
 	// CurrentSceneがないなら失敗
-	if (!edit->m_GameCore->GetSceneManager()->GetCurrentScene())
+	if (!edit->m_GameCore->GetSceneManager()->GetMainScene())
 	{
 		Log::Write(LogLevel::Assert, "Current Scene is nullptr");
 		return false;

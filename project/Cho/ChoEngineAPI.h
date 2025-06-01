@@ -49,7 +49,9 @@ namespace ChoSystem
 	// SceneManager
 	struct SceneManagerAPI
 	{
-		void LoadScene(const std::string& sceneName);
+		CHO_API void LoadScene(const std::wstring& sceneName);
+		CHO_API void UnloadScene(const std::wstring& sceneName);
+		CHO_API void ChangeMainScene(const std::wstring& sceneName);
 	};
 	CHO_API extern SceneManagerAPI sceneManager;
 #endif

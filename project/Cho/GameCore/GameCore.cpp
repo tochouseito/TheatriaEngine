@@ -78,6 +78,8 @@ void GameCore::GameRun()
 	}*/
 	Cho::FileSystem::ScriptProject::LoadScriptDLL();
 	isRunning = true;
+	// 
+	m_MainSceneID = m_pSceneManager->GetMainScene()->GetSceneID();
 	// StartSystemの実行
 	m_pObjectContainer->InitializeAllGameObjects();
 	m_pSingleSystemManager->StartAll(m_pECSManager.get());
@@ -99,6 +101,8 @@ void GameCore::GameStop()
 	m_pObjectContainer->InitializeAllGameObjects();
 	// DLLのアンロード
 	Cho::FileSystem::ScriptProject::UnloadScriptDLL();
+	// SceneManager
+	m_pSceneManager->EditorReLoad(m_MainSceneID);
 	isRunning = false;
 }
 

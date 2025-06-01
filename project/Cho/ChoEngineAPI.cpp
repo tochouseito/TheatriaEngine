@@ -180,7 +180,17 @@ CHO_API float ChoSystem::DeltaTime()
 	return Timer::GetDeltaTime();
 }
 
-void ChoSystem::SceneManagerAPI::LoadScene(const std::string& sceneName)
+void ChoSystem::SceneManagerAPI::LoadScene(const std::wstring& sceneName)
 {
-	sceneName;
+	g_Engine->GetEngineCommand()->GetGameCore()->GetSceneManager()->LoadScene(sceneName);
+}
+
+void ChoSystem::SceneManagerAPI::UnloadScene(const std::wstring& sceneName)
+{
+	g_Engine->GetEngineCommand()->GetGameCore()->GetSceneManager()->UnLoadScene(sceneName);
+}
+
+void ChoSystem::SceneManagerAPI::ChangeMainScene(const std::wstring& sceneName)
+{
+	g_Engine->GetEngineCommand()->GetGameCore()->GetSceneManager()->ChangeMainScene(sceneName);
 }

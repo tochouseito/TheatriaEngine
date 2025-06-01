@@ -290,7 +290,7 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, SceneManager*
     // 使用中のオブジェクトを保存
     nlohmann::ordered_json objArray = nlohmann::json::array();
 	// 選択中のシーンならUseListを使用。そうじゃないならObjectDataListを使用
-    if (scene->GetSceneName() == sceneManager->GetCurrentScene()->GetSceneName())
+    if (scene->GetSceneName() == sceneManager->GetMainScene()->GetSceneName())
     {
         for (ObjectID& id : scene->GetUseObjects())
         {
@@ -1263,7 +1263,8 @@ bool Cho::FileSystem::LoadProjectFolder(const std::wstring& projectName, EngineC
     ScanFolder(projectPath,engineCommand);
 	// 最初のシーンをリクエスト
 	SceneManager* sceneManager = engineCommand->GetGameCore()->GetSceneManager();
-	sceneManager->ChangeSceneRequest(sceneManager->GetSceneID(g_GameSettings.startScene));
+	//sceneManager->ChangeSceneRequest(sceneManager->GetSceneID(g_GameSettings.startScene));
+    sceneManager->ChangeMainScene(g_GameSettings.startScene);
     return true;
 }
 

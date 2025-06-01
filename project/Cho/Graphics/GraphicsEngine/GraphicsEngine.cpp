@@ -409,13 +409,13 @@ void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& ga
 		for (ModelData& modelData : resourceManager.GetModelManager()->GetModelDataContainer())
 		{
 			// シーンがないならスキップ
-			if (!gameCore.GetSceneManager()->GetCurrentScene()) { continue; }
+			if (!gameCore.GetSceneManager()->GetMainScene()) { continue; }
 			IConstantBuffer* cameraBuffer = nullptr;
 			// メインカメラを取得
 			if (mode == RenderMode::Game||mode == RenderMode::Release)
 			{
 				// カメラオブジェクトのIDを取得
-				std::optional<uint32_t> cameraID = gameCore.GetSceneManager()->GetCurrentScene()->GetMainCameraID();
+				std::optional<uint32_t> cameraID = gameCore.GetSceneManager()->GetMainScene()->GetMainCameraID();
 				if (!cameraID) { continue; }
 				// カメラオブジェクトを取得
 				GameObject& cameraObject = gameCore.GetObjectContainer()->GetGameObject(cameraID.value());
@@ -487,13 +487,13 @@ void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& ga
 			// ルートシグネチャセット
 			context->SetGraphicsRootSignature(m_PipelineManager->GetLinePSO().rootSignature.Get());
 			// シーンがないならスキップ
-			if (!gameCore.GetSceneManager()->GetCurrentScene()) { continue; }
+			if (!gameCore.GetSceneManager()->GetMainScene()) { continue; }
 			IConstantBuffer* cameraBuffer = nullptr;
 			// メインカメラを取得
 			if (mode == RenderMode::Game||mode==RenderMode::Release)
 			{
 				// カメラオブジェクトのIDを取得
-				std::optional<uint32_t> cameraID = gameCore.GetSceneManager()->GetCurrentScene()->GetMainCameraID();
+				std::optional<uint32_t> cameraID = gameCore.GetSceneManager()->GetMainScene()->GetMainCameraID();
 				if (!cameraID) { continue; }
 				// カメラオブジェクトを取得
 				GameObject& cameraObject = gameCore.GetObjectContainer()->GetGameObject(cameraID.value());
@@ -608,13 +608,13 @@ void GraphicsEngine::DrawPostProcess(ResourceManager& resourceManager, GameCore&
 		// ルートシグネチャセット
 		context->SetGraphicsRootSignature(m_PipelineManager->GetIntegratePSO().rootSignature.Get());
 		// シーンがないならスキップ
-		if (!gameCore.GetSceneManager()->GetCurrentScene()) { return; }
+		if (!gameCore.GetSceneManager()->GetMainScene()) { return; }
 		IConstantBuffer* cameraBuffer = nullptr;
 		// メインカメラを取得
 		if (mode == RenderMode::Game)
 		{
 			// カメラオブジェクトのIDを取得
-			std::optional<uint32_t> cameraID = gameCore.GetSceneManager()->GetCurrentScene()->GetMainCameraID();
+			std::optional<uint32_t> cameraID = gameCore.GetSceneManager()->GetMainScene()->GetMainCameraID();
 			if (!cameraID) { return; }
 			// カメラオブジェクトを取得
 			GameObject& cameraObject = gameCore.GetObjectContainer()->GetGameObject(cameraID.value());
@@ -729,13 +729,13 @@ void GraphicsEngine::DrawParticles(CommandContext* context, ResourceManager& res
 		MeshRendererComponent* meshRendererComponent = gameCore.GetECSManager()->GetComponent<MeshRendererComponent>(object->GetEntity());
 		if (!meshRendererComponent) { continue; }
 		// シーンがないならスキップ
-		if (!gameCore.GetSceneManager()->GetCurrentScene()) { continue; }
+		if (!gameCore.GetSceneManager()->GetMainScene()) { continue; }
 		IConstantBuffer* cameraBuffer = nullptr;
 		// メインカメラを取得
 		if (mode == RenderMode::Game)
 		{
 			// カメラオブジェクトのIDを取得
-			std::optional<uint32_t> cameraID = gameCore.GetSceneManager()->GetCurrentScene()->GetMainCameraID();
+			std::optional<uint32_t> cameraID = gameCore.GetSceneManager()->GetMainScene()->GetMainCameraID();
 			if (!cameraID) { continue; }
 			// カメラオブジェクトを取得
 			GameObject& cameraObject = gameCore.GetObjectContainer()->GetGameObject(cameraID.value());
@@ -796,13 +796,13 @@ void GraphicsEngine::EffectEditorDraw(CommandContext* context, ResourceManager& 
 	// ルートシグネチャセット
 	context->SetGraphicsRootSignature(m_PipelineManager->GetEffectSpritePSO().rootSignature.Get());
 	// シーンがないならスキップ
-	if (!gameCore.GetSceneManager()->GetCurrentScene()) { return; }
+	if (!gameCore.GetSceneManager()->GetMainScene()) { return; }
 	IConstantBuffer* cameraBuffer = nullptr;
 	// メインカメラを取得
 	if (mode == RenderMode::Game)
 	{
 		// カメラオブジェクトのIDを取得
-		std::optional<uint32_t> cameraID = gameCore.GetSceneManager()->GetCurrentScene()->GetMainCameraID();
+		std::optional<uint32_t> cameraID = gameCore.GetSceneManager()->GetMainScene()->GetMainCameraID();
 		if (!cameraID) { return; }
 		// カメラオブジェクトを取得
 		GameObject& cameraObject = gameCore.GetObjectContainer()->GetGameObject(cameraID.value());
@@ -870,13 +870,13 @@ void GraphicsEngine::DrawUI(CommandContext* context, ResourceManager& resourceMa
 
 	// UIComponentを取得
 	// シーンがないならスキップ
-	if (!gameCore.GetSceneManager()->GetCurrentScene()) { return; }
+	if (!gameCore.GetSceneManager()->GetMainScene()) { return; }
 	IConstantBuffer* cameraBuffer = nullptr;
 	// メインカメラを取得
 	if (mode == RenderMode::Game)
 	{
 		// カメラオブジェクトのIDを取得
-		std::optional<uint32_t> cameraID = gameCore.GetSceneManager()->GetCurrentScene()->GetMainCameraID();
+		std::optional<uint32_t> cameraID = gameCore.GetSceneManager()->GetMainScene()->GetMainCameraID();
 		if (!cameraID) { return; }
 		// カメラオブジェクトを取得
 		GameObject& cameraObject = gameCore.GetObjectContainer()->GetGameObject(cameraID.value());

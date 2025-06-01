@@ -186,11 +186,41 @@ void ScenePrefab::Finalize()
 
 void SceneManager::Update()
 {
-	// 次のシーンがある場合
-	if (m_pNextScene) { ChangeScene(); }
-	// 現在のシーンがない場合
-	if (!m_pCurrentScene){ return; }
-	m_pCurrentScene->Update();
+	//// 次のシーンがある場合
+	//if (m_pNextScene) { ChangeScene(); }
+	//// 現在のシーンがない場合
+	//if (!m_pCurrentScene){ return; }
+	//m_pCurrentScene->Update();
+	// メインシーンが存在する場合は終了処理を行う
+	if (!m_NextSceneName.empty())
+	{
+		if (!m_SceneNameToID.contains(m_NextSceneName))
+		{
+			return;
+		}
+		// 既に有効ならなにもしない
+		if (m_SceneNameToScene.contains(m_NextSceneName))
+		{
+			return;
+		}
+		if (m_MainSceneID.has_value())
+		{
+			ScenePrefab* mainScene = m_pScenes[m_MainSceneID.value()].get();
+			const std::wstring mainSceneName = mainScene->GetSceneName();
+			mainScene->Finalize();
+			// 有効リストから削除
+			m_SceneNameToScene.erase(mainSceneName);
+		}
+		// メインシーンのIDを更新
+		m_MainSceneID = m_SceneNameToID[m_NextSceneName];
+		// メインシーンを有効リストに追加
+		ScenePrefab* newMainScene = m_pScenes[m_MainSceneID.value()].get();
+		if (!newMainScene) { return; }
+		m_SceneNameToScene[m_NextSceneName] = newMainScene;
+		// メインシーンの初期化
+		newMainScene->Start();
+		m_NextSceneName.clear();
+	}
 }
 
 // シーンを追加
@@ -206,21 +236,96 @@ void SceneManager::AddScene(const ScenePrefab& newScene)
 	m_SceneNameToID[sceneName] = sceneID;
 }
 
-void SceneManager::ChangeScene()
+void SceneManager::LoadScene(const std::wstring& sceneName)
 {
-	if (!m_pCurrentScene)// 現在のシーンがない場合
+	//　シーン名が存在しない場合は何もしない
+	if (!m_SceneNameToID.contains(sceneName))
 	{
-		// 次のシーンを現在のシーンにセット
-		m_pCurrentScene = m_pNextScene;
-		m_pNextScene = nullptr;
-		m_pCurrentScene->Start();
-	} else
-	{
-		// 現在のシーンを終了
-		m_pCurrentScene->Finalize();
-		m_pCurrentScene = nullptr;
-		m_pCurrentScene = m_pNextScene;
-		m_pNextScene = nullptr;
-		m_pCurrentScene->Start();
+		return;
 	}
+	// 既に有効ならなにもしない
+	if (m_SceneNameToScene.contains(sceneName))
+	{
+		return;
+	}
+	// 有効リストに追加
+	SceneID id = m_SceneNameToID[sceneName];
+	ScenePrefab* newScene = m_pScenes[id].get();
+	if (!newScene) { return; }
+	m_SceneNameToScene[sceneName] = newScene;
+	// 初期化
+	newScene->Start();
 }
+
+void SceneManager::UnLoadScene(const std::wstring& sceneName)
+{
+	//　シーン名が存在しない場合は何もしない
+	if (!m_SceneNameToID.contains(sceneName))
+	{
+		return;
+	}
+	// 有効リストに存在しない場合は何もしない
+	if (!m_SceneNameToScene.contains(sceneName))
+	{
+		return;
+	}
+	// シーンを取得
+	ScenePrefab* scene = m_SceneNameToScene[sceneName];
+	if (!scene) { return; }
+	// シーンの終了処理を行う
+	scene->Finalize();
+	// 有効リストから削除
+	m_SceneNameToScene.erase(sceneName);
+}
+
+void SceneManager::ChangeMainScene(const std::wstring& sceneName)
+{
+	////　シーン名が存在しない場合は何もしない
+	//if (!m_SceneNameToID.contains(sceneName))
+	//{
+	//	return;
+	//}
+	//// 既に有効ならなにもしない
+	//if (m_SceneNameToScene.contains(sceneName))
+	//{
+	//	return;
+	//}
+	// メインシーンの終了
+	m_NextSceneName = sceneName;
+	//// メインシーンが存在する場合は終了処理を行う
+	//if (m_MainSceneID.has_value())
+	//{
+	//	ScenePrefab* mainScene = m_pScenes[m_MainSceneID.value()].get();
+	//	const std::wstring mainSceneName = mainScene->GetSceneName();
+	//	mainScene->Finalize();
+	//	// 有効リストから削除
+	//	m_SceneNameToScene.erase(mainSceneName);
+	//}
+	//// メインシーンのIDを更新
+	//m_MainSceneID = m_SceneNameToID[sceneName];
+	//// メインシーンを有効リストに追加
+	//ScenePrefab* newMainScene = m_pScenes[m_MainSceneID.value()].get();
+	//if (!newMainScene) { return; }
+	//m_SceneNameToScene[sceneName] = newMainScene;
+	//// メインシーンの初期化
+	//newMainScene->Start();
+}
+
+//void SceneManager::ChangeScene()
+//{
+//	if (!m_pCurrentScene)// 現在のシーンがない場合
+//	{
+//		// 次のシーンを現在のシーンにセット
+//		m_pCurrentScene = m_pNextScene;
+//		m_pNextScene = nullptr;
+//		m_pCurrentScene->Start();
+//	} else
+//	{
+//		// 現在のシーンを終了
+//		m_pCurrentScene->Finalize();
+//		m_pCurrentScene = nullptr;
+//		m_pCurrentScene = m_pNextScene;
+//		m_pNextScene = nullptr;
+//		m_pCurrentScene->Start();
+//	}
+//}

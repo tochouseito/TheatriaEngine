@@ -428,17 +428,22 @@ void MainMenu::SettingWindow()
         ImGui::EndCombo();
     }
     ImGui::Text("シーンを切り替え");
-    std::wstring sceneName = m_EngineCommand->GetGameCore()->GetSceneManager()->GetCurrentScene()->GetSceneName();
+	std::wstring sceneName = L"シーンがありません";
+    if (m_EngineCommand->GetGameCore()->GetSceneManager()->GetMainScene())
+    {
+        sceneName = m_EngineCommand->GetGameCore()->GetSceneManager()->GetMainScene()->GetSceneName();
+    }
 	if (ImGui::BeginCombo("##SceneSelector", ConvertString(sceneName).c_str()))
 	{
 		for (const auto& scene : m_EngineCommand->GetGameCore()->GetSceneManager()->GetScenes().GetVector())
 		{
             if (ImGui::Selectable(ConvertString(scene->GetSceneName()).c_str()))
             {
-                if (m_EngineCommand->GetGameCore()->GetSceneManager()->GetCurrentScene()->GetSceneName() !=
+                if (m_EngineCommand->GetGameCore()->GetSceneManager()->GetMainScene()->GetSceneName() !=
                     scene->GetSceneName())
                 {
-                    m_EngineCommand->GetGameCore()->GetSceneManager()->ChangeSceneRequest(scene->GetSceneID());
+                    //m_EngineCommand->GetGameCore()->GetSceneManager()->ChangeSceneRequest(scene->GetSceneID());
+                    m_EngineCommand->GetGameCore()->GetSceneManager()->ChangeMainScene(scene->GetSceneName());
 					m_EngineCommand->SetSelectedObject(nullptr);
                 }
             }
