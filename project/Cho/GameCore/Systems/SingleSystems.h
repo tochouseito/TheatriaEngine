@@ -87,8 +87,8 @@ public:
 	{
 	}
 	~TransformFinalizeSystem() = default;
+	void Finalize(Entity entity, TransformComponent& transform);
 private:
-	void Finalize(Entity entity,TransformComponent& transform);
 	ECSManager* m_ECS = nullptr;
 };
 // Camera更新System
@@ -183,6 +183,7 @@ private:
 // スクリプト終了システム
 class ScriptFinalizeSystem : public ECSManager::System<ScriptComponent>
 {
+	friend class GameCore;
 public:
 	ScriptFinalizeSystem(ECSManager* ecs)
 		: ECSManager::System<ScriptComponent>([this](Entity e, ScriptComponent& script)
@@ -325,6 +326,7 @@ private:
 };
 class Rigidbody2DResetSystem : public ECSManager::System<TransformComponent, Rigidbody2DComponent>
 {
+	friend class GameCore;
 public:
 	Rigidbody2DResetSystem(ECSManager* ecs, b2World* world)
 		: ECSManager::System<TransformComponent, Rigidbody2DComponent>(

@@ -50,12 +50,15 @@ class CHO_API GameObject
 	friend class ScirptFinalizeSystem;
 	friend class CollisionSystem;
 	friend class ContactListener2D;
+	friend class ScenePrefab;
 public:
 	std::optional<ObjectID> GetID() const noexcept;
 	Entity GetEntity() const noexcept { return m_Entity; }
 	std::wstring GetName() const noexcept;
 	ObjectType GetType() const noexcept { return m_Type; }
 	std::string GetTag() const noexcept;
+	std::wstring GetCurrentSceneName() const noexcept;
+	void SetCurrentSceneName(const std::wstring& name) noexcept;
 	void SetTag(std::string_view tag) noexcept;// この関数はEditorに移す予定
 	// オブジェクトが有効かどうか
 	bool IsActive() const noexcept { return m_Active; }

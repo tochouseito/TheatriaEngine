@@ -45,6 +45,7 @@ class EngineCommand
 	friend class CopyGameObjectCommand;
 	friend class CreateEffectCommand;
 	friend class AddEffectNodeCommand;
+	friend class CloneObjectCommand;
 	// Editor
 	friend class EffectEditorUpdateSystem;
 	friend class EffectEditor;

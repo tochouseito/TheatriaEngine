@@ -35,6 +35,7 @@ public:
 	virtual void Update() = 0;
 	virtual void Finalize() = 0;
 	inline void SetSceneID(const SceneID sceneID) { m_SceneID = sceneID; }
+	virtual inline void AddClonedObject(const ObjectID& objectID) { m_ClonedObjects.push_back(objectID); }
 protected:
 	SceneID m_SceneID = 0;
 	std::wstring m_SceneName = L"";
@@ -43,7 +44,7 @@ protected:
 	std::optional<ObjectID> m_MainCameraID = std::nullopt;
 	std::vector<GameObjectData> m_GameObjectData;
 	std::wstring m_StartCameraName = L"";
-	
+	std::vector<ObjectID> m_ClonedObjects; // クローンされたオブジェクトのIDを保持するためのコンテナ
 };
 
 class ScenePrefab : public BaseScene {

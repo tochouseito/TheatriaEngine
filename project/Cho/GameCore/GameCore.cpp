@@ -190,16 +190,6 @@ void GameCore::InitializeGenerateObject()
 		}
 	}
 	m_GameLoadSceneID.clear();
-
-	for (const auto& sceneID : m_GameUnloadSceneID)
-	{
-		for(const ObjectID& id : m_pSceneManager->GetScene(sceneID)->GetUseObjects())
-		{
-			id;
-		}
-	}
-
-	m_GameUnloadSceneID.clear();
 }
 
 void GameCore::ClearGenerateObject()
@@ -218,6 +208,36 @@ void GameCore::UpdateEnvironmentSetting()
 	// 環境情報バッファ
 	ConstantBuffer<BUFFER_DATA_ENVIRONMENT>* envBuffer = m_EngineCommand->GetResourceManager()->GetEnvironmentBuffer();
 	envBuffer->UpdateData(m_EnvironmentData);
+}
+
+void GameCore::SceneFinelize(ScenePrefab* scene)
+{
+	for (ObjectID& id : scene->GetUseObjects())
+	{
+		GameObject& object = m_pObjectContainer->GetGameObject(id);
+		if (!object.IsActive()) { continue; }
+		// オブジェクトの初期化
+		Entity entity = object.GetEntity();
+		// TransformComponentを取得
+		TransformComponent* transform = m_pECSManager->GetComponent<TransformComponent>(entity);
+		if (!transform) { continue; }
+		// TransformComponentの初期化
+		tfFinalizeOnceSystem->Finalize(entity,*transform);
+		// スクリプトの取得
+		ScriptComponent* script = m_pECSManager->GetComponent<ScriptComponent>(entity);
+		if (script)
+		{
+			// スクリプトの初期化
+			scriptFinalizeOnceSystem->FinalizeScript(*script);
+		}
+		// Rigidbody2DComponentの取得
+		Rigidbody2DComponent* rb = m_pECSManager->GetComponent<Rigidbody2DComponent>(entity);
+		if (rb)
+		{
+			// Rigidbody2DComponentの初期化
+			physicsResetOnceSystem->Reset(*transform, *rb);
+		}
+	}
 }
 
 void GameCore::CreateSystems(InputManager* input, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine)
@@ -314,6 +334,5 @@ void GameCore::CreateSystems(InputManager* input, ResourceManager* resourceManag
 	tfFinalizeOnceSystem = std::make_unique<TransformFinalizeSystem>(m_pECSManager.get());
 	scriptFinalizeOnceSystem = std::make_unique<ScriptFinalizeSystem>(m_pECSManager.get());
 	physicsResetOnceSystem = std::make_unique<Rigidbody2DResetSystem>(m_pECSManager.get(), m_pPhysicsWorld.get());
-	particleFinaOnceSystem = std::make_unique<ParticleInitializeSystem>(m_pECSManager.get(), resourceManager, graphicsEngine);
 }
 

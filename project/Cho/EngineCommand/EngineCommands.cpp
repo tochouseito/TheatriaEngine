@@ -969,3 +969,37 @@ bool AddEffectNodeCommand::Undo(EngineCommand* edit)
 	edit;
 	return false;
 }
+
+bool CloneObjectCommand::Execute(EngineCommand* edit)
+{
+	// CurrentSceneがないなら失敗
+	if (!edit->m_GameCore->GetSceneManager()->GetMainScene())
+	{
+		Log::Write(LogLevel::Assert, "Current Scene is nullptr");
+		return false;
+	}
+	// 各IDの取得
+	// Entity
+	Entity entity = edit->m_GameCore->GetECSManager()->GenerateEntity();
+	// デフォルトの名前
+	std::wstring name = L"NewMeshObject";
+	// 重複回避
+	name = GenerateUniqueName(name, edit->m_GameCore->GetObjectContainer()->GetNameToObjectID());
+	// Transform統合バッファからmapIDを取得
+	uint32_t mapID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::Transform)->GetMapID();
+	// TransformComponentを追加
+	TransformComponent* transform = edit->m_GameCore->GetECSManager()->AddComponent<TransformComponent>(entity);
+	transform->mapID = mapID;
+	// GameObjectを追加
+	ObjectID objectID = edit->m_GameCore->GetObjectContainer()->AddGameObject(entity, name, ObjectType::MeshObject);
+	m_ObjectID = objectID;
+	// シーンに追加
+	edit->m_GameCore->GetSceneManager()->GetScene(edit->m_GameCore->GetSceneManager()->GetSceneID(m_CurrendSceneName))->AddClonedObject(objectID);
+	return true;
+}
+
+bool CloneObjectCommand::Undo(EngineCommand* edit)
+{
+	edit;
+	return false;
+}
