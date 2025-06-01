@@ -662,3 +662,4 @@ private:
 	ResourceManager* m_pResourceManager = nullptr;
 	GraphicsEngine* m_pGraphicsEngine = nullptr;
 };
+

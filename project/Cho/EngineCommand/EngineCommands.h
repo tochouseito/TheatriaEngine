@@ -41,7 +41,7 @@ public:
 private:
 	uint32_t m_ObjectID;
 };
-// Editor用のEffectオブジェクトを追加するコマンド
+// Effectオブジェクトを追加するコマンド
 class AddEffectObjectCommand :public IEngineCommand
 {
 public:
@@ -310,4 +310,30 @@ class CopyGameObjectCommand : public IEngineCommand
 private:
 	uint32_t m_ObjectID;
 	uint32_t m_CopyObjectID;
+};
+
+// Effectを新規作成するコマンド
+class CreateEffectCommand : public IEngineCommand
+{
+	public:
+	CreateEffectCommand()
+	{
+	}
+	bool Execute(EngineCommand* edit)override;
+	bool Undo(EngineCommand* edit)override;
+private:
+	uint32_t m_Entity;
+};
+
+// EffectNodeを追加するコマンド
+class AddEffectNodeCommand : public IEngineCommand
+{
+	public:
+	AddEffectNodeCommand()
+	{
+	}
+	bool Execute(EngineCommand* edit)override;
+	bool Undo(EngineCommand* edit)override;
+private:
+	uint32_t m_Entity;
 };

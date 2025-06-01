@@ -24,6 +24,9 @@ enum IntegrationDataType
 	Line,
 	Material,
 	UISprite,
+	EffectRootInt,
+	EffectNodeInt,
+	EffectSpriteInt,
 	kCount,
 };
 
@@ -164,6 +167,15 @@ public:
 		case IntegrationDataType::UISprite:
 			return GetBuffer<IStructuredBuffer>(m_IntegrationData[IntegrationDataType::UISprite]->GetBufferIndex());
 			break;
+		case IntegrationDataType::EffectRootInt:
+			return GetBuffer<IStructuredBuffer>(m_IntegrationData[IntegrationDataType::EffectRootInt]->GetBufferIndex());
+			break;
+		case IntegrationDataType::EffectNodeInt:
+			return GetBuffer<IStructuredBuffer>(m_IntegrationData[IntegrationDataType::EffectNodeInt]->GetBufferIndex());
+			break;
+		case IntegrationDataType::EffectSpriteInt:
+			return GetBuffer<IStructuredBuffer>(m_IntegrationData[IntegrationDataType::EffectSpriteInt]->GetBufferIndex());
+			break;
 		default:
 			break;
 		}
@@ -241,6 +253,15 @@ public:
 		case IntegrationDataType::UISprite:
 			return m_IntegrationData[IntegrationDataType::UISprite].get();
 			break;
+		case IntegrationDataType::EffectRootInt:
+			return m_IntegrationData[IntegrationDataType::EffectRootInt].get();
+			break;
+		case IntegrationDataType::EffectNodeInt:
+			return m_IntegrationData[IntegrationDataType::EffectNodeInt].get();
+			break;
+		case IntegrationDataType::EffectSpriteInt:
+			return m_IntegrationData[IntegrationDataType::EffectSpriteInt].get();
+			break;
 		default:
 			break;
 		}
@@ -282,6 +303,62 @@ public:
 	ConstantBuffer<BUFFER_DATA_ENVIRONMENT>* GetEnvironmentBuffer() const
 	{
 		return m_EnvironmentBuffer;
+	}
+	// EffectParticleBuffer
+	void CreateEffectParticleBuffer();
+	RWStructuredBuffer<EffectParticle>* GetEffectParticleBuffer() const
+	{
+		return m_EffectParticleBuffer;
+	}
+	// EffectParticleFreeListBuffer
+	RWStructuredBuffer<uint32_t>* GetEffectParticleFreeListBuffer() const
+	{
+		return m_EffectParticleFreeList;
+	}
+	// EffectRootUseListBuffer
+	void CreateEffectRootUseListBuffer();
+	StructuredBuffer<uint32_t>* GetEffectRootUseListBuffer() const
+	{
+		return m_EffectRootUseListBuffer;
+	}
+	// EffectRootUseListIndex
+	uint32_t GetEffectRootUseListIndex()
+	{
+		if (m_EffectRootUseListRecycle.empty())
+		{
+			return m_NextEffectRootUseListIndex++;
+		}
+		uint32_t index = m_EffectRootUseListRecycle.back();
+		m_EffectRootUseListRecycle.pop_back();
+		return index;
+	}
+	void RecycleEffectRootUseListIndex(const uint32_t& index)
+	{
+		m_EffectRootUseListRecycle.push_back(index);
+	}
+	size_t GetEffectRootUseListCount() const
+	{
+		return m_EffectRootUseList.size();
+	}
+	void AddEffectRootUseList(const uint32_t& index)
+	{
+		m_EffectRootUseList.push_back(index);
+		// 更新
+		uint32_t a = 0;
+		for(const auto& i : m_EffectRootUseList)
+		{
+			m_EffectRootUseListBuffer->UpdateData(i, a);
+		}
+	}
+	void RemoveEffectRootUseList(const uint32_t& index)
+	{
+		m_EffectRootUseList.remove(index);
+		// 更新
+		uint32_t a = 0;
+		for (const auto& i : m_EffectRootUseList)
+		{
+			m_EffectRootUseListBuffer->UpdateData(i, a);
+		}
 	}
 private:
 	// Heap生成
@@ -340,12 +417,27 @@ private:
 	std::vector<uint32_t> m_LightIndexRecycle;
 	// 環境情報バッファ
 	ConstantBuffer<BUFFER_DATA_ENVIRONMENT>* m_EnvironmentBuffer = nullptr;
+	// EffectParticleバッファ
+	RWStructuredBuffer<EffectParticle>* m_EffectParticleBuffer = nullptr;
+	// EffectParticleFreeList
+	RWStructuredBuffer<uint32_t>* m_EffectParticleFreeList = nullptr;
+	// EffectRootUseListBuffer
+	StructuredBuffer<uint32_t>* m_EffectRootUseListBuffer = nullptr;
+	// RootUseList
+	std::list<uint32_t> m_EffectRootUseList;
+	// RootUseList用
+	uint32_t m_NextEffectRootUseListIndex = 0;
+	// EffectRootUseListのリサイクル用
+	std::vector<uint32_t> m_EffectRootUseListRecycle;
 
 	// static member
 	static const uint32_t kIntegrationTFBufferSize = 1024;// Transformの統合バッファのサイズ
 	static const uint32_t kIntegrationLineBufferSize = 1024;// Lineの統合バッファのサイズ
 	static const uint32_t kIntegrationMaterialBufferSize = 1024;// Materialの統合バッファのサイズ
 	static const uint32_t kIntegrationUISpriteBufferSize = 128;// UISpriteの統合バッファのサイズ
+	static const uint32_t kIntegrationEffectRootBufferSize = 128;// EffectRootの統合バッファのサイズ
+	static const uint32_t kIntegrationEffectNodeBufferSize = 1024;// EffectNodeの統合バッファのサイズ
+	static const uint32_t kIntegrationEffectSpriteBufferSize = 1024;// EffectSpriteの統合バッファのサイズ
 	// Texture最大数
 	static const uint32_t kMaxTextureCount = 256;
 };

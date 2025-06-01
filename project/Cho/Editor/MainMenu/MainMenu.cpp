@@ -184,19 +184,15 @@ void MainMenu::EditMenu()
 		case WorkSpaceType::EffectEdit:
             if (ImGui::MenuItem("新規作成"))
             {
-				std::unique_ptr<AddEffectObjectCommand> addEffectObject = std::make_unique<AddEffectObjectCommand>();
+				// エフェクトを新規作成
+				std::unique_ptr<CreateEffectCommand> addEffectObject = std::make_unique<CreateEffectCommand>();
 				m_EngineCommand->ExecuteCommand(std::move(addEffectObject));
             }
             if (ImGui::MenuItem("ノードの追加"))
             {
 				// 現在の編集中のRootにノードを追加
-				EffectComponent* effect = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<EffectComponent>(m_EngineCommand->GetEffectEntity().value());
-                uint32_t nodeID = m_EngineCommand->GetNodeIntegrationData()->GetMapID();
-				effect->nodeID.push_back(nodeID);
-				std::string nodeName = "Node" + std::to_string(nodeID);
-				effect->nodeData.push_back(EffectNodeData(nodeID,nodeName));
-				effect->nodeData[nodeID].scale.value = { 1.0f, 1.0f, 1.0f };
-                effect->nodeData[nodeID].draw.meshDataIndex = m_EngineCommand->GetSpriteIntegrationData()->GetMapID();
+				std::unique_ptr<AddEffectNodeCommand> addEffectNode = std::make_unique<AddEffectNodeCommand>();
+				m_EngineCommand->ExecuteCommand(std::move(addEffectNode));
             }
             break;
         default:

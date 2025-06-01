@@ -12,10 +12,14 @@ void PipelineManager::Initialize(ID3D12Device8* device)
 	CreatePipelineParticleInit(device);
 	CreatePipelineParticleUpdate(device);
 	CreatePipelineParticleEmit(device);
-	CreatePipelineEffectEditor(device);
+	/*CreatePipelineEffectEditor(device);
 	CreatePipelineEffectEditorInit(device);
 	CreatePipelineEffectEditorUpdate(device);
-	CreatePipelineEffectEditorEmit(device);
+	CreatePipelineEffectEditorEmit(device);*/
+	CreatePipelineEffectInit(device);
+	CreatePipelineEffectTimeBaseEmit(device);
+	CreatePipelineEffectTimeBaseUpdate(device);
+	CreatePipelineEffectSprite(device);
 	CreatePipelineUI(device);
 	CreatePipelineSkinningCS(device);
 }
@@ -1734,6 +1738,545 @@ void PipelineManager::CreatePipelineEffectEditorEmit(ID3D12Device8* device)
 	hr = device->CreateComputePipelineState(&computePipelineStateDesc,
 		IID_PPV_ARGS(&m_EffectEditorEmitPSO.pso));
 	assert(SUCCEEDED(hr));
+}
+
+void PipelineManager::CreatePipelineEffectInit(ID3D12Device8* device)
+{
+	HRESULT hr;
+
+	// Shaderをコンパイルする
+	Microsoft::WRL::ComPtr < IDxcBlob> computeShaderBlob =
+		m_pShaderCompiler->CompileShader(
+			L"Cho/Resources/EngineAssets/Shader/Effect/EffectInit.CS.hlsl",
+			L"cs_6_5"
+		);
+	assert(computeShaderBlob);
+
+	// RootSignature作成
+	D3D12_ROOT_SIGNATURE_DESC descriptionRooTSignature{};
+	descriptionRooTSignature.Flags =
+		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+	// RootParameter作成。PixelShaderのMaterialとVertexShaderのTransform
+	D3D12_ROOT_PARAMETER rootParameter[3] = {};
+
+	D3D12_DESCRIPTOR_RANGE descriptorUAVRange = {};
+	descriptorUAVRange.BaseShaderRegister = 0;
+	descriptorUAVRange.NumDescriptors = 1;
+	descriptorUAVRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+	descriptorUAVRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	// UAV:Particle
+	rootParameter[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameter[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	rootParameter[0].DescriptorTable.pDescriptorRanges = &descriptorUAVRange;// Tableの中身の配列を指定
+	rootParameter[0].DescriptorTable.NumDescriptorRanges = 1;// Tableで利用する数
+
+	D3D12_DESCRIPTOR_RANGE descriptorUAVRange1 = {};
+	descriptorUAVRange1.BaseShaderRegister = 1;
+	descriptorUAVRange1.NumDescriptors = 1;
+	descriptorUAVRange1.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+	descriptorUAVRange1.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	// UAV:FreeList
+	rootParameter[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameter[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	rootParameter[1].DescriptorTable.pDescriptorRanges = &descriptorUAVRange1;// Tableの中身の配列を指定
+	rootParameter[1].DescriptorTable.NumDescriptorRanges = 1;// Tableで利用する数
+
+	// Counter
+	rootParameter[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_UAV;
+	rootParameter[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	rootParameter[2].Descriptor.ShaderRegister = 2;
+
+	descriptionRooTSignature.pParameters = rootParameter;// ルートパラメータ配列へのポインタ
+	descriptionRooTSignature.NumParameters = _countof(rootParameter);// 配列の長さ
+
+	// シリアライズしてバイナリにする
+	Microsoft::WRL::ComPtr < ID3DBlob> signatureBlob = nullptr;
+	Microsoft::WRL::ComPtr < ID3DBlob> errorBlob = nullptr;
+	hr = D3D12SerializeRootSignature(&descriptionRooTSignature,
+		D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
+	assert(SUCCEEDED(hr));
+	// バイナリをもとに生成
+	hr = device->CreateRootSignature(0, signatureBlob->GetBufferPointer(),
+		signatureBlob->GetBufferSize(), IID_PPV_ARGS(&m_EffectInitPSO.rootSignature));
+	assert(SUCCEEDED(hr));
+
+	D3D12_COMPUTE_PIPELINE_STATE_DESC computePipelineStateDesc{};
+	computePipelineStateDesc.CS = {
+	.pShaderBytecode = computeShaderBlob->GetBufferPointer(),
+	.BytecodeLength = computeShaderBlob->GetBufferSize() };
+	computePipelineStateDesc.pRootSignature = m_EffectInitPSO.rootSignature.Get();
+	// 実際に生成
+	hr = device->CreateComputePipelineState(&computePipelineStateDesc,
+		IID_PPV_ARGS(&m_EffectInitPSO.pso));
+	assert(SUCCEEDED(hr));
+}
+
+void PipelineManager::CreatePipelineEffectTimeBaseEmit(ID3D12Device8* device)
+{
+	HRESULT hr;
+
+	// Shaderをコンパイルする
+	Microsoft::WRL::ComPtr < IDxcBlob> computeShaderBlob =
+		m_pShaderCompiler->CompileShader(
+			L"Cho/Resources/EngineAssets/Shader/Effect/EffectTimeBaseEmit.CS.hlsl",
+			L"cs_6_5"
+		);
+	assert(computeShaderBlob);
+
+	// RootSignature作成
+	D3D12_ROOT_SIGNATURE_DESC descriptionRooTSignature{};
+	descriptionRooTSignature.Flags =
+		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+	// RootParameter作成。PixelShaderのMaterialとVertexShaderのTransform
+	D3D12_ROOT_PARAMETER rootParameter[7] = {};
+
+	// SRV:UseRootNumber
+	D3D12_DESCRIPTOR_RANGE userootRange = {};
+	userootRange.BaseShaderRegister = 0;
+	userootRange.NumDescriptors = 1;
+	userootRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	userootRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameter[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameter[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	rootParameter[0].DescriptorTable.pDescriptorRanges = &userootRange;// Tableの中身の配列を指定
+	rootParameter[0].DescriptorTable.NumDescriptorRanges = 1;// Tableで利用する数
+
+	// SRV:Root
+	D3D12_DESCRIPTOR_RANGE rootRange = {};
+	rootRange.BaseShaderRegister = 1;
+	rootRange.NumDescriptors = 1;
+	rootRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	rootRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameter[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameter[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	rootParameter[1].DescriptorTable.pDescriptorRanges = &rootRange;// Tableの中身の配列を指定
+	rootParameter[1].DescriptorTable.NumDescriptorRanges = 1;// Tableで利用する数
+
+	// SRV:Node
+	D3D12_DESCRIPTOR_RANGE nodeRange = {};
+	nodeRange.BaseShaderRegister = 2;
+	nodeRange.NumDescriptors = 1;
+	nodeRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	nodeRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameter[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameter[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	rootParameter[2].DescriptorTable.pDescriptorRanges = &nodeRange;// Tableの中身の配列を指定
+	rootParameter[2].DescriptorTable.NumDescriptorRanges = 1;// Tableで利用する数
+
+	// SRV:Sprite
+	D3D12_DESCRIPTOR_RANGE spriteRange = {};
+	spriteRange.BaseShaderRegister = 3;
+	spriteRange.NumDescriptors = 1;
+	spriteRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	spriteRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameter[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameter[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	rootParameter[3].DescriptorTable.pDescriptorRanges = &spriteRange;// Tableの中身の配列を指定
+	rootParameter[3].DescriptorTable.NumDescriptorRanges = 1;// Tableで利用する数
+
+	// UAV:Particle
+	D3D12_DESCRIPTOR_RANGE particleRange = {};
+	particleRange.BaseShaderRegister = 0;
+	particleRange.NumDescriptors = 1;
+	particleRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+	particleRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameter[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameter[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	rootParameter[4].DescriptorTable.pDescriptorRanges = &particleRange;// Tableの中身の配列を指定
+	rootParameter[4].DescriptorTable.NumDescriptorRanges = 1;// Tableで利用する数
+
+	// UAV:FreeList
+	D3D12_DESCRIPTOR_RANGE freeListRange = {};
+	freeListRange.BaseShaderRegister = 1;
+	freeListRange.NumDescriptors = 1;
+	freeListRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+	freeListRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameter[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameter[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	rootParameter[5].DescriptorTable.pDescriptorRanges = &freeListRange;// Tableの中身の配列を指定
+	rootParameter[5].DescriptorTable.NumDescriptorRanges = 1;// Tableで利用する数
+
+	// UAV:FreeListCounter
+	rootParameter[6].ParameterType = D3D12_ROOT_PARAMETER_TYPE_UAV;
+	rootParameter[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	rootParameter[6].Descriptor.ShaderRegister = 2;// レジスタ番号2とバインド
+
+
+	descriptionRooTSignature.pParameters = rootParameter;// ルートパラメータ配列へのポインタ
+	descriptionRooTSignature.NumParameters = _countof(rootParameter);// 配列の長さ
+
+	// シリアライズしてバイナリにする
+	Microsoft::WRL::ComPtr < ID3DBlob> signatureBlob = nullptr;
+	Microsoft::WRL::ComPtr < ID3DBlob> errorBlob = nullptr;
+	hr = D3D12SerializeRootSignature(&descriptionRooTSignature,
+		D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
+	assert(SUCCEEDED(hr));
+
+	// バイナリをもとに生成
+	hr = device->CreateRootSignature(0, signatureBlob->GetBufferPointer(),
+		signatureBlob->GetBufferSize(), IID_PPV_ARGS(&m_EffectTimeBaseEmitPSO.rootSignature));
+	assert(SUCCEEDED(hr));
+
+	D3D12_COMPUTE_PIPELINE_STATE_DESC computePipelineStateDesc{};
+	computePipelineStateDesc.CS = {
+	.pShaderBytecode = computeShaderBlob->GetBufferPointer(),
+	.BytecodeLength = computeShaderBlob->GetBufferSize() };
+	computePipelineStateDesc.pRootSignature = m_EffectTimeBaseEmitPSO.rootSignature.Get();
+	// 実際に生成
+	hr = device->CreateComputePipelineState(&computePipelineStateDesc,
+		IID_PPV_ARGS(&m_EffectTimeBaseEmitPSO.pso));
+	assert(SUCCEEDED(hr));
+}
+
+void PipelineManager::CreatePipelineEffectTimeBaseUpdate(ID3D12Device8* device)
+{
+	HRESULT hr;
+
+	// Shaderをコンパイルする
+	Microsoft::WRL::ComPtr < IDxcBlob> computeShaderBlob =
+		m_pShaderCompiler->CompileShader(
+			L"Cho/Resources/EngineAssets/Shader/Effect/EffectTimeBaseUpdate.CS.hlsl",
+			L"cs_6_5"
+		);
+	assert(computeShaderBlob);
+
+	// RootSignature作成
+	D3D12_ROOT_SIGNATURE_DESC descriptionRooTSignature{};
+	descriptionRooTSignature.Flags =
+		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+	// RootParameter作成。PixelShaderのMaterialとVertexShaderのTransform
+	D3D12_ROOT_PARAMETER rootParameter[5] = {};
+
+	// SRV:Root
+	D3D12_DESCRIPTOR_RANGE rootRange = {};
+	rootRange.BaseShaderRegister = 0;
+	rootRange.NumDescriptors = 1;
+	rootRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	rootRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameter[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameter[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	rootParameter[0].DescriptorTable.pDescriptorRanges = &rootRange;// Tableの中身の配列を指定
+	rootParameter[0].DescriptorTable.NumDescriptorRanges = 1;// Tableで利用する数
+
+	// SRV:Node
+	D3D12_DESCRIPTOR_RANGE nodeRange = {};
+	nodeRange.BaseShaderRegister = 1;
+	nodeRange.NumDescriptors = 1;
+	nodeRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	nodeRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameter[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameter[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	rootParameter[1].DescriptorTable.pDescriptorRanges = &nodeRange;// Tableの中身の配列を指定
+	rootParameter[1].DescriptorTable.NumDescriptorRanges = 1;// Tableで利用する数
+
+	// SRV:Sprite
+	D3D12_DESCRIPTOR_RANGE spriteRange = {};
+	spriteRange.BaseShaderRegister = 2;
+	spriteRange.NumDescriptors = 1;
+	spriteRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	spriteRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameter[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameter[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	rootParameter[2].DescriptorTable.pDescriptorRanges = &spriteRange;// Tableの中身の配列を指定
+	rootParameter[2].DescriptorTable.NumDescriptorRanges = 1;// Tableで利用する数
+
+	// UAV:Particle
+	D3D12_DESCRIPTOR_RANGE particleRange = {};
+	particleRange.BaseShaderRegister = 0;
+	particleRange.NumDescriptors = 1;
+	particleRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+	particleRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameter[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameter[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	rootParameter[3].DescriptorTable.pDescriptorRanges = &particleRange;// Tableの中身の配列を指定
+	rootParameter[3].DescriptorTable.NumDescriptorRanges = 1;// Tableで利用する数
+
+	// UAV:FreeList
+	D3D12_DESCRIPTOR_RANGE freeListRange = {};
+	freeListRange.BaseShaderRegister = 1;
+	freeListRange.NumDescriptors = 1;
+	freeListRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+	freeListRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameter[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameter[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	rootParameter[4].DescriptorTable.pDescriptorRanges = &freeListRange;// Tableの中身の配列を指定
+	rootParameter[4].DescriptorTable.NumDescriptorRanges = 1;// Tableで利用する数
+
+	descriptionRooTSignature.pParameters = rootParameter;// ルートパラメータ配列へのポインタ
+	descriptionRooTSignature.NumParameters = _countof(rootParameter);// 配列の長さ
+
+	// シリアライズしてバイナリにする
+	Microsoft::WRL::ComPtr < ID3DBlob> signatureBlob = nullptr;
+	Microsoft::WRL::ComPtr < ID3DBlob> errorBlob = nullptr;
+	hr = D3D12SerializeRootSignature(&descriptionRooTSignature,
+		D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
+	assert(SUCCEEDED(hr));
+
+
+	// バイナリをもとに生成
+	hr = device->CreateRootSignature(0, signatureBlob->GetBufferPointer(),
+		signatureBlob->GetBufferSize(), IID_PPV_ARGS(&m_EffectTimeBaseUpdatePSO.rootSignature));
+	assert(SUCCEEDED(hr));
+
+	D3D12_COMPUTE_PIPELINE_STATE_DESC computePipelineStateDesc{};
+	computePipelineStateDesc.CS = {
+	.pShaderBytecode = computeShaderBlob->GetBufferPointer(),
+	.BytecodeLength = computeShaderBlob->GetBufferSize() };
+	computePipelineStateDesc.pRootSignature = m_EffectTimeBaseUpdatePSO.rootSignature.Get();
+	// 実際に生成
+	hr = device->CreateComputePipelineState(&computePipelineStateDesc,
+		IID_PPV_ARGS(&m_EffectTimeBaseUpdatePSO.pso));
+	assert(SUCCEEDED(hr));
+}
+
+void PipelineManager::CreatePipelineEffectSprite(ID3D12Device8* device)
+{
+	HRESULT hr = {};
+	// Compile shaders
+	ComPtr<IDxcBlob> pVSBlob =
+		m_pShaderCompiler->CompileShader(
+			L"Cho/Resources/EngineAssets/Shader/Effect/Effect_Sprite.VS.hlsl",
+			L"vs_6_5"
+		);
+	//ComPtr<ID3D12ShaderReflection> pVSReflection = m_pShaderCompiler->ReflectShader(pVSBlob.Get());
+
+	ComPtr<IDxcBlob> pPSBlob =
+		m_pShaderCompiler->CompileShader(
+			L"Cho/Resources/EngineAssets/Shader/Effect/Effect_Sprite.PS.hlsl",
+			L"ps_6_5"
+		);
+	//ComPtr<ID3D12ShaderReflection> pPSReflection = m_pShaderCompiler->ReflectShader(pPSBlob.Get());
+	// CreateRootSignature
+	D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc = {};
+	rootSignatureDesc.Flags =
+		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+	// ジェネリックに作成
+	D3D12_ROOT_PARAMETER rootParameters[8] = {};
+
+	// CBV:ViewProjection
+	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	rootParameters[0].Descriptor.ShaderRegister = 0;
+
+	// SRV:Root
+	D3D12_DESCRIPTOR_RANGE rootRange = {};
+	rootRange.BaseShaderRegister = 0;
+	rootRange.RegisterSpace = 0;
+	rootRange.NumDescriptors = 1;
+	rootRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	rootRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	rootParameters[1].DescriptorTable.pDescriptorRanges = &rootRange;// Tableの中身の配列を指定
+	rootParameters[1].DescriptorTable.NumDescriptorRanges = 1;// Tableで利用する数
+
+	// SRV:Node
+	D3D12_DESCRIPTOR_RANGE nodeRange = {};
+	nodeRange.BaseShaderRegister = 1;
+	nodeRange.RegisterSpace = 0;
+	nodeRange.NumDescriptors = 1;
+	nodeRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	nodeRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	rootParameters[2].DescriptorTable.pDescriptorRanges = &nodeRange;// Tableの中身の配列を指定
+	rootParameters[2].DescriptorTable.NumDescriptorRanges = 1;// Tableで利用する数
+
+	// SRV:Sprite
+	D3D12_DESCRIPTOR_RANGE spriteRange = {};
+	spriteRange.BaseShaderRegister = 2;
+	spriteRange.NumDescriptors = 1;
+	spriteRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	spriteRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	rootParameters[3].DescriptorTable.pDescriptorRanges = &spriteRange;// Tableの中身の配列を指定
+	rootParameters[3].DescriptorTable.NumDescriptorRanges = 1;// Tableで利用する数
+
+	// UAV:Particle
+	D3D12_DESCRIPTOR_RANGE particleRange = {};
+	particleRange.BaseShaderRegister = 0;
+	particleRange.RegisterSpace = 0;
+	particleRange.NumDescriptors = 1;
+	particleRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+	particleRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	rootParameters[4].DescriptorTable.pDescriptorRanges = &particleRange;// Tableの中身の配列を指定
+	rootParameters[4].DescriptorTable.NumDescriptorRanges = 1;// Tableで利用する数
+
+	// SRV:Node
+	D3D12_DESCRIPTOR_RANGE nodeRange2 = {};
+	nodeRange2.BaseShaderRegister = 0;
+	nodeRange2.RegisterSpace = 1;
+	nodeRange2.NumDescriptors = 1;
+	nodeRange2.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	nodeRange2.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameters[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[5].DescriptorTable.pDescriptorRanges = &nodeRange2;// Tableの中身の配列を指定
+	rootParameters[5].DescriptorTable.NumDescriptorRanges = 1;// Tableで利用する数
+
+	// UAV:Particle
+	D3D12_DESCRIPTOR_RANGE particleRange2 = {};
+	particleRange2.BaseShaderRegister = 0;
+	particleRange2.RegisterSpace = 1;
+	particleRange2.NumDescriptors = 1;
+	particleRange2.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+	particleRange2.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameters[6].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[6].DescriptorTable.pDescriptorRanges = &particleRange2;// Tableの中身の配列を指定
+	rootParameters[6].DescriptorTable.NumDescriptorRanges = 1;// Tableで利用する数
+
+	// Texture
+	D3D12_DESCRIPTOR_RANGE textureRange = {};
+	textureRange.BaseShaderRegister = 1;
+	textureRange.RegisterSpace = 1;
+	textureRange.NumDescriptors = 256;
+	textureRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	textureRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameters[7].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[7].DescriptorTable.pDescriptorRanges = &textureRange;
+	rootParameters[7].DescriptorTable.NumDescriptorRanges = 1;
+
+	rootSignatureDesc.pParameters = rootParameters;
+	rootSignatureDesc.NumParameters = _countof(rootParameters);
+
+	// Static Sampler
+	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
+	staticSamplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;// バイリニアフィルタ
+	staticSamplers[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;// 0~1の範囲外をリピート
+	staticSamplers[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	staticSamplers[0].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	staticSamplers[0].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;// 比較しない
+	staticSamplers[0].MaxLOD = D3D12_FLOAT32_MAX;// ありったけのMipmapを使う
+	staticSamplers[0].ShaderRegister = 0;// レジスタ番号を使う
+	staticSamplers[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;// PixelShaderで使う
+	rootSignatureDesc.pStaticSamplers = staticSamplers;
+	rootSignatureDesc.NumStaticSamplers = _countof(staticSamplers);
+	// Serialize RootSignature
+	ComPtr<ID3DBlob> pSignature;
+	ComPtr<ID3DBlob> pError;
+	hr = D3D12SerializeRootSignature(
+		&rootSignatureDesc,
+		D3D_ROOT_SIGNATURE_VERSION_1,
+		&pSignature,
+		&pError
+	);
+	if (FAILED(hr))
+	{
+		Log::Write(LogLevel::Error, reinterpret_cast<const char*>(pError->GetBufferPointer()));
+	}
+	// Create RootSignature
+	hr = device->CreateRootSignature(
+		0,
+		pSignature->GetBufferPointer(),
+		pSignature->GetBufferSize(),
+		IID_PPV_ARGS(&m_EffectSpritePSO.rootSignature)
+	);
+	Log::Write(LogLevel::Assert, "Root signature created.", hr);
+	// InputLayout
+	D3D12_INPUT_ELEMENT_DESC inputElementDesc[5] = {};
+	inputElementDesc[0].SemanticName = "POSITION";
+	inputElementDesc[0].SemanticIndex = 0;
+	inputElementDesc[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	inputElementDesc[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	inputElementDesc[1].SemanticName = "TEXCOORD";
+	inputElementDesc[1].SemanticIndex = 0;
+	inputElementDesc[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+	inputElementDesc[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	inputElementDesc[2].SemanticName = "NORMAL";
+	inputElementDesc[2].SemanticIndex = 0;
+	inputElementDesc[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	inputElementDesc[2].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	inputElementDesc[3].SemanticName = "COLOR";
+	inputElementDesc[3].SemanticIndex = 0;
+	inputElementDesc[3].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	inputElementDesc[3].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	inputElementDesc[4].SemanticName = "VERTEXID";
+	inputElementDesc[4].SemanticIndex = 0;
+	inputElementDesc[4].Format = DXGI_FORMAT_R32_UINT;
+	inputElementDesc[4].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
+	inputLayoutDesc.pInputElementDescs = inputElementDesc;
+	inputLayoutDesc.NumElements = _countof(inputElementDesc);
+
+	// BlendState
+	D3D12_BLEND_DESC blendDesc{};
+	// すべての色要素を書き込む
+	blendDesc.RenderTarget[0].RenderTargetWriteMask =
+		D3D12_COLOR_WRITE_ENABLE_ALL;
+	blendDesc.RenderTarget[0].BlendEnable = true;
+	////blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+	//blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	////blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+	////!< 加算。Src * SrcA + Dest * 1
+	//blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	//blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+	////blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;
+
+	//blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+	//blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ZERO;
+	//blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ONE;
+
+	/*blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ZERO;
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ONE;
+	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;*/
+
+	blendDesc.RenderTarget[0].BlendEnable = true;
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;
+
+	// RasterizerState
+	D3D12_RASTERIZER_DESC rasterizerDesc{};
+	// エフェクトはカリングをオフ
+	rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
+	// 三角形の中を塗りつぶす
+	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
+
+	// DepthStencilState
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
+	// Depthの機能を有効化する
+	depthStencilDesc.DepthEnable = true;
+	// 書き込みをします
+	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+	// 比較関数はLessEqual。つまり、近ければ描画される
+	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+
+	// Create PSO
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc{};
+	psoDesc.pRootSignature = m_EffectSpritePSO.rootSignature.Get();
+	psoDesc.VS = { pVSBlob->GetBufferPointer(),pVSBlob->GetBufferSize() };
+	psoDesc.PS = { pPSBlob->GetBufferPointer(),pPSBlob->GetBufferSize() };
+	psoDesc.InputLayout = inputLayoutDesc;
+	psoDesc.BlendState = blendDesc;
+	psoDesc.RasterizerState = rasterizerDesc;
+	psoDesc.DepthStencilState = depthStencilDesc;
+	psoDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	psoDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
+	psoDesc.SampleDesc.Count = 1;
+	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	psoDesc.NumRenderTargets = 1;
+	psoDesc.RTVFormats[0] = PixelFormat;
+	// Create PSO
+	hr = device->CreateGraphicsPipelineState(
+		&psoDesc,
+		IID_PPV_ARGS(&m_EffectSpritePSO.pso)
+	);
+	Log::Write(LogLevel::Assert, "Pipeline state created.", hr);
 }
 
 void PipelineManager::CreatePipelineUI(ID3D12Device8* device)

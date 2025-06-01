@@ -497,17 +497,9 @@ struct ParticleComponent : public IComponentTag
 struct EffectComponent : public IComponentTag
 {
 	std::wstring effectName = L"";	// エフェクト名
-	std::optional<uint32_t> effectID = std::nullopt;	// エフェクトID
-	float globalTime = 0.0f;	// グローバル時間
-	float maxTime = 120.0f;	// 最大時間
-	float deltaTime = 0.0f;	// デルタ時間
 	bool isRun = false;	// 実行フラグ
-	bool isPreRun = false;	// プリセット実行フラグ
 	bool isLoop = true;	// ループフラグ
-	bool isReset = false;	// リセットフラグ
-	std::vector<uint32_t> nodeID;	// ノードID
-	std::vector<EffectNodeData> nodeData;	// ノードデータ
-
+	std::pair<uint32_t, EffectRootData> root;
 };
 // スプライトコンポーネント
 struct UISpriteComponent : public IComponentTag
