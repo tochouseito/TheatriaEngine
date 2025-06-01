@@ -337,3 +337,20 @@ class AddEffectNodeCommand : public IEngineCommand
 private:
 	uint32_t m_Entity;
 };
+
+// Objectを複製するコマンド
+class CloneObjectCommand : public IEngineCommand
+{
+public:
+	CloneObjectCommand(const std::wstring& sceneName)
+		:m_CurrendSceneName(sceneName)
+	{
+	}
+	bool Execute(EngineCommand* edit)override;
+	bool Undo(EngineCommand* edit)override;
+	// オブジェクトのIDを取得
+	uint32_t GetObjectID() const { return m_ObjectID; }
+private:
+	uint32_t m_ObjectID;
+	std::wstring m_CurrendSceneName;
+};

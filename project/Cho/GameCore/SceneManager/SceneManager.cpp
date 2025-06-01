@@ -20,6 +20,7 @@ void ScenePrefab::Start()
 		// GameObjectを追加
 		ObjectID objectID = objectContainer->AddGameObject(entity, name, type);
 		GameObject& gameObj = objectContainer->GetGameObjectByName(name);
+		gameObj.SetCurrentSceneName(m_SceneName);
 		// SceneUseListに登録
 		AddUseObject(gameObj.GetID().value());
 		// コンポーネントの追加
@@ -183,6 +184,15 @@ void ScenePrefab::Finalize()
 		AddGameObjectData(objectCopy);
 	}
 	m_UseObjects.clear();
+	std::vector<ObjectID> clonedObjects = m_ClonedObjects;
+	for (const auto& objectID : clonedObjects)
+	{
+		// GameObjectを取得
+		//GameObject& object = m_SceneManager->m_pGameCore->GetObjectContainer()->GetGameObject(objectID);
+		std::unique_ptr<DeleteObjectCommand> deleteCommand = std::make_unique<DeleteObjectCommand>(objectID);
+		deleteCommand->Execute(m_SceneManager->m_pGameCore->GetEngineCommand());
+	}
+	m_ClonedObjects.clear();
 }
 
 void SceneManager::Update()
@@ -208,6 +218,8 @@ void SceneManager::Update()
 		{
 			ScenePrefab* mainScene = m_pScenes[m_MainSceneID.value()].get();
 			const std::wstring mainSceneName = mainScene->GetSceneName();
+			// シーンの終了処理を行う
+			m_pGameCore->SceneFinelize(mainScene);
 			mainScene->Finalize();
 			// 有効リストから削除
 			m_SceneNameToScene.erase(mainSceneName);
@@ -247,10 +259,15 @@ void SceneManager::Update()
 		{
 			continue;
 		}
+		if (!scene) { return; }
 		// シーンの終了処理を行う
+		m_pGameCore->SceneFinelize(scene);
 		scene->Finalize();
-
+		// 有効リストから削除
+		m_SceneNameToScene.erase(scene->GetSceneName());
 	}
+
+	m_UnloadedScenesIDs.clear();
 }
 
 // シーンを追加
@@ -279,14 +296,6 @@ void SceneManager::LoadScene(const std::wstring& sceneName)
 		return;
 	}
 	m_LoadedScenesIDs.push_back(m_SceneNameToID[sceneName]);
-	//// 有効リストに追加
-	//SceneID id = m_SceneNameToID[sceneName];
-	//ScenePrefab* newScene = m_pScenes[id].get();
-	//if (!newScene) { return; }
-	//m_SceneNameToScene[sceneName] = newScene;
-	//// 初期化
-	//newScene->Start();
-	//m_pGameCore->AddGameLoadSceneID(newScene->GetSceneID());
 }
 
 void SceneManager::UnLoadScene(const std::wstring& sceneName)
@@ -301,13 +310,7 @@ void SceneManager::UnLoadScene(const std::wstring& sceneName)
 	{
 		return;
 	}
-	// シーンを取得
-	ScenePrefab* scene = m_SceneNameToScene[sceneName];
-	if (!scene) { return; }
-	// シーンの終了処理を行う
-	scene->Finalize();
-	// 有効リストから削除
-	m_SceneNameToScene.erase(sceneName);
+	m_UnloadedScenesIDs.push_back(m_SceneNameToID[sceneName]);
 }
 
 void SceneManager::ChangeMainScene(const std::wstring& sceneName)

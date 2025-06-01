@@ -52,13 +52,17 @@ CHO_API bool ChoSystem::LoadGameParameter(const std::wstring& filePath, const st
 CHO_API GameObject& ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vector3 generatePosition)
 {
 	EngineCommand* engineCommand = g_Engine->GetEngineCommand();
-	std::unique_ptr<Add3DObjectCommand> command = std::make_unique<Add3DObjectCommand>();
-	command->Execute(engineCommand);
 	GameObject& object = engineCommand->GetGameCore()->GetObjectContainer()->GetGameObject(id.value());
+	std::unique_ptr<CloneObjectCommand> command = std::make_unique<CloneObjectCommand>(object.GetCurrentSceneName());
+	command->Execute(engineCommand);
 	GameObject& newObject = engineCommand->GetGameCore()->GetObjectContainer()->GetGameObject(command->GetObjectID());
 	// nameを変更
 	std::unique_ptr<RenameObjectCommand> renameCommand = std::make_unique<RenameObjectCommand>(newObject.GetID().value(), object.GetName());
 	renameCommand->Execute(engineCommand);
+	// Tagのコピー
+	newObject.SetTag(object.GetTag());
+	// CurrendSceneのコピー
+	newObject.SetCurrentSceneName(object.GetCurrentSceneName());
 	// Transform以外のComponentを取得
 	MeshFilterComponent* meshFilter = engineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshFilterComponent>(object.GetEntity());
 	MeshRendererComponent* meshRenderer = engineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshRendererComponent>(object.GetEntity());

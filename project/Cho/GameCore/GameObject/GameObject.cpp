@@ -27,6 +27,8 @@ public:
 	std::string m_Tag = "Default";
 	// スクリプト用パラメータ
 	std::unordered_map<std::string, ObjectParameter> parameters;
+	// 管理しているSceneName
+	std::wstring m_SceneName = L"";
 };
 
 std::optional<ObjectID> GameObject::GetID() const noexcept
@@ -54,6 +56,15 @@ std::string GameObject::GetTag() const noexcept
 		return implGameObject->GetTagFunc();
 	}
 	return "Default";
+}
+
+std::wstring GameObject::GetCurrentSceneName() const noexcept
+{
+	if (implGameObject)
+	{
+		return implGameObject->m_SceneName;
+	}
+	return L"";
 }
 
 void GameObject::SetTag(std::string_view tag) noexcept
@@ -95,6 +106,14 @@ void GameObject::SetName(const std::wstring& name) noexcept
 	if (implGameObject)
 	{
 		implGameObject->SetNameFunc(name);
+	}
+}
+
+void GameObject::SetCurrentSceneName(const std::wstring& name) noexcept
+{
+	if (implGameObject)
+	{
+		implGameObject->m_SceneName = name;
 	}
 }
 

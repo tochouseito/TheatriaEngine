@@ -49,7 +49,7 @@ public:
 
 	// 
 	void AddGameLoadSceneID(const SceneID& id) { m_GameLoadSceneID.push_back(id); }
-	void AddGameUnloadSceneID(const SceneID& id) { m_GameUnloadSceneID.push_back(id); }
+	void SceneFinelize(ScenePrefab* scene);
 private:
 	void CreateSystems(InputManager* input, ResourceManager* resourceManager,GraphicsEngine* graphicsEngine);
 
@@ -77,8 +77,6 @@ private:
 
 	// ゲーム更新中にロードされたシーンのIDを保持するコンテナ
 	std::vector<SceneID> m_GameLoadSceneID;
-	// ゲーム実行中にアンロードされたシーンのIDを保持するコンテナ
-	std::vector<SceneID> m_GameUnloadSceneID;
 	
 	// ゲーム更新中に生成されたidを保持するコンテナ
 	std::vector<ObjectID> m_GameGenerateID;
@@ -94,7 +92,6 @@ private:
 	std::unique_ptr<TransformFinalizeSystem> tfFinalizeOnceSystem;
 	std::unique_ptr<ScriptFinalizeSystem> scriptFinalizeOnceSystem;
 	std::unique_ptr<Rigidbody2DResetSystem> physicsResetOnceSystem;
-	std::unique_ptr<ParticleInitializeSystem> particleFinaOnceSystem;
 
 	// 最初のメインシーン保存用
 	SceneID m_MainSceneID = 0;
