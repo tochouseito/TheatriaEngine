@@ -172,35 +172,35 @@ void DirectX12Common::CreateDevice()
 // 各サポートチェック
 void DirectX12Common::CheckD3D12Features()
 {
-	// シェーダモデルをチェック.
-	{
-		D3D12_FEATURE_DATA_SHADER_MODEL shaderModel = { D3D_SHADER_MODEL_6_5 };
-		if (SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &shaderModel, sizeof(shaderModel))))
-		{
-			Log::Write(LogLevel::Info, "Shader Model 6.5 is supported");
-		} else
-		{
-			Log::Write(LogLevel::Assert, "Shader Model 6.5 is not supported");
-		}
-	}
+	//// シェーダモデルをチェック.
+	//{
+	//	D3D12_FEATURE_DATA_SHADER_MODEL shaderModel = { D3D_SHADER_MODEL_6_5 };
+	//	if (SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &shaderModel, sizeof(shaderModel))))
+	//	{
+	//		Log::Write(LogLevel::Info, "Shader Model 6.5 is supported");
+	//	} else
+	//	{
+	//		Log::Write(LogLevel::Assert, "Shader Model 6.5 is not supported");
+	//	}
+	//}
 
-	// メッシュシェーダをサポートしているかどうかチェック.
-	{
-		D3D12_FEATURE_DATA_D3D12_OPTIONS7 features = {};
-		if (SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS7, &features, sizeof(features))))
-		{
-			std::cout << "Mesh Shader: ";
-			if (features.MeshShaderTier != D3D12_MESH_SHADER_TIER_NOT_SUPPORTED)
-			{
-				// メッシュシェーダのティアを表示
-				Log::Write(LogLevel::Info, std::format("Mesh Shader Tier: {}", (int)features.MeshShaderTier));
-				std::cout << "Supported (Tier " << (int)features.MeshShaderTier << ")\n";
-			} else
-			{
-				Log::Write(LogLevel::Assert, "Mesh Shader: Not Supported");
-			}
-		}
-	}
+	//// メッシュシェーダをサポートしているかどうかチェック.
+	//{
+	//	D3D12_FEATURE_DATA_D3D12_OPTIONS7 features = {};
+	//	if (SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS7, &features, sizeof(features))))
+	//	{
+	//		std::cout << "Mesh Shader: ";
+	//		if (features.MeshShaderTier != D3D12_MESH_SHADER_TIER_NOT_SUPPORTED)
+	//		{
+	//			// メッシュシェーダのティアを表示
+	//			Log::Write(LogLevel::Info, std::format("Mesh Shader Tier: {}", (int)features.MeshShaderTier));
+	//			std::cout << "Supported (Tier " << (int)features.MeshShaderTier << ")\n";
+	//		} else
+	//		{
+	//			Log::Write(LogLevel::Assert, "Mesh Shader: Not Supported");
+	//		}
+	//	}
+	//}
 
 	// Raytracing
 	{
