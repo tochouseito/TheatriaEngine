@@ -898,6 +898,13 @@ bool CreateEffectCommand::Execute(EngineCommand* edit)
 	uint32_t spriteID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::EffectSpriteInt)->GetMapID();
 	nodedata.draw.meshDataIndex = spriteID;
 	nodedata.draw.meshType = static_cast<uint32_t>(EFFECT_MESH_TYPE::SPRITE);
+	EffectSprite sprite;
+	nodedata.drawMesh = sprite;
+	nodedata.name = "NewNode";
+	nodedata.scale.value = Vector3(1.0f, 1.0f, 1.0f);
+	nodedata.scale.pva.value.x.median = 1.0f;
+	nodedata.scale.pva.value.y.median = 1.0f;
+	nodedata.scale.pva.value.z.median = 1.0f;
 	effect->root.second.nodes.push_back(std::move(nodedata));
 	return true;
 }
@@ -943,6 +950,13 @@ bool AddEffectNodeCommand::Execute(EngineCommand* edit)
 	uint32_t spriteID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::EffectSpriteInt)->GetMapID();
 	nodedata.draw.meshDataIndex = spriteID;
 	nodedata.draw.meshType = static_cast<uint32_t>(EFFECT_MESH_TYPE::SPRITE);
+	EffectSprite sprite;
+	nodedata.drawMesh = sprite;
+	nodedata.name = "NewNode";
+	nodedata.scale.value = Vector3(1.0f, 1.0f, 1.0f);
+	nodedata.scale.pva.value.x.median = 1.0f;
+	nodedata.scale.pva.value.y.median = 1.0f;
+	nodedata.scale.pva.value.z.median = 1.0f;
 	// Nodeを追加
 	effect->root.second.nodes.push_back(std::move(nodedata));
 	// 追加したNodeを選択中に設定

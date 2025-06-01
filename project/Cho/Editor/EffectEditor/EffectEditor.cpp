@@ -64,9 +64,15 @@ void EffectEditor::Window()
             {
                 node.name = std::string(nameBuffer);
             }
-            // 生成数
+			// 最大生成数
+			int maxCount = static_cast<int>(node.common.emitCountMax);
+			if (ImGui::DragInt("最大生成数", &maxCount, 1, 0, 1024))
+			{
+				node.common.emitCountMax = static_cast<uint32_t>(maxCount);
+			}
+            // 同時生成数
             int emitCount = static_cast<int>(node.common.emitCount);
-			if (ImGui::DragInt("生成数", &emitCount, 1, 0, 1024))
+			if (ImGui::DragInt("同時生成数", &emitCount, 1, 0, 1024))
 			{
 				node.common.emitCount = static_cast<uint32_t>(emitCount);
 			}
@@ -82,8 +88,8 @@ void EffectEditor::Window()
 			// 全ての子削除で削除フラグ
             // 生存時間
 			ImGui::DragFloat2("生存時間", &node.common.lifeTime.median, 1.0f, 0.0f, 0.0f,"%.0f");
-            // 生成時間
-			ImGui::DragFloat2("生成時間", &node.common.emitInterval.median, 0.1f, 0.0f, 0.0f);
+            // 発生間隔
+			ImGui::DragFloat2("発生間隔", &node.common.emitInterval.median, 0.1f, 0.0f, 0.0f);
 			// 生成開始時間
 			ImGui::DragFloat2("生成開始時間", &node.common.emitStartTime.median, 0.1f, 0.0f, 0.0f);
 
@@ -379,8 +385,8 @@ void EffectEditor::ControlWindow()
 		return;
     }
 
-	ImGui::Text("%f", effect->root.second.time.elapsedTime);
-	ImGui::Text("%f", effect->root.second.time.duration);
+	ImGui::Text("time : %f", effect->root.second.time.elapsedTime);
+	ImGui::Text("maxTime : %f", effect->root.second.time.duration);
 
     // 中央に配置するための計算
     float toolbarWidth = 0.0f;
@@ -416,6 +422,7 @@ void EffectEditor::ControlWindow()
 	{
 		effect->root.second.time.elapsedTime++;
 	}
+	ImGui::SliderFloat("Time", &effect->root.second.time.elapsedTime, 0.0f, effect->root.second.time.duration);
 	ImGui::End();
 }
 

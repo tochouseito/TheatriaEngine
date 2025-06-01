@@ -847,7 +847,7 @@ void GraphicsEngine::EffectEditorDraw(CommandContext* context, ResourceManager& 
 	// NodeBufferをセット
 	context->SetGraphicsRootDescriptorTable(5, nodeBuffer->GetSRVGpuHandle());
 	// EffectParticleBufferをセット
-	context->SetGraphicsRootDescriptorTable(6, spriteBuffer->GetSRVGpuHandle());
+	context->SetGraphicsRootDescriptorTable(6, effectParticleBuffer->GetUAVGpuHandle());
 	// TextureBufferをセット
 	context->SetGraphicsRootDescriptorTable(7, resourceManager.GetSUVDHeap()->GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
 	// DrawCall

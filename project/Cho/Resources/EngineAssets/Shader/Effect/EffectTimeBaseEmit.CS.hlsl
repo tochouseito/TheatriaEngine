@@ -25,12 +25,12 @@ RWStructuredBuffer<uint> gParticleCounter : register(u2);
 uint CalcSpawnCount(
     in EffectCommon common,
     float elapsed,
-    in RandomGenerator generator,
+    //in RandomGenerator generator,
     inout float spawnTime)
 {
     // 発生開始時間を設定
-    float emitStartTime = GenerateRandomInRange(generator.Generate1d(), common.emitStartTime.median, common.emitStartTime.amplitude);
-    
+    //float emitStartTime = GenerateRandomInRange(generator.Generate1d(), common.emitStartTime.median, common.emitStartTime.amplitude);
+    float emitStartTime = common.emitStartTime.median;
     // 発生開始前なら 0
     if (elapsed < emitStartTime)
     {
@@ -41,7 +41,9 @@ uint CalcSpawnCount(
     float t = elapsed - emitStartTime;
     uint totalAllowed;
     // 発生間隔を設定
-    float emitInterval = GenerateRandomInRange(generator.Generate1d(), common.emitInterval.median, common.emitInterval.amplitude);
+    
+    //float emitInterval = GenerateRandomInRange(generator.Generate1d(), common.emitInterval.median, common.emitInterval.amplitude);
+    float emitInterval = common.emitInterval.median;
     if (emitInterval <= 0.0f)
     {
         // 間隔ゼロ=瞬時に一度だけ emitCount 発生
@@ -81,9 +83,6 @@ void main(uint3 DTid : SV_DispatchThreadID, uint3 Gid : SV_GroupID) {
     // 時間情報を取得
     float elapsed = root.time.elapsedTime;
     float delta = root.time.deltaTime;
-    // シード生成
-    RandomGenerator generator;
-    generator.seed = (DTid + elapsed) * elapsed;
     // Rootに紐づくNodeをループ
     for (uint i = 0; i < root.nodeCount; ++i) {
         // Node取得
@@ -91,7 +90,7 @@ void main(uint3 DTid : SV_DispatchThreadID, uint3 Gid : SV_GroupID) {
         EffectNode node = gNodes[nodeID];
         // 生成するパーティクル数を計算
         float spawnTime = 0.0f;
-        uint spawnCount = CalcSpawnCount(node.common, elapsed, generator,spawnTime);
+        uint spawnCount = CalcSpawnCount(node.common, elapsed,spawnTime);
         // 生成するパーティクル数が 0 ならスキップ
         if (spawnCount == 0) {
             continue;
@@ -105,6 +104,9 @@ void main(uint3 DTid : SV_DispatchThreadID, uint3 Gid : SV_GroupID) {
             uint particleIdx = gParticleFreeList.Consume();
             // パーティクル初期化
             EffectParticle particle = gParticles[particleIdx];
+            // シード生成
+            RandomGenerator generator;
+            generator.seed = (pi + root.globalSeed) * root.globalSeed;
             // Position
             switch (node.position.type) {
                 case SRT_TYPE_STANDARD:

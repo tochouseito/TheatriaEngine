@@ -186,11 +186,13 @@ void EmitterEditorUpdateSystem::UpdateEmitter(EmitterComponent& emitter)
 void EffectEditorUpdateSystem::UpdateEffect(EffectComponent& effect)
 {
 	// EditorはTimeBaseでの更新
-	if (!effect.isRun) { return; }
 
 	// エフェクトの時間を更新
 	effect.root.second.time.deltaTime = DeltaTime();
-	effect.root.second.time.elapsedTime++;
+	if (effect.isRun)
+	{
+		effect.root.second.time.elapsedTime++;
+	}
 	if (effect.root.second.time.elapsedTime > effect.root.second.time.duration)
 	{
 		if (effect.isLoop)
