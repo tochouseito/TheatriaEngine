@@ -401,7 +401,7 @@ struct MaterialComponent : public IComponentTag
 		enableTexture = false;
 		uvFlipY = false;
 		matUV = ChoMath::MakeIdentity4x4();
-		shininess = 0.0f;
+		shininess = 50.0f;
 		textureName = L"";
 		textureID = std::nullopt;
 		mapID = std::nullopt;

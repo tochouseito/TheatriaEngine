@@ -583,6 +583,7 @@ class AudioAPI::ImplAudioAPI
 public:
 	ImplAudioAPI() = default;
 	~ImplAudioAPI() = default;
+	std::function<void(const std::string&)> SetSourceFunc;
 	std::function<void(const std::string&, const bool&)> PlayFunc;
 	std::function<void(const std::string&)> StopFunc;
 	std::function<bool(const std::string&)> IsPlayingFunc;
@@ -590,6 +591,10 @@ public:
 };
 AudioAPI::AudioAPI() : implAudioAPI(new AudioAPI::ImplAudioAPI) {}
 AudioAPI::~AudioAPI() { delete implAudioAPI; }
+void AudioAPI::AddSource(const std::string& name)
+{
+	if(implAudioAPI->SetSourceFunc) { implAudioAPI->SetSourceFunc(name); }
+}
 void AudioAPI::Play(const std::string& name, const bool& isLoop)
 {
 	if (implAudioAPI->PlayFunc) { implAudioAPI->PlayFunc(name,isLoop); }
@@ -632,6 +637,25 @@ void AudioAPI::Initialize(const Entity& entity, ECSManager* ecs, ObjectContainer
 	data = audio;
 	if (audio)
 	{
+		implAudioAPI->SetSourceFunc = [this](const std::string& name) {
+			if (auto* a = m_ECS->GetComponent<AudioComponent>(m_Entity))
+			{
+				for (SoundData& soundData : data->soundData)
+				{
+					if (soundData.name == name && !soundData.isPlaying)
+					{
+						return;
+					}
+				}
+				// もし指定された名前のサウンドが見つからなかった場合
+				SoundData newSoundData = m_ResourceManager->GetAudioManager()->CreateSoundData(name);
+				if (!newSoundData.name.empty())
+				{
+					data->soundData.push_back(std::move(newSoundData));
+				}
+				return;
+			}
+			};
 		implAudioAPI->PlayFunc = [this](const std::string& name, const bool& isLoop) {
 			if (auto* a = m_ECS->GetComponent<AudioComponent>(m_Entity))
 			{
