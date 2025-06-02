@@ -520,7 +520,7 @@ void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& ga
 			// カメラバッファをセット
 			context->SetGraphicsRootConstantBufferView(0, cameraBuffer->GetResource()->GetGPUVirtualAddress());
 			// DrawCall
-			context->DrawInstanced(static_cast<UINT>(resourceManager.GetIntegrationData(IntegrationDataType::Line)->GetActiveCount()) * 2, 1, 0, 0);
+			context->DrawInstanced(static_cast<UINT>((resourceManager.GetIntegrationData(IntegrationDataType::Line)->GetActiveCount())+100) * 2, 1, 0, 0);
 		}
 		// パーティクル
 		DrawParticles(context, resourceManager, gameCore, mode);
