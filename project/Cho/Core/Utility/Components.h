@@ -389,6 +389,7 @@ struct MaterialComponent : public IComponentTag
 		enableTexture = other.enableTexture;
 		shininess = other.shininess;
 		textureName = other.textureName;
+		uvFlipY = other.uvFlipY;
 		return *this;
 	}
 
