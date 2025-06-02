@@ -60,6 +60,7 @@ public:
 	std::wstring GetCurrentSceneName() const noexcept;
 	void SetCurrentSceneName(const std::wstring& name) noexcept;
 	void SetTag(std::string_view tag) noexcept;// この関数はEditorに移す予定
+	void SetType(const ObjectType& type) noexcept { m_Type = type; }
 	// オブジェクトが有効かどうか
 	bool IsActive() const noexcept { return m_Active; }
 	// オブジェクトを有効にする

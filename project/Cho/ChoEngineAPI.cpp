@@ -59,13 +59,18 @@ CHO_API GameObject& ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vecto
 	// nameを変更
 	std::unique_ptr<RenameObjectCommand> renameCommand = std::make_unique<RenameObjectCommand>(newObject.GetID().value(), object.GetName());
 	renameCommand->Execute(engineCommand);
+	// Typeのコピー
+	newObject.SetType(object.GetType());
 	// Tagのコピー
 	newObject.SetTag(object.GetTag());
 	// CurrendSceneのコピー
 	newObject.SetCurrentSceneName(object.GetCurrentSceneName());
 	// Componentを取得
 	TransformComponent* transform = engineCommand->GetGameCore()->GetECSManager()->GetComponent<TransformComponent>(newObject.GetEntity());
-
+	if (newObject.GetType() == ObjectType::ParticleSystem)
+	{
+		transform->scale.Zero();
+	}
 
 	MeshFilterComponent* meshFilter = engineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshFilterComponent>(object.GetEntity());
 	MeshRendererComponent* meshRenderer = engineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshRendererComponent>(object.GetEntity());
@@ -74,6 +79,8 @@ CHO_API GameObject& ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vecto
 	Rigidbody2DComponent* rb = engineCommand->GetGameCore()->GetECSManager()->GetComponent<Rigidbody2DComponent>(object.GetEntity());
 	BoxCollider2DComponent* box = engineCommand->GetGameCore()->GetECSManager()->GetComponent<BoxCollider2DComponent>(object.GetEntity());
 	MaterialComponent* material = engineCommand->GetGameCore()->GetECSManager()->GetComponent<MaterialComponent>(object.GetEntity());
+	EmitterComponent* emitter = engineCommand->GetGameCore()->GetECSManager()->GetComponent<EmitterComponent>(object.GetEntity());
+	ParticleComponent* particle = engineCommand->GetGameCore()->GetECSManager()->GetComponent<ParticleComponent>(object.GetEntity());
 	AudioComponent* audio = engineCommand->GetGameCore()->GetECSManager()->GetComponent<AudioComponent>(object.GetEntity());
 	AnimationComponent* animation = engineCommand->GetGameCore()->GetECSManager()->GetComponent<AnimationComponent>(object.GetEntity());
 	// あるやつをnewObjectに追加
@@ -145,6 +152,32 @@ CHO_API GameObject& ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vecto
 			newBox->friction = box->friction;
 			newBox->restitution = box->restitution;
 			newBox->isSensor = box->isSensor;
+		}
+	}
+	if (emitter)
+	{
+		std::unique_ptr<AddEmitterComponent> addEmitterCommand = std::make_unique<AddEmitterComponent>(newObject.GetEntity());
+		addEmitterCommand->Execute(engineCommand);
+		EmitterComponent* newEmitter = engineCommand->GetGameCore()->GetECSManager()->GetComponent<EmitterComponent>(newObject.GetEntity());
+		if (newEmitter)
+		{
+			newEmitter->emitCount = emitter->emitCount;
+			newEmitter->isBillboard = emitter->isBillboard;
+			newEmitter->isFadeOut = emitter->isFadeOut;
+			newEmitter->lifeTime = emitter->lifeTime;
+			newEmitter->position = emitter->position;
+			newEmitter->rotation = emitter->rotation;
+			newEmitter->scale = emitter->scale;
+		}
+	}
+	if (particle)
+	{
+		std::unique_ptr<AddParticleComponent> addParticleCommand = std::make_unique<AddParticleComponent>(newObject.GetEntity());
+		addParticleCommand->Execute(engineCommand);
+		ParticleComponent* newParticle = engineCommand->GetGameCore()->GetECSManager()->GetComponent<ParticleComponent>(newObject.GetEntity());
+		if (newParticle)
+		{
+			newParticle->count = particle->count;
 		}
 	}
 	if (material)

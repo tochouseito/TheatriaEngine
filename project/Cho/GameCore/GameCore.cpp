@@ -87,8 +87,8 @@ void GameCore::GameRun()
 	m_MainSceneID = m_pSceneManager->GetMainScene()->GetSceneID();
 	// StartSystemの実行
 	m_pObjectContainer->InitializeAllGameObjects();
-	m_pSingleSystemManager->StartAll(m_pECSManager.get());
-	m_pMultiSystemManager->StartAll(m_pECSManager.get());
+	//m_pSingleSystemManager->StartAll(m_pECSManager.get());
+	//m_pMultiSystemManager->StartAll(m_pECSManager.get());
 }
 
 void GameCore::GameStop()
@@ -146,6 +146,12 @@ void GameCore::InitializeGenerateObject()
 			// BoxCollider2DComponentの初期化
 			boxInitOnceSystem->CreateFixture(*transform, *rb, *box);
 		}
+		ParticleComponent* particle = m_pECSManager->GetComponent<ParticleComponent>(entity);
+		if (particle)
+		{
+			// ParticleComponentの初期化
+			particleInitializeOnceSystem->InitializeParticle(*particle);
+		}
 		// 初期化済みのIDを追加
 		m_GameInitializedID.push_back(id);
 	}
@@ -186,6 +192,12 @@ void GameCore::InitializeGenerateObject()
 			{
 				// BoxCollider2DComponentの初期化
 				boxInitOnceSystem->CreateFixture(*transform, *rb, *box);
+			}
+			ParticleComponent* particle = m_pECSManager->GetComponent<ParticleComponent>(entity);
+			if (particle)
+			{
+				// ParticleComponentの初期化
+				particleInitializeOnceSystem->InitializeParticle(*particle);
 			}
 		}
 	}
@@ -361,6 +373,7 @@ void GameCore::CreateSystems(InputManager* input, ResourceManager* resourceManag
 	scriptInitializeOnceSystem = std::make_unique<ScriptInitializeSystem>(m_pObjectContainer.get(), input, m_pECSManager.get(), resourceManager);
 	physicsOnceSystem = std::make_unique<Rigidbody2DInitSystem>(m_pECSManager.get(), m_pPhysicsWorld.get());
 	boxInitOnceSystem = std::make_unique<BoxCollider2DInitSystem>(m_pECSManager.get(), m_pPhysicsWorld.get());
+	particleInitializeOnceSystem = std::make_unique<ParticleInitializeSystem>(m_pECSManager.get(), resourceManager, graphicsEngine);
 
 	tfFinalizeOnceSystem = std::make_unique<TransformFinalizeSystem>(m_pECSManager.get());
 	scriptFinalizeOnceSystem = std::make_unique<ScriptFinalizeSystem>(m_pECSManager.get());
