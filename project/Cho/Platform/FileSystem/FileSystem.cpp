@@ -855,24 +855,29 @@ bool Cho::FileSystem::LoadScriptFile(const std::wstring& filePath, EngineCommand
 
         std::vector<std::string> availableScriptFiles = ScriptProject::GetScriptFiles();
 
-        if (j.contains("scripts"))
+        for (const std::string& scriptName : availableScriptFiles)
         {
-            for (const auto& scriptNameJson : j["scripts"])
-            {
-                std::string scriptName = scriptNameJson.get<std::string>();
-
-                // スクリプトファイル群の中に存在しているかをチェック
-                auto found = std::find_if(availableScriptFiles.begin(), availableScriptFiles.end(),
-                    [&](const std::string& file) {
-                        return std::filesystem::path(file).stem().string() == scriptName;
-                    });
-
-                if (found != availableScriptFiles.end())
-                {
-                    scriptContainer->AddScriptData(scriptName);
-                }
-            }
+			scriptContainer->AddScriptData(scriptName);
         }
+
+        //if (j.contains("scripts"))
+        //{
+        //    for (const auto& scriptNameJson : j["scripts"])
+        //    {
+        //        std::string scriptName = scriptNameJson.get<std::string>();
+
+        //        // スクリプトファイル群の中に存在しているかをチェック
+        //        auto found = std::find_if(availableScriptFiles.begin(), availableScriptFiles.end(),
+        //            [&](const std::string& file) {
+        //                return std::filesystem::path(file).stem().string() == scriptName;
+        //            });
+
+        //        if (found != availableScriptFiles.end())
+        //        {
+        //            scriptContainer->AddScriptData(scriptName);
+        //        }
+        //    }
+        //}
 
         return true;
     }
