@@ -2313,7 +2313,7 @@ void Cho::FileSystem::GameBuilder::CopyFilesToBuildFolder(EngineCommand* engineC
     { buildRoot / L"ChoEngine_GameRuntime.lib",    buildRoot / L"ChoEngine.lib" },
     { buildRoot / L"dxcompiler_GameRuntime.dll",   buildRoot / L"dxcompiler.dll" },
     { buildRoot / L"dxil_GameRuntime.dll",         buildRoot / L"dxil.dll" },
-    { buildRoot / L"GameTemplate.exe",             buildRoot / L"RefLaser.exe" }, // 任意の最終ファイル名
+    { buildRoot / L"GameTemplate.exe",             buildRoot / L"3103_reflaser.exe" }, // 任意の最終ファイル名
     };
 
     for (const auto& [from, to] : renameList)
