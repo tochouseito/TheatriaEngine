@@ -99,7 +99,7 @@ public:
 	// エディタの選択中オブジェクトを取得
 	GameObject* GetSelectedObject();
 	// エディタの選択中オブジェクトをセット
-	void SetSelectedObject(const std::wstring& name) { m_SelectedObjectName = name; }
+	void SetSelectedObject(const std::optional<std::wstring>& name);
 	// レンダリングテクスチャのハンドルを取得
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGameTextureHandle();
 	D3D12_GPU_DESCRIPTOR_HANDLE GetSceneTextureHandle();

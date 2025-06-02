@@ -202,9 +202,6 @@ CHO_API GameObject& ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vecto
 			}
 		}
 	}
-	
-	// TransformComponentを取得
-	TransformComponent* transform = engineCommand->GetGameCore()->GetECSManager()->GetComponent<TransformComponent>(newObject.GetEntity());
 	// 初期位置を設定
 	if (transform)
 	{

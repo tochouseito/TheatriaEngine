@@ -444,7 +444,7 @@ void MainMenu::SettingWindow()
                 {
                     //m_EngineCommand->GetGameCore()->GetSceneManager()->ChangeSceneRequest(scene->GetSceneID());
                     m_EngineCommand->GetGameCore()->GetSceneManager()->ChangeMainScene(scene->GetSceneName());
-					m_EngineCommand->SetSelectedObject(nullptr);
+					m_EngineCommand->SetSelectedObject(std::nullopt);
                 }
             }
 		}
