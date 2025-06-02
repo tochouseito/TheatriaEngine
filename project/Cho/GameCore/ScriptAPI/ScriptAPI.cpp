@@ -127,6 +127,11 @@ void Rigidbody2DAPI::Initialize(const Entity& entity, ECSManager* ecs, ObjectCon
 			if (auto* t = m_ECS->GetComponent<Rigidbody2DComponent>(m_Entity))
 			{
 				RayCastCallback callback(m_ObjectContainer, hitTag);
+				if(start == end)
+				{
+					// start と end が同じ場合は何もしない
+					return m_ObjectContainer->GetDummyGameObject();
+				}
 				t->world->RayCast(&callback, b2Vec2(start.x, start.y), b2Vec2(end.x, end.y));
 				if (callback.hit)
 				{
