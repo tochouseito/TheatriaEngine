@@ -25,6 +25,19 @@ GameObject* EngineCommand::GetSelectedObject()
 	return &m_GameCore->GetObjectContainer()->GetGameObjectByName(m_SelectedObjectName.value());
 }
 
+// エディタの選択中オブジェクトをセット
+void EngineCommand::SetSelectedObject(const std::optional<std::wstring>& name)
+{
+	if (name.has_value() && name.value().empty())
+	{
+		m_SelectedObjectName = std::nullopt;
+	}
+	else
+	{
+		m_SelectedObjectName = name;
+	}
+}
+
 D3D12_GPU_DESCRIPTOR_HANDLE EngineCommand::GetGameTextureHandle()
 {
 	// ゲームレンダリングテクスチャのバッファインデックスを取得

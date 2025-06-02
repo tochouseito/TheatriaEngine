@@ -210,8 +210,39 @@ void GameCore::UpdateEnvironmentSetting()
 	envBuffer->UpdateData(m_EnvironmentData);
 }
 
+void GameCore::SceneInitialize(ScenePrefab* scene)
+{
+	for (ObjectID& id : scene->GetUseObjects())
+	{
+		GameObject& object = m_pObjectContainer->GetGameObject(id);
+		if (!object.IsActive()) { continue; }
+		// オブジェクトの初期化
+		Entity entity = object.GetEntity();
+		// TransformComponentを取得
+		TransformComponent* transform = m_pECSManager->GetComponent<TransformComponent>(entity);
+		if (!transform) { continue; }
+		// TransformComponentの初期化
+		tfFinalizeOnceSystem->Finalize(entity, *transform);
+		// スクリプトの取得
+		ScriptComponent* script = m_pECSManager->GetComponent<ScriptComponent>(entity);
+		if (script)
+		{
+			// スクリプトの初期化
+			scriptFinalizeOnceSystem->FinalizeScript(*script);
+		}
+		// Rigidbody2DComponentの取得
+		Rigidbody2DComponent* rb = m_pECSManager->GetComponent<Rigidbody2DComponent>(entity);
+		if (rb)
+		{
+			// Rigidbody2DComponentの初期化
+			physicsResetOnceSystem->Reset(*transform, *rb);
+		}
+	}
+}
+
 void GameCore::SceneFinelize(ScenePrefab* scene)
 {
+	if (!isRunning) { return; }
 	for (ObjectID& id : scene->GetUseObjects())
 	{
 		GameObject& object = m_pObjectContainer->GetGameObject(id);

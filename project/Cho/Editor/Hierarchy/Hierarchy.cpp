@@ -169,7 +169,7 @@ void Hierarchy::Window()
 			std::unique_ptr<DeleteObjectCommand> deleteCommand = std::make_unique<DeleteObjectCommand>(m_EngineCommand->GetSelectedObject()->GetID().value());
 			m_EngineCommand->ExecuteCommand(std::move(deleteCommand));
 			// 選択中オブジェクトをクリア
-			m_EngineCommand->SetSelectedObject(nullptr);
+			m_EngineCommand->SetSelectedObject(std::nullopt);
 			// ポップアップメニューを閉じる
 			ImGui::CloseCurrentPopup();
 		}

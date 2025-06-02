@@ -49,6 +49,7 @@ public:
 
 	// 
 	void AddGameLoadSceneID(const SceneID& id) { m_GameLoadSceneID.push_back(id); }
+	void SceneInitialize(ScenePrefab* scene);
 	void SceneFinelize(ScenePrefab* scene);
 private:
 	void CreateSystems(InputManager* input, ResourceManager* resourceManager,GraphicsEngine* graphicsEngine);
