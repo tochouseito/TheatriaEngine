@@ -72,6 +72,7 @@ public:
 			result.bufferSize = existingData.bufferSize;
 			result.isPlaying = false;
 			result.pSourceVoice = nullptr;
+			m_XAudio2->CreateSourceVoice(&result.pSourceVoice, &result.wfex);
 		}
 		else
 		{
