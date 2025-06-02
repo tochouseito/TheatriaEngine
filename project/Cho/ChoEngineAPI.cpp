@@ -64,7 +64,9 @@ CHO_API GameObject& ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vecto
 	// CurrendSceneのコピー
 	newObject.SetCurrentSceneName(object.GetCurrentSceneName());
 	// Componentを取得
-	TransformComponent* transform = engineCommand->GetGameCore()->GetECSManager()->GetComponent<TransformComponent>(object.GetEntity());
+	TransformComponent* transform = engineCommand->GetGameCore()->GetECSManager()->GetComponent<TransformComponent>(newObject.GetEntity());
+
+
 	MeshFilterComponent* meshFilter = engineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshFilterComponent>(object.GetEntity());
 	MeshRendererComponent* meshRenderer = engineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshRendererComponent>(object.GetEntity());
 	ScriptComponent* script = engineCommand->GetGameCore()->GetECSManager()->GetComponent<ScriptComponent>(object.GetEntity());
@@ -84,7 +86,6 @@ CHO_API GameObject& ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vecto
 		if (newMeshFilter)
 		{
 			newMeshFilter->modelID = g_Engine->GetEngineCommand()->GetResourceManager()->GetModelManager()->GetModelDataIndex(meshFilter->modelName);
-			g_Engine->GetEngineCommand()->GetResourceManager()->GetModelManager()->RemoveModelUseList(newMeshFilter->modelName, transform->mapID.value());
 			newMeshFilter->modelName = meshFilter->modelName;
 			g_Engine->GetEngineCommand()->GetResourceManager()->GetModelManager()->RegisterModelUseList(meshFilter->modelID.value(), transform->mapID.value());
 		}
