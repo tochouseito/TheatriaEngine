@@ -73,8 +73,29 @@ struct ModelData
 	// ボーン行列統合バッファインデックス
 	std::optional<uint32_t> boneMatrixBufferIndex = std::nullopt;
 	uint32_t nextBoneOffsetIndex = 0; // 次のボーンオフセットインデックス
+	std::vector<uint32_t> removedBoneOffsetIndices; // 削除されたボーンオフセットインデックスのリスト
 	std::optional<uint32_t> influenceBufferIndex = std::nullopt; // スキニング情報のバッファインデックス
 	std::optional<uint32_t> skinInfoBufferIndex = std::nullopt;	// スキニング情報バッファーインデックス
+
+	uint32_t AllocateBoneOffsetIdx()
+	{
+		if (removedBoneOffsetIndices.empty())
+		{
+			uint32_t result = nextBoneOffsetIndex;
+			nextBoneOffsetIndex++;
+			return result;
+		}
+		else
+		{
+			uint32_t idx = removedBoneOffsetIndices.back();
+			removedBoneOffsetIndices.pop_back();
+			return idx;
+		}
+	}
+	void RemoveBoneOffsetIdx(const uint32_t& idx)
+	{
+		removedBoneOffsetIndices.push_back(idx);
+	}
 };
 
 class ResourceManager;

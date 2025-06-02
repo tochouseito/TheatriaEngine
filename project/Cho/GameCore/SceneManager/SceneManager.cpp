@@ -147,8 +147,7 @@ void ScenePrefab::Start()
 			{
 				animation->skeleton = modelData->skeleton;
 				animation->skinCluster = modelData->skinCluster;
-				animation->boneOffsetID = modelData->nextBoneOffsetIndex;
-				modelData->nextBoneOffsetIndex++;
+				animation->boneOffsetID = modelData->AllocateBoneOffsetIdx();
 			}
 		}
 	}
