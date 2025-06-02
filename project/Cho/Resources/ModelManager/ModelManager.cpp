@@ -324,6 +324,22 @@ void ModelManager::RegisterModelUseList(const std::variant<uint32_t, std::wstrin
 				if (index == transformMapID)
 				{
 					model.useTransformList.remove(index);
+					// UseListのバッファ更新
+					StructuredBuffer<uint32_t>* buffer = dynamic_cast<StructuredBuffer<uint32_t>*>(m_pResourceManager->GetBuffer<IStructuredBuffer>(model.useTransformBufferIndex));
+					if (buffer)
+					{
+						// UseListの全てをバッファに転送
+						uint32_t i = 0;
+						for (uint32_t& useIndex : model.useTransformList)
+						{
+							buffer->UpdateData(useIndex, i);
+							i++;
+						}
+					}
+					else
+					{
+						Log::Write(LogLevel::Assert, "Buffer is nullptr");
+					}
 					break;
 				}
 			}
@@ -396,6 +412,8 @@ void ModelManager::RemoveModelUseList(const std::variant<uint32_t, std::wstring>
 	}
 	// どのモデルのUseListにない場合は終わり
 	// UseListのバッファ更新
+
+
 	StructuredBuffer<uint32_t>* buffer = dynamic_cast<StructuredBuffer<uint32_t>*>(m_pResourceManager->GetBuffer<IStructuredBuffer>(m_Models[keyIndex].useTransformBufferIndex));
 	if (buffer)
 	{
