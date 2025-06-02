@@ -2259,6 +2259,7 @@ void Cho::FileSystem::GameBuilder::CopyFilesToBuildFolder(EngineCommand* engineC
             fs::path(L"GameProjects") / m_sProjectName / fs::path(L"bin"),
             //fs::path(L"GameProjects") / m_sProjectName / fs::path(L"MainScene.json"),
             fs::path(L"GameProjects") / m_sProjectName / fs::path(L"ScriptData.json"),
+            fs::path(L"GameProjects") / m_sProjectName / fs::path(L"GameSettings.json"),
             L"Cho/Engine",
             L"Cho/Resources/EngineAssets",
             L"Cho/Externals/ChoMath",
