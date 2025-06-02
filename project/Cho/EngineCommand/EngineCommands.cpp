@@ -972,7 +972,7 @@ bool CloneObjectCommand::Execute(EngineCommand* edit)
 	// Entity
 	Entity entity = edit->m_GameCore->GetECSManager()->GenerateEntity();
 	// デフォルトの名前
-	std::wstring name = L"NewMeshObject";
+	std::wstring name = L"NewObject";
 	// 重複回避
 	name = GenerateUniqueName(name, edit->m_GameCore->GetObjectContainer()->GetNameToObjectID());
 	// Transform統合バッファからmapIDを取得

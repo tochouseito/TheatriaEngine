@@ -93,6 +93,7 @@ private:
 	std::unique_ptr<TransformFinalizeSystem> tfFinalizeOnceSystem;
 	std::unique_ptr<ScriptFinalizeSystem> scriptFinalizeOnceSystem;
 	std::unique_ptr<Rigidbody2DResetSystem> physicsResetOnceSystem;
+	std::unique_ptr<ParticleInitializeSystem> particleInitializeOnceSystem;
 
 	// 最初のメインシーン保存用
 	SceneID m_MainSceneID = 0;

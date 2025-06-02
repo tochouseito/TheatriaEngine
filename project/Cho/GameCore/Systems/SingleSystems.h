@@ -514,6 +514,7 @@ private:
 // パーティクル初期化システム
 class ParticleInitializeSystem : public ECSManager::System<ParticleComponent>
 {
+	friend class GameCore;
 public:
 	ParticleInitializeSystem(ECSManager* ecs, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine)
 		: ECSManager::System<ParticleComponent>([this](Entity e, ParticleComponent& particle)
