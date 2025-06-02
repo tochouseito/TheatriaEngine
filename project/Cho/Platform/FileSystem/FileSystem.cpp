@@ -800,92 +800,87 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
     }
 }
 
-bool Cho::FileSystem::SaveScriptFile(const std::wstring& directory, ResourceManager* resourceManager)
-{
-    ScriptContainer* scriptContainer = resourceManager->GetScriptContainer();
-    if (!scriptContainer) return false;
-
-    nlohmann::ordered_json j;
-    j["fileType"] = "ScriptFile";
-
-    std::vector<std::string> scriptList;
-    for (size_t i = 0; i < scriptContainer->GetScriptCount(); ++i)
-    {
-        std::optional<std::string> data = scriptContainer->GetScriptDataByID(static_cast<uint32_t>(i));
-        if (data)
-        {
-            scriptList.push_back(data.value());
-        }
-    }
-    j["scripts"] = scriptList;
-
-    std::filesystem::path path = std::filesystem::path(directory) / "ScriptData.json";
-    try
-    {
-        std::ofstream file(path);
-        if (!file.is_open()) return false;
-        file << j.dump(4);
-        file.close();
-        return true;
-    }
-    catch (...)
-    {
-        return false;
-    }
-}
-
-bool Cho::FileSystem::LoadScriptFile(const std::wstring& filePath, EngineCommand* engineCommand)
-{
-    if (!engineCommand) { Log::Write(LogLevel::Assert, "EngineCommand is nullptr"); }
-	ScriptContainer* scriptContainer = engineCommand->GetResourceManager()->GetScriptContainer();
-    if (!scriptContainer) { return false; }
-
-    try
-    {
-        std::ifstream file(filePath);
-        if (!file.is_open()) { return false; }
-
-        nlohmann::json j;
-        file >> j;
-
-        if (j.contains("fileType") && j["fileType"] != "ScriptFile")
-        {
-            return false;
-        }
-
-        std::vector<std::string> availableScriptFiles = ScriptProject::GetScriptFiles();
-
-        for (const std::string& scriptName : availableScriptFiles)
-        {
-			scriptContainer->AddScriptData(scriptName);
-        }
-
-        //if (j.contains("scripts"))
-        //{
-        //    for (const auto& scriptNameJson : j["scripts"])
-        //    {
-        //        std::string scriptName = scriptNameJson.get<std::string>();
-
-        //        // スクリプトファイル群の中に存在しているかをチェック
-        //        auto found = std::find_if(availableScriptFiles.begin(), availableScriptFiles.end(),
-        //            [&](const std::string& file) {
-        //                return std::filesystem::path(file).stem().string() == scriptName;
-        //            });
-
-        //        if (found != availableScriptFiles.end())
-        //        {
-        //            scriptContainer->AddScriptData(scriptName);
-        //        }
-        //    }
-        //}
-
-        return true;
-    }
-    catch (...)
-    {
-        return false;
-    }
-}
+//bool Cho::FileSystem::SaveScriptFile(const std::wstring& directory, ResourceManager* resourceManager)
+//{
+//    ScriptContainer* scriptContainer = resourceManager->GetScriptContainer();
+//    if (!scriptContainer) return false;
+//
+//    nlohmann::ordered_json j;
+//    j["fileType"] = "ScriptFile";
+//
+//    std::vector<std::string> scriptList;
+//    for (size_t i = 0; i < scriptContainer->GetScriptCount(); ++i)
+//    {
+//        std::optional<std::string> data = scriptContainer->GetScriptDataByID(static_cast<uint32_t>(i));
+//        if (data)
+//        {
+//            scriptList.push_back(data.value());
+//        }
+//    }
+//    j["scripts"] = scriptList;
+//
+//    std::filesystem::path path = std::filesystem::path(directory) / "ScriptData.json";
+//    try
+//    {
+//        std::ofstream file(path);
+//        if (!file.is_open()) return false;
+//        file << j.dump(4);
+//        file.close();
+//        return true;
+//    }
+//    catch (...)
+//    {
+//        return false;
+//    }
+//}
+//
+//bool Cho::FileSystem::LoadScriptFile(const std::wstring& filePath, EngineCommand* engineCommand)
+//{
+//    if (!engineCommand) { Log::Write(LogLevel::Assert, "EngineCommand is nullptr"); }
+//	ScriptContainer* scriptContainer = engineCommand->GetResourceManager()->GetScriptContainer();
+//    if (!scriptContainer) { return false; }
+//
+//    try
+//    {
+//        std::ifstream file(filePath);
+//        if (!file.is_open()) { return false; }
+//
+//        nlohmann::json j;
+//        file >> j;
+//
+//        if (j.contains("fileType") && j["fileType"] != "ScriptFile")
+//        {
+//            return false;
+//        }
+//
+//        std::vector<std::string> availableScriptFiles = ScriptProject::GetScriptFiles();
+//
+//        if (j.contains("scripts"))
+//        {
+//            for (const auto& scriptNameJson : j["scripts"])
+//            {
+//                std::string scriptName = scriptNameJson.get<std::string>();
+//
+//                // スクリプトファイル群の中に存在しているかをチェック
+//                auto found = std::find_if(availableScriptFiles.begin(), availableScriptFiles.end(),
+//                    [&](const std::string& file) {
+//                        return std::filesystem::path(file).stem().string() == scriptName;
+//                    });
+//
+//                if (found != availableScriptFiles.end())
+//                {
+//                    scriptContainer->AddScriptData(scriptName);
+//                }
+//            }
+//        }
+//
+//        return true;
+//    }
+//    catch (...)
+//    {
+//        return false;
+//    }
+//}
 
 bool Cho::FileSystem::SaveGameParameter(const std::wstring& filePath, const std::string& group, const std::string& item, const std::string& dataName, const GameParameterVariant& value)
 {
@@ -1233,6 +1228,7 @@ FileType Cho::FileSystem::GetJsonFileType(const std::filesystem::path& path)
 
 void Cho::FileSystem::SaveProject(SceneManager* sceneManager, ObjectContainer* container, ECSManager* ecs, ResourceManager* resourceManager)
 {
+    resourceManager;
     if (m_sProjectName.empty()) { return; }
     // セーブ
 	std::filesystem::path projectPath = std::filesystem::path(L"GameProjects") / m_sProjectName;
@@ -1251,10 +1247,10 @@ void Cho::FileSystem::SaveProject(SceneManager* sceneManager, ObjectContainer* c
         );
     }
     // ScriptDataFile
-	Cho::FileSystem::SaveScriptFile(
+	/*Cho::FileSystem::SaveScriptFile(
         projectPath,
 		resourceManager
-	);
+	);*/
 }
 
 // プロジェクトフォルダを読み込む
@@ -2052,6 +2048,7 @@ FolderNode* Cho::FileSystem::FindFolderNodeByPath(FolderNode& node, const std::f
 bool Cho::FileSystem::ProcessFile(const path& filePath, EngineCommand* engineCommand)
 {
 	std::wstring wFileName = filePath.filename().wstring();
+	std::wstring scriptName = wFileName.substr(0, wFileName.find_last_of('.')); // 拡張子を除いたファイル名
 
     // テクスチャファイル
     if (wFileName.ends_with(L".dds")|| wFileName.ends_with(L".png") || wFileName.ends_with(L".jpg"))
@@ -2076,6 +2073,7 @@ bool Cho::FileSystem::ProcessFile(const path& filePath, EngineCommand* engineCom
 	if (wFileName.ends_with(L".cpp") || wFileName.ends_with(L".h"))
 	{
 		// スクリプトの処理
+        engineCommand->GetResourceManager()->GetScriptContainer()->AddScriptData(ConvertString(scriptName));
         return false;
 	}
 	// jsonファイル
@@ -2110,7 +2108,7 @@ bool Cho::FileSystem::ProcessFile(const path& filePath, EngineCommand* engineCom
             break;
 		case Cho::ScriptFile:// スクリプトファイル
         {
-			return LoadScriptFile(filePath, engineCommand);
+			//return LoadScriptFile(filePath, engineCommand);
         }
             break;
         case Cho::GameParameter:

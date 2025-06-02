@@ -145,9 +145,9 @@ namespace Cho
 		// シーンファイルを読み込む
         static bool LoadSceneFile(const std::wstring& filePath,EngineCommand* engineCommand);
         // スクリプトのファイルを保存
-		static bool SaveScriptFile(const std::wstring& directory,ResourceManager* resourceManager);
+		//static bool SaveScriptFile(const std::wstring& directory,ResourceManager* resourceManager);
 		// スクリプトのファイルを読み込む
-		static bool LoadScriptFile(const std::wstring& filePath, EngineCommand* engineCommand);
+		//static bool LoadScriptFile(const std::wstring& filePath, EngineCommand* engineCommand);
 		// ゲームパラメーターファイルを保存
         static bool SaveGameParameter(const std::wstring& filePath,
             const std::string& group,
