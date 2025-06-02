@@ -12,7 +12,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma warning(pop)
 	// エンジンのインスタンス
 	std::unique_ptr<Engine, decltype(&Cho::DestroyEngine)> engine(
-		Cho::CreateEngine(RuntimeMode::Game), Cho::DestroyEngine);// エンジンの生成
+		Cho::CreateEngine(RuntimeMode::Editor), Cho::DestroyEngine);// エンジンの生成
 	Cho::SetEngine(engine.get());// エンジンのポインタをセット
 	// エンジンの稼働
 	engine->CrashHandlerEntry();// クラッシュ時の処理のハンドラー
