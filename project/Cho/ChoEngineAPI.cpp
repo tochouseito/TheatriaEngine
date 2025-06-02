@@ -198,8 +198,7 @@ CHO_API GameObject& ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vecto
 			{
 				newAnimation->skeleton = model->skeleton;
 				newAnimation->skinCluster = model->skinCluster;
-				newAnimation->boneOffsetID = model->nextBoneOffsetIndex;
-				model->nextBoneOffsetIndex++;
+				newAnimation->boneOffsetID = model->AllocateBoneOffsetIdx();
 			}
 		}
 	}

@@ -282,7 +282,8 @@ bool DeleteObjectCommand::Execute(EngineCommand* edit)
 	AnimationComponent* animation = edit->m_GameCore->GetECSManager()->GetComponent<AnimationComponent>(object.GetEntity());
 	if (animation)
 	{
-		
+		ModelData* model = edit->m_ResourceManager->GetModelManager()->GetModelData(animation->modelName);
+		model->RemoveBoneOffsetIdx(animation->boneOffsetID.value());
 	}
 	// 削除前にComponentを記録する
 	m_Transform = *transform;
@@ -668,18 +669,8 @@ bool AddAnimationComponent::Execute(EngineCommand* edit)
 	{
 		animation->skeleton = model->skeleton;
 		animation->skinCluster = model->skinCluster;
-		// Resourceの生成
-		//animation->paletteBufferIndex = edit->m_ResourceManager->CreateStructuredBuffer<ConstBufferDataWell>(static_cast<UINT>(animation->skeleton->joints.size()));
-		//StructuredBuffer<ConstBufferDataWell>* paletteBuffer = dynamic_cast<StructuredBuffer<ConstBufferDataWell>*>(edit->m_ResourceManager->GetBuffer<IStructuredBuffer>(animation->paletteBufferIndex));
-		/*animation->influenceBufferIndex = edit->m_ResourceManager->CreateStructuredBuffer<ConstBufferDataVertexInfluence>(static_cast<UINT>(model->meshes[0].vertices.size()));
-		StructuredBuffer<ConstBufferDataVertexInfluence>* influenceBuffer = dynamic_cast<StructuredBuffer<ConstBufferDataVertexInfluence>*>(edit->m_ResourceManager->GetBuffer<IStructuredBuffer>(animation->influenceBufferIndex));
-		std::span<ConstBufferDataVertexInfluence> influenceSpan = influenceBuffer->GetMappedData();
-		std::memset(influenceSpan.data(), 0, sizeof(ConstBufferDataVertexInfluence) * influenceSpan.size());*/
-		// OutputVertexBufferを生成
-		//animation->skinningBufferIndex = edit->m_ResourceManager->CreateVertexBuffer<VertexData>(static_cast<UINT>(model->meshes[0].vertices.size()),true);
 		animation->modelName = model->name;
-		animation->boneOffsetID = model->nextBoneOffsetIndex;
-		model->nextBoneOffsetIndex++;
+		animation->boneOffsetID = model->AllocateBoneOffsetIdx();
 	}
 	
 	return true;
@@ -835,8 +826,7 @@ bool CopyGameObjectCommand::Execute(EngineCommand* edit)
 			ModelData* model = edit->m_ResourceManager->GetModelManager()->GetModelData(animation->modelName);
 			if (model)
 			{
-				animation->boneOffsetID = model->nextBoneOffsetIndex;
-				model->nextBoneOffsetIndex++;
+				animation->boneOffsetID = model->AllocateBoneOffsetIdx();
 				if (model->isBone)
 				{
 					animation->skeleton = model->skeleton;
