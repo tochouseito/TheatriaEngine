@@ -732,7 +732,7 @@ void GraphicsEngine::DrawParticles(CommandContext* context, ResourceManager& res
 		if (!gameCore.GetSceneManager()->GetMainScene()) { continue; }
 		IConstantBuffer* cameraBuffer = nullptr;
 		// メインカメラを取得
-		if (mode == RenderMode::Game)
+		if (mode == RenderMode::Game || mode == RenderMode::Release)
 		{
 			// カメラオブジェクトのIDを取得
 			std::optional<uint32_t> cameraID = gameCore.GetSceneManager()->GetMainScene()->GetMainCameraID();
@@ -799,7 +799,7 @@ void GraphicsEngine::EffectEditorDraw(CommandContext* context, ResourceManager& 
 	if (!gameCore.GetSceneManager()->GetMainScene()) { return; }
 	IConstantBuffer* cameraBuffer = nullptr;
 	// メインカメラを取得
-	if (mode == RenderMode::Game)
+	if (mode == RenderMode::Game || mode == RenderMode::Release)
 	{
 		// カメラオブジェクトのIDを取得
 		std::optional<uint32_t> cameraID = gameCore.GetSceneManager()->GetMainScene()->GetMainCameraID();
@@ -873,7 +873,7 @@ void GraphicsEngine::DrawUI(CommandContext* context, ResourceManager& resourceMa
 	if (!gameCore.GetSceneManager()->GetMainScene()) { return; }
 	IConstantBuffer* cameraBuffer = nullptr;
 	// メインカメラを取得
-	if (mode == RenderMode::Game)
+	if (mode == RenderMode::Game || mode == RenderMode::Release)
 	{
 		// カメラオブジェクトのIDを取得
 		std::optional<uint32_t> cameraID = gameCore.GetSceneManager()->GetMainScene()->GetMainCameraID();

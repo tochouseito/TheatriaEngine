@@ -14,6 +14,8 @@ public:
 	}
     // 負号演算子のオーバーロード
     Vector2 operator-() const { return { -x, -y }; }
+    // 等号演算子
+    bool operator==(const Vector2& other) const { return x == other.x && y == other.y; }
     // 加算
     inline Vector2 operator+(const Vector2& other) const {
         return { x + other.x, y + other.y };
