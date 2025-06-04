@@ -360,6 +360,14 @@ public:
 			m_EffectRootUseListBuffer->UpdateData(i, a);
 		}
 	}
+	std::wstring GetSkyboxTextureName() const
+	{
+		return m_SkyboxTextureName;
+	}
+	void SetSkyboxTextureName(const std::wstring& name)
+	{
+		m_SkyboxTextureName = name;
+	}
 private:
 	// Heap生成
 	void CreateHeap(ID3D12Device8* device);
@@ -429,6 +437,8 @@ private:
 	uint32_t m_NextEffectRootUseListIndex = 0;
 	// EffectRootUseListのリサイクル用
 	std::vector<uint32_t> m_EffectRootUseListRecycle;
+	// SkyboxTexture
+	std::wstring m_SkyboxTextureName = L"";
 
 	// static member
 	static const uint32_t kIntegrationTFBufferSize = 1024;// Transformの統合バッファのサイズ

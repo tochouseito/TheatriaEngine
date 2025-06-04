@@ -1,5 +1,6 @@
 #include "../header/ViewProjection.hlsli"
 #include "../header/Skybox.hlsli"
+#include "../header/Math.hlsli"
 
 struct VSInput
 {
@@ -9,15 +10,15 @@ struct VSInput
 
 // CBV : ViewProjection
 ConstantBuffer<ViewProjection> gVP : register(b0);
-// CBV : Transform
-ConstantBuffer<SkyboxTransform> gTransform : register(b1);
 
 VSOutput main(VSInput input)
 {
     VSOutput output;
     // worldViewProjection
     float4x4 WVP = mul(gVP.view, gVP.projection);
-    output.position = mul(input.position, mul(gTransform.worldMatrix, WVP)).xyww;
+    // TranslateMatrix
+    float4x4 translateMatrix = TranslateMatrix(gVP.cameraPosition);
+    output.position = mul(input.position, mul(translateMatrix, WVP)).xyww;
     output.texCoord = input.position.xyz;
     return output;
 }

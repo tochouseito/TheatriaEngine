@@ -1,11 +1,16 @@
 #include "../header/Skybox.hlsli"
 
+TextureCube<float4> gTextureCube : register(t0);
+SamplerState gSampler : register(s0);
 
+struct PSPOutput {
+    float4 color : SV_Target0;
+};
 
-PixelShaderOutput main(VertexShaderOutput input)
+PSPOutput main(VSOutput input)
 {
-    PixelShaderOutput output;
-    float32_t4 textureColor = gTexture.Sample(gSampler, input.texcoord);
-    output.colorPS = textureColor * colorMaterial;
+    PSPOutput output;
+    float4 textureColor = gTextureCube.Sample(gSampler, input.texCoord);
+    output.color = textureColor;
     return output;
 }

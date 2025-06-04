@@ -62,6 +62,8 @@ public:
 	PSO GetUIPSO() { return m_UIPSO; }
 	// SkinningCS
 	PSO GetSkinningPSO() { return m_Skinning; }
+	// Skybox
+	PSO GetSkyboxPSO() { return m_SkyboxPSO; }
 private:
 	std::vector<std::pair<uint32_t, std::string>> CreateRootParameters(
 		ID3D12ShaderReflection* pReflector,
@@ -100,6 +102,9 @@ private:
 	// SkinningCS
 	void CreatePipelineSkinningCS(ID3D12Device8* device);
 
+	// Skybox
+	void CreatePipelineSkybox(ID3D12Device8* device);
+
 	std::unique_ptr<DXShaderCompiler> m_pShaderCompiler = nullptr;
 	PSO m_DemoPSO;
 	PSO m_ScreenCopyPSO;
@@ -133,5 +138,8 @@ private:
 
 	// SkinningCS
 	PSO m_Skinning;
+
+	// Skybox
+	PSO m_SkyboxPSO;
 };
 

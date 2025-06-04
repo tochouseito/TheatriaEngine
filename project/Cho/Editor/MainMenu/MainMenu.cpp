@@ -8,6 +8,7 @@
 #include "GameCore/GameObject/GameObject.h"
 #include "Platform/FileSystem/FileSystem.h"
 #include "Platform/InputManager/InputManager.h"
+#include "Resources/ResourceManager/ResourceManager.h"
 
 void MainMenu::Initialize()
 {
@@ -449,6 +450,31 @@ void MainMenu::SettingWindow()
             }
 		}
 		ImGui::EndCombo();
+	}
+
+	// SkyboxTextureの選択
+	ImGui::Text("Skybox Texture");
+	std::wstring skyboxTextureName = L"テクスチャがありません";
+    if (!m_EngineCommand->GetResourceManager()->GetSkyboxTextureName().empty())
+    {
+		skyboxTextureName = m_EngineCommand->GetResourceManager()->GetSkyboxTextureName();
+    }
+    std::unordered_map<std::wstring, uint32_t>& textureMap = m_EngineCommand->GetResourceManager()->GetTextureManager()->GetTextureNameContainer();
+
+    if(ImGui::BeginCombo("##SkyboxTextureSelector", ConvertString(skyboxTextureName).c_str()))
+    {
+        for (const auto& texture : textureMap)
+        {
+            if (!m_EngineCommand->GetResourceManager()->GetTextureManager()->GetTextureData(texture.first)->metadata.IsCubemap())
+            {
+				continue; // キューブマップでないテクスチャはスキップ
+            }
+            if (ImGui::Selectable(ConvertString(texture.first).c_str()))
+            {
+                m_EngineCommand->GetResourceManager()->SetSkyboxTextureName(texture.first);
+            }
+        }
+        ImGui::EndCombo();
 	}
 
     ImGui::End();
