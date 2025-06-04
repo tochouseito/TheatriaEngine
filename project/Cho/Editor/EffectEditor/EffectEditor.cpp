@@ -422,7 +422,9 @@ void EffectEditor::ControlWindow()
 	{
 		effect->root.second.time.elapsedTime++;
 	}
-	ImGui::SliderFloat("Time", &effect->root.second.time.elapsedTime, 0.0f, effect->root.second.time.duration);
+	int time = static_cast<int>(effect->root.second.time.elapsedTime);
+	ImGui::SliderInt("Time", &time, 0.0f, effect->root.second.time.duration);
+	effect->root.second.time.elapsedTime = static_cast<float>(time);
 	ImGui::End();
 }
 

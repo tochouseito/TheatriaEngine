@@ -28,9 +28,9 @@ VSOutput main(VSInput input, uint instanceId : SV_InstanceID, uint vertexId : SV
     // cameraPosition
     float3 cameraPosition = gVP.cameraPosition;
     // scaleMatrix
-    float4x4 scaleMatrix = ScaleMatrix(particle.scale.value);
+    float4x4 scaleMatrix = ScaleMatrix(particle.wScl);
     // translateMatrix
-    float4x4 translateMatrix = TranslateMatrix(particle.position.value);
+    float4x4 translateMatrix = TranslateMatrix(particle.wPos);
     // rotationMatrix
     
     // billboardMatrix
@@ -41,17 +41,17 @@ VSOutput main(VSInput input, uint instanceId : SV_InstanceID, uint vertexId : SV
                 break;
             }
         case PLACEMENT_TYPE_BILLBOARDY:{
-                float3 radian = DegreesToRadians(particle.rotation.value);
-                billboardMatrix = FixedYAxisBillboardMatrix(radian, particle.position.value, gVP.cameraPosition);
+                float3 radian = DegreesToRadians(particle.wRot);
+                billboardMatrix = FixedYAxisBillboardMatrix(radian, particle.wPos, gVP.cameraPosition);
                 break;
             }
         case PLACEMENT_TYPE_BILLBOARDXY:{
-                float3 radian = DegreesToRadians(particle.rotation.value);
+                float3 radian = DegreesToRadians(particle.wRot);
                 //billboardMatrix = SphereBillboardMatrix(cameraMatrix, cameraPosition, particle.position.value);
                 break;
             }
         case PLACEMENT_TYPE_CONSTANT:{
-                float3 radian = DegreesToRadians(particle.rotation.value);
+                float3 radian = DegreesToRadians(particle.wRot);
                 billboardMatrix = RotateXYZ(radian);
                 break;
             }

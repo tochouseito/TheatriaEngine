@@ -319,6 +319,9 @@ struct EffectParticlePVA
 };
 struct EffectParticle
 {
+    Vector3 wPos;
+	Vector3 wRot;
+	Vector3 wScl;
 	EffectParticlePVA position;         // 位置
 	EffectParticlePVA rotation;         // 回転
 	EffectParticlePVA scale;            // スケール
