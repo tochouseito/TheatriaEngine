@@ -423,7 +423,7 @@ void EffectEditor::ControlWindow()
 		effect->root.second.time.elapsedTime++;
 	}
 	int time = static_cast<int>(effect->root.second.time.elapsedTime);
-	ImGui::SliderInt("Time", &time, 0.0f, effect->root.second.time.duration);
+	ImGui::SliderInt("Time", &time, 0, static_cast<int>(effect->root.second.time.duration));
 	effect->root.second.time.elapsedTime = static_cast<float>(time);
 	ImGui::End();
 }
@@ -458,17 +458,17 @@ bool EffectEditor::DragRandVector3(const char* label, RandVector3* v, float v_sp
     //--振幅--//
 	// X
 	ImGui::PushItemWidth(single_item_width);
-	bool ax_changed = ImGui::DragFloat("X##AX", &v->x.amplitude, v_speed, v_min, v_max, ":%.3f");
+	bool ax_changed = ImGui::DragFloat("X##AX", &v->x.amplitude, v_speed, 0.0f, v_max, ":%.3f");
 	ImGui::PopItemWidth();
 	ImGui::SameLine(); // 横並び
 	// Y
 	ImGui::PushItemWidth(single_item_width);
-	bool ay_changed = ImGui::DragFloat("Y##AY", &v->y.amplitude, v_speed, v_min, v_max, ":%.3f");
+	bool ay_changed = ImGui::DragFloat("Y##AY", &v->y.amplitude, v_speed, 0.0f, v_max, ":%.3f");
 	ImGui::PopItemWidth();
 	ImGui::SameLine(); // 横並び
 	// Z
 	ImGui::PushItemWidth(single_item_width);
-	bool az_changed = ImGui::DragFloat("Z##AZ", &v->z.amplitude, v_speed, v_min, v_max, ":%.3f");
+	bool az_changed = ImGui::DragFloat("Z##AZ", &v->z.amplitude, v_speed, 0.0f, v_max, ":%.3f");
 	ImGui::PopItemWidth();
 	ImGui::SameLine();        // ラベルとスライダーを横並びにする
 	ImGui::Text("振幅"); // ラベルを表示

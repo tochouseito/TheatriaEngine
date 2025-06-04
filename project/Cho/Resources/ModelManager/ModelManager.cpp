@@ -489,6 +489,8 @@ void ModelManager::CreateDefaultMesh()
 	CreateRing();
 	// Cylinder
 	CreateCylinder();
+	// Skybox
+	CreateSkybox();
 }
 
 void ModelManager::CreateCube()
@@ -869,6 +871,89 @@ void ModelManager::CreateCylinder()
 
 	// メッシュ追加
 	modelData.meshes.push_back(meshData);
+	AddModelData(modelData);
+}
+
+void ModelManager::CreateSkybox()
+{
+	// Skybox
+	std::wstring modelName = L"Skybox";
+	modelName = GenerateUniqueName(modelName, m_ModelNameContainer);
+	ModelData modelData;
+	modelData.name = modelName;
+	MeshData meshData;
+	meshData.name = modelName;
+	// 頂点数とインデックス数
+	uint32_t vertices = 24;// 頂点数
+	uint32_t indices = 36;// インデックス数
+	// メモリ確保
+	meshData.vertices.resize(vertices);
+	meshData.indices.resize(indices);
+	// 頂点データを設定
+#pragma region
+	// 右面
+	meshData.vertices[0] = { {0.5f,  0.5f,  0.5f, 1.0f}, {1.0f, 0.0f}, {1.0f, 0.0f, 0.0f},{1.0f,1.0f,1.0f,1.0f},{0} }; // 右上
+	meshData.vertices[1] = { {0.5f,  0.5f, -0.5f, 1.0f}, {0.0f, 0.0f}, {1.0f, 0.0f, 0.0f} ,{1.0f,1.0f,1.0f,1.0f},{1} }; // 左上
+	meshData.vertices[2] = { {0.5f, -0.5f,  0.5f, 1.0f}, {1.0f, 1.0f}, {1.0f, 0.0f, 0.0f} ,{1.0f,1.0f,1.0f,1.0f},{2} }; // 右下
+	meshData.vertices[3] = { {0.5f, -0.5f, -0.5f, 1.0f}, {0.0f, 1.0f}, {1.0f, 0.0f, 0.0f},{1.0f,1.0f,1.0f,1.0f},{3} }; // 左下
+
+	// 左面
+	meshData.vertices[4] = { {-0.5f,  0.5f, -0.5f, 1.0f}, {1.0f, 0.0f}, {-1.0f, 0.0f, 0.0f} ,{1.0f,1.0f,1.0f,1.0f},{4} }; // 左上
+	meshData.vertices[5] = { {-0.5f,  0.5f,  0.5f, 1.0f}, {0.0f, 0.0f}, {-1.0f, 0.0f, 0.0f} ,{1.0f,1.0f,1.0f,1.0f},{5} }; // 右上
+	meshData.vertices[6] = { {-0.5f, -0.5f, -0.5f, 1.0f}, {1.0f, 1.0f}, {-1.0f, 0.0f, 0.0f} ,{1.0f,1.0f,1.0f,1.0f},{6} }; // 左下
+	meshData.vertices[7] = { {-0.5f, -0.5f,  0.5f, 1.0f}, {0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f} ,{1.0f,1.0f,1.0f,1.0f},{7} }; // 右下
+
+	// 前面
+	meshData.vertices[8] = { {-0.5f,  0.5f,  0.5f, 1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, 1.0f} ,{1.0f,1.0f,1.0f,1.0f},{8} }; // 左上
+	meshData.vertices[9] = { { 0.5f,  0.5f,  0.5f, 1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, 1.0f} ,{1.0f,1.0f,1.0f,1.0f},{9} }; // 右上
+	meshData.vertices[10] = { {-0.5f, -0.5f,  0.5f, 1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, 1.0f} ,{1.0f,1.0f,1.0f,1.0f},{10} }; // 左下
+	meshData.vertices[11] = { { 0.5f, -0.5f,  0.5f, 1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, 1.0f} ,{1.0f,1.0f,1.0f,1.0f},{11} }; // 右下
+
+	// 後面
+	meshData.vertices[12] = { { 0.5f,  0.5f, -0.5f, 1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, -1.0f} ,{1.0f,1.0f,1.0f,1.0f},{12} }; // 右上
+	meshData.vertices[13] = { {-0.5f,  0.5f, -0.5f, 1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, -1.0f} ,{1.0f,1.0f,1.0f,1.0f},{13} }; // 左上
+	meshData.vertices[14] = { { 0.5f, -0.5f, -0.5f, 1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, -1.0f} ,{1.0f,1.0f,1.0f,1.0f},{14} }; // 右下
+	meshData.vertices[15] = { {-0.5f, -0.5f, -0.5f, 1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, -1.0f},{1.0f,1.0f,1.0f,1.0f},{15} }; // 左下
+
+	// 上面
+	meshData.vertices[16] = { {-0.5f,  0.5f, -0.5f, 1.0f}, {0.0f, 0.0f}, {0.0f, 1.0f, 0.0f} ,{1.0f,1.0f,1.0f,1.0f},{16} }; // 左奥
+	meshData.vertices[17] = { { 0.5f,  0.5f, -0.5f, 1.0f}, {1.0f, 0.0f}, {0.0f, 1.0f, 0.0f} ,{1.0f,1.0f,1.0f,1.0f},{17} }; // 右奥
+	meshData.vertices[18] = { {-0.5f,  0.5f,  0.5f, 1.0f}, {0.0f, 1.0f}, {0.0f, 1.0f, 0.0f} ,{1.0f,1.0f,1.0f,1.0f},{18} }; // 左前
+	meshData.vertices[19] = { { 0.5f,  0.5f,  0.5f, 1.0f}, {1.0f, 1.0f}, {0.0f, 1.0f, 0.0f} ,{1.0f,1.0f,1.0f,1.0f},{19} }; // 右前
+
+	// 下面
+	meshData.vertices[20] = { {-0.5f, -0.5f,  0.5f, 1.0f}, {0.0f, 0.0f}, {0.0f, -1.0f, 0.0f} ,{1.0f,1.0f,1.0f,1.0f},{20} }; // 左前
+	meshData.vertices[21] = { { 0.5f, -0.5f,  0.5f, 1.0f}, {1.0f, 0.0f}, {0.0f, -1.0f, 0.0f} ,{1.0f,1.0f,1.0f,1.0f},{21} }; // 右前
+	meshData.vertices[22] = { {-0.5f, -0.5f, -0.5f, 1.0f}, {0.0f, 1.0f}, {0.0f, -1.0f, 0.0f} ,{1.0f,1.0f,1.0f,1.0f},{22} }; // 左奥
+	meshData.vertices[23] = { { 0.5f, -0.5f, -0.5f, 1.0f}, {1.0f, 1.0f}, {0.0f, -1.0f, 0.0f} ,{1.0f,1.0f,1.0f,1.0f},{23} }; // 右奥
+
+	// 右面インデックス
+	meshData.indices[0] = 0; meshData.indices[1] = 1; meshData.indices[2] = 2;
+	meshData.indices[3] = 2; meshData.indices[4] = 1; meshData.indices[5] = 3;
+
+	// 左面インデックス
+	meshData.indices[6] = 4; meshData.indices[7] = 5; meshData.indices[8] = 6;
+	meshData.indices[9] = 6; meshData.indices[10] = 5; meshData.indices[11] = 7;
+
+	// 前面インデックス
+	meshData.indices[12] = 8; meshData.indices[13] = 9; meshData.indices[14] = 10;
+	meshData.indices[15] = 10; meshData.indices[16] = 9; meshData.indices[17] = 11;
+
+	// 後面インデックス
+	meshData.indices[18] = 12; meshData.indices[19] = 13; meshData.indices[20] = 14;
+	meshData.indices[21] = 14; meshData.indices[22] = 13; meshData.indices[23] = 15;
+
+	// 上面インデックス
+	meshData.indices[24] = 16; meshData.indices[25] = 17; meshData.indices[26] = 18;
+	meshData.indices[27] = 18; meshData.indices[28] = 17; meshData.indices[29] = 19;
+
+	// 下面インデックス
+	meshData.indices[30] = 20; meshData.indices[31] = 21; meshData.indices[32] = 22;
+	meshData.indices[33] = 22; meshData.indices[34] = 21; meshData.indices[35] = 23;
+#pragma endregion
+	// コンテナに追加
+	modelData.meshes.push_back(meshData);
+	// modelDataを追加
 	AddModelData(modelData);
 }
 

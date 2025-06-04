@@ -79,7 +79,7 @@ void TextureManager::LoadTextureFile(const fs::path& filePath)
         resourceDesc.Format = metadata.format;// Textureのフォーマット
         resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION(metadata.dimension);// Textureの次元
         resourceDesc.SampleDesc.Count = 1;// サンプル数
-        texData.bufferIndex = m_ResourceManager->CreateTextureBuffer(resourceDesc, nullptr, D3D12_RESOURCE_STATE_COPY_DEST);
+        texData.bufferIndex = m_ResourceManager->CreateTextureBuffer(resourceDesc, nullptr, D3D12_RESOURCE_STATE_COPY_DEST,texData.metadata.IsCubemap());
         // テクスチャデータをコピー
         UploadTextureDataEx(
             m_ResourceManager->GetBuffer<PixelBuffer>(texData.bufferIndex)->GetResource(),
