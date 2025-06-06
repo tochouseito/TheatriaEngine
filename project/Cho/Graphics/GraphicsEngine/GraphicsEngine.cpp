@@ -446,16 +446,16 @@ void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& ga
 			context->SetGraphicsRootConstantBufferView(0, cameraBuffer->GetResource()->GetGPUVirtualAddress());
 			// トランスフォーム統合バッファをセット
 			IStructuredBuffer* transformBuffer = resourceManager.GetIntegrationBuffer(IntegrationDataType::Transform);
-			context->SetGraphicsRootDescriptorTable(1, transformBuffer->GetSRVGpuHandle());
+			context->SetGraphicsRootShaderResourceView(1, transformBuffer->GetResource()->GetGPUVirtualAddress());
 			// UseTransformBufferをセット
 			IStructuredBuffer* useTransformBuffer = resourceManager.GetBuffer<IStructuredBuffer>(modelData.useTransformBufferIndex);
-			context->SetGraphicsRootDescriptorTable(2, useTransformBuffer->GetSRVGpuHandle());
+			context->SetGraphicsRootShaderResourceView(2, useTransformBuffer->GetResource()->GetGPUVirtualAddress());
 			// モデルのボーン行列Bufferをセット
 			IStructuredBuffer* boneBuffer = resourceManager.GetBuffer<IStructuredBuffer>(modelData.boneMatrixBufferIndex);
-			context->SetGraphicsRootDescriptorTable(3, boneBuffer->GetSRVGpuHandle());
+			context->SetGraphicsRootShaderResourceView(3, boneBuffer->GetResource()->GetGPUVirtualAddress());
 			// SkinningInfluenceBufferをセット
 			IStructuredBuffer* skinningInfluenceBuffer = resourceManager.GetBuffer<IStructuredBuffer>(modelData.influenceBufferIndex);
-			context->SetGraphicsRootDescriptorTable(4, skinningInfluenceBuffer->GetSRVGpuHandle());
+			context->SetGraphicsRootShaderResourceView(4, skinningInfluenceBuffer->GetResource()->GetGPUVirtualAddress());
 			// SkinningInfoBufferをセット
 			IConstantBuffer* skinningInfoBuffer = resourceManager.GetBuffer<IConstantBuffer>(modelData.skinInfoBufferIndex);
 			context->SetGraphicsRootConstantBufferView(5, skinningInfoBuffer->GetResource()->GetGPUVirtualAddress());
@@ -466,10 +466,10 @@ void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& ga
 			IConstantBuffer* envBuffer = resourceManager.GetEnvironmentBuffer();
 			context->SetGraphicsRootConstantBufferView(7, envBuffer->GetResource()->GetGPUVirtualAddress());
 			// PS用トランスフォーム統合バッファをセット
-			context->SetGraphicsRootDescriptorTable(8, transformBuffer->GetSRVGpuHandle());
+			context->SetGraphicsRootShaderResourceView(8, transformBuffer->GetResource()->GetGPUVirtualAddress());
 			// マテリアル統合バッファをセット
 			IStructuredBuffer* materialBuffer = resourceManager.GetIntegrationBuffer(IntegrationDataType::Material);
-			context->SetGraphicsRootDescriptorTable(9, materialBuffer->GetSRVGpuHandle());
+			context->SetGraphicsRootShaderResourceView(9, materialBuffer->GetResource()->GetGPUVirtualAddress());
 			// 配列テクスチャのためヒープをセット
 			context->SetGraphicsRootDescriptorTable(10, resourceManager.GetSUVDHeap()->GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
 			// インスタンス数を取得
