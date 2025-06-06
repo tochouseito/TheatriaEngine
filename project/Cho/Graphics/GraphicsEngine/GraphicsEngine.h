@@ -81,6 +81,7 @@ class EngineCommand;
 class GraphicsEngine : public Engine
 {
 	friend class TextureManager;
+	friend class PipelineManager;
 	friend class EngineCommand;
 	friend class ParticleInitializeSystem;
 	friend class ParticleUpdateSystem;
@@ -93,7 +94,7 @@ public:
 	{
 		m_GraphicsCore = std::make_unique<GraphicsCore>(device);
 		m_DepthManager = std::make_unique<DepthManager>();
-		m_PipelineManager = std::make_unique<PipelineManager>();
+		m_PipelineManager = std::make_unique<PipelineManager>(resourceManager,this);
 	}
 	// Destructor
 	~GraphicsEngine() = default;

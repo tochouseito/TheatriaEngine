@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "PipelineManager.h"
+#include "Graphics/GraphicsEngine/GraphicsEngine.h"
 #include <assert.h>
 
 void PipelineManager::Initialize(ID3D12Device8* device)
@@ -608,6 +609,53 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 		IID_PPV_ARGS(&m_IntegratePSO.rootSignature)
 	);
 	Log::Write(LogLevel::Assert, "Root signature created.", hr);
+
+	// Command Signature
+	D3D12_INDIRECT_ARGUMENT_DESC argDesc[11] = {};
+	// ViewProjection
+	argDesc[0].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT_BUFFER_VIEW;
+	argDesc[0].ConstantBufferView.RootParameterIndex = 0;
+	// IntegrationTransform
+	argDesc[1].Type = D3D12_INDIRECT_ARGUMENT_TYPE_SHADER_RESOURCE_VIEW;
+	argDesc[1].ShaderResourceView.RootParameterIndex = 1;
+	// UseTransformList
+	argDesc[2].Type = D3D12_INDIRECT_ARGUMENT_TYPE_SHADER_RESOURCE_VIEW;
+	argDesc[2].ShaderResourceView.RootParameterIndex = 2;
+	// BoneMatrix
+	argDesc[3].Type = D3D12_INDIRECT_ARGUMENT_TYPE_SHADER_RESOURCE_VIEW;
+	argDesc[3].ShaderResourceView.RootParameterIndex = 3;
+	// SkinningInfluence
+	argDesc[4].Type = D3D12_INDIRECT_ARGUMENT_TYPE_SHADER_RESOURCE_VIEW;
+	argDesc[4].ShaderResourceView.RootParameterIndex = 4;
+	// SkinningInfo
+	argDesc[5].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT_BUFFER_VIEW;
+	argDesc[5].ConstantBufferView.RootParameterIndex = 5;
+	// Lights
+	argDesc[6].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT_BUFFER_VIEW;
+	argDesc[6].ConstantBufferView.RootParameterIndex = 6;
+	// Environment
+	argDesc[7].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT_BUFFER_VIEW;
+	argDesc[7].ConstantBufferView.RootParameterIndex = 7;
+	// IntegrationTransform
+	argDesc[8].Type = D3D12_INDIRECT_ARGUMENT_TYPE_SHADER_RESOURCE_VIEW;
+	argDesc[8].ShaderResourceView.RootParameterIndex = 8;
+	// IntegrationMaterial
+	argDesc[9].Type = D3D12_INDIRECT_ARGUMENT_TYPE_SHADER_RESOURCE_VIEW;
+	argDesc[9].ShaderResourceView.RootParameterIndex = 9;
+	// DrawIndexed
+	argDesc[10].Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED;
+
+	D3D12_COMMAND_SIGNATURE_DESC cmdSigDesc = {};
+	cmdSigDesc.ByteStride = sizeof(IndirectArgs);
+	cmdSigDesc.NumArgumentDescs = _countof(argDesc);
+	cmdSigDesc.pArgumentDescs = argDesc;
+
+	hr = device->CreateCommandSignature(
+		&cmdSigDesc,
+		m_IntegratePSO.rootSignature.Get(),
+		IID_PPV_ARGS(&m_IntegratePSO.commandSignature)
+	);
+
 	// InputLayout
 	D3D12_INPUT_ELEMENT_DESC inputElementDesc[5] = {};
 	inputElementDesc[0].SemanticName = "POSITION";
@@ -684,6 +732,20 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 		IID_PPV_ARGS(&m_IntegratePSO.pso)
 	);
 	Log::Write(LogLevel::Assert, "Pipeline state created.", hr);
+
+	// コマンド引数バッファを作成
+	m_IntegratePSO.indirectArgsBuffer = std::make_unique<ConstantBuffer<IndirectArgs>>();
+	m_IntegratePSO.indirectArgsBuffer->CreateConstantBufferResource(device);
+	// リソースの状態遷移
+	CommandContext* context = m_pGraphicsEngine->GetCommandContext();
+	m_pGraphicsEngine->BeginCommandContext(context);
+	context->BarrierTransition(
+		m_IntegratePSO.indirectArgsBuffer->GetResource(),
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT
+	);
+	m_pGraphicsEngine->EndCommandContext(context, Compute);
+	m_pGraphicsEngine->WaitForGPU(Compute);
 }
 
 void PipelineManager::CreatePipelineLine(ID3D12Device8* device)
