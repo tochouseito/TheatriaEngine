@@ -252,6 +252,12 @@ void CommandContext::Dispatch(UINT ThreadGroupCountX, UINT ThreadGroupCountY, UI
 	m_CommandList->Dispatch(ThreadGroupCountX, ThreadGroupCountY, ThreadGroupCountZ);
 }
 
+void CommandContext::ExecuteIndirect(ID3D12CommandSignature* pCommandSignature, UINT MaxCommandCount, ID3D12Resource* pArgumentBuffer, UINT ArgumentBufferOffset, ID3D12Resource* pCountBuffer, UINT CountBufferOffset)
+{
+	// 間接コマンドの実行
+	m_CommandList->ExecuteIndirect(pCommandSignature, MaxCommandCount, pArgumentBuffer, ArgumentBufferOffset, pCountBuffer, CountBufferOffset);
+}
+
 GraphicsContext::GraphicsContext(ID3D12Device* device)
 {
 	Create(device, D3D12_COMMAND_LIST_TYPE_DIRECT);	

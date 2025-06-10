@@ -1,12 +1,33 @@
 #pragma once
+#include "SDK/DirectX/DirectX12/GpuBuffer/GpuBuffer.h"
 #include "SDK/DirectX/DXC/DXShaderCompiler.h"
+#include <memory>
+
+// test
+struct IndirectArgs
+{
+	D3D12_GPU_VIRTUAL_ADDRESS cbv_ViewProjection;
+	D3D12_GPU_VIRTUAL_ADDRESS srv_IntegrationTF;
+	D3D12_GPU_VIRTUAL_ADDRESS srv_UseTransformList;
+	D3D12_GPU_VIRTUAL_ADDRESS srv_BoneMatrix;
+	D3D12_GPU_VIRTUAL_ADDRESS srv_SkinningInfluence;
+	D3D12_GPU_VIRTUAL_ADDRESS cbv_SkinningInfo;
+	D3D12_GPU_VIRTUAL_ADDRESS cbv_Lights;
+	D3D12_GPU_VIRTUAL_ADDRESS cbv_Environment;
+	D3D12_GPU_VIRTUAL_ADDRESS srv_IntegrationTF2;
+	D3D12_GPU_VIRTUAL_ADDRESS srv_IntegrationMTL;
+	D3D12_DRAW_INDEXED_ARGUMENTS drawIndexedArgs;// DrawIndexedIndirect用引数
+};
 
 struct PSO
 {
 	ComPtr<ID3D12PipelineState> pso;
 	ComPtr<ID3D12RootSignature> rootSignature;
 	std::vector<std::pair<uint32_t, std::string>> rootParameters;
+	ComPtr<ID3D12CommandSignature> commandSignature;// コマンドシグネチャ
+	std::unique_ptr<ConstantBuffer<IndirectArgs>> indirectArgsBuffer;// IndirectArgs用バッファ
 };
+
 struct PipelineStateObject
 {
 	ComPtr<ID3D12PipelineState> pipelineState;// パイプラインステートオブジェクト
@@ -19,13 +40,17 @@ struct PipelineStateObject
 	std::string dsPath;// DomainShader
 	// メッシュシェーダー、増幅シェーダー追加予定
 };
+class ResourceManager;
+class GraphicsEngine;
 class PipelineManager
 {
 public:
 	// Constructor
-	PipelineManager()
+	PipelineManager(ResourceManager* resourceManager,GraphicsEngine* graphicsEngine)
 	{
 		m_pShaderCompiler = std::make_unique<DXShaderCompiler>();
+		m_pResourceManager = resourceManager;
+		m_pGraphicsEngine = graphicsEngine;
 	}
 	// Destructor
 	~PipelineManager()
@@ -36,34 +61,34 @@ public:
 	void Initialize(ID3D12Device8* device);
 
 	// Get PSO
-	PSO GetDemoPSO() { return m_DemoPSO; }
-	PSO GetScreenCopyPSO() { return m_ScreenCopyPSO; }
-	PSO GetIntegratePSO() { return m_IntegratePSO; }
-	PSO GetLinePSO() { return m_LinePSO; }
+	const PSO& GetDemoPSO() { return m_DemoPSO; }
+	const PSO& GetScreenCopyPSO() { return m_ScreenCopyPSO; }
+	const PSO& GetIntegratePSO() { return m_IntegratePSO; }
+	const PSO& GetLinePSO() { return m_LinePSO; }
 	// Particle
-	PSO GetParticlePSO() { return m_ParticlePSO; }
-	PSO GetParticleInitPSO() { return m_ParticleInitPSO; }
-	PSO GetParticleUpdatePSO() { return m_ParticleUpdatePSO; }
-	PSO GetParticleEmitPSO() { return m_ParticleEmitPSO; }
+	const PSO& GetParticlePSO() { return m_ParticlePSO; }
+	const PSO& GetParticleInitPSO() { return m_ParticleInitPSO; }
+	const PSO& GetParticleUpdatePSO() { return m_ParticleUpdatePSO; }
+	const PSO& GetParticleEmitPSO() { return m_ParticleEmitPSO; }
 	// EffectEditor
-	PSO GetEffectEditorPSO() { return m_EffectEditorPSO; }
-	PSO GetEffectEditorInitPSO() { return m_EffectEditorInitPSO; }
-	PSO GetEffectEditorUpdatePSO() { return m_EffectEditorUpdatePSO; }
-	PSO GetEffectEditorEmitPSO() { return m_EffectEditorEmitPSO; }
+	const PSO& GetEffectEditorPSO() { return m_EffectEditorPSO; }
+	const PSO& GetEffectEditorInitPSO() { return m_EffectEditorInitPSO; }
+	const PSO& GetEffectEditorUpdatePSO() { return m_EffectEditorUpdatePSO; }
+	const PSO& GetEffectEditorEmitPSO() { return m_EffectEditorEmitPSO; }
 	// Effect
-	PSO GetEffectInitPSO() { return m_EffectInitPSO; }
+	const PSO& GetEffectInitPSO() { return m_EffectInitPSO; }
 	// EffectTimeBase
-	PSO GetEffectTimeBaseEmitPSO() { return m_EffectTimeBaseEmitPSO; }
-	PSO GetEffectTimeBaseUpdatePSO() { return m_EffectTimeBaseUpdatePSO; }
+	const PSO& GetEffectTimeBaseEmitPSO() { return m_EffectTimeBaseEmitPSO; }
+	const PSO& GetEffectTimeBaseUpdatePSO() { return m_EffectTimeBaseUpdatePSO; }
 	// EffectSprite
-	PSO GetEffectSpritePSO() { return m_EffectSpritePSO; }
+	const PSO& GetEffectSpritePSO() { return m_EffectSpritePSO; }
 
 	// UI
-	PSO GetUIPSO() { return m_UIPSO; }
+	const PSO& GetUIPSO() { return m_UIPSO; }
 	// SkinningCS
-	PSO GetSkinningPSO() { return m_Skinning; }
+	const PSO& GetSkinningPSO() { return m_Skinning; }
 	// Skybox
-	PSO GetSkyboxPSO() { return m_SkyboxPSO; }
+	const PSO& GetSkyboxPSO() { return m_SkyboxPSO; }
 private:
 	std::vector<std::pair<uint32_t, std::string>> CreateRootParameters(
 		ID3D12ShaderReflection* pReflector,
@@ -106,6 +131,8 @@ private:
 	void CreatePipelineSkybox(ID3D12Device8* device);
 
 	std::unique_ptr<DXShaderCompiler> m_pShaderCompiler = nullptr;
+	ResourceManager* m_pResourceManager = nullptr;
+	GraphicsEngine* m_pGraphicsEngine = nullptr;
 	PSO m_DemoPSO;
 	PSO m_ScreenCopyPSO;
 	PSO m_IntegratePSO;

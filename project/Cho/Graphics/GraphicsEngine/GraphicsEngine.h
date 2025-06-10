@@ -19,6 +19,29 @@ enum RenderTextureType
 	RenderTextureTypeCount,		// 種類数(使用禁止)
 };
 
+//enum GameRenderTextureType
+//{
+//	GameScreenTexture = 0,			// ゲーム画面用描画テクスチャ
+//	GameGBufferTexture,				// ゲームのGバッファ用描画テクスチャ
+//	GameLightingTexture,			// ゲームのライティング用描画テクスチャ
+//	GameForwardTexture,				// ゲームのフォワード描画用描画テクスチャ
+//	GamePostProcessTexture,			// ゲームのポストプロセス用描画テクスチャ
+//	GameRenderTextureTypeCount,		// 種類数(使用禁止)
+//};
+//
+//// Editor時のみ使用
+//enum SceneRenderTextureType
+//{
+//	SceneScreenTexture = 0,			// シーン画面用描画テクスチャ
+//	SceneGBufferTexture,			// シーンのGバッファ用描画テクスチャ
+//	SceneLightingTexture,			// シーンのライティング用描画テクスチャ
+//	SceneForwardTexture,			// シーンのフォワード描画用テクスチャ
+//	ScenePostProcessTexture,		// シーンのポストプロセス用描画テクスチャ
+//	EffectEditTexture,				// エフェクトエディタ用描画テクスチャ
+//	DebugDrawTexture,				// デバッグ用描画テクスチャ
+//	SceneRenderTextureTypeCount,	// 種類数(使用禁止)
+//};
+
 enum DrawPass
 {
 	GBuffers = 0,
@@ -58,6 +81,7 @@ class EngineCommand;
 class GraphicsEngine : public Engine
 {
 	friend class TextureManager;
+	friend class PipelineManager;
 	friend class EngineCommand;
 	friend class ParticleInitializeSystem;
 	friend class ParticleUpdateSystem;
@@ -70,7 +94,7 @@ public:
 	{
 		m_GraphicsCore = std::make_unique<GraphicsCore>(device);
 		m_DepthManager = std::make_unique<DepthManager>();
-		m_PipelineManager = std::make_unique<PipelineManager>();
+		m_PipelineManager = std::make_unique<PipelineManager>(resourceManager,this);
 	}
 	// Destructor
 	~GraphicsEngine() = default;
