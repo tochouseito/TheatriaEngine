@@ -549,16 +549,16 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 	rootParameters[10].DescriptorTable.pDescriptorRanges = &textureRange;
 	rootParameters[10].DescriptorTable.NumDescriptorRanges = 1;
 
-	D3D12_DESCRIPTOR_RANGE universalRange = {};
-	universalRange.BaseShaderRegister = 0;//t0
-	universalRange.RegisterSpace = 0;// space0
-	universalRange.NumDescriptors = static_cast<UINT>(std::pow(2, 16)); // 65536
-	universalRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	universalRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-	rootParameters[0].DescriptorTable.pDescriptorRanges = &universalRange;
-	rootParameters[0].DescriptorTable.NumDescriptorRanges = 1;
+	//D3D12_DESCRIPTOR_RANGE universalRange = {};
+	//universalRange.BaseShaderRegister = 0;//t0
+	//universalRange.RegisterSpace = 0;// space0
+	//universalRange.NumDescriptors = static_cast<UINT>(std::pow(2, 16)); // 65536
+	//universalRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	//universalRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	//rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	//rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	//rootParameters[0].DescriptorTable.pDescriptorRanges = &universalRange;
+	//rootParameters[0].DescriptorTable.NumDescriptorRanges = 1;
 
 	rootSignatureDesc.pParameters = rootParameters;
 	rootSignatureDesc.NumParameters = _countof(rootParameters);
