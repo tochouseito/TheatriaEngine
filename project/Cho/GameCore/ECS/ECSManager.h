@@ -51,6 +51,57 @@ public:
 		return entity;
 	}
 
+	// Entityをコピーして新しいEntityを生成する
+	Entity CopyEntity(const Entity& src)
+	{
+		const Archetype& arch = GetArchetype(src);
+		Entity dst = GenerateEntity();
+
+		for (CompID id = 0; id < arch.size(); ++id)
+		{
+			if (arch.test(id))
+			{
+				m_TypeToComponents[id]->CloneComponent(src, dst);
+			}
+		}
+		// Archetype / ArchToEntities の更新
+		m_EntityToArchetype[dst] = arch;
+		m_ArchToEntities[arch].Add(dst);
+		return dst;
+	}
+
+	// 既存Entity間でコンポーネントをコピーする
+	void CopyComponents(Entity src, Entity dst, bool overwrite = true)
+	{
+		const Archetype& archSrc = GetArchetype(src);
+		Archetype& archDst = m_EntityToArchetype[dst];
+
+		for (CompID id = 0; id < archSrc.size(); ++id)
+		{
+			if (!archSrc.test(id)) continue;
+			if (!overwrite && archDst.test(id)) continue; // 既存は保持
+
+			m_TypeToComponents[id]->CloneComponent(src, dst);
+			archDst.set(id);
+		}
+	}
+
+	// コンポーネントの全削除
+	inline void ClearEntity(const Entity& e)
+	{
+		if (e >= m_EntityToArchetype.size()) return;
+		Archetype oldArch = m_EntityToArchetype[e];
+		for (CompID id = 0; id < oldArch.size(); ++id)
+		{
+			if (oldArch.test(id))
+			{
+				m_TypeToComponents[id]->RemoveComponent(e);
+			}
+		}
+		m_ArchToEntities[oldArch].Remove(e);
+		m_EntityToArchetype[e].reset();          // からっぽ
+	}
+
 	// コンポーネントを追加する
 	template<ComponentType T>
 	T* AddComponent(const Entity& entity)
@@ -249,6 +300,9 @@ public:
 	class IComponentPool
 	{
 	public:
+		virtual void CloneComponent(Entity src, Entity dst) = 0;
+		virtual void RemoveComponent(Entity e) = 0;
+		virtual ~IComponentPool() = default;
 	private:
 	};
 
@@ -335,6 +389,22 @@ public:
 				m_CompTypeID = ++ECSManager::m_NextCompTypeID;
 			}
 			return m_CompTypeID;
+		}
+
+		// コンポーネントのコピー
+		void CopyComponent(Entity src, Entity dst) override
+		{
+			if constexpr (IsMultiComponent<T>::value)
+			{
+				auto& vSrc = m_Multi[src];
+				auto& vDst = m_Multi[dst];
+				vDst = vSrc;                        // vector 丸ごとコピー
+			}
+			else
+			{
+				if (m_Single.size() <= dst) m_Single.resize(dst + 1);
+				m_Single[dst] = m_Single[src];
+			}
 		}
 
 	private:

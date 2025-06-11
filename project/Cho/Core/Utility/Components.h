@@ -1,6 +1,7 @@
 #pragma once
 #include "ChoMath.h"// ChoEngine数学ライブラリ
 #include <Externals/box2d/include/box2d/box2d.h>
+#include <Externals/AIUtilityLib/chunk_vector.h>
 #include "Core/Utility/Color.h"
 #include "Core/Utility/IDType.h"
 #include "Core/Utility/EffectStruct.h"
@@ -651,6 +652,27 @@ struct AnimationComponent : public IComponentTag
 	//std::optional<uint32_t> paletteBufferIndex = std::nullopt;	// パレットバッファーインデックス
 	//std::optional<uint32_t> influenceBufferIndex = std::nullopt;// インフルエンスバッファーインデックス
 	//std::optional<uint32_t> skinningBufferIndex = std::nullopt;	// スキニングバッファーインデックス
+};
+
+// 全種類のコンポーネントをまとめた構造体
+struct ComponentBlock
+{
+	TransformComponent transform;			// 変形コンポーネント
+	CameraComponent camera;				// カメラコンポーネント
+	MeshFilterComponent meshFilter;		// メッシュフィルターコンポーネント
+	MeshRendererComponent meshRenderer;	// メッシュレンダラーコンポーネント
+	ScriptComponent script;				// スクリプトコンポーネント
+	std::vector<LineRendererComponent> lineRenderers;	// ラインレンダラーコンポーネント
+	Rigidbody2DComponent rigidbody2D;	// 2D物理挙動コンポーネント
+	BoxCollider2DComponent boxCollider2D; // 2D矩形コライダー
+	MaterialComponent material;			// マテリアルコンポーネント
+	EmitterComponent emitter;				// エミッターコンポーネント
+	ParticleComponent particle;			// パーティクルコンポーネント
+	EffectComponent effect;				// エフェクトコンポーネント
+	UISpriteComponent uiSprite;			// UIスプライトコンポーネント
+	LightComponent light;					// ライトコンポーネント
+	AudioComponent audio;					// オーディオコンポーネント
+	AnimationComponent animation;			// アニメーションコンポーネント
 };
 
 // マルチコンポーネントを許可
