@@ -307,37 +307,36 @@ public:
 	};
 
 	// コンポーネントを管理するコンテナクラス
-	template<ComponentType T>
+	template<ComponentType T, size_t ChunkSize = 1024>
 	class ComponentPool :public IComponentPool
 	{
+		using Storage = cho::chunk_vector<T, ChunkSize>;
 	public:
 		// コンテナのメモリを確保
-		ComponentPool(const size_t size)
-
+		ComponentPool(const size_t& reserveEntities = 0)
 		{
-			if constexpr (!IsMultiComponent<T>::value)
-			{
-				m_Single.resize(size);
-			}
+			// 余裕を持ってチャンク確保（任意）
+			size_t chunks = (reserveEntities + ChunkSize - 1) / ChunkSize;
+			storage_.reserve_chunks(chunks);
 		}
 		// コンポーネントを追加
-		T* AddComponent(const Entity& entity)
+		T* AddComponent(const Entity& e)
 		{
 			if constexpr (IsMultiComponent<T>::value)
 			{
 				//return &m_Multi[entity].emplace_back(T{});
-				auto& vec = m_Multi[entity];
+				auto& vec = m_Multi[e];
 				vec.reserve(8); // ← ここで再配置の回避も促す（任意）
 				vec.emplace_back(T{});
 				return &vec.back(); // ← 常に現在のアドレスを返す
 			} else
 			{
-				if (m_Single.size() <= entity)
+				if (m_Single.size() <= e)
 				{
-					m_Single.resize(entity + 1);
+					m_Single.resize(e + 1);
 				}
-				m_Single[entity] = T();
-				return &m_Single[entity];
+				m_Single[e] = T();
+				return &m_Single[e];
 			}
 		}
 
@@ -392,32 +391,31 @@ public:
 		}
 
 		// コンポーネントのコピー
-		void CopyComponent(Entity src, Entity dst) override
+		void CopyComponent(const Entity& src, const Entity& dst) override
 		{
 			if constexpr (IsMultiComponent<T>::value)
 			{
-				auto& vSrc = m_Multi[src];
-				auto& vDst = m_Multi[dst];
-				vDst = vSrc;                        // vector 丸ごとコピー
+				multi_[dst] = multi_[src];
 			}
 			else
 			{
-				if (m_Single.size() <= dst) m_Single.resize(dst + 1);
-				m_Single[dst] = m_Single[src];
+				uint32_t idxSrc = entityToIndex_[src];
+				if (idxSrc == kInvalid) return;
+				if (entityToIndex_.size() <= dst) entityToIndex_.resize(dst + 1, kInvalid);
+
+				uint32_t idxDst = storage_.emplace_back(storage_[idxSrc]);
+				entityToIndex_[dst] = idxDst;
 			}
 		}
 
 	private:
 		friend class ECSManager;
-		//// コンポーネントのインスタンスを管理するコンテナ
-		//std::vector<T> m_Components;
-		//// このコンテナクラスが管理するコンポーネントが持つ一意なID
-		//static CompID m_CompTypeID;
-		// 単一コンポーネント
-		std::vector<T> m_Single;
-		// マルチコンポーネント
-		std::unordered_map<Entity, std::vector<T>> m_Multi;
-		inline static CompID m_CompTypeID = 0;
+		/* 単一コンポーネント用ストレージ */
+		Storage storage_;
+		std::vector<uint32_t> entityToIndex_;
+		static constexpr uint32_t kInvalid = ~0u;
+		/* マルチコンポーネント用ストレージ */
+		std::unordered_map<Entity, Storage> multi_;
 	};
 
 	class ISystem

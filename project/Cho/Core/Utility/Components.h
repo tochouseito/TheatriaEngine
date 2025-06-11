@@ -27,7 +27,10 @@
 class GameObject;
 
 // コンポーネントだと判別するためのタグ
-struct IComponentTag {};
+struct IComponentTag 
+{
+	virtual void Initialize() {} // 初期化関数を定義
+};
 // コンポーネントが複数持てるか(デフォルトは持てない)
 template<typename T>
 struct IsMultiComponent : std::false_type {};
