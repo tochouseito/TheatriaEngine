@@ -324,71 +324,87 @@ public:
 		{
 			if constexpr (IsMultiComponent<T>::value)
 			{
-				//return &m_Multi[entity].emplace_back(T{});
-				auto& vec = m_Multi[e];
-				vec.reserve(8); // ← ここで再配置の回避も促す（任意）
-				vec.emplace_back(T{});
-				return &vec.back(); // ← 常に現在のアドレスを返す
-			} else
+				return &multi_[e].emplace_back();          // vector と同じ感覚
+			}
+			else
 			{
-				if (m_Single.size() <= e)
+				if (entityToIndex_.size() <= e) entityToIndex_.resize(e + 1, kInvalid);
+				// すでに所持していれば上書き
+				uint32_t idx = entityToIndex_[e];
+				if (idx == kInvalid)
 				{
-					m_Single.resize(e + 1);
+					idx = storage_.emplace_back();         // 新規確保
+					entityToIndex_[e] = idx;
 				}
-				m_Single[e] = T();
-				return &m_Single[e];
+				return &storage_[idx];
 			}
 		}
 
 		// コンポーネントを取得する
-		T* GetComponent(const Entity& entity)
+		T* GetComponent(const Entity& e)
 		{
 			if constexpr (IsMultiComponent<T>::value)
 			{
-				auto it = m_Multi.find(entity);
-				if (it != m_Multi.end() && !it->second.empty())
+				auto it = multi_.find(e);
+				return (it != multi_.end() && !it->second.empty()) ? &it->second.front() : nullptr;
+			}
+			else
+			{
+				if (e >= entityToIndex_.size()) return nullptr;
+				uint32_t idx = entityToIndex_[e];
+				return idx != kInvalid ? &storage_[idx] : nullptr;
+			}
+		}
+
+		// コンポーネントを削除する
+		void RemoveComponent(const Entity& e) override
+		{
+			if constexpr (IsMultiComponent<T>::value)
+			{
+				multi_.erase(e);
+			}
+			else
+			{
+				if (e >= entityToIndex_.size()) return;
+				uint32_t idx = entityToIndex_[e];
+				if (idx != kInvalid)
 				{
-					return &it->second.front(); // 最初のやつを返す
+					storage_.erase_swap_and_pop(idx);      // O(1) 削除
+					entityToIndex_[e] = kInvalid;
 				}
-				return nullptr;
-			} else
-			{
-				if (m_Single.size() > entity)
-					return &m_Single[entity];
-				return nullptr;
 			}
 		}
 
-		// すべて取得する（マルチコンポーネント用）
-		std::vector<T>* GetAllComponents(const Entity& entity)
-			requires IsMultiComponent<T>::value// 単一コンポーネントの場合は使用できない
-		{
-			auto it = m_Multi.find(entity);
-			if (it != m_Multi.end())
-			{
-				return &it->second;
-			}
-			return nullptr;
-		}
+		//// すべて取得する（マルチコンポーネント用）
+		//std::vector<T>* GetAllComponents(const Entity& entity)
+		//	requires IsMultiComponent<T>::value// 単一コンポーネントの場合は使用できない
+		//{
+		//	auto it = m_Multi.find(entity);
+		//	if (it != m_Multi.end())
+		//	{
+		//		return &it->second;
+		//	}
+		//	return nullptr;
+		//}
 
-		// コンポーネントを削除する（マルチコンポーネント用）
-		void RemoveAll(const Entity& entity)
-			requires IsMultiComponent<T>::value
-		{
-			m_Multi.erase(entity); // そのEntityに属するすべてのTを削除
-		}
+		//// コンポーネントを削除する（マルチコンポーネント用）
+		//void RemoveAll(const Entity& entity)
+		//	requires IsMultiComponent<T>::value
+		//{
+		//	m_Multi.erase(entity); // そのEntityに属するすべてのTを削除
+		//}
 
 
-		// CompTypeIDを取得する関数
-		static CompID GetID()
-		{
-			// この関数を初めて読んだ時にIDを発行
-			if (!m_CompTypeID)
-			{
-				m_CompTypeID = ++ECSManager::m_NextCompTypeID;
-			}
-			return m_CompTypeID;
-		}
+		//// CompTypeIDを取得する関数
+		//static CompID GetID()
+		//{
+		//	// この関数を初めて読んだ時にIDを発行
+		//	if (!m_CompTypeID)
+		//	{
+		//		m_CompTypeID = ++ECSManager::m_NextCompTypeID;
+		//	}
+		//	return m_CompTypeID;
+		//}
 
 		// コンポーネントのコピー
 		void CopyComponent(const Entity& src, const Entity& dst) override
