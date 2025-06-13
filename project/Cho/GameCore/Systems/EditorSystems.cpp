@@ -17,7 +17,7 @@ void TransformEditorSystem::priorityUpdate(ECSManager* ecs)
 	// すべてのTransformComponentを取得
 	for (auto& [arch, container] : ecs->GetArchToEntities())
 	{
-		if ((arch & m_Required) == m_Required)
+		if ((arch & GetRequired()) == GetRequired())
 		{
 			for (Entity e : container.GetEntities())
 			{
