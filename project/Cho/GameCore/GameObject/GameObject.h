@@ -9,31 +9,6 @@ class ECSManager;
 class ResourceManager;
 class ObjectContainer;
 
-class Prefab 
-{
-public:
-	// Constructor
-	Prefab(const Entity& entity,const std::wstring& name,const ObjectType& type) :
-		m_Entity(entity),  m_Name(name), m_Type(type)
-	{
-	}
-	// Constructor
-	Prefab() {}
-	// Destructor
-	~Prefab()
-	{
-	}
-	ObjectID GetID() const noexcept { return m_ID; }
-	Entity GetEntity() const noexcept { return m_Entity; }
-	std::wstring GetName() const noexcept { return m_Name; }
-	ObjectType GetType() const noexcept { return m_Type; }
-	void SetID(const ObjectID& id) noexcept { m_ID = id; }
-private:
-	PrefabID m_ID;				// プレハブID
-	Entity m_Entity;			// エンティティ
-	std::wstring m_Name = L"";	// プレハブ名
-	ObjectType m_Type;			// プレハブのタイプ
-};
 // GameObjectクラス
 class CHO_API GameObject
 {

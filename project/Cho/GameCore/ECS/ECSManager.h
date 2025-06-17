@@ -218,7 +218,16 @@ public:
         virtual ~IComponentPool() = default;
         virtual void CopyComponent(Entity src, Entity dst) = 0;
         virtual void RemoveComponent(Entity e) = 0;
+        virtual void* GetRawComponent(Entity e) const = 0;
+        virtual std::shared_ptr<void> CloneComponent(CompID id, void* ptr) = 0;
+        virtual bool IsMultiComponentTrait(CompID id) const = 0;
     };
+
+    IComponentPool* GetRawComponentPool(CompID id)
+    {
+        auto it = m_TypeToComponents.find(id);
+        return (it != m_TypeToComponents.end()) ? it->second.get() : nullptr;
+    }
 
     /*---------------------------------------------------------------------
         ComponentPool  (vector‑backed)
@@ -230,6 +239,12 @@ public:
         static constexpr uint32_t kInvalid = ~0u;
     public:
         explicit ComponentPool(size_t reserveEntities = 0) { m_Storage.reserve(reserveEntities); }
+
+        // 登録された型がマルチかどうかを返す
+        bool IsMultiComponentTrait(CompID) const override
+        {
+            return IsMultiComponent<T>::value;
+        }
 
         /*-------------------- add ---------------------*/
         T* AddComponent(Entity e)
@@ -337,6 +352,37 @@ public:
         /*-------------------- expose map -------------*/
         auto& Map() { return m_Multi; }
         const auto& Map() const { return m_Multi; }
+
+        // 単一コンポーネントを void* で取得
+        void* GetRawComponent(Entity e) const override
+        {
+            if constexpr (IsMultiComponent<T>::value)
+            {
+                auto it = m_Multi.find(e);
+                return (it != m_Multi.end() && !it->second.empty()) ? (void*)&it->second : nullptr;
+            }
+            else
+            {
+                if (e >= m_EntityToIndex.size()) return nullptr;
+                uint32_t idx = m_EntityToIndex[e];
+                return (idx != kInvalid) ? (void*)&m_Storage[idx] : nullptr;
+            }
+        }
+
+        // 任意の型を shared_ptr<void> に包んでPrefabにコピー
+        std::shared_ptr<void> CloneComponent(CompID, void* ptr) override
+        {
+            if constexpr (IsMultiComponent<T>::value)
+            {
+                auto src = static_cast<std::vector<T>*>(ptr);
+                return std::make_shared<std::vector<T>>(*src); // Deep copy
+            }
+            else
+            {
+                T* src = static_cast<T*>(ptr);
+                return std::make_shared<T>(*src); // Deep copy
+            }
+        }
     private:
         Storage                         m_Storage;          // dense
         std::vector<uint32_t>           m_EntityToIndex;    // entity -> index

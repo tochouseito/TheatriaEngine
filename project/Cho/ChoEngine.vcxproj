@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameCore\GameWorld\GameWorld.cpp" />
+    <ClCompile Include="GameCore\Prefab\Prefab.cpp" />
     <ClCompile Include="Resources\AudioManager\AudioManager.cpp" />
     <ClCompile Include="ChoEngineAPI.cpp" />
     <ClCompile Include="Core\ChoLog\ChoLog.cpp">
@@ -299,6 +300,7 @@
     <ClInclude Include="Externals\AIUtilityLib\chunk_vector.h" />
     <ClInclude Include="Core\Utility\SoundData.h" />
     <ClInclude Include="GameCore\GameWorld\GameWorld.h" />
+    <ClInclude Include="GameCore\Prefab\Prefab.h" />
     <ClInclude Include="Resources\AudioManager\AudioManager.h" />
     <ClInclude Include="ChoEngineAPI.h" />
     <ClInclude Include="Core\ChoLog\ChoLog.h" />
