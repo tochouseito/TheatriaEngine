@@ -153,7 +153,7 @@ void ScenePrefab::Start()
 	}
 	// MainCameraの設定
 	GameObject* mainCamera = objectContainer->GetGameObjectByName(m_StartCameraName);
-	if (mainCamera->GetType() == ObjectType::Camera)
+	if (mainCamera && mainCamera->GetType() == ObjectType::Camera)
 	{
 		SetMainCameraID(mainCamera->GetID().value());
 	}

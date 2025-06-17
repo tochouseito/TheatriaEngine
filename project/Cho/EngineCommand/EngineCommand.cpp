@@ -22,7 +22,7 @@ GameObject* EngineCommand::GetSelectedObject()
 	{
 		return nullptr;
 	}
-	return &m_GameCore->GetObjectContainer()->GetGameObjectByName(m_SelectedObjectName.value());
+	return m_GameCore->GetObjectContainer()->GetGameObjectByName(m_SelectedObjectName.value());
 }
 
 // エディタの選択中オブジェクトをセット

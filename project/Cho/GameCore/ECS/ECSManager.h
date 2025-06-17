@@ -125,7 +125,10 @@ public:
             arch.set(type);
             m_ArchToEntities[arch].Add(entity);
         }
-        if constexpr (requires(T & c) { c.Initialize(); }) { comp->Initialize(); }
+        if constexpr (HasInitialize<T>)
+        {
+            comp->Initialize(); // Initialize if applicable
+        }
         return comp;
     }
 
@@ -337,22 +340,54 @@ public:
             if constexpr (IsMultiComponent<T>::value)
             {
                 auto it = m_Multi.find(src);
-                if (it == m_Multi.end() || it->second.empty()) return;
-                m_Multi[dst] = it->second;      // shallow copy (T should be copyable)
+                if (it == m_Multi.end() || it->second.empty()) { return; }
+                // shallow copy
+				auto& vecSrc = it->second;
+				auto& vecDst = m_Multi[dst] = vecSrc; // copy vector
+				// コピー直後にInitialize()を呼ぶ
+                if constexpr (HasInitialize<T>)
+                {
+                    for (auto& comp : vecDst)
+                    {
+                        //comp.Initialize();
+                        comp;
+                    }
+				}
             }
             else
             {
                 uint32_t idxSrc = m_EntityToIndex[src];
-                if (idxSrc == kInvalid) return;
+                if (idxSrc == kInvalid) { return; }
+                // すでに dst にコンポーネントがある場合
                 if (dst < m_EntityToIndex.size() && m_EntityToIndex[dst] != kInvalid)
                 {
-                    m_Storage[m_EntityToIndex[dst]] = m_Storage[idxSrc];
+                    auto& c = m_Storage[m_EntityToIndex[dst]];
+                    c = m_Storage[idxSrc];
+                    if constexpr (HasInitialize<T>)
+                    {
+                        //c.Initialize(); // Initialize if applicable
+                    }
                     return;
                 }
-                uint32_t idxDst = static_cast<uint32_t>(m_Storage.size());
+
+                // 新規にコピーする場合
                 m_Storage.emplace_back(m_Storage[idxSrc]);
-                if (m_EntityToIndex.size() <= dst) m_EntityToIndex.resize(dst + 1, kInvalid);
-                if (m_IndexToEntity.size() <= idxDst) m_IndexToEntity.resize(idxDst + 1, kInvalid);
+                auto& newComp = m_Storage.back();
+                newComp;
+                if constexpr (HasInitialize<T>)
+                {
+                    //newComp.Initialize(); // Initialize if applicable
+                }
+
+                uint32_t idxDst = static_cast<uint32_t>(m_Storage.size() - 1);
+                if (m_EntityToIndex.size() <= dst)
+                {
+                    m_EntityToIndex.resize(dst + 1, kInvalid);
+                }
+                if (m_IndexToEntity.size() <= idxDst)
+                {
+                    m_IndexToEntity.resize(idxDst + 1, kInvalid);
+                }
                 m_EntityToIndex[dst] = idxDst;
                 m_IndexToEntity[idxDst] = dst;
             }

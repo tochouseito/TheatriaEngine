@@ -206,7 +206,7 @@ bool AddBoxCollider2DComponent::Undo(EngineCommand* edit)
 
 bool DeleteObjectCommand::Execute(EngineCommand* edit)
 {
-	ECSManager* ecs = ecs;
+	ECSManager* ecs = edit->m_GameCore->GetECSManager();
 	GameObject* object = edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID);
 	if (!object->IsActive()) { return false; }
 	Entity entity = object->GetEntity();
@@ -282,8 +282,7 @@ bool DeleteObjectCommand::Execute(EngineCommand* edit)
 		model->RemoveBoneOffsetIdx(animation->boneOffsetID.value());
 	}
 	// Prefab作成
-	m_Prefab = std::make_unique<Prefab>();
-	m_Prefab.reset(std::move(&Prefab::FromEntity(*ecs, entity)));
+	m_Prefab = std::make_unique<Prefab>(Prefab::FromEntity(*ecs, entity));
 	m_Prefab->Rename(object->GetName());
 	m_Prefab->SetObjectType(object->GetType());
 	// Entityの削除
@@ -910,7 +909,7 @@ bool CloneObjectCommand::Execute(EngineCommand* edit)
 		return false;
 	}
 	// GameObjectを取得
-	GameObject* object = edit->m_GameCore->GetObjectContainer()->GetGameObject(m_SrcID);
+	//GameObject* object = edit->m_GameCore->GetObjectContainer()->GetGameObject(m_SrcID);
 	// 
 	// 各IDの取得
 	// Entity
@@ -926,7 +925,7 @@ bool CloneObjectCommand::Execute(EngineCommand* edit)
 	transform->mapID = mapID;
 	// GameObjectを追加
 	ObjectID objectID = edit->m_GameCore->GetObjectContainer()->AddGameObject(entity, name, ObjectType::MeshObject);
-	m_ObjectID = objectID;
+	m_DstID = objectID;
 	// シーンに追加
 	edit->m_GameCore->GetSceneManager()->GetScene(edit->m_GameCore->GetSceneManager()->GetSceneID(m_CurrendSceneName))->AddClonedObject(objectID);
 	return true;

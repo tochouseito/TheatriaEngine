@@ -16,7 +16,7 @@ public:
 	std::function<b2Vec2(const b2Vec2& incident, const b2Vec2& normal)> ReflectFunc;
 	std::function<b2Vec2(const b2Vec2& start, const b2Vec2& dir, const int ReflectionCount, const float maxLength, const std::string hitTag)> RaycastWithReflectionsOnceFunc;
 	std::function<void(const Vector2& position)> MovePositionFunc;
-	std::function<GameObject& (const Vector2& start, const Vector2& end, const std::string hitTag)> LinecastFunc;
+	std::function<GameObject* (const Vector2& start, const Vector2& end, const std::string hitTag)> LinecastFunc;
 	std::function<void(bool isAwake)> SetAwakeFunc;
 	// 最後の法線（内部的に保持、ただし状態は保持しないなら静的でもよい）
 	b2Vec2 m_LastHitNormal = b2Vec2(0.0f, 1.0f); // 一時的な用途
@@ -45,7 +45,7 @@ void Rigidbody2DAPI::MovePosition(const Vector2& position)
 	if (implRigidbody2DAPI->MovePositionFunc) { implRigidbody2DAPI->MovePositionFunc(position); }
 }
 
-GameObject& Rigidbody2DAPI::Linecast(const Vector2& start, const Vector2& end, const std::string hitTag)
+GameObject* Rigidbody2DAPI::Linecast(const Vector2& start, const Vector2& end, const std::string hitTag)
 {
 	return implRigidbody2DAPI->LinecastFunc(start, end, hitTag);
 }
@@ -123,14 +123,14 @@ void Rigidbody2DAPI::Initialize(const Entity& entity, ECSManager* ecs, ObjectCon
 				}
 			}
 			};
-		implRigidbody2DAPI->LinecastFunc = [this](const Vector2& start, const Vector2& end, const std::string hitTag) -> GameObject& {
+		implRigidbody2DAPI->LinecastFunc = [this](const Vector2& start, const Vector2& end, const std::string hitTag) -> GameObject* {
 			if (auto* t = m_ECS->GetComponent<Rigidbody2DComponent>(m_Entity))
 			{
 				RayCastCallback callback(m_ObjectContainer, hitTag);
 				if(start == end)
 				{
 					// start と end が同じ場合は何もしない
-					return m_ObjectContainer->GetDummyGameObject();
+					return nullptr;
 				}
 				t->world->RayCast(&callback, b2Vec2(start.x, start.y), b2Vec2(end.x, end.y));
 				if (callback.hit)
@@ -139,7 +139,7 @@ void Rigidbody2DAPI::Initialize(const Entity& entity, ECSManager* ecs, ObjectCon
 					return m_ObjectContainer->GetGameObject(id);
 				}
 			}
-			return m_ObjectContainer->GetDummyGameObject();
+			return nullptr;
 			};
 		implRigidbody2DAPI->SetAwakeFunc = [this](bool isAwake) {
 			if (auto* t = m_ECS->GetComponent<Rigidbody2DComponent>(m_Entity))

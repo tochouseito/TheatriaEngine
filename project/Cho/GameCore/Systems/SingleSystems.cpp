@@ -190,8 +190,8 @@ void CameraUpdateSystem::TransferMatrix(TransformComponent& transform, CameraCom
 void ScriptGenerateInstanceSystem::InstanceGenerate(ScriptComponent& script)
 {
 	Log::Write(LogLevel::Info, "Loading script: " + script.scriptName);
-	GameObject& object = m_pObjectContainer->GetGameObject(script.objectID.value());
-	if (script.scriptName.empty() || !object.IsActive())
+	GameObject* object = m_pObjectContainer->GetGameObject(script.objectID.value());
+	if (script.scriptName.empty() || !object->IsActive())
 	{
 		script.isActive = false;
 		return;
@@ -207,8 +207,8 @@ void ScriptGenerateInstanceSystem::InstanceGenerate(ScriptComponent& script)
 		return;
 	}
 	// スクリプトを生成
-	object.Initialize();// 初期化
-	IScript* scriptInstance = createScript(object);
+	object->Initialize();// 初期化
+	IScript* scriptInstance = createScript(*object);
 	if (!scriptInstance)
 	{
 		script.isActive = false;
@@ -354,11 +354,11 @@ void CollisionSystem::CollisionStay(ScriptComponent& script, Rigidbody2DComponen
 	if (script.isActive&&rb.isCollisionStay&&rb.otherObjectID)
 	{
 		// 相手のゲームオブジェクトを取得
-		GameObject& otherObject = m_pObjectContainer->GetGameObject(rb.otherObjectID.value());
-		if (!otherObject.IsActive()) { return; }
+		GameObject* otherObject = m_pObjectContainer->GetGameObject(rb.otherObjectID.value());
+		if (!otherObject) { return; }
 		if (!rb.isActive) { return; }
-		otherObject.Initialize(false);// これいる？？
-		script.onCollisionStayFunc(otherObject);
+		otherObject->Initialize(false);// これいる？？
+		script.onCollisionStayFunc(*otherObject);
 	}
 }
 

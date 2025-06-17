@@ -148,7 +148,7 @@ public:
 	// 瞬間移動
 	void MovePosition(const Vector2& position);
 	// ライン上の最初にヒットしたオブジェクトを取得
-	GameObject& Linecast(const Vector2& start, const Vector2& end, const std::string hitTag);
+	GameObject* Linecast(const Vector2& start, const Vector2& end, const std::string hitTag);
 	// 強制的に物理計算
 	void SetAwake(bool isAwake);
 private:

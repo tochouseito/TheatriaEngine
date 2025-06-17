@@ -13,7 +13,7 @@ public:
     virtual void OnCollisionEnter(GameObject& other) { other; }
     virtual void OnCollisionStay(GameObject& other) { other; }
     virtual void OnCollisionExit( GameObject& other) { other; }
-    GameObject& FindGameObjectByName(std::wstring_view name);
+    GameObject* FindGameObjectByName(std::wstring_view name);
     /*template<typename T>
     static std::vector<ScriptMember> BuildReflectedMembers()
     {

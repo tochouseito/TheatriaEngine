@@ -23,7 +23,7 @@
 #include <cstdint>
 #include <variant>
 
-//struct ScriptContext;
+class EngineCommand;
 class GameObject;
 
 // コンポーネントだと判別するためのタグ
@@ -31,6 +31,11 @@ struct IComponentTag
 {
 	virtual void Initialize() {} // 初期化関数を定義
 };
+
+// ECS用ヘルパー
+template<typename C>
+concept HasInitialize = requires(C& c) { c.Initialize(); };
+
 // コンポーネントが複数持てるか(デフォルトは持てない)
 template<typename T>
 struct IsMultiComponent : std::false_type {};
@@ -655,6 +660,7 @@ struct AnimationComponent : public IComponentTag
 	//std::optional<uint32_t> paletteBufferIndex = std::nullopt;	// パレットバッファーインデックス
 	//std::optional<uint32_t> influenceBufferIndex = std::nullopt;// インフルエンスバッファーインデックス
 	//std::optional<uint32_t> skinningBufferIndex = std::nullopt;	// スキニングバッファーインデックス
+	
 };
 
 // 全種類のコンポーネントをまとめた構造体

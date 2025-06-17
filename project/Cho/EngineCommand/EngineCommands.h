@@ -2,6 +2,7 @@
 #include <optional>
 #include "EngineCommand/EngineCommand.h"
 #include "Core/Utility/Components.h"
+#include "GameCore/Prefab/Prefab.h"
 class GameObject;
 class Prefab;
 // 3Dオブジェクトを追加するコマンド
@@ -327,7 +328,7 @@ class CloneObjectCommand : public IEngineCommand
 {
 public:
 	CloneObjectCommand(const std::wstring& sceneName,const uint32_t& src)
-		:m_CurrendSceneName(sceneName)
+		:m_CurrendSceneName(sceneName), m_SrcID(src)
 	{
 	}
 	bool Execute(EngineCommand* edit)override;

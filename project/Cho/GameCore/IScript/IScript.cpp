@@ -2,13 +2,13 @@
 #include "Platform/FileSystem/FileSystem.h"
 #include "GameCore/ObjectContainer/ObjectContainer.h"
 
-GameObject& IScript::FindGameObjectByName(std::wstring_view name)
+GameObject* IScript::FindGameObjectByName(std::wstring_view name)
 {
-	GameObject& result = gameObject.m_ObjectContainer->GetGameObjectByName(name.data());
-	if (!result.IsActive())
+	GameObject* result = gameObject.m_ObjectContainer->GetGameObjectByName(name.data());
+	if (!result)
 	{
-		return result.m_ObjectContainer->GetDummyGameObject();
+		return nullptr;
 	}
-	result.Initialize(false);
+	result->Initialize(false);
 	return result;
 }

@@ -115,10 +115,10 @@ void GameCore::InitializeGenerateObject()
 {
 	for (const ObjectID& id : m_GameGenerateID)
 	{
-		GameObject& object = m_pObjectContainer->GetGameObject(id);
-		if (!object.IsActive()) { continue; }
+		GameObject* object = m_pObjectContainer->GetGameObject(id);
+		if (!object->IsActive()) { continue; }
 		// オブジェクトの初期化
-		Entity entity = object.GetEntity();
+		Entity entity = object->GetEntity();
 		// TransformComponentを取得
 		TransformComponent* transform = m_pECSManager->GetComponent<TransformComponent>(entity);
 		if (!transform) { continue; }
@@ -162,10 +162,10 @@ void GameCore::InitializeGenerateObject()
 	{
 		for(const ObjectID& id : m_pSceneManager->GetScene(sceneID)->GetUseObjects())
 		{
-			GameObject& object = m_pObjectContainer->GetGameObject(id);
-			if (!object.IsActive()) { continue; }
+			GameObject* object = m_pObjectContainer->GetGameObject(id);
+			if (!object->IsActive()) { continue; }
 			// オブジェクトの初期化
-			Entity entity = object.GetEntity();
+			Entity entity = object->GetEntity();
 			// TransformComponentを取得
 			TransformComponent* transform = m_pECSManager->GetComponent<TransformComponent>(entity);
 			if (!transform) { continue; }
@@ -208,8 +208,8 @@ void GameCore::ClearGenerateObject()
 {
 	for (const ObjectID& id : m_GameInitializedID)
 	{
-		GameObject& object = m_pObjectContainer->GetGameObject(id);
-		std::unique_ptr<DeleteObjectCommand> command = std::make_unique<DeleteObjectCommand>(object.GetID().value());
+		GameObject* object = m_pObjectContainer->GetGameObject(id);
+		std::unique_ptr<DeleteObjectCommand> command = std::make_unique<DeleteObjectCommand>(object->GetID().value());
 		command->Execute(m_EngineCommand);
 	}
 	m_GameInitializedID.clear();
@@ -226,10 +226,10 @@ void GameCore::SceneInitialize(ScenePrefab* scene)
 {
 	for (ObjectID& id : scene->GetUseObjects())
 	{
-		GameObject& object = m_pObjectContainer->GetGameObject(id);
-		if (!object.IsActive()) { continue; }
+		GameObject* object = m_pObjectContainer->GetGameObject(id);
+		if (!object->IsActive()) { continue; }
 		// オブジェクトの初期化
-		Entity entity = object.GetEntity();
+		Entity entity = object->GetEntity();
 		// TransformComponentを取得
 		TransformComponent* transform = m_pECSManager->GetComponent<TransformComponent>(entity);
 		if (!transform) { continue; }
@@ -257,10 +257,10 @@ void GameCore::SceneFinelize(ScenePrefab* scene)
 	if (!isRunning) { return; }
 	for (ObjectID& id : scene->GetUseObjects())
 	{
-		GameObject& object = m_pObjectContainer->GetGameObject(id);
-		if (!object.IsActive()) { continue; }
+		GameObject* object = m_pObjectContainer->GetGameObject(id);
+		if (!object->IsActive()) { continue; }
 		// オブジェクトの初期化
-		Entity entity = object.GetEntity();
+		Entity entity = object->GetEntity();
 		// TransformComponentを取得
 		TransformComponent* transform = m_pECSManager->GetComponent<TransformComponent>(entity);
 		if (!transform) { continue; }

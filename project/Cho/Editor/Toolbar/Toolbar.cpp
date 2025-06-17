@@ -43,13 +43,13 @@ void Toolbar::Window()
     {
         currentTool = m_EngineCommand->GetGameCore()->GetSceneManager()->GetMainScene()->GetMainCameraID().value();
     }
-	GameObject& currentToolObject = m_EngineCommand->GetGameCore()->GetObjectContainer()->GetGameObject(currentTool);
-    if (currentToolObject.IsActive())
+	GameObject* currentToolObject = m_EngineCommand->GetGameCore()->GetObjectContainer()->GetGameObject(currentTool);
+    if (currentToolObject &&currentToolObject->IsActive())
     {
-		if (currentToolObject.GetType() == ObjectType::Camera)
+		if (currentToolObject->GetType() == ObjectType::Camera)
 		{
             // オブジェクトの名前を取得
-            name = currentToolObject.GetName();
+            name = currentToolObject->GetName();
 		}
     }
     ImGui::SetNextItemWidth(100); // プルダウンの横幅指定

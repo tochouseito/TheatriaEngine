@@ -37,7 +37,7 @@ void Hierarchy::Window()
 				std::unique_ptr<Add3DObjectCommand> add3DObject = std::make_unique<Add3DObjectCommand>();
 				add3DObject->Execute(m_EngineCommand);
 				// 生成したオブジェクト
-				GameObject* object = &m_EngineCommand->GetGameCore()->GetObjectContainer()->GetGameObject(add3DObject->GetObjectID());
+				GameObject* object = m_EngineCommand->GetGameCore()->GetObjectContainer()->GetGameObject(add3DObject->GetObjectID());
 				TransformComponent* transform = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<TransformComponent>(object->GetEntity());
 				// 必要なコンポーネントを付与
 				// メッシュ
@@ -92,9 +92,9 @@ void Hierarchy::Window()
 	for (const ObjectID& objectID : currentSceneObjects)
 	{
 		// オブジェクトを取得
-		GameObject& object = m_EngineCommand->GetGameCore()->GetObjectContainer()->GetGameObject(objectID);
-		if (!object.IsActive()) { continue; }// オブジェクトが存在しない場合はスキップ
-		if (editing && editingName == object.GetName())
+		GameObject* object = m_EngineCommand->GetGameCore()->GetObjectContainer()->GetGameObject(objectID);
+		if (!object) { continue; }// オブジェクトが存在しない場合はスキップ
+		if (editing && editingName == object->GetName())
 		{
 			// 編集モード: InputTextを表示
 			std::string inputName = ConvertString(inputBuffer);
@@ -109,7 +109,7 @@ void Hierarchy::Window()
 				if (!wNewName.empty())
 				{
 					// オブジェクトの名前を更新
-					std::unique_ptr<RenameObjectCommand> renameCommand = std::make_unique<RenameObjectCommand>(object.GetID().value(), wNewName);
+					std::unique_ptr<RenameObjectCommand> renameCommand = std::make_unique<RenameObjectCommand>(object->GetID().value(), wNewName);
 					m_EngineCommand->ExecuteCommand(std::move(renameCommand));
 
 					editing = false;  // 編集終了
@@ -123,10 +123,10 @@ void Hierarchy::Window()
 		} else
 		{
 			// オブジェクトの名前を取得
-			std::wstring objectName = object.GetName();
+			std::wstring objectName = object->GetName();
 			// ツリーノードとして表示
 			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanFullWidth;
-			if (m_EngineCommand->GetSelectedObject() && m_EngineCommand->GetSelectedObject()->GetID() == object.GetID())
+			if (m_EngineCommand->GetSelectedObject() && m_EngineCommand->GetSelectedObject()->GetID() == object->GetID())
 			{
 				flags |= ImGuiTreeNodeFlags_Selected; // 選択中のオブジェクトをハイライト
 			}

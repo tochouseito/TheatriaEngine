@@ -60,6 +60,8 @@ CHO_API GameObject* ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vecto
 	newObject->SetTag(object->GetTag());
 	// CurrendSceneのコピー
 	newObject->SetCurrentSceneName(object->GetCurrentSceneName());
+	Entity srcEntity = object->GetEntity();
+	Entity dstEntity = newObject->GetEntity();
 	// Componentを取得
 	TransformComponent* transform = engineCommand->GetGameCore()->GetECSManager()->GetComponent<TransformComponent>(newObject->GetEntity());
 	if (newObject->GetType() == ObjectType::ParticleSystem)
@@ -67,24 +69,24 @@ CHO_API GameObject* ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vecto
 		transform->scale.Zero();
 	}
 
-	MeshFilterComponent* meshFilter = engineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshFilterComponent>(object.GetEntity());
-	MeshRendererComponent* meshRenderer = engineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshRendererComponent>(object.GetEntity());
-	ScriptComponent* script = engineCommand->GetGameCore()->GetECSManager()->GetComponent<ScriptComponent>(object.GetEntity());
-	std::vector<LineRendererComponent>* lineRenderer = engineCommand->GetGameCore()->GetECSManager()->GetAllComponents<LineRendererComponent>(object.GetEntity());
-	Rigidbody2DComponent* rb = engineCommand->GetGameCore()->GetECSManager()->GetComponent<Rigidbody2DComponent>(object.GetEntity());
-	BoxCollider2DComponent* box = engineCommand->GetGameCore()->GetECSManager()->GetComponent<BoxCollider2DComponent>(object.GetEntity());
-	MaterialComponent* material = engineCommand->GetGameCore()->GetECSManager()->GetComponent<MaterialComponent>(object.GetEntity());
-	EmitterComponent* emitter = engineCommand->GetGameCore()->GetECSManager()->GetComponent<EmitterComponent>(object.GetEntity());
-	ParticleComponent* particle = engineCommand->GetGameCore()->GetECSManager()->GetComponent<ParticleComponent>(object.GetEntity());
-	AudioComponent* audio = engineCommand->GetGameCore()->GetECSManager()->GetComponent<AudioComponent>(object.GetEntity());
-	AnimationComponent* animation = engineCommand->GetGameCore()->GetECSManager()->GetComponent<AnimationComponent>(object.GetEntity());
+	MeshFilterComponent* meshFilter = engineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshFilterComponent>(srcEntity);
+	MeshRendererComponent* meshRenderer = engineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshRendererComponent>(srcEntity);
+	ScriptComponent* script = engineCommand->GetGameCore()->GetECSManager()->GetComponent<ScriptComponent>(srcEntity);
+	std::vector<LineRendererComponent>* lineRenderer = engineCommand->GetGameCore()->GetECSManager()->GetAllComponents<LineRendererComponent>(srcEntity);
+	Rigidbody2DComponent* rb = engineCommand->GetGameCore()->GetECSManager()->GetComponent<Rigidbody2DComponent>(srcEntity);
+	BoxCollider2DComponent* box = engineCommand->GetGameCore()->GetECSManager()->GetComponent<BoxCollider2DComponent>(srcEntity);
+	MaterialComponent* material = engineCommand->GetGameCore()->GetECSManager()->GetComponent<MaterialComponent>(srcEntity);
+	EmitterComponent* emitter = engineCommand->GetGameCore()->GetECSManager()->GetComponent<EmitterComponent>(srcEntity);
+	ParticleComponent* particle = engineCommand->GetGameCore()->GetECSManager()->GetComponent<ParticleComponent>(srcEntity);
+	AudioComponent* audio = engineCommand->GetGameCore()->GetECSManager()->GetComponent<AudioComponent>(srcEntity);
+	AnimationComponent* animation = engineCommand->GetGameCore()->GetECSManager()->GetComponent<AnimationComponent>(srcEntity);
 	// あるやつをnewObjectに追加
 	if (meshFilter)
 	{
-		std::unique_ptr<AddMeshFilterComponent> addMeshFilterCommand = std::make_unique<AddMeshFilterComponent>(newObject.GetEntity());
+		std::unique_ptr<AddMeshFilterComponent> addMeshFilterCommand = std::make_unique<AddMeshFilterComponent>(dstEntity);
 		addMeshFilterCommand->Execute(engineCommand);
 		// MeshFilterComponentのMeshを設定
-		MeshFilterComponent* newMeshFilter = engineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshFilterComponent>(newObject.GetEntity());
+		MeshFilterComponent* newMeshFilter = engineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshFilterComponent>(dstEntity);
 		if (newMeshFilter)
 		{
 			newMeshFilter->modelID = g_Engine->GetEngineCommand()->GetResourceManager()->GetModelManager()->GetModelDataIndex(meshFilter->modelName);
@@ -94,19 +96,19 @@ CHO_API GameObject* ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vecto
 	}
 	if (meshRenderer)
 	{
-		std::unique_ptr<AddMeshRendererComponent> addMeshRendererCommand = std::make_unique<AddMeshRendererComponent>(newObject.GetEntity());
+		std::unique_ptr<AddMeshRendererComponent> addMeshRendererCommand = std::make_unique<AddMeshRendererComponent>(dstEntity);
 		addMeshRendererCommand->Execute(engineCommand);
 	}
 	if (script)
 	{
-		std::unique_ptr<AddScriptComponent> addScriptCommand = std::make_unique<AddScriptComponent>(newObject.GetEntity(),newObject.GetID().value());
+		std::unique_ptr<AddScriptComponent> addScriptCommand = std::make_unique<AddScriptComponent>(dstEntity,newObject->GetID().value());
 		addScriptCommand->Execute(engineCommand);
 		// ScriptComponentのスクリプト名を設定
-		ScriptComponent* newScript = engineCommand->GetGameCore()->GetECSManager()->GetComponent<ScriptComponent>(newObject.GetEntity());
+		ScriptComponent* newScript = engineCommand->GetGameCore()->GetECSManager()->GetComponent<ScriptComponent>(dstEntity);
 		if (newScript)
 		{
 			newScript->scriptName = script->scriptName;
-			newScript->objectID = newObject.GetID().value();
+			newScript->objectID = newObject->GetID().value();
 		}
 	}
 	if (lineRenderer)
@@ -114,15 +116,15 @@ CHO_API GameObject* ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vecto
 		for (auto& line : *lineRenderer)
 		{
 			line;
-			std::unique_ptr<AddLineRendererComponent> addLineCommand = std::make_unique<AddLineRendererComponent>(newObject.GetEntity());
+			std::unique_ptr<AddLineRendererComponent> addLineCommand = std::make_unique<AddLineRendererComponent>(dstEntity);
 			addLineCommand->Execute(engineCommand);
 		}
 	}
 	if (rb)
 	{
-		std::unique_ptr<AddRigidbody2DComponent> addRigidbodyCommand = std::make_unique<AddRigidbody2DComponent>(newObject.GetEntity(), newObject.GetID().value());
+		std::unique_ptr<AddRigidbody2DComponent> addRigidbodyCommand = std::make_unique<AddRigidbody2DComponent>(dstEntity, newObject->GetID().value());
 		addRigidbodyCommand->Execute(engineCommand);
-		Rigidbody2DComponent* newRigidbody = engineCommand->GetGameCore()->GetECSManager()->GetComponent<Rigidbody2DComponent>(newObject.GetEntity());
+		Rigidbody2DComponent* newRigidbody = engineCommand->GetGameCore()->GetECSManager()->GetComponent<Rigidbody2DComponent>(dstEntity);
 		if (newRigidbody)
 		{
 			newRigidbody->mass = rb->mass;
@@ -134,9 +136,9 @@ CHO_API GameObject* ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vecto
 	}
 	if (box)
 	{
-		std::unique_ptr<AddBoxCollider2DComponent> addBoxCommand = std::make_unique<AddBoxCollider2DComponent>(newObject.GetEntity());
+		std::unique_ptr<AddBoxCollider2DComponent> addBoxCommand = std::make_unique<AddBoxCollider2DComponent>(dstEntity);
 		addBoxCommand->Execute(engineCommand);
-		BoxCollider2DComponent* newBox = engineCommand->GetGameCore()->GetECSManager()->GetComponent<BoxCollider2DComponent>(newObject.GetEntity());
+		BoxCollider2DComponent* newBox = engineCommand->GetGameCore()->GetECSManager()->GetComponent<BoxCollider2DComponent>(dstEntity);
 		if (newBox)
 		{
 			newBox->offsetX = box->offsetX;
@@ -151,9 +153,9 @@ CHO_API GameObject* ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vecto
 	}
 	if (emitter)
 	{
-		std::unique_ptr<AddEmitterComponent> addEmitterCommand = std::make_unique<AddEmitterComponent>(newObject.GetEntity());
+		std::unique_ptr<AddEmitterComponent> addEmitterCommand = std::make_unique<AddEmitterComponent>(dstEntity);
 		addEmitterCommand->Execute(engineCommand);
-		EmitterComponent* newEmitter = engineCommand->GetGameCore()->GetECSManager()->GetComponent<EmitterComponent>(newObject.GetEntity());
+		EmitterComponent* newEmitter = engineCommand->GetGameCore()->GetECSManager()->GetComponent<EmitterComponent>(dstEntity);
 		if (newEmitter)
 		{
 			newEmitter->emitCount = emitter->emitCount;
@@ -167,9 +169,9 @@ CHO_API GameObject* ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vecto
 	}
 	if (particle)
 	{
-		std::unique_ptr<AddParticleComponent> addParticleCommand = std::make_unique<AddParticleComponent>(newObject.GetEntity());
+		std::unique_ptr<AddParticleComponent> addParticleCommand = std::make_unique<AddParticleComponent>(dstEntity);
 		addParticleCommand->Execute(engineCommand);
-		ParticleComponent* newParticle = engineCommand->GetGameCore()->GetECSManager()->GetComponent<ParticleComponent>(newObject.GetEntity());
+		ParticleComponent* newParticle = engineCommand->GetGameCore()->GetECSManager()->GetComponent<ParticleComponent>(dstEntity);
 		if (newParticle)
 		{
 			newParticle->count = particle->count;
@@ -177,9 +179,9 @@ CHO_API GameObject* ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vecto
 	}
 	if (material)
 	{
-		std::unique_ptr<AddMaterialComponent> addMaterialCommand = std::make_unique<AddMaterialComponent>(newObject.GetEntity());
+		std::unique_ptr<AddMaterialComponent> addMaterialCommand = std::make_unique<AddMaterialComponent>(dstEntity);
 		addMaterialCommand->Execute(engineCommand);
-		MaterialComponent* newMaterial = engineCommand->GetGameCore()->GetECSManager()->GetComponent<MaterialComponent>(newObject.GetEntity());
+		MaterialComponent* newMaterial = engineCommand->GetGameCore()->GetECSManager()->GetComponent<MaterialComponent>(dstEntity);
 		if (newMaterial)
 		{
 			newMaterial->color = material->color;
@@ -192,9 +194,9 @@ CHO_API GameObject* ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vecto
 	}
 	if(audio)
 	{
-		std::unique_ptr<AddAudioComponent> addAudioCommand = std::make_unique<AddAudioComponent>(newObject.GetEntity());
+		std::unique_ptr<AddAudioComponent> addAudioCommand = std::make_unique<AddAudioComponent>(dstEntity);
 		addAudioCommand->Execute(engineCommand);
-		AudioComponent* newAudio = engineCommand->GetGameCore()->GetECSManager()->GetComponent<AudioComponent>(newObject.GetEntity());
+		AudioComponent* newAudio = engineCommand->GetGameCore()->GetECSManager()->GetComponent<AudioComponent>(dstEntity);
 		if (newAudio)
 		{
 			for (const auto& sound : audio->soundData)
@@ -213,9 +215,9 @@ CHO_API GameObject* ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vecto
 	}
 	if(animation)
 	{
-		std::unique_ptr<AddAnimationComponent> addAnimationCommand = std::make_unique<AddAnimationComponent>(newObject.GetEntity());
+		std::unique_ptr<AddAnimationComponent> addAnimationCommand = std::make_unique<AddAnimationComponent>(dstEntity);
 		addAnimationCommand->Execute(engineCommand);
-		AnimationComponent* newAnimation = engineCommand->GetGameCore()->GetECSManager()->GetComponent<AnimationComponent>(newObject.GetEntity());
+		AnimationComponent* newAnimation = engineCommand->GetGameCore()->GetECSManager()->GetComponent<AnimationComponent>(dstEntity);
 		if (newAnimation)
 		{
 			newAnimation->modelName = animation->modelName;
@@ -235,7 +237,7 @@ CHO_API GameObject* ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vecto
 	{
 		transform->position = generatePosition;
 	}
-	engineCommand->GetGameCore()->AddGameGenerateObject(newObject.GetID().value());
+	engineCommand->GetGameCore()->AddGameGenerateObject(newObject->GetID().value());
 	return newObject;
 }
 
