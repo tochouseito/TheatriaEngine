@@ -38,9 +38,9 @@ namespace ChoSystem
 		const std::string& dataName,
 		GameParameterVariant& outValue);
 	// ゲームオブジェクト取得
-	CHO_API GameObject& FindGameObjectByName(std::wstring_view name);
+	CHO_API GameObject* FindGameObjectByName(std::wstring_view name);
 	// ゲームオブジェクト複製
-	CHO_API GameObject& CloneGameObject(std::optional<uint32_t> id, Vector3 generatePosition);
+	CHO_API GameObject* CloneGameObject(std::optional<uint32_t> id, Vector3 generatePosition);
 	// ゲームオブジェクト削除
 	CHO_API void DestroyGameObject(std::optional<uint32_t> id);
 	// デルタタイム取得

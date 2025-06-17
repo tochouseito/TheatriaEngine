@@ -113,7 +113,15 @@ public:
         return prefab;
     }
 
+	void Rename(const std::wstring& name) { m_Name = name; }
+	void SetTag(const std::string& tag) { m_Tag = tag; }
+	void SetObjectType(ObjectType type) { m_ObjectType = type; }
+
 private:
+	ObjectType m_ObjectType = ObjectType::MeshObject;
+	std::wstring m_Name = L"";
+	std::string m_Tag = "";
+
     Archetype m_Archetype;
 
     // 通常のコンポーネント：1つだけ保持

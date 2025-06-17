@@ -2,7 +2,8 @@
 #include <optional>
 #include "EngineCommand/EngineCommand.h"
 #include "Core/Utility/Components.h"
-
+class GameObject;
+class Prefab;
 // 3Dオブジェクトを追加するコマンド
 class Add3DObjectCommand :public IEngineCommand
 {
@@ -173,7 +174,6 @@ private:
 	uint32_t m_Entity;
 };
 // オブジェクトを削除するコマンド
-class GameObject;
 class DeleteObjectCommand : public IEngineCommand
 {
 public:
@@ -184,24 +184,8 @@ public:
 	bool Execute(EngineCommand* edit)override;
 	bool Undo(EngineCommand* edit)override;
 private:
+	std::unique_ptr<Prefab> m_Prefab; // 削除前のPrefab情報を保持
 	uint32_t m_ObjectID;
-	std::wstring m_Name;
-	ObjectType m_Type;
-	TransformComponent m_Transform;
-	std::optional<CameraComponent> m_Camera;
-	std::optional<MeshFilterComponent> m_MeshFilter;
-	std::optional<MeshRendererComponent> m_MeshRenderer;
-	std::optional<MaterialComponent> m_Material;
-	std::optional<ScriptComponent> m_Script;
-	std::optional<std::vector<LineRendererComponent>> m_LineRenderer;
-	std::optional<Rigidbody2DComponent> m_Rigidbody2D;
-	std::optional<BoxCollider2DComponent> m_BoxCollider2D;
-	std::optional<EmitterComponent> m_Emitter;
-	std::optional<ParticleComponent> m_Particle;
-	std::optional<UISpriteComponent> m_UISprite;
-	std::optional<LightComponent> m_Light;
-	std::optional<AnimationComponent> m_Animation;
-	std::optional<AudioComponent> m_Audio;
 };
 // オブジェクトの名前を変更するコマンド
 class RenameObjectCommand : public IEngineCommand
@@ -342,15 +326,16 @@ private:
 class CloneObjectCommand : public IEngineCommand
 {
 public:
-	CloneObjectCommand(const std::wstring& sceneName)
+	CloneObjectCommand(const std::wstring& sceneName,const uint32_t& src)
 		:m_CurrendSceneName(sceneName)
 	{
 	}
 	bool Execute(EngineCommand* edit)override;
 	bool Undo(EngineCommand* edit)override;
 	// オブジェクトのIDを取得
-	uint32_t GetObjectID() const { return m_ObjectID; }
+	uint32_t GetObjectID() const { return m_DstID; }
 private:
-	uint32_t m_ObjectID;
+	uint32_t m_DstID;
+	uint32_t m_SrcID;
 	std::wstring m_CurrendSceneName;
 };

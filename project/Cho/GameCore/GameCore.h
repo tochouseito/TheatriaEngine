@@ -39,7 +39,7 @@ public:
 	bool IsRunning() const { return isRunning; }
 	void GameRun();
 	void GameStop();
-	void AddGameGenerateObject(const ObjectID& id) { m_GameGenerateID.push_back(id); m_pObjectContainer->GetGameObject(id).Initialize(); }
+	void AddGameGenerateObject(const ObjectID& id) { m_GameGenerateID.push_back(id); m_pObjectContainer->GetGameObject(id)->Initialize(); }
 	void InitializeGenerateObject();
 	void ClearGenerateObject();
 	void RemoveGameInitializedID(const ObjectID& id) { m_GameInitializedID.remove(id); }

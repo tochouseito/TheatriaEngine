@@ -14,7 +14,7 @@ public:
 	ObjectContainer(ECSManager* ecs, ResourceManager* resourceManager, InputManager* input) :
 		m_ECS(ecs), m_ResourceManager(resourceManager), m_InputManager(input)
 	{
-		m_DummyGameObject.SetInactive();
+		//m_DummyGameObject.SetInactive();
 	}
 	// Destructor
 	~ObjectContainer()
@@ -47,45 +47,45 @@ public:
 		m_GameObjects.erase(id);
 	}
 	// ゲームオブジェクトを取得
-	/*GameObject* GetGameObject(const ObjectID& index) {
+	GameObject* GetGameObject(const ObjectID& index) {
 		if (!m_GameObjects.isValid(index))
 		{
 			return nullptr;
 		}
-		return &m_GameObjects[index];
-	}*/
-	GameObject& GetGameObject(const ObjectID& index)
+		return m_GameObjects[index].get();
+	}
+	/*GameObject& GetGameObject(const ObjectID& index)
 	{
 		if (!m_GameObjects.isValid(index))
 		{
 			return m_DummyGameObject;
 		}
 		return *m_GameObjects[index];
-	}
+	}*/
 	// ゲームオブジェクトコンテナを取得
 	FVector<std::unique_ptr<GameObject>>& GetGameObjects() { return m_GameObjects; }
 	// 名前検索用補助コンテナを取得
 	std::unordered_map<std::wstring, ObjectID>& GetNameToObjectID() { return m_NameToObjectID; }
 	// 名前でゲームオブジェクトを取得
-	/*GameObject* GetGameObjectByName(const std::wstring& name)
+	GameObject* GetGameObjectByName(const std::wstring& name)
 	{
 		if (m_NameToObjectID.contains(name))
 		{
-			return &m_GameObjects[m_NameToObjectID[name]];
+			return m_GameObjects[m_NameToObjectID[name]].get();
 		}
 		return nullptr;
-	}*/
+	}
 	// 名前でゲームオブジェクトを取得
-	GameObject& GetGameObjectByName(const std::wstring& name)
+	/*GameObject& GetGameObjectByName(const std::wstring& name)
 	{
 		if (m_NameToObjectID.contains(name))
 		{
 			return *m_GameObjects[m_NameToObjectID[name]];
 		}
 		return m_DummyGameObject;
-	}
+	}*/
 	// ダミーGameObjectを取得
-	GameObject& GetDummyGameObject() { return m_DummyGameObject; }
+	//GameObject& GetDummyGameObject() { return m_DummyGameObject; }
 	// GameObject全て初期化
 	void InitializeAllGameObjects()
 	{
@@ -108,5 +108,5 @@ private:
 	std::unordered_map<ObjectType, std::vector<ObjectID>> m_TypeToObjectIDs;
 
 	// ダミーGameObject
-	GameObject m_DummyGameObject;
+	//GameObject m_DummyGameObject;
 };

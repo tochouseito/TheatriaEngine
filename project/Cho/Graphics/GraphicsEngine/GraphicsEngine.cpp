@@ -418,10 +418,10 @@ void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& ga
 				std::optional<uint32_t> cameraID = gameCore.GetSceneManager()->GetMainScene()->GetMainCameraID();
 				if (!cameraID) { continue; }
 				// カメラオブジェクトを取得
-				GameObject& cameraObject = gameCore.GetObjectContainer()->GetGameObject(cameraID.value());
-				if (!cameraObject.IsActive()) { continue; }
+				GameObject* cameraObject = gameCore.GetObjectContainer()->GetGameObject(cameraID.value());
+				if (!cameraObject->IsActive()) { continue; }
 				// カメラのバッファインデックスを取得
-				CameraComponent* cameraComponent = gameCore.GetECSManager()->GetComponent<CameraComponent>(cameraObject.GetEntity());
+				CameraComponent* cameraComponent = gameCore.GetECSManager()->GetComponent<CameraComponent>(cameraObject->GetEntity());
 				if (!cameraComponent) { continue; }
 				// カメラのバッファを取得
 				cameraBuffer = resourceManager.GetBuffer<IConstantBuffer>(cameraComponent->bufferIndex);
@@ -521,10 +521,10 @@ void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& ga
 				std::optional<uint32_t> cameraID = gameCore.GetSceneManager()->GetMainScene()->GetMainCameraID();
 				if (!cameraID) { continue; }
 				// カメラオブジェクトを取得
-				GameObject& cameraObject = gameCore.GetObjectContainer()->GetGameObject(cameraID.value());
-				if (!cameraObject.IsActive()) { continue; }
+				GameObject* cameraObject = gameCore.GetObjectContainer()->GetGameObject(cameraID.value());
+				if (!cameraObject->IsActive()) { continue; }
 				// カメラのバッファインデックスを取得
-				CameraComponent* cameraComponent = gameCore.GetECSManager()->GetComponent<CameraComponent>(cameraObject.GetEntity());
+				CameraComponent* cameraComponent = gameCore.GetECSManager()->GetComponent<CameraComponent>(cameraObject->GetEntity());
 				if (!cameraComponent) { continue; }
 				// カメラのバッファを取得
 				cameraBuffer = resourceManager.GetBuffer<IConstantBuffer>(cameraComponent->bufferIndex);
@@ -644,10 +644,10 @@ void GraphicsEngine::DrawPostProcess(ResourceManager& resourceManager, GameCore&
 			std::optional<uint32_t> cameraID = gameCore.GetSceneManager()->GetMainScene()->GetMainCameraID();
 			if (!cameraID) { return; }
 			// カメラオブジェクトを取得
-			GameObject& cameraObject = gameCore.GetObjectContainer()->GetGameObject(cameraID.value());
-			if (!cameraObject.IsActive()) { return; }
+			GameObject* cameraObject = gameCore.GetObjectContainer()->GetGameObject(cameraID.value());
+			if (!cameraObject->IsActive()) { return; }
 			// カメラのバッファインデックスを取得
-			CameraComponent* cameraComponent = gameCore.GetECSManager()->GetComponent<CameraComponent>(cameraObject.GetEntity());
+			CameraComponent* cameraComponent = gameCore.GetECSManager()->GetComponent<CameraComponent>(cameraObject->GetEntity());
 			if (!cameraComponent) { return; }
 			// カメラのバッファを取得
 			cameraBuffer = resourceManager.GetBuffer<IConstantBuffer>(cameraComponent->bufferIndex);
@@ -765,10 +765,10 @@ void GraphicsEngine::DrawParticles(CommandContext* context, ResourceManager& res
 			std::optional<uint32_t> cameraID = gameCore.GetSceneManager()->GetMainScene()->GetMainCameraID();
 			if (!cameraID) { continue; }
 			// カメラオブジェクトを取得
-			GameObject& cameraObject = gameCore.GetObjectContainer()->GetGameObject(cameraID.value());
-			if (!cameraObject.IsActive()) { continue; }
+			GameObject* cameraObject = gameCore.GetObjectContainer()->GetGameObject(cameraID.value());
+			if (!cameraObject->IsActive()) { continue; }
 			// カメラのバッファインデックスを取得
-			CameraComponent* cameraComponent = gameCore.GetECSManager()->GetComponent<CameraComponent>(cameraObject.GetEntity());
+			CameraComponent* cameraComponent = gameCore.GetECSManager()->GetComponent<CameraComponent>(cameraObject->GetEntity());
 			if (!cameraComponent) { continue; }
 			// カメラのバッファを取得
 			cameraBuffer = resourceManager.GetBuffer<IConstantBuffer>(cameraComponent->bufferIndex);
@@ -832,10 +832,10 @@ void GraphicsEngine::EffectEditorDraw(CommandContext* context, ResourceManager& 
 		std::optional<uint32_t> cameraID = gameCore.GetSceneManager()->GetMainScene()->GetMainCameraID();
 		if (!cameraID) { return; }
 		// カメラオブジェクトを取得
-		GameObject& cameraObject = gameCore.GetObjectContainer()->GetGameObject(cameraID.value());
-		if (!cameraObject.IsActive()) { return; }
+		GameObject* cameraObject = gameCore.GetObjectContainer()->GetGameObject(cameraID.value());
+		if (!cameraObject->IsActive()) { return; }
 		// カメラのバッファインデックスを取得
-		CameraComponent* cameraComponent = gameCore.GetECSManager()->GetComponent<CameraComponent>(cameraObject.GetEntity());
+		CameraComponent* cameraComponent = gameCore.GetECSManager()->GetComponent<CameraComponent>(cameraObject->GetEntity());
 		if (!cameraComponent) { return; }
 		// カメラのバッファを取得
 		cameraBuffer = resourceManager.GetBuffer<IConstantBuffer>(cameraComponent->bufferIndex);
@@ -906,10 +906,10 @@ void GraphicsEngine::DrawUI(CommandContext* context, ResourceManager& resourceMa
 		std::optional<uint32_t> cameraID = gameCore.GetSceneManager()->GetMainScene()->GetMainCameraID();
 		if (!cameraID) { return; }
 		// カメラオブジェクトを取得
-		GameObject& cameraObject = gameCore.GetObjectContainer()->GetGameObject(cameraID.value());
-		if (!cameraObject.IsActive()) { return; }
+		GameObject* cameraObject = gameCore.GetObjectContainer()->GetGameObject(cameraID.value());
+		if (!cameraObject->IsActive()) { return; }
 		// カメラのバッファインデックスを取得
-		CameraComponent* cameraComponent = gameCore.GetECSManager()->GetComponent<CameraComponent>(cameraObject.GetEntity());
+		CameraComponent* cameraComponent = gameCore.GetECSManager()->GetComponent<CameraComponent>(cameraObject->GetEntity());
 		if (!cameraComponent) { return; }
 		// カメラのバッファを取得
 		cameraBuffer = resourceManager.GetBuffer<IConstantBuffer>(cameraComponent->bufferIndex);
@@ -969,10 +969,10 @@ void GraphicsEngine::SkyboxRender(CommandContext* context, ResourceManager& reso
 		std::optional<uint32_t> cameraID = gameCore.GetSceneManager()->GetMainScene()->GetMainCameraID();
 		if (!cameraID) { return; }
 		// カメラオブジェクトを取得
-		GameObject& cameraObject = gameCore.GetObjectContainer()->GetGameObject(cameraID.value());
-		if (!cameraObject.IsActive()) { return; }
+		GameObject* cameraObject = gameCore.GetObjectContainer()->GetGameObject(cameraID.value());
+		if (!cameraObject->IsActive()) { return; }
 		// カメラのバッファインデックスを取得
-		CameraComponent* cameraComponent = gameCore.GetECSManager()->GetComponent<CameraComponent>(cameraObject.GetEntity());
+		CameraComponent* cameraComponent = gameCore.GetECSManager()->GetComponent<CameraComponent>(cameraObject->GetEntity());
 		if (!cameraComponent) { return; }
 		// カメラのバッファを取得
 		cameraBuffer = resourceManager.GetBuffer<IConstantBuffer>(cameraComponent->bufferIndex);

@@ -19,10 +19,10 @@ void ScenePrefab::Start()
 		Entity entity = ecs->GenerateEntity();
 		// GameObjectを追加
 		ObjectID objectID = objectContainer->AddGameObject(entity, name, type);
-		GameObject& gameObj = objectContainer->GetGameObjectByName(name);
-		gameObj.SetCurrentSceneName(m_SceneName);
+		GameObject* gameObj = objectContainer->GetGameObjectByName(name);
+		gameObj->SetCurrentSceneName(m_SceneName);
 		// SceneUseListに登録
-		AddUseObject(gameObj.GetID().value());
+		AddUseObject(gameObj->GetID().value());
 		// コンポーネントの追加
 		// TransformComponentの追加
 		if (objData.m_Transform.has_value())
@@ -152,10 +152,10 @@ void ScenePrefab::Start()
 		}
 	}
 	// MainCameraの設定
-	GameObject& mainCamera = objectContainer->GetGameObjectByName(m_StartCameraName);
-	if (mainCamera.GetType() == ObjectType::Camera)
+	GameObject* mainCamera = objectContainer->GetGameObjectByName(m_StartCameraName);
+	if (mainCamera->GetType() == ObjectType::Camera)
 	{
-		SetMainCameraID(mainCamera.GetID().value());
+		SetMainCameraID(mainCamera->GetID().value());
 	}
 	// GameObjectDataをクリア
 	m_GameObjectData.clear();
@@ -173,8 +173,8 @@ void ScenePrefab::Finalize()
 	for (const auto& objectID : useObjects)
 	{
 		// GameObjectを取得
-		GameObject& object = m_SceneManager->m_pGameCore->GetObjectContainer()->GetGameObject(objectID);
-		GameObjectData objectCopy = object;
+		GameObject* object = m_SceneManager->m_pGameCore->GetObjectContainer()->GetGameObject(objectID);
+		GameObjectData objectCopy = *object;
 		std::unique_ptr<DeleteObjectCommand> deleteCommand = std::make_unique<DeleteObjectCommand>(objectID);
 		if (!deleteCommand->Execute(m_SceneManager->m_pGameCore->GetEngineCommand()))
 		{

@@ -38,17 +38,48 @@ public:
         return entity;
     }
 
+    /*-------------------- Clear all components ------------------------*/
+    inline void ClearEntity(const Entity& e)
+    {
+        if (e >= m_EntityToArchetype.size()) { return; }
+        Archetype oldArch = m_EntityToArchetype[e];
+        for (CompID id = 0; id < oldArch.size(); ++id)
+        {
+            if (oldArch.test(id))
+            {
+                m_TypeToComponents[id]->RemoveComponent(e);
+            }
+        }
+        m_ArchToEntities[oldArch].Remove(e);
+        m_EntityToArchetype[e].reset();
+    }
+
+    /*-------------------- Disable entity ------------------------------*/
+    inline void RemoveEntity(const Entity& entity)
+    {
+		ClearEntity(entity); // Clear components first
+        m_EntityToActive[entity] = false;
+        m_ArchToEntities[m_EntityToArchetype[entity]].Remove(entity);
+        m_RecycleEntities.emplace_back(entity);
+    }
+
     /*-------------------- Copy whole entity ---------------------------*/
     Entity CopyEntity(const Entity& src)
     {
         Archetype arch = GetArchetype(src);      // copy value
         Entity   dst = GenerateEntity();
         for (CompID id = 0; id < arch.size(); ++id)
+        {
             if (arch.test(id))
+            {
                 m_TypeToComponents[id]->CopyComponent(src, dst);
+            }
+        }
 
         if (m_EntityToArchetype.size() <= dst)
+        {
             m_EntityToArchetype.resize(dst + 1);
+        }
         m_EntityToArchetype[dst] = arch;
         m_ArchToEntities[arch].Add(dst);
         return dst;
@@ -76,17 +107,6 @@ public:
         }
     }
 
-    /*-------------------- Clear all components ------------------------*/
-    inline void ClearEntity(const Entity& e)
-    {
-        if (e >= m_EntityToArchetype.size()) return;
-        Archetype oldArch = m_EntityToArchetype[e];
-        for (CompID id = 0; id < oldArch.size(); ++id)
-            if (oldArch.test(id)) m_TypeToComponents[id]->RemoveComponent(e);
-        m_ArchToEntities[oldArch].Remove(e);
-        m_EntityToArchetype[e].reset();
-    }
-
     /*-------------------- Add component -------------------------------*/
     template<ComponentType T>
     T* AddComponent(const Entity& entity)
@@ -105,7 +125,7 @@ public:
             arch.set(type);
             m_ArchToEntities[arch].Add(entity);
         }
-        if constexpr (requires(T & c) { c.Initialize(); }) comp->Initialize();
+        if constexpr (requires(T & c) { c.Initialize(); }) { comp->Initialize(); }
         return comp;
     }
 
@@ -153,14 +173,6 @@ public:
     {
         auto pool = GetComponentPool<T>();
         if (pool) pool->RemoveAll(entity);
-    }
-
-    /*-------------------- Disable entity ------------------------------*/
-    inline void RemoveEntity(const Entity& entity)
-    {
-        m_EntityToActive[entity] = false;
-        m_ArchToEntities[m_EntityToArchetype[entity]].Remove(entity);
-        m_RecycleEntities.emplace_back(entity);
     }
 
     /*-------------------- Accessors ----------------------------------*/

@@ -37,37 +37,32 @@ CHO_API bool ChoSystem::LoadGameParameter(const std::wstring& filePath, const st
 }
 
 // ゲームオブジェクト取得
-CHO_API GameObject& ChoSystem::FindGameObjectByName(std::wstring_view name)
+CHO_API GameObject* ChoSystem::FindGameObjectByName(std::wstring_view name)
 {
 	GameCore* gameCore = g_Engine->GetEngineCommand()->GetGameCore();
-	GameObject& result = gameCore->GetObjectContainer()->GetGameObjectByName(name.data());
-	if (!result.IsActive())
-	{
-		return gameCore->GetObjectContainer()->GetDummyGameObject();
-	}
-	//result.Initialize(false);
+	GameObject* result = gameCore->GetObjectContainer()->GetGameObjectByName(name.data());
 	return result;
 }
 
-CHO_API GameObject& ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vector3 generatePosition)
+CHO_API GameObject* ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vector3 generatePosition)
 {
 	EngineCommand* engineCommand = g_Engine->GetEngineCommand();
-	GameObject& object = engineCommand->GetGameCore()->GetObjectContainer()->GetGameObject(id.value());
-	std::unique_ptr<CloneObjectCommand> command = std::make_unique<CloneObjectCommand>(object.GetCurrentSceneName());
+	GameObject* object = engineCommand->GetGameCore()->GetObjectContainer()->GetGameObject(id.value());
+	std::unique_ptr<CloneObjectCommand> command = std::make_unique<CloneObjectCommand>(object->GetCurrentSceneName(),object->GetID().value());
 	command->Execute(engineCommand);
-	GameObject& newObject = engineCommand->GetGameCore()->GetObjectContainer()->GetGameObject(command->GetObjectID());
+	GameObject* newObject = engineCommand->GetGameCore()->GetObjectContainer()->GetGameObject(command->GetObjectID());
 	// nameを変更
-	std::unique_ptr<RenameObjectCommand> renameCommand = std::make_unique<RenameObjectCommand>(newObject.GetID().value(), object.GetName());
+	std::unique_ptr<RenameObjectCommand> renameCommand = std::make_unique<RenameObjectCommand>(newObject->GetID().value(), object->GetName());
 	renameCommand->Execute(engineCommand);
 	// Typeのコピー
-	newObject.SetType(object.GetType());
+	newObject->SetType(object->GetType());
 	// Tagのコピー
-	newObject.SetTag(object.GetTag());
+	newObject->SetTag(object->GetTag());
 	// CurrendSceneのコピー
-	newObject.SetCurrentSceneName(object.GetCurrentSceneName());
+	newObject->SetCurrentSceneName(object->GetCurrentSceneName());
 	// Componentを取得
-	TransformComponent* transform = engineCommand->GetGameCore()->GetECSManager()->GetComponent<TransformComponent>(newObject.GetEntity());
-	if (newObject.GetType() == ObjectType::ParticleSystem)
+	TransformComponent* transform = engineCommand->GetGameCore()->GetECSManager()->GetComponent<TransformComponent>(newObject->GetEntity());
+	if (newObject->GetType() == ObjectType::ParticleSystem)
 	{
 		transform->scale.Zero();
 	}
