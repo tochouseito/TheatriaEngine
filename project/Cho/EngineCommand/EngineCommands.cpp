@@ -208,7 +208,7 @@ bool DeleteObjectCommand::Execute(EngineCommand* edit)
 {
 	ECSManager* ecs = edit->m_GameCore->GetECSManager();
 	GameObject* object = edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID);
-	if (!object->IsActive()) { return false; }
+	if (!object) { return false; }
 	Entity entity = object->GetEntity();
 	// 各コンポーネントの削除処理
 	// モデルのUseListから削除

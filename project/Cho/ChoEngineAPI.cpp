@@ -44,23 +44,22 @@ CHO_API GameObject* ChoSystem::FindGameObjectByName(std::wstring_view name)
 	return result;
 }
 
-CHO_API GameObject* ChoSystem::CloneGameObject(std::optional<uint32_t> id, Vector3 generatePosition)
+CHO_API GameObject* ChoSystem::CloneGameObject(const GameObject* srcObj, Vector3 generatePosition)
 {
 	EngineCommand* engineCommand = g_Engine->GetEngineCommand();
-	GameObject* object = engineCommand->GetGameCore()->GetObjectContainer()->GetGameObject(id.value());
-	std::unique_ptr<CloneObjectCommand> command = std::make_unique<CloneObjectCommand>(object->GetCurrentSceneName(),object->GetID().value());
+	std::unique_ptr<CloneObjectCommand> command = std::make_unique<CloneObjectCommand>(srcObj->GetCurrentSceneName(),srcObj->GetID().value());
 	command->Execute(engineCommand);
 	GameObject* newObject = engineCommand->GetGameCore()->GetObjectContainer()->GetGameObject(command->GetObjectID());
 	// nameを変更
-	std::unique_ptr<RenameObjectCommand> renameCommand = std::make_unique<RenameObjectCommand>(newObject->GetID().value(), object->GetName());
+	std::unique_ptr<RenameObjectCommand> renameCommand = std::make_unique<RenameObjectCommand>(newObject->GetID().value(), srcObj->GetName());
 	renameCommand->Execute(engineCommand);
 	// Typeのコピー
-	newObject->SetType(object->GetType());
+	newObject->SetType(srcObj->GetType());
 	// Tagのコピー
-	newObject->SetTag(object->GetTag());
+	newObject->SetTag(srcObj->GetTag());
 	// CurrendSceneのコピー
-	newObject->SetCurrentSceneName(object->GetCurrentSceneName());
-	Entity srcEntity = object->GetEntity();
+	newObject->SetCurrentSceneName(srcObj->GetCurrentSceneName());
+	Entity srcEntity = srcObj->GetEntity();
 	Entity dstEntity = newObject->GetEntity();
 	// Componentを取得
 	TransformComponent* transform = engineCommand->GetGameCore()->GetECSManager()->GetComponent<TransformComponent>(newObject->GetEntity());

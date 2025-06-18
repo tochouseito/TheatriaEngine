@@ -333,6 +333,12 @@ void Inspector::Rigidbody2DComponentView(GameObject* object)
 		// Is Kinematic（参考用）
 		ImGui::Checkbox("Is Kinematic", &rigidbody->isKinematic);
 
+		// コンポーネント削除
+		if (ImGui::Button("Remove Rigidbody2D Component"))
+		{
+			m_EngineCommand->GetGameCore()->GetECSManager()->RemoveComponent<Rigidbody2DComponent>(object->GetEntity());
+		}
+
 		ImGui::TreePop();
 	}
 	// 実行中の変更を反映させるためのボタン
@@ -365,6 +371,12 @@ void Inspector::BoxCollider2DComponentView(GameObject* object)
 		ImGui::DragFloat("Restitution", &collider->restitution, 0.05f, 0.0f, 1.0f);
 
 		ImGui::Checkbox("Is Sensor", &collider->isSensor);
+
+		// コンポーネント削除
+		if (ImGui::Button("Remove BoxCollider2D Component"))
+		{
+			m_EngineCommand->GetGameCore()->GetECSManager()->RemoveComponent<BoxCollider2DComponent>(object->GetEntity());
+		}
 
 		ImGui::TreePop();
 	}
