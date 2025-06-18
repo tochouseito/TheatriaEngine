@@ -83,6 +83,7 @@ struct CHO_API TransformAPI
 	Scale& scale() { return data->scale; }
 	Matrix4& worldMatrix() { return data->matWorld; }
 	void SetParent(Entity parent) { data->parent = parent; }
+	Vector3& forward() { return data->forward; }
 
 private:
 	friend class GameObject;

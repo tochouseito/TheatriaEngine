@@ -679,4 +679,13 @@ Quaternion ChoMath::MakeLookRotation(const Vector3& forward, const Vector3& up)
 	return Quaternion::FromMatrix(rotMat); // 回転行列 → クォータニオン変換
 }
 
+Vector3 ChoMath::GetForwardVectorFromMatrix(const Matrix4& rotMatrix)
+{
+	return Vector3(
+		rotMatrix.m[0][2], // x
+		rotMatrix.m[1][2], // y
+		rotMatrix.m[2][2]  // z
+	);
+}
+
 

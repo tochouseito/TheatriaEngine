@@ -47,7 +47,7 @@ struct TransformStartValue
 	Quaternion rotation = { 0.0f, 0.0f, 0.0f,1.0f };
 	Scale scale = { 1.0f, 1.0f, 1.0f };
 	Vector3 degrees = { 0.0f, 0.0f, 0.0f };
-};;
+};
 
 struct TransformComponent : public IComponentTag
 {
@@ -63,7 +63,11 @@ struct TransformComponent : public IComponentTag
 	std::wstring parentName = L"";						// 親の名前
 	std::vector<std::wstring> childNames;				// 子供の名前
 	std::optional<uint32_t> parent = std::nullopt;		// 親のEntity
+	Matrix4 matLocal = ChoMath::MakeIdentity4x4();	// ローカル行列
+	Matrix4 matRotation = ChoMath::MakeIdentity4x4();	// 回転行列
+	Matrix4 matScale = ChoMath::MakeIdentity4x4();	// スケール行列
 	int tickPriority = 0;								// Tick優先度
+	Vector3 forward = { 0.0f, 0.0f, 1.0f };			// 前方向ベクトル
 	//uint32_t bufferIndex = UINT32_MAX;				// バッファーインデックス
 	std::optional<uint32_t> mapID = std::nullopt;		// マップインデックス
 	TransformStartValue startValue;						// 初期値保存用

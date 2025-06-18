@@ -100,6 +100,15 @@ void TransformUpdateSystem::UpdateComponent(Entity e, TransformComponent& transf
 		transform.boneOffsetID = anim->boneOffsetID.value();
 	}
 
+	// 各行列
+	transform.matLocal = ChoMath::MakeTranslateMatrix(transform.position);
+	transform.matRotation = ChoMath::MakeRotateMatrix(transform.rotation);
+	transform.matScale = ChoMath::MakeScaleMatrix(transform.scale);
+
+	// 前方ベクトル
+	transform.forward = ChoMath::GetForwardVectorFromMatrix(transform.matRotation);
+	transform.forward.Normalize();
+
 	// 行列の転送
 	TransferMatrix(transform);
 }
