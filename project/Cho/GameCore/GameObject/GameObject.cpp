@@ -29,6 +29,8 @@ public:
 	std::unordered_map<std::string, ObjectParameter> parameters;
 	// 管理しているSceneName
 	std::wstring m_SceneName = L"";
+	// クローン時のオリジナルのID
+	std::optional<ObjectID> m_SrcID = std::nullopt;
 };
 
 std::optional<ObjectID> GameObject::GetID() const noexcept
@@ -36,6 +38,15 @@ std::optional<ObjectID> GameObject::GetID() const noexcept
 	if (implGameObject&&implGameObject->GetIDFunc)
 	{
 		return implGameObject->GetIDFunc();
+	}
+	return std::nullopt;
+}
+
+std::optional<ObjectID> GameObject::GetSrcID() const noexcept
+{
+	if(implGameObject)
+	{
+		return implGameObject->m_SrcID;
 	}
 	return std::nullopt;
 }
@@ -122,8 +133,8 @@ ScriptComponent* GameObject::GetScriptComponent() const noexcept
 	return m_ECS->GetComponent<ScriptComponent>(m_Entity);
 }
 
-GameObject::GameObject(ObjectContainer* objectContainer, InputManager* input, ResourceManager* resourceManager, ECSManager* ecs, const Entity& entity, const std::wstring& name, const ObjectType& type) :
-	m_ObjectContainer(objectContainer), m_InputManager(input), m_ResourceManager(resourceManager), m_ECS(ecs), m_Entity(entity), m_Type(type)
+GameObject::GameObject(ObjectContainer* objectContainer, InputManager* input, ResourceManager* resourceManager, ECSManager* ecs, const Entity& entity, const std::wstring& name, const ObjectType& type, const SceneID& sceneID) :
+	m_ObjectContainer(objectContainer), m_InputManager(input), m_ResourceManager(resourceManager), m_ECS(ecs), m_Entity(entity), m_Type(type), m_GenerationSceneID(sceneID)
 {
 	m_Active = true;
 	implGameObject = new ImplGameObject();

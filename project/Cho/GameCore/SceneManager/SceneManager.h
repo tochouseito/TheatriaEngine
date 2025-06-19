@@ -1,7 +1,6 @@
 #pragma once
 #include "GameCore/ObjectContainer/ObjectContainer.h"
 #include <string>
-using SceneID = uint32_t;
 class SceneManager;
 class GameCore;
 class BaseScene {

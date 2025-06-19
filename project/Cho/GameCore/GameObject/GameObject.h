@@ -26,8 +26,10 @@ class CHO_API GameObject
 	friend class CollisionSystem;
 	friend class ContactListener2D;
 	friend class ScenePrefab;
+	friend class GameWorld;
 public:
 	std::optional<ObjectID> GetID() const noexcept;
+	std::optional<ObjectID> GetSrcID() const noexcept;
 	Entity GetEntity() const noexcept { return m_Entity; }
 	std::wstring GetName() const noexcept;
 	ObjectType GetType() const noexcept { return m_Type; }
@@ -58,14 +60,6 @@ public:
 		return nullptr;
 	}
 
-	// 使用禁止
-	template<typename T>
-	std::vector<T> GetValues()
-	{
-		std::vector<T> values;
-		return values;
-	}
-
 	TransformAPI transform;			// TransformAPI
 	CameraAPI camera;				// CameraAPI
 	LineRendererAPI lineRenderer;	// LineRendererAPI
@@ -83,14 +77,13 @@ public:
 	// パラメータを設定
 	void SetParameter(const std::string& name, const ObjectParameter& value);
 private:
-
 	void SetID(const ObjectID& id) noexcept;
 	void SetName(const std::wstring& name) noexcept;
 	
 	Entity m_Entity;								// エンティティ
-	
 	ObjectType m_Type;								// ゲームオブジェクトのタイプ
 	bool m_Active = false;							// アクティブフラグ
+	const SceneID m_GenerationSceneID;				// 生成されたシーンのID
 	
 	ECSManager* m_ECS = nullptr;					// ECSManager
 	ResourceManager* m_ResourceManager = nullptr;	// ResourceManager
@@ -119,9 +112,13 @@ private:
 	ScriptComponent* GetScriptComponent() const noexcept;
 public:
 	// コンストラクタ
-	GameObject(ObjectContainer* objectContainer, InputManager* input, ResourceManager* resourceManager, ECSManager* ecs, const Entity& entity, const std::wstring& name, const ObjectType& type);
-	// デフォルトコンストラクタ
-	GameObject() { m_Active = false; }
+	GameObject(
+		ObjectContainer* objectContainer,
+		InputManager* input,
+		ResourceManager* resourceManager,
+		ECSManager* ecs,
+		const Entity& entity, const std::wstring& name,
+		const ObjectType& type, const SceneID& sceneID = 0);
 	// デストラクタ
 	~GameObject();
 	// コピー、代入禁止
