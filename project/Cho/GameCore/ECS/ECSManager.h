@@ -12,6 +12,14 @@ enum SystemState
 	Finalize,
 };
 
+struct IComponentEventListener
+{
+    virtual void OnComponentAdded(Entity e, CompID compType) = 0;
+    virtual void OnComponentCopied(Entity src, Entity dst, CompID compType) = 0;
+    virtual void OnComponentRemoved(Entity e, CompID compType) = 0;
+    virtual void OnComponentRemovedInstance(Entity e, CompID compType, void* rawVec, size_t index) = 0;
+};
+
 class ECSManager
 {
 public:
@@ -57,7 +65,7 @@ public:
     /*-------------------- Disable entity ------------------------------*/
     inline void RemoveEntity(const Entity& entity)
     {
-		ClearEntity(entity); // Clear components first
+        ClearEntity(entity); // Clear components first
         m_EntityToActive[entity] = false;
         m_ArchToEntities[m_EntityToArchetype[entity]].Remove(entity);
         m_RecycleEntities.emplace_back(entity);
@@ -68,6 +76,7 @@ public:
     {
         Archetype arch = GetArchetype(src);      // copy value
         Entity   dst = GenerateEntity();
+
         for (CompID id = 0; id < arch.size(); ++id)
         {
             if (arch.test(id))
@@ -82,6 +91,14 @@ public:
         }
         m_EntityToArchetype[dst] = arch;
         m_ArchToEntities[arch].Add(dst);
+        Archetype dstArch = GetArchetype(dst);
+        for (CompID id = 0; id < dstArch.size(); ++id)
+        {
+            if (dstArch.test(id))
+            {
+                NotifyComponentCopied(src, dst, id); // Notify listeners
+            }
+        }
         return dst;
     }
 
@@ -98,6 +115,7 @@ public:
             bool dstHas = archDst.test(id);
             if (!overwrite && dstHas) continue;             // skip
             m_TypeToComponents[id]->CopyComponent(src, dst);
+            NotifyComponentCopied(src, dst, id); // Notify listeners
             if (!dstHas) archDst.set(id);
         }
         if (archDst != oldArch)
@@ -129,6 +147,7 @@ public:
         {
             comp->Initialize(); // Initialize if applicable
         }
+        NotifyComponentAdded(entity, type); // Notify listeners
         return comp;
     }
 
@@ -163,6 +182,7 @@ public:
         if (entity >= m_EntityToArchetype.size() || !m_EntityToArchetype[entity].test(type)) return;
         auto pool = GetComponentPool<T>();
         if (!pool) return;
+        NotifyComponentRemoved(entity, type); // Notify listeners
         pool->RemoveComponent(entity);
         Archetype& arch = m_EntityToArchetype[entity];
         m_ArchToEntities[arch].Remove(entity);
@@ -174,8 +194,57 @@ public:
     template<ComponentType T>
     void RemoveAllComponents(const Entity& entity) requires IsMultiComponent<T>::value
     {
-        auto pool = GetComponentPool<T>();
-        if (pool) pool->RemoveAll(entity);
+        // ① プール取得
+        auto* pool = GetComponentPool<T>();
+        if (!pool) return;
+
+        // ② 削除予定のインスタンス数を取得
+        NotifyComponentRemoved(entity, ComponentPool<T>::GetID()); // Notify listeners
+
+        // ③ 実際に消す
+        pool->RemoveAll(entity);
+
+        // ④ Archetype ビットのクリア
+        Archetype& arch = m_EntityToArchetype[entity];
+        arch.reset(ComponentPool<T>::GetID());
+        m_ArchToEntities[arch].Remove(entity);
+        m_ArchToEntities[arch].Add(entity);
+    }
+
+    // マルチコンポーネントの単一インスタンスを消す
+    template<ComponentType T>
+    void RemoveComponentInstance(const Entity& e, size_t index)
+        requires IsMultiComponent<T>::value
+    {
+        CompID id = ComponentPool<T>::GetID();
+        // 1) プールと生ポインタを取得
+        auto* pool = GetComponentPool<T>();
+        void* rawVec = pool ? pool->GetRawComponent(e) : nullptr;
+
+        // 2) まだ要素があるかチェックして、これから消す「インデックス」を通知
+        if (pool)
+        {
+            auto* vec = static_cast<std::vector<T>*>(rawVec);
+            if (vec && index < vec->size())
+            {
+                // インスタンス単位の通知
+                for (auto* l : m_Listeners)
+                    l->OnComponentRemovedInstance(e, id, rawVec, index);
+            }
+        }
+
+        // 3) 本体を消す
+        if (pool) pool->RemoveInstance(e, index);
+
+        // 4) Archetype ビットの更新
+        auto& arch = m_EntityToArchetype[e];
+        auto* remaining = pool ? pool->GetAllComponents(e) : nullptr;
+        if (!remaining || remaining->empty())
+        {
+            m_ArchToEntities[arch].Remove(e);
+            arch.reset(id);
+            m_ArchToEntities[arch].Add(e);
+        }
     }
 
     /*-------------------- Accessors ----------------------------------*/
@@ -191,6 +260,9 @@ public:
         auto it = m_TypeToComponents.find(ComponentPool<T>::GetID());
         return (it == m_TypeToComponents.end()) ? nullptr : static_cast<ComponentPool<T>*>(it->second.get());
     }
+
+    void AddListener(IComponentEventListener* l) { m_Listeners.push_back(l); }
+    void ClearListeners() { m_Listeners.clear(); }
 
     /*---------------------------------------------------------------------
         EntityContainer (archetype bucket)
@@ -236,6 +308,7 @@ public:
         virtual void* GetRawComponent(Entity e) const = 0;
         virtual std::shared_ptr<void> CloneComponent(CompID id, void* ptr) = 0;
         virtual bool IsMultiComponentTrait(CompID id) const = 0;
+        virtual size_t GetComponentCount(Entity e) const = 0;
     };
 
     IComponentPool* GetRawComponentPool(CompID id)
@@ -332,6 +405,20 @@ public:
             auto it = m_Multi.find(e);
             return (it != m_Multi.end()) ? &it->second : nullptr;
         }
+        // マルチコンポーネント用：特定インデックスの要素を消す
+        void RemoveInstance(Entity e, size_t index) requires IsMultiComponent<T>::value
+        {
+            auto it = m_Multi.find(e);
+            if (it == m_Multi.end()) return;
+            auto& vec = it->second;
+            if (index >= vec.size()) return;
+            vec.erase(vec.begin() + index);
+            if (vec.empty())
+            {
+                // すべて消えたらバケットからも削除
+                m_Multi.erase(e);
+            }
+        }
         void RemoveAll(Entity e) requires IsMultiComponent<T>::value { m_Multi.erase(e); }
 
         /*-------------------- copy --------------------*/
@@ -342,17 +429,9 @@ public:
                 auto it = m_Multi.find(src);
                 if (it == m_Multi.end() || it->second.empty()) { return; }
                 // shallow copy
-				auto& vecSrc = it->second;
-				auto& vecDst = m_Multi[dst] = vecSrc; // copy vector
-				// コピー直後にInitialize()を呼ぶ
-                if constexpr (HasInitialize<T>)
-                {
-                    for (auto& comp : vecDst)
-                    {
-                        //comp.Initialize();
-                        comp;
-                    }
-				}
+                auto& vecSrc = it->second;
+                auto& vecDst = m_Multi[dst] = vecSrc; // copy vector
+                vecDst;
             }
             else
             {
@@ -363,10 +442,6 @@ public:
                 {
                     auto& c = m_Storage[m_EntityToIndex[dst]];
                     c = m_Storage[idxSrc];
-                    if constexpr (HasInitialize<T>)
-                    {
-                        //c.Initialize(); // Initialize if applicable
-                    }
                     return;
                 }
 
@@ -374,10 +449,6 @@ public:
                 m_Storage.emplace_back(m_Storage[idxSrc]);
                 auto& newComp = m_Storage.back();
                 newComp;
-                if constexpr (HasInitialize<T>)
-                {
-                    //newComp.Initialize(); // Initialize if applicable
-                }
 
                 uint32_t idxDst = static_cast<uint32_t>(m_Storage.size() - 1);
                 if (m_EntityToIndex.size() <= dst)
@@ -428,6 +499,19 @@ public:
             {
                 T* src = static_cast<T*>(ptr);
                 return std::make_shared<T>(*src); // Deep copy
+            }
+        }
+        size_t GetComponentCount(Entity e) const override
+        {
+            if constexpr (IsMultiComponent<T>::value)
+            {
+                auto it = m_Multi.find(e);
+                return (it == m_Multi.end()) ? 0u : it->second.size();
+            }
+            else
+            {
+                if (e >= m_EntityToIndex.size()) return 0u;
+                return (m_EntityToIndex[e] != kInvalid) ? 1u : 0u;
             }
         }
     private:
@@ -509,6 +593,28 @@ public:
     std::unordered_map<Archetype, EntityContainer>& GetArchToEntities() { return m_ArchToEntities; }
 
 private:
+    void NotifyComponentAdded(Entity e, CompID c)
+    {
+        for (auto* l : m_Listeners) l->OnComponentAdded(e, c);
+    }
+    void NotifyComponentCopied(Entity src, Entity dst, CompID c)
+    {
+        for (auto* l : m_Listeners) l->OnComponentCopied(src, dst, c);
+    }
+    void NotifyComponentRemoved(Entity e, CompID c)
+    {
+        for (auto* l : m_Listeners) l->OnComponentRemoved(e, c);
+    }
+    bool IsMultiComponentByID(CompID id) const
+    {
+        auto it = m_TypeToComponents.find(id);
+        if (it != m_TypeToComponents.end())
+        {
+            return it->second->IsMultiComponentTrait(id);
+        }
+        return false;
+    }
+
     /*-------------------- data members --------------------------------*/
     std::unordered_map<CompID, std::shared_ptr<IComponentPool>> m_TypeToComponents;
     std::vector<Archetype> m_EntityToArchetype;
@@ -517,4 +623,182 @@ private:
     Entity                 m_NextEntityID = 0;
     std::vector<Entity>    m_RecycleEntities;
     static inline CompID   m_NextCompTypeID = 0;
+    std::vector<IComponentEventListener*> m_Listeners;
+};
+
+class ComponentEventDispatcher : public IComponentEventListener
+{
+    // 単一用
+    std::unordered_map<CompID, std::vector<std::function<void(Entity, IComponentTag*)>>>  onAddSingle;
+    // マルチ用
+    std::unordered_map<CompID, std::vector<std::function<void(Entity, void*, size_t)>>>      onAddMulti;
+    // 単一用
+    std::unordered_map<CompID, std::vector<std::function<void(Entity, Entity, IComponentTag*)>>> onCopySingle;
+    // マルチ用
+    std::unordered_map<CompID, std::vector<std::function<void(Entity, Entity, void*, size_t)>>> onCopyMulti;
+    // 単一用
+    std::unordered_map<CompID, std::vector<std::function<void(Entity, IComponentTag*)>>> onRemoveSingle;
+    // マルチ用
+    std::unordered_map<CompID, std::vector<std::function<void(Entity, void*, size_t)>>> onRemoveMulti;
+
+public:
+    // 単一用
+    template<ComponentType T>
+    void RegisterOnAdd(std::function<void(Entity, T*)> f)
+    {
+        CompID id = ECSManager::ComponentPool<T>::GetID();
+        onAddSingle[id].push_back(
+            [f](Entity e, IComponentTag* raw) {
+                f(e, static_cast<T*>(raw));
+            }
+        );
+    }
+    // マルチ用
+    template<ComponentType T>
+    void RegisterOnAdd(std::function<void(Entity, T*, size_t)> f)
+    {
+        CompID id = ECSManager::ComponentPool<T>::GetID();
+        onAddMulti[id].push_back(
+            [f](Entity e, void* rawVec, size_t idx) {
+                auto* vec = static_cast<std::vector<T>*>(rawVec);
+                f(e, &(*vec)[idx], idx);
+            }
+        );
+    }
+
+    // 単一コンポーネント用
+    template<ComponentType T>
+    void RegisterOnCopy(std::function<void(Entity, Entity, T*)> f)
+    {
+        CompID id = ECSManager::ComponentPool<T>::GetID();
+        onCopySingle[id].push_back(
+            [f](Entity src, Entity dst, IComponentTag* raw) {
+                f(src, dst, static_cast<T*>(raw));
+            }
+        );
+    }
+
+    // マルチコンポーネント用
+    template<ComponentType T>
+    void RegisterOnCopy(std::function<void(Entity, Entity, T*, size_t)> f)
+    {
+        CompID id = ECSManager::ComponentPool<T>::GetID();
+        onCopyMulti[id].push_back(
+            [f](Entity src, Entity dst, void* rawVec, size_t idx) {
+                auto* vec = static_cast<std::vector<T>*>(rawVec);
+                f(src, dst, &(*vec)[idx], idx);
+            }
+        );
+    }
+
+    // 単一コンポーネント用
+    template<ComponentType T>
+    void RegisterOnRemove(std::function<void(Entity, T*)> f)
+    {
+        CompID id = ECSManager::ComponentPool<T>::GetID();
+        onRemoveSingle[id].push_back(
+            [f](Entity e, IComponentTag* raw) {
+                f(e, static_cast<T*>(raw));
+            }
+        );
+    }
+
+    // マルチコンポーネント用（インスタンスごとに index 付き）
+    template<ComponentType T>
+    void RegisterOnRemove(std::function<void(Entity, T*, size_t)> f)
+    {
+        CompID id = ECSManager::ComponentPool<T>::GetID();
+        onRemoveMulti[id].push_back(
+            [f](Entity e, void* rawVec, size_t idx) {
+                auto* vec = static_cast<std::vector<T>*>(rawVec);
+                f(e, &(*vec)[idx], idx);
+            }
+        );
+    }
+
+    // ECS側から呼ばれる
+    void OnComponentAdded(Entity e, CompID compType) override
+    {
+        // ① 単一コンポーネント向け
+        if (auto it = onAddSingle.find(compType); it != onAddSingle.end())
+        {
+            void* raw = ecs->GetRawComponentPool(compType)->GetRawComponent(e);
+            for (auto& cb : it->second)
+                cb(e, static_cast<IComponentTag*>(raw));
+        }
+
+        // ② マルチコンポーネント向け
+        if (auto it2 = onAddMulti.find(compType); it2 != onAddMulti.end())
+        {
+            ECSManager::IComponentPool* pool = ecs->GetRawComponentPool(compType);
+            void* rawVec = pool->GetRawComponent(e);
+            size_t count = pool->GetComponentCount(e);
+
+            // **新しく追加されたインスタンスの index = count-1**
+            size_t idxNew = (count == 0 ? 0 : count - 1);
+
+            for (auto& cb : it2->second)
+                cb(e, rawVec, idxNew);
+        }
+    }
+    void OnComponentCopied(Entity src, Entity dst, CompID compType) override
+    {
+        // 単一コンポーネント向け
+        if (auto it = onCopySingle.find(compType); it != onCopySingle.end())
+        {
+            void* raw = ecs->GetRawComponentPool(compType)->GetRawComponent(dst);
+            for (auto& cb : it->second)
+                cb(src, dst, static_cast<IComponentTag*>(raw));
+        }
+
+        // マルチコンポーネント向け
+        if (auto it2 = onCopyMulti.find(compType); it2 != onCopyMulti.end())
+        {
+            ECSManager::IComponentPool* pool = ecs->GetRawComponentPool(compType);
+            void* rawVec = pool->GetRawComponent(dst);
+            size_t count = pool->GetComponentCount(dst);
+
+            for (size_t idx = 0; idx < count; ++idx)
+                for (auto& cb : it2->second)
+                    cb(src, dst, rawVec, idx);
+        }
+    }
+    void OnComponentRemoved(Entity e, CompID compType) override
+    {
+        // ① 単一コンポーネント向け
+        if (auto it = onRemoveSingle.find(compType); it != onRemoveSingle.end())
+        {
+            void* raw = ecs->GetRawComponentPool(compType)
+                ->GetRawComponent(e);
+            for (auto& cb : it->second)
+                cb(e, static_cast<IComponentTag*>(raw));
+        }
+
+        // ② マルチコンポーネント向け
+        if (auto it2 = onRemoveMulti.find(compType); it2 != onRemoveMulti.end())
+        {
+            ECSManager::IComponentPool* pool = ecs->GetRawComponentPool(compType);
+            void* rawVec = pool->GetRawComponent(e);
+            size_t count = pool->GetComponentCount(e);
+
+            for (size_t idx = 0; idx < count; ++idx)
+                for (auto& cb : it2->second)
+                    cb(e, rawVec, idx);
+        }
+    }
+    void OnComponentRemovedInstance(Entity e, CompID compType, void* rawVec, size_t idx) override
+    {
+        if (auto it = onRemoveMulti.find(compType); it != onRemoveMulti.end())
+        {
+            for (auto& cb : it->second)
+            {
+                cb(e, rawVec, idx);
+            }
+        }
+    }
+
+    // 依存する ECSManager のポインタをセット
+    void SetECSManager(ECSManager* ecs_) { ecs = ecs_; }
+private:
+    ECSManager* ecs = nullptr;
 };
