@@ -17,6 +17,15 @@ class ScriptInitializeSystem;
 class Rigidbody2DInitSystem;
 class BoxCollider2DInitSystem;
 
+// ECSのイベントリスナー
+class ComponentEventDispatcher : public IComponentEventListener
+{
+public:
+	ComponentEventDispatcher(EngineCommand* engineCommand) : m_EngineCommand(engineCommand) {}
+private:
+	EngineCommand* m_EngineCommand = nullptr;
+};
+
 class GameCore
 {
 	friend class ChoEngine;
@@ -52,6 +61,7 @@ public:
 	void SceneInitialize(ScenePrefab* scene);
 	void SceneFinelize(ScenePrefab* scene);
 private:
+	void RegisterECSEvents();
 	void CreateSystems(InputManager* input, ResourceManager* resourceManager,GraphicsEngine* graphicsEngine);
 
 	// シーンマネージャー
@@ -97,5 +107,8 @@ private:
 
 	// 最初のメインシーン保存用
 	SceneID m_MainSceneID = 0;
+
+	// イベントディスパッチャー
+	std::unique_ptr<ComponentEventDispatcher> m_pComponentEventDispatcher = nullptr;
 };
 

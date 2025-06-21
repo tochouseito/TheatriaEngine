@@ -1,5 +1,6 @@
 #pragma once
 #include "Core/Utility/Components.h"
+#include <tuple>
 
 // コンポーネント型のみ許可する
 template<typename T>
@@ -12,12 +13,13 @@ enum SystemState
 	Finalize,
 };
 
-struct IComponentEventListener
+struct IIComponentEventListener
 {
+    // ECS側から呼ばれる
     virtual void OnComponentAdded(Entity e, CompID compType) = 0;
     virtual void OnComponentCopied(Entity src, Entity dst, CompID compType) = 0;
     virtual void OnComponentRemoved(Entity e, CompID compType) = 0;
-    virtual void OnComponentRemovedInstance(Entity e, CompID compType, void* rawVec, size_t index) = 0;
+    virtual void OnComponentRemovedInstance(Entity e, CompID compType, void* rawVec, size_t idx) = 0;
 };
 
 class ECSManager
@@ -261,7 +263,7 @@ public:
         return (it == m_TypeToComponents.end()) ? nullptr : static_cast<ComponentPool<T>*>(it->second.get());
     }
 
-    void AddListener(IComponentEventListener* l) { m_Listeners.push_back(l); }
+    void AddListener(IIComponentEventListener* l) { m_Listeners.push_back(l); }
     void ClearListeners() { m_Listeners.clear(); }
 
     /*---------------------------------------------------------------------
@@ -623,25 +625,16 @@ private:
     Entity                 m_NextEntityID = 0;
     std::vector<Entity>    m_RecycleEntities;
     static inline CompID   m_NextCompTypeID = 0;
-    std::vector<IComponentEventListener*> m_Listeners;
+    std::vector<IIComponentEventListener*> m_Listeners;
 };
 
-class ComponentEventDispatcher : public IComponentEventListener
+struct IComponentEventListener : public IIComponentEventListener
 {
-    // 単一用
-    std::unordered_map<CompID, std::vector<std::function<void(Entity, IComponentTag*)>>>  onAddSingle;
-    // マルチ用
-    std::unordered_map<CompID, std::vector<std::function<void(Entity, void*, size_t)>>>      onAddMulti;
-    // 単一用
-    std::unordered_map<CompID, std::vector<std::function<void(Entity, Entity, IComponentTag*)>>> onCopySingle;
-    // マルチ用
-    std::unordered_map<CompID, std::vector<std::function<void(Entity, Entity, void*, size_t)>>> onCopyMulti;
-    // 単一用
-    std::unordered_map<CompID, std::vector<std::function<void(Entity, IComponentTag*)>>> onRemoveSingle;
-    // マルチ用
-    std::unordered_map<CompID, std::vector<std::function<void(Entity, void*, size_t)>>> onRemoveMulti;
-
+    friend class ECSManager;
 public:
+    // 依存する ECSManager のポインタをセット
+    void SetECSManager(ECSManager* ecs) { m_pEcs = ecs; }
+
     // 単一用
     template<ComponentType T>
     void RegisterOnAdd(std::function<void(Entity, T*)> f)
@@ -715,14 +708,14 @@ public:
             }
         );
     }
-
+private:
     // ECS側から呼ばれる
     void OnComponentAdded(Entity e, CompID compType) override
     {
         // ① 単一コンポーネント向け
         if (auto it = onAddSingle.find(compType); it != onAddSingle.end())
         {
-            void* raw = ecs->GetRawComponentPool(compType)->GetRawComponent(e);
+            void* raw = m_pEcs->GetRawComponentPool(compType)->GetRawComponent(e);
             for (auto& cb : it->second)
                 cb(e, static_cast<IComponentTag*>(raw));
         }
@@ -730,7 +723,7 @@ public:
         // ② マルチコンポーネント向け
         if (auto it2 = onAddMulti.find(compType); it2 != onAddMulti.end())
         {
-            ECSManager::IComponentPool* pool = ecs->GetRawComponentPool(compType);
+            ECSManager::IComponentPool* pool = m_pEcs->GetRawComponentPool(compType);
             void* rawVec = pool->GetRawComponent(e);
             size_t count = pool->GetComponentCount(e);
 
@@ -741,12 +734,12 @@ public:
                 cb(e, rawVec, idxNew);
         }
     }
-    void OnComponentCopied(Entity src, Entity dst, CompID compType) override
+    void OnComponentCopied(Entity src, Entity dst, CompID compType)override
     {
         // 単一コンポーネント向け
         if (auto it = onCopySingle.find(compType); it != onCopySingle.end())
         {
-            void* raw = ecs->GetRawComponentPool(compType)->GetRawComponent(dst);
+            void* raw = m_pEcs->GetRawComponentPool(compType)->GetRawComponent(dst);
             for (auto& cb : it->second)
                 cb(src, dst, static_cast<IComponentTag*>(raw));
         }
@@ -754,7 +747,7 @@ public:
         // マルチコンポーネント向け
         if (auto it2 = onCopyMulti.find(compType); it2 != onCopyMulti.end())
         {
-            ECSManager::IComponentPool* pool = ecs->GetRawComponentPool(compType);
+            ECSManager::IComponentPool* pool = m_pEcs->GetRawComponentPool(compType);
             void* rawVec = pool->GetRawComponent(dst);
             size_t count = pool->GetComponentCount(dst);
 
@@ -763,12 +756,12 @@ public:
                     cb(src, dst, rawVec, idx);
         }
     }
-    void OnComponentRemoved(Entity e, CompID compType) override
+    void OnComponentRemoved(Entity e, CompID compType)override
     {
         // ① 単一コンポーネント向け
         if (auto it = onRemoveSingle.find(compType); it != onRemoveSingle.end())
         {
-            void* raw = ecs->GetRawComponentPool(compType)
+            void* raw = m_pEcs->GetRawComponentPool(compType)
                 ->GetRawComponent(e);
             for (auto& cb : it->second)
                 cb(e, static_cast<IComponentTag*>(raw));
@@ -777,7 +770,7 @@ public:
         // ② マルチコンポーネント向け
         if (auto it2 = onRemoveMulti.find(compType); it2 != onRemoveMulti.end())
         {
-            ECSManager::IComponentPool* pool = ecs->GetRawComponentPool(compType);
+            ECSManager::IComponentPool* pool = m_pEcs->GetRawComponentPool(compType);
             void* rawVec = pool->GetRawComponent(e);
             size_t count = pool->GetComponentCount(e);
 
@@ -786,7 +779,7 @@ public:
                     cb(e, rawVec, idx);
         }
     }
-    void OnComponentRemovedInstance(Entity e, CompID compType, void* rawVec, size_t idx) override
+    void OnComponentRemovedInstance(Entity e, CompID compType, void* rawVec, size_t idx)override
     {
         if (auto it = onRemoveMulti.find(compType); it != onRemoveMulti.end())
         {
@@ -796,9 +789,19 @@ public:
             }
         }
     }
-
-    // 依存する ECSManager のポインタをセット
-    void SetECSManager(ECSManager* ecs_) { ecs = ecs_; }
 private:
-    ECSManager* ecs = nullptr;
+    ECSManager* m_pEcs = nullptr;
+protected:
+    // 単一用
+    std::unordered_map<CompID, std::vector<std::function<void(Entity, IComponentTag*)>>>  onAddSingle;
+    // マルチ用
+    std::unordered_map<CompID, std::vector<std::function<void(Entity, void*, size_t)>>>      onAddMulti;
+    // 単一用
+    std::unordered_map<CompID, std::vector<std::function<void(Entity, Entity, IComponentTag*)>>> onCopySingle;
+    // マルチ用
+    std::unordered_map<CompID, std::vector<std::function<void(Entity, Entity, void*, size_t)>>> onCopyMulti;
+    // 単一用
+    std::unordered_map<CompID, std::vector<std::function<void(Entity, IComponentTag*)>>> onRemoveSingle;
+    // マルチ用
+    std::unordered_map<CompID, std::vector<std::function<void(Entity, void*, size_t)>>> onRemoveMulti;
 };

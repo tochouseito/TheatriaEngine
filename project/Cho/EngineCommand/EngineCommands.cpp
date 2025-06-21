@@ -24,10 +24,10 @@ bool Add3DObjectCommand::Execute(EngineCommand* edit)
 	// 重複回避
 	name = GenerateUniqueName(name, edit->m_GameCore->GetObjectContainer()->GetNameToObjectID());
 	// Transform統合バッファからmapIDを取得
-	uint32_t mapID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::Transform)->GetMapID();
+	//uint32_t mapID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::Transform)->GetMapID();
 	// TransformComponentを追加
-	TransformComponent* transform = edit->m_GameCore->GetECSManager()->AddComponent<TransformComponent>(entity);
-	transform->mapID = mapID;
+	edit->m_GameCore->GetECSManager()->AddComponent<TransformComponent>(entity);
+	//transform->mapID = mapID;
 	// GameObjectを追加
 	ObjectID objectID = edit->m_GameCore->GetObjectContainer()->AddGameObject(entity, name, ObjectType::MeshObject);
 	m_ObjectID = objectID;
@@ -919,10 +919,10 @@ bool CloneObjectCommand::Execute(EngineCommand* edit)
 	// 重複回避
 	name = GenerateUniqueName(name, edit->m_GameCore->GetObjectContainer()->GetNameToObjectID());
 	// Transform統合バッファからmapIDを取得
-	uint32_t mapID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::Transform)->GetMapID();
+	//uint32_t mapID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::Transform)->GetMapID();
 	// TransformComponentを追加
-	TransformComponent* transform = edit->m_GameCore->GetECSManager()->AddComponent<TransformComponent>(entity);
-	transform->mapID = mapID;
+	edit->m_GameCore->GetECSManager()->AddComponent<TransformComponent>(entity);
+	//transform->mapID = mapID;
 	// GameObjectを追加
 	ObjectID objectID = edit->m_GameCore->GetObjectContainer()->AddGameObject(entity, name, ObjectType::MeshObject);
 	m_DstID = objectID;

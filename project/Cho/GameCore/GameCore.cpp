@@ -14,6 +14,8 @@ void GameCore::Initialize(InputManager* input, ResourceManager* resourceManager,
 	m_pSceneManager = std::make_unique<SceneManager>(this,resourceManager);
 	// ECSマネージャの生成
 	m_pECSManager = std::make_unique<ECSManager>();
+	// ECSイベントの登録
+	RegisterECSEvents();
 	// オブジェクトコンテナの生成
 	m_pObjectContainer = std::make_unique<ObjectContainer>(m_pECSManager.get(), resourceManager, input);
 	// Systemマネージャの生成
@@ -281,6 +283,21 @@ void GameCore::SceneFinelize(ScenePrefab* scene)
 			physicsResetOnceSystem->Reset(*transform, *rb);
 		}
 	}
+}
+
+void GameCore::RegisterECSEvents()
+{
+	m_pComponentEventDispatcher = std::make_unique<ComponentEventDispatcher>(m_EngineCommand);
+	m_pComponentEventDispatcher->SetECSManager(m_pECSManager.get());
+	m_pECSManager->AddListener(m_pComponentEventDispatcher.get());
+	// イベントの登録
+	m_pComponentEventDispatcher->RegisterOnAdd<TransformComponent>(
+		[&](Entity e, TransformComponent* c) {
+			// Transform統合バッファからmapIDを取得
+			e;
+			uint32_t mapID = m_EngineCommand->GetResourceManager()->GetIntegrationData(IntegrationDataType::Transform)->GetMapID();
+			c->mapID = mapID;
+		});
 }
 
 void GameCore::CreateSystems(InputManager* input, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine)
