@@ -39,11 +39,9 @@ protected:
 	SceneID m_SceneID = 0;
 	std::wstring m_SceneName = L"";
 	SceneManager* m_SceneManager = nullptr;
-	std::vector<ObjectID> m_UseObjects;
 	std::optional<ObjectID> m_MainCameraID = std::nullopt;
-	std::vector<GameObjectData> m_GameObjectData;
+	std::vector<Prefab> m_Prefabs;
 	std::wstring m_StartCameraName = L"";
-	std::vector<ObjectID> m_ClonedObjects; // クローンされたオブジェクトのIDを保持するためのコンテナ
 };
 
 class ScenePrefab : public BaseScene {

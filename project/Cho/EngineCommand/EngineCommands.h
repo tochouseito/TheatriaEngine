@@ -287,14 +287,14 @@ class CopyGameObjectCommand : public IEngineCommand
 {
 	public:
 	CopyGameObjectCommand(const uint32_t& objectID) :
-		m_ObjectID(objectID)
+		m_SrcID(objectID)
 	{
 	}
 	bool Execute(EngineCommand* edit)override;
 	bool Undo(EngineCommand* edit)override;
 private:
-	uint32_t m_ObjectID;
-	uint32_t m_CopyObjectID;
+	uint32_t m_SrcID;
+	uint32_t m_DstID;
 };
 
 // Effectを新規作成するコマンド

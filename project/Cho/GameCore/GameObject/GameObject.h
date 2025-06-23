@@ -28,8 +28,7 @@ class CHO_API GameObject
 	friend class ScenePrefab;
 	friend class GameWorld;
 public:
-	std::optional<ObjectID> GetID() const noexcept;
-	std::optional<ObjectID> GetSrcID() const noexcept;
+	std::optional<Entity> GetSrcEntity() const noexcept;
 	Entity GetEntity() const noexcept { return m_Entity; }
 	std::wstring GetName() const noexcept;
 	ObjectType GetType() const noexcept { return m_Type; }
@@ -77,7 +76,6 @@ public:
 	// パラメータを設定
 	void SetParameter(const std::string& name, const ObjectParameter& value);
 private:
-	void SetID(const ObjectID& id) noexcept;
 	void SetName(const std::wstring& name) noexcept;
 	
 	Entity m_Entity;								// エンティティ
@@ -129,45 +127,9 @@ public:
 	GameObject& operator=(GameObject&&) noexcept = default;
 };
 
-// GameObjectを生成するためのDataクラス
-class GameObjectData
-{
-	friend class FileSystem;
-	friend class ScenePrefab;
-	friend class CopyGameObjectCommand;
-public:
-	GameObjectData(const std::wstring& name, const ObjectType& type) :
-		m_Name(name), m_Type(type)
-	{
-	}
-	// GameObject からのコピー用コンストラクタ
-	GameObjectData(const GameObject& other);
-	~GameObjectData() {}
-private:
-	std::wstring m_Name = L"";						// ゲームオブジェクト名
-	ObjectType m_Type;								// ゲームオブジェクトのタイプ
-	std::string m_Tag = "Default";					// タグ
-	// コンポーネント
-	std::optional<TransformComponent> m_Transform = std::nullopt;
-	std::optional<CameraComponent> m_Camera = std::nullopt;
-	std::optional<MeshFilterComponent> m_MeshFilter = std::nullopt;
-	std::optional<MeshRendererComponent> m_MeshRenderer = std::nullopt;
-	std::optional<ScriptComponent> m_Script = std::nullopt;
-	std::vector<LineRendererComponent> m_LineRenderer;
-	std::optional<MaterialComponent> m_Material = std::nullopt;
-	std::optional<Rigidbody2DComponent> m_Rigidbody2D = std::nullopt;
-	std::optional<BoxCollider2DComponent> m_BoxCollider2D = std::nullopt;
-	std::optional<EmitterComponent> m_Emitter = std::nullopt;
-	std::optional<ParticleComponent> m_Particle = std::nullopt;
-	std::optional<UISpriteComponent> m_UISprite = std::nullopt;
-	std::optional<LightComponent> m_Light = std::nullopt;
-	std::optional<AudioComponent> m_Audio = std::nullopt;
-	std::optional<AnimationComponent> m_Animation = std::nullopt;
-};
-
-// IDと生成したSceneと紐づけるハンドル
-struct GameObjectHandle
-{
-	uint32_t id{};
-	std::optional<uint32_t> generation{};
-};
+//// IDと生成したSceneと紐づけるハンドル
+//struct GameObjectHandle
+//{
+//	uint32_t id{};
+//	std::optional<uint32_t> generation{};
+//};

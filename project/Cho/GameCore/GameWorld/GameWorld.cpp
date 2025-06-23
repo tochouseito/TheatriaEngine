@@ -1,12 +1,14 @@
 #include "pch.h"
 #include "GameWorld.h"
 
-ObjectID GameWorld::AddGameObject(GameObject obj)
+void GameWorld::AddGameObject(GameObject obj)
 {
-    ObjectID id = static_cast<ObjectID>(m_pGameObjects.push_back(FVector<std::unique_ptr<GameObject>>()));
-	obj.SetID(id);
-	m_pGameObjects[id].push_back(std::make_unique<GameObject>(std::move(obj)));
-	return id;
+    uint32_t id = static_cast<uint32_t>(m_pGameObjects.push_back(FVector<FVector<std::unique_ptr<GameObject>>>()));
+	if (id != obj.GetEntity())
+	{
+		Log::Write(LogLevel::Assert, "GameWorldID mismatch Entity");
+	}
+	m_pGameObjects[id][0].push_back(std::make_unique<GameObject>(std::move(obj)));
 }
 
 void GameWorld::AddGameObjectClone(const ObjectID& srcID, GameObject clone)

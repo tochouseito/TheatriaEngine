@@ -24,6 +24,7 @@ public:
 	ObjectID AddGameObject(const Entity& entity,const std::wstring& name,const ObjectType& type)
 	{
 		ObjectID id = static_cast<ObjectID>(m_GameObjects.push_back(std::make_unique<GameObject>(this, m_InputManager, m_ResourceManager, m_ECS, entity, name, type)));
+		if (id != entity) { Log::Write(LogLevel::Assert, "not much ObjectID Entity"); }
 		//m_GameObjects[id].Initialize();
 		m_NameToObjectID[name] = id;
 		m_TypeToObjectIDs[type].push_back(id);

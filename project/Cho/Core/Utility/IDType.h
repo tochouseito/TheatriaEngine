@@ -4,7 +4,6 @@
 using Entity = uint32_t;
 using CompID = size_t;
 using Archetype = std::bitset<256>;
-using ObjectID = uint32_t;
 using PrefabID = uint32_t;
 using SceneID = uint32_t;
 
@@ -17,6 +16,7 @@ enum class ObjectType
 	Effect,				// エフェクトオブジェクト
 	Light,				// ライトオブジェクト
 	UI,					// UIオブジェクト
+	None,				// オブジェクトなし
 	Count,				// カウント
 };
 
@@ -39,6 +39,7 @@ inline const char* ObjectTypeToWString(ObjectType type)
 	case ObjectType::Effect:  return "Effect";
 	case ObjectType::Light:  return "Light";
 	case ObjectType::UI:     return "UI";
+	case ObjectType::None:   return "None";
 	default:                  return "Unknown";
 	}
 }
@@ -51,5 +52,6 @@ inline ObjectType ObjectTypeFromString(const std::string& str)
 	if (str == "Effect") return ObjectType::Effect;
 	if (str == "Light") return ObjectType::Light;
 	if (str == "UI") return ObjectType::UI;
+	if (str == "None") return ObjectType::None;
 	return ObjectType::Count; // または Unknown があればそちら
 }

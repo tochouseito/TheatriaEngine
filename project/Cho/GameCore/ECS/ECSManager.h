@@ -32,6 +32,7 @@ public:
     ~ECSManager() = default;
 
     /*-------------------- Entity create / recycle ----------------------*/
+    [[ nodiscard ]]
     inline const Entity GenerateEntity()
     {
         Entity entity;
@@ -51,7 +52,7 @@ public:
     /*-------------------- Clear all components ------------------------*/
     inline void ClearEntity(const Entity& e)
     {
-        if (e >= m_EntityToArchetype.size()) { return; }
+        /*if (e >= m_EntityToArchetype.size()) { return; }
         Archetype oldArch = m_EntityToArchetype[e];
         for (CompID id = 0; id < oldArch.size(); ++id)
         {
@@ -60,6 +61,46 @@ public:
                 m_TypeToComponents[id]->RemoveComponent(e);
             }
         }
+        m_ArchToEntities[oldArch].Remove(e);
+        m_EntityToArchetype[e].reset();*/
+        if (e >= m_EntityToArchetype.size()) return;
+
+        // 1) 古いアーキタイプを退避
+        Archetype oldArch = m_EntityToArchetype[e];
+
+        // 2) イベント通知（RemoveEntity と同じく、削除前に通知を投げる）
+        for (size_t id = 0; id < oldArch.size(); ++id)
+        {
+            if (!oldArch.test(id)) continue;
+
+            auto* pool = m_TypeToComponents[id].get();
+            // 削除対象のコンポーネント数
+            size_t count = pool->GetComponentCount(e);
+
+            if (pool->IsMultiComponentTrait(id))
+            {
+                // マルチコンポーネント：インスタンスごとに NotifyComponentRemovedInstance
+                void* rawVec = pool->GetRawComponent(e);
+                for (size_t idx = 0; idx < count; ++idx)
+                {
+                    NotifyComponentRemovedInstance(e, id, rawVec, idx);
+                }
+            }
+            else
+            {
+                // 単一コンポーネント：１回だけ NotifyComponentRemoved
+                NotifyComponentRemoved(e, id);
+            }
+        }
+
+        // 3) 実際の削除処理
+        for (size_t id = 0; id < oldArch.size(); ++id)
+        {
+            if (!oldArch.test(id)) continue;
+            m_TypeToComponents[id]->RemoveComponent(e);
+        }
+
+        // 4) アーキタイプバケット／マッピングのクリア
         m_ArchToEntities[oldArch].Remove(e);
         m_EntityToArchetype[e].reset();
     }
@@ -74,6 +115,7 @@ public:
     }
 
     /*-------------------- Copy whole entity ---------------------------*/
+    [[ nodiscard ]]
     Entity CopyEntity(const Entity& src)
     {
         Archetype arch = GetArchetype(src);      // copy value
@@ -607,6 +649,10 @@ private:
     {
         for (auto* l : m_Listeners) l->OnComponentRemoved(e, c);
     }
+    void NotifyComponentRemovedInstance(Entity e, CompID c, void* rawVec, size_t idx)
+    {
+        for (auto* l : m_Listeners) l->OnComponentRemovedInstance(e, c, rawVec, idx);
+	}
     bool IsMultiComponentByID(CompID id) const
     {
         auto it = m_TypeToComponents.find(id);
@@ -639,6 +685,7 @@ public:
     template<ComponentType T>
     void RegisterOnAdd(std::function<void(Entity, T*)> f)
     {
+        static_assert(!IsMultiComponent<T>::value, "Use singleComponent");
         CompID id = ECSManager::ComponentPool<T>::GetID();
         onAddSingle[id].push_back(
             [f](Entity e, IComponentTag* raw) {
@@ -650,6 +697,7 @@ public:
     template<ComponentType T>
     void RegisterOnAdd(std::function<void(Entity, T*, size_t)> f)
     {
+        static_assert(IsMultiComponent<T>::value, "Use multiComponent");
         CompID id = ECSManager::ComponentPool<T>::GetID();
         onAddMulti[id].push_back(
             [f](Entity e, void* rawVec, size_t idx) {
@@ -663,6 +711,7 @@ public:
     template<ComponentType T>
     void RegisterOnCopy(std::function<void(Entity, Entity, T*)> f)
     {
+        static_assert(!IsMultiComponent<T>::value, "Use singleComponent");
         CompID id = ECSManager::ComponentPool<T>::GetID();
         onCopySingle[id].push_back(
             [f](Entity src, Entity dst, IComponentTag* raw) {
@@ -675,6 +724,7 @@ public:
     template<ComponentType T>
     void RegisterOnCopy(std::function<void(Entity, Entity, T*, size_t)> f)
     {
+        static_assert(IsMultiComponent<T>::value, "Use multiComponent");
         CompID id = ECSManager::ComponentPool<T>::GetID();
         onCopyMulti[id].push_back(
             [f](Entity src, Entity dst, void* rawVec, size_t idx) {
@@ -688,6 +738,7 @@ public:
     template<ComponentType T>
     void RegisterOnRemove(std::function<void(Entity, T*)> f)
     {
+        static_assert(!IsMultiComponent<T>::value, "Use singleComponent");
         CompID id = ECSManager::ComponentPool<T>::GetID();
         onRemoveSingle[id].push_back(
             [f](Entity e, IComponentTag* raw) {
@@ -700,6 +751,7 @@ public:
     template<ComponentType T>
     void RegisterOnRemove(std::function<void(Entity, T*, size_t)> f)
     {
+        static_assert(IsMultiComponent<T>::value, "Use multiComponent");
         CompID id = ECSManager::ComponentPool<T>::GetID();
         onRemoveMulti[id].push_back(
             [f](Entity e, void* rawVec, size_t idx) {

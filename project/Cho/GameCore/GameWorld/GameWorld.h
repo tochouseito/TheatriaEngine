@@ -24,14 +24,15 @@ public:
 	}
 private:
 	// オブジェクトを追加
-	ObjectID AddGameObject(GameObject obj);
+	void AddGameObject(GameObject obj);
 	// クローンを追加
 	void AddGameObjectClone(const ObjectID& srcID, GameObject clone);
 	// オブジェクトを削除
 	void RemoveGameObject(const ObjectID& id);
 
 	// GameObjectコンテナ
-	FVector<FVector<std::unique_ptr<GameObject>>> m_pGameObjects;
+	// [SceneID][EntityID][CloneID] = GameObject
+	FVector<FVector<FVector<std::unique_ptr<GameObject>>>> m_pGameObjects;
 	// 名前検索
 	std::unordered_map<std::wstring, ObjectID> m_ObjectNameMap;
 };
