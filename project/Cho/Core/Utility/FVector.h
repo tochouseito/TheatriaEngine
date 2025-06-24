@@ -1,13 +1,74 @@
 #pragma once
 #include <vector>
 #include <cstdint>
+#include <memory>
 #include "Core/ChoLog/ChoLog.h"
 using namespace Cho;
+
+template <typename T>
+class FVectorIterator
+{
+public:
+    FVectorIterator(FVector<T>* vector, size_t index)
+        : vector(vector), index(index)
+    {
+        advanceToValid(); // 無効な要素をスキップ
+    }
+
+    T& operator*() { return (*vector)[index]; }
+
+    FVectorIterator& operator++()
+    {
+        ++index;
+        advanceToValid();
+        return *this;
+    }
+
+    bool operator!=(const FVectorIterator& other) const
+    {
+        return index != other.index || vector != other.vector;
+    }
+
+private:
+    FVector<T>* vector;
+    size_t index;
+
+    void advanceToValid()
+    {
+        while (index < vector->nextIndex && !vector->isValid(index))
+        {
+            ++index;
+        }
+    }
+};
+
 // フリーリスト付き可変長配列
 template <typename T>
-class FVector {
+class FVector
+{
+    using iterator = FVectorIterator<T>;
 public:
     FVector() = default;
+
+    size_t push_back(const T& value)
+    {
+        if (!freeList.empty())
+        {
+            size_t index = freeList.back();
+            freeList.pop_back();
+            data[index] = value;  // コピー
+            return index;
+        }
+        if (nextIndex >= data.size())
+        {
+            data.push_back(value);
+        }
+        else
+        {
+            data[nextIndex] = value;
+        }
+        return nextIndex++;
+    }
 
     // 新しい要素を追加し、インデックスを返す
     size_t push_back(T&& value) {
@@ -48,11 +109,6 @@ public:
         return data[index];
     }
 
-    // 現在の有効な要素数
-    /*size_t size() const {
-        return nextIndex - freeList.size();
-    }*/
-
 	// 要素が有効かどうか
 	bool isValid(size_t index) const
 	{
@@ -87,6 +143,16 @@ public:
 
 	// vectorの取得
 	std::vector<T>& GetVector() { return data; }
+
+    iterator begin()
+    {
+        return iterator(this, 0);
+    }
+
+    iterator end()
+    {
+        return iterator(this, nextIndex);
+    }
 
 private:
     std::vector<T> data;          // 実際のデータ
