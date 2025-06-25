@@ -20,7 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameCore\GameWorld\GameWorld.cpp" />
-    <ClCompile Include="GameCore\Prefab\Prefab.cpp" />
     <ClCompile Include="GameCore\GameScene\GameScene.cpp" />
     <ClCompile Include="Resources\AudioManager\AudioManager.cpp" />
     <ClCompile Include="ChoEngineAPI.cpp" />
@@ -247,11 +246,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="GameCore\MultiSystemManager\MultiSystemManager.cpp" />
     <ClCompile Include="GameCore\ObjectContainer\ObjectContainer.cpp" />
     <ClCompile Include="GameCore\SceneManager\SceneManager.cpp" />
     <ClCompile Include="GameCore\ScriptAPI\ScriptAPI.cpp" />
-    <ClCompile Include="GameCore\SingleSystemManager\SingleSystemManager.cpp" />
     <ClCompile Include="GameCore\Systems\EditorSystems.cpp" />
     <ClCompile Include="GameCore\Systems\MultiSystems.cpp" />
     <ClCompile Include="GameCore\Systems\SingleSystems.cpp" />
@@ -301,7 +298,6 @@
     <ClInclude Include="Externals\AIUtilityLib\chunk_vector.h" />
     <ClInclude Include="Core\Utility\SoundData.h" />
     <ClInclude Include="GameCore\GameWorld\GameWorld.h" />
-    <ClInclude Include="GameCore\Prefab\Prefab.h" />
     <ClInclude Include="GameCore\GameScene\GameScene.h" />
     <ClInclude Include="Resources\AudioManager\AudioManager.h" />
     <ClInclude Include="ChoEngineAPI.h" />
@@ -361,11 +357,9 @@
     <ClInclude Include="GameCore\GameCore.h" />
     <ClInclude Include="GameCore\GameObject\GameObject.h" />
     <ClInclude Include="GameCore\IScript\IScript.h" />
-    <ClInclude Include="GameCore\MultiSystemManager\MultiSystemManager.h" />
     <ClInclude Include="GameCore\ObjectContainer\ObjectContainer.h" />
     <ClInclude Include="GameCore\SceneManager\SceneManager.h" />
     <ClInclude Include="GameCore\ScriptAPI\ScriptAPI.h" />
-    <ClInclude Include="GameCore\SingleSystemManager\SingleSystemManager.h" />
     <ClInclude Include="GameCore\Systems\EditorSystems.h" />
     <ClInclude Include="GameCore\Systems\MultiSystems.h" />
     <ClInclude Include="GameCore\Systems\SingleSystems.h" />
