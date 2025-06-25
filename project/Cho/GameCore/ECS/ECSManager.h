@@ -1,17 +1,60 @@
 #pragma once
-#include "Core/Utility/Components.h"
-#include <tuple>
+
+// ECSManager.h
+// C++ 標準ライブラリヘッダ一覧:
+//
+//   <cstdint>       // C++11: uint32_t, etc.
+//   <cstddef>       // C++98: size_t
+//   <bitset>        // C++98: std::bitset
+//   <vector>        // C++98: std::vector
+//   <unordered_map> // C++11: std::unordered_map
+//   <memory>        // C++11: std::shared_ptr, std::weak_ptr
+//   <functional>    // C++98: std::function
+//   <algorithm>     // C++98: std::sort
+//   <concepts>      // C++20: std::derived_from, etc.
+//   <type_traits>   // C++11: std::false_type, std::true_type
+//   <stdexcept>     // C++98: std::runtime_error
+
+#include <cstdint>
+#include <cstddef>
+#include <bitset>
+#include <vector>
+#include <unordered_map>
+#include <memory>
+#include <functional>
+#include <algorithm>
+#include <concepts>
+#include <type_traits>
+#include <stdexcept>
+
+using Entity = uint32_t;
+using CompID = size_t;
+using Archetype = std::bitset<256>;
+
+// コンポーネントだと判別するためのタグ
+struct IComponentTag
+{
+    virtual void Initialize() {} // 初期化関数を定義
+    bool  IsActive() const noexcept { return m_Active; } // アクティブ状態を取得する関数
+    void SetActive(bool active) noexcept { m_Active = active; } // アクティブ状態を設定する関数
+private:
+    bool m_Active = true; // アクティブ状態を保持するメンバ変数
+};
+// コンポーネントが複数持てるか(デフォルトは持てない)
+template<typename T>
+struct IsMultiComponent : std::false_type {};
+
+// マルチコンポーネントを許可
+//template<>
+//struct IsMultiComponent</*マルチにしたいコンポーネント*/> : std::true_type {};
 
 // コンポーネント型のみ許可する
 template<typename T>
 concept ComponentType = std::derived_from<T, IComponentTag>;
 
-enum SystemState
-{
-	Initialize = 0,
-	Update,
-	Finalize,
-};
+// ECS用ヘルパー
+template<typename C>
+concept HasInitialize = requires(C & c) { c.Initialize(); };
 
 struct IIComponentEventListener
 {
@@ -20,6 +63,17 @@ struct IIComponentEventListener
     virtual void OnComponentCopied(Entity src, Entity dst, CompID compType) = 0;
     virtual void OnComponentRemoved(Entity e, CompID compType) = 0;
     virtual void OnComponentRemovedInstance(Entity e, CompID compType, void* rawVec, size_t idx) = 0;
+};
+
+struct IEntityEventListener
+{
+    virtual ~IEntityEventListener() = default;
+
+    /// e が新しく生成された直後に呼ばれる
+    virtual void OnEntityCreated(Entity e) = 0;
+
+    /// e のすべてのコンポーネントがクリアされ、RecycleQueue に入った直後に呼ばれる
+    virtual void OnEntityDestroyed(Entity e) = 0;
 };
 
 class ECSManager
@@ -31,87 +85,109 @@ public:
     ECSManager() : m_NextEntityID(static_cast<Entity>(-1)) {}
     ~ECSManager() = default;
 
+    // 公開API
+    [[nodiscard]]
+    bool IsEntityActive(Entity e) const
+    {
+        return e < m_EntityToActive.size() && m_EntityToActive[e];
+    }
+
+    void SetEntityActive(Entity e, bool f)
+    {
+        if (e < m_EntityToActive.size())
+            m_EntityToActive[e] = f;
+    }
+
     /*-------------------- Entity create / recycle ----------------------*/
     [[ nodiscard ]]
     inline const Entity GenerateEntity()
     {
-        Entity entity;
-        if (!m_RecycleEntities.empty())
-        {
-            entity = m_RecycleEntities.back();
-            m_RecycleEntities.pop_back();
-        }
-        else { entity = ++m_NextEntityID; }
+        Entity entity = m_RecycleEntities.empty()
+            ? ++m_NextEntityID
+            : m_RecycleEntities.back();
+        if (!m_RecycleEntities.empty()) m_RecycleEntities.pop_back();
 
+        // アクティブ化
         if (m_EntityToActive.size() <= entity)
             m_EntityToActive.resize(entity + 1, false);
         m_EntityToActive[entity] = true;
+
+        // Archetype 配列も拡張
+        if (m_EntityToArchetype.size() <= entity)
+            m_EntityToArchetype.resize(entity + 1);
+
+        // ① 空のアーキタイプ（全ビットfalse）にも必ず登録しておく
+        {
+            Archetype emptyArch;  // 全ビットfalse
+            m_ArchToEntities[emptyArch].Add(entity);
+        }
+
+        // ② エンティティ生成イベントを通知（更新中なら遅延）
+        auto notify = [this, entity]() {
+            for (auto& wp : m_EntityListeners)
+                if (auto sp = wp.lock())
+                    sp->OnEntityCreated(entity);
+            };
+        if (m_IsUpdating)
+            Defer(std::move(notify));
+        else
+            notify();
+
         return entity;
     }
 
     /*-------------------- Clear all components ------------------------*/
     inline void ClearEntity(const Entity& e)
     {
-        /*if (e >= m_EntityToArchetype.size()) { return; }
-        Archetype oldArch = m_EntityToArchetype[e];
-        for (CompID id = 0; id < oldArch.size(); ++id)
-        {
-            if (oldArch.test(id))
-            {
-                m_TypeToComponents[id]->RemoveComponent(e);
-            }
-        }
-        m_ArchToEntities[oldArch].Remove(e);
-        m_EntityToArchetype[e].reset();*/
         if (e >= m_EntityToArchetype.size()) return;
 
-        // 1) 古いアーキタイプを退避
-        Archetype oldArch = m_EntityToArchetype[e];
+        Archetype old = m_EntityToArchetype[e];
 
-        // 2) イベント通知（RemoveEntity と同じく、削除前に通知を投げる）
-        for (size_t id = 0; id < oldArch.size(); ++id)
+        // コンポーネントごとの削除イベント
+        for (CompID id = 0; id < old.size(); ++id) if (old.test(id))
         {
-            if (!oldArch.test(id)) continue;
-
             auto* pool = m_TypeToComponents[id].get();
-            // 削除対象のコンポーネント数
-            size_t count = pool->GetComponentCount(e);
-
+            size_t cnt = pool->GetComponentCount(e);
             if (pool->IsMultiComponentTrait(id))
             {
-                // マルチコンポーネント：インスタンスごとに NotifyComponentRemovedInstance
-                void* rawVec = pool->GetRawComponent(e);
-                for (size_t idx = 0; idx < count; ++idx)
-                {
-                    NotifyComponentRemovedInstance(e, id, rawVec, idx);
-                }
+                void* raw = pool->GetRawComponent(e);
+                for (size_t i = 0; i < cnt; ++i)
+                    NotifyComponentRemovedInstance(e, id, raw, i);
             }
             else
             {
-                // 単一コンポーネント：１回だけ NotifyComponentRemoved
                 NotifyComponentRemoved(e, id);
             }
+            pool->RemoveComponent(e);
         }
 
-        // 3) 実際の削除処理
-        for (size_t id = 0; id < oldArch.size(); ++id)
-        {
-            if (!oldArch.test(id)) continue;
-            m_TypeToComponents[id]->RemoveComponent(e);
-        }
-
-        // 4) アーキタイプバケット／マッピングのクリア
-        m_ArchToEntities[oldArch].Remove(e);
+        // バケット・アーキタイプクリア
+        m_ArchToEntities[old].Remove(e);
         m_EntityToArchetype[e].reset();
     }
 
-    /*-------------------- Disable entity ------------------------------*/
-    inline void RemoveEntity(const Entity& entity)
+    //――――――――――――――――――
+    // 他のシステムやメインループから呼んでよい、
+    // 更新中も安全に追加できる汎用 Defer
+    //――――――――――――――――――
+    void Defer(std::function<void()> cmd)
     {
-        ClearEntity(entity); // Clear components first
-        m_EntityToActive[entity] = false;
-        m_ArchToEntities[m_EntityToArchetype[entity]].Remove(entity);
-        m_RecycleEntities.emplace_back(entity);
+        m_DeferredCommands.push_back(std::move(cmd));
+    }
+
+    /*-------------------- Disable entity ------------------------------*/
+    inline void RemoveEntity(const Entity& e)
+    {
+        if (m_IsUpdating)
+        {
+            // システム更新中なら遅延キューに積む
+            Defer([this, e] { RemoveEntityImpl(e); });
+        }
+        else
+        {
+            // 通常フレームなら即時実行
+            RemoveEntityImpl(e);
+        }
     }
 
     /*-------------------- Copy whole entity ---------------------------*/
@@ -173,11 +249,19 @@ public:
     template<ComponentType T>
     T* AddComponent(const Entity& entity)
     {
+        if (m_IsUpdating)
+        {
+            // 更新中ならコマンドを遅延キューへ
+            Defer([this, entity]() { AddComponent<T>(entity); });
+            return nullptr;
+        }
+
         CompID type = ComponentPool<T>::GetID();
         auto [it, _] = m_TypeToComponents.try_emplace(type, std::make_shared<ComponentPool<T>>(4096));
         auto pool = std::static_pointer_cast<ComponentPool<T>>(it->second);
         T* comp = pool->AddComponent(entity);
 
+        // Archetype 更新
         if (m_EntityToArchetype.size() <= entity)
             m_EntityToArchetype.resize(entity + 1, Archetype{});
         Archetype& arch = m_EntityToArchetype[entity];
@@ -187,12 +271,10 @@ public:
             arch.set(type);
             m_ArchToEntities[arch].Add(entity);
         }
-        if constexpr (HasInitialize<T>)
-        {
-            comp->Initialize(); // Initialize if applicable
-        }
-        NotifyComponentAdded(entity, type); // Notify listeners
-        return comp;
+
+        if constexpr (HasInitialize<T>) comp->Initialize();
+        NotifyComponentAdded(entity, type);
+        return comp; // コンポーネントを返す
     }
 
     /*-------------------- Get component -------------------------------*/
@@ -221,13 +303,21 @@ public:
     template<ComponentType T>
     void RemoveComponent(const Entity& entity)
     {
+        if (m_IsUpdating)
+        {
+            Defer([this, entity]() { RemoveComponent<T>(entity); });
+            return;
+        }
+
         static_assert(!IsMultiComponent<T>::value, "Use RemoveAllComponents for multi-instance.");
         CompID type = ComponentPool<T>::GetID();
         if (entity >= m_EntityToArchetype.size() || !m_EntityToArchetype[entity].test(type)) return;
         auto pool = GetComponentPool<T>();
         if (!pool) return;
-        NotifyComponentRemoved(entity, type); // Notify listeners
+
+        NotifyComponentRemoved(entity, type);
         pool->RemoveComponent(entity);
+
         Archetype& arch = m_EntityToArchetype[entity];
         m_ArchToEntities[arch].Remove(entity);
         arch.reset(type);
@@ -238,17 +328,18 @@ public:
     template<ComponentType T>
     void RemoveAllComponents(const Entity& entity) requires IsMultiComponent<T>::value
     {
-        // ① プール取得
+        if (m_IsUpdating)
+        {
+            Defer([this, entity]() { RemoveAllComponents<T>(entity); });
+            return;
+        }
+
         auto* pool = GetComponentPool<T>();
         if (!pool) return;
 
-        // ② 削除予定のインスタンス数を取得
-        NotifyComponentRemoved(entity, ComponentPool<T>::GetID()); // Notify listeners
-
-        // ③ 実際に消す
+        NotifyComponentRemoved(entity, ComponentPool<T>::GetID());
         pool->RemoveAll(entity);
 
-        // ④ Archetype ビットのクリア
         Archetype& arch = m_EntityToArchetype[entity];
         arch.reset(ComponentPool<T>::GetID());
         m_ArchToEntities[arch].Remove(entity);
@@ -260,27 +351,24 @@ public:
     void RemoveComponentInstance(const Entity& e, size_t index)
         requires IsMultiComponent<T>::value
     {
+        if (m_IsUpdating)
+        {
+            Defer([this, e, index]() { RemoveComponentInstance<T>(e, index); });
+            return;
+        }
+
         CompID id = ComponentPool<T>::GetID();
-        // 1) プールと生ポインタを取得
         auto* pool = GetComponentPool<T>();
         void* rawVec = pool ? pool->GetRawComponent(e) : nullptr;
-
-        // 2) まだ要素があるかチェックして、これから消す「インデックス」を通知
         if (pool)
         {
             auto* vec = static_cast<std::vector<T>*>(rawVec);
             if (vec && index < vec->size())
-            {
-                // インスタンス単位の通知
-                for (auto* l : m_Listeners)
-                    l->OnComponentRemovedInstance(e, id, rawVec, index);
-            }
+                NotifyComponentRemovedInstance(e, id, rawVec, index);
         }
 
-        // 3) 本体を消す
         if (pool) pool->RemoveInstance(e, index);
 
-        // 4) Archetype ビットの更新
         auto& arch = m_EntityToArchetype[e];
         auto* remaining = pool ? pool->GetAllComponents(e) : nullptr;
         if (!remaining || remaining->empty())
@@ -298,15 +386,88 @@ public:
         return (e < m_EntityToArchetype.size()) ? m_EntityToArchetype[e] : empty;
     }
 
-    template<ComponentType T>
-    auto GetComponentPool()
+
+    /// コンポーネントイベントリスナーを登録（shared_ptr で受け取る）
+    void AddComponentListener(std::shared_ptr<IIComponentEventListener> listener)
     {
-        auto it = m_TypeToComponents.find(ComponentPool<T>::GetID());
-        return (it == m_TypeToComponents.end()) ? nullptr : static_cast<ComponentPool<T>*>(it->second.get());
+        m_ComponentListeners.emplace_back(listener);
     }
 
-    void AddListener(IIComponentEventListener* l) { m_Listeners.push_back(l); }
-    void ClearListeners() { m_Listeners.clear(); }
+    /// エンティティイベントリスナーを登録（shared_ptr で受け取る）
+    void AddEntityListener(std::shared_ptr<IEntityEventListener> listener)
+    {
+        m_EntityListeners.emplace_back(listener);
+    }
+    /// (オプション) 全リスナーをクリア
+    void ClearComponentListeners()
+    {
+        m_ComponentListeners.clear();
+    }
+    void ClearEntityListeners()
+    {
+        m_EntityListeners.clear();
+    }
+
+    //――――――――――――――――――
+    // システム登録
+    //――――――――――――――――――
+    template<typename S, typename... Args>
+    S& AddSystem(Args&&... args)
+    {
+        static_assert(std::is_base_of_v<ISystem, S>, "S must derive from ISystem");
+        auto ptr = std::make_unique<S>(std::forward<Args>(args)...);
+        S* raw = ptr.get();
+        m_Systems.push_back(std::move(ptr));
+        return *raw;
+    }
+    template<typename S>
+    S* GetSystem()
+    {
+        for (auto& up : m_Systems)
+        {
+            if (auto p = dynamic_cast<S*>(up.get()))
+                return p;
+        }
+        return nullptr;
+    }
+
+    // ① ゲーム開始前に一度だけ
+    void InitializeAllSystems()
+    {
+        std::sort(m_Systems.begin(), m_Systems.end(),
+            [](auto& a, auto& b) { return a->GetPriority() < b->GetPriority(); });
+        for (auto& sys : m_Systems)
+            if (sys->IsEnabled())
+                sys->Initialize(this);
+    }
+
+    //――――――――――――――――――
+    // フレーム毎に呼ぶ：全システムを優先度順に更新
+    //――――――――――――――――――
+    void UpdateAllSystems()
+    {
+        m_IsUpdating = true;
+
+        // システム更新
+        std::sort(m_Systems.begin(), m_Systems.end(),
+            [](auto& a, auto& b) { return a->GetPriority() < b->GetPriority(); });
+        for (auto& sys : m_Systems)
+            if (sys->IsEnabled())
+                sys->Update(this);
+
+        m_IsUpdating = false;
+        FlushDeferred();
+    }
+
+    // ③ ゲーム終了後に一度だけ
+    void FinalizeAllSystems()
+    {
+        std::sort(m_Systems.begin(), m_Systems.end(),
+            [](auto& a, auto& b) { return a->GetPriority() < b->GetPriority(); });
+        for (auto& sys : m_Systems)
+            if (sys->IsEnabled())
+                sys->Finalize(this);
+    }
 
     /*---------------------------------------------------------------------
         EntityContainer (archetype bucket)
@@ -565,11 +726,26 @@ public:
         std::unordered_map<Entity, std::vector<T>> m_Multi; // multi‑instance
     };
 
+    template<ComponentType T>
+    ComponentPool<T>* GetComponentPool()
+    {
+        auto it = m_TypeToComponents.find(ComponentPool<T>::GetID());
+        if (it == m_TypeToComponents.end()) return nullptr;
+        return static_cast<ComponentPool<T>*>(it->second.get());
+    }
+
     class ISystem
     {
     public:
         ISystem() = default;
+        /// 開始時に一度だけ呼ばれる
+        virtual void Initialize([[maybe_unused]] ECSManager* ecs) {}
+
+        /// 毎フレーム呼ばれる
         virtual void Update(ECSManager* ecs) = 0;
+
+        /// 終了時に一度だけ呼ばれる
+        virtual void Finalize([[maybe_unused]] ECSManager* ecs) {}
         virtual ~ISystem() = default;
         virtual int GetPriority() const { return priority; }
         virtual void SetPriority(int p) { priority = p; }
@@ -594,41 +770,61 @@ public:
         void Update(ECSManager* ecs) override
         {
             for (auto& [arch, bucket] : ecs->GetArchToEntities())
-                if ((arch & m_Required) == m_Required)
-                    for (Entity e : bucket.GetEntities())
-                        m_Func(e, *ecs->GetComponent<T>(e)...);
+            {
+                // アーキタイプフィルタ
+                if ((arch & m_Required) != m_Required) continue;
+
+                for (Entity e : bucket.GetEntities())
+                {
+                    // 1) エンティティが非アクティブならスキップ
+                    if (!ecs->IsEntityActive(e)) continue;
+
+                    // 2) 全コンポーネントが存在するかチェック
+                    if (!((ecs->GetComponent<T>(e) != nullptr) && ...)) continue;
+
+                    // 3) 全コンポーネントがアクティブかチェック
+                    if (!((ecs->GetComponent<T>(e)->IsActive()) && ...)) continue;
+
+                    // 4) 問題なければコールバック
+                    m_Func(e, *ecs->GetComponent<T>(e)...);
+                }
+            }
         }
         const Archetype& GetRequired() const { return m_Required; }
     private:
-        Archetype m_Required; FuncType m_Func;
-    };
-
-    // マルチコンポーネントシステムの基底クラス
-    class IMultiSystem
-    {
-    public:
-        virtual ~IMultiSystem() = default;
-        virtual void Update(ECSManager* ecs) = 0;
-        virtual int GetPriority() const { return priority; }
-        virtual void SetPriority(int p) { priority = p; }
-        virtual bool IsEnabled() const { return enabled; }
-        virtual void SetEnabled(bool e) { enabled = e; }
-    protected:
-        int priority = 0;
-        bool enabled = true;
+        Archetype m_Required;
+        FuncType m_Func;
     };
 
     template<ComponentType T>
         requires IsMultiComponent<T>::value
-    class MultiComponentSystem : public IMultiSystem
+    class MultiComponentSystem : public ISystem
     {
         using FuncType = std::function<void(Entity, std::vector<T>&)>;
     public:
         explicit MultiComponentSystem(FuncType f) : m_Func(std::move(f)) {}
         void Update(ECSManager* ecs) override
         {
-            auto* pool = ecs->GetComponentPool<T>(); if (!pool) return;
-            for (auto& [e, comps] : pool->Map()) if (!comps.empty()) m_Func(e, comps);
+            auto* pool = ecs->GetComponentPool<T>();
+            if (!pool) return;
+
+            for (auto& [e, vec] : pool->Map())
+            {
+                // 1) エンティティがアクティブでない、またはインスタンスが空ならスキップ
+                if (!ecs->IsEntityActive(e) || vec.empty())
+                    continue;
+
+                // 2) インスタンスごとに IsActive フラグを確認して、filteredVec を作る
+                std::vector<T> filtered;
+                filtered.reserve(vec.size());
+                for (auto& inst : vec)
+                    if (inst.IsActive())
+                        filtered.push_back(inst);
+
+                // 3) 有効インスタンスがひとつでもあればコール
+                if (!filtered.empty())
+                    m_Func(e, filtered);
+            }
         }
     private:
         FuncType m_Func;
@@ -639,20 +835,24 @@ public:
 private:
     void NotifyComponentAdded(Entity e, CompID c)
     {
-        for (auto* l : m_Listeners) l->OnComponentAdded(e, c);
+        for (auto& wp : m_ComponentListeners) if (auto sp = wp.lock())
+            sp->OnComponentAdded(e, c); // Notify listeners
     }
     void NotifyComponentCopied(Entity src, Entity dst, CompID c)
     {
-        for (auto* l : m_Listeners) l->OnComponentCopied(src, dst, c);
+        for (auto& wp : m_ComponentListeners) if (auto sp = wp.lock())
+            sp->OnComponentCopied(src, dst, c); // Notify listeners
     }
     void NotifyComponentRemoved(Entity e, CompID c)
     {
-        for (auto* l : m_Listeners) l->OnComponentRemoved(e, c);
+        for (auto& wp : m_ComponentListeners) if (auto sp = wp.lock())
+            sp->OnComponentRemoved(e, c);
     }
-    void NotifyComponentRemovedInstance(Entity e, CompID c, void* rawVec, size_t idx)
+    void NotifyComponentRemovedInstance(Entity e, CompID c, void* v, size_t i)
     {
-        for (auto* l : m_Listeners) l->OnComponentRemovedInstance(e, c, rawVec, idx);
-	}
+        for (auto& wp : m_ComponentListeners) if (auto sp = wp.lock())
+            sp->OnComponentRemovedInstance(e, c, v, i);
+    }
     bool IsMultiComponentByID(CompID id) const
     {
         auto it = m_TypeToComponents.find(id);
@@ -662,16 +862,48 @@ private:
         }
         return false;
     }
+    //――――――――――――――――――
+    // RemoveEntity の本体（ClearEntity → リスナ通知 → 再利用キュー）
+    //――――――――――――――――――
+    void RemoveEntityImpl(Entity e)
+    {
+        // 1) すべてのコンポーネントをクリア（イベント込み）
+        ClearEntity(e);
+        // 2) 非アクティブ化
+        m_EntityToActive[e] = false;
+        // 3) リサイクル
+        m_RecycleEntities.push_back(e);
+        // 4) エンティティ破棄イベント
+        for (auto& wp : m_EntityListeners)
+        {
+            if (auto sp = wp.lock()) sp->OnEntityDestroyed(e);
+        }
+    }
+
+    // フレーム末にまとめてコマンドを実行
+    void FlushDeferred()
+    {
+        for (auto& cmd : m_DeferredCommands) cmd();
+        m_DeferredCommands.clear();
+    }
 
     /*-------------------- data members --------------------------------*/
+
+
+
+
+    bool                    m_IsUpdating = false;
+    Entity                  m_NextEntityID = 0;
+    std::vector<bool>       m_EntityToActive;
+    std::vector<Entity>     m_RecycleEntities;
+    static inline CompID    m_NextCompTypeID = 0;
+    std::vector<Archetype>  m_EntityToArchetype;
+    std::vector<std::function<void()>>          m_DeferredCommands;
+    std::vector<std::weak_ptr<IEntityEventListener>>          m_EntityListeners;
+    std::vector<std::unique_ptr<ISystem>>       m_Systems;
+    std::vector<std::weak_ptr<IIComponentEventListener>>      m_ComponentListeners;
+    std::unordered_map<Archetype, EntityContainer>              m_ArchToEntities;
     std::unordered_map<CompID, std::shared_ptr<IComponentPool>> m_TypeToComponents;
-    std::vector<Archetype> m_EntityToArchetype;
-    std::vector<bool>      m_EntityToActive;
-    std::unordered_map<Archetype, EntityContainer> m_ArchToEntities;
-    Entity                 m_NextEntityID = 0;
-    std::vector<Entity>    m_RecycleEntities;
-    static inline CompID   m_NextCompTypeID = 0;
-    std::vector<IIComponentEventListener*> m_Listeners;
 };
 
 struct IComponentEventListener : public IIComponentEventListener
@@ -856,4 +1088,211 @@ protected:
     std::unordered_map<CompID, std::vector<std::function<void(Entity, IComponentTag*)>>> onRemoveSingle;
     // マルチ用
     std::unordered_map<CompID, std::vector<std::function<void(Entity, void*, size_t)>>> onRemoveMulti;
+};
+
+class Prefab
+{
+public:
+    Prefab() = default;
+
+    //――――――――――――――――――
+    // ① 事前登録：扱う型すべてに対して呼ぶ
+    // Prefab::RegisterCopyFunc<YourComponent>();
+    //――――――――――――――――――
+    template<ComponentType T>
+    static void RegisterCopyFunc()
+    {
+        CompID id = ECSManager::ComponentPool<T>::GetID();
+
+        if constexpr (IsMultiComponent<T>::value)
+        {
+            m_MultiCopyFuncs[id] = [](Entity e, ECSManager& ecs, void* rawVec) {
+                auto* vec = static_cast<std::vector<T>*>(rawVec);
+                for (auto const& comp : *vec)
+                {
+                    T* dst = ecs.AddComponent<T>(e);
+                    *dst = comp;
+                }
+                };
+        }
+        else
+        {
+            m_CopyFuncs[id] = [](Entity e, ECSManager& ecs, void* raw) {
+                T* dst = ecs.AddComponent<T>(e);
+                *dst = *static_cast<T*>(raw);
+                };
+        }
+    }
+
+    //――――――――――――――――――
+    // ② 既存エンティティから Prefab を作る
+    //――――――――――――――――――
+    static Prefab FromEntity(ECSManager& ecs, Entity e)
+    {
+        Prefab prefab;
+        const Archetype& arch = ecs.GetArchetype(e);
+
+        for (size_t id = 0; id < arch.size(); ++id)
+        {
+            if (!arch.test(id)) continue;
+            auto* pool = ecs.GetRawComponentPool(id);
+            void* raw = pool->GetRawComponent(e);
+            if (!raw) continue;
+
+            // 深いコピーを shared_ptr<void> で受け取る
+            auto clonePtr = pool->CloneComponent(id, raw);
+            if (pool->IsMultiComponentTrait(id))
+                prefab.m_MultiComponents[id] = std::move(clonePtr);
+            else
+                prefab.m_Components[id] = std::move(clonePtr);
+
+            prefab.m_Archetype.set(id);
+        }
+        return prefab;
+    }
+
+    //――――――――――――――――――
+    // ③ Instantiate するとき
+    //――――――――――――――――――
+    Entity Instantiate(ECSManager& ecs) const
+    {
+        Entity e = ecs.GenerateEntity();
+
+        // 単一コンポーネントを戻す
+        for (auto const& [id, raw] : m_Components)
+        {
+            auto it = m_CopyFuncs.find(id);
+            if (it != m_CopyFuncs.end())
+                it->second(e, ecs, raw.get());
+        }
+
+        // マルチコンポーネントを戻す
+        for (auto const& [id, rawVec] : m_MultiComponents)
+        {
+            auto it = m_MultiCopyFuncs.find(id);
+            if (it != m_MultiCopyFuncs.end())
+                it->second(e, ecs, rawVec.get());
+        }
+
+        return e;
+    }
+
+    //――――――――――――――――――
+    // ④ Prefab にコンポーネントを追加するとき
+    //――――――――――――――――――
+    template<ComponentType T>
+    void AddComponent(const T& comp)
+    {
+        CompID id = ECSManager::ComponentPool<T>::GetID();
+        if constexpr (IsMultiComponent<T>::value)
+        {
+            auto& ptr = m_MultiComponents[id];
+            if (!ptr) ptr = std::make_shared<std::vector<T>>();
+            auto& vec = *std::static_pointer_cast<std::vector<T>>(ptr);
+            vec.push_back(comp);
+        }
+        else
+        {
+            m_Components[id] = std::make_shared<T>(comp);
+        }
+        m_Archetype.set(id);
+    }
+
+    //――――――――――――――――――
+    // コンポーネントを 1 つだけ持つ場合の参照取得
+    //――――――――――――――――――
+    template<ComponentType T>
+    T& GetComponent()
+    {
+        CompID id = ECSManager::ComponentPool<T>::GetID();
+        auto it = m_Components.find(id);
+        if (it == m_Components.end())
+            throw std::runtime_error("Prefab にそのコンポーネントはありません");
+        return *std::static_pointer_cast<T>(it->second);
+    }
+
+    //――――――――――――――――――
+    // マルチコンポーネントをすべて参照
+    //――――――――――――――――――
+    template<ComponentType T>
+    std::vector<T>& GetAllComponents()
+        requires IsMultiComponent<T>::value
+    {
+        CompID id = ECSManager::ComponentPool<T>::GetID();
+        auto it = m_MultiComponents.find(id);
+        if (it == m_MultiComponents.end())
+            throw std::runtime_error("Prefab にそのマルチコンポーネントはありません");
+        return *std::static_pointer_cast<std::vector<T>>(it->second);
+    }
+
+    //――――――――――――――――――
+    // 単一コンポーネントを上書きする
+    //――――――――――――――――――
+    template<ComponentType T>
+    void SetComponent(const T& comp)
+    {
+        CompID id = ECSManager::ComponentPool<T>::GetID();
+        m_Components[id] = std::make_shared<T>(comp);
+        m_Archetype.set(id);
+    }
+
+    //――――――――――――――――――
+    // 単一コンポーネントを Prefab から削除
+    //――――――――――――――――――
+    template<ComponentType T>
+    void RemoveComponent()
+    {
+        CompID id = ECSManager::ComponentPool<T>::GetID();
+        // マップから単一コンポーネントのエントリを消す
+        m_Components.erase(id);
+        // Archetype からビットをクリア
+        m_Archetype.reset(id);
+    }
+
+    //――――――――――――――――――
+    // マルチコンポーネントの特定インスタンスを Prefab から削除
+    //――――――――――――――――――
+    template<ComponentType T>
+    void RemoveComponentInstance(size_t idx)
+        requires IsMultiComponent<T>::value
+    {
+        CompID id = ECSManager::ComponentPool<T>::GetID();
+        auto it = m_MultiComponents.find(id);
+        if (it == m_MultiComponents.end()) return;
+
+        auto& vec = *std::static_pointer_cast<std::vector<T>>(it->second);
+        if (idx >= vec.size()) return;
+        vec.erase(vec.begin() + idx);
+
+        // もし空になったら Prefab から完全に消す
+        if (vec.empty())
+        {
+            m_MultiComponents.erase(id);
+            m_Archetype.reset(id);
+        }
+    }
+
+    //――――――――――――――――――
+    // マルチコンポーネント全体を Prefab から削除
+    //――――――――――――――――――
+    template<ComponentType T>
+    void ClearAllComponents()
+        requires IsMultiComponent<T>::value
+    {
+        CompID id = ECSManager::ComponentPool<T>::GetID();
+        m_MultiComponents.erase(id);
+        m_Archetype.reset(id);
+    }
+
+private:
+    Archetype m_Archetype;
+    // void ポインタで型消去したストレージ
+    std::unordered_map<CompID, std::shared_ptr<void>> m_Components;
+    std::unordered_map<CompID, std::shared_ptr<void>> m_MultiComponents;
+
+    // インスタンス化用マップ
+    inline static std::unordered_map<CompID,
+        std::function<void(Entity, ECSManager&, void*)>> m_CopyFuncs;
+    inline static std::unordered_map<CompID,
+        std::function<void(Entity, ECSManager&, void*)>> m_MultiCopyFuncs;
 };

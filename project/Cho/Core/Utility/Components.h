@@ -7,38 +7,16 @@
 #include "Core/Utility/EffectStruct.h"
 #include "Core/Utility/AnimationStruct.h"
 #include "Core/Utility/SoundData.h"
-#include <vector>         // C++98
+#include "GameCore/ECS/ECSManager.h" // ECSManager
 #include <array>          // C++11
-#include <functional>     // C++98
-#include <bitset>         // C++98
-#include <memory>         // C++98
-#include <algorithm>      // C++98
-#include <unordered_map>  // C++11
 #include <unordered_set>  // C++11
 #include <typeindex>      // C++11
 #include <optional>       // C++17
-#include <concepts>       // C++20
 #include <ranges>         // C++20
 #include <numbers>        // C++20
-#include <cstdint>
 #include <variant>
 
-class EngineCommand;
 class GameObject;
-
-// コンポーネントだと判別するためのタグ
-struct IComponentTag 
-{
-	virtual void Initialize() {} // 初期化関数を定義
-};
-
-// ECS用ヘルパー
-template<typename C>
-concept HasInitialize = requires(C& c) { c.Initialize(); };
-
-// コンポーネントが複数持てるか(デフォルトは持てない)
-template<typename T>
-struct IsMultiComponent : std::false_type {};
 
 // 初期値を保存するための構造体
 struct TransformStartValue
