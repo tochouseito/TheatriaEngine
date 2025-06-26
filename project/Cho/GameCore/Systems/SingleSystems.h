@@ -12,33 +12,66 @@ class ScriptContainer;
 class ObjectContainer;
 class InputManager;
 
-enum SystemPriority
+// TransformComponentSystem
+class TransformSystem : public ECSManager::System<TransformComponent>
 {
-	TransformSystem=0,
-	CameraSystem,
-	ScriptSystem,
-};
-
-// Transform初期化
-class TransformInitializeSystem : public ECSManager::System<TransformComponent>
-{
-	friend class GameCore;
 public:
-	TransformInitializeSystem(ECSManager* ecs)
-		: ECSManager::System<TransformComponent>([this](Entity e, TransformComponent& transform)
+	TransformSystem():
+		ECSManager::System<TransformComponent>(
+			[&](Entity e, TransformComponent& transform)
 			{
-				e;
-				Log::Write(LogLevel::Info, "TransformInitializeSystem");
-				Start(transform);
-			}),
-		m_ECS(ecs)
+				UpdateComponent(e, transform);
+			},
+			[&](Entity e, TransformComponent& transform)
+			{
+				InitializeComponent(e, transform);
+			},
+			[&](Entity e, TransformComponent& transform)
+			{
+				FinalizeComponent(e, transform);
+			})
 	{
 	}
-	~TransformInitializeSystem() = default;
 private:
-	void Start(TransformComponent& transform);
-	ECSManager* m_ECS = nullptr;
+	void InitializeComponent(Entity e, TransformComponent& transform)
+	{
+		// 初期値保存
+		transform.startValue.translation = transform.position;
+		transform.startValue.rotation = transform.rotation;
+		transform.startValue.scale = transform.scale;
+		transform.startValue.degrees = transform.degrees;
+
+		// 度数からラジアンに変換
+		Vector3 radians = ChoMath::DegreesToRadians(transform.degrees);
+
+		// 各軸のクオータニオンを作成
+		Quaternion qx = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(1.0f, 0.0f, 0.0f), radians.x);
+		Quaternion qy = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0.0f, 1.0f, 0.0f), radians.y);
+		Quaternion qz = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0.0f, 0.0f, 1.0f), radians.z);
+
+		// 同時回転を累積
+		transform.rotation = qx * qy * qz;
+
+		// 精度を維持するための正規化
+		transform.rotation.Normalize();
+
+		// アフィン変換
+		transform.matWorld = ChoMath::MakeAffineMatrix(transform.scale, transform.rotation, transform.position);
+
+		// 次のフレーム用に保存する
+		transform.prePos = transform.position;
+		transform.preRot = radians;
+		transform.preScale = transform.scale;
+	}
+	void UpdateComponent(Entity e, TransformComponent& transform)
+	{
+
+	}
+	void FinalizeComponent(Entity e, TransformComponent& transform)
+	{
+	}
 };
+
 // Transform更新
 class TransformUpdateSystem : public ECSManager::System<TransformComponent>
 {

@@ -417,6 +417,8 @@ public:
         static_assert(std::is_base_of_v<ISystem, S>, "S must derive from ISystem");
         auto ptr = std::make_unique<S>(std::forward<Args>(args)...);
         S* raw = ptr.get();
+        // 所属する ECSManager のポインタを渡す
+        raw->OnRegister(this);
         m_Systems.push_back(std::move(ptr));
         return *raw;
     }
@@ -438,7 +440,7 @@ public:
             [](auto& a, auto& b) { return a->GetPriority() < b->GetPriority(); });
         for (auto& sys : m_Systems)
             if (sys->IsEnabled())
-                sys->Initialize(this);
+                sys->Initialize();
     }
 
     //――――――――――――――――――
@@ -453,7 +455,7 @@ public:
             [](auto& a, auto& b) { return a->GetPriority() < b->GetPriority(); });
         for (auto& sys : m_Systems)
             if (sys->IsEnabled())
-                sys->Update(this);
+                sys->Update();
 
         m_IsUpdating = false;
         FlushDeferred();
@@ -466,7 +468,7 @@ public:
             [](auto& a, auto& b) { return a->GetPriority() < b->GetPriority(); });
         for (auto& sys : m_Systems)
             if (sys->IsEnabled())
-                sys->Finalize(this);
+                sys->Finalize();
     }
 
     /*---------------------------------------------------------------------
@@ -737,21 +739,27 @@ public:
     class ISystem
     {
     public:
-        ISystem() = default;
+        ISystem() : m_pEcs(nullptr) {}
         /// 開始時に一度だけ呼ばれる
-        virtual void Initialize([[maybe_unused]] ECSManager* ecs) {}
+        virtual void Initialize() {}
 
         /// 毎フレーム呼ばれる
-        virtual void Update(ECSManager* ecs) = 0;
+        virtual void Update() = 0;
 
         /// 終了時に一度だけ呼ばれる
-        virtual void Finalize([[maybe_unused]] ECSManager* ecs) {}
+        virtual void Finalize() {}
         virtual ~ISystem() = default;
+        /// ECSManager に登録されたタイミングで呼び出される
+        virtual void OnRegister(ECSManager* ecs)
+        {
+            m_pEcs = ecs;
+        }
         virtual int GetPriority() const { return priority; }
         virtual void SetPriority(int p) { priority = p; }
         virtual bool IsEnabled() const { return enabled; }
         virtual void SetEnabled(bool e) { enabled = e; }
     protected:
+        ECSManager* m_pEcs = nullptr; // ECSManager へのポインタ（初期化時に設定される）
         uint32_t priority = 0;// 優先度
         bool enabled = true;// 有効フラグ
     };
@@ -764,12 +772,36 @@ public:
     {
         static constexpr bool kNoMulti = (!IsMultiComponent<T>::value && ...);
         static_assert(kNoMulti, "System<T...> cannot include multi-instance components");
+        using UpdateFunc = std::function<void(Entity, T&...)>;
+        using InitFunc = std::function<void(Entity, T&...)>;
+        using FinFunc = std::function<void(Entity, T&...)>;
     public:
-        using FuncType = std::function<void(Entity, T&...)>;
-        explicit System(FuncType f) : m_Func(f) { (m_Required.set(ComponentPool<T>::GetID()), ...); }
-        void Update(ECSManager* ecs) override
+        explicit System(UpdateFunc u,
+            InitFunc   i = {},
+            FinFunc    f = {})
+            : m_Update(u), m_Init(i), m_Fin(f)
         {
-            for (auto& [arch, bucket] : ecs->GetArchToEntities())
+            (m_Required.set(ComponentPool<T>::GetID()), ...);
+        }
+        // 初期化フェーズでエンティティごとの処理
+        void Initialize() override
+        {
+            if (!m_Init) return;
+            for (auto& [arch, bucket] : m_pEcs->GetArchToEntities())
+            {
+                if ((arch & m_Required) != m_Required) continue;
+                for (Entity e : bucket.GetEntities())
+                {
+                    if (!m_pEcs->IsEntityActive(e))                continue;
+                    if (!((m_pEcs->GetComponent<T>(e) != nullptr) && ...)) continue;
+                    if (!((m_pEcs->GetComponent<T>(e)->IsActive()) && ...)) continue;
+                    m_Init(e, *m_pEcs->GetComponent<T>(e)...);
+                }
+            }
+        }
+        void Update() override
+        {
+            for (auto& [arch, bucket] : m_pEcs->GetArchToEntities())
             {
                 // アーキタイプフィルタ
                 if ((arch & m_Required) != m_Required) continue;
@@ -777,41 +809,88 @@ public:
                 for (Entity e : bucket.GetEntities())
                 {
                     // 1) エンティティが非アクティブならスキップ
-                    if (!ecs->IsEntityActive(e)) continue;
+                    if (!m_pEcs->IsEntityActive(e)) continue;
 
                     // 2) 全コンポーネントが存在するかチェック
-                    if (!((ecs->GetComponent<T>(e) != nullptr) && ...)) continue;
+                    if (!((m_pEcs->GetComponent<T>(e) != nullptr) && ...)) continue;
 
                     // 3) 全コンポーネントがアクティブかチェック
-                    if (!((ecs->GetComponent<T>(e)->IsActive()) && ...)) continue;
+                    if (!((m_pEcs->GetComponent<T>(e)->IsActive()) && ...)) continue;
 
                     // 4) 問題なければコールバック
-                    m_Func(e, *ecs->GetComponent<T>(e)...);
+                    m_Update(e, *m_pEcs->GetComponent<T>(e)...);
+                }
+            }
+        }
+        // 終了フェーズでエンティティごとの処理
+        void Finalize() override
+        {
+            if (!m_Fin) return;
+            for (auto& [arch, bucket] : m_pEcs->GetArchToEntities())
+            {
+                if ((arch & m_Required) != m_Required) continue;
+                for (Entity e : bucket.GetEntities())
+                {
+                    if (!m_pEcs->IsEntityActive(e))                continue;
+                    if (!((m_pEcs->GetComponent<T>(e) != nullptr) && ...)) continue;
+                    if (!((m_pEcs->GetComponent<T>(e)->IsActive()) && ...)) continue;
+                    m_Fin(e, *m_pEcs->GetComponent<T>(e)...);
                 }
             }
         }
         const Archetype& GetRequired() const { return m_Required; }
     private:
-        Archetype m_Required;
-        FuncType m_Func;
+        Archetype          m_Required;
+        UpdateFunc         m_Update;
+        InitFunc           m_Init;
+        FinFunc            m_Fin;
     };
 
     template<ComponentType T>
         requires IsMultiComponent<T>::value
     class MultiComponentSystem : public ISystem
     {
-        using FuncType = std::function<void(Entity, std::vector<T>&)>;
+        using InitFunc = std::function<void(Entity, std::vector<T>&)>;
+        using UpdateFunc = std::function<void(Entity, std::vector<T>&)>;
+        using FinFunc = std::function<void(Entity, std::vector<T>&)>;
     public:
-        explicit MultiComponentSystem(FuncType f) : m_Func(std::move(f)) {}
-        void Update(ECSManager* ecs) override
+        explicit MultiComponentSystem(UpdateFunc u,
+            InitFunc   i = {},
+            FinFunc    f = {})
+            : m_Update(u), m_Init(i), m_Fin(f)
         {
-            auto* pool = ecs->GetComponentPool<T>();
+        }
+        // 起動時に一度だけ呼ばれる
+        void Initialize() override
+        {
+            if (!m_Init) return;
+            processAll(m_Init);
+        }
+
+        // 毎フレーム呼ばれる
+        void Update() override
+        {
+            processAll(m_Update);
+        }
+
+        // 終了時に一度だけ呼ばれる
+        void Finalize() override
+        {
+            if (!m_Fin) return;
+            processAll(m_Fin);
+        }
+    private:
+        // 実際にプールを走査してコールバックを呼び出す共通処理
+        template<typename Func>
+        void processAll(const Func& func)
+        {
+            auto* pool = m_pEcs->GetComponentPool<T>();
             if (!pool) return;
 
             for (auto& [e, vec] : pool->Map())
             {
                 // 1) エンティティがアクティブでない、またはインスタンスが空ならスキップ
-                if (!ecs->IsEntityActive(e) || vec.empty())
+                if (!m_pEcs->IsEntityActive(e) || vec.empty())
                     continue;
 
                 // 2) インスタンスごとに IsActive フラグを確認して、filteredVec を作る
@@ -823,11 +902,13 @@ public:
 
                 // 3) 有効インスタンスがひとつでもあればコール
                 if (!filtered.empty())
-                    m_Func(e, filtered);
+                    func(e, filtered);
             }
         }
-    private:
-        FuncType m_Func;
+
+        UpdateFunc         m_Update;
+        InitFunc           m_Init;
+        FinFunc            m_Fin;
     };
 
     std::unordered_map<Archetype, EntityContainer>& GetArchToEntities() { return m_ArchToEntities; }

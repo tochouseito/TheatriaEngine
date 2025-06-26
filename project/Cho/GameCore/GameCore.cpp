@@ -644,7 +644,10 @@ void GameCore::CreateSystems(InputManager* input, ResourceManager* resourceManag
 	// シングルシステム
 	// 初期化システムの登録
 	// TransformComponentの初期化
+	m_pECSManager->AddSystem<TransformInitializeSystem>();
+	auto tfSystem = m_pECSManager->GetSystem<TransformInitializeSystem>();
 	std::unique_ptr<ECSManager::ISystem> tfStateSystem = std::make_unique<TransformInitializeSystem>(m_pECSManager.get());
+
 	m_pSingleSystemManager->RegisterSystem(std::move(tfStateSystem), SystemState::Initialize);
 	// Particleの初期化
 	std::unique_ptr<ECSManager::ISystem> particleInitSystem = std::make_unique<ParticleInitializeSystem>(m_pECSManager.get(),resourceManager,graphicsEngine);
