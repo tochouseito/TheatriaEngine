@@ -6,28 +6,66 @@
 
 class ResourceManager;
 
-// LineRendererSystem
 class LineRendererSystem : public ECSManager::MultiComponentSystem<LineRendererComponent>
 {
-public:
-	LineRendererSystem(ECSManager* ecs, ResourceManager* resourceManager)
-		: ECSManager::MultiComponentSystem<LineRendererComponent>([this](Entity e, std::vector<LineRendererComponent>& lines)
+	public:
+		LineRendererSystem() : ECSManager::MultiComponentSystem<LineRendererComponent>(
+			[&](Entity e, std::vector<LineRendererComponent>& lines)
 			{
 				for (LineRendererComponent& line : lines)
 				{
 					UpdateComponent(e, line);
 				}
-			}),
-		m_pECS(ecs), m_pResourceManager(resourceManager)
+			},
+			[&](Entity e, std::vector<LineRendererComponent>& lines)
+			{
+				for (LineRendererComponent& line : lines)
+				{
+					InitializeComponent(e, line);
+				}
+			},
+			[&](Entity e, std::vector<LineRendererComponent>& lines)
+			{
+				for (LineRendererComponent& line : lines)
+				{
+					FinalizeComponent(e, line);
+				}
+			})
 	{
-		m_pIntegrationBuffer = resourceManager->GetLineIntegrationBuffer();
 	}
 	~LineRendererSystem() = default;
 private:
-	void UpdateComponent(Entity e, LineRendererComponent& line);
-	void TransferMatrix(LineRendererComponent& lineRenderer);
-	ECSManager* m_pECS = nullptr;
+	void InitializeComponent([[maybe_unused]] Entity e, [[maybe_unused]] LineRendererComponent& line)
+	{
+	}
+	void UpdateComponent([[maybe_unused]] Entity e, LineRendererComponent& line)
+	{
+		// 転送
+		TransferMatrix(line);
+	}
+	void TransferMatrix(LineRendererComponent& lineRenderer)
+	{
+		// 転送
+		uint32_t index = lineRenderer.mapID.value() * 2;
+		{// 始点
+			BUFFER_DATA_LINE bufferData;
+			bufferData.position = lineRenderer.line.start;
+			bufferData.color = lineRenderer.line.color;
+			m_pIntegrationBuffer->UpdateData(bufferData, index);
+		}
+		{// 終点
+			BUFFER_DATA_LINE bufferData;
+			bufferData.position = lineRenderer.line.end;
+			bufferData.color = lineRenderer.line.color;
+			m_pIntegrationBuffer->UpdateData(bufferData, index + 1);
+		}
+	}
+	void FinalizeComponent([[maybe_unused]] Entity e, [[maybe_unused]] LineRendererComponent& line)
+	{
+	}
+
 	ResourceManager* m_pResourceManager = nullptr;
 	VertexBuffer<BUFFER_DATA_LINE>* m_pIntegrationBuffer = nullptr;
 };
+
 

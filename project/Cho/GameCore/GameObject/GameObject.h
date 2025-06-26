@@ -12,21 +12,6 @@ class ObjectContainer;
 // GameObjectクラス
 class CHO_API GameObject
 {
-	friend class GameCore;
-	friend class ObjectContainer;
-	friend class Add3DObjectCommand;
-	friend class AddCameraObjectCommand;
-	friend class RenameObjectCommand;
-	friend class IScript;
-	friend class GameObjectData;
-	friend class ScriptGenerateInstanceSystem;
-	friend class ScriptInitializeSystem;
-	friend class ScriptUpdateSystem;
-	friend class ScirptFinalizeSystem;
-	friend class CollisionSystem;
-	friend class ContactListener2D;
-	friend class ScenePrefab;
-	friend class GameWorld;
 public:
 	std::optional<Entity> GetSrcEntity() const noexcept;
 	Entity GetEntity() const noexcept { return m_Entity; }

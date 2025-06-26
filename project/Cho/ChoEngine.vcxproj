@@ -249,7 +249,6 @@
     <ClCompile Include="GameCore\ObjectContainer\ObjectContainer.cpp" />
     <ClCompile Include="GameCore\SceneManager\SceneManager.cpp" />
     <ClCompile Include="GameCore\ScriptAPI\ScriptAPI.cpp" />
-    <ClCompile Include="GameCore\Systems\EditorSystems.cpp" />
     <ClCompile Include="GameCore\Systems\MultiSystems.cpp" />
     <ClCompile Include="GameCore\Systems\SingleSystems.cpp" />
     <ClCompile Include="Graphics\DepthManager\DepthManager.cpp" />
@@ -360,7 +359,6 @@
     <ClInclude Include="GameCore\ObjectContainer\ObjectContainer.h" />
     <ClInclude Include="GameCore\SceneManager\SceneManager.h" />
     <ClInclude Include="GameCore\ScriptAPI\ScriptAPI.h" />
-    <ClInclude Include="GameCore\Systems\EditorSystems.h" />
     <ClInclude Include="GameCore\Systems\MultiSystems.h" />
     <ClInclude Include="GameCore\Systems\SingleSystems.h" />
     <ClInclude Include="Graphics\DepthManager\DepthManager.h" />
