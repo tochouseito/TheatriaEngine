@@ -133,6 +133,15 @@ public:
         else
             notify();
 
+        // ③ 新規エンティティは「初期化待ちリスト」に登録
+        if (m_IsUpdating)
+        {
+            auto enqueueInit = [this, entity]() {
+                m_PendingInitEntities.push_back(entity);
+                };
+            Defer(std::move(enqueueInit));
+        }
+
         return entity;
     }
 
@@ -274,6 +283,16 @@ public:
 
         if constexpr (HasInitialize<T>) comp->Initialize();
         NotifyComponentAdded(entity, type);
+
+        // ③ コンポーネント追加後も「初期化待ちリスト」に登録
+        if (m_IsUpdating)
+        {
+            auto enqueueInit = [this, entity]() {
+                m_PendingInitEntities.push_back(entity);
+                };
+            Defer(std::move(enqueueInit));
+        }
+
         return comp; // コンポーネントを返す
     }
 
@@ -459,6 +478,17 @@ public:
 
         m_IsUpdating = false;
         FlushDeferred();
+
+        //    各システムの InitializeEntity() を呼ぶ
+        for (Entity e : m_PendingInitEntities)
+        {
+            for (auto& sys : m_Systems)
+            {
+                if (sys->IsEnabled())
+                    sys->InitializeEntity(e);
+            }
+        }
+        m_PendingInitEntities.clear();
     }
 
     // ③ ゲーム終了後に一度だけ
@@ -754,6 +784,9 @@ public:
         {
             m_pEcs = ecs;
         }
+        /// フレーム中に遅延で追加されたエンティティ／コンポーネントを受け取って、
+        /// そのエンティティだけ初期化フェーズの処理を走らせたいときに使う
+        virtual void InitializeEntity(Entity /*e*/) {}
         virtual int GetPriority() const { return priority; }
         virtual void SetPriority(int p) { priority = p; }
         virtual bool IsEnabled() const { return enabled; }
@@ -838,6 +871,18 @@ public:
                 }
             }
         }
+        void InitializeEntity(Entity e) override
+        {
+            if (!m_Init) return;
+            // ① アーキタイプが揃っているか
+            auto arch = m_pEcs->GetArchetype(e);
+            if ((arch & m_Required) != m_Required) return;
+            // ② 必要なコンポーネントが存在＆アクティブか
+            if (!((m_pEcs->GetComponent<T>(e) && m_pEcs->GetComponent<T>(e)->IsActive()) && ...))
+                return;
+            // ③ 初期化コールバック
+            m_Init(e, *m_pEcs->GetComponent<T>(e)...);
+        }
         const Archetype& GetRequired() const { return m_Required; }
     private:
         Archetype          m_Required;
@@ -878,6 +923,23 @@ public:
         {
             if (!m_Fin) return;
             processAll(m_Fin);
+        }
+        void InitializeEntity(Entity e) override
+        {
+            if (!m_Init) return;
+            auto* pool = m_pEcs->GetComponentPool<T>();
+            if (!pool) return;
+            auto it = pool->Map().find(e);
+            if (it == pool->Map().end() || it->second.empty()) return;
+
+            // 有効なインスタンスだけ抽出
+            std::vector<T> filtered;
+            for (auto& inst : it->second)
+                if (inst.IsActive())
+                    filtered.push_back(inst);
+
+            if (!filtered.empty())
+                m_Init(e, filtered);
         }
     private:
         // 実際にプールを走査してコールバックを呼び出す共通処理
@@ -977,6 +1039,7 @@ private:
     Entity                  m_NextEntityID = 0;
     std::vector<bool>       m_EntityToActive;
     std::vector<Entity>     m_RecycleEntities;
+    std::vector<Entity>  m_PendingInitEntities;
     static inline CompID    m_NextCompTypeID = 0;
     std::vector<Archetype>  m_EntityToArchetype;
     std::vector<std::function<void()>>          m_DeferredCommands;

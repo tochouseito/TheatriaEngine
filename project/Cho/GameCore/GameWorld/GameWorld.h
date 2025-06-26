@@ -1,6 +1,5 @@
 #pragma once
 #include "GameCore/GameObject/GameObject.h"
-#include "GameCore/Prefab/Prefab.h"
 #include "Core/Utility/FVector.h"
 class GameWorld
 {

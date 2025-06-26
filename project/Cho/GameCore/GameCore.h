@@ -1,21 +1,12 @@
 #pragma once
 #include "GameCore/SceneManager/SceneManager.h"
 #include "GameCore/ECS/ECSManager.h"
-#include "GameCore/SingleSystemManager/SingleSystemManager.h"
-#include "GameCore/MultiSystemManager/MultiSystemManager.h"
 #include "GameCore/ObjectContainer/ObjectContainer.h"
 #include "GameCore/PhysicsEngine/PhysicsEngine.h"
-#include "GameCore/Systems/SingleSystems.h"
 class InputManager;
 class ResourceManager;
 class GraphicsEngine;
 class EngineCommand;
-
-class TransformInitializeSystem;
-class ScriptGenerateInstanceSystem;
-class ScriptInitializeSystem;
-class Rigidbody2DInitSystem;
-class BoxCollider2DInitSystem;
 
 // ECSのイベントリスナー
 class ComponentEventDispatcher : public IComponentEventListener
@@ -62,19 +53,13 @@ public:
 	void SceneFinelize(ScenePrefab* scene);
 private:
 	void RegisterECSEvents();
-	void CreateSystems(InputManager* input, ResourceManager* resourceManager,GraphicsEngine* graphicsEngine);
+	void RegisterECSSystems(InputManager* input, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine);
+	
 
 	// シーンマネージャー
 	std::unique_ptr<SceneManager> m_pSceneManager = nullptr;
 	// ECSマネージャ
 	std::unique_ptr<ECSManager> m_pECSManager = nullptr;
-	// システムマネージャ
-	std::unique_ptr<SingleSystemManager> m_pSingleSystemManager = nullptr;
-	// マルチシステムマネージャ
-	std::unique_ptr<MultiSystemManager> m_pMultiSystemManager = nullptr;
-	// エディタの更新システム
-	std::unique_ptr<SingleSystemManager> m_pEditorSingleSystem = nullptr;
-	std::unique_ptr<MultiSystemManager> m_pEditorMultiSystem = nullptr;
 	// オブジェクトコンテナ
 	std::unique_ptr<ObjectContainer> m_pObjectContainer = nullptr;
 	// ゲーム実行フラグ
@@ -108,7 +93,7 @@ private:
 	// 最初のメインシーン保存用
 	SceneID m_MainSceneID = 0;
 
-	// イベントディスパッチャー
-	std::unique_ptr<ComponentEventDispatcher> m_pComponentEventDispatcher = nullptr;
+	// ECSイベントディスパッチャー
+	std::shared_ptr<ComponentEventDispatcher> m_pComponentEventDispatcher = nullptr;
 };
 
