@@ -1,8 +1,12 @@
 #pragma once
 #include "GameCore/GameScene/GameScene.h"
-class GameCore;
 
-class ResourceManager;
+enum class LoadSceneMode
+{
+	Single,  // 単一ロード
+	Additive,// 追加ロード
+};
+
 class SceneManager
 {
 public:
@@ -23,6 +27,23 @@ public:
 		AddScene(scene);
 		ChangeMainScene(L"MainScene");
 	}
+
+	// 読み込まれているシーンを破棄して指定したシーンをロード
+	GameSceneInstance* LoadScene(const std::wstring& sceneName);
+	// 非同期でシーンをロード
+	GameSceneInstance* LoadSceneAsync(const std::wstring& sceneName,const LoadSceneMode& mode);
+
+	// コンテナからシーンを取得
+	GameScene* GetScene(const SceneID& sceneID) noexcept
+	{
+		if (m_Scenes.isValid(sceneID))
+		{
+			return &m_Scenes[sceneID];
+		}
+		return nullptr;
+	}
+	// シーンコンテナを取得
+
 
 	// シーンを更新
 	void Update();
@@ -91,21 +112,11 @@ public:
 		ChangeMainScene(sceneName);
 	}
 private:
-	// GameCore
-	GameCore* m_pGameCore = nullptr;
-	// ResourceManager
-	ResourceManager* m_pResourceManager = nullptr;
-	// メインシーンID
-	std::optional<SceneID> m_MainSceneID = std::nullopt;
-	// メインシーン名
-	std::wstring m_MainSceneName = L"";
 	// シーンコンテナ（フリーリスト付き）
 	FVector<GameScene> m_Scenes;
 	// 名前検索用補助コンテナ
 	std::unordered_map<std::wstring, SceneID> m_SceneNameToID;
-	// 読み込まれたScene
-	std::vector<SceneID> m_LoadedScenesIDs;
-	// 解除されたScene
-	std::vector<SceneID> m_UnloadedScenesIDs;
+	// シーンインスタンスコンテナ
+	FVector<std::unique_ptr<GameSceneInstance>> m_pSceneInstances;
 };
 

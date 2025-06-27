@@ -96,12 +96,9 @@ private:
 public:
 	// コンストラクタ
 	GameObject(
-		ObjectContainer* objectContainer,
-		InputManager* input,
-		ResourceManager* resourceManager,
-		ECSManager* ecs,
-		const Entity& entity, const std::wstring& name,
-		const ObjectType& type, const SceneID& sceneID = 0);
+		const Entity& entity,
+		const std::wstring& name,
+		const ObjectType& type);
 	// デストラクタ
 	~GameObject();
 	// コピー、代入禁止

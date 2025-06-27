@@ -1234,10 +1234,10 @@ protected:
     std::unordered_map<CompID, std::vector<std::function<void(Entity, void*, size_t)>>> onRemoveMulti;
 };
 
-class Prefab
+class IPrefab
 {
 public:
-    Prefab() = default;
+    IPrefab() = default;
 
     //――――――――――――――――――
     // ① 事前登録：扱う型すべてに対して呼ぶ
@@ -1271,9 +1271,9 @@ public:
     //――――――――――――――――――
     // ② 既存エンティティから Prefab を作る
     //――――――――――――――――――
-    static Prefab FromEntity(ECSManager& ecs, Entity e)
+    static IPrefab FromEntity(ECSManager& ecs, Entity e)
     {
-        Prefab prefab;
+        IPrefab prefab;
         const Archetype& arch = ecs.GetArchetype(e);
 
         for (size_t id = 0; id < arch.size(); ++id)
@@ -1300,23 +1300,17 @@ public:
     //――――――――――――――――――
     Entity Instantiate(ECSManager& ecs) const
     {
-        Entity e = ecs.GenerateEntity();
+        // 1) エンティティ生成（派生で名前付けしたい場合はここをオーバーライド）
+        Entity e = CreateEntity(ecs);
 
-        // 単一コンポーネントを戻す
-        for (auto const& [id, raw] : m_Components)
-        {
-            auto it = m_CopyFuncs.find(id);
-            if (it != m_CopyFuncs.end())
-                it->second(e, ecs, raw.get());
-        }
+        // 2) コンポーネント復元（派生は基本的にそのまま使う）
+        InstantiateComponents(e, ecs);
 
-        // マルチコンポーネントを戻す
-        for (auto const& [id, rawVec] : m_MultiComponents)
-        {
-            auto it = m_MultiCopyFuncs.find(id);
-            if (it != m_MultiCopyFuncs.end())
-                it->second(e, ecs, rawVec.get());
-        }
+        // 3) 子 Prefab 再帰生成＆親子リンク
+        InstantiateChildren(e, ecs);
+
+        // 4) 完了フック（後始末的な処理があれば派生で）
+        OnAfterInstantiate(e, ecs);
 
         return e;
     }
@@ -1340,6 +1334,28 @@ public:
             m_Components[id] = std::make_shared<T>(comp);
         }
         m_Archetype.set(id);
+    }
+
+    //――――――――――――――――――
+    // ⑤ 子 Prefab を追加
+    //――――――――――――――――――
+    void AddSubPrefab(std::shared_ptr<IPrefab> child)
+    {
+        m_SubPrefabs.push_back(std::move(child));
+        // 必要なら m_Archetype にもビットを立てる
+    }
+
+    //――――――――――――――――――
+    // ⑥ 子 Prefab 一覧取得
+    //――――――――――――――――――
+    std::vector<std::shared_ptr<IPrefab>>& GetSubPrefabs() noexcept
+    {
+        return m_SubPrefabs;
+    }
+
+    const std::vector<std::shared_ptr<IPrefab>>& GetSubPrefabs() const noexcept
+    {
+        return m_SubPrefabs;
     }
 
     //――――――――――――――――――
@@ -1428,11 +1444,60 @@ public:
         m_Archetype.reset(id);
     }
 
+protected:
+    // —————— hooks ——————
+
+    // (1) まずエンティティを作る。追加の初期化／名前付けは here を override。
+    virtual Entity CreateEntity(ECSManager& ecs) const
+    {
+        return ecs.GenerateEntity();
+    }
+
+    // (2) m_Components/m_MultiComponents を使って既存の復元ロジック
+    virtual void InstantiateComponents(Entity e, ECSManager& ecs) const
+    {
+        for (auto const& [id, raw] : m_Components)
+        {
+            if (auto it = m_CopyFuncs.find(id); it != m_CopyFuncs.end())
+                it->second(e, ecs, raw.get());
+        }
+        for (auto const& [id, rawVec] : m_MultiComponents)
+        {
+            if (auto it = m_MultiCopyFuncs.find(id); it != m_MultiCopyFuncs.end())
+                it->second(e, ecs, rawVec.get());
+        }
+    }
+
+    // (3) 子 Prefab を再帰的にインスタンス化し、リンク用フックを呼ぶ
+    virtual void InstantiateChildren(Entity parent, ECSManager& ecs) const
+    {
+        for (auto const& child : m_SubPrefabs)
+        {
+            Entity childEnt = child->Instantiate(ecs);
+            LinkParentChild(parent, childEnt, ecs);
+        }
+    }
+
+    // 親→子を結びつけたい場合はここを override
+    virtual void LinkParentChild(Entity /*parent*/, Entity /*child*/, ECSManager& /*ecs*/) const
+    {
+        // default: なにもしない
+    }
+
+    // (4) 全部終わったあとに追加処理したい場合はここ
+    virtual void OnAfterInstantiate(Entity /*e*/, ECSManager& /*ecs*/) const
+    {
+        // default: なにもしない
+    }
+
 private:
     Archetype m_Archetype;
     // void ポインタで型消去したストレージ
     std::unordered_map<CompID, std::shared_ptr<void>> m_Components;
     std::unordered_map<CompID, std::shared_ptr<void>> m_MultiComponents;
+
+    // 追加：ネストされた Prefab のリスト
+    std::vector<std::shared_ptr<IPrefab>> m_SubPrefabs;
 
     // インスタンス化用マップ
     inline static std::unordered_map<CompID,

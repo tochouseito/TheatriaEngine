@@ -612,22 +612,22 @@ void GameCore::RegisterECSEvents()
 			model->RemoveBoneOffsetIdx(c->boneOffsetID.value());
 		});
 	// Prefabにコンポーネントを登録
-	Prefab::RegisterCopyFunc<TransformComponent>();
-	Prefab::RegisterCopyFunc<CameraComponent>();
-	Prefab::RegisterCopyFunc<MeshFilterComponent>();
-	Prefab::RegisterCopyFunc<MeshRendererComponent>();
-	Prefab::RegisterCopyFunc<ScriptComponent>();
-	Prefab::RegisterCopyFunc<MaterialComponent>();
-	Prefab::RegisterCopyFunc<ParticleComponent>();
-	Prefab::RegisterCopyFunc<EmitterComponent>();
-	Prefab::RegisterCopyFunc<LineRendererComponent>();
-	Prefab::RegisterCopyFunc<Rigidbody2DComponent>();
-	Prefab::RegisterCopyFunc<BoxCollider2DComponent>();
-	Prefab::RegisterCopyFunc<EffectComponent>();
-	Prefab::RegisterCopyFunc<UISpriteComponent>();
-	Prefab::RegisterCopyFunc<LightComponent>();
-	Prefab::RegisterCopyFunc<AudioComponent>();
-	Prefab::RegisterCopyFunc<AnimationComponent>();
+	IPrefab::RegisterCopyFunc<TransformComponent>();
+	IPrefab::RegisterCopyFunc<CameraComponent>();
+	IPrefab::RegisterCopyFunc<MeshFilterComponent>();
+	IPrefab::RegisterCopyFunc<MeshRendererComponent>();
+	IPrefab::RegisterCopyFunc<ScriptComponent>();
+	IPrefab::RegisterCopyFunc<MaterialComponent>();
+	IPrefab::RegisterCopyFunc<ParticleComponent>();
+	IPrefab::RegisterCopyFunc<EmitterComponent>();
+	IPrefab::RegisterCopyFunc<LineRendererComponent>();
+	IPrefab::RegisterCopyFunc<Rigidbody2DComponent>();
+	IPrefab::RegisterCopyFunc<BoxCollider2DComponent>();
+	IPrefab::RegisterCopyFunc<EffectComponent>();
+	IPrefab::RegisterCopyFunc<UISpriteComponent>();
+	IPrefab::RegisterCopyFunc<LightComponent>();
+	IPrefab::RegisterCopyFunc<AudioComponent>();
+	IPrefab::RegisterCopyFunc<AnimationComponent>();
 }
 
 void GameCore::RegisterECSSystems(InputManager* input, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine)

@@ -220,7 +220,7 @@ bool DeleteObjectCommand::Execute(EngineCommand* edit)
 	if (!object) { return false; }
 	Entity entity = object->GetEntity();
 	// Prefab作成
-	m_Prefab = std::make_unique<Prefab>(Prefab::FromEntity(*ecs, entity));
+	m_Prefab = std::make_unique<IPrefab>(IPrefab::FromEntity(*ecs, entity));
 	m_Prefab->SetName(object->GetName());
 	m_Prefab->SetType(object->GetType());
 	m_Prefab->SetTag(object->GetTag());

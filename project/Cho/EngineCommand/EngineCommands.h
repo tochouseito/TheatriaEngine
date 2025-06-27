@@ -4,7 +4,7 @@
 #include "Core/Utility/Components.h"
 #include "GameCore/Prefab/Prefab.h"
 class GameObject;
-class Prefab;
+class IPrefab;
 // 3Dオブジェクトを追加するコマンド
 class Add3DObjectCommand :public IEngineCommand
 {
@@ -185,7 +185,7 @@ public:
 	bool Execute(EngineCommand* edit)override;
 	bool Undo(EngineCommand* edit)override;
 private:
-	std::unique_ptr<Prefab> m_Prefab; // 削除前のPrefab情報を保持
+	std::unique_ptr<IPrefab> m_Prefab; // 削除前のPrefab情報を保持
 	uint32_t m_ObjectID;
 };
 // オブジェクトの名前を変更するコマンド

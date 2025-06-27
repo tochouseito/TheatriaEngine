@@ -47,6 +47,7 @@ template <typename T>
 class FVector
 {
     using iterator = FVectorIterator<T>;
+    friend class FVectorIterator<T>;
 public:
     FVector() = default;
 
