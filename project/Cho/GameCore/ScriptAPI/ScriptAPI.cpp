@@ -2,7 +2,6 @@
 #include "ScriptAPI.h"
 #include "Platform/InputManager/InputManager.h"
 #include "GameCore/ECS/ECSManager.h"
-#include "GameCore/ObjectContainer/ObjectContainer.h"
 #include "GameCore/PhysicsEngine/PhysicsEngine.h"
 #include "Resources/ResourceManager/ResourceManager.h"
 #include "Resources/AudioManager/AudioManager.h"
@@ -135,8 +134,8 @@ void Rigidbody2DAPI::Initialize(const Entity& entity, ECSManager* ecs, ObjectCon
 				t->world->RayCast(&callback, b2Vec2(start.x, start.y), b2Vec2(end.x, end.y));
 				if (callback.hit)
 				{
-					ObjectID id = static_cast<ObjectID>(callback.fixture->GetBody()->GetUserData().pointer);
-					return m_ObjectContainer->GetGameObject(id);
+					Entity entity = static_cast<Entity>(callback.fixture->GetBody()->GetUserData().pointer);
+					return m_ObjectContainer->GetGameObject(entity);
 				}
 			}
 			return nullptr;

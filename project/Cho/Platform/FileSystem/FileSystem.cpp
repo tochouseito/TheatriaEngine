@@ -279,268 +279,146 @@ bool Cho::FileSystem::LoadGameSettings(const std::wstring& filePath)
     }
 }
 
-bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, SceneManager* sceneManager, BaseScene* scene, ObjectContainer* container, ECSManager* ecs)
+bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, GameScene* scene, ECSManager* ecs)
 {
-    std::filesystem::path path = std::filesystem::path(directory) / (scene->GetSceneName() + L".json");
+    std::filesystem::path path = std::filesystem::path(directory) / (scene->GetName() + L".json");
 
     nlohmann::ordered_json j;
     j["fileType"] = "SceneFile";
-    j["sceneName"] = std::filesystem::path(scene->GetSceneName()).string();
+    j["sceneName"] = std::filesystem::path(scene->GetName()).string();
 
-    // 使用中のオブジェクトを保存
+    // オブジェクト情報を保存
     nlohmann::ordered_json objArray = nlohmann::json::array();
-	// 選択中のシーンならUseListを使用。そうじゃないならObjectDataListを使用
-    if (scene->GetSceneName() == sceneManager->GetMainScene()->GetSceneName())
+    for (CPrefab& prefab : scene->GetPrefabs())
     {
-        for (ObjectID& id : scene->GetUseObjects())
+		nlohmann::ordered_json prefabJson;
+		prefabJson["name"] = std::filesystem::path(prefab.GetName()).string();
+		prefabJson["type"] = ObjectTypeToWString(prefab.GetType());
+		// コンポーネントの保存
+		nlohmann::ordered_json comps;
+		// TransformComponentの保存
+        if (IsComponentAllowedAtRuntime<TransformComponent>(prefab.GetType()))
         {
-            const GameObject* obj = container->GetGameObject(id);
-            if (!obj) continue;
-
-            nlohmann::ordered_json objJson;
-            objJson["name"] = std::filesystem::path(obj->GetName()).string();
-            objJson["type"] = ObjectTypeToWString(obj->GetType());
-
-            // components
-            nlohmann::ordered_json comps;
-
-            Entity entity = obj->GetEntity();
-            // マルチコンポーネント存在確認用
-            std::vector<LineRendererComponent>* lineRenderers;
-
-            // コンポーネントの保存
-            if (IsComponentAllowedAtRuntime<TransformComponent>(obj->GetType()))
+            if (const auto* t = prefab.GetComponentPtr<TransformComponent>())
             {
-                if (const auto* t = ecs->GetComponent<TransformComponent>(entity))
-                {
-                    comps["Transform"] = Cho::Serialization::ToJson(*t);
-                }
+                comps["Transform"] = Cho::Serialization::ToJson(*t);
             }
-            if (IsComponentAllowedAtRuntime<MeshFilterComponent>(obj->GetType()))
-            {
-                if (const auto* m = ecs->GetComponent<MeshFilterComponent>(entity))
-                {
-                    comps["MeshFilter"] = Cho::Serialization::ToJson(*m);
-                }
-            }
-            if (IsComponentAllowedAtRuntime<MeshRendererComponent>(obj->GetType()))
-            {
-                if (const auto* r = ecs->GetComponent<MeshRendererComponent>(entity))
-                {
-                    comps["MeshRenderer"] = Cho::Serialization::ToJson(*r);
-                }
-            }
-            if (IsComponentAllowedAtRuntime<MaterialComponent>(obj->GetType()))
-            {
-                if (const auto* m = ecs->GetComponent<MaterialComponent>(entity))
-                {
-                    comps["Material"] = Cho::Serialization::ToJson(*m);
-                }
-            }
-            if (IsComponentAllowedAtRuntime<ScriptComponent>(obj->GetType()))
-            {
-                if (const auto* s = ecs->GetComponent<ScriptComponent>(entity))
-                {
-                    comps["Script"] = Cho::Serialization::ToJson(*s);
-                }
-            }
-            if (IsComponentAllowedAtRuntime<LineRendererComponent>(obj->GetType()))
-            {
-                lineRenderers = ecs->GetAllComponents<LineRendererComponent>(entity);
-                if (lineRenderers)
-                {
-                    comps["LineRenderer"] = Cho::Serialization::ToJson(*lineRenderers);
-                }
-            }
-            if (IsComponentAllowedAtRuntime<Rigidbody2DComponent>(obj->GetType()))
-            {
-                if (const auto* rb = ecs->GetComponent<Rigidbody2DComponent>(entity))
-                {
-                    comps["Rigidbody2D"] = Cho::Serialization::ToJson(*rb);
-                }
-            }
-            if (IsComponentAllowedAtRuntime<BoxCollider2DComponent>(obj->GetType()))
-            {
-                if (const auto* bc = ecs->GetComponent<BoxCollider2DComponent>(entity))
-                {
-                    comps["BoxCollider2D"] = Cho::Serialization::ToJson(*bc);
-                }
-            }
-            if (IsComponentAllowedAtRuntime<CameraComponent>(obj->GetType()))
-            {
-                if (const auto* c = ecs->GetComponent<CameraComponent>(entity))
-                {
-                    comps["Camera"] = Cho::Serialization::ToJson(*c);
-                }
-            }
-            if (IsComponentAllowedAtRuntime<ParticleComponent>(obj->GetType()))
-            {
-                if (const auto* p = ecs->GetComponent<ParticleComponent>(entity))
-                {
-                    comps["Particle"] = Cho::Serialization::ToJson(*p);
-                }
-            }
-            if (IsComponentAllowedAtRuntime<EmitterComponent>(obj->GetType()))
-            {
-                if (const auto* e = ecs->GetComponent<EmitterComponent>(entity))
-                {
-                    comps["Emitter"] = Cho::Serialization::ToJson(*e);
-                }
-            }
-            if (IsComponentAllowedAtRuntime<UISpriteComponent>(obj->GetType()))
-            {
-                if (const auto* ui = ecs->GetComponent<UISpriteComponent>(entity))
-                {
-                    comps["UISprite"] = Cho::Serialization::ToJson(*ui);
-                }
-            }
-			if (IsComponentAllowedAtRuntime<LightComponent>(obj->GetType()))
-			{
-				if (const auto* l = ecs->GetComponent<LightComponent>(entity))
-				{
-					comps["Light"] = Cho::Serialization::ToJson(*l);
-				}
-			}
-			if (IsComponentAllowedAtRuntime<AudioComponent>(obj->GetType()))
-			{
-				if (const auto* a = ecs->GetComponent<AudioComponent>(entity))
-				{
-					comps["Audio"] = Cho::Serialization::ToJson(*a);
-				}
-			}
-            if (IsComponentAllowedAtRuntime<AnimationComponent>(obj->GetType()))
-            {
-                if (const auto* anim = ecs->GetComponent<AnimationComponent>(entity))
-                {
-                    comps["Animation"] = Cho::Serialization::ToJson(*anim);
-                }
-			}
-
-            objJson["components"] = comps;
-            objArray.push_back(objJson);
         }
-    } else
-    {
-        for (const GameObjectData& objData : scene->GetGameObjectData())
+		// MeshFilterComponentの保存
+        if (IsComponentAllowedAtRuntime<MeshFilterComponent>(prefab.GetType()))
         {
-            nlohmann::ordered_json objJson;
-            objJson["name"] = std::filesystem::path(objData.m_Name).string();
-            objJson["type"] = ObjectTypeToWString(objData.m_Type);
-
-            // components
-            nlohmann::ordered_json comps;
-
-            // コンポーネントの保存
-            if (IsComponentAllowedAtRuntime<TransformComponent>(objData.m_Type))
+            if (const auto* m = prefab.GetComponentPtr<MeshFilterComponent>())
             {
-                if (objData.m_Transform.has_value())
-                {
-                    comps["Transform"] = Cho::Serialization::ToJson(objData.m_Transform.value());
-                }
+                comps["MeshFilter"] = Cho::Serialization::ToJson(*m);
             }
-            if (IsComponentAllowedAtRuntime<MeshFilterComponent>(objData.m_Type))
+		}
+        // MeshRendererComponentの保存
+        if (IsComponentAllowedAtRuntime<MeshRendererComponent>(prefab.GetType()))
+        {
+            if (const auto* r = prefab.GetComponentPtr<MeshRendererComponent>())
             {
-                if (objData.m_MeshFilter.has_value())
-                {
-                    comps["MeshFilter"] = Cho::Serialization::ToJson(objData.m_MeshFilter.value());
-                }
+                comps["MeshRenderer"] = Cho::Serialization::ToJson(*r);
             }
-            if (IsComponentAllowedAtRuntime<MeshRendererComponent>(objData.m_Type))
+		}
+        // MaterialComponentの保存
+        if (IsComponentAllowedAtRuntime<MaterialComponent>(prefab.GetType()))
+        {
+            if (const auto* m = prefab.GetComponentPtr<MaterialComponent>())
             {
-                if (objData.m_MeshRenderer.has_value())
-                {
-                    comps["MeshRenderer"] = Cho::Serialization::ToJson(objData.m_MeshRenderer.value());
-                }
-            }
-            if (IsComponentAllowedAtRuntime<MaterialComponent>(objData.m_Type))
-            {
-                if (objData.m_Material.has_value())
-                {
-                    comps["Material"] = Cho::Serialization::ToJson(objData.m_Material.value());
-                }
-            }
-            if (IsComponentAllowedAtRuntime<ScriptComponent>(objData.m_Type))
-            {
-                if (objData.m_Script.has_value())
-                {
-                    comps["Script"] = Cho::Serialization::ToJson(objData.m_Script.value());
-                }
-            }
-            if (IsComponentAllowedAtRuntime<LineRendererComponent>(objData.m_Type))
-            {
-                //lineRenderers = ecs->GetAllComponents<LineRendererComponent>(entity);
-                if (!objData.m_LineRenderer.empty())
-                {
-                    comps["LineRenderer"] = Cho::Serialization::ToJson(objData.m_LineRenderer);
-                }
-            }
-            if (IsComponentAllowedAtRuntime<Rigidbody2DComponent>(objData.m_Type))
-            {
-                if (objData.m_Rigidbody2D.has_value())
-                {
-                    comps["Rigidbody2D"] = Cho::Serialization::ToJson(objData.m_Rigidbody2D.value());
-                }
-            }
-            if (IsComponentAllowedAtRuntime<BoxCollider2DComponent>(objData.m_Type))
-            {
-                if (objData.m_BoxCollider2D.has_value())
-                {
-                    comps["BoxCollider2D"] = Cho::Serialization::ToJson(objData.m_BoxCollider2D.value());
-                }
-            }
-            if (IsComponentAllowedAtRuntime<CameraComponent>(objData.m_Type))
-            {
-                if (objData.m_Camera.has_value())
-                {
-                    comps["Camera"] = Cho::Serialization::ToJson(objData.m_Camera.value());
-                }
-            }
-            if (IsComponentAllowedAtRuntime<ParticleComponent>(objData.m_Type))
-            {
-                if (objData.m_Particle.has_value())
-                {
-                    comps["Particle"] = Cho::Serialization::ToJson(objData.m_Particle.value());
-                }
-            }
-            if (IsComponentAllowedAtRuntime<EmitterComponent>(objData.m_Type))
-            {
-                if (objData.m_Emitter.has_value())
-                {
-                    comps["Emitter"] = Cho::Serialization::ToJson(objData.m_Emitter.value());
-                }
-            }
-            if (IsComponentAllowedAtRuntime<UISpriteComponent>(objData.m_Type))
-            {
-                if (objData.m_UISprite.has_value())
-                {
-                    comps["UISprite"] = Cho::Serialization::ToJson(objData.m_UISprite.value());
-                }
-            }
-            if (IsComponentAllowedAtRuntime<LightComponent>(objData.m_Type))
-            {
-                if (objData.m_Light.has_value())
-                {
-                    comps["Light"] = Cho::Serialization::ToJson(objData.m_Light.value());
-                }
-            }
-			if (IsComponentAllowedAtRuntime<AudioComponent>(objData.m_Type))
-			{
-				if (objData.m_Audio.has_value())
-				{
-					comps["Audio"] = Cho::Serialization::ToJson(objData.m_Audio.value());
-				}
+                comps["Material"] = Cho::Serialization::ToJson(*m);
 			}
-			if (IsComponentAllowedAtRuntime<AnimationComponent>(objData.m_Type))
-                {
-                if (objData.m_Animation.has_value())
-                {
-                    comps["Animation"] = Cho::Serialization::ToJson(objData.m_Animation.value());
-                }
-			}
-
-            objJson["components"] = comps;
-            objArray.push_back(objJson);
+            }
+        // ScriptComponentの保存
+        if (IsComponentAllowedAtRuntime<ScriptComponent>(prefab.GetType()))
+        {
+            if (const auto* s = prefab.GetComponentPtr<ScriptComponent>())
+            {
+                comps["Script"] = Cho::Serialization::ToJson(*s);
+            }
         }
+        // LineRendererComponentの保存
+        if (IsComponentAllowedAtRuntime<LineRendererComponent>(prefab.GetType()))
+        {
+            const auto* lineRenderers = prefab.GetAllComponentsPtr<LineRendererComponent>();
+            if (lineRenderers)
+            {
+                comps["LineRenderer"] = Cho::Serialization::ToJson(*lineRenderers);
+			}
+            }
+        // Rigidbody2DComponentの保存
+        if (IsComponentAllowedAtRuntime<Rigidbody2DComponent>(prefab.GetType()))
+        {
+            if (const auto* rb = prefab.GetComponentPtr<Rigidbody2DComponent>())
+            {
+                comps["Rigidbody2D"] = Cho::Serialization::ToJson(*rb);
+            }
+        }
+        // BoxCollider2DComponentの保存
+        if (IsComponentAllowedAtRuntime<BoxCollider2DComponent>(prefab.GetType()))
+        {
+            if (const auto* bc = prefab.GetComponentPtr<BoxCollider2DComponent>())
+            {
+                comps["BoxCollider2D"] = Cho::Serialization::ToJson(*bc);
+            }
+        }
+        // CameraComponentの保存
+        if (IsComponentAllowedAtRuntime<CameraComponent>(prefab.GetType()))
+        {
+            if (const auto* c = prefab.GetComponentPtr<CameraComponent>())
+            {
+                comps["Camera"] = Cho::Serialization::ToJson(*c);
+			}
+            }
+        // ParticleComponentの保存
+        if (IsComponentAllowedAtRuntime<ParticleComponent>(prefab.GetType()))
+        {
+            if (const auto* p = prefab.GetComponentPtr<ParticleComponent>())
+            {
+                comps["Particle"] = Cho::Serialization::ToJson(*p);
+            }
+        }
+        // EmitterComponentの保存
+        if (IsComponentAllowedAtRuntime<EmitterComponent>(prefab.GetType()))
+        {
+            if (const auto* e = prefab.GetComponentPtr<EmitterComponent>())
+            {
+                comps["Emitter"] = Cho::Serialization::ToJson(*e);
+			}
+        }
+        // UISpriteComponentの保存
+        if (IsComponentAllowedAtRuntime<UISpriteComponent>(prefab.GetType()))
+        {
+            if (const auto* ui = prefab.GetComponentPtr<UISpriteComponent>())
+            {
+                comps["UISprite"] = Cho::Serialization::ToJson(*ui);
+			}
+        }
+		// LightComponentの保存
+        if (IsComponentAllowedAtRuntime<LightComponent>(prefab.GetType()))
+        {
+            if (const auto* l = prefab.GetComponentPtr<LightComponent>())
+            {
+                comps["Light"] = Cho::Serialization::ToJson(*l);
+            }
+        }
+		// AudioComponentの保存
+        if (IsComponentAllowedAtRuntime<AudioComponent>(prefab.GetType()))
+        {
+            if (const auto* a = prefab.GetComponentPtr<AudioComponent>())
+            {
+                comps["Audio"] = Cho::Serialization::ToJson(*a);
+            }
+		}
+        // AnimationComponentの保存
+        if (IsComponentAllowedAtRuntime<AnimationComponent>(prefab.GetType()))
+        {
+            if (const auto* anim = prefab.GetComponentPtr<AnimationComponent>())
+            {
+                comps["Animation"] = Cho::Serialization::ToJson(*anim);
+            }
+		}
+        prefabJson["components"] = comps;
+        objArray.push_back(prefabJson);
     }
     j["objects"] = objArray;
 
@@ -548,7 +426,6 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, SceneManager*
     if (!scene->GetStartCameraName().empty())
     {
         j["mainCamera"] = std::filesystem::path(scene->GetStartCameraName()).string();
-
     }
 
     try
@@ -568,7 +445,6 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, SceneManager*
 bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand* engineCommand)
 {
     if (!engineCommand) { Log::Write(LogLevel::Assert, "EngineCommand is nullptr"); }
-	SceneManager* sceneManager = engineCommand->GetGameCore()->GetSceneManager();
     try
     {
         std::ifstream file(filePath);
@@ -581,14 +457,13 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
         {
             return false;
         }
-        //BaseScene* scene = nullptr;
-        ScenePrefab scene(sceneManager);
+        std::wstring sceneName;
         // シーン名設定
         if (j.contains("sceneName"))
         {
-			std::wstring sceneName = std::filesystem::path(j["sceneName"].get<std::string>()).wstring();
-			scene.SetSceneName(sceneName);
+			sceneName = std::filesystem::path(j["sceneName"].get<std::string>()).wstring();
 		}
+		GameScene scene(sceneName);
 
         // オブジェクト読み込み
         if (j.contains("objects"))
@@ -597,8 +472,8 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
             {
                 std::wstring name = std::filesystem::path(obj["name"].get<std::string>()).wstring();
                 ObjectType type = ObjectTypeFromString(obj["type"].get<std::string>());
-                // GameObjectData
-				GameObjectData objData(name, type);
+                
+				CPrefab prefab(name, type);
 
                 if (!obj.contains("components")) continue;
                 const auto& comps = obj["components"];
@@ -610,7 +485,7 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
 					// TransformComponentの読み込み
 					Deserialization::FromJson(jt,t);
                     // TransformComponentの保存
-                    objData.m_Transform = t;
+					prefab.AddComponent<TransformComponent>(t);
                 }
 
                 if (comps.contains("Camera"))
@@ -620,7 +495,7 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
 					// CameraComponentの読み込み
 					Deserialization::FromJson(jc, c);
 					// CameraComponentの保存
-					objData.m_Camera = c;
+					prefab.AddComponent<CameraComponent>(c);
                 }
 
                 if (comps.contains("MeshFilter"))
@@ -636,7 +511,7 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
                         m.modelID = comps["MeshFilter"]["modelID"];
                     }
                     // MeshFilterComponentの保存
-					objData.m_MeshFilter = m;
+					prefab.AddComponent<MeshFilterComponent>(m);
                 }
 
                 if (comps.contains("MeshRenderer"))
@@ -644,7 +519,7 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
                     MeshRendererComponent r{};
                     r.visible = comps["MeshRenderer"].value("visible", true);
 					// MeshRendererComponentの保存
-					objData.m_MeshRenderer = r;
+					prefab.AddComponent<MeshRendererComponent>(r);
                 }
 
 				if (comps.contains("Material"))
@@ -654,7 +529,7 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
 					// MaterialComponentの読み込み
 					Deserialization::FromJson(jm, m);
 					// MaterialComponentの保存
-					objData.m_Material = m;
+					prefab.AddComponent<MaterialComponent>(m);
 				}
 
                 if (comps.contains("Script"))
@@ -664,7 +539,7 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
                     {
                         std::string scriptNameStr = comps["Script"]["scriptName"].get<std::string>();
                         s.scriptName = scriptNameStr;
-						objData.m_Script = s;
+						prefab.AddComponent<ScriptComponent>(s);
                     }
                 }
 
@@ -683,7 +558,7 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
                         l.line.color = Color{ color[0], color[1], color[2], color[3] };
 
 						// LineRendererComponentの保存
-						objData.m_LineRenderer.push_back(l);
+						prefab.AddComponent<LineRendererComponent>(l);
                     }
                 }
 
@@ -704,7 +579,7 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
 					r.otherEntity = std::nullopt;
 
 					// Rigidbody2DComponentの保存
-					objData.m_Rigidbody2D = r;
+					prefab.AddComponent<Rigidbody2DComponent>(r);
                 }
 
                 // BoxCollider2D
@@ -722,7 +597,7 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
 					b.isSensor = jb.value("isSensor", false);
 
 					// BoxCollider2DComponentの保存
-					objData.m_BoxCollider2D = b;
+					prefab.AddComponent<BoxCollider2DComponent>(b);
                 }
 
                 // Emitter
@@ -732,7 +607,7 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
                     auto& je = comps["Emitter"];
 					Deserialization::FromJson(je, e);
 					// EmitterComponentの保存
-					objData.m_Emitter = e;
+					prefab.AddComponent<EmitterComponent>(e);
                 }
 
 				// Particle
@@ -742,7 +617,7 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
                     auto& jp = comps["Particle"];
                     Deserialization::FromJson(jp, p);
 					// ParticleComponentの保存
-					objData.m_Particle = p;
+					prefab.AddComponent<ParticleComponent>(p);
                 }
 				// UISprite
                 if (comps.contains("UISprite"))
@@ -751,7 +626,7 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
                     auto& ju = comps["UISprite"];
                     Deserialization::FromJson(ju, u);
 					// UISpriteComponentの保存
-					objData.m_UISprite = u;
+					prefab.AddComponent<UISpriteComponent>(u);
                 }
                 // Light
                 if (comps.contains("Light"))
@@ -760,7 +635,7 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
                     auto& jl = comps["Light"];
                     Deserialization::FromJson(jl, l);
                     // LightComponentの保存
-                    objData.m_Light = l;
+					prefab.AddComponent<LightComponent>(l);
                 }
 				// Audio
 				if (comps.contains("Audio"))
@@ -769,7 +644,7 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
 					auto& ja = comps["Audio"];
 					Deserialization::FromJson(ja, a);
 					// AudioComponentの保存
-					objData.m_Audio = a;
+					prefab.AddComponent<AudioComponent>(a);
 				}
 				// Animation
                 if (comps.contains("Animation"))
@@ -778,20 +653,19 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
                     auto& jan = comps["Animation"];
                     Deserialization::FromJson(jan, anim);
                     // AnimationComponentの保存
-                    objData.m_Animation = anim;
+					prefab.AddComponent<AnimationComponent>(anim);
                 }
-				// GameObjectDataの追加
-				scene.AddGameObjectData(objData);
+				// Prefabの追加
+				scene.AddPrefab(prefab);
             }
         }
-
         // メインカメラ
         if (j.contains("mainCamera"))
         {
             std::wstring camName = std::filesystem::path(j["mainCamera"].get<std::string>()).wstring();
 			scene.SetStartCameraName(camName);
         }
-		sceneManager->AddScene(scene);
+		engineCommand->GetGameCore()->GetSceneManager()->AddScene(scene);
         return true;
     }
     catch (...)
@@ -1226,31 +1100,23 @@ FileType Cho::FileSystem::GetJsonFileType(const std::filesystem::path& path)
     }
 }
 
-void Cho::FileSystem::SaveProject(SceneManager* sceneManager, ObjectContainer* container, ECSManager* ecs, ResourceManager* resourceManager)
+void Cho::FileSystem::SaveProject(SceneManager* sceneManager, GameWorld* gameWorld, ECSManager* ecs)
 {
-    resourceManager;
     if (m_sProjectName.empty()) { return; }
     // セーブ
 	std::filesystem::path projectPath = std::filesystem::path(L"GameProjects") / m_sProjectName;
 	// GameSettingsFile
     Cho::FileSystem::SaveGameSettings(projectPath, g_GameSettings);
     // SceneFile
-    for (auto& scene : sceneManager->GetScenes().GetVector())
+    for (auto& scene : sceneManager->GetScenes())
     {
         // シーンファイルを保存
         Cho::FileSystem::SaveSceneFile(
             projectPath,
-            sceneManager,
-            scene.get(),
-            container,
+            &scene,
             ecs
         );
     }
-    // ScriptDataFile
-	/*Cho::FileSystem::SaveScriptFile(
-        projectPath,
-		resourceManager
-	);*/
 }
 
 // プロジェクトフォルダを読み込む
@@ -1262,10 +1128,8 @@ bool Cho::FileSystem::LoadProjectFolder(const std::wstring& projectName, EngineC
     // プロジェクトファイル類を読み込み
     // 全ファイル走査（サブディレクトリ含む）
     ScanFolder(projectPath,engineCommand);
-	// 最初のシーンをリクエスト
-	SceneManager* sceneManager = engineCommand->GetGameCore()->GetSceneManager();
-	//sceneManager->ChangeSceneRequest(sceneManager->GetSceneID(g_GameSettings.startScene));
-    sceneManager->ChangeMainScene(g_GameSettings.startScene);
+	// 最初のシーンをロード
+    engineCommand->GetGameCore()->GetSceneManager()->LoadScene(g_GameSettings.startScene);
     return true;
 }
 
@@ -2268,9 +2132,9 @@ void Cho::FileSystem::GameBuilder::CopyFilesToBuildFolder(EngineCommand* engineC
             L"Cho/ChoEngineAPI.h",
         };
 
-        for (const auto& scene : engineCommand->GetGameCore()->GetSceneManager()->GetScenes().GetVector())
+        for (const auto& scene : engineCommand->GetGameCore()->GetSceneManager()->GetScenes())
         {
-			sources.push_back(fs::path(L"GameProjects") / m_sProjectName / fs::path(scene->GetSceneName()).replace_extension(L".json"));
+			sources.push_back(fs::path(L"GameProjects") / m_sProjectName / fs::path(scene.GetName()).replace_extension(L".json"));
         }
 
         for (const auto& src : sources)

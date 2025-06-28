@@ -1385,6 +1385,32 @@ public:
         return *std::static_pointer_cast<std::vector<T>>(it->second);
     }
 
+    // 単一コンポーネント取得：存在しなければ nullptr
+    template<ComponentType T>
+    T* GetComponentPtr() const noexcept
+    {
+        CompID id = ECSManager::ComponentPool<T>::GetID();
+        auto it = m_Components.find(id);
+        if (it == m_Components.end())
+            return nullptr;
+        // shared_ptr<void> を shared_ptr<T> にキャストして生ポインタを返す
+        auto ptr = std::static_pointer_cast<T>(it->second);
+        return ptr.get();
+    }
+
+    // マルチコンポーネント取得：存在しなければ nullptr
+    template<ComponentType T>
+    std::vector<T>* GetAllComponentsPtr() const noexcept
+        requires IsMultiComponent<T>::value
+    {
+        CompID id = ECSManager::ComponentPool<T>::GetID();
+        auto it = m_MultiComponents.find(id);
+        if (it == m_MultiComponents.end())
+            return nullptr;
+        auto ptr = std::static_pointer_cast<std::vector<T>>(it->second);
+        return ptr.get();
+    }
+
     //――――――――――――――――――
     // 単一コンポーネントを上書きする
     //――――――――――――――――――

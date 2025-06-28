@@ -39,6 +39,7 @@ public:
 	void UpdateEnvironmentSetting();
 
 	GameWorld* GetGameWorld() { return m_pGameWorld.get(); }
+	SceneManager* GetSceneManager() { return m_pSceneManager.get(); }
 private:
 	void RegisterECSEvents();
 	void RegisterECSSystems(InputManager* input, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine);

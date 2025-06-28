@@ -2,7 +2,7 @@
 #include "GameScene.h"
 #include <algorithm>
 
-void GameScene::AddPrefab(const IPrefab& prefab)
+void GameScene::AddPrefab(const CPrefab& prefab)
 {
 	if (prefab.GetName().empty())
 	{

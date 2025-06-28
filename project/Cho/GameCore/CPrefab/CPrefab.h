@@ -4,7 +4,10 @@
 class CPrefab : public IPrefab
 {
 public:
-	CPrefab() = default;
+	CPrefab(const std::wstring& name, ObjectType type)
+		: m_Name(name), m_Type(type)
+	{
+	}
 	~CPrefab() = default;
 
 	std::wstring GetName() const { return m_Name; }

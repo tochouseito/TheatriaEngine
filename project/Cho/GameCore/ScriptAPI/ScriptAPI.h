@@ -72,7 +72,6 @@
 
 class ECSManager;
 class ResourceManager;
-class ObjectContainer;
 
 struct CHO_API TransformAPI
 {
