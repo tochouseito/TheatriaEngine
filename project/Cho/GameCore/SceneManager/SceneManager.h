@@ -11,8 +11,7 @@ class SceneManager
 {
 public:
 	// Constructor
-	SceneManager(GameCore* gameCore,ResourceManager* resourceManager):
-		m_pGameCore(gameCore),m_pResourceManager(resourceManager)
+	SceneManager()
 	{
 	}
 	// Destructor
@@ -25,14 +24,40 @@ public:
 	{
 		GameScene scene(L"MainScene");
 		AddScene(scene);
-		ChangeMainScene(L"MainScene");
+		LoadScene(L"MainScene");
 	}
 
 	// 読み込まれているシーンを破棄して指定したシーンをロード
-	GameSceneInstance* LoadScene(const std::wstring& sceneName);
+	GameSceneInstance* LoadScene(const std::wstring& sceneName)
+	{
+		// コンテナ
+		if (!m_SceneNameToID.contains(sceneName))
+		{
+			return nullptr; // シーンが存在しない場合はnullptrを返す
+		}
+		// 読み込まれているシーンをすべて破棄
+		// ロード
+	}
 	// 非同期でシーンをロード
-	GameSceneInstance* LoadSceneAsync(const std::wstring& sceneName,const LoadSceneMode& mode);
+	GameSceneInstance* LoadSceneAsync(const std::wstring& sceneName, const LoadSceneMode& mode)
+	{
 
+	}
+	// シーンをアンロード
+	void UnLoadScene(GameSceneInstance* pSceneInstance)
+	{
+
+	}
+	// シーンを追加
+	void AddScene(GameScene scene)
+	{
+		if (m_SceneNameToID.contains(scene.GetName()))
+		{
+			return; // 既に存在する場合は何もしない
+		}
+		SceneID id = static_cast<SceneID>(m_Scenes.push_back(scene));
+		m_SceneNameToID[scene.GetName()] = id; // シーン名とIDを紐付け
+	}
 	// コンテナからシーンを取得
 	GameScene* GetScene(const SceneID& sceneID) noexcept
 	{
@@ -42,21 +67,16 @@ public:
 		}
 		return nullptr;
 	}
+	GameScene* GetScene(const std::wstring& sceneName) noexcept
+	{
+		if (m_SceneNameToID.contains(sceneName))
+		{
+			return &m_Scenes[m_SceneNameToID.at(sceneName)];
+		}
+		return nullptr;
+	}
 	// シーンコンテナを取得
-
-
-	// シーンを更新
-	void Update();
-	// シーンを追加
-	void AddScene(const GameScene& newScene);
-	// シーンを変更リクエスト
-	//void ChangeSceneRequest(const SceneID& sceneID) noexcept { m_pNextScene = m_pScenes[sceneID].get(); }
-	// シーンを追加ロード
-	void LoadScene(const std::wstring& sceneName);
-	// シーンの解除
-	void UnLoadScene(const std::wstring& sceneName);
-	// メインシーンの変更
-	void ChangeMainScene(const std::wstring& sceneName);
+	FVector<GameScene>& GetScenes() noexcept { return m_Scenes; }
 	// シーンを取得
 	GameScene* GetGameScene(const SceneID& index) noexcept
 	{
@@ -84,32 +104,6 @@ public:
 			return &m_Scenes[m_SceneNameToID.at(sceneName)];
 		}
 		return nullptr;
-	}
-	// メインシーンを取得
-	GameScene* GetMainScene() noexcept
-	{
-		if (!m_MainSceneID.has_value())
-		{
-			return nullptr;
-		}
-		return &m_Scenes[m_MainSceneID.value()];
-	}
-	// シーンをクリア
-	void ClearScenes() noexcept
-	{
-		for (auto& scene : m_SceneNameToScene)
-		{
-			scene.second->Finalize();
-		}
-		m_SceneNameToScene.clear();
-		m_MainSceneID = std::nullopt;
-	}
-	void EditorReLoad(const SceneID& sceneID)
-	{
-		// 最初のシーンに戻す
-		ClearScenes();
-		std::wstring sceneName = m_pScenes[sceneID]->GetSceneName();
-		ChangeMainScene(sceneName);
 	}
 private:
 	// シーンコンテナ（フリーリスト付き）

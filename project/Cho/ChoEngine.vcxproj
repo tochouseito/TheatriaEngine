@@ -247,7 +247,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="GameCore\ObjectContainer\ObjectContainer.cpp" />
     <ClCompile Include="GameCore\SceneManager\SceneManager.cpp" />
     <ClCompile Include="GameCore\ScriptAPI\ScriptAPI.cpp" />
     <ClCompile Include="GameCore\Systems\MultiSystems.cpp" />
@@ -358,7 +357,6 @@
     <ClInclude Include="GameCore\GameCore.h" />
     <ClInclude Include="GameCore\GameObject\GameObject.h" />
     <ClInclude Include="GameCore\IScript\IScript.h" />
-    <ClInclude Include="GameCore\ObjectContainer\ObjectContainer.h" />
     <ClInclude Include="GameCore\SceneManager\SceneManager.h" />
     <ClInclude Include="GameCore\ScriptAPI\ScriptAPI.h" />
     <ClInclude Include="GameCore\Systems\MultiSystems.h" />

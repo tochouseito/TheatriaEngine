@@ -467,7 +467,7 @@ private:
 	{
 		if (rb.runtimeBody != nullptr) return;
 		b2BodyDef bodyDef;
-		bodyDef.userData.pointer = static_cast<uintptr_t>(rb.selfObjectID.value());
+		bodyDef.userData.pointer = static_cast<uintptr_t>(rb.selfEntity.value());
 		bodyDef.type = rb.bodyType;
 		bodyDef.gravityScale = rb.gravityScale;
 		bodyDef.fixedRotation = rb.fixedRotation;
@@ -545,7 +545,7 @@ private:
 			rb.runtimeBody = nullptr;
 		}
 		rb.isCollisionStay = false;
-		rb.otherObjectID.reset();
+		rb.otherEntity.reset();
 	}
 	template<typename ColliderT>
 	void ResetCollider(Entity e)
@@ -585,10 +585,10 @@ public:
 private:
 	void CollisionStay(ScriptComponent& script, Rigidbody2DComponent& rb)
 	{
-		if (script.isActive && rb.isCollisionStay && rb.otherObjectID)
+		if (script.isActive && rb.isCollisionStay && rb.otherEntity)
 		{
 			// 相手のゲームオブジェクトを取得
-			GameObject* otherObject = m_pObjectContainer->GetGameObject(rb.otherObjectID.value());
+			GameObject* otherObject = m_pObjectContainer->GetGameObject(rb.otherEntity.value());
 			if (!otherObject) { return; }
 			if (!rb.isActive) { return; }
 			otherObject->Initialize(false);// これいる？？

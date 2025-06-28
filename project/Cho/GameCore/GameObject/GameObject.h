@@ -9,12 +9,32 @@ class ECSManager;
 class ResourceManager;
 class ObjectContainer;
 
+struct ObjectHandle
+{
+	SceneID sceneID;
+	uint32_t objectID;
+	Entity entity;
+	bool isClone = false; // クローンかどうか
+	uint32_t originalID = 0; // オリジナルID
+	uint32_t cloneID = 0; // クローンID
+
+	void Clear() noexcept
+	{
+		sceneID = 0;
+		objectID = 0;
+		entity = 0;
+		isClone = false;
+		originalID = 0;
+		cloneID = 0;
+	}
+};
+
 // GameObjectクラス
 class CHO_API GameObject
 {
 public:
 	std::optional<Entity> GetSrcEntity() const noexcept;
-	Entity GetEntity() const noexcept { return m_Entity; }
+	ObjectHandle GetHandle() const noexcept { return m_Handle; }
 	std::wstring GetName() const noexcept;
 	ObjectType GetType() const noexcept { return m_Type; }
 	std::string GetTag() const noexcept;
@@ -63,10 +83,9 @@ public:
 private:
 	void SetName(const std::wstring& name) noexcept;
 	
-	Entity m_Entity;								// エンティティ
+	ObjectHandle m_Handle;			// オブジェクトハンドル
 	ObjectType m_Type;								// ゲームオブジェクトのタイプ
 	bool m_Active = false;							// アクティブフラグ
-	const SceneID m_GenerationSceneID;				// 生成されたシーンのID
 	
 	ECSManager* m_ECS = nullptr;					// ECSManager
 	ResourceManager* m_ResourceManager = nullptr;	// ResourceManager
@@ -77,7 +96,7 @@ private:
 	class ImplGameObject;
 	ImplGameObject* implGameObject = nullptr;
 
-	void Initialize(bool isParentReset = true)
+	/*void Initialize(bool isParentReset = true)
 	{
 		transform.Initialize(m_Entity, m_ECS, m_ObjectContainer, m_ResourceManager, isParentReset);
 		camera.Initialize(m_Entity, m_ECS, m_ObjectContainer, m_ResourceManager);
@@ -90,13 +109,13 @@ private:
 		particle.Initialize(m_Entity, m_ECS, m_ObjectContainer, m_ResourceManager);
 		audio.Initialize(m_Entity, m_ECS, m_ObjectContainer, m_ResourceManager);
 		animation.Initialize(m_Entity, m_ECS, m_ObjectContainer, m_ResourceManager);
-	}
+	}*/
 	// スクリプトインスタンス取得関数補助
 	ScriptComponent* GetScriptComponent() const noexcept;
 public:
 	// コンストラクタ
 	GameObject(
-		const Entity& entity,
+		const ObjectHandle& handle,
 		const std::wstring& name,
 		const ObjectType& type);
 	// デストラクタ

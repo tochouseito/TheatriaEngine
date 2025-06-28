@@ -21,7 +21,7 @@ public:
 	void SetSceneName(const std::wstring& sceneName) { m_SceneName = sceneName; }
 	void SetStartCameraName(const std::wstring& cameraName) { m_StartCameraName = cameraName; }
 	FVector<CPrefab> GetPrefabs() { return m_Prefabs; }
-	std::wstring GetSceneName() const { return m_SceneName; }
+	std::wstring GetName() const { return m_SceneName; }
 	std::wstring GetStartCameraName() const { return m_StartCameraName; }
 	std::unordered_map<std::wstring, size_t> GetPrefabNameToIdxMap() const { return m_PrefabNameToIdxMap; }
 private:

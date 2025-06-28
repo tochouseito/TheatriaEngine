@@ -114,7 +114,7 @@ ScriptComponent* GameObject::GetScriptComponent() const noexcept
 	return m_ECS->GetComponent<ScriptComponent>(m_Entity);
 }
 
-GameObject::GameObject(ObjectContainer* objectContainer, InputManager* input, ResourceManager* resourceManager, ECSManager* ecs, const Entity& entity, const std::wstring& name, const ObjectType& type, const SceneID& sceneID) :
+GameObject::GameObject(const ObjectHandle& handle, const std::wstring& name, const ObjectType& type, const SceneID& sceneID) :
 	m_ObjectContainer(objectContainer), m_InputManager(input), m_ResourceManager(resourceManager), m_ECS(ecs), m_Entity(entity), m_Type(type), m_GenerationSceneID(sceneID)
 {
 	m_Active = true;

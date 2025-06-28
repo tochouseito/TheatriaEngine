@@ -9,57 +9,41 @@
 
 void GameCore::Initialize(InputManager* input, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine)
 {
-	// シーンマネージャーの生成
-	m_pSceneManager = std::make_unique<SceneManager>(this,resourceManager);
 	// ECSマネージャの生成
 	m_pECSManager = std::make_unique<ECSManager>();
+	// シーンマネージャーの生成
+	m_pSceneManager = std::make_unique<SceneManager>();
+	// ゲームワールドの生成
+	m_pGameWorld = std::make_unique<GameWorld>(m_pECSManager.get());
 	// ECSイベントの登録
 	RegisterECSEvents();
 	// ECSシステムの登録
-	
-	// オブジェクトコンテナの生成
-	m_pObjectContainer = std::make_unique<ObjectContainer>(m_pECSManager.get(), resourceManager, input);
+	RegisterECSSystems(input,resourceManager,graphicsEngine);
 	// box2dの生成
 	//b2Vec2 gravity(0.0f, -9.8f);
 	b2Vec2 gravity(0.0f, 0.0f);
 	m_pPhysicsWorld = std::make_unique<b2World>(gravity);
-	m_pContactListener = std::make_unique<ContactListener2D>(m_pECSManager.get(), resourceManager, input, m_pObjectContainer.get());
+	m_pContactListener = std::make_unique<ContactListener2D>(m_pECSManager.get(), m_pGameWorld.get());
 	m_pPhysicsWorld->SetContactListener(m_pContactListener.get());
 	// システムの生成
 	input;resourceManager;graphicsEngine;
 	m_EnvironmentData.ambientColor = { 0.01f,0.01f,0.01f,1.0f };
 }
 
-void GameCore::Start(ResourceManager& resourceManager)
+void GameCore::Start()
 {
+	// スクリプト読み込み（場所変更予定）
+	Cho::FileSystem::ScriptProject::LoadScriptDLL();
+	// StartSystemの実行
 	m_pECSManager->InitializeAllSystems();
 }
 
-void GameCore::Update(ResourceManager& resourceManager, GraphicsEngine& graphicsEngine)
+void GameCore::Update()
 {
-	//m_pSceneManager->Update();
 	// 環境設定の更新
 	UpdateEnvironmentSetting();
 	// ゲームが実行中でなければreturn
-	if (isRunning)
-	{
-		Log::Write(LogLevel::Info, "GameCore Update");
-		InitializeGenerateObject();
-		m_pSingleSystemManager->UpdateAll(m_pECSManager.get());
-		m_pMultiSystemManager->UpdateAll(m_pECSManager.get());
-		Log::Write(LogLevel::Info, "GameCore Update End");
-	} else
-	{
-		m_pEditorSingleSystem->UpdateAll(m_pECSManager.get());
-		m_pEditorMultiSystem->UpdateAll(m_pECSManager.get());
-	}
-	resourceManager;
-	graphicsEngine;
-}
-
-void GameCore::SceneUpdate()
-{
-	m_pSceneManager->Update();
+	m_pECSManager->UpdateAllSystems();
 }
 
 void GameCore::GameRun()
@@ -68,20 +52,12 @@ void GameCore::GameRun()
 	{
 		return;
 	}
-	// ゲームの初期化処理
-	// スクリプトDLLの読み込み
-	/*if (!FileSystem::ScriptProject::BuildScriptDLL())
-	{
-		return;
-	}*/
+	// スクリプト読み込み（場所変更予定）
 	Cho::FileSystem::ScriptProject::LoadScriptDLL();
-	isRunning = true;
-	// 
-	m_MainSceneID = m_pSceneManager->GetMainScene()->GetSceneID();
 	// StartSystemの実行
-	m_pObjectContainer->InitializeAllGameObjects();
-	//m_pSingleSystemManager->StartAll(m_pECSManager.get());
-	//m_pMultiSystemManager->StartAll(m_pECSManager.get());
+	m_pECSManager->InitializeAllSystems();
+	// 実行中フラグを立てる
+	isRunning = true;
 }
 
 void GameCore::GameStop()
@@ -90,122 +66,12 @@ void GameCore::GameStop()
 	{
 		return;
 	}
-	// スクリプトのインスタンスを解放
-	m_pSingleSystemManager->EndAll(m_pECSManager.get());
-	m_pMultiSystemManager->EndAll(m_pECSManager.get());
-	// 生成されたオブジェクトを削除
-	ClearGenerateObject();
-	m_GameGenerateID.clear();
-	// SceneManager
-	m_pSceneManager->EditorReLoad(m_MainSceneID);
-	m_pObjectContainer->InitializeAllGameObjects();
-	// DLLのアンロード
+	// FinalizeSystemの実行
+	m_pECSManager->FinalizeAllSystems();
+	// スクリプトのアンロード（場所変更予定）
 	Cho::FileSystem::ScriptProject::UnloadScriptDLL();
+	// 実行中フラグを下ろす
 	isRunning = false;
-}
-
-void GameCore::InitializeGenerateObject()
-{
-	for (const ObjectID& id : m_GameGenerateID)
-	{
-		GameObject* object = m_pObjectContainer->GetGameObject(id);
-		if (!object->IsActive()) { continue; }
-		// オブジェクトの初期化
-		Entity entity = object->GetEntity();
-		// TransformComponentを取得
-		TransformComponent* transform = m_pECSManager->GetComponent<TransformComponent>(entity);
-		if (!transform) { continue; }
-		// TransformComponentの初期化
-		tfOnceSystem->Start(*transform);
-		// スクリプトの取得
-		ScriptComponent* script = m_pECSManager->GetComponent<ScriptComponent>(entity);
-		if (script)
-		{
-			// スクリプトの初期化
-			scriptGenerateOnceSystem->InstanceGenerate(*script);
-			scriptInitializeOnceSystem->StartScript(*script);
-		}
-		// Rigidbody2DComponentの取得
-		Rigidbody2DComponent* rb = m_pECSManager->GetComponent<Rigidbody2DComponent>(entity);
-		if (rb)
-		{
-			// Rigidbody2DComponentの初期化
-			physicsOnceSystem->CreateBody(entity, *transform, *rb);
-		}
-		// BoxCollider2DComponentの取得
-		BoxCollider2DComponent* box = m_pECSManager->GetComponent<BoxCollider2DComponent>(entity);
-		if (box)
-		{
-			// BoxCollider2DComponentの初期化
-			boxInitOnceSystem->CreateFixture(*transform, *rb, *box);
-		}
-		ParticleComponent* particle = m_pECSManager->GetComponent<ParticleComponent>(entity);
-		if (particle)
-		{
-			// ParticleComponentの初期化
-			particleInitializeOnceSystem->InitializeParticle(*particle);
-		}
-		// 初期化済みのIDを追加
-		m_GameInitializedID.push_back(id);
-	}
-	// 初期化済みのIDをクリア
-	m_GameGenerateID.clear();
-	
-	for(const auto& sceneID : m_GameLoadSceneID)
-	{
-		for(const ObjectID& id : m_pSceneManager->GetScene(sceneID)->GetUseObjects())
-		{
-			GameObject* object = m_pObjectContainer->GetGameObject(id);
-			if (!object->IsActive()) { continue; }
-			// オブジェクトの初期化
-			Entity entity = object->GetEntity();
-			// TransformComponentを取得
-			TransformComponent* transform = m_pECSManager->GetComponent<TransformComponent>(entity);
-			if (!transform) { continue; }
-			// TransformComponentの初期化
-			tfOnceSystem->Start(*transform);
-			// スクリプトの取得
-			ScriptComponent* script = m_pECSManager->GetComponent<ScriptComponent>(entity);
-			if (script)
-			{
-				// スクリプトの初期化
-				scriptGenerateOnceSystem->InstanceGenerate(*script);
-				scriptInitializeOnceSystem->StartScript(*script);
-			}
-			// Rigidbody2DComponentの取得
-			Rigidbody2DComponent* rb = m_pECSManager->GetComponent<Rigidbody2DComponent>(entity);
-			if (rb)
-			{
-				// Rigidbody2DComponentの初期化
-				physicsOnceSystem->CreateBody(entity, *transform, *rb);
-			}
-			// BoxCollider2DComponentの取得
-			BoxCollider2DComponent* box = m_pECSManager->GetComponent<BoxCollider2DComponent>(entity);
-			if (box)
-			{
-				// BoxCollider2DComponentの初期化
-				boxInitOnceSystem->CreateFixture(*transform, *rb, *box);
-			}
-			ParticleComponent* particle = m_pECSManager->GetComponent<ParticleComponent>(entity);
-			if (particle)
-			{
-				// ParticleComponentの初期化
-				particleInitializeOnceSystem->InitializeParticle(*particle);
-			}
-		}
-	}
-	m_GameLoadSceneID.clear();
-}
-
-void GameCore::ClearGenerateObject()
-{
-	for (const ObjectID& id : m_GameInitializedID)
-	{
-		GameObject* object = m_pObjectContainer->GetGameObject(id);
-		std::unique_ptr<DeleteObjectCommand> command = std::make_unique<DeleteObjectCommand>(object->GetID().value());
-		command->Execute(m_EngineCommand);
-	}
-	m_GameInitializedID.clear();
 }
 
 void GameCore::UpdateEnvironmentSetting()
@@ -213,67 +79,6 @@ void GameCore::UpdateEnvironmentSetting()
 	// 環境情報バッファ
 	ConstantBuffer<BUFFER_DATA_ENVIRONMENT>* envBuffer = m_EngineCommand->GetResourceManager()->GetEnvironmentBuffer();
 	envBuffer->UpdateData(m_EnvironmentData);
-}
-
-void GameCore::SceneInitialize(ScenePrefab* scene)
-{
-	for (ObjectID& id : scene->GetUseObjects())
-	{
-		GameObject* object = m_pObjectContainer->GetGameObject(id);
-		if (!object->IsActive()) { continue; }
-		// オブジェクトの初期化
-		Entity entity = object->GetEntity();
-		// TransformComponentを取得
-		TransformComponent* transform = m_pECSManager->GetComponent<TransformComponent>(entity);
-		if (!transform) { continue; }
-		// TransformComponentの初期化
-		tfFinalizeOnceSystem->Finalize(entity, *transform);
-		// スクリプトの取得
-		ScriptComponent* script = m_pECSManager->GetComponent<ScriptComponent>(entity);
-		if (script)
-		{
-			// スクリプトの初期化
-			scriptFinalizeOnceSystem->FinalizeScript(*script);
-		}
-		// Rigidbody2DComponentの取得
-		Rigidbody2DComponent* rb = m_pECSManager->GetComponent<Rigidbody2DComponent>(entity);
-		if (rb)
-		{
-			// Rigidbody2DComponentの初期化
-			physicsResetOnceSystem->Reset(*transform, *rb);
-		}
-	}
-}
-
-void GameCore::SceneFinelize(ScenePrefab* scene)
-{
-	if (!isRunning) { return; }
-	for (ObjectID& id : scene->GetUseObjects())
-	{
-		GameObject* object = m_pObjectContainer->GetGameObject(id);
-		if (!object->IsActive()) { continue; }
-		// オブジェクトの初期化
-		Entity entity = object->GetEntity();
-		// TransformComponentを取得
-		TransformComponent* transform = m_pECSManager->GetComponent<TransformComponent>(entity);
-		if (!transform) { continue; }
-		// TransformComponentの初期化
-		tfFinalizeOnceSystem->Finalize(entity,*transform);
-		// スクリプトの取得
-		ScriptComponent* script = m_pECSManager->GetComponent<ScriptComponent>(entity);
-		if (script)
-		{
-			// スクリプトの初期化
-			scriptFinalizeOnceSystem->FinalizeScript(*script);
-		}
-		// Rigidbody2DComponentの取得
-		Rigidbody2DComponent* rb = m_pECSManager->GetComponent<Rigidbody2DComponent>(entity);
-		if (rb)
-		{
-			// Rigidbody2DComponentの初期化
-			physicsResetOnceSystem->Reset(*transform, *rb);
-		}
-	}
 }
 
 void GameCore::RegisterECSEvents()
@@ -318,9 +123,9 @@ void GameCore::RegisterECSEvents()
 	m_pComponentEventDispatcher->RegisterOnRemove<CameraComponent>(
 		[&]([[maybe_unused]] Entity e, [[maybe_unused]] CameraComponent* c) {
 			// シーンのMainCameraを削除
-			if (m_EngineCommand->GetGameCore()->GetSceneManager()->GetMainScene()->GetMainCameraID() == e)
+			if (m_EngineCommand->GetGameCore()->GetGameWorld()->GetMainCamera()->GetHandle().entity == e)
 			{
-				m_EngineCommand->GetGameCore()->GetSceneManager()->GetMainScene()->SetMainCameraID(std::nullopt);
+				m_EngineCommand->GetGameCore()->GetGameWorld()->ClearMainCamera();
 			}
 			// Bufferの削除
 			//m_EngineCommand->GetResourceManager()->DeleteConstantBuffer(c->bufferIndex.value());
@@ -371,13 +176,13 @@ void GameCore::RegisterECSEvents()
 	// ScriptComponent
 	m_pComponentEventDispatcher->RegisterOnAdd<ScriptComponent>(
 		[&]([[maybe_unused]] Entity e, [[maybe_unused]] ScriptComponent* c) {
-			c->objectID = e;
+			c->objectHandle = m_EngineCommand->GetGameCore()->GetGameWorld()->GetGameObject(e)->GetHandle();
 		});
 	m_pComponentEventDispatcher->RegisterOnCopy<ScriptComponent>(
 		[&]([[maybe_unused]] Entity src, [[maybe_unused]] Entity dst, [[maybe_unused]] ScriptComponent* c) {
 			ScriptComponent& srcScript = *m_pECSManager->GetComponent<ScriptComponent>(src);
 			*c = srcScript;
-			c->objectID = dst;
+			c->objectHandle = m_EngineCommand->GetGameCore()->GetGameWorld()->GetGameObject(dst)->GetHandle();
 		});
 	m_pComponentEventDispatcher->RegisterOnRemove<ScriptComponent>(
 		[&]([[maybe_unused]] Entity e, [[maybe_unused]] ScriptComponent* c) {
@@ -474,13 +279,13 @@ void GameCore::RegisterECSEvents()
 	// Rigidbody2DComponent
 	m_pComponentEventDispatcher->RegisterOnAdd<Rigidbody2DComponent>(
 		[&]([[maybe_unused]] Entity e, [[maybe_unused]] Rigidbody2DComponent* c) {
-			c->selfObjectID = e;
+			c->selfEntity = e;
 		});
 	m_pComponentEventDispatcher->RegisterOnCopy<Rigidbody2DComponent>(
 		[&]([[maybe_unused]] Entity src, [[maybe_unused]] Entity dst, [[maybe_unused]] Rigidbody2DComponent* c) {
 			Rigidbody2DComponent& srcRigidbody = *m_pECSManager->GetComponent<Rigidbody2DComponent>(src);
 			*c = srcRigidbody;
-			c->selfObjectID = dst;
+			c->selfEntity = dst;
 		});
 	m_pComponentEventDispatcher->RegisterOnRemove<Rigidbody2DComponent>(
 		[&]([[maybe_unused]] Entity e, [[maybe_unused]] Rigidbody2DComponent* c) {
@@ -649,16 +454,5 @@ void GameCore::RegisterECSSystems(InputManager* input, ResourceManager* resource
 	// Collider2DComponentSystem
 	// CollisionSystem
 	// LineRendererComponentSystem
-	// 更新中に生成されたオブジェクトの初期化システム
-	tfOnceSystem = std::make_unique<TransformInitializeSystem>(m_pECSManager.get());
-	scriptGenerateOnceSystem = std::make_unique<ScriptGenerateInstanceSystem>(m_pObjectContainer.get(), input, m_pECSManager.get(), resourceManager);
-	scriptInitializeOnceSystem = std::make_unique<ScriptInitializeSystem>(m_pObjectContainer.get(), input, m_pECSManager.get(), resourceManager);
-	physicsOnceSystem = std::make_unique<Rigidbody2DInitSystem>(m_pECSManager.get(), m_pPhysicsWorld.get());
-	boxInitOnceSystem = std::make_unique<BoxCollider2DInitSystem>(m_pECSManager.get(), m_pPhysicsWorld.get());
-	particleInitializeOnceSystem = std::make_unique<ParticleInitializeSystem>(m_pECSManager.get(), resourceManager, graphicsEngine);
-
-	tfFinalizeOnceSystem = std::make_unique<TransformFinalizeSystem>(m_pECSManager.get());
-	scriptFinalizeOnceSystem = std::make_unique<ScriptFinalizeSystem>(m_pECSManager.get());
-	physicsResetOnceSystem = std::make_unique<Rigidbody2DResetSystem>(m_pECSManager.get(), m_pPhysicsWorld.get());
 }
 

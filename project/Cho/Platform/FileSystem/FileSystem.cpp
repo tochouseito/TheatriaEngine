@@ -701,7 +701,7 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
 					r.isCollisionStay = false;
 					r.runtimeBody = nullptr;
 					r.world = nullptr;
-					r.otherObjectID = std::nullopt;
+					r.otherEntity = std::nullopt;
 
 					// Rigidbody2DComponentの保存
 					objData.m_Rigidbody2D = r;
