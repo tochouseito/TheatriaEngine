@@ -2,9 +2,12 @@
 #include "GameCore/GameObject/GameObject.h"
 #include "Core/Utility/FVector.h"
 
+// 前方宣言
 class ECSManager;
+
 class GameWorld
 {
+	friend class SceneManager;
 public:
 	// Constructor
 	GameWorld(ECSManager* ecs):m_pECSManager(ecs)
@@ -14,73 +17,21 @@ public:
 	~GameWorld()
 	{
 	}
-	void Initialize()
-	{
-		
-	}
-	void Update()
-	{
-
-	}
+	void Initialize();
+	void Update();
 	// オブジェクトを取得
-	GameObject* GetGameObject(const std::wstring& name)
-	{
-		if (!m_ObjectHandleMap.contains(name))
-		{
-			return nullptr;
-		}
-		ObjectHandle handle = m_ObjectHandleMap[name];
-		return m_pGameObjects[handle.sceneID][handle.objectID][handle.cloneID].get();
-	}
-	GameObject* GetGameObject(const Entity& e)
-	{
-		if (!m_ObjectHandleMapFromEntity.contains(e))
-		{
-			return nullptr;
-		}
-		ObjectHandle handle = m_ObjectHandleMapFromEntity[e];
-		return m_pGameObjects[handle.sceneID][handle.objectID][handle.cloneID].get();
-	}
-	GameObject* GetGameObject(const ObjectHandle& handle)
-	{
-		if (!m_pGameObjects.isValid(handle.sceneID) ||
-			!m_pGameObjects[handle.sceneID].isValid(handle.objectID)||
-			!m_pGameObjects[handle.sceneID][handle.objectID].isValid(handle.cloneID))
-		{
-			return nullptr;
-		}
-		return m_pGameObjects[handle.sceneID][handle.objectID][handle.cloneID].get();
-	}
+	GameObject* GetGameObject(const std::wstring& name);
+	GameObject* GetGameObject(const Entity& e);
+	GameObject* GetGameObject(const ObjectHandle& handle);
 	// メインカメラを取得
-	GameObject* GetMainCamera()
-	{
-		return m_pMainCamera;
-	}
+	GameObject* GetMainCamera() { return m_pMainCamera; }
 	// メインカメラを空にする
-	void ClearMainCamera()
-	{
-		m_pMainCamera = nullptr;
-	}
+	void ClearMainCamera() { m_pMainCamera = nullptr; }
 private:
 	// オブジェクトを作成
-	ObjectHandle CreateGameObject(const std::wstring& name, ObjectType type)
-	{
-		// handleを作成
-		ObjectHandle handle;
-		handle.sceneID = 0; // 0番のSceneに追加
-		// Entityを取得
-		Entity entity = m_pECSManager->GenerateEntity();
-		handle.entity = entity;
-		// オブジェクトIDを取得
-		uint32_t objectID = static_cast<uint32_t>(m_pGameObjects[0].push_back(FVector<std::unique_ptr<GameObject>>()));
-		handle.objectID = objectID;
-		// GameObjectを作成
-		m_pGameObjects[0][objectID].push_back(std::make_unique<GameObject>(handle, name, type));
-		// 辞書に登録
-		m_ObjectHandleMap[name] = handle;
-		m_ObjectHandleMapFromEntity[entity] = handle;
-		return handle;
-	}
+	ObjectHandle CreateGameObject(const std::wstring& name, ObjectType type);
+	// シーンデータからオブジェクトを作成
+	SceneID AddGameObjectFromScene(const GameScene& scene);
 	// クローンを追加
 	void AddGameObjectClone(const GameObject& src)
 	{
@@ -95,6 +46,29 @@ private:
 	void SetMainCamera(GameObject* pCamera)
 	{
 		m_pMainCamera = pCamera;
+	}
+	// 全シーン破棄
+	void ClearAllScenes()
+	{
+		for (auto& scene : m_pGameObjects)
+		{
+			for (auto& object : scene)
+			{
+				for (auto& clone : object)
+				{
+					std::wstring name = clone->GetName();
+					Entity entity = clone->GetHandle().entity;
+					// ECSから削除
+					m_pECSManager->RemoveEntity(entity);
+				}
+			}
+		}
+		// コンテナと辞書をクリア
+		m_pGameObjects.clear();
+		m_ObjectHandleMap.clear();
+		m_ObjectHandleMapFromEntity.clear();
+		// メインカメラをクリア
+		m_pMainCamera = nullptr;
 	}
 
 	ECSManager* m_pECSManager = nullptr;	

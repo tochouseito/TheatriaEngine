@@ -20,9 +20,10 @@ public:
 	void ClearPrefabs() { m_Prefabs.clear(); m_PrefabNameToIdxMap.clear(); }
 	void SetSceneName(const std::wstring& sceneName) { m_SceneName = sceneName; }
 	void SetStartCameraName(const std::wstring& cameraName) { m_StartCameraName = cameraName; }
-	FVector<CPrefab> GetPrefabs() { return m_Prefabs; }
 	std::wstring GetName() const { return m_SceneName; }
 	std::wstring GetStartCameraName() const { return m_StartCameraName; }
+	FVector<CPrefab> GetPrefabs() const { return m_Prefabs; }
+	FVector<CPrefab>& GetPrefabs() { return m_Prefabs; }
 	std::unordered_map<std::wstring, size_t> GetPrefabNameToIdxMap() const { return m_PrefabNameToIdxMap; }
 private:
 	std::wstring m_SceneName = L"";
@@ -35,13 +36,12 @@ private:
 class GameSceneInstance
 {
 public:
-	GameSceneInstance(SceneManager* sm,const SceneID& instanceID,const uint32_t& generationID) : m_pSceneManager(sm),m_InstanceID(instanceID),m_GenerationID(generationID) {}
+	GameSceneInstance(SceneManager* sm,const SceneID& instanceID) : m_pSceneManager(sm),m_InstanceID(instanceID){}
 	~GameSceneInstance() = default;
 
 	void UnloadScene();
 private:
 	SceneManager* m_pSceneManager = nullptr;
 	SceneID m_InstanceID;
-	uint32_t m_GenerationID;
 };
 

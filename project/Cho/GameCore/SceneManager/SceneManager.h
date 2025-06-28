@@ -7,11 +7,14 @@ enum class LoadSceneMode
 	Additive,// 追加ロード
 };
 
+// 前方宣言
+class GameWorld;
+
 class SceneManager
 {
 public:
 	// Constructor
-	SceneManager()
+	SceneManager(GameWorld* gameWorld) : m_pGameWorld(gameWorld)
 	{
 	}
 	// Destructor
@@ -36,7 +39,13 @@ public:
 			return nullptr; // シーンが存在しない場合はnullptrを返す
 		}
 		// 読み込まれているシーンをすべて破棄
+		m_pGameWorld->ClearAllScenes(); // ゲームワールドのシーンをクリア
+		// シーンインスタンスを破棄
+		m_pSceneInstances.clear();
 		// ロード
+		SceneID id = m_pGameWorld->AddGameObjectFromScene(m_Scenes[m_SceneNameToID[sceneName]]);
+		// シーンインスタンスを作成
+		m_pSceneInstances.push_back(std::make_unique<GameSceneInstance>(this, id));
 	}
 	// 非同期でシーンをロード
 	GameSceneInstance* LoadSceneAsync(const std::wstring& sceneName, const LoadSceneMode& mode)
@@ -106,6 +115,8 @@ public:
 		return nullptr;
 	}
 private:
+	GameWorld* m_pGameWorld = nullptr; // ゲームワールドへのポインタ
+
 	// シーンコンテナ（フリーリスト付き）
 	FVector<GameScene> m_Scenes;
 	// 名前検索用補助コンテナ

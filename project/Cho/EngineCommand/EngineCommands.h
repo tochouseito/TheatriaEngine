@@ -2,7 +2,6 @@
 #include <optional>
 #include "EngineCommand/EngineCommand.h"
 #include "Core/Utility/Components.h"
-#include "GameCore/Prefab/Prefab.h"
 class GameObject;
 class IPrefab;
 // 3Dオブジェクトを追加するコマンド
