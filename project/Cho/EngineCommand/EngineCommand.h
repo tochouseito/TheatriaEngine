@@ -47,7 +47,7 @@ class EngineCommand
 	friend class AddEffectNodeCommand;
 	friend class CloneObjectCommand;
 	// Editor
-	friend class EffectEditorUpdateSystem;
+	friend class EffectEditorSystem;
 	friend class EffectEditor;
 
 	friend class GraphicsEngine;

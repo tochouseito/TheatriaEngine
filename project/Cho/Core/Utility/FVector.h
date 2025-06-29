@@ -51,37 +51,21 @@ class FVector
 public:
     FVector() = default;
 
-    size_t push_back(const T& value)
+    // 新しい要素を追加し、インデックスを返す
+    size_t push_back(T&& value)
     {
         if (!freeList.empty())
         {
             size_t index = freeList.back();
             freeList.pop_back();
-            data[index] = value;  // コピー
+            data[index] = std::move(value);
             return index;
         }
         if (nextIndex >= data.size())
         {
-            data.push_back(value);
-        }
-        else
-        {
-            data[nextIndex] = value;
-        }
-        return nextIndex++;
-    }
-
-    // 新しい要素を追加し、インデックスを返す
-    size_t push_back(T&& value) {
-        if (!freeList.empty()) {
-            size_t index = freeList.back();
-            freeList.pop_back();
-            data[index] = std::move(value);
-            return index;
-        }
-        if (nextIndex >= data.size()) {
             data.push_back(std::move(value));
-        } else {
+        } else
+        {
             data[nextIndex] = std::move(value);
         }
         return nextIndex++;

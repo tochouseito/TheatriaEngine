@@ -179,7 +179,7 @@ struct ScriptComponent : public IComponentTag
 	ObjectHandle objectHandle;			// スクリプトのオブジェクトハンドル
 	using ScriptFunc = std::function<void()>;					// スクリプト関数型
 
-	IScript* scriptInstance = nullptr;							// スクリプトインスタンス
+	IScript* instance = nullptr;							// スクリプトインスタンス
 	ScriptFunc startFunc;										// Start関数
 	ScriptFunc updateFunc;										// Update関数
 	std::function<void()> cleanupFunc;							// 解放関数

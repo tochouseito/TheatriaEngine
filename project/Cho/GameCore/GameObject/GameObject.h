@@ -58,7 +58,7 @@ public:
 		{
 			if (ScriptComponent* script = GetScriptComponent())
 			{
-				return static_cast<T*>(script->scriptInstance);
+				return static_cast<T*>(script->instance);
 			}
 		}
 		return nullptr;

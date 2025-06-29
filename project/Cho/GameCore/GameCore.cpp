@@ -15,10 +15,6 @@ void GameCore::Initialize(InputManager* input, ResourceManager* resourceManager,
 	m_pSceneManager = std::make_unique<SceneManager>();
 	// ゲームワールドの生成
 	m_pGameWorld = std::make_unique<GameWorld>(m_pECSManager.get());
-	// ECSイベントの登録
-	RegisterECSEvents();
-	// ECSシステムの登録
-	RegisterECSSystems(input,resourceManager,graphicsEngine);
 	// box2dの生成
 	//b2Vec2 gravity(0.0f, -9.8f);
 	b2Vec2 gravity(0.0f, 0.0f);
@@ -26,7 +22,10 @@ void GameCore::Initialize(InputManager* input, ResourceManager* resourceManager,
 	m_pContactListener = std::make_unique<ContactListener2D>(m_pECSManager.get(), m_pGameWorld.get());
 	m_pPhysicsWorld->SetContactListener(m_pContactListener.get());
 	// システムの生成
-	input;resourceManager;graphicsEngine;
+	// ECSイベントの登録
+	RegisterECSEvents();
+	// ECSシステムの登録
+	RegisterECSSystems(input, resourceManager, graphicsEngine);
 	m_EnvironmentData.ambientColor = { 0.01f,0.01f,0.01f,1.0f };
 }
 
@@ -441,18 +440,60 @@ void GameCore::RegisterECSSystems(InputManager* input, ResourceManager* resource
 	// 初期化システムの登録
 	// ScriptInstanceGenerateSystem
 	m_pECSManager->AddSystem<ScriptInstanceGenerateSystem>();
+	ScriptInstanceGenerateSystem* scriptInstanceGenerateSystem = m_pECSManager->GetSystem<ScriptInstanceGenerateSystem>();
+	scriptInstanceGenerateSystem->SetGameWorld(m_pGameWorld.get());
 	// ScriptComponentSystem
 	m_pECSManager->AddSystem<ScriptSystem>();
 	// TransformComponentSystem
 	m_pECSManager->AddSystem<TransformSystem>();
+	TransformSystem* transformSystem = m_pECSManager->GetSystem<TransformSystem>();
+	transformSystem->SetBuffer(static_cast<StructuredBuffer<BUFFER_DATA_TF>*>(resourceManager->GetIntegrationBuffer(IntegrationDataType::Transform)));
+	// AnimationComponentSystem
+	m_pECSManager->AddSystem<AnimationSystem>();
+	AnimationSystem* animationSystem = m_pECSManager->GetSystem<AnimationSystem>();
+	animationSystem->SetResourceManager(resourceManager);
+	animationSystem->SetGraphicsEngine(graphicsEngine);
 	// CameraComponentSystem
+	m_pECSManager->AddSystem<CameraSystem>();
+	CameraSystem* cameraSystem = m_pECSManager->GetSystem<CameraSystem>();
+	cameraSystem->SetBuffer(static_cast<StructuredBuffer<BUFFER_DATA_TF>*>(resourceManager->GetIntegrationBuffer(IntegrationDataType::Transform)));
 	// MaterialComponentSystem
+	m_pECSManager->AddSystem<MaterialSystem>();
+	MaterialSystem* materialSystem = m_pECSManager->GetSystem<MaterialSystem>();
+	materialSystem->SetBuffer(static_cast<StructuredBuffer<BUFFER_DATA_MATERIAL>*>(resourceManager->GetIntegrationBuffer(IntegrationDataType::Material)));
+	materialSystem->SetResourceManager(resourceManager);
+	// LightComponentSystem
+	m_pECSManager->AddSystem<LightSystem>();
+	LightSystem* lightSystem = m_pECSManager->GetSystem<LightSystem>();
+	lightSystem->SetResourceManager(resourceManager);
 	// UISpriteComponentSystem
+	m_pECSManager->AddSystem<UISpriteSystem>();
+	UISpriteSystem* uiSpriteSystem = m_pECSManager->GetSystem<UISpriteSystem>();
+	uiSpriteSystem->SetResourceManager(resourceManager);
+	uiSpriteSystem->SetBuffer(static_cast<StructuredBuffer<BUFFER_DATA_UISPRITE>*>(resourceManager->GetIntegrationBuffer(IntegrationDataType::UISprite)));
 	// ParticleComponentSystem
+	m_pECSManager->AddSystem<ParticleEmitterSystem>();
+	ParticleEmitterSystem* particleEmitterSystem = m_pECSManager->GetSystem<ParticleEmitterSystem>();
+	particleEmitterSystem->SetResourceManager(resourceManager);
+	particleEmitterSystem->SetGraphicsEngine(graphicsEngine);
 	// EffectEditorComponentSystem
+	m_pECSManager->AddSystem<EffectEditorSystem>();
+	EffectEditorSystem* effectEditorSystem = m_pECSManager->GetSystem<EffectEditorSystem>();
+	effectEditorSystem->SetEngineCommand(m_EngineCommand);
 	// rigidbody2DComponentSystem
+	m_pECSManager->AddSystem<Rigidbody2DSystem>();
+	Rigidbody2DSystem* rigidbody2DSystem = m_pECSManager->GetSystem<Rigidbody2DSystem>();
+	rigidbody2DSystem->SetPhysicsWorld(m_pPhysicsWorld.get());
 	// Collider2DComponentSystem
+	m_pECSManager->AddSystem<Collider2DSystem>();
 	// CollisionSystem
+	m_pECSManager->AddSystem<CollisionSystem>();
+	CollisionSystem* collisionSystem = m_pECSManager->GetSystem<CollisionSystem>();
+	collisionSystem->SetGameWorld(m_pGameWorld.get());
 	// LineRendererComponentSystem
-}
+	m_pECSManager->AddSystem<LineRendererSystem>();
+	LineRendererSystem* lineRendererSystem = m_pECSManager->GetSystem<LineRendererSystem>();
+	lineRendererSystem->SetResourceManager(resourceManager);
+	lineRendererSystem->SetBuffer(static_cast<VertexBuffer<BUFFER_DATA_LINE>*>(resourceManager->GetLineIntegrationBuffer()));
 
+}

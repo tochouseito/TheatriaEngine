@@ -80,13 +80,14 @@ struct Quaternion final {
     }
 
     // 正規化
-    void Normalize() {
+    Quaternion Normalize() {
         float norm = Norm();
         if (norm == 0.0f) {
             x = 0.0f;y = 0.0f;z = 0.0f;w = 1.0f;
         } else {
             x /= norm;y /= norm;z /= norm;w /= norm;
         }
+		return *this;
     }
 
     // 逆クォータニオン

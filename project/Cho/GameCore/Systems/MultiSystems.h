@@ -8,6 +8,7 @@ class ResourceManager;
 
 class LineRendererSystem : public ECSManager::MultiComponentSystem<LineRendererComponent>
 {
+	friend class GameCore;
 	public:
 		LineRendererSystem() : ECSManager::MultiComponentSystem<LineRendererComponent>(
 			[&](Entity e, std::vector<LineRendererComponent>& lines)
@@ -43,25 +44,18 @@ private:
 		// 転送
 		TransferMatrix(line);
 	}
-	void TransferMatrix(LineRendererComponent& lineRenderer)
-	{
-		// 転送
-		uint32_t index = lineRenderer.mapID.value() * 2;
-		{// 始点
-			BUFFER_DATA_LINE bufferData;
-			bufferData.position = lineRenderer.line.start;
-			bufferData.color = lineRenderer.line.color;
-			m_pIntegrationBuffer->UpdateData(bufferData, index);
-		}
-		{// 終点
-			BUFFER_DATA_LINE bufferData;
-			bufferData.position = lineRenderer.line.end;
-			bufferData.color = lineRenderer.line.color;
-			m_pIntegrationBuffer->UpdateData(bufferData, index + 1);
-		}
-	}
+	void TransferMatrix(LineRendererComponent& lineRenderer);
 	void FinalizeComponent([[maybe_unused]] Entity e, [[maybe_unused]] LineRendererComponent& line)
 	{
+	}
+
+	void SetResourceManager(ResourceManager* resourceManager)
+	{
+		m_pResourceManager = resourceManager;
+	}
+	void SetBuffer(VertexBuffer<BUFFER_DATA_LINE>* buffer)
+	{
+		m_pIntegrationBuffer = buffer;
 	}
 
 	ResourceManager* m_pResourceManager = nullptr;

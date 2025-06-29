@@ -64,7 +64,7 @@ public:
 		{
 			return; // 既に存在する場合は何もしない
 		}
-		SceneID id = static_cast<SceneID>(m_Scenes.push_back(scene));
+		SceneID id = static_cast<SceneID>(m_Scenes.push_back(std::move(scene)));
 		m_SceneNameToID[scene.GetName()] = id; // シーン名とIDを紐付け
 	}
 	// コンテナからシーンを取得
