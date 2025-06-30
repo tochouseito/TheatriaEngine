@@ -22,7 +22,7 @@ void HubManager::Update()
     }
     if (m_IsGameRuntime)
     {
-        std::wstring selectedProjectName = L"RefLaser";
+        std::wstring selectedProjectName = L"PortfolioPiece";
         // プロジェクトの読み込み
         FileSystem::LoadProjectFolder(selectedProjectName, m_pEngineCommand);
         // プロジェクトのパスを保存

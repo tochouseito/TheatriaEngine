@@ -2255,10 +2255,10 @@ void Cho::FileSystem::GameBuilder::CopyFilesToBuildFolder(EngineCommand* engineC
             L"dxil_GameRuntime.dll",
             L"GameTemplate.exe",
             L"imgui.ini", // 後で消す
-            fs::path(L"GameProjects") / m_sProjectName / fs::path(L"resourseData"),
+            fs::path(L"GameProjects") / m_sProjectName / fs::path(L"Assets"),
             fs::path(L"GameProjects") / m_sProjectName / fs::path(L"bin"),
             //fs::path(L"GameProjects") / m_sProjectName / fs::path(L"MainScene.json"),
-            fs::path(L"GameProjects") / m_sProjectName / fs::path(L"ScriptData.json"),
+            //fs::path(L"GameProjects") / m_sProjectName / fs::path(L"ScriptData.json"),
             fs::path(L"GameProjects") / m_sProjectName / fs::path(L"GameSettings.json"),
             L"Cho/Engine",
             L"Cho/Resources/EngineAssets",

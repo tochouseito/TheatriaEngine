@@ -263,6 +263,7 @@ public:
 	void SetRotation(const Vector3& rotation);
 	void SetScale(const Vector3& scale);
 	void SetColor(const Vector3& color);
+	EmitterComponent* GetEmitterData() const { return data; } // EmitterComponentのデータを取得
 	
 private:
 	friend class GameObject;

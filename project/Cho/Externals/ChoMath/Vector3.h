@@ -98,15 +98,16 @@ struct Vector3 final {
     }
 
     // 正規化
-    void Normalize() {
+    Vector3 Normalize() {
         float len = Length();
         if (len == 0.0f) {
             Initialize();
-            return;
+            return *this;
         }
         x = x / len;
         y = y / len;
         z = z / len;
+		return *this;
     }
 
     // 内積
@@ -139,6 +140,10 @@ struct Vector3 final {
     }
 
 public:// 静的メンバ
+    static Vector3 Zero() {
+        return Vector3{ 0.0f, 0.0f, 0.0f };
+	}
+
     static Vector3 Normalize(const Vector3& v) {
         Vector3 result=v;
         float len = result.Length();
