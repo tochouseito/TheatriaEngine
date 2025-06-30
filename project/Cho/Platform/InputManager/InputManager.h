@@ -55,6 +55,8 @@ public:
 	Vector2 CheckAndWarpMouse();
 private:
 	bool IsTriggerTrigger(const LR& LorR, int32_t stickNo = 0);
+	Vector2 ApplyRadialDeadZone(int16_t rawX, int16_t rawY, int deadZone);
+
 public:
 	ComPtr<IDirectInput8> m_DirectInput = nullptr;
 	ComPtr<IDirectInputDevice8> m_Keyboard = nullptr;
