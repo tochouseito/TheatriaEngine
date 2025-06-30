@@ -2,7 +2,6 @@
 #include "GameObject.h"
 #include "GameCore/ECS/ECSManager.h"
 #include "Platform/InputManager/InputManager.h"
-#include "GameCore/ObjectContainer/ObjectContainer.h"
 #include "GameCore/PhysicsEngine/PhysicsEngine.h"
 #include "Resources/ResourceManager/ResourceManager.h"
 
@@ -111,11 +110,12 @@ void GameObject::SetCurrentSceneName(const std::wstring& name) noexcept
 
 ScriptComponent* GameObject::GetScriptComponent() const noexcept
 {
-	return m_ECS->GetComponent<ScriptComponent>(m_Entity);
+	//return m_ECS->GetComponent<ScriptComponent>(m_Entity);
+	return nullptr;
 }
 
-GameObject::GameObject(const ObjectHandle& handle, const std::wstring& name, const ObjectType& type, const SceneID& sceneID) :
-	m_ObjectContainer(objectContainer), m_InputManager(input), m_ResourceManager(resourceManager), m_ECS(ecs), m_Entity(entity), m_Type(type), m_GenerationSceneID(sceneID)
+GameObject::GameObject(const ObjectHandle& handle, const std::wstring& name, const ObjectType& type) :
+	m_Handle(handle), m_Type(type)
 {
 	m_Active = true;
 	implGameObject = new ImplGameObject();

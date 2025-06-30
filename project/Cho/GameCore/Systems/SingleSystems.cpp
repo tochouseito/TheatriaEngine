@@ -211,17 +211,17 @@ void TransformSystem::FinalizeComponent(Entity e, TransformComponent& transform)
 	transform.degrees = transform.startValue.degrees;
 }
 
-inline void CameraSystem::InitializeComponent(Entity e, TransformComponent& transform, CameraComponent&)
+void CameraSystem::InitializeComponent(Entity e, TransformComponent& transform, CameraComponent&)
 {
 
 }
 
-inline void CameraSystem::UpdateComponent(Entity e, TransformComponent& transform, CameraComponent& camera)
+void CameraSystem::UpdateComponent(Entity e, TransformComponent& transform, CameraComponent& camera)
 {
 	TransferMatrix(transform, camera);
 }
 
-inline void CameraSystem::TransferMatrix(TransformComponent& transform, CameraComponent& camera)
+void CameraSystem::TransferMatrix(TransformComponent& transform, CameraComponent& camera)
 {
 	BUFFER_DATA_VIEWPROJECTION data = {};
 	data.matWorld = transform.matWorld;
@@ -229,15 +229,16 @@ inline void CameraSystem::TransferMatrix(TransformComponent& transform, CameraCo
 	data.projection = ChoMath::MakePerspectiveFovMatrix(camera.fovAngleY, camera.aspectRatio, camera.nearZ, camera.farZ);
 	data.projectionInverse = Matrix4::Inverse(data.projection);
 	data.cameraPosition = transform.position;
-	m_pCameraBuffer->UpdateData(data);
+	ConstantBuffer<BUFFER_DATA_VIEWPROJECTION>* cameraBuffer = dynamic_cast<ConstantBuffer<BUFFER_DATA_VIEWPROJECTION>*>(m_pResourceManager->GetBuffer<IConstantBuffer>(camera.bufferIndex.value()));
+	cameraBuffer->UpdateData(data);
 }
 
-inline void CameraSystem::FinalizeComponent(Entity e, TransformComponent& transform, CameraComponent& camera)
+void CameraSystem::FinalizeComponent(Entity e, TransformComponent& transform, CameraComponent& camera)
 {
 
 }
 
-inline void ScriptInstanceGenerateSystem::GenerateInstance(Entity e, ScriptComponent& script)
+void ScriptInstanceGenerateSystem::GenerateInstance(Entity e, ScriptComponent& script)
 {
 	if (script.scriptName.empty())
 	{
@@ -289,7 +290,7 @@ inline void ScriptInstanceGenerateSystem::GenerateInstance(Entity e, ScriptCompo
 	script.isActive = true;
 }
 
-inline void ScriptSystem::InitializeComponent(Entity e, ScriptComponent& script)
+void ScriptSystem::InitializeComponent(Entity e, ScriptComponent& script)
 {
 	if (!script.isActive || !script.instance) return;
 	try
@@ -312,7 +313,7 @@ inline void ScriptSystem::InitializeComponent(Entity e, ScriptComponent& script)
 	}
 }
 
-inline void ScriptSystem::UpdateComponent(Entity e, ScriptComponent& script)
+void ScriptSystem::UpdateComponent(Entity e, ScriptComponent& script)
 {
 	if (!script.isActive || !script.instance) return;
 	try
@@ -335,7 +336,7 @@ inline void ScriptSystem::UpdateComponent(Entity e, ScriptComponent& script)
 	}
 }
 
-inline void ScriptSystem::FinalizeComponent(Entity e, ScriptComponent& script)
+void ScriptSystem::FinalizeComponent(Entity e, ScriptComponent& script)
 {
 	if (!script.isActive || !script.instance) return;
 	try
@@ -357,7 +358,7 @@ inline void ScriptSystem::FinalizeComponent(Entity e, ScriptComponent& script)
 	script.isActive = false;
 }
 
-inline void Rigidbody2DSystem::InitializeComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb)
+void Rigidbody2DSystem::InitializeComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb)
 {
 	if (rb.runtimeBody != nullptr) return;
 	b2BodyDef bodyDef;
@@ -378,7 +379,7 @@ inline void Rigidbody2DSystem::InitializeComponent(Entity e, TransformComponent&
 	transform.position.y = rb.runtimeBody->GetPosition().y;
 }
 
-inline void Rigidbody2DSystem::StepSimulation()
+void Rigidbody2DSystem::StepSimulation()
 {
 	float timeStep = Timer::GetDeltaTime();
 	constexpr int velocityIterations = 6;
@@ -386,7 +387,7 @@ inline void Rigidbody2DSystem::StepSimulation()
 	m_World->Step(timeStep, velocityIterations, positionIterations);
 }
 
-inline void Rigidbody2DSystem::UpdateComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb)
+void Rigidbody2DSystem::UpdateComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb)
 {
 	if (rb.runtimeBody == nullptr) return;
 
@@ -433,7 +434,7 @@ inline void Rigidbody2DSystem::UpdateComponent(Entity e, TransformComponent& tra
 
 }
 
-inline void Rigidbody2DSystem::Reset(Rigidbody2DComponent& rb)
+void Rigidbody2DSystem::Reset(Rigidbody2DComponent& rb)
 {
 	// Bodyがあるなら削除
 	if (rb.runtimeBody)
@@ -445,13 +446,13 @@ inline void Rigidbody2DSystem::Reset(Rigidbody2DComponent& rb)
 	rb.otherEntity.reset();
 }
 
-inline void Rigidbody2DSystem::FinalizeComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb)
+void Rigidbody2DSystem::FinalizeComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb)
 {
 	Reset(rb);
 	ResetCollider<BoxCollider2DComponent>(e);
 }
 
-inline void CollisionSystem::CollisionStay(ScriptComponent& script, Rigidbody2DComponent& rb)
+void CollisionSystem::CollisionStay(ScriptComponent& script, Rigidbody2DComponent& rb)
 {
 	if (script.isActive && rb.isCollisionStay && rb.otherEntity)
 	{
@@ -463,7 +464,7 @@ inline void CollisionSystem::CollisionStay(ScriptComponent& script, Rigidbody2DC
 	}
 }
 
-inline float Collider2DSystem::ComputePolygonArea(const b2PolygonShape* shape)
+float Collider2DSystem::ComputePolygonArea(const b2PolygonShape* shape)
 {
 	float area = 0.0f;
 	const int count = shape->m_count;
@@ -478,7 +479,7 @@ inline float Collider2DSystem::ComputePolygonArea(const b2PolygonShape* shape)
 	return 0.5f * std::abs(area);
 }
 
-inline void Collider2DSystem::InitializeComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb, BoxCollider2DComponent& box)
+void Collider2DSystem::InitializeComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb, BoxCollider2DComponent& box)
 {
 	transform;
 	if (!rb.runtimeBody || box.runtimeFixture != nullptr) return;
@@ -499,7 +500,7 @@ inline void Collider2DSystem::InitializeComponent(Entity e, TransformComponent& 
 	box.runtimeFixture = rb.runtimeBody->CreateFixture(&fixtureDef);
 }
 
-inline void Collider2DSystem::UpdateComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb, BoxCollider2DComponent& box)
+void Collider2DSystem::UpdateComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb, BoxCollider2DComponent& box)
 {
 	// サイズの変更があった場合、フィクスチャを再作成
 	if (box.runtimeFixture == nullptr) { return; }
@@ -518,16 +519,16 @@ inline void Collider2DSystem::UpdateComponent(Entity e, TransformComponent& tran
 	}
 }
 
-inline void Collider2DSystem::FinalizeComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb, BoxCollider2DComponent& box)
+void Collider2DSystem::FinalizeComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb, BoxCollider2DComponent& box)
 {
 
 }
 
-inline void MaterialSystem::InitializeComponent(Entity e, MaterialComponent& material)
+void MaterialSystem::InitializeComponent(Entity e, MaterialComponent& material)
 {
 }
 
-inline void MaterialSystem::UpdateComponent(Entity e, MaterialComponent& material)
+void MaterialSystem::UpdateComponent(Entity e, MaterialComponent& material)
 {
 	BUFFER_DATA_MATERIAL data = {};
 	data.color = material.color;
@@ -562,11 +563,11 @@ inline void MaterialSystem::UpdateComponent(Entity e, MaterialComponent& materia
 	m_pIntegrationBuffer->UpdateData(data, material.mapID.value());
 }
 
-inline void MaterialSystem::FinalizeComponent(Entity e, MaterialComponent& material)
+void MaterialSystem::FinalizeComponent(Entity e, MaterialComponent& material)
 {
 }
 
-inline void ParticleEmitterSystem::InitializeComponent(Entity e, ParticleComponent& particle, EmitterComponent& emitter)
+void ParticleEmitterSystem::InitializeComponent(Entity e, ParticleComponent& particle, EmitterComponent& emitter)
 {
 	particle.time = 0.0f;
 
@@ -595,7 +596,7 @@ inline void ParticleEmitterSystem::InitializeComponent(Entity e, ParticleCompone
 	m_pGraphicsEngine->WaitForGPU(QueueType::Compute);
 }
 
-inline void ParticleEmitterSystem::UpdateComponent(Entity e, ParticleComponent& particle, EmitterComponent& emitter)
+void ParticleEmitterSystem::UpdateComponent(Entity e, ParticleComponent& particle, EmitterComponent& emitter)
 {
 	TransformComponent* transform = m_pEcs->GetComponent<TransformComponent>(e);
 	emitter.frequencyTime += DeltaTime();
@@ -700,16 +701,16 @@ inline void ParticleEmitterSystem::UpdateComponent(Entity e, ParticleComponent& 
 	m_pGraphicsEngine->WaitForGPU(QueueType::Compute);
 }
 
-inline void ParticleEmitterSystem::FinalizeComponent(Entity e, ParticleComponent& particle, EmitterComponent& emitter)
+void ParticleEmitterSystem::FinalizeComponent(Entity e, ParticleComponent& particle, EmitterComponent& emitter)
 {
 }
 
-inline void UISpriteSystem::InitializeComponent(Entity e, UISpriteComponent& uiSprite)
+void UISpriteSystem::InitializeComponent(Entity e, UISpriteComponent& uiSprite)
 {
 
 }
 
-inline void UISpriteSystem::UpdateComponent(Entity e, UISpriteComponent& uiSprite)
+void UISpriteSystem::UpdateComponent(Entity e, UISpriteComponent& uiSprite)
 {
 	// UIの更新
 	float left = 0.0f - uiSprite.anchorPoint.x;
@@ -765,16 +766,16 @@ inline void UISpriteSystem::UpdateComponent(Entity e, UISpriteComponent& uiSprit
 	m_pIntegrationBuffer->UpdateData(data, uiSprite.mapID.value());
 }
 
-inline void UISpriteSystem::FinalizeComponent(Entity e, UISpriteComponent& uiSprite)
+void UISpriteSystem::FinalizeComponent(Entity e, UISpriteComponent& uiSprite)
 {
 
 }
 
-inline void LightSystem::InitializeComponent(Entity e, TransformComponent& transform, LightComponent& light)
+void LightSystem::InitializeComponent(Entity e, TransformComponent& transform, LightComponent& light)
 {
 }
 
-inline void LightSystem::UpdateComponent(Entity e, TransformComponent& transform, LightComponent& light)
+void LightSystem::UpdateComponent(Entity e, TransformComponent& transform, LightComponent& light)
 {
 	e;
 	Vector3 direction = ChoMath::TransformDirection(Vector3(0.0f, 0.0f, 1.0f), ChoMath::MakeRotateXYZMatrix(ChoMath::DegreesToRadians(transform.degrees)));
@@ -795,25 +796,25 @@ inline void LightSystem::UpdateComponent(Entity e, TransformComponent& transform
 	// 参照に書き込んでいるので転送は不要
 }
 
-inline void LightSystem::FinalizeComponent(Entity e, TransformComponent& transform, LightComponent& light)
+void LightSystem::FinalizeComponent(Entity e, TransformComponent& transform, LightComponent& light)
 {
 }
 
-inline void AnimationSystem::InitializeComponent(Entity e, AnimationComponent& animation)
+void AnimationSystem::InitializeComponent(Entity e, AnimationComponent& animation)
 {
 }
 
-inline void AnimationSystem::UpdateComponent(Entity e, AnimationComponent& animation)
+void AnimationSystem::UpdateComponent(Entity e, AnimationComponent& animation)
 {
 	ModelData* model = m_pResourceManager->GetModelManager()->GetModelData(animation.modelName);
 	timeUpdate(animation, model);
 }
 
-inline void AnimationSystem::FinalizeComponent(Entity e, AnimationComponent& animation)
+void AnimationSystem::FinalizeComponent(Entity e, AnimationComponent& animation)
 {
 }
 
-inline Scale AnimationSystem::CalculateValue(const std::vector<KeyframeScale>& keyframes, const float& time)
+Scale AnimationSystem::CalculateValue(const std::vector<KeyframeScale>& keyframes, const float& time)
 {
 	assert(!keyframes.empty());// キーがないものは返す値がわからないのでだめ
 	if (keyframes.size() == 1 || time <= keyframes[0].time)
@@ -835,7 +836,7 @@ inline Scale AnimationSystem::CalculateValue(const std::vector<KeyframeScale>& k
 	return (*keyframes.rbegin()).value;
 }
 
-inline void AnimationSystem::timeUpdate(AnimationComponent& animation, ModelData* model)
+void AnimationSystem::timeUpdate(AnimationComponent& animation, ModelData* model)
 {
 	if (animation.isRun)
 	{
@@ -902,7 +903,7 @@ inline void AnimationSystem::timeUpdate(AnimationComponent& animation, ModelData
 	animation.prevAnimationIndex = animation.animationIndex;
 }
 
-inline void AnimationSystem::ApplyAnimation(AnimationComponent& animation, ModelData* model)
+void AnimationSystem::ApplyAnimation(AnimationComponent& animation, ModelData* model)
 {
 	for (Joint& joint : animation.skeleton->joints)
 	{
@@ -936,7 +937,7 @@ inline void AnimationSystem::ApplyAnimation(AnimationComponent& animation, Model
 	}
 }
 
-inline void AnimationSystem::SkeletonUpdate(AnimationComponent& animation, ModelData* model)
+void AnimationSystem::SkeletonUpdate(AnimationComponent& animation, ModelData* model)
 {
 	model;
 	// すべてのJointを更新。親が若いので通常ループで処理可能になっている
@@ -954,7 +955,7 @@ inline void AnimationSystem::SkeletonUpdate(AnimationComponent& animation, Model
 	}
 }
 
-inline void AnimationSystem::SkinClusterUpdate(AnimationComponent& animation, ModelData* model)
+void AnimationSystem::SkinClusterUpdate(AnimationComponent& animation, ModelData* model)
 {
 	StructuredBuffer<ConstBufferDataWell>* paletteBuffer = dynamic_cast<StructuredBuffer<ConstBufferDataWell>*>(m_pResourceManager->GetBuffer<IStructuredBuffer>(model->boneMatrixBufferIndex));
 	for (uint32_t jointIndex = 0; jointIndex < model->skeleton.joints.size(); ++jointIndex)
@@ -970,7 +971,7 @@ inline void AnimationSystem::SkinClusterUpdate(AnimationComponent& animation, Mo
 	}
 }
 
-inline void AnimationSystem::ApplySkinning(AnimationComponent& animation, ModelData* model)
+void AnimationSystem::ApplySkinning(AnimationComponent& animation, ModelData* model)
 {
 	animation;
 	model;
@@ -1008,7 +1009,7 @@ inline void AnimationSystem::ApplySkinning(AnimationComponent& animation, ModelD
 	//m_pGraphicsEngine->WaitForGPU(QueueType::Compute);
 }
 
-inline Quaternion AnimationSystem::CalculateValue(const std::vector<KeyframeQuaternion>& keyframes, const float& time)
+Quaternion AnimationSystem::CalculateValue(const std::vector<KeyframeQuaternion>& keyframes, const float& time)
 {
 	assert(!keyframes.empty());// キーがないものは返す値がわからないのでだめ
 	if (keyframes.size() == 1 || time <= keyframes[0].time)
@@ -1030,7 +1031,7 @@ inline Quaternion AnimationSystem::CalculateValue(const std::vector<KeyframeQuat
 	return (*keyframes.rbegin()).value;
 }
 
-inline Vector3 AnimationSystem::CalculateValue(const std::vector<KeyframeVector3>& keyframes, const float& time)
+Vector3 AnimationSystem::CalculateValue(const std::vector<KeyframeVector3>& keyframes, const float& time)
 {
 	assert(!keyframes.empty());// キーがないものは返す値がわからないのでだめ
 	if (keyframes.size() == 1 || time <= keyframes[0].time)
@@ -1052,12 +1053,12 @@ inline Vector3 AnimationSystem::CalculateValue(const std::vector<KeyframeVector3
 	return (*keyframes.rbegin()).value;
 }
 
-inline void EffectEditorSystem::InitializeComponent(Entity e, EffectComponent& effect)
+void EffectEditorSystem::InitializeComponent(Entity e, EffectComponent& effect)
 {
 
 }
 
-inline void EffectEditorSystem::UpdateComponent(Entity e, EffectComponent& effect)
+void EffectEditorSystem::UpdateComponent(Entity e, EffectComponent& effect)
 {
 	// EditorはTimeBaseでの更新
 
@@ -1140,17 +1141,17 @@ inline void EffectEditorSystem::UpdateComponent(Entity e, EffectComponent& effec
 	rootBuffer->UpdateData(root, effect.root.first);
 }
 
-inline void EffectEditorSystem::FinalizeComponent(Entity e, EffectComponent& effect)
+void EffectEditorSystem::FinalizeComponent(Entity e, EffectComponent& effect)
 {
 
 }
 
-inline void EffectEditorSystem::UpdateEffect(EffectComponent& effect)
+void EffectEditorSystem::UpdateEffect(EffectComponent& effect)
 {
 
 }
 
-inline void EffectEditorSystem::InitEffectParticle()
+void EffectEditorSystem::InitEffectParticle()
 {
 	// ParticleBuffer
 	IRWStructuredBuffer* particleBuffer = m_pEngineCommand->GetResourceManager()->GetEffectParticleBuffer();
@@ -1178,7 +1179,7 @@ inline void EffectEditorSystem::InitEffectParticle()
 	m_pEngineCommand->GetGraphicsEngine()->EndCommandContext(context, QueueType::Compute);
 }
 
-inline void EffectEditorSystem::UpdateShader()
+void EffectEditorSystem::UpdateShader()
 {
 	if (!m_pEngineCommand->m_ResourceManager->GetEffectRootUseListCount()) { return; }
 

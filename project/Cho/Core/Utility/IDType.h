@@ -7,6 +7,26 @@ using Archetype = std::bitset<256>;
 using PrefabID = uint32_t;
 using SceneID = uint32_t;
 
+struct ObjectHandle
+{
+	SceneID sceneID;
+	uint32_t objectID;
+	Entity entity;
+	bool isClone = false; // クローンかどうか
+	uint32_t originalID = 0; // オリジナルID
+	uint32_t cloneID = 0; // クローンID
+
+	void Clear() noexcept
+	{
+		sceneID = 0;
+		objectID = 0;
+		entity = 0;
+		isClone = false;
+		originalID = 0;
+		cloneID = 0;
+	}
+};
+
 // オブジェクトのタイプ
 enum class ObjectType
 {

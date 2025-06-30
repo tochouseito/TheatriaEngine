@@ -5,47 +5,46 @@
 #include "Core/ChoLog/ChoLog.h"
 using namespace Cho;
 
-template <typename T>
-class FVectorIterator
-{
-public:
-    FVectorIterator(FVector<T>* vector, size_t index)
-        : vector(vector), index(index)
-    {
-        advanceToValid(); // 無効な要素をスキップ
-    }
-
-    T& operator*() { return (*vector)[index]; }
-
-    FVectorIterator& operator++()
-    {
-        ++index;
-        advanceToValid();
-        return *this;
-    }
-
-    bool operator!=(const FVectorIterator& other) const
-    {
-        return index != other.index || vector != other.vector;
-    }
-
-private:
-    FVector<T>* vector;
-    size_t index;
-
-    void advanceToValid()
-    {
-        while (index < vector->nextIndex && !vector->isValid(index))
-        {
-            ++index;
-        }
-    }
-};
-
 // フリーリスト付き可変長配列
 template <typename T>
 class FVector
 {
+    template <typename T>
+    class FVectorIterator
+    {
+    public:
+        FVectorIterator(FVector<T>* vector, size_t index)
+            : vector(vector), index(index)
+        {
+            advanceToValid(); // 無効な要素をスキップ
+        }
+
+        T& operator*() { return (*vector)[index]; }
+
+        FVectorIterator& operator++()
+        {
+            ++index;
+            advanceToValid();
+            return *this;
+        }
+
+        bool operator!=(const FVectorIterator& other) const
+        {
+            return index != other.index || vector != other.vector;
+        }
+
+    private:
+        FVector<T>* vector;
+        size_t index;
+
+        void advanceToValid()
+        {
+            while (index < vector->nextIndex && !vector->isValid(index))
+            {
+                ++index;
+            }
+        }
+    };
     using iterator = FVectorIterator<T>;
     friend class FVectorIterator<T>;
 public:

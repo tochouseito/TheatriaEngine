@@ -14,7 +14,7 @@ public:
 	// Destructor
 	~GameScene() = default;
 
-	void AddPrefab(const CPrefab& prefab);
+	void AddPrefab(CPrefab& prefab);
 	void RemovePrefab(const std::wstring& prefabName);
 	void RemovePrefab(const size_t idx);
 	void ClearPrefabs() { m_Prefabs.clear(); m_PrefabNameToIdxMap.clear(); }

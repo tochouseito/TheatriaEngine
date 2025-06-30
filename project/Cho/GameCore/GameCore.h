@@ -40,6 +40,7 @@ public:
 
 	GameWorld* GetGameWorld() { return m_pGameWorld.get(); }
 	SceneManager* GetSceneManager() { return m_pSceneManager.get(); }
+	ECSManager* GetECSManager() { return m_pECSManager.get(); }
 private:
 	void RegisterECSEvents();
 	void RegisterECSSystems(InputManager* input, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine);

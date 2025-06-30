@@ -3,18 +3,18 @@
 #include "GameCore/GameScene/GameScene.h"
 #include "Core/ChoLog/ChoLog.h"
 
-inline void GameWorld::Initialize()
+void GameWorld::Initialize()
 {
 
 }
 
-inline void GameWorld::Update()
+void GameWorld::Update()
 {
 
 }
 
 // オブジェクトを取得
-inline GameObject* GameWorld::GetGameObject(const std::wstring& name)
+GameObject* GameWorld::GetGameObject(const std::wstring& name)
 {
 	if (!m_ObjectHandleMap.contains(name))
 	{
@@ -24,7 +24,7 @@ inline GameObject* GameWorld::GetGameObject(const std::wstring& name)
 	return m_pGameObjects[handle.sceneID][handle.objectID][handle.cloneID].get();
 }
 
-inline GameObject* GameWorld::GetGameObject(const Entity& e)
+GameObject* GameWorld::GetGameObject(const Entity& e)
 {
 	if (!m_ObjectHandleMapFromEntity.contains(e))
 	{
@@ -34,7 +34,7 @@ inline GameObject* GameWorld::GetGameObject(const Entity& e)
 	return m_pGameObjects[handle.sceneID][handle.objectID][handle.cloneID].get();
 }
 
-inline GameObject* GameWorld::GetGameObject(const ObjectHandle& handle)
+GameObject* GameWorld::GetGameObject(const ObjectHandle& handle)
 {
 	if (!m_pGameObjects.isValid(handle.sceneID) ||
 		!m_pGameObjects[handle.sceneID].isValid(handle.objectID) ||
@@ -46,7 +46,7 @@ inline GameObject* GameWorld::GetGameObject(const ObjectHandle& handle)
 }
 
 // オブジェクトを作成
-inline ObjectHandle GameWorld::CreateGameObject(const std::wstring& name, ObjectType type)
+ObjectHandle GameWorld::CreateGameObject(const std::wstring& name, ObjectType type)
 {
 	// handleを作成
 	ObjectHandle handle;
@@ -66,7 +66,7 @@ inline ObjectHandle GameWorld::CreateGameObject(const std::wstring& name, Object
 }
 
 // シーンデータからオブジェクトを作成
-inline SceneID GameWorld::AddGameObjectFromScene(const GameScene& scene)
+SceneID GameWorld::AddGameObjectFromScene(const GameScene& scene)
 {
 	// シーンIDを取得
 	SceneID sceneID = static_cast<SceneID>(m_pGameObjects.push_back(FVector<FVector<std::unique_ptr<GameObject>>>()));

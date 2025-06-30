@@ -9,26 +9,6 @@ class ECSManager;
 class ResourceManager;
 class ObjectContainer;
 
-struct ObjectHandle
-{
-	SceneID sceneID;
-	uint32_t objectID;
-	Entity entity;
-	bool isClone = false; // クローンかどうか
-	uint32_t originalID = 0; // オリジナルID
-	uint32_t cloneID = 0; // クローンID
-
-	void Clear() noexcept
-	{
-		sceneID = 0;
-		objectID = 0;
-		entity = 0;
-		isClone = false;
-		originalID = 0;
-		cloneID = 0;
-	}
-};
-
 // GameObjectクラス
 class CHO_API GameObject
 {
@@ -54,27 +34,24 @@ public:
 	{
 		// TがIScriptを継承しているか確認
 		static_assert(std::is_base_of<IScript, T>::value, "T must be derived from IScript");
-		if (m_ECS)
+		if (ScriptComponent* script = GetScriptComponent())
 		{
-			if (ScriptComponent* script = GetScriptComponent())
-			{
-				return static_cast<T*>(script->instance);
-			}
+			return static_cast<T*>(script->instance);
 		}
 		return nullptr;
 	}
 
-	TransformAPI transform;			// TransformAPI
-	CameraAPI camera;				// CameraAPI
-	LineRendererAPI lineRenderer;	// LineRendererAPI
-	Rigidbody2DAPI rigidbody2D;		// Rigidbody2DAPI
-	BoxCollider2DAPI boxCollider2D;	// BoxCollider2DAPI
-	MaterialAPI material;			// MaterialAPI
-	UISpriteAPI ui;					// UIAPI
-	AudioAPI audio;					// AudioAPI
-	InputAPI input;					// InputAPI
-	AnimationAPI animation;			// AnimationAPI
-	ParticleAPI particle;		// ParticleAPI
+	//TransformAPI transform;			// TransformAPI
+	//CameraAPI camera;				// CameraAPI
+	//LineRendererAPI lineRenderer;	// LineRendererAPI
+	//Rigidbody2DAPI rigidbody2D;		// Rigidbody2DAPI
+	//BoxCollider2DAPI boxCollider2D;	// BoxCollider2DAPI
+	//MaterialAPI material;			// MaterialAPI
+	//UISpriteAPI ui;					// UIAPI
+	//AudioAPI audio;					// AudioAPI
+	//InputAPI input;					// InputAPI
+	//AnimationAPI animation;			// AnimationAPI
+	//ParticleAPI particle;		// ParticleAPI
 
 	// パラメータを取得
 	ObjectParameter GetParameter(const std::string& name) const;
@@ -86,11 +63,6 @@ private:
 	ObjectHandle m_Handle;			// オブジェクトハンドル
 	ObjectType m_Type;								// ゲームオブジェクトのタイプ
 	bool m_Active = false;							// アクティブフラグ
-	
-	ECSManager* m_ECS = nullptr;					// ECSManager
-	ResourceManager* m_ResourceManager = nullptr;	// ResourceManager
-	InputManager* m_InputManager = nullptr;			// InputManager
-	ObjectContainer* m_ObjectContainer = nullptr;	// ObjectContainer
 
 	// 実装隠蔽クラス
 	class ImplGameObject;

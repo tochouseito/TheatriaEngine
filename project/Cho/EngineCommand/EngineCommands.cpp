@@ -10,12 +10,6 @@ using namespace Cho;
 
 bool Add3DObjectCommand::Execute(EngineCommand* edit)
 {
-	// CurrentSceneがないなら失敗
-	if (!edit->m_GameCore->GetSceneManager()->GetMainScene())
-	{
-		Log::Write(LogLevel::Assert, "Current Scene is nullptr");
-		return false;
-	}
 	// 各IDの取得
 	// Entity
 	Entity entity = edit->m_GameCore->GetECSManager()->GenerateEntity();

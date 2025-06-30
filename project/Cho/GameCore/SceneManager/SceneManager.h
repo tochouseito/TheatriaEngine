@@ -95,7 +95,6 @@ public:
 		}
 		return nullptr;
 	}
-	FVector<GameScene>& GetScenes() noexcept { return m_Scenes; }
 	// シーン名からシーンIDを取得
 	SceneID GetSceneID(const std::wstring& sceneName) const noexcept
 	{

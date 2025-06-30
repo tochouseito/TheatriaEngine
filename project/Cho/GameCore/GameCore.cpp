@@ -456,6 +456,7 @@ void GameCore::RegisterECSSystems(InputManager* input, ResourceManager* resource
 	// CameraComponentSystem
 	m_pECSManager->AddSystem<CameraSystem>();
 	CameraSystem* cameraSystem = m_pECSManager->GetSystem<CameraSystem>();
+	cameraSystem->SetResourceManager(resourceManager);
 	cameraSystem->SetBuffer(static_cast<StructuredBuffer<BUFFER_DATA_TF>*>(resourceManager->GetIntegrationBuffer(IntegrationDataType::Transform)));
 	// MaterialComponentSystem
 	m_pECSManager->AddSystem<MaterialSystem>();

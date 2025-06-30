@@ -76,7 +76,11 @@ private:
 	{
 		m_pIntegrationBuffer = buffer;
 	}
-
+	void SetResourceManager(ResourceManager* resourceManager)
+	{
+		m_pResourceManager = resourceManager;
+	}
+	ResourceManager* m_pResourceManager = nullptr;
 	StructuredBuffer<BUFFER_DATA_TF>* m_pIntegrationBuffer = nullptr;
 };
 

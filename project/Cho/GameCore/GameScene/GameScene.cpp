@@ -2,13 +2,13 @@
 #include "GameScene.h"
 #include <algorithm>
 
-void GameScene::AddPrefab(const CPrefab& prefab)
+void GameScene::AddPrefab(CPrefab& prefab)
 {
 	if (prefab.GetName().empty())
 	{
 		throw std::invalid_argument("Prefab name cannot be empty.");
 	}
-	m_PrefabNameToIdxMap[prefab.GetName()] = m_Prefabs.push_back(prefab);
+	m_PrefabNameToIdxMap[prefab.GetName()] = m_Prefabs.push_back(std::move(prefab));
 }
 
 void GameScene::RemovePrefab(const std::wstring& prefabName)
