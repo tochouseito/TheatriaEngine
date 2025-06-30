@@ -3,6 +3,7 @@
 #include "Resources/ResourceManager/ResourceManager.h"
 #include "Graphics/GraphicsEngine/GraphicsEngine.h"
 #include "GameCore/GameCore.h"
+#include "Editor/EditorManager/EditorManager.h"
 #include "Core/Utility/GenerateUnique.h"
 #include "Core/ChoLog/ChoLog.h"
 using namespace Cho;
@@ -10,30 +11,12 @@ using namespace Cho;
 
 bool Add3DObjectCommand::Execute(EngineCommand* edit)
 {
-	// 各IDの取得
-	// Entity
-	Entity entity = edit->m_GameCore->GetECSManager()->GenerateEntity();
 	// デフォルトの名前
 	std::wstring name = L"NewMeshObject";
-	// 重複回避
-	name = GenerateUniqueName(name, edit->m_GameCore->GetObjectContainer()->GetNameToObjectID());
-	// Transform統合バッファからmapIDを取得
-	//uint32_t mapID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::Transform)->GetMapID();
-	// TransformComponentを追加
-	edit->m_GameCore->GetECSManager()->AddComponent<TransformComponent>(entity);
-	//transform->mapID = mapID;
-	// GameObjectを追加
-	ObjectID objectID = edit->m_GameCore->GetObjectContainer()->AddGameObject(entity, name, ObjectType::MeshObject);
-	if (objectID == entity)
-	{
-		Log::Write(LogLevel::Assert, "Failed to add GameObject to ObjectContainer. ObjectID is same as Entity.");
-		return false;
-	}
-	m_ObjectID = objectID;
-	// シーンに追加
-	edit->m_GameCore->GetSceneManager()->GetMainScene()->AddUseObject(objectID);
+	// Worldに追加
+	m_Handle = edit->GetGameCore()->GetGameWorld()->CreateGameObject(name, ObjectType::MeshObject);
 	// SelectedObjectを設定
-	edit->SetSelectedObject(edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID)->GetName());
+	edit->GetEditorManager()->SetSelectedGameObject(edit->GetGameCore()->GetGameWorld()->GetGameObject(m_Handle));
 	return true;
 }
 
@@ -45,40 +28,12 @@ bool Add3DObjectCommand::Undo(EngineCommand* edit)
 
 bool AddCameraObjectCommand::Execute(EngineCommand* edit)
 {
-	// CurrentSceneがないなら失敗
-	if (!edit->m_GameCore->GetSceneManager()->GetMainScene())
-	{
-		Log::Write(LogLevel::Assert, "Current Scene is nullptr");
-		return false;
-	}
-	// 各IDの取得
-	// Entity
-	Entity entity = edit->m_GameCore->GetECSManager()->GenerateEntity();
 	// デフォルトの名前
 	std::wstring name = L"NewCameraObject";
-	// 重複回避
-	name = GenerateUniqueName(name, edit->m_GameCore->GetObjectContainer()->GetNameToObjectID());
-	// Transform統合バッファからmapIDを取得
-	//uint32_t mapID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::Transform)->GetMapID();
-	// TransformComponentを追加
-	edit->m_GameCore->GetECSManager()->AddComponent<TransformComponent>(entity);
-	//transform->mapID = mapID;
-	// CameraComponentを追加
-	edit->m_GameCore->GetECSManager()->AddComponent<CameraComponent>(entity);
-	// Resourceの生成
-	//camera->bufferIndex = edit->m_ResourceManager->CreateConstantBuffer<BUFFER_DATA_VIEWPROJECTION>();
-	// GameObjectを追加
-	ObjectID objectID = edit->m_GameCore->GetObjectContainer()->AddGameObject(entity, name, ObjectType::Camera);
-	if (objectID == entity)
-	{
-		Log::Write(LogLevel::Assert, "Failed to add GameObject to ObjectContainer. ObjectID is same as Entity.");
-		return false;
-	}
-	m_ObjectID = objectID;
-	// シーンに追加
-	edit->m_GameCore->GetSceneManager()->GetMainScene()->AddUseObject(objectID);
+	// Worldに追加
+	m_Handle = edit->GetGameCore()->GetGameWorld()->CreateGameObject(name, ObjectType::Camera);
 	// SelectedObjectを設定
-	edit->SetSelectedObject(edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID)->GetName());
+	edit->GetEditorManager()->SetSelectedGameObject(edit->GetGameCore()->GetGameWorld()->GetGameObject(m_Handle));
 	return true;
 }
 

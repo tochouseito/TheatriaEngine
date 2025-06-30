@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "GameWorld.h"
 #include "GameCore/GameScene/GameScene.h"
+#include "Core/Utility/GenerateUnique.h"
 #include "Core/ChoLog/ChoLog.h"
 
 void GameWorld::Initialize()
@@ -57,8 +58,10 @@ ObjectHandle GameWorld::CreateGameObject(const std::wstring& name, ObjectType ty
 	// オブジェクトIDを取得
 	uint32_t objectID = static_cast<uint32_t>(m_pGameObjects[0].push_back(FVector<std::unique_ptr<GameObject>>()));
 	handle.objectID = objectID;
+	// 名前被り防止
+	std::wstring newName = GenerateUniqueName<std::unordered_map<std::wstring, ObjectHandle>>(name,m_ObjectHandleMap);
 	// GameObjectを作成
-	m_pGameObjects[0][objectID].push_back(std::make_unique<GameObject>(handle, name, type));
+	m_pGameObjects[0][objectID].push_back(std::make_unique<GameObject>(handle, newName, type));
 	// 辞書に登録
 	m_ObjectHandleMap[name] = handle;
 	m_ObjectHandleMapFromEntity[entity] = handle;
@@ -100,4 +103,28 @@ SceneID GameWorld::AddGameObjectFromScene(const GameScene& scene)
 		m_ObjectHandleMapFromEntity[entity] = handle;
 	}
 	return sceneID;
+}
+
+// 全シーン破棄
+void GameWorld::ClearAllScenes()
+{
+	for (auto& scene : m_pGameObjects)
+	{
+		for (auto& object : scene)
+		{
+			for (auto& clone : object)
+			{
+				std::wstring name = clone->GetName();
+				Entity entity = clone->GetHandle().entity;
+				// ECSから削除
+				m_pECSManager->RemoveEntity(entity);
+			}
+		}
+	}
+	// コンテナと辞書をクリア
+	m_pGameObjects.clear();
+	m_ObjectHandleMap.clear();
+	m_ObjectHandleMapFromEntity.clear();
+	// メインカメラをクリア
+	m_pMainCamera = nullptr;
 }

@@ -13,10 +13,11 @@ public:
 	}
 	bool Execute(EngineCommand* edit)override;
 	bool Undo(EngineCommand* edit)override;
-	// オブジェクトのIDを取得
-	uint32_t GetObjectID() const { return m_ObjectID; }
+	
+	// オブジェクトのハンドルを取得
+	ObjectHandle GetObjectHandle() const { return m_Handle; }
 private:
-	uint32_t m_ObjectID;
+	ObjectHandle m_Handle;
 };
 // カメラオブジェクトを追加するコマンド
 class AddCameraObjectCommand :public IEngineCommand
@@ -27,8 +28,10 @@ public:
 	}
 	bool Execute(EngineCommand* edit)override;
 	bool Undo(EngineCommand* edit)override;
+	// オブジェクトのハンドルを取得
+	ObjectHandle GetObjectHandle() const { return m_Handle; }
 private:
-	uint32_t m_ObjectID;
+	ObjectHandle m_Handle;
 };
 // パーティクルシステムオブジェクトを追加するコマンド
 class AddParticleSystemObjectCommand :public IEngineCommand

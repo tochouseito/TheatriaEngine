@@ -1,5 +1,24 @@
 #include "pch.h"
 #include "EditorManager.h"
+#include "EngineCommand/EngineCommand.h"
+
+EditorManager::EditorManager(EngineCommand* engineCommand, InputManager* inputManager) :
+	m_EngineCommand(engineCommand), m_InputManager(inputManager)
+{
+	m_Toolbar = std::make_unique<Toolbar>(this);
+	m_MainMenu = std::make_unique<MainMenu>(this, m_Toolbar.get());
+	m_DebugCamera = std::make_unique<DebugCamera>(this);
+	m_SceneView = std::make_unique<SceneView>(this, m_DebugCamera.get());
+	m_GameView = std::make_unique<GameView>(this);
+	m_Hierarchy = std::make_unique<Hierarchy>(this);
+	m_Inspector = std::make_unique<Inspector>(this);
+	m_AssetBrowser = std::make_unique<AssetBrowser>(this);
+	m_Console = std::make_unique<Console>(this);
+	m_EffectEditor = std::make_unique<EffectEditor>(this);
+	m_EffectView = std::make_unique<EffectView>(this, m_DebugCamera.get());
+	m_EffectHierarchy = std::make_unique<EffectHierarchy>(this);
+	engineCommand->SetEditorManager(this);
+}
 
 void EditorManager::Initialize()
 {

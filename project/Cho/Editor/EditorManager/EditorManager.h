@@ -26,22 +26,7 @@ class InputManager;
 class EditorManager
 {
 public:
-	EditorManager(EngineCommand* engineCommand,InputManager* inputManager) :
-		m_EngineCommand(engineCommand), m_InputManager(inputManager)
-	{
-		m_Toolbar = std::make_unique<Toolbar>(this);
-		m_MainMenu = std::make_unique<MainMenu>(this,m_Toolbar.get());
-		m_DebugCamera = std::make_unique<DebugCamera>(this);
-		m_SceneView = std::make_unique<SceneView>(this, m_DebugCamera.get());
-		m_GameView = std::make_unique<GameView>(this);
-		m_Hierarchy = std::make_unique<Hierarchy>(this);
-		m_Inspector = std::make_unique<Inspector>(this);
-		m_AssetBrowser = std::make_unique<AssetBrowser>(this);
-		m_Console = std::make_unique<Console>(this);
-		m_EffectEditor = std::make_unique<EffectEditor>(this);
-		m_EffectView = std::make_unique<EffectView>(this,m_DebugCamera.get());
-		m_EffectHierarchy = std::make_unique<EffectHierarchy>(this);
-	}
+	EditorManager(EngineCommand* engineCommand,InputManager* inputManager);
 	~EditorManager()
 	{
 	}
@@ -51,6 +36,15 @@ public:
 	InputManager* GetInputManager() { return m_InputManager; }
 	void SetWorkSpaceType(const std::string& typeName);
 	WorkSpaceType GetWorkSpaceType() { return m_WorkSpaceType; }
+
+	GameObject* GetSelectedGameObject() const { return m_SelectedGameObject; }
+	void SetSelectedGameObject(GameObject* gameObject) { m_SelectedGameObject = gameObject; }
+
+	// EffectEditor
+	std::optional<uint32_t> GetEffectEntity() const { return m_EffectEntity; }
+	void SetEffectEntity(std::optional<uint32_t> entity) { m_EffectEntity = entity; }
+	std::optional<uint32_t> GetEffectNodeID() const { return m_EffectNodeID; }
+	void SetEffectNodeIndex(std::optional<uint32_t> nodeID) { m_EffectNodeID = nodeID; }
 private:
 	EngineCommand* m_EngineCommand = nullptr;
 	InputManager* m_InputManager = nullptr;
@@ -66,6 +60,13 @@ private:
 	std::unique_ptr<EffectEditor> m_EffectEditor = nullptr;
 	std::unique_ptr<EffectView> m_EffectView = nullptr;
 	std::unique_ptr<EffectHierarchy> m_EffectHierarchy = nullptr;
+
+	// 選択中のオブジェクト
+	GameObject* m_SelectedGameObject = nullptr;
+	// 編集中のエフェクトEntity
+	std::optional<uint32_t> m_EffectEntity = std::nullopt;
+	// 選択中のEffectNode
+	std::optional<uint32_t> m_EffectNodeID = std::nullopt;
 
 	// ワークスペース
 	WorkSpaceType m_WorkSpaceType = WorkSpaceType::SceneEdit;
