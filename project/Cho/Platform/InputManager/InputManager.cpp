@@ -85,56 +85,38 @@ void InputManager::Update()
 				// XInputのステートを取得
 				if (XInputGetState(i, &joystick.state.xInput) == ERROR_SUCCESS)
 				{
-					// XInputのコントローラーが接続されている場合の処理
+					joystick.statePre = joystick.state;
 
-					// 左スティック
-					float leftThumbX = joystick.state.xInput.Gamepad.sThumbLX;
-					float leftThumbY = joystick.state.xInput.Gamepad.sThumbLY;
+					// 左スティック（補正値で上書き）
+					Vector2 leftStick = ApplyRadialDeadZone(
+						joystick.state.xInput.Gamepad.sThumbLX,
+						joystick.state.xInput.Gamepad.sThumbLY,
+						m_LeftStickDeadZone);
 
-					// 左スティックのデッドゾーン処理
-					if (std::abs(leftThumbX) < m_LeftStickDeadZone)
-					{
-						//leftThumbX = 0;
-						joystick.state.xInput.Gamepad.sThumbLX = 0;
-					}
-					if (std::abs(leftThumbY) < m_LeftStickDeadZone)
-					{
-						//leftThumbY = 0;
-						joystick.state.xInput.Gamepad.sThumbLY = 0;
-					}
+					joystick.state.xInput.Gamepad.sThumbLX = static_cast<SHORT>(leftStick.x * 32767.0f);
+					joystick.state.xInput.Gamepad.sThumbLY = static_cast<SHORT>(leftStick.y * 32767.0f);
 
 					// 右スティック
-					float rightThumbX = joystick.state.xInput.Gamepad.sThumbRX;
-					float rightThumbY = joystick.state.xInput.Gamepad.sThumbRY;
+					Vector2 rightStick = ApplyRadialDeadZone(
+						joystick.state.xInput.Gamepad.sThumbRX,
+						joystick.state.xInput.Gamepad.sThumbRY,
+						m_RightStickDeadZone);
 
-					// 右スティックのデッドゾーン処理
-					if (std::abs(rightThumbX) < m_RightStickDeadZone)
-					{
-						//rightThumbX = 0;
-						joystick.state.xInput.Gamepad.sThumbRX = 0;
-					}
-					if (std::abs(rightThumbY) < m_RightStickDeadZone)
-					{
-						//rightThumbY = 0;
-						joystick.state.xInput.Gamepad.sThumbRY = 0;
-					}
+					joystick.state.xInput.Gamepad.sThumbRX = static_cast<SHORT>(rightStick.x * 32767.0f);
+					joystick.state.xInput.Gamepad.sThumbRY = static_cast<SHORT>(rightStick.y * 32767.0f);
 
-					// トリガー
-					BYTE leftTrigger = joystick.state.xInput.Gamepad.bLeftTrigger;
-					BYTE rightTrigger = joystick.state.xInput.Gamepad.bRightTrigger;
+					// トリガー（通常処理）
+					BYTE& leftTrigger = joystick.state.xInput.Gamepad.bLeftTrigger;
+					BYTE& rightTrigger = joystick.state.xInput.Gamepad.bRightTrigger;
 
-					// トリガーのデッドゾーン処理
-					if (leftTrigger < XINPUT_GAMEPAD_TRIGGER_THRESHOLD)
+					if (leftTrigger < m_TriggerDeadZone)
 					{
-						//leftTrigger = 0;
-						joystick.state.xInput.Gamepad.bLeftTrigger = 0;
+						leftTrigger = 0;
 					}
-					if (rightTrigger < XINPUT_GAMEPAD_TRIGGER_THRESHOLD)
+					if (rightTrigger < m_TriggerDeadZone)
 					{
-						//rightTrigger = 0;
-						joystick.state.xInput.Gamepad.bRightTrigger = 0;
+						rightTrigger = 0;
 					}
-
 				}
 			}
 		}
@@ -281,21 +263,24 @@ Vector2 InputManager::GetStickValue(const LR& padStick, int32_t stickNo)
 	Vector2 result{ 0.0f,0.0f };
 
 	XINPUT_STATE currentState;
+	if (!GetJoystickState(stickNo, currentState))
+	{
+		return { 0.0f, 0.0f };
+	}
 	if (GetJoystickState(stickNo, currentState))
 	{
 		switch (padStick)
 		{
 		case LR::LEFT:
-			result = Vector2(
-				static_cast<float>(currentState.Gamepad.sThumbLX) / 32768.0f,
-				static_cast<float>(currentState.Gamepad.sThumbLY) / 32768.0f
-			);
-			break;
+			return ApplyRadialDeadZone(
+				currentState.Gamepad.sThumbLX,
+				currentState.Gamepad.sThumbLY,
+				m_LeftStickDeadZone);
 		case LR::RIGHT:
-			result = Vector2(
-				static_cast<float>(currentState.Gamepad.sThumbRX) / 32768.0f,
-				static_cast<float>(currentState.Gamepad.sThumbRY) / 32768.0f
-			);
+			return ApplyRadialDeadZone(
+				currentState.Gamepad.sThumbRX,
+				currentState.Gamepad.sThumbRY,
+				m_RightStickDeadZone);
 			break;
 		}
 	}
@@ -403,4 +388,23 @@ bool InputManager::IsTriggerTrigger(const LR& LorR, int32_t stickNo)
 	}
 
 	return value[0] > 0.8f && value[1] <= 0.8f;
+}
+
+Vector2 InputManager::ApplyRadialDeadZone(int16_t rawX, int16_t rawY, int deadZone)
+{
+	float x = static_cast<float>(rawX);
+	float y = static_cast<float>(rawY);
+	float magnitude = std::sqrt(x * x + y * y);
+
+	if (magnitude < static_cast<float>(deadZone))
+	{
+		return Vector2(0.0f, 0.0f);
+	}
+
+	float norm = (magnitude - deadZone) / (32767.0f - deadZone);
+	norm = std::clamp(norm, 0.0f, 1.0f);
+
+	float scale = norm / magnitude;
+
+	return Vector2(x * scale, y * scale);
 }
