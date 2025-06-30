@@ -24,22 +24,8 @@ void DebugCamera::Update()
 	static bool isLeftClicked = false;
 	static bool isWheelClicked = false;
 
-	// 度数からラジアンに変換
-	Vector3 radians = ChoMath::DegreesToRadians(m_TransformComponent.degrees);
-
-	// 差分計算
-	Vector3 diff = m_TransformComponent.preRot - radians;
-
-	// 各軸のクオータニオンを作成
-	Quaternion qx = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(1.0f, 0.0f, 0.0f), diff.x);
-	Quaternion qy = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0.0f, 1.0f, 0.0f), diff.y);
-	Quaternion qz = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0.0f, 0.0f, 1.0f), diff.z);
-
-	// 同時回転を累積(順序は気にしなくていい)
-	Quaternion rotation = m_TransformComponent.rotation * qx * qy * qz;
-
 	// 回転を考慮する
-	Matrix4 rotationMatrix = ChoMath::MakeRotateMatrix(rotation);
+	Matrix4 rotationMatrix = ChoMath::MakeRotateMatrix(m_TransformComponent.rotation);
 	Vector3 X = { 1.0f, 0.0f, 0.0f };
 	Vector3 Y = { 0.0f, 1.0f, 0.0f };
 	Vector3 Z = { 0.0f, 0.0f, -1.0f };
@@ -59,13 +45,15 @@ void DebugCamera::Update()
 	}
 	if (inputManager->IsPressMouse(MouseButton::Right))
 	{
-		// マウスの移動量を取得
-		deltaMousePos.x = inputManager->GetMouseWindowPosition().x - preMousePos.x;
-		deltaMousePos.y = inputManager->GetMouseWindowPosition().y - preMousePos.y;
-		preMousePos = inputManager->GetMouseWindowPosition();
-		// カメラ回転を更新
-		m_TransformComponent.degrees.x -= deltaMousePos.y * mouseSensitivity;
-		m_TransformComponent.degrees.y += deltaMousePos.x * mouseSensitivity;
+		Vector2 cur = inputManager->GetMouseWindowPosition();
+			Vector2 delta = cur - preMousePos;
+		preMousePos = cur;
+
+		m_TransformComponent.degrees.x = std::clamp(
+			m_TransformComponent.degrees.x + delta.y * mouseSensitivity,
+			-89.0f, 89.0f     // 真上・真下の反転防止
+		);
+		m_TransformComponent.degrees.y += delta.x * mouseSensitivity;
 	}
 	// 位置
 	if (inputManager->IsTriggerMouse(MouseButton::Center))
@@ -91,37 +79,28 @@ void DebugCamera::Update()
 	m_TransformComponent.position += rotatedZ * float(wheelDelta) * moveSpeed;
 	// デルタマウス位置を初期化
 	deltaMousePos.Initialize();
+	m_TransformComponent.degrees.z = 0.0f; // Z軸の回転は無効化（カメラの傾き防止）
 	UpdateMatrix();
 }
 
 void DebugCamera::UpdateMatrix()
 {
 	// 度数からラジアンに変換
-	Vector3 radians = ChoMath::DegreesToRadians(m_TransformComponent.degrees);
-
-	// 変更がなければreturn
-	/*if (compo.translation==compo.prePos&&
-		radians == compo.preRot) {
-		return;
-	}*/
-
-	// 差分計算
-	Vector3 diff = m_TransformComponent.preRot - radians;
+	Vector3 rad = ChoMath::DegreesToRadians(m_TransformComponent.degrees);
 
 	// 各軸のクオータニオンを作成
-	Quaternion qx = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(1.0f, 0.0f, 0.0f), diff.x);
-	Quaternion qy = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0.0f, -1.0f, 0.0f), diff.y);
-	Quaternion qz = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0.0f, 0.0f, -1.0f), diff.z);
+	Quaternion qYaw = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0, 1, 0), rad.y);
+	Quaternion qPitch = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(1, 0, 0), rad.x);
 
 	// 同時回転を累積
-	m_TransformComponent.rotation = m_TransformComponent.rotation * qx * qy * qz;//*compo.rotation;
+	m_TransformComponent.rotation = qYaw * qPitch;
 
 	// アフィン変換
 	m_TransformComponent.matWorld = ChoMath::MakeAffineMatrix(Scale(1.0f, 1.0f, 1.0f), m_TransformComponent.rotation, m_TransformComponent.position);
 
 	// 次のフレーム用に保存する
 	m_TransformComponent.prePos = m_TransformComponent.position;
-	m_TransformComponent.preRot = radians;
+	m_TransformComponent.preRot = rad;
 
 	TransferMatrix();
 }
