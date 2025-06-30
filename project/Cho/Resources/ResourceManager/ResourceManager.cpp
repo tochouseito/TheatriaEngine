@@ -100,7 +100,7 @@ uint32_t ResourceManager::CreateDepthBuffer(D3D12_RESOURCE_DESC& desc, D3D12_RES
 	return index;
 }
 
-uint32_t ResourceManager::CreateTextureBuffer(D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES state)
+uint32_t ResourceManager::CreateTextureBuffer(D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES state, const bool& isTextureCube)
 {
 	std::unique_ptr<PixelBuffer> buffer = std::make_unique<PixelBuffer>();
 	buffer->CreatePixelBufferResource(m_Device, desc, clearValue, state);
@@ -108,8 +108,17 @@ uint32_t ResourceManager::CreateTextureBuffer(D3D12_RESOURCE_DESC& desc, D3D12_C
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Format = desc.Format;
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MipLevels = static_cast<UINT>(desc.MipLevels);
+	srvDesc.ViewDimension = isTextureCube ? D3D12_SRV_DIMENSION_TEXTURECUBE : D3D12_SRV_DIMENSION_TEXTURE2D;
+		if (isTextureCube)
+		{
+			srvDesc.TextureCube.MostDetailedMip = 0;
+			srvDesc.TextureCube.MipLevels = UINT_MAX;
+			srvDesc.TextureCube.ResourceMinLODClamp = 0.0f;
+		}
+		else
+		{
+			srvDesc.Texture2D.MipLevels = static_cast<UINT>(desc.MipLevels);
+		}
 	// Viewの生成
 	buffer->CreateSRV(m_Device, srvDesc, m_SUVDescriptorHeap.get());
 	// コンテナに移動

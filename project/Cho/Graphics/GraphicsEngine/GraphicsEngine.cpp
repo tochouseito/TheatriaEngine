@@ -528,6 +528,8 @@ void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& ga
 		EffectEditorDraw(context, resourceManager, gameCore, mode);
 		// UI
 		DrawUI(context, resourceManager, gameCore, mode);
+		// Skyboxの描画
+		SkyboxRender(context, resourceManager, gameCore, mode);
 	} else
 	{
 		// パイプラインセット
@@ -916,5 +918,64 @@ void GraphicsEngine::DrawUI(CommandContext* context, ResourceManager& resourceMa
 	context->SetGraphicsRootDescriptorTable(3, resourceManager.GetSUVDHeap()->GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
 	// DrawCall
 	context->DrawIndexedInstanced(6, static_cast<UINT>(resourceManager.GetUIContainer()->GetUseList().size()), 0, 0, 0);
+
+}
+
+void GraphicsEngine::SkyboxRender(CommandContext* context, ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode)
+{
+	if (resourceManager.GetSkyboxTextureName().empty())
+	{
+		return;
+	}
+
+	// プリミティブトポロジの設定
+	context->SetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	// パイプラインセット
+	context->SetGraphicsPipelineState(m_PipelineManager->GetSkyboxPSO().pso.Get());
+	// ルートシグネチャセット
+	context->SetGraphicsRootSignature(m_PipelineManager->GetSkyboxPSO().rootSignature.Get());
+	// シーンがないならスキップ
+	if (!gameCore.GetSceneManager()->GetMainScene()) { return; }
+	IConstantBuffer* cameraBuffer = nullptr;
+	// メインカメラを取得
+	if (mode == RenderMode::Game || mode == RenderMode::Release)
+	{
+		// カメラオブジェクトのIDを取得
+		std::optional<uint32_t> cameraID = gameCore.GetSceneManager()->GetMainScene()->GetMainCameraID();
+		if (!cameraID) { return; }
+		// カメラオブジェクトを取得
+		GameObject& cameraObject = gameCore.GetObjectContainer()->GetGameObject(cameraID.value());
+		if (!cameraObject.IsActive()) { return; }
+		// カメラのバッファインデックスを取得
+		CameraComponent* cameraComponent = gameCore.GetECSManager()->GetComponent<CameraComponent>(cameraObject.GetEntity());
+		if (!cameraComponent) { return; }
+		// カメラのバッファを取得
+		cameraBuffer = resourceManager.GetBuffer<IConstantBuffer>(cameraComponent->bufferIndex);
+		// カメラがないならスキップ
+		if (!cameraBuffer) { return; }
+	}
+	else// デバッグカメラ
+	{
+		// カメラのバッファを取得
+		cameraBuffer = resourceManager.GetDebugCameraBuffer();
+		// カメラがないならスキップ
+		if (!cameraBuffer) { return; }
+	}
+	// Skyboxの頂点バッファを取得
+	ModelData* model = resourceManager.GetModelManager()->GetModelData(L"Skybox");
+	// VBVをセット
+	D3D12_VERTEX_BUFFER_VIEW* vbv = resourceManager.GetBuffer<IVertexBuffer>(model->meshes[0].vertexBufferIndex)->GetVertexBufferView();
+	context->SetVertexBuffers(0, 1, vbv);
+	// IBVをセット
+	D3D12_INDEX_BUFFER_VIEW* ibv = resourceManager.GetBuffer<IIndexBuffer>(model->meshes[0].indexBufferIndex)->GetIndexBufferView();
+	context->SetIndexBuffer(ibv);
+	// カメラバッファをセット
+	context->SetGraphicsRootConstantBufferView(0, cameraBuffer->GetResource()->GetGPUVirtualAddress());
+	// Skyboxのテクスチャをセット
+	TextureData* skyboxTexture = resourceManager.GetTextureManager()->GetTextureData(resourceManager.GetSkyboxTextureName());
+	PixelBuffer* skyboxPixelBuffer = resourceManager.GetBuffer<PixelBuffer>(skyboxTexture->bufferIndex);
+	context->SetGraphicsRootDescriptorTable(1, skyboxPixelBuffer->GetSRVGpuHandle());
+	// DrawCall
+	context->DrawIndexedInstanced(static_cast<UINT>(model->meshes[0].indices.size()), 1, 0, 0, 0);
 
 }

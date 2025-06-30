@@ -144,7 +144,7 @@ public:
 	}
 	uint32_t CreateColorBuffer(D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES state);
 	uint32_t CreateDepthBuffer(D3D12_RESOURCE_DESC& desc, D3D12_RESOURCE_STATES state);
-	uint32_t CreateTextureBuffer(D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES state);
+	uint32_t CreateTextureBuffer(D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES state, const bool& isTextureCube = false);
 
 
 	// RemakeBuffer
@@ -360,6 +360,14 @@ public:
 			m_EffectRootUseListBuffer->UpdateData(i, a);
 		}
 	}
+	std::wstring GetSkyboxTextureName()
+	{
+		return m_SkyboxTextureName;
+	}
+	void SetSkyboxTextureName(const std::wstring& name)
+	{
+		m_SkyboxTextureName = name;
+	}
 private:
 	// Heap生成
 	void CreateHeap(ID3D12Device8* device);
@@ -429,6 +437,8 @@ private:
 	uint32_t m_NextEffectRootUseListIndex = 0;
 	// EffectRootUseListのリサイクル用
 	std::vector<uint32_t> m_EffectRootUseListRecycle;
+	// SkyboxTexture
+	std::wstring m_SkyboxTextureName = L"";
 
 	// static member
 	static const uint32_t kIntegrationTFBufferSize = 1024;// Transformの統合バッファのサイズ

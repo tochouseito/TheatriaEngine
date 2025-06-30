@@ -128,6 +128,7 @@ private:
 	void DrawParticles(CommandContext* context, ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode);
 	void EffectEditorDraw(CommandContext* context, ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode);
 	void DrawUI(CommandContext* context, ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode);
+	void SkyboxRender(CommandContext* context, ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode);
 
 	ID3D12Device8* m_Device = nullptr;
 	ResourceManager* m_ResourceManager = nullptr;

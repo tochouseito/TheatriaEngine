@@ -151,6 +151,8 @@ private:
 	void CreateRing();
 	// Cylinderの生成
 	void CreateCylinder();
+	// Skyboxの生成
+	void CreateSkybox();
 
 	// 
 	Node ReadNode(aiNode* node, const std::string& parentName);

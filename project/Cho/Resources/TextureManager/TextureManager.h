@@ -72,6 +72,11 @@ public:
 		}
 		return &m_Textures[0];
 	}
+	// 名前コンテナを取得
+	std::unordered_map<std::wstring, uint32_t>& GetTextureNameContainer()
+	{
+		return m_TextureNameContainer;
+	}
 private:
 	ResourceManager* m_ResourceManager = nullptr;
 	GraphicsEngine* m_GraphicsEngine = nullptr;
