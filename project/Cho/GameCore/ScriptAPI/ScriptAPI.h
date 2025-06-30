@@ -101,6 +101,7 @@ struct CHO_API CameraAPI
 	float& aspectRatio() { return data->aspectRatio; }
 	float& nearZ() { return data->nearZ; }
 	float& farZ() { return data->farZ; }
+	CameraComponent* GetCameraData() const { return data; } // CameraComponentのデータを取得
 private:
 	friend class GameObject;
 	void Initialize(const Entity& entity, ECSManager* ecs, ObjectContainer* objectContainer, ResourceManager* resourceManager);

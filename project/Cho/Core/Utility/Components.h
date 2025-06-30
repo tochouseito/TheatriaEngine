@@ -60,6 +60,7 @@ struct TransformComponent : public IComponentTag
 	TransformStartValue startValue;						// 初期値保存用
 	std::optional<uint32_t> materialID = std::nullopt;	// マテリアルID
 	std::optional<uint32_t> boneOffsetID = std::nullopt;	// ボーンオフセットID
+	bool isBillboard = false;					// ビルボードフラグ
 
 	TransformComponent& operator=(const TransformComponent& other)
 	{
@@ -73,6 +74,7 @@ struct TransformComponent : public IComponentTag
 		preRot = other.preRot;
 		preScale = other.preScale;
 		tickPriority = other.tickPriority;
+		isBillboard = other.isBillboard;
 
 		// optionalな要素は、コピー可能な値として処理
 		parent = other.parent;
@@ -105,6 +107,7 @@ struct TransformComponent : public IComponentTag
 		parent = std::nullopt;
 		mapID = std::nullopt;
 		materialID = std::nullopt;
+		isBillboard = false;
 	}
 };
 

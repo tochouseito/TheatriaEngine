@@ -76,6 +76,8 @@ void Inspector::TransformComponentView(GameObject* object)
 	ImGuiEx::ColoredDragFloat3("Rotation", &transform->degrees.x, 0.1f, 0.0f, 0.0f, "%.1f°");
 	// スケールの操作
 	ImGuiEx::ColoredDragFloat3("Scale", &transform->scale.x, 0.01f, 0.0f, 0.0f, "%.1f");
+	// ビルボード
+	ImGui::Checkbox("Billboard", &transform->isBillboard);
 }
 
 void Inspector::MeshFilterComponentView(GameObject* object)

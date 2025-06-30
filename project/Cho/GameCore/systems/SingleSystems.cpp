@@ -3,6 +3,7 @@
 #include "Resources/ResourceManager/ResourceManager.h"
 #include "Graphics/GraphicsEngine/GraphicsEngine.h"
 #include "GameCore/ObjectContainer/ObjectContainer.h"
+#include "GameCore/GameCore.h"
 #include "GameCore/IScript/IScript.h"
 #include "Platform/FileSystem/FileSystem.h"
 #include "OS/Windows/WinApp/WinApp.h"
@@ -74,7 +75,16 @@ void TransformUpdateSystem::UpdateComponent(Entity e, TransformComponent& transf
 	transform.rotation.Normalize();
 
 	// アフィン変換
-	transform.matWorld = ChoMath::MakeAffineMatrix(transform.scale, transform.rotation, transform.position);
+	if (transform.isBillboard)
+	{
+		GameObject* gameObject = &m_pGameCore->GetObjectContainer()->GetGameObject(m_pGameCore->GetSceneManager()->GetMainScene()->GetMainCameraID().value());
+		TransformComponent* camera = m_pECS->GetComponent<TransformComponent>(gameObject->GetEntity());
+		transform.matWorld = ChoMath::MakeAffineMatrix(transform.scale, ChoMath::BillboardMatrix(camera->matWorld), transform.position);
+	}
+	else
+	{
+		transform.matWorld = ChoMath::MakeAffineMatrix(transform.scale, transform.rotation, transform.position);
+	}
 
 	// 次のフレーム用に保存する
 	transform.prePos = transform.position;

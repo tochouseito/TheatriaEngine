@@ -224,7 +224,7 @@ bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 				bindPoseMatrixAssimp.Decompose(scale, rotate, translate);// 成分を抽出
 				/*左手系のBindPoseMatrixを作る*/
 				Matrix4 bindPoseMatrix = ChoMath::MakeAffineMatrix(
-					{ scale.x,scale.y,scale.z }, { rotate.x,-rotate.y,-rotate.z,rotate.w }, { -translate.x,translate.y,translate.z });
+					Scale(scale.x,scale.y,scale.z), Quaternion(rotate.x,-rotate.y,-rotate.z,rotate.w), Vector3(-translate.x, translate.y, translate.z ));
 				/*InverseBindPoseMatrixにする*/
 				jointWeightData.inverseBindPoseMatrix = Matrix4::Inverse(bindPoseMatrix);
 

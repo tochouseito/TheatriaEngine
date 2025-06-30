@@ -81,10 +81,14 @@ namespace ChoMath {
 	Vector3 ToEulerAngles(const Quaternion& q, RotationOrder order);
 	Matrix4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate);
 	Matrix4 MakeAffineMatrix(const Scale& scale, const Quaternion& rotate, const Vector3& translate);
+	Matrix4 MakeAffineMatrix(const Scale& scale, const Matrix4& rotate, const Vector3& translate);
 
 	Vector3 TransformDirection(const Vector3& v,const Matrix4& m);
 
 	float LerpShortAngle(float startAngle, float endAngle, float t);
 
 	Quaternion MakeLookRotation(const Vector3& forward, const Vector3& up);
+
+	// ALLBillboard
+	Matrix4 BillboardMatrix(const Matrix4 cameraMatrix);
 };

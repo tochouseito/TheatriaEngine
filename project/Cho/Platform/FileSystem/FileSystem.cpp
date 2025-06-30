@@ -973,6 +973,7 @@ json Cho::Serialization::ToJson(const TransformComponent& t)
     j["rotation"] = { t.rotation.x, t.rotation.y, t.rotation.z, t.rotation.w };
     j["scale"] = { t.scale.x, t.scale.y, t.scale.z };
 	j["degrees"] = { t.degrees.x, t.degrees.y, t.degrees.z };
+	j["isBillboard"] = t.isBillboard;
     return j;
 }
 
@@ -1803,6 +1804,7 @@ void Cho::Deserialization::FromJson(const json& j, TransformComponent& t)
 	t.rotation = { j["rotation"][0], j["rotation"][1], j["rotation"][2], j["rotation"][3] };
 	t.scale = { j["scale"][0], j["scale"][1], j["scale"][2] };
 	t.degrees = { j["degrees"][0], j["degrees"][1], j["degrees"][2] };
+	t.isBillboard = j.value("isBillboard", false);
 }
 
 void Cho::Deserialization::FromJson(const json& j, CameraComponent& c)

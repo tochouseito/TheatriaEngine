@@ -625,6 +625,16 @@ Matrix4 ChoMath::MakeAffineMatrix(const Scale& scale, const Quaternion& rotate, 
 	return result;
 }
 
+Matrix4 ChoMath::MakeAffineMatrix(const Scale& scale, const Matrix4& rotate, const Vector3& translate)
+{
+	Matrix4 result;
+	Matrix4 scaleMatrix = MakeScaleMatrix(scale);
+	Matrix4 rotateMatrix = rotate;
+	Matrix4 translateMatrix = MakeTranslateMatrix(translate);
+	result = scaleMatrix * rotateMatrix * translateMatrix;
+	return result;
+}
+
 Vector3 ChoMath::TransformDirection(const Vector3& v, const Matrix4& m)
 {
 	return {
@@ -677,6 +687,28 @@ Quaternion ChoMath::MakeLookRotation(const Vector3& forward, const Vector3& up)
 	};
 
 	return Quaternion::FromMatrix(rotMat); // 回転行列 → クォータニオン変換
+}
+
+// ALLBillboard
+Matrix4 ChoMath::BillboardMatrix(const Matrix4 cameraMatrix)
+{
+	Matrix4 result;
+
+	float cosY = cos(M_PI);
+	float sinY = sin(M_PI);
+
+	Matrix4 backToFrontMatrix = {
+		cosY, 0.0f, -sinY, 0.0f,
+		0.0f, 1.0f, 0.0f, 0.0f,
+		sinY, 0.0f, cosY, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f };
+
+	result = backToFrontMatrix * cameraMatrix;
+	result.m[3][0] = 0.0f;
+	result.m[3][1] = 0.0f;
+	result.m[3][2] = 0.0f;
+
+	return result;
 }
 
 

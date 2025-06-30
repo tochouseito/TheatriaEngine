@@ -7,19 +7,20 @@
 class ResourceManager;
 class GraphicsEngine;
 class EngineCommand;
+class GameCore;
 
 // エディタのTransform更新システム
 class TransformEditorSystem : public ECSManager::System<TransformComponent>
 {
 public:
-	TransformEditorSystem(ECSManager* ecs, ResourceManager* resourceManager, IStructuredBuffer* integrationBuffer)
+	TransformEditorSystem(GameCore* gameCore,ECSManager* ecs, ResourceManager* resourceManager, IStructuredBuffer* integrationBuffer)
 		: ECSManager::System<TransformComponent>([this](Entity e, TransformComponent& transform)
 			{
 				e;
 				transform;
 				priorityUpdate(m_pECS);
 			}),
-		m_pECS(ecs), m_pResourceManager(resourceManager)
+		m_pGameCore(gameCore), m_pECS(ecs), m_pResourceManager(resourceManager)
 	{
 		m_pIntegrationBuffer = dynamic_cast<StructuredBuffer<BUFFER_DATA_TF>*>(integrationBuffer);
 	}
@@ -33,6 +34,7 @@ private:
 	// 転送
 	void TransferMatrix(TransformComponent& transform);
 
+	GameCore* m_pGameCore = nullptr;
 	ECSManager* m_pECS = nullptr;
 	ResourceManager* m_pResourceManager = nullptr;
 	StructuredBuffer<BUFFER_DATA_TF>* m_pIntegrationBuffer = nullptr;
