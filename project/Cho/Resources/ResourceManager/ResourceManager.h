@@ -438,7 +438,7 @@ private:
 	// EffectRootUseListのリサイクル用
 	std::vector<uint32_t> m_EffectRootUseListRecycle;
 	// SkyboxTexture
-	std::wstring m_SkyboxTextureName = L"";
+	std::wstring m_SkyboxTextureName = L"vz_empty_space_cubemap_ue";
 
 	// static member
 	static const uint32_t kIntegrationTFBufferSize = 1024;// Transformの統合バッファのサイズ
