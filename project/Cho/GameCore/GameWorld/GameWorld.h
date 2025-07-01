@@ -25,10 +25,18 @@ public:
 	GameObject* GetGameObject(const ObjectHandle& handle);
 	// メインカメラを取得
 	GameObject* GetMainCamera() { return m_pMainCamera; }
+	// メインカメラを設定
+	void SetMainCamera(GameObject* pCamera) { m_pMainCamera = pCamera; }
 	// メインカメラを空にする
 	void ClearMainCamera() { m_pMainCamera = nullptr; }
 	// オブジェクトを作成
 	ObjectHandle CreateGameObject(const std::wstring& name, ObjectType type);
+	// オブジェクトを削除
+	void RemoveGameObject(const ObjectHandle& handle);
+	// 名前変更
+	void RenameGameObject(const ObjectHandle& handle, const std::wstring& newName);
+	// クローンを追加
+	ObjectHandle AddGameObjectClone(const ObjectHandle& src);
 private:
 	// シーンデータからオブジェクトを作成
 	SceneID AddGameObjectFromScene(const GameScene& scene);
@@ -37,21 +45,7 @@ private:
 	{
 
 	}
-	// クローンを追加
-	void AddGameObjectClone(const GameObject& src)
-	{
-
-	}
-	// オブジェクトを削除
-	void RemoveGameObject(const Entity& e)
-	{
-
-	}
-	// メインカメラを設定
-	void SetMainCamera(GameObject* pCamera)
-	{
-		m_pMainCamera = pCamera;
-	}
+	
 	// 全シーン破棄
 	void ClearAllScenes();
 	// タイプごとの初期コンポーネントを追加
@@ -69,6 +63,9 @@ private:
 			m_pECSManager->AddComponent<CameraComponent>(handle.entity);
 			break;
 		case ObjectType::ParticleSystem:
+			m_pECSManager->AddComponent<MeshFilterComponent>(handle.entity);
+			m_pECSManager->AddComponent<MeshRendererComponent>(handle.entity);
+			m_pECSManager->AddComponent<MaterialComponent>(handle.entity);
 			m_pECSManager->AddComponent<ParticleComponent>(handle.entity);
 			m_pECSManager->AddComponent<EmitterComponent>(handle.entity);
 			break;
@@ -77,6 +74,8 @@ private:
 		case ObjectType::Light:
 			break;
 		case ObjectType::UI:
+			m_pECSManager->AddComponent<UISpriteComponent>(handle.entity);
+			m_pECSManager->AddComponent<MaterialComponent>(handle.entity);
 			break;
 		case ObjectType::None:
 			break;

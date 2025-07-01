@@ -12,7 +12,7 @@ void GameWorld::Initialize()
 void GameWorld::Update()
 {
 
-}
+} 
 
 // オブジェクトを取得
 GameObject* GameWorld::GetGameObject(const std::wstring& name)
@@ -62,8 +62,10 @@ ObjectHandle GameWorld::CreateGameObject(const std::wstring& name, ObjectType ty
 	std::wstring newName = GenerateUniqueName<std::unordered_map<std::wstring, ObjectHandle>>(name,m_ObjectHandleMap);
 	// GameObjectを作成
 	m_pGameObjects[0][objectID].push_back(std::make_unique<GameObject>(handle, newName, type));
+	// Entityにコンポーネントを追加
+	AddDefaultComponentsToGameObject(handle, type);
 	// 辞書に登録
-	m_ObjectHandleMap[name] = handle;
+	m_ObjectHandleMap[newName] = handle;
 	m_ObjectHandleMapFromEntity[entity] = handle;
 	return handle;
 }
@@ -103,6 +105,66 @@ SceneID GameWorld::AddGameObjectFromScene(const GameScene& scene)
 		m_ObjectHandleMapFromEntity[entity] = handle;
 	}
 	return sceneID;
+}
+
+
+// オブジェクトを削除
+void GameWorld::RemoveGameObject(const ObjectHandle& handle)
+{
+	// GemeObjectを取得
+	GameObject* gameObject = GetGameObject(handle);
+	// ECSから削除
+	m_pECSManager->RemoveEntity(handle.entity);
+	// コンテナから削除
+	m_pGameObjects[handle.sceneID][handle.objectID].erase(handle.cloneID);
+	// 辞書から削除
+	m_ObjectHandleMap.erase(gameObject->GetName());
+	m_ObjectHandleMapFromEntity.erase(handle.entity);
+}
+
+// 名前変更
+void GameWorld::RenameGameObject(const ObjectHandle& handle, const std::wstring& newName)
+{
+	// GameObjectを取得
+	GameObject* gameObject = GetGameObject(handle);
+	// 同じ名前なら何もしない
+	if (gameObject->GetName() == newName) { return; }
+	// 名前被り防止
+	std::wstring uniqueName = GenerateUniqueName<std::unordered_map<std::wstring, ObjectHandle>>(newName, m_ObjectHandleMap);
+	// 辞書から削除
+	m_ObjectHandleMap.erase(gameObject->GetName());
+	// 辞書に新しい名前で登録
+	m_ObjectHandleMap[uniqueName] = handle;
+	// 名前を変更
+	gameObject->SetName(uniqueName);
+}
+
+
+// クローンを追加
+ObjectHandle GameWorld::AddGameObjectClone(const ObjectHandle& src)
+{
+	// srcのGameObjectを取得
+	GameObject* srcGameObject = GetGameObject(src);
+	// handleを作成
+	ObjectHandle handle;
+	// クローンフラグ
+	handle.isClone = true;
+	handle.sceneID = src.sceneID; // srcのSceneに追加
+	// Entityを取得
+	Entity entity = m_pECSManager->CopyEntity(src.entity);
+	handle.entity = entity;
+	// objectIDを取得
+	handle.objectID = src.objectID; // srcのobjectIDを使用
+	// 名前被り防止
+	std::wstring newName = GenerateUniqueName<std::unordered_map<std::wstring, ObjectHandle>>(srcGameObject->GetName(), m_ObjectHandleMap);
+	// srcのクローンリストに追加
+	handle.cloneID = static_cast<uint32_t>(m_pGameObjects[src.sceneID][src.objectID].push_back(std::make_unique<GameObject>(handle, newName, srcGameObject->GetType())));
+	// Entityにコンポーネントを追加
+	AddDefaultComponentsToGameObject(handle, srcGameObject->GetType());
+	// 辞書に登録
+	m_ObjectHandleMap[newName] = handle;
+	m_ObjectHandleMapFromEntity[entity] = handle;
+	return handle;
 }
 
 // 全シーン破棄

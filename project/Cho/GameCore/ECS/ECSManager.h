@@ -1271,7 +1271,7 @@ public:
     //――――――――――――――――――
     // ② 既存エンティティから Prefab を作る
     //――――――――――――――――――
-    static IPrefab FromEntity(ECSManager& ecs, Entity e)
+    static IPrefab FromEntity(ECSManager& ecs, Entity e) 
     {
         IPrefab prefab;
         const Archetype& arch = ecs.GetArchetype(e);
@@ -1472,6 +1472,28 @@ public:
 
 protected:
     // —————— hooks ——————
+
+    void PopulateFromEntity(ECSManager& ecs, Entity e)
+    {
+        const Archetype& arch = ecs.GetArchetype(e);
+
+        for (size_t id = 0; id < arch.size(); ++id)
+        {
+            if (!arch.test(id)) continue;
+            auto* pool = ecs.GetRawComponentPool(id);
+            void* raw = pool->GetRawComponent(e);
+            if (!raw) continue;
+
+            // 深いコピーを shared_ptr<void> で受け取る
+            auto clonePtr = pool->CloneComponent(id, raw);
+            if (pool->IsMultiComponentTrait(id))
+                m_MultiComponents[id] = std::move(clonePtr);
+            else
+                m_Components[id] = std::move(clonePtr);
+
+            m_Archetype.set(id);
+        }
+    }
 
     // (1) まずエンティティを作る。追加の初期化／名前付けは here を override。
     virtual Entity CreateEntity(ECSManager& ecs) const

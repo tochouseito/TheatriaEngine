@@ -81,17 +81,12 @@ bool AddMeshRendererComponent::Undo(EngineCommand* edit)
 
 bool SetMainCamera::Execute(EngineCommand* edit)
 {
+	// 現在のMainCameraを取得
+	m_PreCameraHandle = edit->m_GameCore->GetGameWorld()->GetMainCamera()->GetHandle();
+	// MainCameraを取得
+	GameObject* camera = edit->m_GameCore->GetGameWorld()->GetGameObject(m_SetCameraHandle);
 	// MainCameraを設定
-	// シーンがないなら失敗
-	if (!edit->m_GameCore->GetSceneManager()->GetMainScene())
-	{
-		Log::Write(LogLevel::Assert, "Current Scene is nullptr");
-		return false;
-	}
-	// 現在のMainCameraIDを取得
-	m_PreCameraID = edit->m_GameCore->GetSceneManager()->GetMainScene()->GetMainCameraID();
-	// MainCameraを設定
-	edit->m_GameCore->GetSceneManager()->GetMainScene()->SetMainCameraID(m_SetCameraID.value());
+	edit->m_GameCore->GetGameWorld()->SetMainCamera(camera);
 
 	return true;
 }
@@ -165,20 +160,11 @@ bool AddBoxCollider2DComponent::Undo(EngineCommand* edit)
 bool DeleteObjectCommand::Execute(EngineCommand* edit)
 {
 	ECSManager* ecs = edit->m_GameCore->GetECSManager();
-	GameObject* object = edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID);
-	if (!object) { return false; }
-	Entity entity = object->GetEntity();
+	GameObject* object = edit->m_GameCore->GetGameWorld()->GetGameObject(m_Handle);
 	// Prefab作成
-	m_Prefab = std::make_unique<IPrefab>(IPrefab::FromEntity(*ecs, entity));
-	m_Prefab->SetName(object->GetName());
-	m_Prefab->SetType(object->GetType());
-	m_Prefab->SetTag(object->GetTag());
-	// Entityの削除
-	ecs->RemoveEntity(entity);
-	// CurrentSceneから削除
-	edit->m_GameCore->GetSceneManager()->GetMainScene()->RemoveUseObject(m_ObjectID);
-	// GameObjectの削除
-	edit->m_GameCore->GetObjectContainer()->DeleteGameObject(object->GetID().value());
+	m_Prefab = std::make_unique<CPrefab>(CPrefab::FromEntity(*ecs, object->GetHandle().entity,object->GetName(),object->GetType(),object->GetTag()));
+	// GameWorldから削除
+	edit->m_GameCore->GetGameWorld()->RemoveGameObject(m_Handle);
 	return true;
 }
 
@@ -190,24 +176,12 @@ bool DeleteObjectCommand::Undo(EngineCommand* edit)
 
 bool RenameObjectCommand::Execute(EngineCommand* edit)
 {
-	GameObject* object = edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID);
-	if (!object->IsActive()) { return false; }
+	// GameObjectを取得
+	GameObject* object = edit->m_GameCore->GetGameWorld()->GetGameObject(m_Handle);
 	// 変更前の名前を保存
 	m_PreName = object->GetName();
-	// 名前があるかどうかを確認
-	std::unordered_map<std::wstring, ObjectID>& nameToObjectID = edit->m_GameCore->GetObjectContainer()->GetNameToObjectID();
-	auto it = nameToObjectID.find(m_PreName);
-	if (!nameToObjectID.contains(m_PreName))
-	{
-		return false;
-	}
-	// 名前の重複を確認
-	m_NewName = GenerateUniqueName(m_NewName, edit->m_GameCore->GetObjectContainer()->GetNameToObjectID());
-	// 名前コンテナから削除
-	nameToObjectID.erase(it);
-	// 名前を変更
-	nameToObjectID[m_NewName] = object->GetID().value();
-	object->SetName(m_NewName);
+	// 名前変更
+	edit->m_GameCore->GetGameWorld()->RenameGameObject(m_Handle, m_NewName);
 	return true;
 }
 
@@ -243,52 +217,17 @@ bool AddMaterialComponent::Undo(EngineCommand* edit)
 
 bool AddParticleSystemObjectCommand::Execute(EngineCommand* edit)
 {
-	// CurrentSceneがないなら失敗
-	if (!edit->m_GameCore->GetSceneManager()->GetMainScene())
-	{
-		Log::Write(LogLevel::Assert, "Current Scene is nullptr");
-		return false;
-	}
-	// 各IDの取得
-	// Entity
-	Entity entity = edit->m_GameCore->GetECSManager()->GenerateEntity();
 	// デフォルトの名前
 	std::wstring name = L"NewParticleSystem";
-	// 重複回避
-	name = GenerateUniqueName(name, edit->m_GameCore->GetObjectContainer()->GetNameToObjectID());
-	// Transform統合バッファからmapIDを取得
-	//uint32_t mapID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::Transform)->GetMapID();
-	// TransformComponentを追加
-	TransformComponent* transform = edit->m_GameCore->GetECSManager()->AddComponent<TransformComponent>(entity);
-	//transform->mapID = mapID;
-	// GameObjectを追加
-	ObjectID objectID = edit->m_GameCore->GetObjectContainer()->AddGameObject(entity, name, ObjectType::ParticleSystem);
-	m_ObjectID = objectID;
-	// シーンに追加
-	edit->m_GameCore->GetSceneManager()->GetMainScene()->AddUseObject(objectID);
+	// Worldに追加
+	m_Handle = edit->GetGameCore()->GetGameWorld()->CreateGameObject(name, ObjectType::ParticleSystem);
 	// SelectedObjectを設定
-	edit->SetSelectedObject(edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID)->GetName());
-	transform->scale.Zero();
-	// MeshFilterComponentを追加
-	std::unique_ptr<AddMeshFilterComponent> addMeshFilter = std::make_unique<AddMeshFilterComponent>(entity);
-	addMeshFilter->Execute(edit);
-	// MeshRendererComponentを追加
-	std::unique_ptr<AddMeshRendererComponent> addMeshRenderer = std::make_unique<AddMeshRendererComponent>(entity);
-	addMeshRenderer->Execute(edit);
-	// MaterialComponentを追加
-	std::unique_ptr<AddMaterialComponent> addMaterial = std::make_unique<AddMaterialComponent>(entity);
-	addMaterial->Execute(edit);
-	// EmitterComponentを追加
-	std::unique_ptr<AddEmitterComponent> addEmitter = std::make_unique<AddEmitterComponent>(entity);
-	addEmitter->Execute(edit);
-	EmitterComponent* emitter = edit->m_GameCore->GetECSManager()->GetComponent<EmitterComponent>(entity);
+	edit->GetEditorManager()->SetSelectedGameObject(edit->GetGameCore()->GetGameWorld()->GetGameObject(m_Handle));
+	EmitterComponent* emitter = edit->m_GameCore->GetECSManager()->GetComponent<EmitterComponent>(m_Handle.entity);
 	emitter->scale.value.x.median = 1.0f;
 	emitter->scale.value.y.median = 1.0f;
 	emitter->scale.value.z.median = 1.0f;
 	emitter->lifeTime.median = 20.0f;
-	// ParticleComponentを追加
-	std::unique_ptr<AddParticleComponent> addParticle = std::make_unique<AddParticleComponent>(entity);
-	addParticle->Execute(edit);
 	return true;
 }
 
@@ -338,25 +277,12 @@ bool AddParticleComponent::Undo(EngineCommand* edit)
 
 bool AddEffectObjectCommand::Execute(EngineCommand* edit)
 {
-	// CurrentSceneがないなら失敗
-	if (!edit->m_GameCore->GetSceneManager()->GetMainScene())
-	{
-		Log::Write(LogLevel::Assert, "Current Scene is nullptr");
-		return false;
-	}
-	// 各IDの取得
-	// Entity
-	Entity entity = edit->m_GameCore->GetECSManager()->GenerateEntity();
-	m_Entity = entity;
 	// デフォルトの名前
 	std::wstring name = L"EditorEffect";
-	// 重複回避
-	name = GenerateUniqueName(name, edit->m_GameCore->GetObjectContainer()->GetNameToObjectID());
-	// EffectComponentを追加
-	edit->m_GameCore->GetECSManager()->AddComponent<EffectComponent>(entity);
-	/*if (!effect) { return false; }
-	effect->isRun = false;
-	effect->isLoop = true;*/
+	// Worldに追加
+	m_Handle = edit->GetGameCore()->GetGameWorld()->CreateGameObject(name, ObjectType::Effect);
+	// SelectedObjectを設定
+	edit->GetEditorManager()->SetSelectedGameObject(edit->GetGameCore()->GetGameWorld()->GetGameObject(m_Handle));
 	return true;
 }
 
@@ -368,43 +294,12 @@ bool AddEffectObjectCommand::Undo(EngineCommand* edit)
 
 bool AddUIObjectCommand::Execute(EngineCommand* edit)
 {
-	// CurrentSceneがないなら失敗
-	if (!edit->m_GameCore->GetSceneManager()->GetMainScene())
-	{
-		Log::Write(LogLevel::Assert, "Current Scene is nullptr");
-		return false;
-	}
-	// 各IDの取得
-	// Entity
-	Entity entity = edit->m_GameCore->GetECSManager()->GenerateEntity();
 	// デフォルトの名前
 	std::wstring name = L"NewUI";
-	// 重複回避
-	name = GenerateUniqueName(name, edit->m_GameCore->GetObjectContainer()->GetNameToObjectID());
-	// Transform統合バッファからmapIDを取得
-	//uint32_t tfMapID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::Transform)->GetMapID();
-	// TransformComponentを追加
-	edit->m_GameCore->GetECSManager()->AddComponent<TransformComponent>(entity);
-	//transform->mapID = tfMapID;
-	// UISprite統合バッファからmapIDを取得
-	//uint32_t mapID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::UISprite)->GetMapID();
-	// SpriteComponentを追加
-	edit->m_GameCore->GetECSManager()->AddComponent<UISpriteComponent>(entity);
-	//uiSprite->mapID = mapID;
-	// UseListに登録
-	//edit->m_ResourceManager->GetUIContainer()->AddUI(mapID);
-	// GameObjectを追加
-	ObjectID objectID = edit->m_GameCore->GetObjectContainer()->AddGameObject(entity, name, ObjectType::UI);
-	if (objectID == entity)
-	{
-		Log::Write(LogLevel::Assert, "Failed to add GameObject to ObjectContainer. ObjectID is same as Entity.");
-		return false;
-	}
-	m_ObjectID = objectID;
-	// シーンに追加
-	edit->m_GameCore->GetSceneManager()->GetMainScene()->AddUseObject(objectID);
+	// Worldに追加
+	m_Handle = edit->GetGameCore()->GetGameWorld()->CreateGameObject(name, ObjectType::UI);
 	// SelectedObjectを設定
-	edit->SetSelectedObject(edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID)->GetName());
+	edit->GetEditorManager()->SetSelectedGameObject(edit->GetGameCore()->GetGameWorld()->GetGameObject(m_Handle));
 	return true;
 }
 
@@ -434,36 +329,12 @@ bool SetGravityCommand::Undo(EngineCommand* edit)
 
 bool AddLightObjectCommand::Execute(EngineCommand* edit)
 {
-	// CurrentSceneがないなら失敗
-	if (!edit->m_GameCore->GetSceneManager()->GetMainScene())
-	{
-		Log::Write(LogLevel::Assert, "Current Scene is nullptr");
-		return false;
-	}
-	// 各IDの取得
-	// Entity
-	Entity entity = edit->m_GameCore->GetECSManager()->GenerateEntity();
 	// デフォルトの名前
 	std::wstring name = L"NewLight";
-	// 重複回避
-	name = GenerateUniqueName(name, edit->m_GameCore->GetObjectContainer()->GetNameToObjectID());
-	// Transform統合バッファからmapIDを取得
-	//uint32_t tfMapID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::Transform)->GetMapID();
-	// TransformComponentを追加
-	edit->m_GameCore->GetECSManager()->AddComponent<TransformComponent>(entity);
-	//transform->mapID = tfMapID;
-	// LightバッファからmapIDを取得
-	//uint32_t mapID = edit->m_ResourceManager->GetLightIndex();
-	// LightComponentを追加
-	edit->m_GameCore->GetECSManager()->AddComponent<LightComponent>(entity);
-	//light->mapID = mapID;
-	// GameObjectを追加
-	ObjectID objectID = edit->m_GameCore->GetObjectContainer()->AddGameObject(entity, name, ObjectType::Light);
-	m_ObjectID = objectID;
-	// シーンに追加
-	edit->m_GameCore->GetSceneManager()->GetMainScene()->AddUseObject(objectID);
+	// Worldに追加
+	m_Handle = edit->GetGameCore()->GetGameWorld()->CreateGameObject(name, ObjectType::UI);
 	// SelectedObjectを設定
-	edit->SetSelectedObject(edit->m_GameCore->GetObjectContainer()->GetGameObject(m_ObjectID)->GetName());
+	edit->GetEditorManager()->SetSelectedGameObject(edit->GetGameCore()->GetGameWorld()->GetGameObject(m_Handle));
 	return true;
 }
 
@@ -514,86 +385,58 @@ bool AddAnimationComponent::Undo(EngineCommand* edit)
 	return false;
 }
 
-bool CopyGameObjectCommand::Execute(EngineCommand* edit)
-{
-	ECSManager* ecs = edit->m_GameCore->GetECSManager();
-	// GameObjectを取得
-	GameObject* object = edit->m_GameCore->GetObjectContainer()->GetGameObject(m_SrcID);
-	if (!object->IsActive()) { return false; }
-	// オブジェクト名とタイプを取得
-	std::wstring name = object->GetName();
-	name = GenerateUniqueName(name, edit->m_GameCore->GetObjectContainer()->GetNameToObjectID());
-	// Entityを生成
-	Entity entity = edit->m_GameCore->GetECSManager()->CopyEntity(object->GetEntity());
-	// GameObjectを追加
-	ObjectID objectID = edit->m_GameCore->GetObjectContainer()->AddGameObject(entity, name, object->GetType());
-	GameObject* newObj = edit->m_GameCore->GetObjectContainer()->GetGameObjectByName(name);
-	// タイプ、タグのコピー
-	newObj->SetType(object->GetType());
-	newObj->SetTag(object->GetTag());
-	// SceneUseListに登録
-	edit->m_GameCore->GetSceneManager()->GetMainScene()->AddUseObject(newObj->GetID().value());
-	return true;
-}
-
-bool CopyGameObjectCommand::Undo(EngineCommand* edit)
-{
-	edit;
-	return false;
-}
-
 bool CreateEffectCommand::Execute(EngineCommand* edit)
 {
-	// CurrentSceneがないなら失敗
-	if (!edit->m_GameCore->GetSceneManager()->GetMainScene())
-	{
-		Log::Write(LogLevel::Assert, "Current Scene is nullptr");
-		return false;
-	}
-	// 作成中のEffectObjectがあるなら失敗
-	if (edit->GetEffectEntity().has_value()) { return false; }
-	// 各IDの取得
-	// Entity
-	Entity entity = edit->m_GameCore->GetECSManager()->GenerateEntity();
-	m_Entity = entity;
-	// デフォルトの名前
-	std::wstring name = L"EditorEffect";
-	// 重複回避
-	name = GenerateUniqueName(name, edit->m_GameCore->GetObjectContainer()->GetNameToObjectID());
-	// EffectComponentを追加
-	EffectComponent* effect = edit->m_GameCore->GetECSManager()->AddComponent<EffectComponent>(entity);
-	if (!effect) { return false; }
-	//effect->isRun = false;
-	//effect->isLoop = true;
-	edit->SetEffectEntity(entity);
-	// Rootを取得
-	uint32_t rootID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::EffectRootInt)->GetMapID();
-	effect->root = std::make_pair(rootID, EffectRootData());
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_int_distribution<> dist(1, 1000);
-	effect->root.second.globalSeed = static_cast<uint32_t>(dist(gen));
-	// UseListに登録
-	edit->m_ResourceManager->AddEffectRootUseList(rootID);
-	// Nodeを一つ追加
-	uint32_t nodeID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::EffectNodeInt)->GetMapID();
-	effect->root.second.nodeCount++;
-	EffectNodeData nodedata;
-	nodedata.nodeID = nodeID;
-	// Rootを親に設定
-	nodedata.isRootParent = 1;
-	// 初期はSprite
-	uint32_t spriteID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::EffectSpriteInt)->GetMapID();
-	nodedata.draw.meshDataIndex = spriteID;
-	nodedata.draw.meshType = static_cast<uint32_t>(EFFECT_MESH_TYPE::SPRITE);
-	EffectSprite sprite;
-	nodedata.drawMesh = sprite;
-	nodedata.name = "NewNode";
-	nodedata.scale.value = Vector3(1.0f, 1.0f, 1.0f);
-	nodedata.scale.pva.value.x.median = 1.0f;
-	nodedata.scale.pva.value.y.median = 1.0f;
-	nodedata.scale.pva.value.z.median = 1.0f;
-	effect->root.second.nodes.push_back(std::move(nodedata));
+	//// CurrentSceneがないなら失敗
+	//if (!edit->m_GameCore->GetSceneManager()->GetMainScene())
+	//{
+	//	Log::Write(LogLevel::Assert, "Current Scene is nullptr");
+	//	return false;
+	//}
+	//// 作成中のEffectObjectがあるなら失敗
+	//if (edit->GetEffectEntity().has_value()) { return false; }
+	//// 各IDの取得
+	//// Entity
+	//Entity entity = edit->m_GameCore->GetECSManager()->GenerateEntity();
+	//m_Entity = entity;
+	//// デフォルトの名前
+	//std::wstring name = L"EditorEffect";
+	//// 重複回避
+	//name = GenerateUniqueName(name, edit->m_GameCore->GetObjectContainer()->GetNameToObjectID());
+	//// EffectComponentを追加
+	//EffectComponent* effect = edit->m_GameCore->GetECSManager()->AddComponent<EffectComponent>(entity);
+	//if (!effect) { return false; }
+	////effect->isRun = false;
+	////effect->isLoop = true;
+	//edit->SetEffectEntity(entity);
+	//// Rootを取得
+	//uint32_t rootID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::EffectRootInt)->GetMapID();
+	//effect->root = std::make_pair(rootID, EffectRootData());
+	//std::random_device rd;
+	//std::mt19937 gen(rd());
+	//std::uniform_int_distribution<> dist(1, 1000);
+	//effect->root.second.globalSeed = static_cast<uint32_t>(dist(gen));
+	//// UseListに登録
+	//edit->m_ResourceManager->AddEffectRootUseList(rootID);
+	//// Nodeを一つ追加
+	//uint32_t nodeID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::EffectNodeInt)->GetMapID();
+	//effect->root.second.nodeCount++;
+	//EffectNodeData nodedata;
+	//nodedata.nodeID = nodeID;
+	//// Rootを親に設定
+	//nodedata.isRootParent = 1;
+	//// 初期はSprite
+	//uint32_t spriteID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::EffectSpriteInt)->GetMapID();
+	//nodedata.draw.meshDataIndex = spriteID;
+	//nodedata.draw.meshType = static_cast<uint32_t>(EFFECT_MESH_TYPE::SPRITE);
+	//EffectSprite sprite;
+	//nodedata.drawMesh = sprite;
+	//nodedata.name = "NewNode";
+	//nodedata.scale.value = Vector3(1.0f, 1.0f, 1.0f);
+	//nodedata.scale.pva.value.x.median = 1.0f;
+	//nodedata.scale.pva.value.y.median = 1.0f;
+	//nodedata.scale.pva.value.z.median = 1.0f;
+	//effect->root.second.nodes.push_back(std::move(nodedata));
 	return true;
 }
 
@@ -605,50 +448,50 @@ bool CreateEffectCommand::Undo(EngineCommand* edit)
 
 bool AddEffectNodeCommand::Execute(EngineCommand* edit)
 {
-	// CurrentSceneがないなら失敗
-	if (!edit->m_GameCore->GetSceneManager()->GetMainScene())
-	{
-		Log::Write(LogLevel::Assert, "Current Scene is nullptr");
-		return false;
-	}
-	// 作成中のEffectObjectがないなら失敗
-	if (!edit->GetEffectEntity().has_value()) { return false; }
-	// EffectComponentを取得
-	EffectComponent* effect = edit->m_GameCore->GetECSManager()->GetComponent<EffectComponent>(edit->GetEffectEntity().value());
-	if (!effect) { return false; }
-	// 新しいNodeのIDを取得
-	uint32_t nodeID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::EffectNodeInt)->GetMapID();
-	//std::span<EffectRoot> rootSpan = dynamic_cast<StructuredBuffer<EffectRoot>*>(edit->m_ResourceManager->GetIntegrationBuffer(IntegrationDataType::EffectRootInt))->GetMappedData();
-	// EffectRootのNodeIDに追加
-	effect->root.second.nodeCount++;
-	EffectNodeData nodedata;
-	nodedata.nodeID = nodeID;
-	// 選択中のNodeを親に設定
-	if (edit->m_EffectNodeID.has_value())
-	{
-		nodedata.isRootParent = 0;
-		nodedata.parentIndex = effect->root.second.nodes[edit->m_EffectNodeID.value()].nodeID;
-	}
-	else
-	{
-		// 親がないならRootを親に設定
-		nodedata.isRootParent = 1;
-	}
-	// 初期はSprite
-	uint32_t spriteID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::EffectSpriteInt)->GetMapID();
-	nodedata.draw.meshDataIndex = spriteID;
-	nodedata.draw.meshType = static_cast<uint32_t>(EFFECT_MESH_TYPE::SPRITE);
-	EffectSprite sprite;
-	nodedata.drawMesh = sprite;
-	nodedata.name = "NewNode";
-	nodedata.scale.value = Vector3(1.0f, 1.0f, 1.0f);
-	nodedata.scale.pva.value.x.median = 1.0f;
-	nodedata.scale.pva.value.y.median = 1.0f;
-	nodedata.scale.pva.value.z.median = 1.0f;
-	// Nodeを追加
-	effect->root.second.nodes.push_back(std::move(nodedata));
-	// 追加したNodeを選択中に設定
-	edit->SetEffectNodeIndex(nodeID);
+	//// CurrentSceneがないなら失敗
+	//if (!edit->m_GameCore->GetSceneManager()->GetMainScene())
+	//{
+	//	Log::Write(LogLevel::Assert, "Current Scene is nullptr");
+	//	return false;
+	//}
+	//// 作成中のEffectObjectがないなら失敗
+	//if (!edit->GetEffectEntity().has_value()) { return false; }
+	//// EffectComponentを取得
+	//EffectComponent* effect = edit->m_GameCore->GetECSManager()->GetComponent<EffectComponent>(edit->GetEffectEntity().value());
+	//if (!effect) { return false; }
+	//// 新しいNodeのIDを取得
+	//uint32_t nodeID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::EffectNodeInt)->GetMapID();
+	////std::span<EffectRoot> rootSpan = dynamic_cast<StructuredBuffer<EffectRoot>*>(edit->m_ResourceManager->GetIntegrationBuffer(IntegrationDataType::EffectRootInt))->GetMappedData();
+	//// EffectRootのNodeIDに追加
+	//effect->root.second.nodeCount++;
+	//EffectNodeData nodedata;
+	//nodedata.nodeID = nodeID;
+	//// 選択中のNodeを親に設定
+	//if (edit->m_EffectNodeID.has_value())
+	//{
+	//	nodedata.isRootParent = 0;
+	//	nodedata.parentIndex = effect->root.second.nodes[edit->m_EffectNodeID.value()].nodeID;
+	//}
+	//else
+	//{
+	//	// 親がないならRootを親に設定
+	//	nodedata.isRootParent = 1;
+	//}
+	//// 初期はSprite
+	//uint32_t spriteID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::EffectSpriteInt)->GetMapID();
+	//nodedata.draw.meshDataIndex = spriteID;
+	//nodedata.draw.meshType = static_cast<uint32_t>(EFFECT_MESH_TYPE::SPRITE);
+	//EffectSprite sprite;
+	//nodedata.drawMesh = sprite;
+	//nodedata.name = "NewNode";
+	//nodedata.scale.value = Vector3(1.0f, 1.0f, 1.0f);
+	//nodedata.scale.pva.value.x.median = 1.0f;
+	//nodedata.scale.pva.value.y.median = 1.0f;
+	//nodedata.scale.pva.value.z.median = 1.0f;
+	//// Nodeを追加
+	//effect->root.second.nodes.push_back(std::move(nodedata));
+	//// 追加したNodeを選択中に設定
+	//edit->SetEffectNodeIndex(nodeID);
 	return true;
 }
 
@@ -660,27 +503,7 @@ bool AddEffectNodeCommand::Undo(EngineCommand* edit)
 
 bool CloneObjectCommand::Execute(EngineCommand* edit)
 {
-	ECSManager* ecs = edit->m_GameCore->GetECSManager();
-	// GameObjectを取得
-	GameObject* object = edit->m_GameCore->GetObjectContainer()->GetGameObject(m_SrcID);
-	if (!object->IsActive()) { return false; }
-	//GameObjectData objData = *object;
-	// オブジェクト名とタイプを取得
-	std::wstring name = object->GetName();
-	name = GenerateUniqueName(name, edit->m_GameCore->GetObjectContainer()->GetNameToObjectID());
-	ObjectType type = object->GetType();
-	// Entityを生成
-	Entity entity = edit->m_GameCore->GetECSManager()->CopyEntity(object->GetEntity());
-	// GameObjectを追加
-	ObjectID objectID = edit->m_GameCore->GetObjectContainer()->AddGameObject(entity, name, type);
-	m_DstID = objectID;
-	GameObject* newObj = edit->m_GameCore->GetObjectContainer()->GetGameObjectByName(name);
-	// タイプ、タグのコピー
-	newObj->SetType(type);
-	newObj->SetTag(object->GetTag());
-	// SceneUseListに登録
-	// シーンに追加
-	edit->m_GameCore->GetSceneManager()->GetScene(edit->m_GameCore->GetSceneManager()->GetSceneID(m_CurrendSceneName))->AddClonedObject(objectID);
+	edit->GetGameCore()->GetGameWorld()->AddGameObjectClone(m_Src);
 	return true;
 }
 

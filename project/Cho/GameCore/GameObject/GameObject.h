@@ -22,6 +22,7 @@ public:
 	void SetCurrentSceneName(const std::wstring& name) noexcept;
 	void SetTag(std::string_view tag) noexcept;// この関数はEditorに移す予定
 	void SetType(const ObjectType& type) noexcept { m_Type = type; }
+	void SetName(const std::wstring& name) noexcept;
 	// オブジェクトが有効かどうか
 	bool IsActive() const noexcept { return m_Active; }
 	// オブジェクトを有効にする
@@ -58,8 +59,6 @@ public:
 	// パラメータを設定
 	void SetParameter(const std::string& name, const ObjectParameter& value);
 private:
-	void SetName(const std::wstring& name) noexcept;
-	
 	ObjectHandle m_Handle;			// オブジェクトハンドル
 	ObjectType m_Type;								// ゲームオブジェクトのタイプ
 	bool m_Active = false;							// アクティブフラグ
