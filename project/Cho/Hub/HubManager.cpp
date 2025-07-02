@@ -105,7 +105,11 @@ void HubManager::ShowSidebar()
             bool created = FileSystem::CreateNewProjectFolder(name);
             if (created)
             {
-                m_pEngineCommand->GetGameCore()->GetSceneManager()->CreateDefaultScene();
+				// デフォルトのシーンを作成
+                GameScene scene = m_pEngineCommand->GetGameCore()->GetSceneManager()->CreateDefaultScene();
+                // デフォルトのシーンを保存
+                std::filesystem::path projectPath = std::filesystem::path(L"GameProjects") / name;
+                FileSystem::SaveSceneFile(projectPath, &scene, m_pEngineCommand->GetGameCore()->GetECSManager());
                 // プロジェクト名を保存
                 FileSystem::m_sProjectName = name;
 				// プロジェクトフォルダを作成

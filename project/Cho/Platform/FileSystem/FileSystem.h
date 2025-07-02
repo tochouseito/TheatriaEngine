@@ -167,6 +167,7 @@ namespace Cho
 		static void SaveProject(SceneManager* sceneManager, GameWorld* gameWorld, ECSManager* ecs);
         // プロジェクトフォルダを読み込む
         static bool LoadProjectFolder(const std::wstring& projectName, EngineCommand* engineCommand);
+        // 
 
         static FileType DetectFileType(const nlohmann::json& j)
         {

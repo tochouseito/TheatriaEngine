@@ -74,8 +74,24 @@ bool Cho::FileSystem::CreateNewProjectFolder(const std::wstring& projectName)
         // すでに同名のプロジェクトがある
         return false;
     }
+    if (!std::filesystem::create_directory(newProjectPath))
+    {
+		return false; // プロジェクトフォルダの作成に失敗
+    }
+	// Assets フォルダを作成
+	std::filesystem::path assetsPath = newProjectPath / "Assets";
+    if(!std::filesystem::create_directory(assetsPath))
+    {
+        return false; // Assets フォルダの作成に失敗
+	}
+	// ProjectSettings フォルダを作成
+	std::filesystem::path projectSettingsPath = newProjectPath / "ProjectSettings";
+    if (!std::filesystem::create_directory(projectSettingsPath))
+    {
+        return false; // ProjectSettings フォルダの作成に失敗
+    }
 
-    return std::filesystem::create_directory(newProjectPath);
+	return true; // プロジェクトフォルダの作成に成功
 }
 
 // プロジェクトファイルを保存
@@ -224,7 +240,18 @@ std::optional<Cho::EngineConfigInfo> Cho::FileSystem::LoadEngineConfig(const std
 // ゲーム設定ファイルを保存
 bool Cho::FileSystem::SaveGameSettings(const std::wstring& projectName, const Cho::GameSettingsInfo& settings)
 {
-    std::filesystem::path path = std::filesystem::path(projectName) / "GameSettings.json";
+    std::filesystem::path path = std::filesystem::path(projectName) / "ProjectSettings";
+	std::filesystem::path fileName = "GameSettings.json";
+	// プロジェクト設定フォルダが存在しない場合は作成
+    if (!std::filesystem::exists(path))
+    {
+        if (!std::filesystem::create_directory(path))
+        {
+            return false; // フォルダの作成に失敗
+        }
+	}
+	// ファイルパスを設定
+	path /= fileName;
 
     nlohmann::ordered_json j;
     j["fileType"] = "GameSettings";
@@ -282,7 +309,17 @@ bool Cho::FileSystem::LoadGameSettings(const std::wstring& filePath)
 bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, GameScene* scene, ECSManager* ecs)
 {
     ecs;
-    std::filesystem::path path = std::filesystem::path(directory) / (scene->GetName() + L".json");
+	// アセットフォルダが存在しない場合は作成
+    std::filesystem::path path = std::filesystem::path(directory) / L"Assets";
+    if (!std::filesystem::exists(path))
+    {
+        if (!std::filesystem::create_directory(path))
+        {
+            return false; // フォルダの作成に失敗
+        }
+	}
+    std::filesystem::path fileName = scene->GetName() + L".json";
+	path /= fileName;
 
     nlohmann::ordered_json j;
     j["fileType"] = "SceneFile";
