@@ -24,16 +24,10 @@ public:
 	}
 
 	// デフォルトのシーンを作成
-	GameScene CreateDefaultScene()
-	{
-		GameScene scene(L"MainScene");
-		AddScene(scene);
-		LoadScene(L"MainScene");
-		return m_Scenes[0]; // 最初のシーンを返す
-	}
+	GameScene CreateDefaultScene();
 
 	// 読み込まれているシーンを破棄して指定したシーンをロード
-	GameSceneInstance* LoadScene(const std::wstring& sceneName);
+	GameSceneInstance* LoadScene(const std::wstring& sceneName, const bool& updateMaincamera = false);
 	// 非同期でシーンをロード
 	GameSceneInstance* LoadSceneAsync(const std::wstring& sceneName, const LoadSceneMode& mode)
 	{

@@ -73,7 +73,7 @@ ObjectHandle GameWorld::CreateGameObject(const std::wstring& name, ObjectType ty
 }
 
 // シーンデータからオブジェクトを作成
-SceneID GameWorld::AddGameObjectFromScene(const GameScene& scene)
+SceneID GameWorld::AddGameObjectFromScene(const GameScene& scene, const bool& updateMaincamera)
 {
 	// シーンIDを取得
 	SceneID sceneID = static_cast<SceneID>(m_pGameObjects.push_back(FVector<FVector<std::unique_ptr<GameObject>>>()));
@@ -105,6 +105,13 @@ SceneID GameWorld::AddGameObjectFromScene(const GameScene& scene)
 		// 辞書に登録
 		m_ObjectHandleMap[prefab.GetName()] = handle;
 		m_ObjectHandleMapFromEntity[entity] = handle;
+	}
+	// シーンのカメラを設定
+	if (updateMaincamera)
+	{
+		// メインカメラを取得
+		GameObject* cameraObject = GetGameObject(scene.GetStartCameraName());
+		SetMainCamera(cameraObject);
 	}
 	return sceneID;
 }

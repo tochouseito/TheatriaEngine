@@ -55,12 +55,13 @@ PixelShaderOutput main(VSOut input) {
         // ライトのタイプごとにライティング
         for (int i = 0; i < MAX_LIGHTS; i++) {
             Light light = gLights.lights[i];
+            // ライトが無効ならスキップ
+            if (light.active == 0)
+            {
+                continue;
+            }
             switch (light.type) {
                 case LIGHT_TYPE_DIRECTIONAL:{// 平行光源
-                        // ライトが無効ならスキップ
-                        if (light.active == 0) {
-                            continue;
-                        }
                         // ライトの位置を取得
                         float3 position = {
                             gITF[light.transformMapID].matWorld[3][0],
@@ -86,10 +87,6 @@ PixelShaderOutput main(VSOut input) {
                         break;
                     }
                 case LIGHT_TYPE_POINT:{// 点光源
-                        // ライトが無効ならスキップ
-                        if (light.active == 0) {
-                            continue;
-                        }
                         // ライトの位置を取得
                         float3 position = {
                             gITF[light.transformMapID].matWorld[3][0],
@@ -99,10 +96,6 @@ PixelShaderOutput main(VSOut input) {
                         break;
                     }
                 case LIGHT_TYPE_SPOT:{// スポットライト
-                        // ライトが無効ならスキップ
-                        if (light.active == 0) {
-                            continue;
-                        }
                         // ライトの位置を取得
                         float3 position = {
                             gITF[light.transformMapID].matWorld[3][0],
