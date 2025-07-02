@@ -7,14 +7,14 @@
 #include "GameCore/Systems/MultiSystems.h"
 #include "EngineCommand/EngineCommands.h"
 
-void GameCore::Initialize(InputManager* input, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine)
+void GameCore::Initialize(ResourceManager* resourceManager, GraphicsEngine* graphicsEngine)
 {
 	// ECSマネージャの生成
 	m_pECSManager = std::make_unique<ECSManager>();
-	// シーンマネージャーの生成
-	m_pSceneManager = std::make_unique<SceneManager>();
 	// ゲームワールドの生成
 	m_pGameWorld = std::make_unique<GameWorld>(m_pECSManager.get());
+	// シーンマネージャーの生成
+	m_pSceneManager = std::make_unique<SceneManager>(m_pGameWorld.get());
 	// box2dの生成
 	//b2Vec2 gravity(0.0f, -9.8f);
 	b2Vec2 gravity(0.0f, 0.0f);
@@ -25,7 +25,7 @@ void GameCore::Initialize(InputManager* input, ResourceManager* resourceManager,
 	// ECSイベントの登録
 	RegisterECSEvents();
 	// ECSシステムの登録
-	RegisterECSSystems(input, resourceManager, graphicsEngine);
+	RegisterECSSystems(resourceManager, graphicsEngine);
 	m_EnvironmentData.ambientColor = { 0.01f,0.01f,0.01f,1.0f };
 }
 
@@ -434,7 +434,7 @@ void GameCore::RegisterECSEvents()
 	IPrefab::RegisterCopyFunc<AnimationComponent>();
 }
 
-void GameCore::RegisterECSSystems(InputManager* input, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine)
+void GameCore::RegisterECSSystems(ResourceManager* resourceManager, GraphicsEngine* graphicsEngine)
 {
 	// シングルシステム
 	// 初期化システムの登録
@@ -480,7 +480,8 @@ void GameCore::RegisterECSSystems(InputManager* input, ResourceManager* resource
 	// EffectEditorComponentSystem
 	m_pECSManager->AddSystem<EffectEditorSystem>();
 	EffectEditorSystem* effectEditorSystem = m_pECSManager->GetSystem<EffectEditorSystem>();
-	effectEditorSystem->SetEngineCommand(m_EngineCommand);
+	effectEditorSystem->SetGraphicsEngine(graphicsEngine);
+	effectEditorSystem->SetResourceManager(resourceManager);
 	// rigidbody2DComponentSystem
 	m_pECSManager->AddSystem<Rigidbody2DSystem>();
 	Rigidbody2DSystem* rigidbody2DSystem = m_pECSManager->GetSystem<Rigidbody2DSystem>();

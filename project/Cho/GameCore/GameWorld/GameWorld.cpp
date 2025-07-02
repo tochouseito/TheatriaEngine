@@ -3,6 +3,8 @@
 #include "GameCore/GameScene/GameScene.h"
 #include "Core/Utility/GenerateUnique.h"
 #include "Core/ChoLog/ChoLog.h"
+#include "GameCore/SceneManager/SceneManager.h"
+#include "GameCore/ECS/ECSManager.h"
 
 void GameWorld::Initialize()
 {
@@ -105,6 +107,29 @@ SceneID GameWorld::AddGameObjectFromScene(const GameScene& scene)
 		m_ObjectHandleMapFromEntity[entity] = handle;
 	}
 	return sceneID;
+}
+
+// ワールドからGameSceneを生成
+GameScene GameWorld::CreateGameSceneFromWorld(SceneManager& sceneManager) const
+{
+	// 編集対象のシーンをGameSceneに変換
+	// とりあえず0番目のシーンを対象にする
+	// クローンは除外
+	std::wstring sceneName = sceneManager.GetGameScene(0)->GetName();
+	GameScene gameScene(sceneName);
+	for (auto& object : m_pGameObjects[0])
+	{
+		// オブジェクトのエンティティからCPrefabを生成
+		CPrefab prefab = CPrefab::FromEntity(*m_pECSManager,
+			object[0]->GetHandle().entity,
+			object[0]->GetName(),
+			object[0]->GetType());
+		gameScene.AddPrefab(prefab);
+	}
+	// シーンのカメラを設定
+	gameScene.SetStartCameraName(m_pMainCamera->GetName());
+
+	return gameScene;
 }
 
 

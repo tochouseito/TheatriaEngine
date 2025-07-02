@@ -4,6 +4,10 @@
 
 // 前方宣言
 class ECSManager;
+class SceneManager;
+class GameScene;
+// コンテナのエイリアス
+using WorldContainer = FVector<FVector<FVector<std::unique_ptr<GameObject>>>>;
 
 class GameWorld
 {
@@ -23,6 +27,9 @@ public:
 	GameObject* GetGameObject(const std::wstring& name);
 	GameObject* GetGameObject(const Entity& e);
 	GameObject* GetGameObject(const ObjectHandle& handle);
+	// オブジェクトコンテナを取得
+	WorldContainer& GetWorldContainer() { return m_pGameObjects; }
+	const WorldContainer& GetWorldContainer() const { return m_pGameObjects; }
 	// メインカメラを取得
 	GameObject* GetMainCamera() { return m_pMainCamera; }
 	// メインカメラを設定
@@ -41,10 +48,7 @@ private:
 	// シーンデータからオブジェクトを作成
 	SceneID AddGameObjectFromScene(const GameScene& scene);
 	// ワールドからGameSceneを生成
-	GameScene CreateGameSceneFromWorld() const
-	{
-
-	}
+	GameScene CreateGameSceneFromWorld(SceneManager& sceneManager) const;
 	
 	// 全シーン破棄
 	void ClearAllScenes();
@@ -89,7 +93,7 @@ private:
 	ECSManager* m_pECSManager = nullptr;	
 	// GameObjectコンテナ
 	// [SceneID][ObjectID][CloneID] = GameObject
-	FVector<FVector<FVector<std::unique_ptr<GameObject>>>> m_pGameObjects;
+	WorldContainer m_pGameObjects;
 	// 名前検索辞書
 	std::unordered_map<std::wstring, ObjectHandle> m_ObjectHandleMap;
 	// Entityから逆引きする辞書

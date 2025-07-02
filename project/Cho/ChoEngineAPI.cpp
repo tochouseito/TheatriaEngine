@@ -37,23 +37,23 @@ CHO_API bool ChoSystem::LoadGameParameter(const std::wstring& filePath, const st
 }
 
 // ゲームオブジェクト取得
-CHO_API GameObject* ChoSystem::FindGameObjectByName(std::wstring_view name)
+CHO_API GameObject* ChoSystem::FindGameObjectByName(const std::wstring& name)
 {
 	GameCore* gameCore = g_Engine->GetEngineCommand()->GetGameCore();
-	GameObject* result = gameCore->GetObjectContainer()->GetGameObjectByName(name.data());
+	GameObject* result = gameCore->GetGameWorld()->GetGameObject(name);
 	return result;
 }
 
 CHO_API GameObject* ChoSystem::CloneGameObject(const GameObject* srcObj, Vector3 generatePosition)
 {
 	EngineCommand* engineCommand = g_Engine->GetEngineCommand();
-	std::unique_ptr<CloneObjectCommand> command = std::make_unique<CloneObjectCommand>(srcObj->GetCurrentSceneName(),srcObj->GetID().value());
+	std::unique_ptr<CloneObjectCommand> command = std::make_unique<CloneObjectCommand>(srcObj->GetHandle());
 	command->Execute(engineCommand);
-	GameObject* newObject = engineCommand->GetGameCore()->GetObjectContainer()->GetGameObject(command->GetObjectID());
+	GameObject* newObject = engineCommand->GetGameCore()->GetGameWorld()->GetGameObject(command->GetDstHandle());
 	// CurrendSceneのコピー
 	newObject->SetCurrentSceneName(srcObj->GetCurrentSceneName());
 	// Componentを取得
-	TransformComponent* transform = engineCommand->GetGameCore()->GetECSManager()->GetComponent<TransformComponent>(newObject->GetEntity());
+	TransformComponent* transform = engineCommand->GetGameCore()->GetECSManager()->GetComponent<TransformComponent>(newObject->GetHandle().entity);
 	if (newObject->GetType() == ObjectType::ParticleSystem)
 	{
 		transform->scale.Zero();
@@ -63,20 +63,7 @@ CHO_API GameObject* ChoSystem::CloneGameObject(const GameObject* srcObj, Vector3
 	{
 		transform->position = generatePosition;
 	}
-	engineCommand->GetGameCore()->AddGameGenerateObject(newObject->GetID().value());
 	return newObject;
-}
-
-CHO_API void ChoSystem::DestroyGameObject(std::optional<uint32_t> id)
-{
-	EngineCommand* engineCommand = g_Engine->GetEngineCommand();
-	if (!engineCommand) { return; }
-	GameCore* gameCore = engineCommand->GetGameCore();
-	if (!gameCore) { return; }
-	gameCore->RemoveGameInitializedID(id.value());
-	// 生成されたオブジェクトを削除
-	std::unique_ptr<DeleteObjectCommand> command = std::make_unique<DeleteObjectCommand>(id.value());
-	command->Execute(engineCommand);
 }
 
 CHO_API float ChoSystem::DeltaTime()
@@ -91,10 +78,10 @@ void ChoSystem::SceneManagerAPI::LoadScene(const std::wstring& sceneName)
 
 void ChoSystem::SceneManagerAPI::UnloadScene(const std::wstring& sceneName)
 {
-	g_Engine->GetEngineCommand()->GetGameCore()->GetSceneManager()->UnLoadScene(sceneName);
+	sceneName;
 }
 
 void ChoSystem::SceneManagerAPI::ChangeMainScene(const std::wstring& sceneName)
 {
-	g_Engine->GetEngineCommand()->GetGameCore()->GetSceneManager()->ChangeMainScene(sceneName);
+	sceneName;
 }

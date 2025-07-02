@@ -387,6 +387,7 @@ bool AddAnimationComponent::Undo(EngineCommand* edit)
 
 bool CreateEffectCommand::Execute(EngineCommand* edit)
 {
+	edit;
 	//// CurrentSceneがないなら失敗
 	//if (!edit->m_GameCore->GetSceneManager()->GetMainScene())
 	//{
@@ -448,6 +449,7 @@ bool CreateEffectCommand::Undo(EngineCommand* edit)
 
 bool AddEffectNodeCommand::Execute(EngineCommand* edit)
 {
+	edit;
 	//// CurrentSceneがないなら失敗
 	//if (!edit->m_GameCore->GetSceneManager()->GetMainScene())
 	//{

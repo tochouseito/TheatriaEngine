@@ -315,7 +315,7 @@ void ModelManager::RegisterModelUseList(const std::variant<uint32_t, std::wstrin
 		}
 	}
 	// ほかのモデルに登録されていたら、削除
-	for (auto& model : m_Models.GetVector())
+	for (auto& model : m_Models)
 	{
 		if (model.useTransformList.size() > 0)
 		{
@@ -411,7 +411,7 @@ void ModelManager::RemoveModelUseList(const std::variant<uint32_t, std::wstring>
 			}
 		}
 		// ほかのモデルに登録されていたら、削除
-		for (auto& model : m_Models.GetVector())
+		for (auto& model : m_Models)
 		{
 			if (model.useTransformList.size() > 0)
 			{

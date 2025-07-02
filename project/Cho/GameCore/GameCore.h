@@ -3,6 +3,7 @@
 #include "GameCore/ECS/ECSManager.h"
 #include "GameCore/GameWorld/GameWorld.h"
 #include "GameCore/PhysicsEngine/PhysicsEngine.h"
+#include "Core/Utility/CompBufferData.h"
 class InputManager;
 class ResourceManager;
 class GraphicsEngine;
@@ -27,7 +28,7 @@ public:
 	~GameCore() 
 	{
 	}
-	void Initialize(InputManager* input,ResourceManager* resourceManager, GraphicsEngine* graphicsEngine);
+	void Initialize(ResourceManager* resourceManager, GraphicsEngine* graphicsEngine);
 	void SetEngineCommandPtr(EngineCommand* engineCommand) { m_EngineCommand = engineCommand; }
 	void Start();
 	void Update();
@@ -43,7 +44,7 @@ public:
 	ECSManager* GetECSManager() { return m_pECSManager.get(); }
 private:
 	void RegisterECSEvents();
-	void RegisterECSSystems(InputManager* input, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine);
+	void RegisterECSSystems(ResourceManager* resourceManager, GraphicsEngine* graphicsEngine);
 	
 	EngineCommand* m_EngineCommand = nullptr;
 

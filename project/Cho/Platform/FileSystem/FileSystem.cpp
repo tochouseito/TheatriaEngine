@@ -281,6 +281,7 @@ bool Cho::FileSystem::LoadGameSettings(const std::wstring& filePath)
 
 bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, GameScene* scene, ECSManager* ecs)
 {
+    ecs;
     std::filesystem::path path = std::filesystem::path(directory) / (scene->GetName() + L".json");
 
     nlohmann::ordered_json j;
@@ -1102,6 +1103,7 @@ FileType Cho::FileSystem::GetJsonFileType(const std::filesystem::path& path)
 
 void Cho::FileSystem::SaveProject(SceneManager* sceneManager, GameWorld* gameWorld, ECSManager* ecs)
 {
+    gameWorld;
     if (m_sProjectName.empty()) { return; }
     // セーブ
 	std::filesystem::path projectPath = std::filesystem::path(L"GameProjects") / m_sProjectName;

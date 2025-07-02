@@ -31,8 +31,8 @@ private:
 class RayCastCallback : public b2RayCastCallback
 {
 public:
-	RayCastCallback(ObjectContainer* objectContainer, std::string tag) :
-		m_ObjectContainer(objectContainer), m_Tag(tag)
+	RayCastCallback(GameWorld* gameWorld, std::string tag) :
+		m_pGameWorld(gameWorld), m_Tag(tag)
 	{
 	}
 
@@ -46,6 +46,6 @@ public:
 	b2Fixture* fixture = nullptr;
 	b2Body* body = nullptr;
 private:
-	ObjectContainer* m_ObjectContainer = nullptr;
+	GameWorld* m_pGameWorld = nullptr;
 	std::string m_Tag;
 };

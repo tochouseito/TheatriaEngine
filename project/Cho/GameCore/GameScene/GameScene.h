@@ -39,7 +39,10 @@ public:
 	GameSceneInstance(SceneManager* sm,const SceneID& instanceID) : m_pSceneManager(sm),m_InstanceID(instanceID){}
 	~GameSceneInstance() = default;
 
-	void UnloadScene();
+	void UnloadScene()
+	{
+
+	}
 private:
 	SceneManager* m_pSceneManager = nullptr;
 	SceneID m_InstanceID;

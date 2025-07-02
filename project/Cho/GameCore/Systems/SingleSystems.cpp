@@ -12,6 +12,7 @@
 
 void TransformSystem::InitializeComponent(Entity e, TransformComponent& transform)
 {
+	e;
 	// 初期値保存
 	transform.startValue.translation = transform.position;
 	transform.startValue.rotation = transform.rotation;
@@ -204,6 +205,7 @@ void TransformSystem::TransferMatrix(TransformComponent& transform)
 
 void TransformSystem::FinalizeComponent(Entity e, TransformComponent& transform)
 {
+	e;
 	// 初期値に戻す
 	transform.position = transform.startValue.translation;
 	transform.rotation = transform.startValue.rotation;
@@ -211,13 +213,14 @@ void TransformSystem::FinalizeComponent(Entity e, TransformComponent& transform)
 	transform.degrees = transform.startValue.degrees;
 }
 
-void CameraSystem::InitializeComponent(Entity e, TransformComponent& transform, CameraComponent&)
+void CameraSystem::InitializeComponent(Entity e, TransformComponent& transform, CameraComponent& camera )
 {
-
+	e; transform; camera;
 }
 
 void CameraSystem::UpdateComponent(Entity e, TransformComponent& transform, CameraComponent& camera)
 {
+	e;
 	TransferMatrix(transform, camera);
 }
 
@@ -235,7 +238,7 @@ void CameraSystem::TransferMatrix(TransformComponent& transform, CameraComponent
 
 void CameraSystem::FinalizeComponent(Entity e, TransformComponent& transform, CameraComponent& camera)
 {
-
+	e; transform; camera;
 }
 
 void ScriptInstanceGenerateSystem::GenerateInstance(Entity e, ScriptComponent& script)
@@ -338,6 +341,7 @@ void ScriptSystem::UpdateComponent(Entity e, ScriptComponent& script)
 
 void ScriptSystem::FinalizeComponent(Entity e, ScriptComponent& script)
 {
+	e;
 	if (!script.isActive || !script.instance) return;
 	try
 	{
@@ -360,6 +364,7 @@ void ScriptSystem::FinalizeComponent(Entity e, ScriptComponent& script)
 
 void Rigidbody2DSystem::InitializeComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb)
 {
+	e;
 	if (rb.runtimeBody != nullptr) return;
 	b2BodyDef bodyDef;
 	bodyDef.userData.pointer = static_cast<uintptr_t>(rb.selfEntity.value());
@@ -389,6 +394,7 @@ void Rigidbody2DSystem::StepSimulation()
 
 void Rigidbody2DSystem::UpdateComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb)
 {
+	e;
 	if (rb.runtimeBody == nullptr) return;
 
 	if (rb.requestedPosition)
@@ -448,6 +454,7 @@ void Rigidbody2DSystem::Reset(Rigidbody2DComponent& rb)
 
 void Rigidbody2DSystem::FinalizeComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb)
 {
+	transform;
 	Reset(rb);
 	ResetCollider<BoxCollider2DComponent>(e);
 }
@@ -482,6 +489,7 @@ float Collider2DSystem::ComputePolygonArea(const b2PolygonShape* shape)
 void Collider2DSystem::InitializeComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb, BoxCollider2DComponent& box)
 {
 	transform;
+	e;
 	if (!rb.runtimeBody || box.runtimeFixture != nullptr) return;
 
 	b2PolygonShape shape;
@@ -502,6 +510,8 @@ void Collider2DSystem::InitializeComponent(Entity e, TransformComponent& transfo
 
 void Collider2DSystem::UpdateComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb, BoxCollider2DComponent& box)
 {
+	e;
+	transform;
 	// サイズの変更があった場合、フィクスチャを再作成
 	if (box.runtimeFixture == nullptr) { return; }
 	if (box.width != box.runtimeFixture->GetShape()->m_radius || box.height != box.runtimeFixture->GetShape()->m_radius)
@@ -521,15 +531,17 @@ void Collider2DSystem::UpdateComponent(Entity e, TransformComponent& transform, 
 
 void Collider2DSystem::FinalizeComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb, BoxCollider2DComponent& box)
 {
-
+	e; transform; rb; box;
 }
 
 void MaterialSystem::InitializeComponent(Entity e, MaterialComponent& material)
 {
+	e; material;
 }
 
 void MaterialSystem::UpdateComponent(Entity e, MaterialComponent& material)
 {
+	e;
 	BUFFER_DATA_MATERIAL data = {};
 	data.color = material.color;
 	data.enableLighting = material.enableLighting;
@@ -565,10 +577,12 @@ void MaterialSystem::UpdateComponent(Entity e, MaterialComponent& material)
 
 void MaterialSystem::FinalizeComponent(Entity e, MaterialComponent& material)
 {
+	e; material;
 }
 
 void ParticleEmitterSystem::InitializeComponent(Entity e, ParticleComponent& particle, EmitterComponent& emitter)
 {
+	e; emitter;
 	particle.time = 0.0f;
 
 	// CSで初期化
@@ -611,33 +625,33 @@ void ParticleEmitterSystem::UpdateComponent(Entity e, ParticleComponent& particl
 	//	// 射出間隔を上回ってないので、許可は出せない
 	//	emitter.emit = 1;
 	//}
-	BUFFER_DATA_EMITTER data = {};
-	data.lifeTime = emitter.lifeTime;
-	data.position = emitter.position;
-	data.position.value.x.median = transform->position.x;
-	data.position.value.y.median = transform->position.y;
-	data.position.value.z.median = transform->position.z;
-	data.rotation = emitter.rotation;
-	data.scale = emitter.scale;
-	data.frequency = emitter.frequency;
-	data.frequencyTime = emitter.frequencyTime;
-	data.emit = emitter.emit;
-	data.emitCount = emitter.emitCount;
-	data.isFadeOut = emitter.isFadeOut;
-	data.isBillboard = emitter.isBillboard;
-	if (transform->materialID.has_value())
 	{
-		data.materialID = transform->materialID.value();
+		BUFFER_DATA_EMITTER data = {};
+		data.lifeTime = emitter.lifeTime;
+		data.position = emitter.position;
+		data.position.value.x.median = transform->position.x;
+		data.position.value.y.median = transform->position.y;
+		data.position.value.z.median = transform->position.z;
+		data.rotation = emitter.rotation;
+		data.scale = emitter.scale;
+		data.frequency = emitter.frequency;
+		data.frequencyTime = emitter.frequencyTime;
+		data.emit = emitter.emit;
+		data.emitCount = emitter.emitCount;
+		data.isFadeOut = emitter.isFadeOut;
+		data.isBillboard = emitter.isBillboard;
+		if (transform->materialID.has_value())
+		{
+			data.materialID = transform->materialID.value();
+		}
+		else
+		{
+			data.materialID = 0;
+		}
+		StructuredBuffer<BUFFER_DATA_EMITTER>* buffer = dynamic_cast<StructuredBuffer<BUFFER_DATA_EMITTER>*>(m_pResourceManager->GetBuffer<IStructuredBuffer>(emitter.bufferIndex));
+		buffer->UpdateData(data, 0);
+		emitter.emit = false;
 	}
-	else
-	{
-		data.materialID = 0;
-	}
-	StructuredBuffer<BUFFER_DATA_EMITTER>* buffer = dynamic_cast<StructuredBuffer<BUFFER_DATA_EMITTER>*>(m_pResourceManager->GetBuffer<IStructuredBuffer>(emitter.bufferIndex));
-	buffer->UpdateData(data, 0);
-	emitter.emit = false;
-
-
 
 	particle.time += DeltaTime();
 	particle.deltaTime = DeltaTime();
@@ -703,15 +717,17 @@ void ParticleEmitterSystem::UpdateComponent(Entity e, ParticleComponent& particl
 
 void ParticleEmitterSystem::FinalizeComponent(Entity e, ParticleComponent& particle, EmitterComponent& emitter)
 {
+	e; particle; emitter;
 }
 
 void UISpriteSystem::InitializeComponent(Entity e, UISpriteComponent& uiSprite)
 {
-
+	e; uiSprite;
 }
 
 void UISpriteSystem::UpdateComponent(Entity e, UISpriteComponent& uiSprite)
 {
+	e;
 	// UIの更新
 	float left = 0.0f - uiSprite.anchorPoint.x;
 	float right = uiSprite.size.x - uiSprite.anchorPoint.x;
@@ -768,11 +784,12 @@ void UISpriteSystem::UpdateComponent(Entity e, UISpriteComponent& uiSprite)
 
 void UISpriteSystem::FinalizeComponent(Entity e, UISpriteComponent& uiSprite)
 {
-
+	e; uiSprite;
 }
 
 void LightSystem::InitializeComponent(Entity e, TransformComponent& transform, LightComponent& light)
 {
+	e; transform; light;
 }
 
 void LightSystem::UpdateComponent(Entity e, TransformComponent& transform, LightComponent& light)
@@ -798,20 +815,24 @@ void LightSystem::UpdateComponent(Entity e, TransformComponent& transform, Light
 
 void LightSystem::FinalizeComponent(Entity e, TransformComponent& transform, LightComponent& light)
 {
+	e; transform; light;
 }
 
 void AnimationSystem::InitializeComponent(Entity e, AnimationComponent& animation)
 {
+	e; animation;
 }
 
 void AnimationSystem::UpdateComponent(Entity e, AnimationComponent& animation)
 {
+	e;
 	ModelData* model = m_pResourceManager->GetModelManager()->GetModelData(animation.modelName);
 	timeUpdate(animation, model);
 }
 
 void AnimationSystem::FinalizeComponent(Entity e, AnimationComponent& animation)
 {
+	e; animation;
 }
 
 Scale AnimationSystem::CalculateValue(const std::vector<KeyframeScale>& keyframes, const float& time)
@@ -1055,11 +1076,12 @@ Vector3 AnimationSystem::CalculateValue(const std::vector<KeyframeVector3>& keyf
 
 void EffectEditorSystem::InitializeComponent(Entity e, EffectComponent& effect)
 {
-
+	e; effect;
 }
 
 void EffectEditorSystem::UpdateComponent(Entity e, EffectComponent& effect)
 {
+	e;
 	// EditorはTimeBaseでの更新
 
 	// エフェクトの時間を更新
@@ -1084,9 +1106,9 @@ void EffectEditorSystem::UpdateComponent(Entity e, EffectComponent& effect)
 	}
 
 	// バッファに転送
-	StructuredBuffer<EffectRoot>* rootBuffer = dynamic_cast<StructuredBuffer<EffectRoot>*>(m_pEngineCommand->m_ResourceManager->GetIntegrationBuffer(IntegrationDataType::EffectRootInt));
-	StructuredBuffer<EffectNode>* nodeBuffer = dynamic_cast<StructuredBuffer<EffectNode>*>(m_pEngineCommand->m_ResourceManager->GetIntegrationBuffer(IntegrationDataType::EffectNodeInt));
-	StructuredBuffer<EffectSprite>* spriteBuffer = dynamic_cast<StructuredBuffer<EffectSprite>*>(m_pEngineCommand->m_ResourceManager->GetIntegrationBuffer(IntegrationDataType::EffectSpriteInt));
+	StructuredBuffer<EffectRoot>* rootBuffer = dynamic_cast<StructuredBuffer<EffectRoot>*>(m_pResourceManager->GetIntegrationBuffer(IntegrationDataType::EffectRootInt));
+	StructuredBuffer<EffectNode>* nodeBuffer = dynamic_cast<StructuredBuffer<EffectNode>*>(m_pResourceManager->GetIntegrationBuffer(IntegrationDataType::EffectNodeInt));
+	StructuredBuffer<EffectSprite>* spriteBuffer = dynamic_cast<StructuredBuffer<EffectSprite>*>(m_pResourceManager->GetIntegrationBuffer(IntegrationDataType::EffectSpriteInt));
 
 	// EffectRootを更新
 	EffectRoot root;
@@ -1143,27 +1165,27 @@ void EffectEditorSystem::UpdateComponent(Entity e, EffectComponent& effect)
 
 void EffectEditorSystem::FinalizeComponent(Entity e, EffectComponent& effect)
 {
-
+	e; effect;
 }
 
 void EffectEditorSystem::UpdateEffect(EffectComponent& effect)
 {
-
+	effect;
 }
 
 void EffectEditorSystem::InitEffectParticle()
 {
 	// ParticleBuffer
-	IRWStructuredBuffer* particleBuffer = m_pEngineCommand->GetResourceManager()->GetEffectParticleBuffer();
+	IRWStructuredBuffer* particleBuffer = m_pResourceManager->GetEffectParticleBuffer();
 	// ParticleListBuffer
-	IRWStructuredBuffer* particleListBuffer = m_pEngineCommand->GetResourceManager()->GetEffectParticleFreeListBuffer();
+	IRWStructuredBuffer* particleListBuffer = m_pResourceManager->GetEffectParticleFreeListBuffer();
 	// コマンドリスト開始
-	CommandContext* context = m_pEngineCommand->GetGraphicsEngine()->GetCommandContext();
-	m_pEngineCommand->GetGraphicsEngine()->BeginCommandContext(context);
+	CommandContext* context = m_pGraphicsEngine->GetCommandContext();
+	m_pGraphicsEngine->BeginCommandContext(context);
 	// パイプラインセット
-	context->SetComputePipelineState(m_pEngineCommand->GetGraphicsEngine()->GetPipelineManager()->GetEffectInitPSO().pso.Get());
+	context->SetComputePipelineState(m_pGraphicsEngine->GetPipelineManager()->GetEffectInitPSO().pso.Get());
 	// ルートシグネチャセット
-	context->SetComputeRootSignature(m_pEngineCommand->GetGraphicsEngine()->GetPipelineManager()->GetEffectInitPSO().rootSignature.Get());
+	context->SetComputeRootSignature(m_pGraphicsEngine->GetPipelineManager()->GetEffectInitPSO().rootSignature.Get());
 	// Particleバッファをセット
 	context->SetComputeRootDescriptorTable(0, particleBuffer->GetUAVGpuHandle());
 	// ParticleListバッファをセット
@@ -1176,31 +1198,31 @@ void EffectEditorSystem::InitEffectParticle()
 	context->BarrierUAV(D3D12_RESOURCE_BARRIER_TYPE_UAV, D3D12_RESOURCE_BARRIER_FLAG_NONE, particleBuffer->GetResource());
 	context->BarrierUAV(D3D12_RESOURCE_BARRIER_TYPE_UAV, D3D12_RESOURCE_BARRIER_FLAG_NONE, particleListBuffer->GetResource());
 	// クローズ
-	m_pEngineCommand->GetGraphicsEngine()->EndCommandContext(context, QueueType::Compute);
+	m_pGraphicsEngine->EndCommandContext(context, QueueType::Compute);
 }
 
 void EffectEditorSystem::UpdateShader()
 {
-	if (!m_pEngineCommand->m_ResourceManager->GetEffectRootUseListCount()) { return; }
+	if (!m_pResourceManager->GetEffectRootUseListCount()) { return; }
 
 	// バッファを取得
-	IStructuredBuffer* useRootListBuffer = m_pEngineCommand->GetResourceManager()->GetEffectRootUseListBuffer();
-	IStructuredBuffer* rootBuffer = m_pEngineCommand->GetResourceManager()->GetIntegrationBuffer(IntegrationDataType::EffectRootInt);
-	IStructuredBuffer* nodeBuffer = m_pEngineCommand->GetResourceManager()->GetIntegrationBuffer(IntegrationDataType::EffectNodeInt);
-	IStructuredBuffer* spriteBuffer = m_pEngineCommand->GetResourceManager()->GetIntegrationBuffer(IntegrationDataType::EffectSpriteInt);
-	IRWStructuredBuffer* particleBuffer = m_pEngineCommand->GetResourceManager()->GetEffectParticleBuffer();
-	IRWStructuredBuffer* particleListBuffer = m_pEngineCommand->GetResourceManager()->GetEffectParticleFreeListBuffer();
+	IStructuredBuffer* useRootListBuffer = m_pResourceManager->GetEffectRootUseListBuffer();
+	IStructuredBuffer* rootBuffer = m_pResourceManager->GetIntegrationBuffer(IntegrationDataType::EffectRootInt);
+	IStructuredBuffer* nodeBuffer = m_pResourceManager->GetIntegrationBuffer(IntegrationDataType::EffectNodeInt);
+	IStructuredBuffer* spriteBuffer = m_pResourceManager->GetIntegrationBuffer(IntegrationDataType::EffectSpriteInt);
+	IRWStructuredBuffer* particleBuffer = m_pResourceManager->GetEffectParticleBuffer();
+	IRWStructuredBuffer* particleListBuffer = m_pResourceManager->GetEffectParticleFreeListBuffer();
 
 	// コマンドリスト取得
-	CommandContext* context = m_pEngineCommand->GetGraphicsEngine()->GetCommandContext();
+	CommandContext* context = m_pGraphicsEngine->GetCommandContext();
 	// コマンドリスト開始
-	m_pEngineCommand->GetGraphicsEngine()->BeginCommandContext(context);
+	m_pGraphicsEngine->BeginCommandContext(context);
 
 	// 発生
 	// パイプラインセット
-	context->SetComputePipelineState(m_pEngineCommand->GetGraphicsEngine()->GetPipelineManager()->GetEffectTimeBaseEmitPSO().pso.Get());
+	context->SetComputePipelineState(m_pGraphicsEngine->GetPipelineManager()->GetEffectTimeBaseEmitPSO().pso.Get());
 	// ルートシグネチャセット
-	context->SetComputeRootSignature(m_pEngineCommand->GetGraphicsEngine()->GetPipelineManager()->GetEffectTimeBaseEmitPSO().rootSignature.Get());
+	context->SetComputeRootSignature(m_pGraphicsEngine->GetPipelineManager()->GetEffectTimeBaseEmitPSO().rootSignature.Get());
 	// UseListをセット
 	context->SetComputeRootDescriptorTable(0, useRootListBuffer->GetSRVGpuHandle());
 	// Rootをセット
@@ -1216,7 +1238,7 @@ void EffectEditorSystem::UpdateShader()
 	// ListCounterバッファをセット
 	context->SetComputeRootUnorderedAccessView(6, particleListBuffer->GetCounterResource()->GetGPUVirtualAddress());
 	// Dispatch
-	context->Dispatch(static_cast<UINT>(m_pEngineCommand->m_ResourceManager->GetEffectRootUseListCount()), 1, 1);
+	context->Dispatch(static_cast<UINT>(m_pResourceManager->GetEffectRootUseListCount()), 1, 1);
 
 	// 並列阻止
 	context->BarrierUAV(D3D12_RESOURCE_BARRIER_TYPE_UAV, D3D12_RESOURCE_BARRIER_FLAG_NONE, particleBuffer->GetResource());
@@ -1224,9 +1246,9 @@ void EffectEditorSystem::UpdateShader()
 
 	// 更新
 	// パイプラインセット
-	context->SetComputePipelineState(m_pEngineCommand->GetGraphicsEngine()->GetPipelineManager()->GetEffectTimeBaseUpdatePSO().pso.Get());
+	context->SetComputePipelineState(m_pGraphicsEngine->GetPipelineManager()->GetEffectTimeBaseUpdatePSO().pso.Get());
 	// ルートシグネチャセット
-	context->SetComputeRootSignature(m_pEngineCommand->GetGraphicsEngine()->GetPipelineManager()->GetEffectTimeBaseUpdatePSO().rootSignature.Get());
+	context->SetComputeRootSignature(m_pGraphicsEngine->GetPipelineManager()->GetEffectTimeBaseUpdatePSO().rootSignature.Get());
 	// Rootをセット
 	context->SetComputeRootDescriptorTable(0, rootBuffer->GetSRVGpuHandle());
 	// ノードバッファをセット
@@ -1240,5 +1262,5 @@ void EffectEditorSystem::UpdateShader()
 	// Dispatch
 	context->Dispatch(128, 1, 1);
 	// クローズ
-	m_pEngineCommand->GetGraphicsEngine()->EndCommandContext(context, QueueType::Compute);
+	m_pGraphicsEngine->EndCommandContext(context, QueueType::Compute);
 }

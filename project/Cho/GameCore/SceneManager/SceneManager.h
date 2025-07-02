@@ -1,6 +1,7 @@
 #pragma once
 #include "GameCore/GameScene/GameScene.h"
 
+
 enum class LoadSceneMode
 {
 	Single,  // 単一ロード
@@ -31,31 +32,17 @@ public:
 	}
 
 	// 読み込まれているシーンを破棄して指定したシーンをロード
-	GameSceneInstance* LoadScene(const std::wstring& sceneName)
-	{
-		// コンテナ
-		if (!m_SceneNameToID.contains(sceneName))
-		{
-			return nullptr; // シーンが存在しない場合はnullptrを返す
-		}
-		// 読み込まれているシーンをすべて破棄
-		m_pGameWorld->ClearAllScenes(); // ゲームワールドのシーンをクリア
-		// シーンインスタンスを破棄
-		m_pSceneInstances.clear();
-		// ロード
-		SceneID id = m_pGameWorld->AddGameObjectFromScene(m_Scenes[m_SceneNameToID[sceneName]]);
-		// シーンインスタンスを作成
-		m_pSceneInstances.push_back(std::make_unique<GameSceneInstance>(this, id));
-	}
+	GameSceneInstance* LoadScene(const std::wstring& sceneName);
 	// 非同期でシーンをロード
 	GameSceneInstance* LoadSceneAsync(const std::wstring& sceneName, const LoadSceneMode& mode)
 	{
-
+		sceneName; // 使用しない引数
+		mode; // 使用しない引数
 	}
 	// シーンをアンロード
 	void UnLoadScene(GameSceneInstance* pSceneInstance)
 	{
-
+		pSceneInstance->UnloadScene(); // シーンインスタンスのアンロード
 	}
 	// シーンを追加
 	void AddScene(GameScene scene)
@@ -64,8 +51,9 @@ public:
 		{
 			return; // 既に存在する場合は何もしない
 		}
+		std::wstring sceneName = scene.GetName();
 		SceneID id = static_cast<SceneID>(m_Scenes.push_back(std::move(scene)));
-		m_SceneNameToID[scene.GetName()] = id; // シーン名とIDを紐付け
+		m_SceneNameToID[sceneName] = id; // シーン名とIDを紐付け
 	}
 	// コンテナからシーンを取得
 	GameScene* GetScene(const SceneID& sceneID) noexcept

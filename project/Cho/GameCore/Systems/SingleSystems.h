@@ -2,6 +2,14 @@
 #include "GameCore/ECS/ECSManager.h"
 #include "SDK/DirectX/DirectX12/GpuBuffer/GpuBuffer.h"
 #include "Core/Utility/CompBufferData.h"
+#include "Core/Utility/Components.h"
+
+// 前方宣言
+class ResourceManager;
+class GraphicsEngine;
+class GameWorld;
+class EngineCommand;
+struct ModelData;
 
 // TransformComponentSystem
 class TransformSystem : public ECSManager::System<TransformComponent>
@@ -67,7 +75,7 @@ class CameraSystem : public ECSManager::System<TransformComponent, CameraCompone
 		}
 	~CameraSystem() = default;
 private:
-	void InitializeComponent([[maybe_unused]] Entity e, TransformComponent& transform, CameraComponent&);
+	void InitializeComponent([[maybe_unused]] Entity e, TransformComponent& transform, CameraComponent& camera);
 	void UpdateComponent([[maybe_unused]] Entity e, TransformComponent& transform, CameraComponent& camera);
 	void TransferMatrix(TransformComponent& transform, CameraComponent& camera);
 	void FinalizeComponent([[maybe_unused]] Entity e, TransformComponent& transform, CameraComponent& camera);
@@ -175,7 +183,7 @@ private:
 	template<typename ColliderT>
 	void ResetCollider(Entity e)
 	{
-		ColliderT* col = m_ECS->GetComponent<ColliderT>(e);
+		ColliderT* col = m_pEcs->GetComponent<ColliderT>(e);
 		if (col && col->runtimeFixture)
 		{
 			col->runtimeFixture = nullptr;
@@ -406,8 +414,7 @@ class AnimationSystem : public ECSManager::System<AnimationComponent>
 {
 	friend class GameCore;
 public:
-	AnimationSystem(ECSManager* ecs, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine)
-		: ECSManager::System<AnimationComponent>(
+	AnimationSystem(): ECSManager::System<AnimationComponent>(
 			[&](Entity e, AnimationComponent& animation)
 			{
 				UpdateComponent(e, animation);
@@ -419,7 +426,7 @@ public:
 			[&](Entity e, AnimationComponent& animation)
 			{
 				FinalizeComponent(e, animation);
-			}),
+			})
 	{
 	}
 	~AnimationSystem() = default;
@@ -489,10 +496,15 @@ private:
 	void InitEffectParticle();
 	void UpdateShader();
 
-	void SetEngineCommand(EngineCommand* engineCommand)
+	void SetResourceManager(ResourceManager* resourceManager)
 	{
-		m_pEngineCommand = engineCommand;
+		m_pResourceManager = resourceManager;
+	}
+	void SetGraphicsEngine(GraphicsEngine* graphicsEngine)
+	{
+		m_pGraphicsEngine = graphicsEngine;
 	}
 
-	EngineCommand* m_pEngineCommand = nullptr;
+	GraphicsEngine* m_pGraphicsEngine = nullptr;
+	ResourceManager* m_pResourceManager = nullptr;
 };

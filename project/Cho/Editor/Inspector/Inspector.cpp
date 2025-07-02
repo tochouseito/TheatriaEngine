@@ -23,10 +23,10 @@ void Inspector::Window()
 	ImGui::Begin("Inspector", nullptr, windowFlags);
 
 	// 選択中のオブジェクトがある場合に情報を表示
-	if (m_EngineCommand->GetSelectedObject())
+	if (m_EditorManager->GetSelectedGameObject())
 	{
 		// 選択中のオブジェクトを取得
-		GameObject* object = m_EngineCommand->GetSelectedObject();
+		GameObject* object = m_EditorManager->GetSelectedGameObject();
 		// オブジェクトの名前を取得
 		std::wstring objectName = object->GetName();
 		// オブジェクトのタイプを取得
@@ -66,7 +66,7 @@ void Inspector::ComponentsView(GameObject* object)
 void Inspector::TransformComponentView(GameObject* object)
 {
 	// TransformComponentを取得
-	TransformComponent* transform = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<TransformComponent>(object->GetEntity());
+	TransformComponent* transform = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<TransformComponent>(object->GetHandle().entity);
 	if (!transform) { return; }
 	// Transformを表示
 	ImGui::SeparatorText("Transform"); // ラインとテキスト表示
@@ -83,7 +83,7 @@ void Inspector::MeshFilterComponentView(GameObject* object)
 	// 許可されているコンポーネントか確認
 	if (!IsComponentAllowedAtRuntime<MeshFilterComponent>(object->GetType())) { return; }
 	// MeshFilterComponentを取得
-	MeshFilterComponent* mesh = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshFilterComponent>(object->GetEntity());
+	MeshFilterComponent* mesh = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshFilterComponent>(object->GetHandle().entity);
 	if (!mesh) { return; }
 	ImGui::Text("Mesh Component");
 	ImGui::Text("Mesh Name: %s", ConvertString(mesh->modelName).c_str());
@@ -95,7 +95,7 @@ void Inspector::MeshFilterComponentView(GameObject* object)
 			if (ImGui::MenuItem(name.c_str()))
 			{
 				// Transformとの連携
-				TransformComponent* transform = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<TransformComponent>(object->GetEntity());
+				TransformComponent* transform = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<TransformComponent>(object->GetHandle().entity);
 				// モデル名を設定
 				mesh->modelName = modelName.first;
 				// モデルのIDを取得
@@ -114,7 +114,7 @@ void Inspector::MeshRendererComponentView(GameObject* object)
 	// 許可されているコンポーネントか確認
 	if (!IsComponentAllowedAtRuntime<MeshRendererComponent>(object->GetType())) { return; }
 	// MeshRendererComponentを取得
-	MeshRendererComponent* render = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshRendererComponent>(object->GetEntity());
+	MeshRendererComponent* render = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshRendererComponent>(object->GetHandle().entity);
 	if (render) { return; }
 	ImGui::Text("Render Component");
 }
@@ -124,7 +124,7 @@ void Inspector::CameraComponentView(GameObject* object)
 	// 許可されているコンポーネントか確認
 	if (!IsComponentAllowedAtRuntime<CameraComponent>(object->GetType())) { return; }
 	// CameraComponentを取得
-	CameraComponent* camera = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<CameraComponent>(object->GetEntity());
+	CameraComponent* camera = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<CameraComponent>(object->GetHandle().entity);
 	if (!camera) { return; }
 	ImGui::Text("Camera Component");
 }
@@ -134,7 +134,7 @@ void Inspector::UISpriteComponentView(GameObject* object)
 	// 許可されているコンポーネントか確認
 	if (!IsComponentAllowedAtRuntime<UISpriteComponent>(object->GetType())) { return; }
 	// UISpriteComponentを取得
-	UISpriteComponent* sprite = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<UISpriteComponent>(object->GetEntity());
+	UISpriteComponent* sprite = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<UISpriteComponent>(object->GetHandle().entity);
 	if (!sprite) { return; }
 	ImGui::Text("Sprite Component");
 	// position
@@ -158,7 +158,7 @@ void Inspector::MaterialComponentView(GameObject* object)
 	// 許可されているコンポーネントか確認
 	if (!IsComponentAllowedAtRuntime<MaterialComponent>(object->GetType())) { return; }
 	// MaterialComponentを取得
-	MaterialComponent* material = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<MaterialComponent>(object->GetEntity());
+	MaterialComponent* material = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<MaterialComponent>(object->GetHandle().entity);
 	if (!material) { return; }
 	ImGui::Text("Material Component");
 	ImGui::ColorEdit4("Color", &material->color.r);
@@ -198,7 +198,7 @@ void Inspector::ScriptComponentView(GameObject* object)
 {
 	// 許可されているコンポーネントか確認
 	if (!IsComponentAllowedAtRuntime<ScriptComponent>(object->GetType())) { return; }
-	ScriptComponent* script = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<ScriptComponent>(object->GetEntity());
+	ScriptComponent* script = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<ScriptComponent>(object->GetHandle().entity);
 	if (!script) return;
 	ScriptContainer* scriptContainer = m_EngineCommand->GetResourceManager()->GetScriptContainer();
 	if (!scriptContainer) return;
@@ -261,7 +261,7 @@ void Inspector::LineRendererComponentView(GameObject* object)
 {
 	// 許可されているコンポーネントか確認
 	if (!IsComponentAllowedAtRuntime<LineRendererComponent>(object->GetType())) { return; }
-	auto lines = m_EngineCommand->GetGameCore()->GetECSManager()->GetAllComponents<LineRendererComponent>(object->GetEntity());
+	auto lines = m_EngineCommand->GetGameCore()->GetECSManager()->GetAllComponents<LineRendererComponent>(object->GetHandle().entity);
 
 	if (!lines || lines->empty()) return;
 
@@ -306,7 +306,7 @@ void Inspector::Rigidbody2DComponentView(GameObject* object)
 {
 	// 許可されているコンポーネントか確認
 	if (!IsComponentAllowedAtRuntime<Rigidbody2DComponent>(object->GetType())) { return; }
-	Rigidbody2DComponent* rigidbody = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<Rigidbody2DComponent>(object->GetEntity());
+	Rigidbody2DComponent* rigidbody = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<Rigidbody2DComponent>(object->GetHandle().entity);
 	if (!rigidbody) { return; }
 	if (ImGui::TreeNode("Rigidbody2D"))
 	{
@@ -336,7 +336,7 @@ void Inspector::Rigidbody2DComponentView(GameObject* object)
 		// コンポーネント削除
 		if (ImGui::Button("Remove Rigidbody2D Component"))
 		{
-			m_EngineCommand->GetGameCore()->GetECSManager()->RemoveComponent<Rigidbody2DComponent>(object->GetEntity());
+			m_EngineCommand->GetGameCore()->GetECSManager()->RemoveComponent<Rigidbody2DComponent>(object->GetHandle().entity);
 		}
 
 		ImGui::TreePop();
@@ -358,7 +358,7 @@ void Inspector::BoxCollider2DComponentView(GameObject* object)
 	// 許可されているコンポーネントか確認
 	if (!IsComponentAllowedAtRuntime<BoxCollider2DComponent>(object->GetType())) { return; }
 	BoxCollider2DComponent* collider =
-		m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<BoxCollider2DComponent>(object->GetEntity());
+		m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<BoxCollider2DComponent>(object->GetHandle().entity);
 
 	if (!collider) { return; }
 	if (ImGui::TreeNode("BoxCollider2D"))
@@ -375,7 +375,7 @@ void Inspector::BoxCollider2DComponentView(GameObject* object)
 		// コンポーネント削除
 		if (ImGui::Button("Remove BoxCollider2D Component"))
 		{
-			m_EngineCommand->GetGameCore()->GetECSManager()->RemoveComponent<BoxCollider2DComponent>(object->GetEntity());
+			m_EngineCommand->GetGameCore()->GetECSManager()->RemoveComponent<BoxCollider2DComponent>(object->GetHandle().entity);
 		}
 
 		ImGui::TreePop();
@@ -386,7 +386,7 @@ void Inspector::EmitterComponentView(GameObject* object)
 {
 	// 許可されているコンポーネントか確認
 	if (!IsComponentAllowedAtRuntime<EmitterComponent>(object->GetType())) { return; }
-	EmitterComponent* emitter = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<EmitterComponent>(object->GetEntity());
+	EmitterComponent* emitter = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<EmitterComponent>(object->GetHandle().entity);
 	if (!emitter) { return; }
 	if (ImGui::Button("発生"))
 	{
@@ -435,7 +435,7 @@ void Inspector::ParticleComponentView(GameObject* object)
 {
 	// 許可されているコンポーネントか確認
 	if (!IsComponentAllowedAtRuntime<ParticleComponent>(object->GetType())) { return; }
-	ParticleComponent* particle = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<ParticleComponent>(object->GetEntity());
+	ParticleComponent* particle = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<ParticleComponent>(object->GetHandle().entity);
 	if (!particle) { return; }
 	ImGui::Text("Particle Component");
 	/*if (ImGui::TreeNode("Particle"))
@@ -454,7 +454,7 @@ void Inspector::LightComponentView(GameObject* object)
 {
 	// 許可されているコンポーネントか確認
 	if (!IsComponentAllowedAtRuntime<LightComponent>(object->GetType())) { return; }
-	LightComponent* light = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<LightComponent>(object->GetEntity());
+	LightComponent* light = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<LightComponent>(object->GetHandle().entity);
 	if (!light) { return; }
 	ImGui::Text("Light Component");
 	ImGui::ColorEdit4("Color", &light->color.r);
@@ -469,7 +469,7 @@ void Inspector::AudioComponentView(GameObject* object)
 {
 	// 許可されているコンポーネントか確認
 	if (!IsComponentAllowedAtRuntime<AudioComponent>(object->GetType())) { return; }
-	AudioComponent* audio = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<AudioComponent>(object->GetEntity());
+	AudioComponent* audio = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<AudioComponent>(object->GetHandle().entity);
 	if (!audio) { return; }
 	ImGui::Text("Audio Component");
 	//ImGui::Text("Audio Name: %s", ConvertString(audio->audioName).c_str());
@@ -493,7 +493,7 @@ void Inspector::AnimationComponentView(GameObject* object)
 {
 	// 許可されているコンポーネントか確認
 	if (!IsComponentAllowedAtRuntime<AnimationComponent>(object->GetType())) { return; }
-	AnimationComponent* animation = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<AnimationComponent>(object->GetEntity());
+	AnimationComponent* animation = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<AnimationComponent>(object->GetHandle().entity);
 	if (!animation) { return; }
 	ImGui::Text("Animation Component");
 	ModelData* modelData = m_EngineCommand->GetResourceManager()->GetModelManager()->GetModelData(animation->modelName);
@@ -565,13 +565,13 @@ void Inspector::AddComponent(GameObject* object)
 
 		if (canAddMeshFilter)
 		{
-			mesh = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshFilterComponent>(object->GetEntity());
+			mesh = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshFilterComponent>(object->GetHandle().entity);
 			if (!mesh)
 			{
 				if (ImGui::Selectable("MeshFilterComponent"))
 				{
 					// MeshFilterComponentを追加
-					std::unique_ptr<AddMeshFilterComponent> addMeshComp = std::make_unique<AddMeshFilterComponent>(object->GetEntity());
+					std::unique_ptr<AddMeshFilterComponent> addMeshComp = std::make_unique<AddMeshFilterComponent>(object->GetHandle().entity);
 					m_EngineCommand->ExecuteCommand(std::move(addMeshComp));
 					isOpen = false;
 				}
@@ -579,13 +579,13 @@ void Inspector::AddComponent(GameObject* object)
 		}
 		if (canAddMeshRenderer)
 		{
-			render = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshRendererComponent>(object->GetEntity());
+			render = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<MeshRendererComponent>(object->GetHandle().entity);
 			if (!render)
 			{
 				if (ImGui::Selectable("MeshRendererComponent"))
 				{
 					// MeshRendererComponentを追加
-					std::unique_ptr<AddMeshRendererComponent> addRenderComp = std::make_unique<AddMeshRendererComponent>(object->GetEntity());
+					std::unique_ptr<AddMeshRendererComponent> addRenderComp = std::make_unique<AddMeshRendererComponent>(object->GetHandle().entity);
 					m_EngineCommand->ExecuteCommand(std::move(addRenderComp));
 					isOpen = false;
 				}
@@ -593,13 +593,13 @@ void Inspector::AddComponent(GameObject* object)
 		}
 		if (canAddMaterial)
 		{
-			material = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<MaterialComponent>(object->GetEntity());
+			material = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<MaterialComponent>(object->GetHandle().entity);
 			if (!material)
 			{
 				if (ImGui::Selectable("MaterialComponent"))
 				{
 					// MaterialComponentを追加
-					std::unique_ptr<AddMaterialComponent> addMaterialComp = std::make_unique<AddMaterialComponent>(object->GetEntity());
+					std::unique_ptr<AddMaterialComponent> addMaterialComp = std::make_unique<AddMaterialComponent>(object->GetHandle().entity);
 					m_EngineCommand->ExecuteCommand(std::move(addMaterialComp));
 					isOpen = false;
 				}
@@ -607,13 +607,13 @@ void Inspector::AddComponent(GameObject* object)
 		}
 		if (canAddScript)
 		{
-			script = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<ScriptComponent>(object->GetEntity());
+			script = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<ScriptComponent>(object->GetHandle().entity);
 			if (!script)
 			{
 				if (ImGui::Selectable("ScriptComponent"))
 				{
 					// ScriptComponentを追加
-					std::unique_ptr<AddScriptComponent> addScriptComp = std::make_unique<AddScriptComponent>(object->GetEntity(), object->GetID().value());
+					std::unique_ptr<AddScriptComponent> addScriptComp = std::make_unique<AddScriptComponent>(object->GetHandle().entity);
 					m_EngineCommand->ExecuteCommand(std::move(addScriptComp));
 					isOpen = false;
 				}
@@ -624,20 +624,20 @@ void Inspector::AddComponent(GameObject* object)
 			if (ImGui::Selectable("LineRendererComponent"))
 			{
 				// LineRendererComponentを追加
-				std::unique_ptr<AddLineRendererComponent> addLineComp = std::make_unique<AddLineRendererComponent>(object->GetEntity());
+				std::unique_ptr<AddLineRendererComponent> addLineComp = std::make_unique<AddLineRendererComponent>(object->GetHandle().entity);
 				m_EngineCommand->ExecuteCommand(std::move(addLineComp));
 				isOpen = false;
 			}
 		}
 		if (canAddRigidbody2D)
 		{
-			rigidbody = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<Rigidbody2DComponent>(object->GetEntity());
+			rigidbody = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<Rigidbody2DComponent>(object->GetHandle().entity);
 			if (!rigidbody)
 			{
 				if (ImGui::Selectable("Rigidbody2DComponent"))
 				{
 					// Rigidbody2DComponentを追加
-					std::unique_ptr<AddRigidbody2DComponent> addRigidBodyComp = std::make_unique<AddRigidbody2DComponent>(object->GetEntity(), object->GetID().value());
+					std::unique_ptr<AddRigidbody2DComponent> addRigidBodyComp = std::make_unique<AddRigidbody2DComponent>(object->GetHandle().entity);
 					m_EngineCommand->ExecuteCommand(std::move(addRigidBodyComp));
 					isOpen = false;
 				}
@@ -645,13 +645,13 @@ void Inspector::AddComponent(GameObject* object)
 		}
 		if (canAddBoxCollider2D)
 		{
-			boxCollider2d = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<BoxCollider2DComponent>(object->GetEntity());
+			boxCollider2d = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<BoxCollider2DComponent>(object->GetHandle().entity);
 			if (!boxCollider2d)
 			{
 				if (ImGui::Selectable("BoxCollider2DComponent"))
 				{
 					// BoxCollider2DComponentを追加
-					std::unique_ptr<AddBoxCollider2DComponent> addBoxColliderComp = std::make_unique<AddBoxCollider2DComponent>(object->GetEntity());
+					std::unique_ptr<AddBoxCollider2DComponent> addBoxColliderComp = std::make_unique<AddBoxCollider2DComponent>(object->GetHandle().entity);
 					m_EngineCommand->ExecuteCommand(std::move(addBoxColliderComp));
 					isOpen = false;
 				}
@@ -659,13 +659,13 @@ void Inspector::AddComponent(GameObject* object)
 		}
 		if (canAddEmitter)
 		{
-			emitter = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<EmitterComponent>(object->GetEntity());
+			emitter = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<EmitterComponent>(object->GetHandle().entity);
 			if (!emitter)
 			{
 				if (ImGui::Selectable("EmitterComponent"))
 				{
 					// EmitterComponentを追加
-					std::unique_ptr<AddEmitterComponent> addEmitterComp = std::make_unique<AddEmitterComponent>(object->GetEntity());
+					std::unique_ptr<AddEmitterComponent> addEmitterComp = std::make_unique<AddEmitterComponent>(object->GetHandle().entity);
 					m_EngineCommand->ExecuteCommand(std::move(addEmitterComp));
 					isOpen = false;
 				}
@@ -673,13 +673,13 @@ void Inspector::AddComponent(GameObject* object)
 		}
 		if (canAddParticle)
 		{
-			particle = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<ParticleComponent>(object->GetEntity());
+			particle = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<ParticleComponent>(object->GetHandle().entity);
 			if (!particle)
 			{
 				if (ImGui::Selectable("ParticleComponent"))
 				{
 					// ParticleComponentを追加
-					std::unique_ptr<AddParticleComponent> addParticleComp = std::make_unique<AddParticleComponent>(object->GetEntity());
+					std::unique_ptr<AddParticleComponent> addParticleComp = std::make_unique<AddParticleComponent>(object->GetHandle().entity);
 					m_EngineCommand->ExecuteCommand(std::move(addParticleComp));
 					isOpen = false;
 				}
@@ -688,13 +688,13 @@ void Inspector::AddComponent(GameObject* object)
 		if(canAddAnimation)
 		{
 			// AnimationComponentを取得
-			AnimationComponent* animation = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<AnimationComponent>(object->GetEntity());
+			AnimationComponent* animation = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<AnimationComponent>(object->GetHandle().entity);
 			if (!animation)
 			{
 				if (ImGui::Selectable("AnimationComponent"))
 				{
 					// AnimationComponentを追加
-					std::unique_ptr<AddAnimationComponent> addAnimationComp = std::make_unique<AddAnimationComponent>(object->GetEntity());
+					std::unique_ptr<AddAnimationComponent> addAnimationComp = std::make_unique<AddAnimationComponent>(object->GetHandle().entity);
 					m_EngineCommand->ExecuteCommand(std::move(addAnimationComp));
 					isOpen = false;
 				}
@@ -702,13 +702,13 @@ void Inspector::AddComponent(GameObject* object)
 		}
 		if (canAddAudio)
 		{
-			AudioComponent* audio = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<AudioComponent>(object->GetEntity());
+			AudioComponent* audio = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<AudioComponent>(object->GetHandle().entity);
 			if (!audio)
 			{
 				if (ImGui::Selectable("AudioComponent"))
 				{
 					// AudioComponentを追加
-					std::unique_ptr<AddAudioComponent> addAudioComp = std::make_unique<AddAudioComponent>(object->GetEntity());
+					std::unique_ptr<AddAudioComponent> addAudioComp = std::make_unique<AddAudioComponent>(object->GetHandle().entity);
 					m_EngineCommand->ExecuteCommand(std::move(addAudioComp));
 					isOpen = false;
 				}
