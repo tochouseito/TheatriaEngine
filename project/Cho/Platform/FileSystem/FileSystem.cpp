@@ -1287,7 +1287,7 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
     fs::path includeBase = fs::relative(currentPath, projectDir);
     fs::path systemPath = includeBase / "Cho";
     fs::path mathLibPath = includeBase / "Cho/Externals/ChoMath";
-    fs::path scriptPath = includeBase / "Cho/GameCore/IScript";
+    fs::path scriptPath = includeBase / "Cho/GameCore/Marionnette";
 	fs::path contextPath = includeBase / "Cho/GameCore/ScriptAPI";
     fs::path projectDirPath = "$(ProjectDir)";
 

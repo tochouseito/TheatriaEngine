@@ -3,19 +3,18 @@
 #define USE_CHOENGINE_SCRIPT
 #include "ChoEngineAPI.h"
 class GameObject;
-class CHO_API IScript
+class CHO_API Marionnette
 {
     friend class ScriptInstanceGenerateSystem;
     friend class ScriptSystem;
 public:
-	IScript(GameObject& object) : gameObject(object) {}
-    virtual ~IScript() = default;
+	Marionnette(GameObject& object) : gameObject(object) {}
+    virtual ~Marionnette() = default;
     virtual void Start() = 0;
     virtual void Update() = 0;
     virtual void OnCollisionEnter(GameObject&) {}
     virtual void OnCollisionStay(GameObject&) {}
-    virtual void OnCollisionExit( GameObject&) {}
-    GameObject* FindGameObjectByName(std::wstring_view name);
+    virtual void OnCollisionExit(GameObject&) {}
     /*template<typename T>
     static std::vector<ScriptMember> BuildReflectedMembers()
     {

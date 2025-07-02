@@ -35,11 +35,11 @@ namespace Cho
                 return baseName;
         }
 
-        while (ContainsKey(nameList, newName + L" (" + std::to_wstring(counter) + L")"))
+        while (ContainsKey(nameList, newName + L"(" + std::to_wstring(counter) + L")"))
         {
             counter++;
         }
 
-        return newName + L" (" + std::to_wstring(counter) + L")";
+        return newName + L"(" + std::to_wstring(counter) + L")";
     }
 }

@@ -33,8 +33,8 @@ public:
 	template<typename T>
 	T* GetScriptInstance() const noexcept
 	{
-		// TがIScriptを継承しているか確認
-		static_assert(std::is_base_of<IScript, T>::value, "T must be derived from IScript");
+		// TがMarionnetteを継承しているか確認
+		static_assert(std::is_base_of<Marionnette, T>::value, "T must be derived from Marionnette");
 		if (ScriptComponent* script = GetScriptComponent())
 		{
 			return static_cast<T*>(script->instance);

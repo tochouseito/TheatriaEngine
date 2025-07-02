@@ -4,7 +4,7 @@
 #include "APIExportsMacro.h"
 
 #define REGISTER_SCRIPT_FACTORY(SCRIPTNAME) \
-    extern "C" __declspec(dllexport) IScript* Create##SCRIPTNAME##Script(GameObject& object) { \
+    extern "C" __declspec(dllexport) Marionnette* Create##SCRIPTNAME##Script(GameObject& object) { \
         return new SCRIPTNAME(object);}
 //// メンバ登録マクロ
 //#define REFLECT_SCRIPT_MEMBER(CLASS, MEMBER) \

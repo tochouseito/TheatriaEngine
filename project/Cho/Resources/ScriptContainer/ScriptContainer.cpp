@@ -6,7 +6,7 @@ void ScriptContainer::RegisterScript(const std::string& scriptName, ScriptFactor
 	m_ScriptRegistry[scriptName] = std::move(func);
 }
 
-std::unique_ptr<IScript> ScriptContainer::CreateScript(const std::string& scriptName)
+std::unique_ptr<Marionnette> ScriptContainer::CreateScript(const std::string& scriptName)
 {
 	auto it = m_ScriptRegistry.find(scriptName);
 	if (it != m_ScriptRegistry.end())

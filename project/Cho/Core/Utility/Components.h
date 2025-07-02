@@ -172,14 +172,14 @@ struct MeshRendererComponent : public IComponentTag
 };
 
 // スクリプトコンポーネント
-class IScript;
+class Marionnette;
 struct ScriptComponent : public IComponentTag
 {
 	std::string scriptName = "";								// スクリプト名
 	ObjectHandle objectHandle;			// スクリプトのオブジェクトハンドル
 	using ScriptFunc = std::function<void()>;					// スクリプト関数型
 
-	IScript* instance = nullptr;							// スクリプトインスタンス
+	Marionnette* instance = nullptr;							// スクリプトインスタンス
 	ScriptFunc startFunc;										// Start関数
 	ScriptFunc updateFunc;										// Update関数
 	std::function<void()> cleanupFunc;							// 解放関数

@@ -4,7 +4,7 @@
 #include "Graphics/GraphicsEngine/GraphicsEngine.h"
 #include "GameCore/GameWorld/GameWorld.h"
 #include "EngineCommand/EngineCommand.h"
-#include "GameCore/IScript/IScript.h"
+#include "GameCore/Marionnette/Marionnette.h"
 #include "Platform/FileSystem/FileSystem.h"
 #include "OS/Windows/WinApp/WinApp.h"
 #include "Core/ChoLog/ChoLog.h"
@@ -251,7 +251,7 @@ void ScriptInstanceGenerateSystem::GenerateInstance(Entity e, ScriptComponent& s
 	std::string funcName = "Create" + script.scriptName + "Script";
 	funcName.erase(std::remove_if(funcName.begin(), funcName.end(), ::isspace), funcName.end());
 	// CreateScript関数を取得
-	typedef IScript* (*CreateScriptFunc)(GameObject&);
+	typedef Marionnette* (*CreateScriptFunc)(GameObject&);
 	CreateScriptFunc createScript = (CreateScriptFunc)GetProcAddress(Cho::FileSystem::ScriptProject::m_DllHandle, funcName.c_str());
 	if (!createScript)
 	{
@@ -260,7 +260,7 @@ void ScriptInstanceGenerateSystem::GenerateInstance(Entity e, ScriptComponent& s
 	}
 	// スクリプトを生成
 	GameObject* object = m_pGameWorld->GetGameObject(e);
-	IScript* scriptInstance = createScript(*object);
+	Marionnette* scriptInstance = createScript(*object);
 	if (!scriptInstance)
 	{
 		script.isActive = false;
