@@ -12,10 +12,10 @@
 using namespace std::filesystem;
 using json = nlohmann::json;
 using GameParameterVariant = std::variant<int, float, bool, Vector3>;
-class BaseScene;
+class GameScene;
+class GameWorld;
 class SceneManager;
 class ECSManager;
-class ObjectContainer;
 class ResourceManager;
 class EngineCommand;
 namespace Cho
@@ -141,7 +141,7 @@ namespace Cho
 		// ゲーム設定ファイルを読み込む
         static bool LoadGameSettings(const std::wstring& filePath);
 		// シーンファイルを保存
-        static bool SaveSceneFile(const std::wstring& directory,SceneManager* sceneManager,BaseScene* scene,ObjectContainer* container, ECSManager* ecs );
+        static bool SaveSceneFile(const std::wstring& directory, GameScene* scene, ECSManager* ecs);
 		// シーンファイルを読み込む
         static bool LoadSceneFile(const std::wstring& filePath,EngineCommand* engineCommand);
         // スクリプトのファイルを保存
@@ -164,9 +164,10 @@ namespace Cho
         static FileType GetJsonFileType(const std::filesystem::path& path);
 
         // プロジェクトを保存
-		static void SaveProject(SceneManager* sceneManager, ObjectContainer* container, ECSManager* ecs, ResourceManager* resourceManager);
+		static void SaveProject(SceneManager* sceneManager, GameWorld* gameWorld, ECSManager* ecs);
         // プロジェクトフォルダを読み込む
         static bool LoadProjectFolder(const std::wstring& projectName, EngineCommand* engineCommand);
+        // 
 
         static FileType DetectFileType(const nlohmann::json& j)
         {

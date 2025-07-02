@@ -1,2 +1,224 @@
 #include "pch.h"
 #include "GameWorld.h"
+#include "GameCore/GameScene/GameScene.h"
+#include "Core/Utility/GenerateUnique.h"
+#include "Core/ChoLog/ChoLog.h"
+#include "GameCore/SceneManager/SceneManager.h"
+#include "GameCore/ECS/ECSManager.h"
+
+void GameWorld::Initialize()
+{
+
+}
+
+void GameWorld::Update()
+{
+
+} 
+
+// オブジェクトを取得
+GameObject* GameWorld::GetGameObject(const std::wstring& name)
+{
+	if (!m_ObjectHandleMap.contains(name))
+	{
+		return nullptr;
+	}
+	ObjectHandle handle = m_ObjectHandleMap[name];
+	return m_pGameObjects[handle.sceneID][handle.objectID][handle.cloneID].get();
+}
+
+GameObject* GameWorld::GetGameObject(const Entity& e)
+{
+	if (!m_ObjectHandleMapFromEntity.contains(e))
+	{
+		return nullptr;
+	}
+	ObjectHandle handle = m_ObjectHandleMapFromEntity[e];
+	return m_pGameObjects[handle.sceneID][handle.objectID][handle.cloneID].get();
+}
+
+GameObject* GameWorld::GetGameObject(const ObjectHandle& handle)
+{
+	if (!m_pGameObjects.isValid(handle.sceneID) ||
+		!m_pGameObjects[handle.sceneID].isValid(handle.objectID) ||
+		!m_pGameObjects[handle.sceneID][handle.objectID].isValid(handle.cloneID))
+	{
+		return nullptr;
+	}
+	return m_pGameObjects[handle.sceneID][handle.objectID][handle.cloneID].get();
+}
+
+// オブジェクトを作成
+ObjectHandle GameWorld::CreateGameObject(const std::wstring& name, ObjectType type)
+{
+	// handleを作成
+	ObjectHandle handle;
+	handle.sceneID = 0; // 0番のSceneに追加
+	// Entityを取得
+	Entity entity = m_pECSManager->GenerateEntity();
+	handle.entity = entity;
+	// オブジェクトIDを取得
+	uint32_t objectID = static_cast<uint32_t>(m_pGameObjects[0].push_back(FVector<std::unique_ptr<GameObject>>()));
+	handle.objectID = objectID;
+	// 名前被り防止
+	std::wstring newName = GenerateUniqueName<std::unordered_map<std::wstring, ObjectHandle>>(name,m_ObjectHandleMap);
+	// GameObjectを作成
+	m_pGameObjects[0][objectID].push_back(std::make_unique<GameObject>(handle, newName, type));
+	// Entityにコンポーネントを追加
+	AddDefaultComponentsToGameObject(handle, type);
+	// 辞書に登録
+	m_ObjectHandleMap[newName] = handle;
+	m_ObjectHandleMapFromEntity[entity] = handle;
+	return handle;
+}
+
+// シーンデータからオブジェクトを作成
+SceneID GameWorld::AddGameObjectFromScene(const GameScene& scene, const bool& updateMaincamera)
+{
+	// シーンIDを取得
+	SceneID sceneID = static_cast<SceneID>(m_pGameObjects.push_back(FVector<FVector<std::unique_ptr<GameObject>>>()));
+	// シーンのオブジェクトを作成
+	FVector<CPrefab> prefabs = scene.GetPrefabs();
+	for (auto& prefab : prefabs)
+	{
+		// handleを作成
+		ObjectHandle handle;
+		handle.sceneID = sceneID; // シーンIDを設定
+		// PrefabからEntityを生成
+		Entity entity = prefab.Instantiate(*m_pECSManager);
+		handle.entity = entity;
+		// オブジェクトIDを取得
+		uint32_t objectID = static_cast<uint32_t>(m_pGameObjects[sceneID].push_back(FVector<std::unique_ptr<GameObject>>()));
+		handle.objectID = objectID;
+		// GameObjectを作成
+		if (prefab.GetName().empty())
+		{
+			Cho::Log::Write(Cho::LogLevel::Assert, "Prefab name is empty. Please set a valid name for the prefab.");
+			return sceneID;
+		}
+		if(prefab.GetType() == ObjectType::None)
+		{
+			Cho::Log::Write(Cho::LogLevel::Assert, "Prefab type is None. Please set a valid type for the prefab.");
+			return sceneID;
+		}
+		m_pGameObjects[sceneID][objectID].push_back(std::make_unique<GameObject>(handle, prefab.GetName(), prefab.GetType()));
+		// 辞書に登録
+		m_ObjectHandleMap[prefab.GetName()] = handle;
+		m_ObjectHandleMapFromEntity[entity] = handle;
+	}
+	// シーンのカメラを設定
+	if (updateMaincamera)
+	{
+		// メインカメラを取得
+		GameObject* cameraObject = GetGameObject(scene.GetStartCameraName());
+		SetMainCamera(cameraObject);
+	}
+	return sceneID;
+}
+
+// ワールドからGameSceneを生成
+GameScene GameWorld::CreateGameSceneFromWorld(SceneManager& sceneManager) const
+{
+	// 編集対象のシーンをGameSceneに変換
+	// とりあえず0番目のシーンを対象にする
+	// クローンは除外
+	std::wstring sceneName = sceneManager.GetGameScene(0)->GetName();
+	GameScene gameScene(sceneName);
+	for (auto& object : m_pGameObjects[0])
+	{
+		// オブジェクトのエンティティからCPrefabを生成
+		CPrefab prefab = CPrefab::FromEntity(*m_pECSManager,
+			object[0]->GetHandle().entity,
+			object[0]->GetName(),
+			object[0]->GetType());
+		gameScene.AddPrefab(prefab);
+	}
+	// シーンのカメラを設定
+	gameScene.SetStartCameraName(m_pMainCamera->GetName());
+
+	return gameScene;
+}
+
+
+// オブジェクトを削除
+void GameWorld::RemoveGameObject(const ObjectHandle& handle)
+{
+	// GemeObjectを取得
+	GameObject* gameObject = GetGameObject(handle);
+	// ECSから削除
+	m_pECSManager->RemoveEntity(handle.entity);
+	// コンテナから削除
+	m_pGameObjects[handle.sceneID][handle.objectID].erase(handle.cloneID);
+	// 辞書から削除
+	m_ObjectHandleMap.erase(gameObject->GetName());
+	m_ObjectHandleMapFromEntity.erase(handle.entity);
+}
+
+// 名前変更
+void GameWorld::RenameGameObject(const ObjectHandle& handle, const std::wstring& newName)
+{
+	// GameObjectを取得
+	GameObject* gameObject = GetGameObject(handle);
+	// 同じ名前なら何もしない
+	if (gameObject->GetName() == newName) { return; }
+	// 名前被り防止
+	std::wstring uniqueName = GenerateUniqueName<std::unordered_map<std::wstring, ObjectHandle>>(newName, m_ObjectHandleMap);
+	// 辞書から削除
+	m_ObjectHandleMap.erase(gameObject->GetName());
+	// 辞書に新しい名前で登録
+	m_ObjectHandleMap[uniqueName] = handle;
+	// 名前を変更
+	gameObject->SetName(uniqueName);
+}
+
+
+// クローンを追加
+ObjectHandle GameWorld::AddGameObjectClone(const ObjectHandle& src)
+{
+	// srcのGameObjectを取得
+	GameObject* srcGameObject = GetGameObject(src);
+	// handleを作成
+	ObjectHandle handle;
+	// クローンフラグ
+	handle.isClone = true;
+	handle.sceneID = src.sceneID; // srcのSceneに追加
+	// Entityを取得
+	Entity entity = m_pECSManager->CopyEntity(src.entity);
+	handle.entity = entity;
+	// objectIDを取得
+	handle.objectID = src.objectID; // srcのobjectIDを使用
+	// 名前被り防止
+	std::wstring newName = GenerateUniqueName<std::unordered_map<std::wstring, ObjectHandle>>(srcGameObject->GetName(), m_ObjectHandleMap);
+	// srcのクローンリストに追加
+	handle.cloneID = static_cast<uint32_t>(m_pGameObjects[src.sceneID][src.objectID].push_back(std::make_unique<GameObject>(handle, newName, srcGameObject->GetType())));
+	// Entityにコンポーネントを追加
+	AddDefaultComponentsToGameObject(handle, srcGameObject->GetType());
+	// 辞書に登録
+	m_ObjectHandleMap[newName] = handle;
+	m_ObjectHandleMapFromEntity[entity] = handle;
+	return handle;
+}
+
+// 全シーン破棄
+void GameWorld::ClearAllScenes()
+{
+	for (auto& scene : m_pGameObjects)
+	{
+		for (auto& object : scene)
+		{
+			for (auto& clone : object)
+			{
+				std::wstring name = clone->GetName();
+				Entity entity = clone->GetHandle().entity;
+				// ECSから削除
+				m_pECSManager->RemoveEntity(entity);
+			}
+		}
+	}
+	// コンテナと辞書をクリア
+	m_pGameObjects.clear();
+	m_ObjectHandleMap.clear();
+	m_ObjectHandleMapFromEntity.clear();
+	// メインカメラをクリア
+	m_pMainCamera = nullptr;
+}

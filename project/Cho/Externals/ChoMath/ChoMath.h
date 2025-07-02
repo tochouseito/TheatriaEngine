@@ -87,4 +87,6 @@ namespace ChoMath {
 	float LerpShortAngle(float startAngle, float endAngle, float t);
 
 	Quaternion MakeLookRotation(const Vector3& forward, const Vector3& up);
+
+	Vector3 GetForwardVectorFromMatrix(const Matrix4& rotMatrix);
 };

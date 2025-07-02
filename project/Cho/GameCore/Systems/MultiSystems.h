@@ -6,28 +6,60 @@
 
 class ResourceManager;
 
-// LineRendererSystem
 class LineRendererSystem : public ECSManager::MultiComponentSystem<LineRendererComponent>
 {
-public:
-	LineRendererSystem(ECSManager* ecs, ResourceManager* resourceManager)
-		: ECSManager::MultiComponentSystem<LineRendererComponent>([this](Entity e, std::vector<LineRendererComponent>& lines)
+	friend class GameCore;
+	public:
+		LineRendererSystem() : ECSManager::MultiComponentSystem<LineRendererComponent>(
+			[&](Entity e, std::vector<LineRendererComponent>& lines)
 			{
 				for (LineRendererComponent& line : lines)
 				{
 					UpdateComponent(e, line);
 				}
-			}),
-		m_pECS(ecs), m_pResourceManager(resourceManager)
+			},
+			[&](Entity e, std::vector<LineRendererComponent>& lines)
+			{
+				for (LineRendererComponent& line : lines)
+				{
+					InitializeComponent(e, line);
+				}
+			},
+			[&](Entity e, std::vector<LineRendererComponent>& lines)
+			{
+				for (LineRendererComponent& line : lines)
+				{
+					FinalizeComponent(e, line);
+				}
+			})
 	{
-		m_pIntegrationBuffer = resourceManager->GetLineIntegrationBuffer();
 	}
 	~LineRendererSystem() = default;
 private:
-	void UpdateComponent(Entity e, LineRendererComponent& line);
+	void InitializeComponent([[maybe_unused]] Entity e, [[maybe_unused]] LineRendererComponent& line)
+	{
+	}
+	void UpdateComponent([[maybe_unused]] Entity e, LineRendererComponent& line)
+	{
+		// 転送
+		TransferMatrix(line);
+	}
 	void TransferMatrix(LineRendererComponent& lineRenderer);
-	ECSManager* m_pECS = nullptr;
+	void FinalizeComponent([[maybe_unused]] Entity e, [[maybe_unused]] LineRendererComponent& line)
+	{
+	}
+
+	void SetResourceManager(ResourceManager* resourceManager)
+	{
+		m_pResourceManager = resourceManager;
+	}
+	void SetBuffer(VertexBuffer<BUFFER_DATA_LINE>* buffer)
+	{
+		m_pIntegrationBuffer = buffer;
+	}
+
 	ResourceManager* m_pResourceManager = nullptr;
 	VertexBuffer<BUFFER_DATA_LINE>* m_pIntegrationBuffer = nullptr;
 };
+
 

@@ -1,76 +1,21 @@
 #pragma once
-#include "GameCore/ObjectContainer/ObjectContainer.h"
-#include <string>
-using SceneID = uint32_t;
-class SceneManager;
-class GameCore;
-class BaseScene {
-public:
-	// Constructor
-	BaseScene(SceneManager* sceneManger):
-		m_SceneManager(sceneManger)
-	{
+#include "GameCore/GameScene/GameScene.h"
 
-	}
-	// Destructor
-	virtual ~BaseScene()
-	{
 
-	}
-	virtual inline SceneID GetSceneID() const noexcept { return m_SceneID;}
-	virtual inline const std::wstring& GetSceneName() const noexcept { return m_SceneName; }
-	virtual inline void SetSceneName(const std::wstring& sceneName) { m_SceneName = sceneName; }
-	virtual inline std::vector<ObjectID>& GetUseObjects() noexcept { return m_UseObjects; }
-	virtual inline void AddUseObject(const ObjectID& objectID) { m_UseObjects.push_back(objectID); }
-	virtual inline void AddGameObjectData(const GameObjectData& data) { m_GameObjectData.push_back(data); }
-	virtual inline std::vector<GameObjectData>& GetGameObjectData() noexcept { return m_GameObjectData; }
-	virtual inline void RemoveUseObject(const ObjectID& objectID) { m_UseObjects.erase(std::remove(m_UseObjects.begin(), m_UseObjects.end(), objectID), m_UseObjects.end()); }
-	virtual inline void ClearUseObjects() { m_UseObjects.clear(); }
-	virtual inline void ClearGameObjectData() { m_GameObjectData.clear(); }
-	virtual inline void SetMainCameraID(std::optional<ObjectID> cameraID) { m_MainCameraID = cameraID; }
-	virtual inline std::optional<ObjectID> GetMainCameraID() const noexcept { return m_MainCameraID; }
-	virtual inline void SetStartCameraName(const std::wstring& cameraName) { m_StartCameraName = cameraName; }
-	virtual inline std::wstring GetStartCameraName() const noexcept { return m_StartCameraName; }
-	virtual void Start() = 0;
-	virtual void Update() = 0;
-	virtual void Finalize() = 0;
-	inline void SetSceneID(const SceneID sceneID) { m_SceneID = sceneID; }
-	virtual inline void AddClonedObject(const ObjectID& objectID) { m_ClonedObjects.push_back(objectID); }
-protected:
-	SceneID m_SceneID = 0;
-	std::wstring m_SceneName = L"";
-	SceneManager* m_SceneManager = nullptr;
-	std::vector<ObjectID> m_UseObjects;
-	std::optional<ObjectID> m_MainCameraID = std::nullopt;
-	std::vector<GameObjectData> m_GameObjectData;
-	std::wstring m_StartCameraName = L"";
-	std::vector<ObjectID> m_ClonedObjects; // クローンされたオブジェクトのIDを保持するためのコンテナ
+enum class LoadSceneMode
+{
+	Single,  // 単一ロード
+	Additive,// 追加ロード
 };
 
-class ScenePrefab : public BaseScene {
-public:
-	// Constructor
-	ScenePrefab(SceneManager* sceneManger) :
-		BaseScene(sceneManger)
-	{
-	}
-	// Destructor
-	~ScenePrefab() = default;
+// 前方宣言
+class GameWorld;
 
-	void Start() override;
-	void Update() override;
-	void Finalize() override;
-private:
-};
-
-class ResourceManager;
 class SceneManager
 {
-	friend class ScenePrefab;
 public:
 	// Constructor
-	SceneManager(GameCore* gameCore,ResourceManager* resourceManager):
-		m_pGameCore(gameCore),m_pResourceManager(resourceManager)
+	SceneManager(GameWorld* gameWorld) : m_pGameWorld(gameWorld)
 	{
 	}
 	// Destructor
@@ -79,37 +24,60 @@ public:
 	}
 
 	// デフォルトのシーンを作成
-	void CreateDefaultScene()
+	GameScene CreateDefaultScene();
+
+	// 読み込まれているシーンを破棄して指定したシーンをロード
+	GameSceneInstance* LoadScene(const std::wstring& sceneName, const bool& updateMaincamera = false);
+	// 非同期でシーンをロード
+	GameSceneInstance* LoadSceneAsync(const std::wstring& sceneName, const LoadSceneMode& mode)
 	{
-		ScenePrefab scene(this);
-		scene.SetSceneName(L"MainScene");
-		AddScene(scene);
-		//ChangeSceneRequest(m_SceneNameToID[L"MainScene"]);
-		ChangeMainScene(L"MainScene");
+		sceneName; // 使用しない引数
+		mode; // 使用しない引数
 	}
-
-	// シーンを更新
-	void Update();
-	// シーンを追加
-	void AddScene(const ScenePrefab& newScene);
-	// シーンを変更リクエスト
-	//void ChangeSceneRequest(const SceneID& sceneID) noexcept { m_pNextScene = m_pScenes[sceneID].get(); }
-	// シーンを追加ロード
-	void LoadScene(const std::wstring& sceneName);
-	// シーンの解除
-	void UnLoadScene(const std::wstring& sceneName);
-	// メインシーンの変更
-	void ChangeMainScene(const std::wstring& sceneName);
-
-	ScenePrefab* GetScene(const SceneID& index) const noexcept
+	// シーンをアンロード
+	void UnLoadScene(GameSceneInstance* pSceneInstance)
 	{
-		if (m_pScenes.isValid(index))
+		pSceneInstance->UnloadScene(); // シーンインスタンスのアンロード
+	}
+	// シーンを追加
+	void AddScene(GameScene scene)
+	{
+		if (m_SceneNameToID.contains(scene.GetName()))
 		{
-			return m_pScenes[index].get();
+			return; // 既に存在する場合は何もしない
+		}
+		std::wstring sceneName = scene.GetName();
+		SceneID id = static_cast<SceneID>(m_Scenes.push_back(std::move(scene)));
+		m_SceneNameToID[sceneName] = id; // シーン名とIDを紐付け
+	}
+	// コンテナからシーンを取得
+	GameScene* GetScene(const SceneID& sceneID) noexcept
+	{
+		if (m_Scenes.isValid(sceneID))
+		{
+			return &m_Scenes[sceneID];
 		}
 		return nullptr;
 	}
-	FVector<std::unique_ptr<ScenePrefab>>& GetScenes() noexcept { return m_pScenes; }
+	GameScene* GetScene(const std::wstring& sceneName) noexcept
+	{
+		if (m_SceneNameToID.contains(sceneName))
+		{
+			return &m_Scenes[m_SceneNameToID.at(sceneName)];
+		}
+		return nullptr;
+	}
+	// シーンコンテナを取得
+	FVector<GameScene>& GetScenes() noexcept { return m_Scenes; }
+	// シーンを取得
+	GameScene* GetGameScene(const SceneID& index) noexcept
+	{
+		if (m_Scenes.isValid(index))
+		{
+			return &m_Scenes[index];
+		}
+		return nullptr;
+	}
 	// シーン名からシーンIDを取得
 	SceneID GetSceneID(const std::wstring& sceneName) const noexcept
 	{
@@ -120,67 +88,22 @@ public:
 		return 0;
 	}
 	// シーン名からシーンを取得
-	ScenePrefab* GetSceneToName(const std::wstring& sceneName) const noexcept
+	GameScene* GetSceneToName(const std::wstring& sceneName) noexcept
 	{
 		if (m_SceneNameToID.contains(sceneName))
 		{
-			return m_pScenes[m_SceneNameToID.at(sceneName)].get();
+			return &m_Scenes[m_SceneNameToID.at(sceneName)];
 		}
 		return nullptr;
 	}
-	//ScenePrefab* GetCurrentScene() const noexcept { return m_pCurrentScene; }
-	// メインシーンを取得
-	ScenePrefab* GetMainScene() const noexcept
-	{
-		if (!m_MainSceneID.has_value())
-		{
-			return nullptr;
-		}
-		return m_pScenes[m_MainSceneID.value()].get();
-	}
-	// シーンをクリア
-	void ClearScenes() noexcept
-	{
-		/*m_pScenes.clear();
-		m_SceneNameToID.clear();*/
-		for (auto& scene : m_SceneNameToScene)
-		{
-			scene.second->Finalize();
-		}
-		m_SceneNameToScene.clear();
-		m_MainSceneID = std::nullopt;
-	}
-	void EditorReLoad(const SceneID& sceneID)
-	{
-		// 最初のシーンに戻す
-		ClearScenes();
-		std::wstring sceneName = m_pScenes[sceneID]->GetSceneName();
-		ChangeMainScene(sceneName);
-	}
 private:
-	// シーンを変更
-	//void ChangeScene();
-	// GameCore
-	GameCore* m_pGameCore = nullptr;
-	// ResourceManager
-	ResourceManager* m_pResourceManager = nullptr;
-	// 現在のシーン
-	//ScenePrefab* m_pCurrentScene = nullptr;
-	// 次のシーン
-	//ScenePrefab* m_pNextScene = nullptr;
-	std::wstring m_NextSceneName = L"";
-	// メインシーンID
-	std::optional<SceneID> m_MainSceneID = std::nullopt;
-	// 有効なシーン
-	std::unordered_map<std::wstring, ScenePrefab*> m_SceneNameToScene;
+	GameWorld* m_pGameWorld = nullptr; // ゲームワールドへのポインタ
+
 	// シーンコンテナ（フリーリスト付き）
-	FVector<std::unique_ptr<ScenePrefab>> m_pScenes;
+	FVector<GameScene> m_Scenes;
 	// 名前検索用補助コンテナ
 	std::unordered_map<std::wstring, SceneID> m_SceneNameToID;
-
-	// 読み込まれたScene
-	std::vector<SceneID> m_LoadedScenesIDs;
-	// 解除されたScene
-	std::vector<SceneID> m_UnloadedScenesIDs;
+	// シーンインスタンスコンテナ
+	FVector<std::unique_ptr<GameSceneInstance>> m_pSceneInstances;
 };
 

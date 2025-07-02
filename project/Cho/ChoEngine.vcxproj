@@ -19,7 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="GameCore\CPrefab\CPrefab.cpp" />
     <ClCompile Include="GameCore\GameWorld\GameWorld.cpp" />
+    <ClCompile Include="GameCore\GameScene\GameScene.cpp" />
     <ClCompile Include="Resources\AudioManager\AudioManager.cpp" />
     <ClCompile Include="ChoEngineAPI.cpp" />
     <ClCompile Include="Core\ChoLog\ChoLog.cpp">
@@ -245,12 +247,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="GameCore\MultiSystemManager\MultiSystemManager.cpp" />
-    <ClCompile Include="GameCore\ObjectContainer\ObjectContainer.cpp" />
     <ClCompile Include="GameCore\SceneManager\SceneManager.cpp" />
     <ClCompile Include="GameCore\ScriptAPI\ScriptAPI.cpp" />
-    <ClCompile Include="GameCore\SingleSystemManager\SingleSystemManager.cpp" />
-    <ClCompile Include="GameCore\Systems\EditorSystems.cpp" />
     <ClCompile Include="GameCore\Systems\MultiSystems.cpp" />
     <ClCompile Include="GameCore\Systems\SingleSystems.cpp" />
     <ClCompile Include="Graphics\DepthManager\DepthManager.cpp" />
@@ -296,8 +294,11 @@
   <ItemGroup>
     <ClInclude Include="APIExportsMacro.h" />
     <ClInclude Include="Core\Utility\AnimationStruct.h" />
+    <ClInclude Include="GameCore\CPrefab\CPrefab.h" />
+    <ClInclude Include="Externals\AIUtilityLib\chunk_vector.h" />
     <ClInclude Include="Core\Utility\SoundData.h" />
     <ClInclude Include="GameCore\GameWorld\GameWorld.h" />
+    <ClInclude Include="GameCore\GameScene\GameScene.h" />
     <ClInclude Include="Resources\AudioManager\AudioManager.h" />
     <ClInclude Include="ChoEngineAPI.h" />
     <ClInclude Include="Core\ChoLog\ChoLog.h" />
@@ -356,12 +357,8 @@
     <ClInclude Include="GameCore\GameCore.h" />
     <ClInclude Include="GameCore\GameObject\GameObject.h" />
     <ClInclude Include="GameCore\IScript\IScript.h" />
-    <ClInclude Include="GameCore\MultiSystemManager\MultiSystemManager.h" />
-    <ClInclude Include="GameCore\ObjectContainer\ObjectContainer.h" />
     <ClInclude Include="GameCore\SceneManager\SceneManager.h" />
     <ClInclude Include="GameCore\ScriptAPI\ScriptAPI.h" />
-    <ClInclude Include="GameCore\SingleSystemManager\SingleSystemManager.h" />
-    <ClInclude Include="GameCore\Systems\EditorSystems.h" />
     <ClInclude Include="GameCore\Systems\MultiSystems.h" />
     <ClInclude Include="GameCore\Systems\SingleSystems.h" />
     <ClInclude Include="Graphics\DepthManager\DepthManager.h" />
@@ -422,6 +419,7 @@
     <None Include="Resources\EngineAssets\Shader\header\Random.hlsli" />
     <None Include="Resources\EngineAssets\Shader\header\ScreenCopy.hlsli" />
     <None Include="Resources\EngineAssets\Shader\header\Skinning.hlsli" />
+    <None Include="Resources\EngineAssets\Shader\header\Skybox.hlsli" />
     <None Include="Resources\EngineAssets\Shader\header\UIStandard.hlsli" />
     <None Include="Resources\EngineAssets\Shader\header\ViewProjection.hlsli" />
   </ItemGroup>
@@ -602,6 +600,22 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Resources\EngineAssets\Shader\Skybox\Skybox.PS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Resources\EngineAssets\Shader\Skybox\Skybox.VS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>

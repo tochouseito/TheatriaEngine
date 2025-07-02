@@ -119,7 +119,7 @@ public:
 	// 名前コンテナを取得する
 	std::unordered_map<std::wstring, uint32_t>& GetModelNameContainer() { return m_ModelNameContainer; }
 	// モデルデータコンテナを取得する
-	std::vector<ModelData>& GetModelDataContainer() { return m_Models.GetVector(); }
+	FVector<ModelData>& GetModelDataContainer() { return m_Models; }
 	// 名前で検索してインデックスを取得する
 	std::optional<uint32_t> GetModelDataIndex(const std::wstring& name);
 	// モデルデータを取得する
@@ -151,6 +151,8 @@ private:
 	void CreateRing();
 	// Cylinderの生成
 	void CreateCylinder();
+	// Skyboxの生成
+	void CreateSkybox();
 
 	// 
 	Node ReadNode(aiNode* node, const std::string& parentName);

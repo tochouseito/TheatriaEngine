@@ -48,14 +48,13 @@ void ChoEngine::Initialize()
 
 	// GameCore初期化
 	gameCore = std::make_unique<GameCore>();
-	gameCore->Initialize(platformLayer->GetInputManager(), resourceManager.get(),graphicsEngine.get());
+	gameCore->Initialize(resourceManager.get(),graphicsEngine.get());
 
 	// EngineCommand初期化
 	engineCommand = std::make_unique<EngineCommand>(gameCore.get(), resourceManager.get(), graphicsEngine.get(),platformLayer->GetInputManager());
 	// GameCoreにEngineCommandをセット
 	gameCore->SetEngineCommandPtr(engineCommand.get());
 	graphicsEngine->SetEngineCommand(engineCommand.get());
-	gameCore->CreateSystems(platformLayer->GetInputManager(), resourceManager.get(), graphicsEngine.get());
 
 	// EditorManager初期化
 	editorManager = std::make_unique<EditorManager>(engineCommand.get(), platformLayer->GetInputManager());
@@ -79,10 +78,10 @@ void ChoEngine::Finalize()
 		if (gameCore->IsRunning())
 		{
 			gameCore->GameStop();
-			gameCore->SceneUpdate();
+			//gameCore->SceneUpdate();
 			//gameCore->Update(*resourceManager, *graphicsEngine);
 		}
-		FileSystem::SaveProject(gameCore->GetSceneManager(), gameCore->GetObjectContainer(), gameCore->GetECSManager(), resourceManager.get());
+		FileSystem::SaveProject(gameCore->GetSceneManager(), gameCore->GetGameWorld(), gameCore->GetECSManager());
 	}
 	// ImGuiManager終了処理
 	imGuiManager->Finalize();
@@ -140,7 +139,7 @@ void ChoEngine::Update()
 			editorManager->Update();
 		}
 	}
-	gameCore->SceneUpdate();
+	//gameCore->SceneUpdate();
 	static bool isGameRun = true;
 	if (runtimeMode == RuntimeMode::Game && isGameRun)
 	{
@@ -148,7 +147,7 @@ void ChoEngine::Update()
 		isGameRun = false;
 	}
 	// GameCore更新
-	gameCore->Update(*resourceManager, *graphicsEngine);
+	gameCore->Update();
 	// ImGuiManager終了
 	imGuiManager->End();
 }
@@ -192,7 +191,7 @@ void ChoEngine::Start()
 	{
 		if (runtimeMode == RuntimeMode::Editor&&!gameCore->IsRunning())
 		{
-			FileSystem::SaveProject(gameCore->GetSceneManager(), gameCore->GetObjectContainer(), gameCore->GetECSManager(), resourceManager.get());
+			FileSystem::SaveProject(gameCore->GetSceneManager(), gameCore->GetGameWorld(), gameCore->GetECSManager());
 		}
 	}
 	// ブランチが変更されたかどうか
@@ -223,13 +222,13 @@ void ChoEngine::Start()
 		imGuiManager->Initialize(dx12->GetDevice(), resourceManager.get());
 		// GameCore初期化
 		gameCore = std::make_unique<GameCore>();
-		gameCore->Initialize(platformLayer->GetInputManager(), resourceManager.get(),graphicsEngine.get());
+		gameCore->Initialize(resourceManager.get(),graphicsEngine.get());
 		// EngineCommand初期化
 		engineCommand = std::make_unique<EngineCommand>(gameCore.get(), resourceManager.get(), graphicsEngine.get(),platformLayer->GetInputManager());
 		// GameCoreにEngineCommandをセット
 		gameCore->SetEngineCommandPtr(engineCommand.get());
 		graphicsEngine->SetEngineCommand(engineCommand.get());
-		gameCore->CreateSystems(platformLayer->GetInputManager(), resourceManager.get(), graphicsEngine.get());
+		
 		// EditorManager初期化
 		editorManager = std::make_unique<EditorManager>(engineCommand.get(), platformLayer->GetInputManager());
 		editorManager->Initialize();

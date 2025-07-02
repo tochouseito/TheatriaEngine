@@ -16,28 +16,6 @@ EngineCommand::EngineCommand(GameCore* gameCore, ResourceManager* resourceManage
 	
 }
 
-GameObject* EngineCommand::GetSelectedObject()
-{
-	if (!m_SelectedObjectName.has_value())
-	{
-		return nullptr;
-	}
-	return &m_GameCore->GetObjectContainer()->GetGameObjectByName(m_SelectedObjectName.value());
-}
-
-// エディタの選択中オブジェクトをセット
-void EngineCommand::SetSelectedObject(const std::optional<std::wstring>& name)
-{
-	if (name.has_value() && name.value().empty())
-	{
-		m_SelectedObjectName = std::nullopt;
-	}
-	else
-	{
-		m_SelectedObjectName = name;
-	}
-}
-
 D3D12_GPU_DESCRIPTOR_HANDLE EngineCommand::GetGameTextureHandle()
 {
 	// ゲームレンダリングテクスチャのバッファインデックスを取得
@@ -69,7 +47,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE EngineCommand::GetTextureHandle(const std::wstring& 
 
 void EngineCommand::SaveProjectFile()
 {
-	Cho::FileSystem::SaveProject(m_GameCore->GetSceneManager(), m_GameCore->GetObjectContainer(), m_GameCore->GetECSManager(), m_ResourceManager);
+	Cho::FileSystem::SaveProject(m_GameCore->GetSceneManager(), m_GameCore->GetGameWorld(), m_GameCore->GetECSManager());
 }
 
 void EngineCommand::GenerateScript(const std::string& scriptName)

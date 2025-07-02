@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "PipelineManager.h"
+#include "Graphics/GraphicsEngine/GraphicsEngine.h"
 #include <assert.h>
 
 void PipelineManager::Initialize(ID3D12Device8* device)
@@ -23,6 +24,7 @@ void PipelineManager::Initialize(ID3D12Device8* device)
 	CreatePipelineEffectSprite(device);
 	CreatePipelineUI(device);
 	CreatePipelineSkinningCS(device);
+	CreatePipelineSkybox(device);
 }
 
 std::vector<std::pair<uint32_t, std::string>> PipelineManager::CreateRootParameters(ID3D12ShaderReflection* pReflector, std::vector<D3D12_ROOT_PARAMETER>& rootParameters, std::vector<D3D12_DESCRIPTOR_RANGE>& descriptorRanges, D3D12_SHADER_VISIBILITY VISIBILITY)
@@ -458,49 +460,49 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 	rootParameters[0].Descriptor.ShaderRegister = 0;
 	// IntegrationTransform
-	D3D12_DESCRIPTOR_RANGE integrationTransformRange = {};
-	integrationTransformRange.BaseShaderRegister = 0;//t0
-	integrationTransformRange.RegisterSpace = 0;// space0
-	integrationTransformRange.NumDescriptors = 1;
-	integrationTransformRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	integrationTransformRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	//D3D12_DESCRIPTOR_RANGE integrationTransformRange = {};
+	//integrationTransformRange.BaseShaderRegister = 0;//t0
+	//integrationTransformRange.RegisterSpace = 0;// space0
+	//integrationTransformRange.NumDescriptors = 1;
+	//integrationTransformRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	//integrationTransformRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
 	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-	rootParameters[1].DescriptorTable.pDescriptorRanges = &integrationTransformRange;
-	rootParameters[1].DescriptorTable.NumDescriptorRanges = 1;
+	rootParameters[1].Descriptor.ShaderRegister = 0;
+	rootParameters[1].Descriptor.RegisterSpace = 0; // space0
 	// UseTransformList
-	D3D12_DESCRIPTOR_RANGE useTransformListRange = {};
-	useTransformListRange.BaseShaderRegister = 1;//t1
-	useTransformListRange.RegisterSpace = 0;// space0
-	useTransformListRange.NumDescriptors = 1;
-	useTransformListRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	useTransformListRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	//D3D12_DESCRIPTOR_RANGE useTransformListRange = {};
+	//useTransformListRange.BaseShaderRegister = 1;//t1
+	//useTransformListRange.RegisterSpace = 0;// space0
+	//useTransformListRange.NumDescriptors = 1;
+	//useTransformListRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	//useTransformListRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
 	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-	rootParameters[2].DescriptorTable.pDescriptorRanges = &useTransformListRange;
-	rootParameters[2].DescriptorTable.NumDescriptorRanges = 1;
+	rootParameters[2].Descriptor.ShaderRegister = 1;
+	rootParameters[2].Descriptor.RegisterSpace = 0; // space0
 	// BoneMatrix
-	D3D12_DESCRIPTOR_RANGE boneMatrixRange = {};
-	boneMatrixRange.BaseShaderRegister = 2;//t2
-	boneMatrixRange.RegisterSpace = 0;// space0
-	boneMatrixRange.NumDescriptors = 1;
-	boneMatrixRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	boneMatrixRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	//D3D12_DESCRIPTOR_RANGE boneMatrixRange = {};
+	//boneMatrixRange.BaseShaderRegister = 2;//t2
+	//boneMatrixRange.RegisterSpace = 0;// space0
+	//boneMatrixRange.NumDescriptors = 1;
+	//boneMatrixRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	//boneMatrixRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
 	rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-	rootParameters[3].DescriptorTable.pDescriptorRanges = &boneMatrixRange;
-	rootParameters[3].DescriptorTable.NumDescriptorRanges = 1;
+	rootParameters[3].Descriptor.ShaderRegister = 2;
+	rootParameters[3].Descriptor.RegisterSpace = 0; // space0
 	// SkinningInfluence
-	D3D12_DESCRIPTOR_RANGE skinningInfluenceRange = {};
-	skinningInfluenceRange.BaseShaderRegister = 3;//t3
-	skinningInfluenceRange.RegisterSpace = 0;// space0
-	skinningInfluenceRange.NumDescriptors = 1;
-	skinningInfluenceRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	skinningInfluenceRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-	rootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	//D3D12_DESCRIPTOR_RANGE skinningInfluenceRange = {};
+	//skinningInfluenceRange.BaseShaderRegister = 3;//t3
+	//skinningInfluenceRange.RegisterSpace = 0;// space0
+	//skinningInfluenceRange.NumDescriptors = 1;
+	//skinningInfluenceRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	//skinningInfluenceRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
 	rootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-	rootParameters[4].DescriptorTable.pDescriptorRanges = &skinningInfluenceRange;
-	rootParameters[4].DescriptorTable.NumDescriptorRanges = 1;
+	rootParameters[4].Descriptor.ShaderRegister = 3;
+	rootParameters[4].Descriptor.RegisterSpace = 0; // space0
 	// SkinningInfo
 	rootParameters[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	rootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
@@ -514,27 +516,27 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 	rootParameters[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 	rootParameters[7].Descriptor.ShaderRegister = 3;
 	// IntegrationTransform
-	D3D12_DESCRIPTOR_RANGE integrationTransformRange2 = {};
-	integrationTransformRange2.BaseShaderRegister = 0;//t0
-	integrationTransformRange2.RegisterSpace = 1;// space1
-	integrationTransformRange2.NumDescriptors = 1;
-	integrationTransformRange2.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	integrationTransformRange2.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-	rootParameters[8].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	//D3D12_DESCRIPTOR_RANGE integrationTransformRange2 = {};
+	//integrationTransformRange2.BaseShaderRegister = 0;//t0
+	//integrationTransformRange2.RegisterSpace = 1;// space1
+	//integrationTransformRange2.NumDescriptors = 1;
+	//integrationTransformRange2.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	//integrationTransformRange2.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameters[8].ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
 	rootParameters[8].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	rootParameters[8].DescriptorTable.pDescriptorRanges = &integrationTransformRange2;
-	rootParameters[8].DescriptorTable.NumDescriptorRanges = 1;
+	rootParameters[8].Descriptor.ShaderRegister = 0;
+	rootParameters[8].Descriptor.RegisterSpace = 1; // space1
 	// IntegrationMaterial
-	D3D12_DESCRIPTOR_RANGE integrationMaterialRange = {};
-	integrationMaterialRange.BaseShaderRegister = 1;//t1
-	integrationMaterialRange.RegisterSpace = 1;// space1
-	integrationMaterialRange.NumDescriptors = 1;
-	integrationMaterialRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	integrationMaterialRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-	rootParameters[9].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	//D3D12_DESCRIPTOR_RANGE integrationMaterialRange = {};
+	//integrationMaterialRange.BaseShaderRegister = 1;//t1
+	//integrationMaterialRange.RegisterSpace = 1;// space1
+	//integrationMaterialRange.NumDescriptors = 1;
+	//integrationMaterialRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	//integrationMaterialRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameters[9].ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
 	rootParameters[9].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	rootParameters[9].DescriptorTable.pDescriptorRanges = &integrationMaterialRange;
-	rootParameters[9].DescriptorTable.NumDescriptorRanges = 1;
+	rootParameters[9].Descriptor.ShaderRegister = 1;
+	rootParameters[9].Descriptor.RegisterSpace = 1; // space1
 	// Texture
 	D3D12_DESCRIPTOR_RANGE textureRange = {};
 	textureRange.BaseShaderRegister = 2;//t2
@@ -546,6 +548,17 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 	rootParameters[10].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 	rootParameters[10].DescriptorTable.pDescriptorRanges = &textureRange;
 	rootParameters[10].DescriptorTable.NumDescriptorRanges = 1;
+
+	//D3D12_DESCRIPTOR_RANGE universalRange = {};
+	//universalRange.BaseShaderRegister = 0;//t0
+	//universalRange.RegisterSpace = 0;// space0
+	//universalRange.NumDescriptors = static_cast<UINT>(std::pow(2, 16)); // 65536
+	//universalRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	//universalRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	//rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	//rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	//rootParameters[0].DescriptorTable.pDescriptorRanges = &universalRange;
+	//rootParameters[0].DescriptorTable.NumDescriptorRanges = 1;
 
 	rootSignatureDesc.pParameters = rootParameters;
 	rootSignatureDesc.NumParameters = _countof(rootParameters);
@@ -607,6 +620,53 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 		IID_PPV_ARGS(&m_IntegratePSO.rootSignature)
 	);
 	Log::Write(LogLevel::Assert, "Root signature created.", hr);
+
+	// Command Signature
+	D3D12_INDIRECT_ARGUMENT_DESC argDesc[11] = {};
+	// ViewProjection
+	argDesc[0].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT_BUFFER_VIEW;
+	argDesc[0].ConstantBufferView.RootParameterIndex = 0;
+	// IntegrationTransform
+	argDesc[1].Type = D3D12_INDIRECT_ARGUMENT_TYPE_SHADER_RESOURCE_VIEW;
+	argDesc[1].ShaderResourceView.RootParameterIndex = 1;
+	// UseTransformList
+	argDesc[2].Type = D3D12_INDIRECT_ARGUMENT_TYPE_SHADER_RESOURCE_VIEW;
+	argDesc[2].ShaderResourceView.RootParameterIndex = 2;
+	// BoneMatrix
+	argDesc[3].Type = D3D12_INDIRECT_ARGUMENT_TYPE_SHADER_RESOURCE_VIEW;
+	argDesc[3].ShaderResourceView.RootParameterIndex = 3;
+	// SkinningInfluence
+	argDesc[4].Type = D3D12_INDIRECT_ARGUMENT_TYPE_SHADER_RESOURCE_VIEW;
+	argDesc[4].ShaderResourceView.RootParameterIndex = 4;
+	// SkinningInfo
+	argDesc[5].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT_BUFFER_VIEW;
+	argDesc[5].ConstantBufferView.RootParameterIndex = 5;
+	// Lights
+	argDesc[6].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT_BUFFER_VIEW;
+	argDesc[6].ConstantBufferView.RootParameterIndex = 6;
+	// Environment
+	argDesc[7].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT_BUFFER_VIEW;
+	argDesc[7].ConstantBufferView.RootParameterIndex = 7;
+	// IntegrationTransform
+	argDesc[8].Type = D3D12_INDIRECT_ARGUMENT_TYPE_SHADER_RESOURCE_VIEW;
+	argDesc[8].ShaderResourceView.RootParameterIndex = 8;
+	// IntegrationMaterial
+	argDesc[9].Type = D3D12_INDIRECT_ARGUMENT_TYPE_SHADER_RESOURCE_VIEW;
+	argDesc[9].ShaderResourceView.RootParameterIndex = 9;
+	// DrawIndexed
+	argDesc[10].Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED;
+
+	D3D12_COMMAND_SIGNATURE_DESC cmdSigDesc = {};
+	cmdSigDesc.ByteStride = sizeof(IndirectArgs);
+	cmdSigDesc.NumArgumentDescs = _countof(argDesc);
+	cmdSigDesc.pArgumentDescs = argDesc;
+
+	hr = device->CreateCommandSignature(
+		&cmdSigDesc,
+		m_IntegratePSO.rootSignature.Get(),
+		IID_PPV_ARGS(&m_IntegratePSO.commandSignature)
+	);
+
 	// InputLayout
 	D3D12_INPUT_ELEMENT_DESC inputElementDesc[5] = {};
 	inputElementDesc[0].SemanticName = "POSITION";
@@ -661,7 +721,7 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
 	// 比較関数はLessEqual。つまり、近ければ描画される
 	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
-
+	
 	// Create PSO
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc{};
 	psoDesc.pRootSignature = m_IntegratePSO.rootSignature.Get();
@@ -683,6 +743,20 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 		IID_PPV_ARGS(&m_IntegratePSO.pso)
 	);
 	Log::Write(LogLevel::Assert, "Pipeline state created.", hr);
+
+	// コマンド引数バッファを作成
+	m_IntegratePSO.indirectArgsBuffer = std::make_unique<ConstantBuffer<IndirectArgs>>();
+	m_IntegratePSO.indirectArgsBuffer->CreateConstantBufferResource(device);
+	// リソースの状態遷移
+	CommandContext* context = m_pGraphicsEngine->GetCommandContext();
+	m_pGraphicsEngine->BeginCommandContext(context);
+	context->BarrierTransition(
+		m_IntegratePSO.indirectArgsBuffer->GetResource(),
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT
+	);
+	m_pGraphicsEngine->EndCommandContext(context, Compute);
+	m_pGraphicsEngine->WaitForGPU(Compute);
 }
 
 void PipelineManager::CreatePipelineLine(ID3D12Device8* device)
@@ -2548,4 +2622,146 @@ void PipelineManager::CreatePipelineSkinningCS(ID3D12Device8* device)
 	hr = device->CreateComputePipelineState(&computePipelineStateDesc,
 		IID_PPV_ARGS(&m_Skinning.pso));
 	assert(SUCCEEDED(hr));
+}
+
+void PipelineManager::CreatePipelineSkybox(ID3D12Device8* device)
+{
+	HRESULT hr = {};
+	// Compile shaders
+	ComPtr<IDxcBlob> pVSBlob =
+		m_pShaderCompiler->CompileShader(
+			L"Cho/Resources/EngineAssets/Shader/Skybox/Skybox.VS.hlsl",
+			L"vs_6_5"
+		);
+	//ComPtr<ID3D12ShaderReflection> pVSReflection = m_pShaderCompiler->ReflectShader(pVSBlob.Get());
+
+	ComPtr<IDxcBlob> pPSBlob =
+		m_pShaderCompiler->CompileShader(
+			L"Cho/Resources/EngineAssets/Shader/Skybox/Skybox.PS.hlsl",
+			L"ps_6_5"
+		);
+	//ComPtr<ID3D12ShaderReflection> pPSReflection = m_pShaderCompiler->ReflectShader(pPSBlob.Get());
+	// CreateRootSignature
+	D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc = {};
+	rootSignatureDesc.Flags =
+		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+	// ジェネリックに作成
+	D3D12_ROOT_PARAMETER rootParameters[2] = {};
+
+	// ViewProjection
+	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	rootParameters[0].Descriptor.ShaderRegister = 0;
+	// TextureCube
+	D3D12_DESCRIPTOR_RANGE textureCubeRange = {};
+	textureCubeRange.BaseShaderRegister = 0;
+	textureCubeRange.NumDescriptors = 1;
+	textureCubeRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	textureCubeRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[1].DescriptorTable.pDescriptorRanges = &textureCubeRange;// Tableの中身の配列を指定
+	rootParameters[1].DescriptorTable.NumDescriptorRanges = 1;// Tableで利用する数
+
+	rootSignatureDesc.pParameters = rootParameters;
+	rootSignatureDesc.NumParameters = _countof(rootParameters);
+
+	// Static Sampler
+	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
+	staticSamplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;// バイリニアフィルタ
+	staticSamplers[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;// 0~1の範囲外をリピート
+	staticSamplers[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	staticSamplers[0].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	staticSamplers[0].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;// 比較しない
+	staticSamplers[0].MaxLOD = D3D12_FLOAT32_MAX;// ありったけのMipmapを使う
+	staticSamplers[0].ShaderRegister = 0;// レジスタ番号を使う
+	staticSamplers[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;// PixelShaderで使う
+	rootSignatureDesc.pStaticSamplers = staticSamplers;
+	rootSignatureDesc.NumStaticSamplers = _countof(staticSamplers);
+	// Serialize RootSignature
+	ComPtr<ID3DBlob> pSignature;
+	ComPtr<ID3DBlob> pError;
+	hr = D3D12SerializeRootSignature(
+		&rootSignatureDesc,
+		D3D_ROOT_SIGNATURE_VERSION_1,
+		&pSignature,
+		&pError
+	);
+	if (FAILED(hr))
+	{
+		Log::Write(LogLevel::Error, reinterpret_cast<const char*>(pError->GetBufferPointer()));
+	}
+	// Create RootSignature
+	hr = device->CreateRootSignature(
+		0,
+		pSignature->GetBufferPointer(),
+		pSignature->GetBufferSize(),
+		IID_PPV_ARGS(&m_SkyboxPSO.rootSignature)
+	);
+	Log::Write(LogLevel::Assert, "Root signature created.", hr);
+	// InputLayout
+	D3D12_INPUT_ELEMENT_DESC inputElementDesc[2] = {};
+	inputElementDesc[0].SemanticName = "POSITION";
+	inputElementDesc[0].SemanticIndex = 0;
+	inputElementDesc[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	inputElementDesc[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	inputElementDesc[1].SemanticName = "TEXCOORD";
+	inputElementDesc[1].SemanticIndex = 0;
+	inputElementDesc[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+	inputElementDesc[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
+	inputLayoutDesc.pInputElementDescs = inputElementDesc;
+	inputLayoutDesc.NumElements = _countof(inputElementDesc);
+
+	// BlendState
+	D3D12_BLEND_DESC blendDesc{};
+	// すべての色要素を書き込む
+	blendDesc.RenderTarget[0].RenderTargetWriteMask =
+		D3D12_COLOR_WRITE_ENABLE_ALL;
+	blendDesc.RenderTarget[0].BlendEnable = true;
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ZERO;
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ONE;
+
+	// RasterizerState
+	D3D12_RASTERIZER_DESC rasterizerDesc{};
+	// 裏面（時計回り）を表示しな
+	rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	// 三角形の中を塗りつぶす
+	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
+
+	// DepthStencilState
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
+	// Depthの機能を有効化する
+	depthStencilDesc.DepthEnable = true;
+	// 書き込みをします
+	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+	// 比較関数はLessEqual。つまり、近ければ描画される
+	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+
+	// Create PSO
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc{};
+	psoDesc.pRootSignature = m_SkyboxPSO.rootSignature.Get();
+	psoDesc.VS = { pVSBlob->GetBufferPointer(),pVSBlob->GetBufferSize() };
+	psoDesc.PS = { pPSBlob->GetBufferPointer(),pPSBlob->GetBufferSize() };
+	psoDesc.InputLayout = inputLayoutDesc;
+	psoDesc.BlendState = blendDesc;
+	psoDesc.RasterizerState = rasterizerDesc;
+	psoDesc.DepthStencilState = depthStencilDesc;
+	psoDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	psoDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
+	psoDesc.SampleDesc.Count = 1;
+	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	psoDesc.NumRenderTargets = 1;
+	psoDesc.RTVFormats[0] = PixelFormat;
+	// Create PSO
+	hr = device->CreateGraphicsPipelineState(
+		&psoDesc,
+		IID_PPV_ARGS(&m_SkyboxPSO.pso)
+	);
+	Log::Write(LogLevel::Assert, "Pipeline state created.", hr);
 }

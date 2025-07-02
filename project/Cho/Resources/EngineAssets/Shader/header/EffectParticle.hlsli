@@ -6,6 +6,9 @@ struct EffectParticlePVA
 };
 struct EffectParticle
 {
+    float3 wPos;
+    float3 wRot;
+    float3 wScl;
     EffectParticlePVA position;
     EffectParticlePVA rotation;
     EffectParticlePVA scale;

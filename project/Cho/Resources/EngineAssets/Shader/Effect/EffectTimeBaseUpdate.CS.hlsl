@@ -51,11 +51,11 @@ void main(uint3 DTid : SV_DispatchThreadID, uint3 Gid : SV_GroupID, uint3 GTid :
     // 生きているパーティクルの更新
     if (particle.isAlive) { 
         // 位置
-        particle.position.value = particle.position.value + particle.position.velocity * currentTime + 0.5f * particle.position.acceleration * currentTime * currentTime;
+        particle.wPos = particle.position.value + particle.position.velocity * currentTime + 0.5f * particle.position.acceleration * currentTime * currentTime;
         // 回転
-        particle.rotation.value = particle.rotation.value + particle.rotation.velocity * currentTime + 0.5f * particle.rotation.acceleration * currentTime * currentTime;
+        particle.wRot = particle.rotation.value + particle.rotation.velocity * currentTime + 0.5f * particle.rotation.acceleration * currentTime * currentTime;
         // スケール
-        particle.scale.value = particle.scale.value + particle.scale.velocity * currentTime + 0.5f * particle.scale.acceleration * currentTime * currentTime;
+        particle.wScl = particle.scale.value + particle.scale.velocity * currentTime + 0.5f * particle.scale.acceleration * currentTime * currentTime;
         // 色
         switch (node.draw.meshType) {
             case MESH_TYPE_SPRITE:

@@ -8,6 +8,7 @@
 #include "GameCore/GameObject/GameObject.h"
 #include "Platform/FileSystem/FileSystem.h"
 #include "Platform/InputManager/InputManager.h"
+#include "Resources/ResourceManager/ResourceManager.h"
 
 void MainMenu::Initialize()
 {
@@ -368,9 +369,8 @@ void MainMenu::PopupNewSceneName()
 		if (ImGui::Button("OK"))
 		{
 			std::string sceneName = sceneNameBuffer;
-			ScenePrefab scene(m_EngineCommand->GetGameCore()->GetSceneManager());
-			scene.SetSceneName(ConvertString(sceneName));
-			m_EngineCommand->GetGameCore()->GetSceneManager()->AddScene(scene);
+            GameScene gameScene(ConvertString(sceneName));
+			m_EngineCommand->GetGameCore()->GetSceneManager()->AddScene(gameScene);
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::SameLine();
@@ -416,11 +416,11 @@ void MainMenu::SettingWindow()
     }
     if (ImGui::BeginCombo("##firstSceneSelector", ConvertString(startScene).c_str()))
     {
-        for (const auto& scene : m_EngineCommand->GetGameCore()->GetSceneManager()->GetScenes().GetVector())
+        for (const auto& scene : m_EngineCommand->GetGameCore()->GetSceneManager()->GetScenes())
         {
-            if (ImGui::Selectable(ConvertString(scene->GetSceneName()).c_str()))
+            if (ImGui::Selectable(ConvertString(scene.GetName()).c_str()))
             {
-                selectFirstScene = scene->GetSceneName();
+				selectFirstScene = scene.GetName(); // 選択されたシーン名を保存
                 // ゲーム設定に保存
                 Cho::FileSystem::g_GameSettings.startScene = selectFirstScene;
             }
@@ -428,27 +428,52 @@ void MainMenu::SettingWindow()
         ImGui::EndCombo();
     }
     ImGui::Text("シーンを切り替え");
-	std::wstring sceneName = L"シーンがありません";
-    if (m_EngineCommand->GetGameCore()->GetSceneManager()->GetMainScene())
+	//std::wstring sceneName = L"シーンがありません";
+ //   if (m_EngineCommand->GetGameCore()->GetSceneManager()->GetMainScene())
+ //   {
+ //       sceneName = m_EngineCommand->GetGameCore()->GetSceneManager()->GetMainScene()->GetSceneName();
+ //   }
+	//if (ImGui::BeginCombo("##SceneSelector", ConvertString(sceneName).c_str()))
+	//{
+	//	for (const auto& scene : m_EngineCommand->GetGameCore()->GetSceneManager()->GetScenes().GetVector())
+	//	{
+ //           if (ImGui::Selectable(ConvertString(scene->GetSceneName()).c_str()))
+ //           {
+ //               if (m_EngineCommand->GetGameCore()->GetSceneManager()->GetMainScene()->GetSceneName() !=
+ //                   scene->GetSceneName())
+ //               {
+ //                   //m_EngineCommand->GetGameCore()->GetSceneManager()->ChangeSceneRequest(scene->GetSceneID());
+ //                   m_EngineCommand->GetGameCore()->GetSceneManager()->ChangeMainScene(scene->GetSceneName());
+	//				m_EngineCommand->SetSelectedObject(std::nullopt);
+ //               }
+ //           }
+	//	}
+	//	ImGui::EndCombo();
+	//}
+
+	// SkyboxTextureの選択
+	ImGui::Text("Skybox Texture");
+	std::wstring skyboxTextureName = L"テクスチャがありません";
+    if (!m_EngineCommand->GetResourceManager()->GetSkyboxTextureName().empty())
     {
-        sceneName = m_EngineCommand->GetGameCore()->GetSceneManager()->GetMainScene()->GetSceneName();
+		skyboxTextureName = m_EngineCommand->GetResourceManager()->GetSkyboxTextureName();
     }
-	if (ImGui::BeginCombo("##SceneSelector", ConvertString(sceneName).c_str()))
-	{
-		for (const auto& scene : m_EngineCommand->GetGameCore()->GetSceneManager()->GetScenes().GetVector())
-		{
-            if (ImGui::Selectable(ConvertString(scene->GetSceneName()).c_str()))
+    std::unordered_map<std::wstring, uint32_t>& textureMap = m_EngineCommand->GetResourceManager()->GetTextureManager()->GetTextureNameContainer();
+
+    if(ImGui::BeginCombo("##SkyboxTextureSelector", ConvertString(skyboxTextureName).c_str()))
+    {
+        for (const auto& texture : textureMap)
+        {
+            if (!m_EngineCommand->GetResourceManager()->GetTextureManager()->GetTextureData(texture.first)->metadata.IsCubemap())
             {
-                if (m_EngineCommand->GetGameCore()->GetSceneManager()->GetMainScene()->GetSceneName() !=
-                    scene->GetSceneName())
-                {
-                    //m_EngineCommand->GetGameCore()->GetSceneManager()->ChangeSceneRequest(scene->GetSceneID());
-                    m_EngineCommand->GetGameCore()->GetSceneManager()->ChangeMainScene(scene->GetSceneName());
-					m_EngineCommand->SetSelectedObject(std::nullopt);
-                }
+				continue; // キューブマップでないテクスチャはスキップ
             }
-		}
-		ImGui::EndCombo();
+            if (ImGui::Selectable(ConvertString(texture.first).c_str()))
+            {
+                m_EngineCommand->GetResourceManager()->SetSkyboxTextureName(texture.first);
+            }
+        }
+        ImGui::EndCombo();
 	}
 
     ImGui::End();

@@ -4,14 +4,6 @@
 #include "GameCore/IScript/IScript.h"
 #include "Platform/FileSystem/FileSystem.h"
 #include "Core/ChoLog/ChoLog.h"
-using namespace Cho;
-
-void LineRendererSystem::UpdateComponent(Entity e, LineRendererComponent& line)
-{
-	e;
-	// 転送
-	TransferMatrix(line);
-}
 
 void LineRendererSystem::TransferMatrix(LineRendererComponent& lineRenderer)
 {

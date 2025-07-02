@@ -55,6 +55,11 @@ struct Vector3 final {
         return { x * scalar, y * scalar, z * scalar };
     }
 
+	// ベクトル乗算
+    Vector3 operator*(const Vector3& other) const {
+        return { x * other.x, y * other.y, z * other.z };
+	}
+
     // += 演算子
     Vector3& operator+=(const Vector3& other) {
         x += other.x;

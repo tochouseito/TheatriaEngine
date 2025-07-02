@@ -2,7 +2,9 @@
 #include <optional>
 #include "EngineCommand/EngineCommand.h"
 #include "Core/Utility/Components.h"
-
+class GameObject;
+class IPrefab;
+class CPrefab;
 // 3Dオブジェクトを追加するコマンド
 class Add3DObjectCommand :public IEngineCommand
 {
@@ -12,10 +14,11 @@ public:
 	}
 	bool Execute(EngineCommand* edit)override;
 	bool Undo(EngineCommand* edit)override;
-	// オブジェクトのIDを取得
-	uint32_t GetObjectID() const { return m_ObjectID; }
+	
+	// オブジェクトのハンドルを取得
+	ObjectHandle GetObjectHandle() const { return m_Handle; }
 private:
-	uint32_t m_ObjectID;
+	ObjectHandle m_Handle;
 };
 // カメラオブジェクトを追加するコマンド
 class AddCameraObjectCommand :public IEngineCommand
@@ -26,8 +29,10 @@ public:
 	}
 	bool Execute(EngineCommand* edit)override;
 	bool Undo(EngineCommand* edit)override;
+	// オブジェクトのハンドルを取得
+	ObjectHandle GetObjectHandle() const { return m_Handle; }
 private:
-	uint32_t m_ObjectID;
+	ObjectHandle m_Handle;
 };
 // パーティクルシステムオブジェクトを追加するコマンド
 class AddParticleSystemObjectCommand :public IEngineCommand
@@ -39,7 +44,7 @@ public:
 	bool Execute(EngineCommand* edit)override;
 	bool Undo(EngineCommand* edit)override;
 private:
-	uint32_t m_ObjectID;
+	ObjectHandle m_Handle;
 };
 // Effectオブジェクトを追加するコマンド
 class AddEffectObjectCommand :public IEngineCommand
@@ -51,7 +56,7 @@ public:
 	bool Execute(EngineCommand* edit)override;
 	bool Undo(EngineCommand* edit)override;
 private:
-	uint32_t m_Entity;
+	ObjectHandle m_Handle;
 };
 // UIオブジェクトを追加するコマンド
 class AddUIObjectCommand :public IEngineCommand
@@ -63,7 +68,7 @@ public:
 	bool Execute(EngineCommand* edit)override;
 	bool Undo(EngineCommand* edit)override;
 private:
-	uint32_t m_ObjectID;
+	ObjectHandle m_Handle;
 };
 // LightObjectを追加するコマンド
 class AddLightObjectCommand :public IEngineCommand
@@ -75,7 +80,7 @@ public:
 	bool Execute(EngineCommand* edit)override;
 	bool Undo(EngineCommand* edit)override;
 private:
-	uint32_t m_ObjectID;
+	ObjectHandle m_Handle;
 };
 // MeshFilterComponentを追加するコマンド
 class AddMeshFilterComponent :public IEngineCommand
@@ -107,29 +112,28 @@ private:
 class SetMainCamera :public IEngineCommand
 {
 public:
-	SetMainCamera(const uint32_t& setCameraID):
-		m_SetCameraID(setCameraID)
+	SetMainCamera(const ObjectHandle& setCameraHandle):
+		m_SetCameraHandle(setCameraHandle)
 	{
 	}
 	bool Execute(EngineCommand* edit)override;
 	bool Undo(EngineCommand* edit)override;
 private:
-	std::optional<uint32_t> m_PreCameraID = std::nullopt;
-	std::optional<uint32_t> m_SetCameraID = std::nullopt;
+	ObjectHandle m_PreCameraHandle{};
+	ObjectHandle m_SetCameraHandle{};
 };
 // スクリプトコンポーネントを追加するコマンド
 class AddScriptComponent :public IEngineCommand
 {
 public:
-	AddScriptComponent(const uint32_t& entity,const uint32_t& objectID) :
-		m_Entity(entity), m_ObjectID(objectID)
+	AddScriptComponent(const uint32_t& entity) :
+		m_Entity(entity)
 	{
 	}
 	bool Execute(EngineCommand* edit)override;
 	bool Undo(EngineCommand* edit)override;
 private:
 	uint32_t m_Entity;
-	uint32_t m_ObjectID;
 };
 // ラインレンダラーコンポーネントを追加するコマンド
 class AddLineRendererComponent :public IEngineCommand
@@ -149,15 +153,14 @@ private:
 class AddRigidbody2DComponent :public IEngineCommand
 {
 public:
-	AddRigidbody2DComponent(const uint32_t& entity,const uint32_t& objectID) :
-		m_Entity(entity), m_ObjectID(objectID)
+	AddRigidbody2DComponent(const uint32_t& entity) :
+		m_Entity(entity)
 	{
 	}
 	bool Execute(EngineCommand* edit)override;
 	bool Undo(EngineCommand* edit)override;
 private:
 	uint32_t m_Entity;
-	uint32_t m_ObjectID;
 };
 // BoxCollider2Dコンポーネントを追加するコマンド
 class AddBoxCollider2DComponent :public IEngineCommand
@@ -173,48 +176,31 @@ private:
 	uint32_t m_Entity;
 };
 // オブジェクトを削除するコマンド
-class GameObject;
 class DeleteObjectCommand : public IEngineCommand
 {
 public:
-	DeleteObjectCommand(const uint32_t& objectID) :
-		m_ObjectID(objectID)
+	DeleteObjectCommand(const ObjectHandle& handle) :
+		m_Handle(handle)
 	{
 	}
 	bool Execute(EngineCommand* edit)override;
 	bool Undo(EngineCommand* edit)override;
 private:
-	uint32_t m_ObjectID;
-	std::wstring m_Name;
-	ObjectType m_Type;
-	TransformComponent m_Transform;
-	std::optional<CameraComponent> m_Camera;
-	std::optional<MeshFilterComponent> m_MeshFilter;
-	std::optional<MeshRendererComponent> m_MeshRenderer;
-	std::optional<MaterialComponent> m_Material;
-	std::optional<ScriptComponent> m_Script;
-	std::optional<std::vector<LineRendererComponent>> m_LineRenderer;
-	std::optional<Rigidbody2DComponent> m_Rigidbody2D;
-	std::optional<BoxCollider2DComponent> m_BoxCollider2D;
-	std::optional<EmitterComponent> m_Emitter;
-	std::optional<ParticleComponent> m_Particle;
-	std::optional<UISpriteComponent> m_UISprite;
-	std::optional<LightComponent> m_Light;
-	std::optional<AnimationComponent> m_Animation;
-	std::optional<AudioComponent> m_Audio;
+	std::unique_ptr<CPrefab> m_Prefab; // 削除前のPrefab情報を保持
+	ObjectHandle m_Handle{};
 };
 // オブジェクトの名前を変更するコマンド
 class RenameObjectCommand : public IEngineCommand
 {
 public:
-	RenameObjectCommand(const uint32_t& objectID, const std::wstring& name) :
-		m_ObjectID(objectID), m_NewName(name)
+	RenameObjectCommand(const ObjectHandle& handle, const std::wstring& name) :
+		m_Handle(handle), m_NewName(name)
 	{
 	}
 	bool Execute(EngineCommand* edit)override;
 	bool Undo(EngineCommand* edit)override;
 private:
-	uint32_t m_ObjectID;
+	ObjectHandle m_Handle;
 	std::wstring m_NewName;
 	std::wstring m_PreName;
 };
@@ -297,20 +283,6 @@ public:
 private:
 	uint32_t m_Entity;
 };
-// GameObjectを複製するコマンド
-class CopyGameObjectCommand : public IEngineCommand
-{
-	public:
-	CopyGameObjectCommand(const uint32_t& objectID) :
-		m_ObjectID(objectID)
-	{
-	}
-	bool Execute(EngineCommand* edit)override;
-	bool Undo(EngineCommand* edit)override;
-private:
-	uint32_t m_ObjectID;
-	uint32_t m_CopyObjectID;
-};
 
 // Effectを新規作成するコマンド
 class CreateEffectCommand : public IEngineCommand
@@ -342,15 +314,15 @@ private:
 class CloneObjectCommand : public IEngineCommand
 {
 public:
-	CloneObjectCommand(const std::wstring& sceneName)
-		:m_CurrendSceneName(sceneName)
+	CloneObjectCommand(const ObjectHandle& handle):
+		m_Src(handle)
 	{
 	}
 	bool Execute(EngineCommand* edit)override;
 	bool Undo(EngineCommand* edit)override;
 	// オブジェクトのIDを取得
-	uint32_t GetObjectID() const { return m_ObjectID; }
+	ObjectHandle GetDstHandle() const { return m_Dst; }
 private:
-	uint32_t m_ObjectID;
-	std::wstring m_CurrendSceneName;
+	ObjectHandle m_Src;
+	ObjectHandle m_Dst;
 };

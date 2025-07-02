@@ -11,33 +11,28 @@
 //
 //};
 
-class ECSManager;
-class ResourceManager;
-class InputManager;
-class ObjectContainer;
+class GameWorld;
 class ContactListener2D : public b2ContactListener
 {
 public:
-	ContactListener2D(ECSManager* ecs, ResourceManager* resourceManager, InputManager* inputManager, ObjectContainer* objectContainer)
-		: m_pResourceManager(resourceManager), m_pInputManager(inputManager), m_pObjectContainer(objectContainer), m_pECS(ecs)
+	ContactListener2D(ECSManager* ecs, GameWorld* gameWorld):
+		m_pECS(ecs), m_pGameWorld(gameWorld)
 	{
 	}
 	void BeginContact(b2Contact* contact) override;
 	void EndContact(b2Contact* contact) override;
 private:
-	void CollisionEnter(ObjectID self, ObjectID other);
-	void CollisionExit(ObjectID self, ObjectID other);
+	void CollisionEnter(const Entity& self, const Entity& other);
+	void CollisionExit(const Entity& self, const Entity& other);
 
-	ECSManager* m_pECS = nullptr; // 外部から渡す or シングルトンで取得
-	ResourceManager* m_pResourceManager = nullptr;
-	InputManager* m_pInputManager = nullptr;
-	ObjectContainer* m_pObjectContainer = nullptr;
+	ECSManager* m_pECS = nullptr;
+	GameWorld* m_pGameWorld = nullptr;	
 };
 class RayCastCallback : public b2RayCastCallback
 {
 public:
-	RayCastCallback(ObjectContainer* objectContainer, std::string tag) :
-		m_ObjectContainer(objectContainer), m_Tag(tag)
+	RayCastCallback(GameWorld* gameWorld, std::string tag) :
+		m_pGameWorld(gameWorld), m_Tag(tag)
 	{
 	}
 
@@ -51,6 +46,6 @@ public:
 	b2Fixture* fixture = nullptr;
 	b2Body* body = nullptr;
 private:
-	ObjectContainer* m_ObjectContainer = nullptr;
+	GameWorld* m_pGameWorld = nullptr;
 	std::string m_Tag;
 };

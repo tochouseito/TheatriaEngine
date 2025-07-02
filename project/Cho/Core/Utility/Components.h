@@ -1,35 +1,22 @@
 #pragma once
 #include "ChoMath.h"// ChoEngine数学ライブラリ
 #include <Externals/box2d/include/box2d/box2d.h>
+#include <Externals/AIUtilityLib/chunk_vector.h>
 #include "Core/Utility/Color.h"
 #include "Core/Utility/IDType.h"
 #include "Core/Utility/EffectStruct.h"
 #include "Core/Utility/AnimationStruct.h"
 #include "Core/Utility/SoundData.h"
-#include <vector>         // C++98
+#include "GameCore/ECS/ECSManager.h" // ECSManager
 #include <array>          // C++11
-#include <functional>     // C++98
-#include <bitset>         // C++98
-#include <memory>         // C++98
-#include <algorithm>      // C++98
-#include <unordered_map>  // C++11
 #include <unordered_set>  // C++11
 #include <typeindex>      // C++11
 #include <optional>       // C++17
-#include <concepts>       // C++20
 #include <ranges>         // C++20
 #include <numbers>        // C++20
-#include <cstdint>
 #include <variant>
 
-//struct ScriptContext;
 class GameObject;
-
-// コンポーネントだと判別するためのタグ
-struct IComponentTag {};
-// コンポーネントが複数持てるか(デフォルトは持てない)
-template<typename T>
-struct IsMultiComponent : std::false_type {};
 
 // 初期値を保存するための構造体
 struct TransformStartValue
@@ -38,7 +25,7 @@ struct TransformStartValue
 	Quaternion rotation = { 0.0f, 0.0f, 0.0f,1.0f };
 	Scale scale = { 1.0f, 1.0f, 1.0f };
 	Vector3 degrees = { 0.0f, 0.0f, 0.0f };
-};;
+};
 
 struct TransformComponent : public IComponentTag
 {
@@ -54,7 +41,11 @@ struct TransformComponent : public IComponentTag
 	std::wstring parentName = L"";						// 親の名前
 	std::vector<std::wstring> childNames;				// 子供の名前
 	std::optional<uint32_t> parent = std::nullopt;		// 親のEntity
+	Matrix4 matLocal = ChoMath::MakeIdentity4x4();	// ローカル行列
+	Matrix4 matRotation = ChoMath::MakeIdentity4x4();	// 回転行列
+	Matrix4 matScale = ChoMath::MakeIdentity4x4();	// スケール行列
 	int tickPriority = 0;								// Tick優先度
+	Vector3 forward = { 0.0f, 0.0f, 1.0f };			// 前方向ベクトル
 	//uint32_t bufferIndex = UINT32_MAX;				// バッファーインデックス
 	std::optional<uint32_t> mapID = std::nullopt;		// マップインデックス
 	TransformStartValue startValue;						// 初期値保存用
@@ -185,10 +176,10 @@ class IScript;
 struct ScriptComponent : public IComponentTag
 {
 	std::string scriptName = "";								// スクリプト名
-	std::optional<ObjectID> objectID = std::nullopt;			// スクリプトのオブジェクトID
+	ObjectHandle objectHandle;			// スクリプトのオブジェクトハンドル
 	using ScriptFunc = std::function<void()>;					// スクリプト関数型
 
-	IScript* scriptInstance = nullptr;							// スクリプトインスタンス
+	IScript* instance = nullptr;							// スクリプトインスタンス
 	ScriptFunc startFunc;										// Start関数
 	ScriptFunc updateFunc;										// Update関数
 	std::function<void()> cleanupFunc;							// 解放関数
@@ -210,7 +201,7 @@ struct ScriptComponent : public IComponentTag
 	void Initialize()
 	{
 		scriptName = "";
-		objectID = std::nullopt;
+		objectHandle.Clear();
 		startFunc = nullptr;
 		updateFunc = nullptr;
 		cleanupFunc = nullptr;
@@ -265,8 +256,8 @@ struct Rigidbody2DComponent : public IComponentTag
 	b2Body* runtimeBody = nullptr; // Box2D Bodyへのポインタ
 	b2World* world = nullptr; // Box2D Worldへのポインタ
 	bool isCollisionStay = false; // 衝突中フラグ
-	std::optional<ObjectID> otherObjectID = std::nullopt; // 衝突したオブジェクトID
-	std::optional<ObjectID> selfObjectID = std::nullopt; // 自分のオブジェクトID
+	std::optional<Entity> otherEntity = std::nullopt; // 衝突したオブジェクトID
+	std::optional<Entity> selfEntity = std::nullopt; // 自分のオブジェクトID
 	std::optional<b2Vec2> requestedPosition = std::nullopt; // 位置リクエスト
 	//std::optional<b2Vec2> requestedVelocity = std::nullopt; // 速度リクエスト
 	Vector2 velocity = { 0.0f, 0.0f }; // 速度
@@ -299,8 +290,8 @@ struct Rigidbody2DComponent : public IComponentTag
 		bodyType = b2_dynamicBody;
 		world = nullptr;
 		isCollisionStay = false;
-		otherObjectID = std::nullopt;
-		selfObjectID = std::nullopt;
+		otherEntity = std::nullopt;
+		selfEntity = std::nullopt;
 		requestedPosition = std::nullopt;
 		velocity.Initialize();
 	}
@@ -651,6 +642,28 @@ struct AnimationComponent : public IComponentTag
 	//std::optional<uint32_t> paletteBufferIndex = std::nullopt;	// パレットバッファーインデックス
 	//std::optional<uint32_t> influenceBufferIndex = std::nullopt;// インフルエンスバッファーインデックス
 	//std::optional<uint32_t> skinningBufferIndex = std::nullopt;	// スキニングバッファーインデックス
+	
+};
+
+// 全種類のコンポーネントをまとめた構造体
+struct ComponentBlock
+{
+	TransformComponent transform;			// 変形コンポーネント
+	CameraComponent camera;				// カメラコンポーネント
+	MeshFilterComponent meshFilter;		// メッシュフィルターコンポーネント
+	MeshRendererComponent meshRenderer;	// メッシュレンダラーコンポーネント
+	ScriptComponent script;				// スクリプトコンポーネント
+	std::vector<LineRendererComponent> lineRenderers;	// ラインレンダラーコンポーネント
+	Rigidbody2DComponent rigidbody2D;	// 2D物理挙動コンポーネント
+	BoxCollider2DComponent boxCollider2D; // 2D矩形コライダー
+	MaterialComponent material;			// マテリアルコンポーネント
+	EmitterComponent emitter;				// エミッターコンポーネント
+	ParticleComponent particle;			// パーティクルコンポーネント
+	EffectComponent effect;				// エフェクトコンポーネント
+	UISpriteComponent uiSprite;			// UIスプライトコンポーネント
+	LightComponent light;					// ライトコンポーネント
+	AudioComponent audio;					// オーディオコンポーネント
+	AnimationComponent animation;			// アニメーションコンポーネント
 };
 
 // マルチコンポーネントを許可

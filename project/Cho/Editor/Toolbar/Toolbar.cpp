@@ -37,43 +37,36 @@ void Toolbar::Window()
 
     // 左側にプルダウン（Combo）
     ImGui::SetCursorPosX(8); // 左端に寄せる
-    static ObjectID currentTool = 0;
     std::wstring name = L"カメラがありません！";
-    if (m_EngineCommand->GetGameCore()->GetSceneManager()->GetMainScene()->GetMainCameraID().has_value())
+	GameObject* mainCamera = m_EngineCommand->GetGameCore()->GetGameWorld()->GetMainCamera();
+    if (mainCamera)
     {
-        currentTool = m_EngineCommand->GetGameCore()->GetSceneManager()->GetMainScene()->GetMainCameraID().value();
-    }
-	GameObject& currentToolObject = m_EngineCommand->GetGameCore()->GetObjectContainer()->GetGameObject(currentTool);
-    if (currentToolObject.IsActive())
-    {
-		if (currentToolObject.GetType() == ObjectType::Camera)
-		{
-            // オブジェクトの名前を取得
-            name = currentToolObject.GetName();
-		}
+        // オブジェクトの名前を取得
+        name = mainCamera->GetName();
     }
     ImGui::SetNextItemWidth(100); // プルダウンの横幅指定
     if (ImGui::BeginCombo("##ToolSelector", ConvertString(name).c_str()))
     {
-        ObjectID n = 0;
-        for (auto& object : m_EngineCommand->GetGameCore()->GetObjectContainer()->GetGameObjects().GetVector())
+        for (const auto& scene : m_EngineCommand->GetGameCore()->GetGameWorld()->GetWorldContainer())
         {
-			if (object->GetType() != ObjectType::Camera) {
-				n++;
-                continue;
-            }
-            bool is_selected = (currentTool == n);
-            if (ImGui::Selectable(ConvertString(object->GetName()).c_str(), is_selected))
+            for (const auto& objects : scene)
             {
-                currentTool = n;
-				m_EngineCommand->GetGameCore()->GetSceneManager()->GetMainScene()->SetMainCameraID(n);
-				m_EngineCommand->GetGameCore()->GetSceneManager()->GetMainScene()->SetStartCameraName(object->GetName());
+                for (const auto& object : objects)
+                {
+                    if(object->GetType() != ObjectType::Camera) {
+                        continue; // カメラ以外はスキップ
+					}
+					bool is_selected = (object->GetName() == name);
+                    if (ImGui::Selectable(ConvertString(object->GetName()).c_str(), is_selected))
+                    {
+                        m_EngineCommand->GetGameCore()->GetGameWorld()->SetMainCamera(object.get());
+                    }
+                    if (is_selected)
+                    {
+                        ImGui::SetItemDefaultFocus();
+                    }
+                }
             }
-            if (is_selected)
-            {
-                ImGui::SetItemDefaultFocus();
-            }
-			n++;
         }
         ImGui::EndCombo();
     }
