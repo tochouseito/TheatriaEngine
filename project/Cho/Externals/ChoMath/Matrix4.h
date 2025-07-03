@@ -156,6 +156,18 @@ struct Matrix4 final {
         }
     }
 
+    // float[16] 形式に変換
+    void ToArray16(float out[16]) const
+    {
+        for (int row = 0; row < 4; ++row)
+        {
+            for (int col = 0; col < 4; ++col)
+            {
+                out[col * 4 + row] = m[row][col];
+            }
+        }
+    }
+
 public:// 静的メンバ
 
     // 単位行列
@@ -235,6 +247,20 @@ public:// 静的メンバ
         for (int i = 0; i < MatNum; i++) {
             for (int j = 0; j < MatNum; j++) {
                 result.m[i][j] = sweep[i][j + MatNum];
+            }
+        }
+        return result;
+    }
+
+    // float[16] 配列から Matrix4 を生成
+    static Matrix4 FromArray16(const float in[16])
+    {
+        Matrix4 result;
+        for (int row = 0; row < 4; ++row)
+        {
+            for (int col = 0; col < 4; ++col)
+            {
+                result.m[row][col] = in[col * 4 + row];
             }
         }
         return result;

@@ -5,6 +5,7 @@
 class EditorManager;
 class DebugCamera
 {
+	friend class Manipulate;
 public:
 	DebugCamera(EditorManager* editorManager)
 		:m_pEditorManager(editorManager)
@@ -21,6 +22,9 @@ public:
 	void TransferMatrix();
 	void SetAspect(const float& aspect) { m_CameraComponent.aspectRatio = aspect; }
 private:
+	TransformComponent& GetTransformComponent() { return m_TransformComponent; }
+	CameraComponent& GetCameraComponent() { return m_CameraComponent; }
+
 	EditorManager* m_pEditorManager = nullptr;
 	TransformComponent m_TransformComponent;
 	CameraComponent m_CameraComponent;

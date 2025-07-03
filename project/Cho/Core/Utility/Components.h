@@ -109,6 +109,10 @@ struct CameraComponent : public IComponentTag
     float nearZ = 0.1f;
     // 深度限界（奥側）
     float farZ = 1000.0f;
+	// View行列
+	Matrix4 viewMatrix = ChoMath::MakeIdentity4x4();
+	// Projection行列
+	Matrix4 projectionMatrix = ChoMath::MakeIdentity4x4();
 	// バッファーインデックス
 	std::optional<uint32_t> bufferIndex = std::nullopt;
 

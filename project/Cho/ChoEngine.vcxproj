@@ -22,6 +22,7 @@
     <ClCompile Include="GameCore\CPrefab\CPrefab.cpp" />
     <ClCompile Include="GameCore\GameWorld\GameWorld.cpp" />
     <ClCompile Include="GameCore\GameScene\GameScene.cpp" />
+    <ClCompile Include="Editor\Manipulate\Manipulate.cpp" />
     <ClCompile Include="Resources\AudioManager\AudioManager.cpp" />
     <ClCompile Include="ChoEngineAPI.cpp" />
     <ClCompile Include="Core\ChoLog\ChoLog.cpp">
@@ -299,6 +300,7 @@
     <ClInclude Include="Core\Utility\SoundData.h" />
     <ClInclude Include="GameCore\GameWorld\GameWorld.h" />
     <ClInclude Include="GameCore\GameScene\GameScene.h" />
+    <ClInclude Include="Editor\Manipulate\Manipulate.h" />
     <ClInclude Include="Resources\AudioManager\AudioManager.h" />
     <ClInclude Include="ChoEngineAPI.h" />
     <ClInclude Include="Core\ChoLog\ChoLog.h" />

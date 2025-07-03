@@ -90,27 +90,37 @@ void TransformSystem::priorityUpdate()
 
 void TransformSystem::UpdateComponent(Entity e, TransformComponent& transform)
 {
-	// 度数からラジアンに変換
-	Vector3 radians = ChoMath::DegreesToRadians(transform.degrees);
-
-	if (m_isQuaternion)
+	// 変更がなければワールド行列を更新しない
+	if(transform.prePos == transform.position &&
+	   transform.preRot == ChoMath::DegreesToRadians(transform.degrees) &&
+	   transform.preScale == transform.scale)
 	{
-		// クォータニオンを使用する場合
-		transform.rotation = MakeQuaternionRotation(radians, transform);
+		
 	}
 	else
 	{
-		// オイラー角を使用する場合
-		transform.rotation = MakeEulerRotation(radians);
-	};
+		// 度数からラジアンに変換
+		Vector3 radians = ChoMath::DegreesToRadians(transform.degrees);
 
-	// アフィン変換
-	transform.matWorld = ChoMath::MakeAffineMatrix(transform.scale, transform.rotation, transform.position);
+		if (m_isQuaternion)
+		{
+			// クォータニオンを使用する場合
+			transform.rotation = MakeQuaternionRotation(radians, transform);
+		}
+		else
+		{
+			// オイラー角を使用する場合
+			transform.rotation = MakeEulerRotation(radians);
+		};
 
-	// 次のフレーム用に保存する
-	transform.prePos = transform.position;
-	transform.preRot = radians;
-	transform.preScale = transform.scale;
+		// アフィン変換
+		transform.matWorld = ChoMath::MakeAffineMatrix(transform.scale, transform.rotation, transform.position);
+
+		// 次のフレーム用に保存する
+		transform.prePos = transform.position;
+		transform.preRot = radians;
+		transform.preScale = transform.scale;
+	}
 
 	// 親があれば親のワールド行列を掛ける
 	if (transform.parent.has_value())
@@ -221,6 +231,8 @@ void CameraSystem::InitializeComponent(Entity e, TransformComponent& transform, 
 void CameraSystem::UpdateComponent(Entity e, TransformComponent& transform, CameraComponent& camera)
 {
 	e;
+	camera.viewMatrix = Matrix4::Inverse(transform.matWorld);
+	camera.projectionMatrix = ChoMath::MakePerspectiveFovMatrix(camera.fovAngleY, camera.aspectRatio, camera.nearZ, camera.farZ);
 	TransferMatrix(transform, camera);
 }
 
@@ -228,8 +240,8 @@ void CameraSystem::TransferMatrix(TransformComponent& transform, CameraComponent
 {
 	BUFFER_DATA_VIEWPROJECTION data = {};
 	data.matWorld = transform.matWorld;
-	data.view = Matrix4::Inverse(transform.matWorld);
-	data.projection = ChoMath::MakePerspectiveFovMatrix(camera.fovAngleY, camera.aspectRatio, camera.nearZ, camera.farZ);
+	data.view = camera.viewMatrix;
+	data.projection = camera.projectionMatrix;
 	data.projectionInverse = Matrix4::Inverse(data.projection);
 	data.cameraPosition = transform.position;
 	ConstantBuffer<BUFFER_DATA_VIEWPROJECTION>* cameraBuffer = dynamic_cast<ConstantBuffer<BUFFER_DATA_VIEWPROJECTION>*>(m_pResourceManager->GetBuffer<IConstantBuffer>(camera.bufferIndex.value()));

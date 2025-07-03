@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <imgui.h>
+#include <ImGuizmo/ImGuizmo.h>
 #include "EngineCommand/EngineCommand.h"
 #include "Editor/MainMenu/MainMenu.h"
 #include "Editor/Toolbar/Toolbar.h"
@@ -14,6 +15,7 @@
 #include "Editor/EffectEditor/EffectEditor.h"
 #include "Editor/EffectView/EffectView.h"
 #include "Editor/EffectHierarchy/EffectHierarchy.h"
+#include "Editor/Manipulate/Manipulate.h"
 
 enum WorkSpaceType
 {
@@ -60,6 +62,7 @@ private:
 	std::unique_ptr<EffectEditor> m_EffectEditor = nullptr;
 	std::unique_ptr<EffectView> m_EffectView = nullptr;
 	std::unique_ptr<EffectHierarchy> m_EffectHierarchy = nullptr;
+	std::unique_ptr<Manipulate> m_Manipulate = nullptr;
 
 	// 選択中のオブジェクト
 	GameObject* m_SelectedGameObject = nullptr;

@@ -83,6 +83,8 @@ void SceneView::Window()
         m_DebugCamera->UpdateMatrix();
     }
 
+    m_Manipulate->Update();
+
     ImGui::End();
 
     // スタイルを元に戻す

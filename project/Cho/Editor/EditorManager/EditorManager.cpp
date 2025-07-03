@@ -8,7 +8,8 @@ EditorManager::EditorManager(EngineCommand* engineCommand, InputManager* inputMa
 	m_Toolbar = std::make_unique<Toolbar>(this);
 	m_MainMenu = std::make_unique<MainMenu>(this, m_Toolbar.get());
 	m_DebugCamera = std::make_unique<DebugCamera>(this);
-	m_SceneView = std::make_unique<SceneView>(this, m_DebugCamera.get());
+	m_Manipulate = std::make_unique<Manipulate>(this, m_DebugCamera.get());
+	m_SceneView = std::make_unique<SceneView>(this, m_DebugCamera.get(),m_Manipulate.get());
 	m_GameView = std::make_unique<GameView>(this);
 	m_Hierarchy = std::make_unique<Hierarchy>(this);
 	m_Inspector = std::make_unique<Inspector>(this);
@@ -28,6 +29,8 @@ void EditorManager::Initialize()
 	m_MainMenu->Initialize();
 	// DebugCamera
 	m_DebugCamera->Initialize();
+	// Manipulate
+	m_Manipulate->Initialize();
 	// SceneView
 	m_SceneView->Initialize();
 	// GameView
