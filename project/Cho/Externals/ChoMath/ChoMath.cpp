@@ -711,4 +711,9 @@ Matrix4 ChoMath::BillboardMatrix(const Matrix4 cameraMatrix)
 	return result;
 }
 
+float ChoMath::Lerp(float a, float b, float t)
+{
+	return a + (b - a) * t;
+}
+
 

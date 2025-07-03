@@ -91,4 +91,6 @@ namespace ChoMath {
 
 	// ALLBillboard
 	Matrix4 BillboardMatrix(const Matrix4 cameraMatrix);
+
+	float Lerp(float a, float b, float t);
 };
