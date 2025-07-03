@@ -41,11 +41,28 @@ void Manipulate::Update()
 	ImGuizmo::MODE mode = ImGuizmo::WORLD;
 
 	// ギズモ操作
-	bool manipulated = ImGuizmo::Manipulate(
-		viewOut, projectionOut,
-		operation, mode,
-		objectOut, nullptr // nullptrにすればdelta行列不要
-	);
+	//bool manipulated = ImGuizmo::Manipulate(
+	//	viewOut, projectionOut,
+	//	operation, mode,
+	//	objectOut, nullptr // nullptrにすればdelta行列不要
+	//);
+	float translation[3], rotation[3], scale[3];
+
+	// 初期値
+	translation[0] = transform->position.x;
+	translation[1] = transform->position.y;
+	translation[2] = transform->position.z;
+	rotation[0] = ChoMath::DegreesToRadians(transform->degrees.x);
+	rotation[1] = ChoMath::DegreesToRadians(transform->degrees.y);
+	rotation[2] = ChoMath::DegreesToRadians(transform->degrees.z);
+	scale[0] = transform->scale.x;
+	scale[1] = transform->scale.y;
+	scale[2] = transform->scale.z;
+
+	ImGuizmo::Mani(
+		view, projection,
+		ImGuizmo::TRANSLATE, ImGuizmo::WORLD,
+		translation, rotation, scale);
 
 	// モデル行列が変更されたら、オブジェクトに反映
 	if (manipulated)
