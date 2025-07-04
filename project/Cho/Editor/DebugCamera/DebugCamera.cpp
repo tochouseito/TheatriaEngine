@@ -20,10 +20,6 @@ void DebugCamera::Initialize()
 
 void DebugCamera::Update()
 {
-	// 各フラグ
-	static bool isLeftClicked = false;
-	static bool isWheelClicked = false;
-
 	// 回転を考慮する
 	Matrix4 rotationMatrix = ChoMath::MakeRotateMatrix(m_TransformComponent.rotation);
 	Vector3 X = { 1.0f, 0.0f, 0.0f };

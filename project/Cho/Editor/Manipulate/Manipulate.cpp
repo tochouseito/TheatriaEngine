@@ -22,47 +22,39 @@ void Manipulate::Update()
 	Matrix4 projection = camera.projectionMatrix;
 
 	// 変換
-	float viewOut[16];
-	float projectionOut[16];
-	float objectOut[16];
+	float viewOut[16]{};
+	float projectionOut[16]{};
+	float objectOut[16]{};
 	view.ToArray16(viewOut);
 	projection.ToArray16(projectionOut);
 	transform->matWorld.ToArray16(objectOut);
 
 	// ImGuizmoの描画設定
 	ImGuizmo::SetOrthographic(false);
-	ImGuizmo::SetDrawlist();
-	ImVec2 windowPos = ImGui::GetWindowPos();
-	ImVec2 windowSize = ImGui::GetWindowSize();
-	ImGuizmo::SetRect(windowPos.x, windowPos.y, windowSize.x, windowSize.y);
+	ImGuizmo::SetDrawlist(ImGui::GetWindowDrawList());
+	ImGuizmo::SetRect(m_ContentPos.x, m_ContentPos.y, m_ContentSize.x, m_ContentSize.y);
 
 	// 操作タイプ（移動・回転・スケールを切り替えるフラグ）
-	ImGuizmo::OPERATION operation = ImGuizmo::TRANSLATE;
-	ImGuizmo::MODE mode = ImGuizmo::WORLD;
+	static ImGuizmo::OPERATION operation = ImGuizmo::TRANSLATE;
+	static ImGuizmo::MODE mode = ImGuizmo::WORLD;
+
+	// ③ 操作タイプ切り替えボタンを「画像の上」に重ねて描画
+	//    - SetCursorScreenPos で好きな場所にカーソルを移動してからボタンを置く
+	const float btnSize = 24.0f;
+	// 左上に少しだけマージンを空けて並べる
+	ImGui::SetCursorScreenPos({ m_ContentPos.x + 10, m_ContentPos.y + 10 });
+	if (ImGui::Button("T", ImVec2(btnSize, btnSize))) operation = ImGuizmo::TRANSLATE;
+	ImGui::SameLine();
+	if (ImGui::Button("R", ImVec2(btnSize, btnSize))) operation = ImGuizmo::ROTATE;
+	ImGui::SameLine();
+	if (ImGui::Button("S", ImVec2(btnSize, btnSize))) operation = ImGuizmo::SCALE;
 
 	// ギズモ操作
-	//bool manipulated = ImGuizmo::Manipulate(
-	//	viewOut, projectionOut,
-	//	operation, mode,
-	//	objectOut, nullptr // nullptrにすればdelta行列不要
-	//);
-	float translation[3], rotation[3], scale[3];
-
-	// 初期値
-	translation[0] = transform->position.x;
-	translation[1] = transform->position.y;
-	translation[2] = transform->position.z;
-	rotation[0] = ChoMath::DegreesToRadians(transform->degrees.x);
-	rotation[1] = ChoMath::DegreesToRadians(transform->degrees.y);
-	rotation[2] = ChoMath::DegreesToRadians(transform->degrees.z);
-	scale[0] = transform->scale.x;
-	scale[1] = transform->scale.y;
-	scale[2] = transform->scale.z;
-
-	ImGuizmo::Mani(
-		view, projection,
-		ImGuizmo::TRANSLATE, ImGuizmo::WORLD,
-		translation, rotation, scale);
+	bool manipulated = ImGuizmo::Manipulate(
+		viewOut, projectionOut,
+		operation, mode,
+		objectOut, nullptr // nullptrにすればdelta行列不要
+	);
 
 	// モデル行列が変更されたら、オブジェクトに反映
 	if (manipulated)
