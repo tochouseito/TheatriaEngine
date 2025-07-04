@@ -61,8 +61,11 @@ void Manipulate::Update()
 	{
 		// model (float[16]) → XMMATRIX へ変換
 		Matrix4 newMatrix = Matrix4::FromArray16(objectOut);
-		// Transformコンポーネントに新しい行列を設定
-		transform->matWorld = newMatrix;
+		// 分解して各プロパティを更新
+		ChoMath::SRT srt = ChoMath::DecomposeMatrix(newMatrix);
+		transform->position = srt.translation;
+		transform->degrees = ChoMath::RadiansToDegrees(srt.rotationEuler);
+		transform->scale = srt.scale;
 	}
 }
 

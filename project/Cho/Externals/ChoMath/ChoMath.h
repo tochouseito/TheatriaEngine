@@ -7,6 +7,14 @@
 
 namespace ChoMath {
 
+	// SRT をまとめた構造体
+	struct SRT
+	{
+		Vector3 translation;
+		Vector3 rotationEuler; // ラジアン or 度数法 に合わせる
+		Scale scale;
+	};
+
 	float Pi();
 
 	// 行列のチェック関数
@@ -89,4 +97,7 @@ namespace ChoMath {
 	Quaternion MakeLookRotation(const Vector3& forward, const Vector3& up);
 
 	Vector3 GetForwardVectorFromMatrix(const Matrix4& rotMatrix);
+
+	// Matrix4 から SRT を取り出す関数
+	SRT DecomposeMatrix(const Matrix4& in);
 };
