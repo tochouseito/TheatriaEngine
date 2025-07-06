@@ -149,14 +149,29 @@ public:
     inline void ClearEntity(const Entity& e)
     {
         if (e >= m_EntityToArchetype.size()) return;
-
         Archetype old = m_EntityToArchetype[e];
 
-        // コンポーネントごとの削除イベント
-        for (CompID id = 0; id < old.size(); ++id) if (old.test(id))
+        // ① 削除対象の CompID を collect
+        std::vector<CompID> toRemove;
+        for (CompID id = 0; id < old.size(); ++id)
+            if (old.test(id))
+                toRemove.push_back(id);
+
+        // ② 優先度→CompID でソート
+        std::sort(toRemove.begin(), toRemove.end(),
+            [&](CompID a, CompID b) {
+                int pa = m_DeletePriority.count(a) ? m_DeletePriority[a] : 0;
+                int pb = m_DeletePriority.count(b) ? m_DeletePriority[b] : 0;
+                if (pa != pb) return pa < pb;
+                return a < b;
+            });
+
+        // ③ ソート後の順で通知＆削除
+        for (CompID id : toRemove)
         {
             auto* pool = m_TypeToComponents[id].get();
             size_t cnt = pool->GetComponentCount(e);
+
             if (pool->IsMultiComponentTrait(id))
             {
                 void* raw = pool->GetRawComponent(e);
@@ -396,6 +411,13 @@ public:
             arch.reset(id);
             m_ArchToEntities[arch].Add(e);
         }
+    }
+
+    // コンポーネント別に「削除時の優先度」を設定できるように
+    template<ComponentType T>
+    void SetDeletionPriority(int priority)
+    {
+        m_DeletePriority[ComponentPool<T>::GetID()] = priority;
     }
 
     /*-------------------- Accessors ----------------------------------*/
@@ -1032,9 +1054,6 @@ private:
 
     /*-------------------- data members --------------------------------*/
 
-
-
-
     bool                    m_IsUpdating = false;
     Entity                  m_NextEntityID = 0;
     std::vector<bool>       m_EntityToActive;
@@ -1042,6 +1061,7 @@ private:
     std::vector<Entity>  m_PendingInitEntities;
     static inline CompID    m_NextCompTypeID = 0;
     std::vector<Archetype>  m_EntityToArchetype;
+    std::unordered_map<CompID, int> m_DeletePriority;   // デフォルトは 0 (CompID 昇順になる)
     std::vector<std::function<void()>>          m_DeferredCommands;
     std::vector<std::weak_ptr<IEntityEventListener>>          m_EntityListeners;
     std::vector<std::unique_ptr<ISystem>>       m_Systems;
@@ -1271,7 +1291,7 @@ public:
     //――――――――――――――――――
     // ② 既存エンティティから Prefab を作る
     //――――――――――――――――――
-    static IPrefab FromEntity(ECSManager& ecs, Entity e) 
+    static IPrefab FromEntity(ECSManager& ecs, Entity e)
     {
         IPrefab prefab;
         const Archetype& arch = ecs.GetArchetype(e);
