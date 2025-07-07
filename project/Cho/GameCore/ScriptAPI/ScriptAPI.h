@@ -4,8 +4,8 @@
 #include "APIExportsMacro.h"
 
 #define REGISTER_SCRIPT_FACTORY(SCRIPTNAME) \
-    extern "C" __declspec(dllexport) Marionnette* Create##SCRIPTNAME##Script(GameObject& object) { \
-        return new SCRIPTNAME(object);}
+    extern "C" __declspec(dllexport) Marionnette* Create##SCRIPTNAME##Script(GameObject& object,ECSManager* ecs) { \
+        return new SCRIPTNAME(object,ecs);}
 //// メンバ登録マクロ
 //#define REFLECT_SCRIPT_MEMBER(CLASS, MEMBER) \
 //    { #MEMBER, \
@@ -72,6 +72,49 @@
 
 class ECSManager;
 class ResourceManager;
+
+namespace Cho
+{
+    namespace ComponentInterface
+    {
+		// スクリプトから取得可能なコンポーネントのインターフェース
+        // 基底クラス
+        class IComponentInterface
+        {
+        public:
+			IComponentInterface(ECSManager* ecs) : m_ECS(ecs) {}
+			virtual ~IComponentInterface() = default;
+        private:
+			ECSManager* m_ECS = nullptr; // ECSManager
+        };
+
+        // インターフェース型の許可
+        template<typename T>
+		concept Type = std::derived_from<T, IComponentInterface>;
+
+        class InterfaceData
+        {
+		public:
+			InterfaceData() = default;
+			~InterfaceData() = default;
+        };
+        class Base
+        {
+		public:
+			Base(InterfaceData* data) : data(data) {}
+			virtual ~Base() = default;
+        private:
+            IntegrationData* data = nullptr;
+        };
+        template<typename T>
+		concept Type = std::derived_from<T, Base>;
+
+        template<Type T>
+        T GetData() const
+        {
+        }
+	}
+}
 
 //struct CHO_API TransformAPI
 //{

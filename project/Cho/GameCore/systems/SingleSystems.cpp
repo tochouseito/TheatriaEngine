@@ -263,7 +263,7 @@ void ScriptInstanceGenerateSystem::GenerateInstance(Entity e, ScriptComponent& s
 	std::string funcName = "Create" + script.scriptName + "Script";
 	funcName.erase(std::remove_if(funcName.begin(), funcName.end(), ::isspace), funcName.end());
 	// CreateScript関数を取得
-	typedef Marionnette* (*CreateScriptFunc)(GameObject&);
+	typedef Marionnette* (*CreateScriptFunc)(GameObject&,ECSManager*);
 	CreateScriptFunc createScript = (CreateScriptFunc)GetProcAddress(Cho::FileSystem::ScriptProject::m_DllHandle, funcName.c_str());
 	if (!createScript)
 	{
@@ -272,7 +272,7 @@ void ScriptInstanceGenerateSystem::GenerateInstance(Entity e, ScriptComponent& s
 	}
 	// スクリプトを生成
 	GameObject* object = m_pGameWorld->GetGameObject(e);
-	Marionnette* scriptInstance = createScript(*object);
+	Marionnette* scriptInstance = createScript(*object,m_pEcs);
 	if (!scriptInstance)
 	{
 		script.isActive = false;

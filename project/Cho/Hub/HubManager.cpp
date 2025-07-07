@@ -110,12 +110,12 @@ void HubManager::ShowSidebar()
                 GameScene scene = m_pEngineCommand->GetGameCore()->GetSceneManager()->CreateDefaultScene();
                 // エディタにセット、ロード
                 m_pEngineCommand->GetEditorManager()->ChangeEditingScene(scene.GetName());
-                // デフォルトのシーンを保存
-                // std::filesystem::path projectPath = std::filesystem::path(L"GameProjects") / name;
                 // プロジェクト名を保存
                 FileSystem::m_sProjectName = name;
 				// プロジェクトフォルダを作成
                 FileSystem::ScriptProject::GenerateSolutionAndProject();
+                // プロジェクトを保存
+                FileSystem::SaveProject(m_pEngineCommand->GetEditorManager(), m_pEngineCommand->GetGameCore()->GetSceneManager(), m_pEngineCommand->GetGameCore()->GetGameWorld(), m_pEngineCommand->GetGameCore()->GetECSManager());
 				m_IsRun = false; // プロジェクト作成後、Hubを終了
             } else
             {

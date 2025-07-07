@@ -7,7 +7,6 @@
 using ObjectParameter = std::variant<int, float, bool, Vector3>;
 class ECSManager;
 class ResourceManager;
-class ObjectContainer;
 
 // GameObjectクラス
 class CHO_API GameObject

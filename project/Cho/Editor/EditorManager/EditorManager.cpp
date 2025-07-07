@@ -103,7 +103,7 @@ void EditorManager::ChangeEditingScene(const std::wstring& sceneName)
 	{
 		m_EditingSceneName = sceneName;
 		// scene読み込み
-		m_EngineCommand->GetGameCore()->GetSceneManager()->LoadTemporaryScene(m_SceneList[m_pSceneMap[sceneName]]);
+		m_EngineCommand->GetGameCore()->GetSceneManager()->LoadTemporaryScene(m_SceneList[m_pSceneMap[sceneName]],true);
 	}
 	else
 	{
@@ -112,7 +112,7 @@ void EditorManager::ChangeEditingScene(const std::wstring& sceneName)
 		GameScene newScene = *m_EngineCommand->GetGameCore()->GetSceneManager()->GetScene(sceneName);
 		m_pSceneMap[sceneName] = m_SceneList.push_back(std::move(newScene));
 		// scene読み込み
-		m_EngineCommand->GetGameCore()->GetSceneManager()->LoadTemporaryScene(m_SceneList[m_pSceneMap[sceneName]]);
+		m_EngineCommand->GetGameCore()->GetSceneManager()->LoadTemporaryScene(m_SceneList[m_pSceneMap[sceneName]],true);
 	}
 }
 
