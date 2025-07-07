@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "EditorManager.h"
 #include "EngineCommand/EngineCommand.h"
+#include "GameCore/GameCore.h"
 
 EditorManager::EditorManager(EngineCommand* engineCommand, InputManager* inputManager) :
 	m_EngineCommand(engineCommand), m_InputManager(inputManager)
@@ -88,4 +89,47 @@ void EditorManager::SetWorkSpaceType(const std::string& typeName)
 {
 	if (typeName == "SceneEdit") { m_WorkSpaceType = WorkSpaceType::SceneEdit; }
 	if (typeName == "EffectEdit") { m_WorkSpaceType = WorkSpaceType::EffectEdit; }
+}
+
+void EditorManager::ChangeEditingScene(const std::wstring& sceneName)
+{
+	// 編集中のシーンを保存
+	if (!m_EditingSceneName.empty())
+	{
+		SaveEditingScene();
+	}
+	// 初めて編集するシーンの時は新たに編集中のシーンを作成する
+	if (m_pSceneMap.contains(sceneName))
+	{
+		m_EditingSceneName = sceneName;
+		// scene読み込み
+		m_EngineCommand->GetGameCore()->GetSceneManager()->LoadTemporaryScene(m_SceneList[m_pSceneMap[sceneName]]);
+	}
+	else
+	{
+		m_EditingSceneName = sceneName;
+		// 元のシーンをコピーする
+		GameScene newScene = *m_EngineCommand->GetGameCore()->GetSceneManager()->GetScene(sceneName);
+		m_pSceneMap[sceneName] = m_SceneList.push_back(std::move(newScene));
+		// scene読み込み
+		m_EngineCommand->GetGameCore()->GetSceneManager()->LoadTemporaryScene(m_SceneList[m_pSceneMap[sceneName]]);
+	}
+}
+
+void EditorManager::SaveEditingScene()
+{
+	// GameWorldからシーンを保存
+	GameScene scene = m_EngineCommand->GetGameCore()->GetGameWorld()->CreateGameSceneFromWorld(*m_EngineCommand->GetGameCore()->GetSceneManager());
+	// EditorManagerのシーンマップに保存
+	m_SceneList[m_pSceneMap[m_EditingSceneName]] = std::move(scene);
+}
+
+// Sceneを取得
+GameScene* EditorManager::GetEditScene(const std::wstring& sceneName)
+{
+	if (m_pSceneMap.contains(sceneName))
+	{
+		return &m_SceneList[m_pSceneMap[sceneName]];
+	}
+	return nullptr;
 }

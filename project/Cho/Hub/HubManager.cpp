@@ -6,6 +6,7 @@
 #include "Resources/ResourceManager/ResourceManager.h"
 #include "Graphics/GraphicsEngine/GraphicsEngine.h"
 #include "GameCore/GameCore.h"
+#include "Editor/EditorManager/EditorManager.h"
 #include "EngineCommand/EngineCommand.h"
 using namespace Cho;
 
@@ -107,9 +108,10 @@ void HubManager::ShowSidebar()
             {
 				// デフォルトのシーンを作成
                 GameScene scene = m_pEngineCommand->GetGameCore()->GetSceneManager()->CreateDefaultScene();
+                // エディタにセット、ロード
+                m_pEngineCommand->GetEditorManager()->ChangeEditingScene(scene.GetName());
                 // デフォルトのシーンを保存
-                std::filesystem::path projectPath = std::filesystem::path(L"GameProjects") / name;
-                FileSystem::SaveSceneFile(projectPath, &scene, m_pEngineCommand->GetGameCore()->GetECSManager());
+                // std::filesystem::path projectPath = std::filesystem::path(L"GameProjects") / name;
                 // プロジェクト名を保存
                 FileSystem::m_sProjectName = name;
 				// プロジェクトフォルダを作成

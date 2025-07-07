@@ -17,6 +17,8 @@
 #include "Editor/EffectHierarchy/EffectHierarchy.h"
 #include "Editor/Manipulate/Manipulate.h"
 
+#include "GameCore/GameScene/GameScene.h"
+
 enum WorkSpaceType
 {
 	SceneEdit = 0,
@@ -47,6 +49,18 @@ public:
 	void SetEffectEntity(std::optional<uint32_t> entity) { m_EffectEntity = entity; }
 	std::optional<uint32_t> GetEffectNodeID() const { return m_EffectNodeID; }
 	void SetEffectNodeIndex(std::optional<uint32_t> nodeID) { m_EffectNodeID = nodeID; }
+
+	// 編集中のSceneの名前を取得
+	std::wstring GetEditingSceneName() const { return m_EditingSceneName; }
+	// 編集中のSceneの名前を設定
+	void ChangeEditingScene(const std::wstring& sceneName);
+	// Sceneのマップを取得
+	std::unordered_map<std::wstring, size_t>& GetSceneMap() { return m_pSceneMap; }
+	// 編集中のSceneを保存
+	void SaveEditingScene();
+	// Sceneを取得
+	GameScene* GetEditScene(const std::wstring& sceneName);
+	 
 private:
 	EngineCommand* m_EngineCommand = nullptr;
 	InputManager* m_InputManager = nullptr;
@@ -70,7 +84,11 @@ private:
 	std::optional<uint32_t> m_EffectEntity = std::nullopt;
 	// 選択中のEffectNode
 	std::optional<uint32_t> m_EffectNodeID = std::nullopt;
-
+	FVector<GameScene> m_SceneList; // Sceneのリスト
+	// 編集元のSceneの名前と編集したSceneのマップ
+	std::unordered_map<std::wstring, size_t> m_pSceneMap;
+	// 編集中のSceneの名前
+	std::wstring m_EditingSceneName = L"";
 	// ワークスペース
 	WorkSpaceType m_WorkSpaceType = WorkSpaceType::SceneEdit;
 };

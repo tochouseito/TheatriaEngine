@@ -28,6 +28,8 @@ public:
 
 	// 読み込まれているシーンを破棄して指定したシーンをロード
 	GameSceneInstance* LoadScene(const std::wstring& sceneName, const bool& updateMaincamera = false);
+	// 一時的に作成したシーンをロードする
+	GameSceneInstance* LoadTemporaryScene(const GameScene& scene, const bool& updateMaincamera = false);
 	// 非同期でシーンをロード
 	GameSceneInstance* LoadSceneAsync(const std::wstring& sceneName, const LoadSceneMode& mode)
 	{

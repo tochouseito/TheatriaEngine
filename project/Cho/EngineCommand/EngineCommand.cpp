@@ -47,7 +47,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE EngineCommand::GetTextureHandle(const std::wstring& 
 
 void EngineCommand::SaveProjectFile()
 {
-	Cho::FileSystem::SaveProject(m_GameCore->GetSceneManager(), m_GameCore->GetGameWorld(), m_GameCore->GetECSManager());
+	Cho::FileSystem::SaveProject(m_EditorManager,m_GameCore->GetSceneManager(), m_GameCore->GetGameWorld(), m_GameCore->GetECSManager());
 }
 
 void EngineCommand::GenerateScript(const std::string& scriptName)

@@ -106,6 +106,8 @@ void GameCore::RegisterECSEvents()
 			// Transform統合バッファからmapIDを削除
 			m_EngineCommand->GetResourceManager()->GetIntegrationData(IntegrationDataType::Transform)->RemoveMapID(c->mapID.value());
 		});
+	// TransformComponentの削除イベントの優先度を下げる
+	m_pECSManager->SetDeletionPriority<TransformComponent>(500);
 	// CameraComponent
 	m_pComponentEventDispatcher->RegisterOnAdd<CameraComponent>(
 		[&]([[maybe_unused]] Entity e, [[maybe_unused]] CameraComponent* c) {
@@ -122,7 +124,8 @@ void GameCore::RegisterECSEvents()
 	m_pComponentEventDispatcher->RegisterOnRemove<CameraComponent>(
 		[&]([[maybe_unused]] Entity e, [[maybe_unused]] CameraComponent* c) {
 			// シーンのMainCameraを削除
-			if (m_EngineCommand->GetGameCore()->GetGameWorld()->GetMainCamera()->GetHandle().entity == e)
+			if (m_EngineCommand->GetGameCore()->GetGameWorld()->GetMainCamera()&&
+				m_EngineCommand->GetGameCore()->GetGameWorld()->GetMainCamera()->GetHandle().entity == e)
 			{
 				m_EngineCommand->GetGameCore()->GetGameWorld()->ClearMainCamera();
 			}

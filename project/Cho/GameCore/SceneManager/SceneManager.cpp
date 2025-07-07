@@ -1,12 +1,14 @@
 #include "pch.h"
 #include "SceneManager.h"
 #include "GameCore/GameWorld/GameWorld.h"
-
+#include "Core/Utility/GenerateUnique.h"
 
 // デフォルトのシーンを作成
 GameScene SceneManager::CreateDefaultScene()
 {
-	GameScene scene(L"MainScene");
+	// シーン名を生成
+	std::wstring sceneName = GenerateUniqueName<std::unordered_map<std::wstring, SceneID>>(L"MainScene", m_SceneNameToID);
+	GameScene scene(sceneName);
 	// デフォルトのObjectを追加
 	// Cube
 	CPrefab cube(L"Cube", ObjectType::MeshObject);
@@ -40,8 +42,7 @@ GameScene SceneManager::CreateDefaultScene()
 	// mainCameraを設定
 	scene.SetStartCameraName(L"MainCamera");
 	AddScene(scene);
-	LoadScene(L"MainScene",true);
-	return m_Scenes[0]; // 最初のシーンを返す
+	return m_Scenes[m_SceneNameToID[sceneName]]; // シーンを返す
 }
 
 // 読み込まれているシーンを破棄して指定したシーンをロード
@@ -58,6 +59,20 @@ GameSceneInstance* SceneManager::LoadScene(const std::wstring& sceneName, const 
 	m_pSceneInstances.clear();
 	// ロード
 	SceneID id = m_pGameWorld->AddGameObjectFromScene(m_Scenes[m_SceneNameToID[sceneName]],updateMaincamera);
+	// シーンインスタンスを作成
+	m_pSceneInstances.push_back(std::make_unique<GameSceneInstance>(this, id));
+	// シーンインスタンスを返す
+	return m_pSceneInstances.back().get();
+}
+
+GameSceneInstance* SceneManager::LoadTemporaryScene(const GameScene& scene, const bool& updateMaincamera)
+{
+	// 読み込まれているシーンをすべて破棄
+	m_pGameWorld->ClearAllScenes(); // ゲームワールドのシーンをクリア
+	// シーンインスタンスを破棄
+	m_pSceneInstances.clear();
+	// ロード
+	SceneID id = m_pGameWorld->AddGameObjectFromScene(scene, updateMaincamera);
 	// シーンインスタンスを作成
 	m_pSceneInstances.push_back(std::make_unique<GameSceneInstance>(this, id));
 	// シーンインスタンスを返す

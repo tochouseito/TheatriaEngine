@@ -134,7 +134,14 @@ GameScene GameWorld::CreateGameSceneFromWorld(SceneManager& sceneManager) const
 		gameScene.AddPrefab(prefab);
 	}
 	// シーンのカメラを設定
-	gameScene.SetStartCameraName(m_pMainCamera->GetName());
+	if (m_pMainCamera)
+	{
+		gameScene.SetStartCameraName(m_pMainCamera->GetName());
+	}
+	else
+	{
+		gameScene.SetStartCameraName(L"None");
+	}
 
 	return gameScene;
 }
@@ -148,7 +155,16 @@ void GameWorld::RemoveGameObject(const ObjectHandle& handle)
 	// ECSから削除
 	m_pECSManager->RemoveEntity(handle.entity);
 	// コンテナから削除
-	m_pGameObjects[handle.sceneID][handle.objectID].erase(handle.cloneID);
+	// クローンならクローンリストから削除
+	if (handle.isClone)
+	{
+		// クローンリストから削除
+		m_pGameObjects[handle.sceneID][handle.objectID].erase(handle.cloneID);
+	}
+	else // クローンでないならオブジェクトリストから削除
+	{
+		m_pGameObjects[handle.sceneID].erase(handle.objectID);
+	}
 	// 辞書から削除
 	m_ObjectHandleMap.erase(gameObject->GetName());
 	m_ObjectHandleMapFromEntity.erase(handle.entity);

@@ -44,11 +44,11 @@ public:
 	void RenameGameObject(const ObjectHandle& handle, const std::wstring& newName);
 	// クローンを追加
 	ObjectHandle AddGameObjectClone(const ObjectHandle& src);
+	// ワールドからGameSceneを生成
+	GameScene CreateGameSceneFromWorld(SceneManager& sceneManager) const;
 private:
 	// シーンデータからオブジェクトを作成
 	SceneID AddGameObjectFromScene(const GameScene& scene,const bool& updateMaincamera = false);
-	// ワールドからGameSceneを生成
-	GameScene CreateGameSceneFromWorld(SceneManager& sceneManager) const;
 	
 	// 全シーン破棄
 	void ClearAllScenes();

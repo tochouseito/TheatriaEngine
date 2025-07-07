@@ -514,3 +514,20 @@ bool CloneObjectCommand::Undo(EngineCommand* edit)
 	edit;
 	return false;
 }
+
+bool ChangeEditorSceneCommand::Execute(EngineCommand* edit)
+{
+	// 編集中のシーンを取得
+	std::wstring editSceneName = edit->GetEditorManager()->GetEditingSceneName();
+	// 変更前のシーンの名前を保存
+	m_PreSceneName = editSceneName;
+	// EditorManagerの編集中のシーンを更新
+	edit->GetEditorManager()->ChangeEditingScene(m_SceneName);
+	return true;
+}
+
+bool ChangeEditorSceneCommand::Undo(EngineCommand* edit)
+{
+	edit;
+	return false;
+}
