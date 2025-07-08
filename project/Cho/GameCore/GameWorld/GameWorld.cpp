@@ -198,6 +198,8 @@ ObjectHandle GameWorld::AddGameObjectClone(const ObjectHandle& src)
 	// クローンフラグ
 	handle.isClone = true;
 	handle.sceneID = src.sceneID; // srcのSceneに追加
+	// クローン元のオブジェクトIDを設定
+	handle.originalID = src.objectID;
 	// Entityを取得
 	Entity entity = m_pECSManager->CopyEntity(src.entity);
 	handle.entity = entity;
@@ -209,6 +211,29 @@ ObjectHandle GameWorld::AddGameObjectClone(const ObjectHandle& src)
 	handle.cloneID = static_cast<uint32_t>(m_pGameObjects[src.sceneID][src.objectID].push_back(std::make_unique<GameObject>(handle, newName, srcGameObject->GetType())));
 	// Entityにコンポーネントを追加
 	AddDefaultComponentsToGameObject(handle, srcGameObject->GetType());
+	// 辞書に登録
+	m_ObjectHandleMap[newName] = handle;
+	m_ObjectHandleMapFromEntity[entity] = handle;
+	return handle;
+}
+
+ObjectHandle GameWorld::CreateGameObjectCopy(const ObjectHandle& src)
+{
+	// srcのGameObjectを取得
+	GameObject* srcGameObject = GetGameObject(src);
+	// handleを作成
+	ObjectHandle handle;
+	handle.sceneID = 0; 
+	// Entityを取得
+	Entity entity = m_pECSManager->CopyEntity(src.entity);
+	handle.entity = entity;
+	// オブジェクトIDを取得
+	uint32_t objectID = static_cast<uint32_t>(m_pGameObjects[0].push_back(FVector<std::unique_ptr<GameObject>>()));
+	handle.objectID = objectID;
+	// 名前被り防止
+	std::wstring newName = GenerateUniqueName<std::unordered_map<std::wstring, ObjectHandle>>(srcGameObject->GetName(), m_ObjectHandleMap);
+	// GameObjectを作成
+	m_pGameObjects[0][objectID].push_back(std::make_unique<GameObject>(handle, newName, srcGameObject->GetType()));
 	// 辞書に登録
 	m_ObjectHandleMap[newName] = handle;
 	m_ObjectHandleMapFromEntity[entity] = handle;

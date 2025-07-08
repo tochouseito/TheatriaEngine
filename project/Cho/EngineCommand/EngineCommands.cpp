@@ -505,11 +505,23 @@ bool AddEffectNodeCommand::Undo(EngineCommand* edit)
 
 bool CloneObjectCommand::Execute(EngineCommand* edit)
 {
-	edit->GetGameCore()->GetGameWorld()->AddGameObjectClone(m_Src);
+	m_Dst = edit->GetGameCore()->GetGameWorld()->AddGameObjectClone(m_Src);
 	return true;
 }
 
 bool CloneObjectCommand::Undo(EngineCommand* edit)
+{
+	edit;
+	return false;
+}
+
+bool CopyObjectCommand::Execute(EngineCommand* edit)
+{
+	m_Dst = edit->GetGameCore()->GetGameWorld()->CreateGameObjectCopy(m_Src);
+	return true;
+}
+
+bool CopyObjectCommand::Undo(EngineCommand* edit)
 {
 	edit;
 	return false;

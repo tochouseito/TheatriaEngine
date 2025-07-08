@@ -44,6 +44,8 @@ public:
 	void RenameGameObject(const ObjectHandle& handle, const std::wstring& newName);
 	// クローンを追加
 	ObjectHandle AddGameObjectClone(const ObjectHandle& src);
+	// コピーを追加
+	ObjectHandle CreateGameObjectCopy(const ObjectHandle& src);
 	// ワールドからGameSceneを生成
 	GameScene CreateGameSceneFromWorld(SceneManager& sceneManager, const std::wstring& editSceneName) const;
 private:
