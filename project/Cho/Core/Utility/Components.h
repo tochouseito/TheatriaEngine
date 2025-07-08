@@ -29,6 +29,13 @@ struct TransformStartValue
 
 struct TransformComponent : public IComponentTag
 {
+	// デフォルト ctor はそのまま
+	TransformComponent() = default;
+	// コピーコンストラクタ
+	TransformComponent(const TransformComponent&) = default;
+	// ムーブコンストラクタ（移動）
+	TransformComponent(TransformComponent&&) noexcept = default;
+
 	Vector3 position = { 0.0f, 0.0f, 0.0f };			// 位置
 	Quaternion rotation = { 0.0f, 0.0f, 0.0f,1.0f };	// 回転
 	Scale scale = { 1.0f, 1.0f, 1.0f };					// スケール
@@ -80,6 +87,9 @@ struct TransformComponent : public IComponentTag
 		return *this;
 	}
 
+	// ムーブ代入を明示的に生成
+	TransformComponent& operator=(TransformComponent&&) noexcept = default;
+
 	// 初期化
 	void Initialize()
 	{
@@ -101,6 +111,13 @@ struct TransformComponent : public IComponentTag
 
 struct CameraComponent : public IComponentTag
 {
+	// デフォルト ctor はそのまま
+	CameraComponent() = default;
+	// コピーコンストラクタ
+	CameraComponent(const CameraComponent&) = default;
+	// ムーブコンストラクタ（移動）
+	CameraComponent(CameraComponent&&) noexcept = default;
+
     // 垂直方向視野角
     float fovAngleY = 45.0f * std::numbers::pi_v<float> / 180.0f;
     // ビューポートのアスペクト比
@@ -125,6 +142,10 @@ struct CameraComponent : public IComponentTag
 		farZ = other.farZ;
 		return *this;
 	}
+
+	// ムーブ代入を明示的に生成
+	CameraComponent& operator=(CameraComponent&&) noexcept = default;
+
 	// 初期化
 	void Initialize()
 	{
@@ -138,6 +159,13 @@ struct CameraComponent : public IComponentTag
 // メッシュコンポーネント
 struct MeshFilterComponent : public IComponentTag
 {
+	// デフォルト ctor はそのまま
+	MeshFilterComponent() = default;
+	// コピーコンストラクタ
+	MeshFilterComponent(const MeshFilterComponent&) = default;
+	// ムーブコンストラクタ（移動）
+	MeshFilterComponent(MeshFilterComponent&&) noexcept = default;
+
 	std::wstring modelName = L"";// モデル名
 	std::optional<uint32_t> modelID = std::nullopt;// Model選択用ID
 
@@ -147,6 +175,9 @@ struct MeshFilterComponent : public IComponentTag
 		modelName = other.modelName;
 		return *this;
 	}
+
+	// ムーブ代入を明示的に生成
+	MeshFilterComponent& operator=(MeshFilterComponent&&) noexcept = default;
 
 	// 初期化
 	void Initialize()
@@ -159,6 +190,13 @@ struct MeshFilterComponent : public IComponentTag
 // 描画コンポーネント
 struct MeshRendererComponent : public IComponentTag
 {
+	// デフォルト ctor はそのまま
+	MeshRendererComponent() = default;
+	// コピーコンストラクタ
+	MeshRendererComponent(const MeshRendererComponent&) = default;
+	// ムーブコンストラクタ（移動）
+	MeshRendererComponent(MeshRendererComponent&&) noexcept = default;
+
 	bool visible = true;// 描画フラグ
 
 	MeshRendererComponent& operator=(const MeshRendererComponent& other)
@@ -167,6 +205,9 @@ struct MeshRendererComponent : public IComponentTag
 		visible = other.visible;
 		return *this;
 	}
+
+	// ムーブ代入を明示的に生成
+	MeshRendererComponent& operator=(MeshRendererComponent&&) noexcept = default;
 
 	// 初期化
 	void Initialize()
@@ -179,6 +220,13 @@ struct MeshRendererComponent : public IComponentTag
 class Marionnette;
 struct ScriptComponent : public IComponentTag
 {
+	// デフォルト ctor はそのまま
+	ScriptComponent() = default;
+	// コピーコンストラクタ
+	ScriptComponent(const ScriptComponent&) = default;
+	// ムーブコンストラクタ（移動）
+	ScriptComponent(ScriptComponent&&) noexcept = default;
+
 	std::string scriptName = "";								// スクリプト名
 	ObjectHandle objectHandle;			// スクリプトのオブジェクトハンドル
 	using ScriptFunc = std::function<void()>;					// スクリプト関数型
@@ -200,6 +248,9 @@ struct ScriptComponent : public IComponentTag
 		scriptName = other.scriptName;
 		return *this;
 	}
+
+	// ムーブ代入を明示的に生成
+	ScriptComponent& operator=(ScriptComponent&&) noexcept = default;
 
 	// 初期化
 	void Initialize()
@@ -226,6 +277,13 @@ struct LineData
 
 struct LineRendererComponent : public IComponentTag
 {
+	// デフォルト ctor はそのまま
+	LineRendererComponent() = default;
+	// コピーコンストラクタ
+	LineRendererComponent(const LineRendererComponent&) = default;
+	// ムーブコンストラクタ（移動）
+	LineRendererComponent(LineRendererComponent&&) noexcept = default;
+
 	LineData line;// ラインデータ
 	std::optional<uint32_t> mapID = std::nullopt;		// マップインデックス
 
@@ -235,6 +293,9 @@ struct LineRendererComponent : public IComponentTag
 		line = other.line;
 		return *this;
 	}
+
+	// ムーブ代入を明示的に生成
+	LineRendererComponent& operator=(LineRendererComponent&&) noexcept = default;
 
 	// 初期化
 	void Initialize()
@@ -251,6 +312,13 @@ struct LineRendererComponent : public IComponentTag
 // 2D物理挙動コンポーネント
 struct Rigidbody2DComponent : public IComponentTag
 {
+	// デフォルト ctor はそのまま
+	Rigidbody2DComponent() = default;
+	// コピーコンストラクタ
+	Rigidbody2DComponent(const Rigidbody2DComponent&) = default;
+	// ムーブコンストラクタ（移動）
+	Rigidbody2DComponent(Rigidbody2DComponent&&) noexcept = default;
+
 	bool isActive = true; // 有効フラグ
 	float mass = 1.0f;
 	float gravityScale = 1.0f;
@@ -278,6 +346,9 @@ struct Rigidbody2DComponent : public IComponentTag
 		return *this;
 	}
 
+	// ムーブ代入を明示的に生成
+	Rigidbody2DComponent& operator=(Rigidbody2DComponent&&) noexcept = default;
+
 	// 初期化
 	void Initialize()
 	{
@@ -303,6 +374,13 @@ struct Rigidbody2DComponent : public IComponentTag
 // 2D矩形コライダー
 struct BoxCollider2DComponent : public IComponentTag
 {
+	// デフォルト ctor はそのまま
+	BoxCollider2DComponent() = default;
+	// コピーコンストラクタ
+	BoxCollider2DComponent(const BoxCollider2DComponent&) = default;
+	// ムーブコンストラクタ（移動）
+	BoxCollider2DComponent(BoxCollider2DComponent&&) noexcept = default;
+
 	float offsetX = 0.0f;
 	float offsetY = 0.0f;
 	float width = 1.0f;
@@ -328,6 +406,9 @@ struct BoxCollider2DComponent : public IComponentTag
 		return *this;
 	}
 
+	// ムーブ代入を明示的に生成
+	BoxCollider2DComponent& operator=(BoxCollider2DComponent&&) noexcept = default;
+
 	// 初期化
 	void Initialize()
 	{
@@ -346,6 +427,16 @@ struct BoxCollider2DComponent : public IComponentTag
 // 2D円形コライダー
 struct CircleCollider2DComponent : public IComponentTag
 {
+	// デフォルト ctor はそのまま
+	CircleCollider2DComponent() = default;
+	// コピーコンストラクタ
+	CircleCollider2DComponent(const CircleCollider2DComponent&) = default;
+	// ムーブコンストラクタ（移動）
+	CircleCollider2DComponent(CircleCollider2DComponent&&) noexcept = default;
+
+	// ムーブ代入を明示的に生成
+	CircleCollider2DComponent& operator=(CircleCollider2DComponent&&) noexcept = default;
+
 	float offsetX = 0.0f;
 	float offsetY = 0.0f;
 	float radius = 0.5f;
@@ -357,6 +448,15 @@ struct CircleCollider2DComponent : public IComponentTag
 // 2D任意形状コライダー
 struct PolygonCollider2DComponent : public IComponentTag
 {
+	// デフォルト ctor はそのまま
+	PolygonCollider2DComponent() = default;
+	// コピーコンストラクタ
+	PolygonCollider2DComponent(const PolygonCollider2DComponent&) = default;
+	// ムーブコンストラクタ（移動）
+	PolygonCollider2DComponent(PolygonCollider2DComponent&&) noexcept = default;
+
+	// ムーブ代入を明示的に生成
+	PolygonCollider2DComponent& operator=(PolygonCollider2DComponent&&) noexcept = default;
 	std::vector<b2Vec2> points;
 	float density = 1.0f;
 	float friction = 0.3f;
@@ -366,6 +466,13 @@ struct PolygonCollider2DComponent : public IComponentTag
 // マテリアルコンポーネント
 struct MaterialComponent : public IComponentTag
 {
+	// デフォルト ctor はそのまま
+	MaterialComponent() = default;
+	// コピーコンストラクタ
+	MaterialComponent(const MaterialComponent&) = default;
+	// ムーブコンストラクタ（移動）
+	MaterialComponent(MaterialComponent&&) noexcept = default;
+
 	Color color;
 	bool enableLighting = true;
 	bool enableTexture = false;
@@ -388,6 +495,9 @@ struct MaterialComponent : public IComponentTag
 		return *this;
 	}
 
+	// ムーブ代入を明示的に生成
+	MaterialComponent& operator=(MaterialComponent&&) noexcept = default;
+
 	// 初期化
 	void Initialize()
 	{
@@ -405,6 +515,13 @@ struct MaterialComponent : public IComponentTag
 // エミッターコンポーネント
 struct EmitterComponent : public IComponentTag
 {
+	// デフォルト ctor はそのまま
+	EmitterComponent() = default;
+	// コピーコンストラクタ
+	EmitterComponent(const EmitterComponent&) = default;
+	// ムーブコンストラクタ（移動）
+	EmitterComponent(EmitterComponent&&) noexcept = default;
+
 	RandValue lifeTime;
 	PVA position;             // 位置
 	PVA rotation;             // 回転
@@ -437,6 +554,9 @@ struct EmitterComponent : public IComponentTag
 		return *this;
 	}
 
+	// ムーブ代入を明示的に生成
+	EmitterComponent& operator=(EmitterComponent&&) noexcept = default;
+
 	// 初期化
 	void Initialize()
 	{
@@ -457,6 +577,13 @@ struct EmitterComponent : public IComponentTag
 // パーティクルコンポーネント
 struct ParticleComponent : public IComponentTag
 {
+	// デフォルト ctor はそのまま
+	ParticleComponent() = default;
+	// コピーコンストラクタ
+	ParticleComponent(const ParticleComponent&) = default;
+	// ムーブコンストラクタ（移動）
+	ParticleComponent(ParticleComponent&&) noexcept = default;
+
 	uint32_t count = 1024;// パーティクル数
 	Matrix4 matBillboard = ChoMath::MakeIdentity4x4();
 	float time = 0.0f;
@@ -476,6 +603,9 @@ struct ParticleComponent : public IComponentTag
 		return *this;
 	}
 
+	// ムーブ代入を明示的に生成
+	ParticleComponent& operator=(ParticleComponent&&) noexcept = default;
+
 	// 初期化
 	void Initialize()
 	{
@@ -492,6 +622,24 @@ struct ParticleComponent : public IComponentTag
 // エフェクトコンポーネント
 struct EffectComponent : public IComponentTag
 {
+	// デフォルト ctor はそのまま
+	EffectComponent() = default;
+	// コピーコンストラクタ
+	EffectComponent(const EffectComponent&) = default;
+	// ムーブコンストラクタ（移動）
+	EffectComponent(EffectComponent&&) noexcept = default;
+	// コピー演算子
+	EffectComponent& operator=(const EffectComponent& other)
+	{
+		if (this == &other) return *this;
+		effectName = other.effectName;
+		//isRun = other.isRun;
+		//isLoop = other.isLoop;
+		//root = other.root;
+		return *this;
+	}
+	// ムーブ代入を明示的に生成
+	EffectComponent& operator=(EffectComponent&&) noexcept = default;
 	std::wstring effectName = L"";	// エフェクト名
 	bool isRun = false;	// 実行フラグ
 	bool isLoop = true;	// ループフラグ
@@ -500,6 +648,13 @@ struct EffectComponent : public IComponentTag
 // スプライトコンポーネント
 struct UISpriteComponent : public IComponentTag
 {
+	// デフォルト ctor はそのまま
+	UISpriteComponent() = default;
+	// コピーコンストラクタ
+	UISpriteComponent(const UISpriteComponent&) = default;
+	// ムーブコンストラクタ（移動）
+	UISpriteComponent(UISpriteComponent&&) noexcept = default;
+
 	Vector2 position{ 0.0f,0.0f };// 位置
 	float rotation = 0.0f;// Z軸回転
 	Vector2 scale = { 1.0f,1.0f };// スケール
@@ -529,6 +684,10 @@ struct UISpriteComponent : public IComponentTag
 		textureSize = other.textureSize;
 		return *this;
 	}
+
+	// ムーブ代入を明示的に生成
+	UISpriteComponent& operator=(UISpriteComponent&&) noexcept = default;
+
 	// 初期化
 	void Initialize()
 	{
@@ -550,6 +709,13 @@ struct UISpriteComponent : public IComponentTag
 // ライトコンポーネント
 struct LightComponent : public IComponentTag
 {
+	// デフォルト ctor はそのまま
+	LightComponent() = default;
+	// コピーコンストラクタ
+	LightComponent(const LightComponent&) = default;
+	// ムーブコンストラクタ（移動）
+	LightComponent(LightComponent&&) noexcept = default;
+
 	Color color;		// 色
 	float intensity=1.0f;	// 強度
 	float range=10.0f;		// 適用距離
@@ -572,6 +738,10 @@ struct LightComponent : public IComponentTag
 		active = other.active;
 		return *this;
 	}
+
+	// ムーブ代入を明示的に生成
+	LightComponent& operator=(LightComponent&&) noexcept = default;
+
 	// 初期化
 	void Initialize()
 	{
@@ -590,6 +760,13 @@ struct LightComponent : public IComponentTag
 struct SoundData;
 struct AudioComponent : public IComponentTag
 {
+	// デフォルト ctor はそのまま
+	AudioComponent() = default;
+	// コピーコンストラクタ
+	AudioComponent(const AudioComponent&) = default;
+	// ムーブコンストラクタ（移動）
+	AudioComponent(AudioComponent&&) noexcept = default;
+
 	//std::string audioName = "";	// オーディオ名
 	//std::optional<uint32_t> audioID = std::nullopt;	// オーディオID
 	std::vector<SoundData> soundData;	// サウンドデータ
@@ -608,6 +785,10 @@ struct AudioComponent : public IComponentTag
 		isStop = other.isStop;
 		return *this;
 	}
+
+	// ムーブ代入を明示的に生成
+	AudioComponent& operator=(AudioComponent&&) noexcept = default;
+
 	// 初期化
 	void Initialize()
 	{
@@ -623,6 +804,23 @@ struct AudioComponent : public IComponentTag
 // アニメーションコンポーネント
 struct AnimationComponent : public IComponentTag
 {
+	// デフォルト ctor はそのまま
+	AnimationComponent() = default;
+	// コピーコンストラクタ
+	AnimationComponent(const AnimationComponent&) = default;
+	// ムーブコンストラクタ（移動）
+	AnimationComponent(AnimationComponent&&) noexcept = default;
+
+	// コピー演算子
+	AnimationComponent& operator=(const AnimationComponent& other)
+	{
+		if (this == &other) return *this;
+		animationIndex = other.animationIndex;
+		return *this;
+	}
+
+	// ムーブ代入を明示的に生成
+	AnimationComponent& operator=(AnimationComponent&&) noexcept = default;
 	float time = 0.0f;// 現在のアニメーションの時間
 	float transitionTime = 0.0f;// 遷移中経過時間
 	float transitionDuration = 0.1f;// 遷移にかける時間

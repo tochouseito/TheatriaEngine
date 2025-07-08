@@ -41,8 +41,8 @@ public:
 	void SetWorkSpaceType(const std::string& typeName);
 	WorkSpaceType GetWorkSpaceType() { return m_WorkSpaceType; }
 
-	GameObject* GetSelectedGameObject() const { return m_SelectedGameObject; }
-	void SetSelectedGameObject(GameObject* gameObject) { m_SelectedGameObject = gameObject; }
+	GameObject* GetSelectedGameObject() const;
+	void SetSelectedGameObject(GameObject* gameObject);
 
 	// EffectEditor
 	std::optional<uint32_t> GetEffectEntity() const { return m_EffectEntity; }
@@ -58,6 +58,8 @@ public:
 	std::unordered_map<std::wstring, size_t>& GetSceneMap() { return m_pSceneMap; }
 	// 編集中のSceneを保存
 	void SaveEditingScene();
+	// 編集中の読み込みなおす
+	void ReloadEditingScene();
 	// Sceneを取得
 	GameScene* GetEditScene(const std::wstring& sceneName);
 	 
@@ -78,8 +80,8 @@ private:
 	std::unique_ptr<EffectHierarchy> m_EffectHierarchy = nullptr;
 	std::unique_ptr<Manipulate> m_Manipulate = nullptr;
 
-	// 選択中のオブジェクト
-	GameObject* m_SelectedGameObject = nullptr;
+	// 選択中のオブジェクトの名前
+	std::wstring m_SelectedGameObjectName = L"";
 	// 編集中のエフェクトEntity
 	std::optional<uint32_t> m_EffectEntity = std::nullopt;
 	// 選択中のEffectNode

@@ -91,6 +91,23 @@ void EditorManager::SetWorkSpaceType(const std::string& typeName)
 	if (typeName == "EffectEdit") { m_WorkSpaceType = WorkSpaceType::EffectEdit; }
 }
 
+GameObject* EditorManager::GetSelectedGameObject() const
+{
+	return m_EngineCommand->GetGameCore()->GetGameWorld()->GetGameObject(m_SelectedGameObjectName);
+}
+
+void EditorManager::SetSelectedGameObject(GameObject* gameObject)
+{
+	if (gameObject)
+	{
+		m_SelectedGameObjectName = gameObject->GetName();
+	}
+	else
+	{
+		m_SelectedGameObjectName.clear();
+	}
+}
+
 void EditorManager::ChangeEditingScene(const std::wstring& sceneName)
 {
 	// 編集中のシーンを保存
@@ -122,6 +139,12 @@ void EditorManager::SaveEditingScene()
 	GameScene scene = m_EngineCommand->GetGameCore()->GetGameWorld()->CreateGameSceneFromWorld(*m_EngineCommand->GetGameCore()->GetSceneManager(),m_EditingSceneName);
 	// EditorManagerのシーンマップに保存
 	m_SceneList[m_pSceneMap[m_EditingSceneName]] = std::move(scene);
+}
+
+void EditorManager::ReloadEditingScene()
+{
+	// scene読み込み
+	m_EngineCommand->GetGameCore()->GetSceneManager()->LoadTemporaryScene(m_SceneList[m_pSceneMap[m_EditingSceneName]], true);
 }
 
 // Sceneを取得

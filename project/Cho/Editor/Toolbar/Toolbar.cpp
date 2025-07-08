@@ -91,6 +91,8 @@ void Toolbar::Window()
         {
             /* Pause */
             m_EngineCommand->GameStop();
+            // 編集中のシーンをロード
+            m_EditorManager->ReloadEditingScene();
         }
     } else // 実行中じゃないなら
     {
@@ -98,6 +100,8 @@ void Toolbar::Window()
         if (ImGui::Button(ICON_FA_PLAY, ImVec2(buttonSize, buttonSize)))
         {
             // Play
+			// 現在のSceneを保存
+            m_EditorManager->SaveEditingScene();
             m_EngineCommand->GameRun();
         }
     }

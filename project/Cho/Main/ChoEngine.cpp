@@ -78,8 +78,7 @@ void ChoEngine::Finalize()
 		if (gameCore->IsRunning())
 		{
 			gameCore->GameStop();
-			//gameCore->SceneUpdate();
-			//gameCore->Update(*resourceManager, *graphicsEngine);
+			editorManager->ReloadEditingScene();
 		}
 		FileSystem::SaveProject(editorManager.get(), gameCore->GetSceneManager(), gameCore->GetGameWorld(), gameCore->GetECSManager());
 	}
