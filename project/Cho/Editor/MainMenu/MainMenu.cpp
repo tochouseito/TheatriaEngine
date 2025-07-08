@@ -307,15 +307,23 @@ void MainMenu::PopupScriptName()
 {
     // スクリプト名バッファ
     static char scriptNameBuffer[64] = "";
+	static bool focusInput = false; // フォーカス状態を保持
     if (m_OpenScriptPopup)
     {
         std::memset(scriptNameBuffer, 0, sizeof(scriptNameBuffer)); // 初期化
         ImGui::OpenPopup("ScriptNamePopup");
         m_OpenScriptPopup = false; // 一度だけ開くように
+		focusInput = true; // ポップアップが開かれたら入力フィールドにフォーカスを当てる
     }
     if (ImGui::BeginPopupModal("ScriptNamePopup", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
         ImGui::Text("スクリプト名を入力してください（A-Z, a-z）:");
+		// フォーカスを当てる
+        if (focusInput)
+        {
+            ImGui::SetKeyboardFocusHere(); // 次のInputTextにフォーカス
+            focusInput = false;
+        }
         ImGui::InputText("##ScriptName", scriptNameBuffer, IM_ARRAYSIZE(scriptNameBuffer),
             ImGuiInputTextFlags_CallbackCharFilter,
             [](ImGuiInputTextCallbackData* data) -> int {

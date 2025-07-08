@@ -178,13 +178,13 @@ void GameCore::RegisterECSEvents()
 	// ScriptComponent
 	m_pComponentEventDispatcher->RegisterOnAdd<ScriptComponent>(
 		[&]([[maybe_unused]] Entity e, [[maybe_unused]] ScriptComponent* c) {
-			c->objectHandle = m_EngineCommand->GetGameCore()->GetGameWorld()->GetGameObject(e)->GetHandle();
+			//c->objectHandle = m_EngineCommand->GetGameCore()->GetGameWorld()->GetGameObject(e)->GetHandle();
 		});
 	m_pComponentEventDispatcher->RegisterOnCopy<ScriptComponent>(
 		[&]([[maybe_unused]] Entity src, [[maybe_unused]] Entity dst, [[maybe_unused]] ScriptComponent* c) {
 			ScriptComponent& srcScript = *m_pECSManager->GetComponent<ScriptComponent>(src);
 			*c = srcScript;
-			c->objectHandle = m_EngineCommand->GetGameCore()->GetGameWorld()->GetGameObject(dst)->GetHandle();
+			//c->objectHandle = m_EngineCommand->GetGameCore()->GetGameWorld()->GetGameObject(dst)->GetHandle();
 		});
 	m_pComponentEventDispatcher->RegisterOnRemove<ScriptComponent>(
 		[&]([[maybe_unused]] Entity e, [[maybe_unused]] ScriptComponent* c) {

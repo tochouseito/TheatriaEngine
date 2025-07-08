@@ -4,8 +4,8 @@
 #include "APIExportsMacro.h"
 
 #define REGISTER_SCRIPT_FACTORY(SCRIPTNAME) \
-    extern "C" __declspec(dllexport) Marionnette* Create##SCRIPTNAME##Script(GameObject& object,ECSManager* ecs) { \
-        return new SCRIPTNAME(object,ecs);}
+    extern "C" __declspec(dllexport) Marionnette* Create##SCRIPTNAME##Script(GameObject& object) { \
+        return new SCRIPTNAME(object);}
 //// メンバ登録マクロ
 //#define REFLECT_SCRIPT_MEMBER(CLASS, MEMBER) \
 //    { #MEMBER, \
@@ -82,37 +82,49 @@ namespace Cho
         class IComponentInterface
         {
         public:
-			IComponentInterface(ECSManager* ecs) : m_ECS(ecs) {}
+			IComponentInterface(Entity e, ECSManager* ecs) :m_Entity(e), m_ECS(ecs) {}
 			virtual ~IComponentInterface() = default;
-        private:
+        protected:
+			Entity m_Entity; // Entity
 			ECSManager* m_ECS = nullptr; // ECSManager
         };
+
+        // Marionnette用特殊
+        template<typename T>
+        concept MarionnetteInterface = std::derived_from<T, Marionnette>;
 
         // インターフェース型の許可
         template<typename T>
 		concept Type = std::derived_from<T, IComponentInterface>;
 
-        class InterfaceData
-        {
-		public:
-			InterfaceData() = default;
-			~InterfaceData() = default;
-        };
-        class Base
-        {
-		public:
-			Base(InterfaceData* data) : data(data) {}
-			virtual ~Base() = default;
-        private:
-            IntegrationData* data = nullptr;
-        };
-        template<typename T>
-		concept Type = std::derived_from<T, Base>;
+        // Traits pattern
+        template<typename Interface>
+        struct InterfaceTraits;
 
-        template<Type T>
-        T GetData() const
+        // Material
+        class Material : public IComponentInterface
         {
-        }
+            friend class Marionnette;
+        public:
+            Material(Entity e, ECSManager* ecs) : IComponentInterface(e,ecs) {}
+			~Material() = default;
+            MaterialComponent* operator->() 
+            { 
+                UpdatePtr();
+				return data;
+			}
+        private:
+            void UpdatePtr()
+            {
+				data = m_ECS->GetComponent<MaterialComponent>(m_Entity);
+            }
+			MaterialComponent* data = nullptr;
+        };
+        template<>
+        struct InterfaceTraits<Cho::ComponentInterface::Material>
+        {
+            using Component = MaterialComponent;
+        };
 	}
 }
 

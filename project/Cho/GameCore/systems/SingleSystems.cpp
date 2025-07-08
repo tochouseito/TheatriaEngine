@@ -263,7 +263,7 @@ void ScriptInstanceGenerateSystem::GenerateInstance(Entity e, ScriptComponent& s
 	std::string funcName = "Create" + script.scriptName + "Script";
 	funcName.erase(std::remove_if(funcName.begin(), funcName.end(), ::isspace), funcName.end());
 	// CreateScript関数を取得
-	typedef Marionnette* (*CreateScriptFunc)(GameObject&,ECSManager*);
+	typedef Marionnette* (*CreateScriptFunc)(GameObject&);
 	CreateScriptFunc createScript = (CreateScriptFunc)GetProcAddress(Cho::FileSystem::ScriptProject::m_DllHandle, funcName.c_str());
 	if (!createScript)
 	{
@@ -272,12 +272,16 @@ void ScriptInstanceGenerateSystem::GenerateInstance(Entity e, ScriptComponent& s
 	}
 	// スクリプトを生成
 	GameObject* object = m_pGameWorld->GetGameObject(e);
-	Marionnette* scriptInstance = createScript(*object,m_pEcs);
+	Marionnette* scriptInstance = createScript(*object);
 	if (!scriptInstance)
 	{
 		script.isActive = false;
 		return;
 	}
+	// Handleを取得
+	script.objectHandle = object->GetHandle();
+	// ECSをセット
+	scriptInstance->SetECSPtr(m_pEcs);
 	// TransformComponentを取得
 	scriptInstance->transform = m_pEcs->GetComponent<TransformComponent>(e);
 	// スクリプトのStart関数とUpdate関数をラップ
