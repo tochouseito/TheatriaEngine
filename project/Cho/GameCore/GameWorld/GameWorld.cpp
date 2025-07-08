@@ -117,12 +117,12 @@ SceneID GameWorld::AddGameObjectFromScene(const GameScene& scene, const bool& up
 }
 
 // ワールドからGameSceneを生成
-GameScene GameWorld::CreateGameSceneFromWorld(SceneManager& sceneManager) const
+GameScene GameWorld::CreateGameSceneFromWorld(SceneManager& sceneManager, const std::wstring& editSceneName) const
 {
 	// 編集対象のシーンをGameSceneに変換
 	// とりあえず0番目のシーンを対象にする
 	// クローンは除外
-	std::wstring sceneName = sceneManager.GetGameScene(0)->GetName();
+	std::wstring sceneName = sceneManager.GetScene(editSceneName)->GetName();
 	GameScene gameScene(sceneName);
 	for (auto& object : m_pGameObjects[0])
 	{
@@ -237,4 +237,42 @@ void GameWorld::ClearAllScenes()
 	m_ObjectHandleMapFromEntity.clear();
 	// メインカメラをクリア
 	m_pMainCamera = nullptr;
+}
+
+// タイプごとの初期コンポーネントを追加
+void GameWorld::AddDefaultComponentsToGameObject(ObjectHandle handle, ObjectType type)
+{
+	// 基本コンポーネントを追加
+	m_pECSManager->AddComponent<TransformComponent>(handle.entity);
+	switch (type)
+	{
+	case ObjectType::MeshObject:
+		m_pECSManager->AddComponent<MeshFilterComponent>(handle.entity);
+		m_pECSManager->AddComponent<MeshRendererComponent>(handle.entity);
+		break;
+	case ObjectType::Camera:
+		m_pECSManager->AddComponent<CameraComponent>(handle.entity);
+		break;
+	case ObjectType::ParticleSystem:
+		m_pECSManager->AddComponent<MeshFilterComponent>(handle.entity);
+		m_pECSManager->AddComponent<MeshRendererComponent>(handle.entity);
+		m_pECSManager->AddComponent<MaterialComponent>(handle.entity);
+		m_pECSManager->AddComponent<ParticleComponent>(handle.entity);
+		m_pECSManager->AddComponent<EmitterComponent>(handle.entity);
+		break;
+	case ObjectType::Effect:
+		break;
+	case ObjectType::Light:
+		break;
+	case ObjectType::UI:
+		m_pECSManager->AddComponent<UISpriteComponent>(handle.entity);
+		m_pECSManager->AddComponent<MaterialComponent>(handle.entity);
+		break;
+	case ObjectType::None:
+		break;
+	case ObjectType::Count:
+		break;
+	default:
+		break;
+	}
 }

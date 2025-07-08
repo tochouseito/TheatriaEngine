@@ -119,7 +119,7 @@ void EditorManager::ChangeEditingScene(const std::wstring& sceneName)
 void EditorManager::SaveEditingScene()
 {
 	// GameWorldからシーンを保存
-	GameScene scene = m_EngineCommand->GetGameCore()->GetGameWorld()->CreateGameSceneFromWorld(*m_EngineCommand->GetGameCore()->GetSceneManager());
+	GameScene scene = m_EngineCommand->GetGameCore()->GetGameWorld()->CreateGameSceneFromWorld(*m_EngineCommand->GetGameCore()->GetSceneManager(),m_EditingSceneName);
 	// EditorManagerのシーンマップに保存
 	m_SceneList[m_pSceneMap[m_EditingSceneName]] = std::move(scene);
 }

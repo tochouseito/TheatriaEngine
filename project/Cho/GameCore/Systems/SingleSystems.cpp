@@ -90,15 +90,15 @@ void TransformSystem::priorityUpdate()
 
 void TransformSystem::UpdateComponent(Entity e, TransformComponent& transform)
 {
-	// 変更がなければワールド行列を更新しない
-	if(transform.prePos == transform.position &&
-	   transform.preRot == ChoMath::DegreesToRadians(transform.degrees) &&
-	   transform.preScale == transform.scale)
-	{
-		
-	}
-	else
-	{
+	//// 変更がなければワールド行列を更新しない
+	//if(transform.prePos == transform.position &&
+	//   transform.preRot == ChoMath::DegreesToRadians(transform.degrees) &&
+	//   transform.preScale == transform.scale)
+	//{
+	//	
+	//}
+	//else
+	//{
 		// 度数からラジアンに変換
 		Vector3 radians = ChoMath::DegreesToRadians(transform.degrees);
 
@@ -120,7 +120,7 @@ void TransformSystem::UpdateComponent(Entity e, TransformComponent& transform)
 		transform.prePos = transform.position;
 		transform.preRot = radians;
 		transform.preScale = transform.scale;
-	}
+	//}
 
 	// 親があれば親のワールド行列を掛ける
 	if (transform.parent.has_value())

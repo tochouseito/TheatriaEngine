@@ -4,10 +4,10 @@
 #include "Core/Utility/GenerateUnique.h"
 
 // デフォルトのシーンを作成
-GameScene SceneManager::CreateDefaultScene()
+GameScene SceneManager::CreateDefaultScene(const std::wstring& name)
 {
 	// シーン名を生成
-	std::wstring sceneName = GenerateUniqueName<std::unordered_map<std::wstring, SceneID>>(L"MainScene", m_SceneNameToID);
+	std::wstring sceneName = GenerateUniqueName<std::unordered_map<std::wstring, SceneID>>(name, m_SceneNameToID);
 	GameScene scene(sceneName);
 	// デフォルトのObjectを追加
 	// Cube
@@ -77,4 +77,61 @@ GameSceneInstance* SceneManager::LoadTemporaryScene(const GameScene& scene, cons
 	m_pSceneInstances.push_back(std::make_unique<GameSceneInstance>(this, id));
 	// シーンインスタンスを返す
 	return m_pSceneInstances.back().get();
+}
+
+// シーンをアンロード
+void SceneManager::UnLoadScene(GameSceneInstance* pSceneInstance)
+{
+	pSceneInstance->UnloadScene(); // シーンインスタンスのアンロード
+}
+
+// シーンを追加
+void SceneManager::AddScene(GameScene scene)
+{
+	if (m_SceneNameToID.contains(scene.GetName()))
+	{
+		return; // 既に存在する場合は何もしない
+	}
+	std::wstring sceneName = scene.GetName();
+	SceneID id = static_cast<SceneID>(m_Scenes.push_back(std::move(scene)));
+	m_SceneNameToID[sceneName] = id; // シーン名とIDを紐付け
+}
+
+// コンテナからシーンを取得
+GameScene* SceneManager::GetScene(const SceneID& sceneID) noexcept
+{
+	if (m_Scenes.isValid(sceneID))
+	{
+		return &m_Scenes[sceneID];
+	}
+	return nullptr;
+}
+
+GameScene* SceneManager::GetScene(const std::wstring& sceneName) noexcept
+{
+	if (m_SceneNameToID.contains(sceneName))
+	{
+		return &m_Scenes[m_SceneNameToID.at(sceneName)];
+	}
+	return nullptr;
+}
+
+// シーン名からシーンIDを取得
+SceneID SceneManager::GetSceneID(const std::wstring& sceneName) const noexcept
+{
+	if (m_SceneNameToID.contains(sceneName))
+	{
+		return m_SceneNameToID.at(sceneName);
+	}
+	return 0;
+}
+
+// シーン名からシーンを取得
+GameScene* SceneManager::GetSceneToName(const std::wstring& sceneName) noexcept
+{
+	if (m_SceneNameToID.contains(sceneName))
+	{
+		return &m_Scenes[m_SceneNameToID.at(sceneName)];
+	}
+	return nullptr;
 }
