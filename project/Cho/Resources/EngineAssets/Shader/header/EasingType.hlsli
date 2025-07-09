@@ -1,3 +1,5 @@
+#pragma once
+
 static const uint EASING_TYPE_COUNT = 20;
 static const uint EASING_TYPE_LEFTANDRIGHT = 0;
 static const uint EASING_TYPE_LINEAR = 1;

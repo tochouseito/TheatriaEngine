@@ -491,6 +491,8 @@ void ModelManager::CreateDefaultMesh()
 	CreateCylinder();
 	// Skybox
 	CreateSkybox();
+	// EffectRing
+	CreateEffectRing();
 }
 
 void ModelManager::CreateCube()
@@ -955,6 +957,40 @@ void ModelManager::CreateSkybox()
 	modelData.meshes.push_back(meshData);
 	// modelDataを追加
 	AddModelData(modelData);
+}
+
+void ModelManager::CreateEffectRing()
+{
+	// Ring
+	m_EffectRingMeshData.name = L"EffectRing";
+	const uint32_t kOuterVertexCount = 256;
+	uint32_t vertices = kOuterVertexCount * 4;
+	uint32_t indices = kOuterVertexCount * 6;
+	m_EffectRingMeshData.vertices.resize(vertices, VertexData());
+	m_EffectRingMeshData.indices.resize(indices);
+
+	for (uint32_t i = 0; i < kOuterVertexCount; ++i)
+	{
+		uint32_t base = i * 4;
+		uint32_t index = i * 6;
+
+		m_EffectRingMeshData.indices[index + 0] = base + 0;
+		m_EffectRingMeshData.indices[index + 1] = base + 1;
+		m_EffectRingMeshData.indices[index + 2] = base + 2;
+
+		m_EffectRingMeshData.indices[index + 3] = base + 1;
+		m_EffectRingMeshData.indices[index + 4] = base + 3;
+		m_EffectRingMeshData.indices[index + 5] = base + 2;
+	}
+
+	// VertexBuffer,IndexBuffer作成
+	m_EffectRingMeshData.vertexBufferIndex = m_pResourceManager->CreateVertexBuffer<VertexData>(static_cast<UINT>(m_EffectRingMeshData.vertices.size()));
+	m_EffectRingMeshData.indexBufferIndex = m_pResourceManager->CreateIndexBuffer<uint32_t>(static_cast<UINT>(m_EffectRingMeshData.indices.size()));
+	VertexBuffer<VertexData>* vertexBuffer = dynamic_cast<VertexBuffer<VertexData>*>(m_pResourceManager->GetBuffer<IVertexBuffer>(m_EffectRingMeshData.vertexBufferIndex));
+	IndexBuffer<uint32_t>* indexBuffer = dynamic_cast<IndexBuffer<uint32_t>*>(m_pResourceManager->GetBuffer<IIndexBuffer>(m_EffectRingMeshData.indexBufferIndex));
+	// コピー
+	vertexBuffer->MappedDataCopy(m_EffectRingMeshData.vertices);
+	indexBuffer->MappedDataCopy(m_EffectRingMeshData.indices);
 }
 
 

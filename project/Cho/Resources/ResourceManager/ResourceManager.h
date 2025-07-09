@@ -27,6 +27,7 @@ enum IntegrationDataType
 	EffectRootInt,
 	EffectNodeInt,
 	EffectSpriteInt,
+	EffectRingInt,
 	kCount,
 };
 
@@ -175,6 +176,9 @@ public:
 			break;
 		case IntegrationDataType::EffectSpriteInt:
 			return GetBuffer<IStructuredBuffer>(m_IntegrationData[IntegrationDataType::EffectSpriteInt]->GetBufferIndex());
+			break;
+		case IntegrationDataType::EffectRingInt:
+			return GetBuffer<IStructuredBuffer>(m_IntegrationData[IntegrationDataType::EffectRingInt]->GetBufferIndex());
 			break;
 		default:
 			break;
@@ -448,6 +452,7 @@ private:
 	static const uint32_t kIntegrationEffectRootBufferSize = 128;// EffectRootの統合バッファのサイズ
 	static const uint32_t kIntegrationEffectNodeBufferSize = 1024;// EffectNodeの統合バッファのサイズ
 	static const uint32_t kIntegrationEffectSpriteBufferSize = 1024;// EffectSpriteの統合バッファのサイズ
+	static const uint32_t kIntegrationEffectRingBufferSize = 1024;// EffectRingの統合バッファのサイズ
 	// Texture最大数
 	static const uint32_t kMaxTextureCount = 256;
 };

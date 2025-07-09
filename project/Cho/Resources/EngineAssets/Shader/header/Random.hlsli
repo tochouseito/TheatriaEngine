@@ -1,3 +1,5 @@
+#pragma once
+
 //get a scalar random value from a 3d value
 float rand3dTo1d(float3 value, float3 dotDir = float3(12.9898, 78.233, 37.719)) {
     //make value smaller to avoid artefacts

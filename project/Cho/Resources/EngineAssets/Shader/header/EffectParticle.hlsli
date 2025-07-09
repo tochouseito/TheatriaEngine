@@ -1,3 +1,5 @@
+#pragma once
+
 struct EffectParticlePVA
 {
     float3 value;

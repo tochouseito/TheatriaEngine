@@ -136,6 +136,9 @@ public:
 	void RegisterModelUseList(const std::variant<uint32_t,std::wstring>& key, const uint32_t& transformMapID);
 	// モデルのUseListから削除する
 	void RemoveModelUseList(const std::variant<uint32_t, std::wstring>& key, const uint32_t& transformMapID);
+
+	// Effect用のメッシュデータを取得する
+	MeshData& GetEffectRingMeshData() { return m_EffectRingMeshData; }
 private:
 	// Assimpのオプションチェック
 	void CheckAssimpOption();
@@ -153,6 +156,8 @@ private:
 	void CreateCylinder();
 	// Skyboxの生成
 	void CreateSkybox();
+	// EffectRingの生成
+	void CreateEffectRing();
 
 	// 
 	Node ReadNode(aiNode* node, const std::string& parentName);
@@ -168,6 +173,9 @@ private:
 	FVector<ModelData> m_Models;
 	// モデルのキーを名前で管理するコンテナ
 	std::unordered_map<std::wstring, uint32_t> m_ModelNameContainer;
+
+	// Effect用メッシュデータ
+	MeshData m_EffectRingMeshData;
 
 	// モデルの使用可能なTransformの数のオフセット
 	static const uint32_t kUseTransformOffset = 1024;

@@ -170,6 +170,9 @@ void ResourceManager::CreateIntegrationBuffers()
 	// EffectSprite統合バッファ
 	std::optional<uint32_t> effectSpriteIndex = CreateStructuredBuffer<EffectSprite>(kIntegrationEffectSpriteBufferSize);
 	m_IntegrationData[IntegrationDataType::EffectSpriteInt] = std::make_unique<IntegrationData<EffectSprite>>(effectSpriteIndex, kIntegrationEffectSpriteBufferSize);
+	// EffectRing統合バッファ
+	std::optional<uint32_t> effectRingIndex = CreateStructuredBuffer<EffectRing>(kIntegrationEffectRingBufferSize);
+	m_IntegrationData[IntegrationDataType::EffectRingInt] = std::make_unique<IntegrationData<EffectRing>>(effectRingIndex, kIntegrationEffectRingBufferSize);
 }
 
 void ResourceManager::CreateLightBuffer()

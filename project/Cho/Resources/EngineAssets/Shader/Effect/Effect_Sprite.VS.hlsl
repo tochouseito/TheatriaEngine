@@ -19,6 +19,17 @@ VSOutput main(VSInput input, uint instanceId : SV_InstanceID, uint vertexId : SV
     VSOutput output;
     
     EffectParticle particle = gParticles[instanceId];
+    
+    // Spriteじゃないなら何もしない
+    if(particle.meshType != MESH_TYPE_SPRITE) {
+        output.position = float4(0, 0, 0, 1);
+        output.texcoord = float2(0, 0);
+        output.normal = float3(0, 0, 0);
+        output.color = float4(1, 1, 1, 0);
+        output.instanceId = instanceId;
+        return output;
+    }
+    
     EffectSprite sprite = gSprites[particle.meshID];
     
     // worldViewProjection

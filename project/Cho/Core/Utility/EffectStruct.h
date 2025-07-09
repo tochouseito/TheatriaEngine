@@ -252,6 +252,29 @@ struct EffectSprite
     SpriteVertexPosition vertexPosition;    // 頂点座標
 };
 
+enum class RING_SHAPETYPE
+{
+	DONUT = 0,       // ドーナツ型
+	CRESCENT,       // 半円型
+};
+
+struct EffectRing
+{
+    uint32_t shape;
+    float startFade;
+    float endFade;
+    float startAngle;
+    float endAngle;
+    uint32_t placement;
+    uint32_t VertexCount;
+    Vector2 outerRing;
+    Vector2 innerRing;
+    float centerRatio;
+    Color outerRingColor;
+    Color centerColor;
+    Color innerRingColor;
+};
+
 struct EffectDraw
 {
 	uint32_t meshType = 1;          // メッシュタイプ

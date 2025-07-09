@@ -1,6 +1,8 @@
+#pragma once
 #include "EasingType.hlsli"
 #include "EffectSRT.hlsli"
 #include "EffectSprite.hlsli"
+#include "EffectRing.hlsli"
 
 struct EffectCommon
 {

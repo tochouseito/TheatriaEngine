@@ -1,3 +1,5 @@
+#pragma once
+
 static const uint MAX_LIGHTS = 30;
 static const uint LIGHT_TYPE_DIRECTIONAL = 0;
 static const uint LIGHT_TYPE_POINT = 1;

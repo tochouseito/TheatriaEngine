@@ -82,6 +82,7 @@ public:
 	const PSO& GetEffectTimeBaseUpdatePSO() { return m_EffectTimeBaseUpdatePSO; }
 	// EffectSprite
 	const PSO& GetEffectSpritePSO() { return m_EffectSpritePSO; }
+	const PSO& GetEffectRingPSO() { return m_EffectRingPSO; }
 
 	// UI
 	const PSO& GetUIPSO() { return m_UIPSO; }
@@ -120,6 +121,8 @@ private:
 	void CreatePipelineEffectTimeBaseUpdate(ID3D12Device8* device);
 	// EffectSprite
 	void CreatePipelineEffectSprite(ID3D12Device8* device);
+	// EffectRing
+	void CreatePipelineEffectRing(ID3D12Device8* device);
 
 	// UI
 	void CreatePipelineUI(ID3D12Device8* device);
@@ -159,6 +162,7 @@ private:
 
 	// EffectSprite
 	PSO m_EffectSpritePSO;
+	PSO m_EffectRingPSO;
 
 	// UI
 	PSO m_UIPSO;

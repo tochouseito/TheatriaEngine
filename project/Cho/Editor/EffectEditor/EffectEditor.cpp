@@ -251,11 +251,118 @@ void EffectEditor::Window()
 			static const char* meshTypeStrings[] = {
 				"Node",     // MeshNode
 				"Sprite",  // MeshSprite
+				"Ribbon",  // MeshRibbon
+				"Trail",   // MeshTrail
+				"Ring",    // MeshRing
 			};
 			int meshType = static_cast<int>(node.draw.meshType);
+			int prevMeshType = meshType;
+
 			if (ImGui::Combo("Mesh Type", &meshType, meshTypeStrings, IM_ARRAYSIZE(meshTypeStrings)))
 			{
-				node.draw.meshType = static_cast<uint32_t>(meshType);
+				if (meshType != prevMeshType)
+				{
+					// 値が変わったときだけ行う処理
+					EFFECT_MESH_TYPE postType = static_cast<EFFECT_MESH_TYPE>(meshType);
+					EFFECT_MESH_TYPE preType = static_cast<EFFECT_MESH_TYPE>(prevMeshType);
+					switch (postType)
+					{
+					case EFFECT_MESH_TYPE::NONE:
+						switch (preType)
+						{
+						case EFFECT_MESH_TYPE::NONE:
+							// 何もしない
+							break;
+						case EFFECT_MESH_TYPE::SPRITE:
+							m_EngineCommand->GetResourceManager()->GetIntegrationData(IntegrationDataType::EffectSpriteInt)->RemoveMapID(node.draw.meshDataIndex);
+							break;
+						case EFFECT_MESH_TYPE::RIBBON:
+							break;
+						case EFFECT_MESH_TYPE::TRAIL:
+							break;
+						case EFFECT_MESH_TYPE::RING:
+							m_EngineCommand->GetResourceManager()->GetIntegrationData(IntegrationDataType::EffectRingInt)->RemoveMapID(node.draw.meshDataIndex);
+							break;
+						case EFFECT_MESH_TYPE::MODEL:
+							break;
+						case EFFECT_MESH_TYPE::CUBE:
+							break;
+						case EFFECT_MESH_TYPE::SPHERE:
+							break;
+						default:
+							break;
+						}
+						break;
+					case EFFECT_MESH_TYPE::SPRITE:
+						switch (preType)
+						{
+						case EFFECT_MESH_TYPE::NONE:
+							// 何もしない
+							break;
+						case EFFECT_MESH_TYPE::SPRITE:
+							// 何もしない
+							break;
+						case EFFECT_MESH_TYPE::RIBBON:
+							break;
+						case EFFECT_MESH_TYPE::TRAIL:
+							break;
+						case EFFECT_MESH_TYPE::RING:
+							m_EngineCommand->GetResourceManager()->GetIntegrationData(IntegrationDataType::EffectRingInt)->RemoveMapID(node.draw.meshDataIndex);
+							break;
+						case EFFECT_MESH_TYPE::MODEL:
+							break;
+						case EFFECT_MESH_TYPE::CUBE:
+							break;
+						case EFFECT_MESH_TYPE::SPHERE:
+							break;
+						default:
+							break;
+						}
+						node.draw.meshDataIndex = m_EngineCommand->GetResourceManager()->GetIntegrationData(IntegrationDataType::EffectSpriteInt)->GetMapID();
+						break;
+					case EFFECT_MESH_TYPE::RIBBON:
+						break;
+					case EFFECT_MESH_TYPE::TRAIL:
+						break;
+					case EFFECT_MESH_TYPE::RING:
+						switch (preType)
+						{
+						case EFFECT_MESH_TYPE::NONE:
+							// 何もしない
+							break;
+						case EFFECT_MESH_TYPE::SPRITE:
+							m_EngineCommand->GetResourceManager()->GetIntegrationData(IntegrationDataType::EffectSpriteInt)->RemoveMapID(node.draw.meshDataIndex);
+							break;
+						case EFFECT_MESH_TYPE::RIBBON:
+							break;
+						case EFFECT_MESH_TYPE::TRAIL:
+							break;
+						case EFFECT_MESH_TYPE::RING:
+							// 何もしない
+							break;
+						case EFFECT_MESH_TYPE::MODEL:
+							break;
+						case EFFECT_MESH_TYPE::CUBE:
+							break;
+						case EFFECT_MESH_TYPE::SPHERE:
+							break;
+						default:
+							break;
+						}
+						node.draw.meshDataIndex = m_EngineCommand->GetResourceManager()->GetIntegrationData(IntegrationDataType::EffectRingInt)->GetMapID();
+						break;
+					case EFFECT_MESH_TYPE::MODEL:
+						break;
+					case EFFECT_MESH_TYPE::CUBE:
+						break;
+					case EFFECT_MESH_TYPE::SPHERE:
+						break;
+					default:
+						break;
+					}
+
+					node.draw.meshType = static_cast<uint32_t>(meshType);
+				}
 			}
 			// Mesh
 			EFFECT_MESH_TYPE type = static_cast<EFFECT_MESH_TYPE>(node.draw.meshType);
@@ -343,6 +450,7 @@ void EffectEditor::Window()
 			case EFFECT_MESH_TYPE::TRAIL:
 				break;
 			case EFFECT_MESH_TYPE::RING:
+
 				break;
 			case EFFECT_MESH_TYPE::MODEL:
 				break;
