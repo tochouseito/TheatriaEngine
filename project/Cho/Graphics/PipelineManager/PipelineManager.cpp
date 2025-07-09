@@ -1012,20 +1012,20 @@ void PipelineManager::CreatePipelineParticle(ID3D12Device8* device)
 	// BlendState
 	D3D12_BLEND_DESC blendDesc{};
 	// すべての色要素を書き込む
-	blendDesc.RenderTarget[0].RenderTargetWriteMask =
-		D3D12_COLOR_WRITE_ENABLE_ALL;
+	blendDesc.RenderTarget[0].RenderTargetWriteMask =D3D12_COLOR_WRITE_ENABLE_ALL;
 	blendDesc.RenderTarget[0].BlendEnable = true;
-	//blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
-	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
-	//blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
-	//!< 加算。Src * SrcA + Dest * 1
-	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
-	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
-	//blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;
 
-	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
-	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ZERO;
-	blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ONE;
+	//blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;			// ソースカラーに掛ける係数（SrcAlpha）
+	//blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;	// デスティネーションカラーに掛ける係数（1 - SrcAlpha）
+	//blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;				// カラー合成方法：加算
+
+	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_ONE;         // ソースカラーそのまま
+	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;        // デスティネーションカラーそのまま
+	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;       // 加算
+
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;			// アルファ値合成：SrcAlpha * 1
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;		// アルファ値合成：DestAlpha * 0
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;		// アルファ合成方法：加算
 
 	// RasterizerState
 	D3D12_RASTERIZER_DESC rasterizerDesc{};
@@ -2285,35 +2285,16 @@ void PipelineManager::CreatePipelineEffectSprite(ID3D12Device8* device)
 	// BlendState
 	D3D12_BLEND_DESC blendDesc{};
 	// すべての色要素を書き込む
-	blendDesc.RenderTarget[0].RenderTargetWriteMask =
-		D3D12_COLOR_WRITE_ENABLE_ALL;
+	blendDesc.RenderTarget[0].RenderTargetWriteMask =D3D12_COLOR_WRITE_ENABLE_ALL;
 	blendDesc.RenderTarget[0].BlendEnable = true;
-	////blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
-	//blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
-	////blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
-	////!< 加算。Src * SrcA + Dest * 1
-	//blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
-	//blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
-	////blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;
 
-	//blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
-	//blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ZERO;
-	//blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ONE;
+	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_ONE;         // ソースカラーそのまま
+	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;        // デスティネーションカラーそのまま
+	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;       // 加算
 
-	/*blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ZERO;
-	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ONE;
-	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
-	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;*/
-
-	blendDesc.RenderTarget[0].BlendEnable = true;
-	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
-	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
-	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
-	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;			// アルファ値合成：SrcAlpha * 1
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;		// アルファ値合成：DestAlpha * 0
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;		// アルファ合成方法：加算
 
 	// RasterizerState
 	D3D12_RASTERIZER_DESC rasterizerDesc{};

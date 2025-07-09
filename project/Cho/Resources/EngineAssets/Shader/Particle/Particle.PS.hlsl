@@ -22,6 +22,11 @@ PixelShaderOutput main(VSOutput input) {
     // テクスチャカラー
     float4 textureColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
     
+    // alpha Test
+    if(material.color.a <= 0.0f) {
+        discard;
+    }
+    
     // テクスチャが有効ならテクスチャカラーを取得
     if (material.enableTexture != 0)
     {
@@ -33,6 +38,10 @@ PixelShaderOutput main(VSOutput input) {
         // UV変換行列を適用
         float4 transformedUV = mul(float4(texCoord, 0.0f, 1.0f), material.matUV);
         textureColor = gTextures[material.textureID].Sample(gSampler, transformedUV.xy);
+        // alpha Test
+        if(textureColor.a <= 0.0f) {
+            discard;
+        }
     }
     // 合計
     finalColor.rgb =input.color.rgb * material.color.rgb * textureColor.rgb;

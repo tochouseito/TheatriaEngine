@@ -37,7 +37,10 @@ PixelShaderOutput main(VSOut input) {
     float3 toEye = normalize(input.cameraPosition - input.position.xyz);
     // 法線
     float3 normal = normalize(input.normal);
-    
+    // alphaが0ならdiscard
+    if(material.color.a <= 0.0f) {
+        discard;
+    }
     // テクスチャが有効ならテクスチャカラーを取得
     if (material.enableTexture != 0)
     {
@@ -49,6 +52,10 @@ PixelShaderOutput main(VSOut input) {
         // テクスチャ
         float4 transformedUV = mul(float4(texcoord, 0.0f, 1.0f), gIMaterial[input.materialID].matUV);
         textureColor = gTextures[material.textureID].Sample(gSampler, transformedUV.xy);
+        // alphaが0ならdiscard
+        if(textureColor.a <= 0.0f) {
+            discard;
+        }
     }
     // ライティングが有効ならライティングを計算
     if (material.enableLighting != 0) {

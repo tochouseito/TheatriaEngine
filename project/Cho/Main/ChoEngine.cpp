@@ -158,7 +158,7 @@ void ChoEngine::Draw()
 	if (runtimeMode == RuntimeMode::Editor)
 	{
 		// 描画
-		//graphicsEngine->Render(*resourceManager, *gameCore, RenderMode::Game);
+		graphicsEngine->Render(*resourceManager, *gameCore, RenderMode::Game);
 		// シーン描画
 		graphicsEngine->Render(*resourceManager, *gameCore, RenderMode::Scene);
 		// 描画後片付け

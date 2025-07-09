@@ -26,7 +26,12 @@ PSOutput main(VSOutput input) {
     }
     else {
         textureColor = gTextures[node.drawCommon.textureID].Sample(gSampler, input.texcoord);
-        output.color = input.color * textureColor;
+        output.color.rgb = input.color.rgb * textureColor.rgb;
+        output.color.a = input.color.a * textureColor.a;
+    }
+    // alpha test
+    if (output.color.a <= 0.0f) {
+        discard;
     }
     return output;
 }
