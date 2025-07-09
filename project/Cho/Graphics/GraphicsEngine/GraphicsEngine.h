@@ -47,7 +47,9 @@ enum DrawPass
 	GBuffers = 0,
 	Lighting,
 	Forward,
-	PostProcess,// ポストプロセス、最終描画
+	PostProcess,
+	SwapChainPass,
+	EditorView,
 	PassCount,
 };
 
@@ -108,7 +110,6 @@ public:
 	void PreRender();
 	void Render(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode = RenderMode::Game);
 	void PostRender(ImGuiManager* imgui, RenderMode mode);
-	void PostRenderWithImGui(ImGuiManager* imgui);
 	// レンダーターゲットテクスチャ、ImGui、スワップチェーンのリサイズ
 	void ScreenResize();
 
@@ -137,6 +138,7 @@ private:
 	void DrawLighting(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode);
 	void DrawForward(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode);
 	void DrawPostProcess(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode);
+	void DrawEditorView(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode);
 	// 深度バッファの生成
 	void CreateDepthBuffer();
 	// オフスクリーンバッファの生成

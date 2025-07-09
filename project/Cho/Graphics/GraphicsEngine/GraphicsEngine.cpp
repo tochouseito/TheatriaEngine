@@ -58,6 +58,8 @@ void GraphicsEngine::Render(ResourceManager& resourceManager, GameCore& gameCore
 	DrawForward(resourceManager, gameCore, mode);
 	// ポストプロセス
 	DrawPostProcess(resourceManager, gameCore, mode);
+	// エディタビュー
+	DrawEditorView(resourceManager, gameCore, mode);
 }
 
 void GraphicsEngine::PostRender(ImGuiManager* imgui, RenderMode mode)
@@ -67,46 +69,31 @@ void GraphicsEngine::PostRender(ImGuiManager* imgui, RenderMode mode)
 	// コマンドリストの取得
 	CommandContext* context = commandManager->GetCommandContext();
 	BeginCommandContext(context);
-	// SwapChainのBackBufferIndexを取得
-	UINT backBufferIndex = m_SwapChain->GetCurrentBackBufferIndex();
-	// SwapChainResourceの状態遷移
-	context->BarrierTransition(
-		m_SwapChain->GetBuffer(backBufferIndex)->pResource.Get(),
-		D3D12_RESOURCE_STATE_PRESENT, 
-		D3D12_RESOURCE_STATE_RENDER_TARGET
-	);
 	// RTVの設定
-	SetRenderTargets(context, DrawPass::SwapChainPass, mode);
-	if (mode == RenderMode::Release)
+	SetRenderTargets(context, DrawPass::SwapChainPass, mode, true);
+	// 描画設定
+	SetRenderState(context, ViewportSwapChain);
+	if(mode == RenderMode::Release)
 	{
-		renderTexType = RenderTextureType::GameScreen;
-		setTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_RenderTextures[renderTexType].m_BufferIndex);
-		context->BarrierTransition(
-			setTex->GetResource(),
-			D3D12_RESOURCE_STATE_RENDER_TARGET,
-			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
-		);
 		// パイプラインセット
 		context->SetGraphicsPipelineState(m_PipelineManager->GetScreenCopyPSO().pso.Get());
 		// ルートシグネチャセット
 		context->SetGraphicsRootSignature(m_PipelineManager->GetScreenCopyPSO().rootSignature.Get());
-		// オフスクリーンレンダリングテクスチャをセット
+		// PostProcessRenderTextureをセット
+		ColorBuffer* setTex = nullptr;
+		setTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_GameRenderTextures[GameRenderTextureType::GamePostProcessTexture].m_BufferIndex);
+		// ポストプロセスレンダリングテクスチャをセット
 		context->SetGraphicsRootDescriptorTable(0, setTex->GetSRVGpuHandle());
 		// DrawCall
 		context->DrawInstanced(3, 1, 0, 0);
 	}
 	else
 	{
-
 		// ImGuiの描画
 		imgui->Draw(context->GetCommandList());
 	}
-	// SwapChainResourceの状態遷移
-	context->BarrierTransition(
-		m_SwapChain->GetBuffer(backBufferIndex)->pResource.Get(),
-		D3D12_RESOURCE_STATE_RENDER_TARGET,
-		D3D12_RESOURCE_STATE_PRESENT
-	);
+	// RenderTargetsの状態を戻す
+	SetRenderTargets(context, DrawPass::SwapChainPass, mode, false);
 	// コマンドリストのクローズ
 	context->Close();
 	// コマンドリストの実行
@@ -117,39 +104,6 @@ void GraphicsEngine::PostRender(ImGuiManager* imgui, RenderMode mode)
 	m_GraphicsCore->GetCommandManager()->Signal(Graphics);
 	// コマンドリストの返却
 	m_GraphicsCore->GetCommandManager()->ReturnCommandContext(context);
-	// GPUの完了待ち
-	WaitForGPU(Graphics);
-}
-
-void GraphicsEngine::PostRenderWithImGui(ImGuiManager* imgui)
-{
-	// コマンドマネージャー
-	CommandManager* commandManager = m_GraphicsCore->GetCommandManager();
-	// コマンドリストの取得
-	CommandContext* context = commandManager->GetCommandContext();
-	BeginCommandContext(context);
-	// SwapChainのBackBufferIndexを取得
-	UINT backBufferIndex = m_SwapChain->GetCurrentBackBufferIndex();
-	// SwapChainResourceの状態遷移
-	context->BarrierTransition(
-		m_SwapChain->GetBuffer(backBufferIndex)->pResource.Get(),
-		D3D12_RESOURCE_STATE_PRESENT,
-		D3D12_RESOURCE_STATE_RENDER_TARGET
-	);
-	// RTVの設定
-	SetRenderTargets(context, DrawPass::SwapChainPass);
-	SetRenderState(context,ViewportSwapChain);
-	// ImGuiの描画
-	imgui->Draw(context->GetCommandList());
-	// SwapChainResourceの状態遷移
-	context->BarrierTransition(
-		m_SwapChain->GetBuffer(backBufferIndex)->pResource.Get(),
-		D3D12_RESOURCE_STATE_RENDER_TARGET,
-		D3D12_RESOURCE_STATE_PRESENT
-	);
-	EndCommandContext(context,Graphics);
-	// SwapChainのPresent
-	m_SwapChain->Present();
 	// GPUの完了待ち
 	WaitForGPU(Graphics);
 }
@@ -371,9 +325,10 @@ void GraphicsEngine::SetRenderTargets(CommandContext* context, DrawPass pass, Re
 					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
 					D3D12_RESOURCE_STATE_RENDER_TARGET
 				);
-				// RTVの設定
+				// RTV,DSVの設定
+				dsvHandle = m_ResourceManager->GetBuffer<DepthBuffer>(m_DepthManager->GetDepthBufferIndex())->GetDSVCpuHandle();
 				rtvHandle = renderTex->GetRTVCpuHandle();
-				context->SetRenderTarget(&rtvHandle);
+				context->SetRenderTarget(&rtvHandle, &dsvHandle);
 				context->ClearRenderTarget(rtvHandle);
 			}
 			else
@@ -398,9 +353,10 @@ void GraphicsEngine::SetRenderTargets(CommandContext* context, DrawPass pass, Re
 					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
 					D3D12_RESOURCE_STATE_RENDER_TARGET
 				);
-				// RTVの設定
+				// RTV,DSVの設定
+				dsvHandle = m_ResourceManager->GetBuffer<DepthBuffer>(m_DepthManager->GetDepthBufferIndex())->GetDSVCpuHandle();
 				rtvHandle = renderTex->GetRTVCpuHandle();
-				context->SetRenderTarget(&rtvHandle);
+				context->SetRenderTarget(&rtvHandle, &dsvHandle);
 				context->ClearRenderTarget(rtvHandle);
 			}
 			else
@@ -472,6 +428,92 @@ void GraphicsEngine::SetRenderTargets(CommandContext* context, DrawPass pass, Re
 			}
 		}
 		break;
+	case SwapChainPass:
+	{
+		// SwapChainのBackBufferIndexを取得
+		UINT backBufferIndex = m_SwapChain->GetCurrentBackBufferIndex();
+		if (isSetTarget)
+		{
+			// StateをRenderTargetに変更	
+			context->BarrierTransition(
+				m_SwapChain->GetBuffer(backBufferIndex)->pResource.Get(),
+				D3D12_RESOURCE_STATE_PRESENT,
+				D3D12_RESOURCE_STATE_RENDER_TARGET);
+			// RTVの設定
+			rtvHandle = m_SwapChain->GetBuffer(backBufferIndex)->m_RTVCpuHandle;
+			context->SetRenderTarget(&rtvHandle);
+			context->ClearRenderTarget(rtvHandle);
+		}
+		else
+		{
+			// StateをPresentに変更
+			context->BarrierTransition(
+				m_SwapChain->GetBuffer(backBufferIndex)->pResource.Get(),
+				D3D12_RESOURCE_STATE_RENDER_TARGET,
+				D3D12_RESOURCE_STATE_PRESENT);
+		}
+	}
+			break;
+	case EditorView:
+		if (mode == RenderMode::Game)
+		{
+			if (isSetTarget)
+			{
+				// StateをRenderTargetに変更	
+				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_GameRenderTextures[GameRenderTextureType::GameScreenTexture].m_BufferIndex);
+				context->BarrierTransition(
+					renderTex->GetResource(),
+					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+					D3D12_RESOURCE_STATE_RENDER_TARGET
+				);
+				// RTVの設定
+				rtvHandle = renderTex->GetRTVCpuHandle();
+				context->SetRenderTarget(&rtvHandle);
+				context->ClearRenderTarget(rtvHandle);
+			}
+			else
+			{
+				// StateをPixelShaderResourceに変更
+				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_GameRenderTextures[GameRenderTextureType::GameScreenTexture].m_BufferIndex);
+				context->BarrierTransition(
+					renderTex->GetResource(),
+					D3D12_RESOURCE_STATE_RENDER_TARGET,
+					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+				);
+			}
+		}
+		else if (mode == RenderMode::Scene)
+		{
+			if (isSetTarget)
+			{
+				// StateをRenderTargetに変更	
+				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_SceneRenderTextures[SceneRenderTextureType::SceneScreenTexture].m_BufferIndex);
+				context->BarrierTransition(
+					renderTex->GetResource(),
+					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+					D3D12_RESOURCE_STATE_RENDER_TARGET
+				);
+				// RTVの設定
+				rtvHandle = renderTex->GetRTVCpuHandle();
+				context->SetRenderTarget(&rtvHandle);
+				context->ClearRenderTarget(rtvHandle);
+			}
+			else
+			{
+				// StateをPixelShaderResourceに変更
+				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_SceneRenderTextures[SceneRenderTextureType::SceneScreenTexture].m_BufferIndex);
+				context->BarrierTransition(
+					renderTex->GetResource(),
+					D3D12_RESOURCE_STATE_RENDER_TARGET,
+					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+				);
+			}
+		}
+		else
+		{
+			Log::Write(LogLevel::Assert, "Unknown RenderMode for EditorView pass");
+		}
+		break;
 	case PassCount:
 		// ここに来るはずがない
 		Log::Write(LogLevel::Assert, "Invalid DrawPass");
@@ -524,18 +566,40 @@ void GraphicsEngine::SetRenderState(CommandContext* context, ViewportType type)
 	context->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode)
+void GraphicsEngine::DrawGBuffers([[maybe_unused]]ResourceManager& resourceManager, [[maybe_unused]] GameCore& gameCore, RenderMode mode)
 {
-	resourceManager;
-	gameCore;
-	mode;
+	// コンテキスト取得
+	CommandContext* context = GetCommandContext();
+	// コマンドリスト開始
+	BeginCommandContext(context);
+	// レンダーターゲットの設定
+	SetRenderTargets(context, DrawPass::GBuffers, mode, true);
+	// 描画設定
+	SetRenderState(context, ViewportGame);
+	// レンダーターゲットのStateを戻す
+	SetRenderTargets(context, DrawPass::GBuffers, mode, false);
+	// コマンドリスト終了
+	EndCommandContext(context, Graphics);
+	// GPUの完了待ち
+	WaitForGPU(Graphics);
 }
 
-void GraphicsEngine::DrawLighting(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode)
+void GraphicsEngine::DrawLighting([[maybe_unused]] ResourceManager& resourceManager, [[maybe_unused]] GameCore& gameCore, RenderMode mode)
 {
-	resourceManager;
-	gameCore;
-	mode;
+	// コンテキスト取得
+	CommandContext* context = GetCommandContext();
+	// コマンドリスト開始
+	BeginCommandContext(context);
+	// レンダーターゲットの設定
+	SetRenderTargets(context, DrawPass::Lighting, mode, true);
+	// 描画設定
+	SetRenderState(context, ViewportGame);
+	// レンダーターゲットのStateを戻す
+	SetRenderTargets(context, DrawPass::Lighting, mode, false);
+	// コマンドリスト終了
+	EndCommandContext(context, Graphics);
+	// GPUの完了待ち
+	WaitForGPU(Graphics);
 }
 
 void GraphicsEngine::DrawForward(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode)
@@ -702,7 +766,7 @@ void GraphicsEngine::DrawForward(ResourceManager& resourceManager, GameCore& gam
 	WaitForGPU(Graphics);
 }
 
-void GraphicsEngine::DrawPostProcess(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode)
+void GraphicsEngine::DrawPostProcess([[maybe_unused]] ResourceManager& resourceManager, [[maybe_unused]]GameCore& gameCore, RenderMode mode)
 {
 	// コンテキスト取得
 	CommandContext* context = GetCommandContext();
@@ -718,13 +782,67 @@ void GraphicsEngine::DrawPostProcess(ResourceManager& resourceManager, GameCore&
 	context->SetGraphicsRootSignature(m_PipelineManager->GetScreenCopyPSO().rootSignature.Get());
 	// フォワードの結果をセット
 	ColorBuffer* forwardTex = nullptr;
-	
+	if(mode == RenderMode::Game || mode == RenderMode::Release)
+	{
+		forwardTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_GameRenderTextures[GameRenderTextureType::GameForwardTexture].m_BufferIndex);
+	}
+	else if (mode == RenderMode::Scene)
+	{
+		forwardTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_SceneRenderTextures[SceneRenderTextureType::SceneForwardTexture].m_BufferIndex);
+	}
+	else
+	{
+		Cho::Log::Write(LogLevel::Assert, "Unknown RenderMode for PostProcess pass");
+		return;
+	}
 	// オフスクリーンレンダリングテクスチャをセット
-	context->SetGraphicsRootDescriptorTable(0, setTex->GetSRVGpuHandle());
+	context->SetGraphicsRootDescriptorTable(0, forwardTex->GetSRVGpuHandle());
 	// DrawCall
 	context->DrawInstanced(3, 1, 0, 0);
 	// レンダーターゲットのStateを戻す
 	SetRenderTargets(context, DrawPass::PostProcess, mode, false);
+	// コマンドリスト終了
+	EndCommandContext(context, Graphics);
+	// GPUの完了待ち
+	WaitForGPU(Graphics);
+}
+
+void GraphicsEngine::DrawEditorView([[maybe_unused]] ResourceManager& resourceManager, [[maybe_unused]] GameCore& gameCore, RenderMode mode)
+{
+	if (mode != RenderMode::Game && mode != RenderMode::Scene) { return; }
+	// コンテキスト取得
+	CommandContext* context = GetCommandContext();
+	// コマンドリスト開始
+	BeginCommandContext(context);
+	// レンダーターゲットの設定
+	SetRenderTargets(context, DrawPass::EditorView, mode, true);
+	// 描画設定
+	SetRenderState(context, ViewportGame);
+	// パイプラインセット
+	context->SetGraphicsPipelineState(m_PipelineManager->GetScreenCopyPSO().pso.Get());
+	// ルートシグネチャセット
+	context->SetGraphicsRootSignature(m_PipelineManager->GetScreenCopyPSO().rootSignature.Get());
+	// ポストプロセスの結果をセット
+	ColorBuffer* postProcess = nullptr;
+	if (mode == RenderMode::Game || mode == RenderMode::Release)
+	{
+		postProcess = m_ResourceManager->GetBuffer<ColorBuffer>(m_GameRenderTextures[GameRenderTextureType::GamePostProcessTexture].m_BufferIndex);
+	}
+	else if (mode == RenderMode::Scene)
+	{
+		postProcess = m_ResourceManager->GetBuffer<ColorBuffer>(m_SceneRenderTextures[SceneRenderTextureType::ScenePostProcessTexture].m_BufferIndex);
+	}
+	else
+	{
+		Cho::Log::Write(LogLevel::Assert, "Unknown RenderMode for PostProcess pass");
+		return;
+	}
+	// オフスクリーンレンダリングテクスチャをセット
+	context->SetGraphicsRootDescriptorTable(0, postProcess->GetSRVGpuHandle());
+	// DrawCall
+	context->DrawInstanced(3, 1, 0, 0);
+	// レンダーターゲットのStateを戻す
+	SetRenderTargets(context, DrawPass::EditorView, mode, false);
 	// コマンドリスト終了
 	EndCommandContext(context, Graphics);
 	// GPUの完了待ち

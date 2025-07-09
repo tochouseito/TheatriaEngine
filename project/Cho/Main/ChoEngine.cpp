@@ -158,11 +158,9 @@ void ChoEngine::Draw()
 	if (runtimeMode == RuntimeMode::Editor)
 	{
 		// 描画
-		graphicsEngine->Render(*resourceManager, *gameCore, RenderMode::Game);
+		//graphicsEngine->Render(*resourceManager, *gameCore, RenderMode::Game);
 		// シーン描画
-		graphicsEngine->Render(*resourceManager, *gameCore, RenderMode::Debug);
-		// EffectEditView描画
-		//graphicsEngine->Render(*resourceManager, *gameCore, RenderMode::Editor);
+		graphicsEngine->Render(*resourceManager, *gameCore, RenderMode::Scene);
 		// 描画後片付け
 		graphicsEngine->PostRender(imGuiManager.get(), RenderMode::Game);
 	}
@@ -173,7 +171,6 @@ void ChoEngine::Draw()
 		// 描画後片付け
 		graphicsEngine->PostRender(imGuiManager.get(), RenderMode::Release);
 	}
-	//graphicsEngine->PostRenderWithImGui(imGuiManager.get());
 }
 
 void ChoEngine::Start()
