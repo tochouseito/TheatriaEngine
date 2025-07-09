@@ -57,7 +57,7 @@ void GraphicsEngine::Render(ResourceManager& resourceManager, GameCore& gameCore
 	// フォワードレンダリング
 	DrawForward(resourceManager, gameCore, mode);
 	// ポストプロセス
-	//DrawPostProcess(resourceManager, gameCore, mode);
+	DrawPostProcess(resourceManager, gameCore, mode);
 }
 
 void GraphicsEngine::PostRender(ImGuiManager* imgui, RenderMode mode)
@@ -77,8 +77,27 @@ void GraphicsEngine::PostRender(ImGuiManager* imgui, RenderMode mode)
 	);
 	// RTVの設定
 	SetRenderTargets(context, DrawPass::SwapChainPass, mode);
-	if (mode != RenderMode::Release)
+	if (mode == RenderMode::Release)
 	{
+		renderTexType = RenderTextureType::GameScreen;
+		setTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_RenderTextures[renderTexType].m_BufferIndex);
+		context->BarrierTransition(
+			setTex->GetResource(),
+			D3D12_RESOURCE_STATE_RENDER_TARGET,
+			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+		);
+		// パイプラインセット
+		context->SetGraphicsPipelineState(m_PipelineManager->GetScreenCopyPSO().pso.Get());
+		// ルートシグネチャセット
+		context->SetGraphicsRootSignature(m_PipelineManager->GetScreenCopyPSO().rootSignature.Get());
+		// オフスクリーンレンダリングテクスチャをセット
+		context->SetGraphicsRootDescriptorTable(0, setTex->GetSRVGpuHandle());
+		// DrawCall
+		context->DrawInstanced(3, 1, 0, 0);
+	}
+	else
+	{
+
 		// ImGuiの描画
 		imgui->Draw(context->GetCommandList());
 	}
@@ -165,28 +184,22 @@ void GraphicsEngine::ScreenResize()
 	clearValue.Color[1] = kClearColor[1];
 	clearValue.Color[2] = kClearColor[2];
 	clearValue.Color[3] = kClearColor[3];
-	for (int i =0 ; i<static_cast<int>(RenderTextureType::RenderTextureTypeCount);i++)
+	for (int i = 0; i < static_cast<int>(GameRenderTextureType::GameRenderTextureTypeCount); i++)
 	{
-		RenderTextureType renderTexType = static_cast<RenderTextureType>(i);
-		switch (renderTexType)
-		{
-		case GameScreen:
-			// リサイズ
-			m_ResourceManager->RemakeColorBuffer(m_RenderTextures[renderTexType].m_BufferIndex, resourceDesc, &clearValue, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-			m_RenderTextures[renderTexType].m_Width = m_ResolutionWidth;
-			m_RenderTextures[renderTexType].m_Height = m_ResolutionHeight;
-			break;
-		case SceneScreen:
-			// リサイズ
-			m_ResourceManager->RemakeColorBuffer(m_RenderTextures[renderTexType].m_BufferIndex, resourceDesc, &clearValue, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-			m_RenderTextures[renderTexType].m_Width = m_ResolutionWidth;
-			m_RenderTextures[renderTexType].m_Height = m_ResolutionHeight;
-			break;
-		case RenderTextureTypeCount:
-			break;
-		default:
-			break;
-		}
+		GameRenderTextureType renderTexType = static_cast<GameRenderTextureType>(i);
+		// リサイズ
+		m_ResourceManager->RemakeColorBuffer(m_GameRenderTextures[renderTexType].m_BufferIndex, resourceDesc, &clearValue, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		m_GameRenderTextures[renderTexType].m_Width = m_ResolutionWidth;
+		m_GameRenderTextures[renderTexType].m_Height = m_ResolutionHeight;
+	}
+	// Scene用
+	for(int i = 0; i < static_cast<int>(SceneRenderTextureType::SceneRenderTextureTypeCount); i++)
+	{
+		SceneRenderTextureType renderTexType = static_cast<SceneRenderTextureType>(i);
+		// リサイズ
+		m_ResourceManager->RemakeColorBuffer(m_SceneRenderTextures[renderTexType].m_BufferIndex, resourceDesc, &clearValue, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		m_SceneRenderTextures[renderTexType].m_Width = m_ResolutionWidth;
+		m_SceneRenderTextures[renderTexType].m_Height = m_ResolutionHeight;
 	}
 }
 
@@ -216,125 +229,247 @@ void GraphicsEngine::WaitForGPU(const QueueType& queue)
 	m_GraphicsCore->GetCommandManager()->WaitForFence(queue);
 }
 
-void GraphicsEngine::SetRenderTargets(CommandContext* context, DrawPass pass, RenderMode mode)
+void GraphicsEngine::SetRenderTargets(CommandContext* context, DrawPass pass, RenderMode mode, bool isSetTarget)
 {
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle;
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle;
-	RenderTextureType renderTexType = RenderTextureType::SceneScreen;
-	ColorBuffer* targetTex = nullptr;
-	ColorBuffer* setTex = nullptr;
+	ColorBuffer* renderTex = nullptr;
 	switch (pass)
 	{
 	case GBuffers:
-		// レンダリングモードでシーン描画かどうかを判定
-		if (mode == RenderMode::Game)
+		if (mode == RenderMode::Game || mode == RenderMode::Release)
 		{
-			renderTexType = RenderTextureType::GameScreen;
-		} else if(mode==RenderMode::Debug)
-		{
-			renderTexType = RenderTextureType::SceneScreen;
-		} else if (mode == RenderMode::Editor)
-		{
-			renderTexType = RenderTextureType::EffectEditScreen;
-		} else if (mode == RenderMode::Release)
-		{
-			renderTexType = RenderTextureType::GameScreen;
-		} else
-		{
-			break;
+			// GameGBufferRenderTextureの状態遷移
+			if (isSetTarget)
+			{
+				// StateをRenderTargetに変更	
+				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_GameRenderTextures[GameRenderTextureType::GameGBufferTexture].m_BufferIndex);
+				context->BarrierTransition(
+					renderTex->GetResource(),
+					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+					D3D12_RESOURCE_STATE_RENDER_TARGET
+				);
+				// RTV,DSVの設定
+				dsvHandle = m_ResourceManager->GetBuffer<DepthBuffer>(m_DepthManager->GetDepthBufferIndex())->GetDSVCpuHandle();
+				rtvHandle = renderTex->GetRTVCpuHandle();
+				context->SetRenderTarget(&rtvHandle, &dsvHandle);
+				context->ClearRenderTarget(rtvHandle);
+				context->ClearDepthStencil(dsvHandle);
+			}
+			else
+			{
+				// StateをPixelShaderResourceに変更
+				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_GameRenderTextures[GameRenderTextureType::GameGBufferTexture].m_BufferIndex);
+				context->BarrierTransition(
+					renderTex->GetResource(),
+					D3D12_RESOURCE_STATE_RENDER_TARGET,
+					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+				);
+			}
 		}
-		// GBufferRenderTextureの状態遷移
-		targetTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_RenderTextures[renderTexType].m_BufferIndex);
-		context->BarrierTransition(
-			targetTex->GetResource(),
-			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-			D3D12_RESOURCE_STATE_RENDER_TARGET
-		);
-		// RTV,DSVの設定
-		dsvHandle = m_ResourceManager->GetBuffer<DepthBuffer>(m_DepthManager->GetDepthBufferIndex())->GetDSVCpuHandle();
-		rtvHandle = m_ResourceManager->GetBuffer<ColorBuffer>(m_RenderTextures[renderTexType].m_BufferIndex)->GetRTVCpuHandle();
-		context->SetRenderTarget(&rtvHandle, &dsvHandle);
-		context->ClearRenderTarget(rtvHandle);
-		context->ClearDepthStencil(dsvHandle);
+		else if(mode == RenderMode::Scene)
+		{
+			if (isSetTarget)
+			{
+				// StateをRenderTargetに変更	
+				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_SceneRenderTextures[SceneRenderTextureType::SceneGBufferTexture].m_BufferIndex);
+				context->BarrierTransition(
+					renderTex->GetResource(),
+					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+					D3D12_RESOURCE_STATE_RENDER_TARGET
+				);
+				// RTV,DSVの設定
+				dsvHandle = m_ResourceManager->GetBuffer<DepthBuffer>(m_DepthManager->GetDepthBufferIndex())->GetDSVCpuHandle();
+				rtvHandle = renderTex->GetRTVCpuHandle();
+				context->SetRenderTarget(&rtvHandle, &dsvHandle);
+				context->ClearRenderTarget(rtvHandle);
+				context->ClearDepthStencil(dsvHandle);
+			}
+			else
+			{
+				// StateをPixelShaderResourceに変更
+				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_SceneRenderTextures[SceneRenderTextureType::SceneGBufferTexture].m_BufferIndex);
+				context->BarrierTransition(
+					renderTex->GetResource(),
+					D3D12_RESOURCE_STATE_RENDER_TARGET,
+					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+				);
+			}
+		}
+		else
+		{
+			Cho::Log::Write(LogLevel::Assert, "Unknown RenderMode for GBuffers pass");
+		}
 		break;
 	case Lighting:
-		// レンダリングモードでシーン描画かどうかを判定
-		if (mode == RenderMode::Game)
+		if (mode == RenderMode::Game || mode == RenderMode::Release)
 		{
-			renderTexType = RenderTextureType::GameScreen;
-		} else if (mode == RenderMode::Debug)
-		{
-			renderTexType = RenderTextureType::SceneScreen;
-		} else if (mode == RenderMode::Editor)
-		{
-			renderTexType = RenderTextureType::EffectEditScreen;
-		} else
-		{
-			break;
+			// GameLightingRenderTextureの状態遷移
+			if (isSetTarget)
+			{
+				// StateをRenderTargetに変更	
+				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_GameRenderTextures[GameRenderTextureType::GameLightingTexture].m_BufferIndex);
+				context->BarrierTransition(
+					renderTex->GetResource(),
+					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+					D3D12_RESOURCE_STATE_RENDER_TARGET
+				);
+				// RTVの設定
+				rtvHandle = renderTex->GetRTVCpuHandle();
+				context->SetRenderTarget(&rtvHandle);
+				context->ClearRenderTarget(rtvHandle);
+			}
+			else
+			{
+				// StateをPixelShaderResourceに変更
+				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_GameRenderTextures[GameRenderTextureType::GameLightingTexture].m_BufferIndex);
+				context->BarrierTransition(
+					renderTex->GetResource(),
+					D3D12_RESOURCE_STATE_RENDER_TARGET,
+					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+				);
+			}
 		}
-		// オフスクリーンレンダリングテクスチャの状態遷移
-		setTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_RenderTextures[renderTexType].m_BufferIndex);
-		context->BarrierTransition(
-			setTex->GetResource(),
-			D3D12_RESOURCE_STATE_RENDER_TARGET,
-			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
-		);
+		else if (mode == RenderMode::Scene)
+		{
+			if (isSetTarget)
+			{
+				// StateをRenderTargetに変更	
+				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_SceneRenderTextures[SceneRenderTextureType::SceneLightingTexture].m_BufferIndex);
+				context->BarrierTransition(
+					renderTex->GetResource(),
+					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+					D3D12_RESOURCE_STATE_RENDER_TARGET
+				);
+				// RTVの設定
+				rtvHandle = renderTex->GetRTVCpuHandle();
+				context->SetRenderTarget(&rtvHandle);
+				context->ClearRenderTarget(rtvHandle);
+			}
+			else
+			{
+				// StateをPixelShaderResourceに変更
+				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_SceneRenderTextures[SceneRenderTextureType::SceneLightingTexture].m_BufferIndex);
+				context->BarrierTransition(
+					renderTex->GetResource(),
+					D3D12_RESOURCE_STATE_RENDER_TARGET,
+					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+				);
+			}
+		}
 		break;
 	case Forward:
+		if (mode == RenderMode::Game || mode == RenderMode::Release)
+		{
+			// GameForwardRenderTextureの状態遷移
+			if (isSetTarget)
+			{
+				// StateをRenderTargetに変更	
+				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_GameRenderTextures[GameRenderTextureType::GameForwardTexture].m_BufferIndex);
+				context->BarrierTransition(
+					renderTex->GetResource(),
+					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+					D3D12_RESOURCE_STATE_RENDER_TARGET
+				);
+				// RTVの設定
+				rtvHandle = renderTex->GetRTVCpuHandle();
+				context->SetRenderTarget(&rtvHandle);
+				context->ClearRenderTarget(rtvHandle);
+			}
+			else
+			{
+				// StateをPixelShaderResourceに変更
+				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_GameRenderTextures[GameRenderTextureType::GameForwardTexture].m_BufferIndex);
+				context->BarrierTransition(
+					renderTex->GetResource(),
+					D3D12_RESOURCE_STATE_RENDER_TARGET,
+					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+				);
+			}
+		}
+		else if (mode == RenderMode::Scene)
+		{
+			if (isSetTarget)
+			{
+				// StateをRenderTargetに変更	
+				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_SceneRenderTextures[SceneRenderTextureType::SceneForwardTexture].m_BufferIndex);
+				context->BarrierTransition(
+					renderTex->GetResource(),
+					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+					D3D12_RESOURCE_STATE_RENDER_TARGET
+				);
+				// RTVの設定
+				rtvHandle = renderTex->GetRTVCpuHandle();
+				context->SetRenderTarget(&rtvHandle);
+				context->ClearRenderTarget(rtvHandle);
+			}
+			else
+			{
+				// StateをPixelShaderResourceに変更
+				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_SceneRenderTextures[SceneRenderTextureType::SceneForwardTexture].m_BufferIndex);
+				context->BarrierTransition(
+					renderTex->GetResource(),
+					D3D12_RESOURCE_STATE_RENDER_TARGET,
+					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+				);
+			}
+		}
 		break;
 	case PostProcess:
-		// レンダリングモードでシーン描画かどうかを判定
-		if (mode == RenderMode::Game)
+		if (mode == RenderMode::Game || mode == RenderMode::Release)
 		{
-			renderTexType = RenderTextureType::PostProcessScreen;
-		} else if (mode == RenderMode::Debug)
-		{
-			renderTexType = RenderTextureType::ScenePostProcessScreen;
-		} else if (mode == RenderMode::Editor)
-		{
-			break;
-		} else
-		{
-			break;
+			// GamePostProcessRenderTextureの状態遷移
+			if (isSetTarget)
+			{
+				// StateをRenderTargetに変更	
+				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_GameRenderTextures[GameRenderTextureType::GamePostProcessTexture].m_BufferIndex);
+				context->BarrierTransition(
+					renderTex->GetResource(),
+					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+					D3D12_RESOURCE_STATE_RENDER_TARGET
+				);
+				// RTVの設定
+				rtvHandle = renderTex->GetRTVCpuHandle();
+				context->SetRenderTarget(&rtvHandle);
+				context->ClearRenderTarget(rtvHandle);
+			}
+			else
+			{
+				// StateをPixelShaderResourceに変更
+				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_GameRenderTextures[GameRenderTextureType::GamePostProcessTexture].m_BufferIndex);
+				context->BarrierTransition(
+					renderTex->GetResource(),
+					D3D12_RESOURCE_STATE_RENDER_TARGET,
+					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+				);
+			}
 		}
-		// ポストプロセス用のテクスチャの状態遷移
-		setTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_RenderTextures[renderTexType].m_BufferIndex);
-		context->BarrierTransition(
-			setTex->GetResource(),
-			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-			D3D12_RESOURCE_STATE_RENDER_TARGET
-		);
-		// RTVの設定
-		renderTexType = RenderTextureType::PostProcessScreen;
-		rtvHandle = m_ResourceManager->GetBuffer<ColorBuffer>(m_RenderTextures[renderTexType].m_BufferIndex)->GetRTVCpuHandle();
-		context->SetRenderTarget(&rtvHandle);
-		context->ClearRenderTarget(rtvHandle);
-		SetRenderState(context, ViewportSwapChain);
-		break;
-	case SwapChainPass:
-		// RTV,DSVの設定
-		rtvHandle = m_SwapChain->GetBuffer(m_SwapChain->GetCurrentBackBufferIndex())->m_RTVCpuHandle;
-		context->SetRenderTarget(&rtvHandle);
-		context->ClearRenderTarget(rtvHandle);
-		SetRenderState(context,ViewportSwapChain);
-		// リリースモードでスワップチェーンに描画
-		if (mode == RenderMode::Release)
+		else if (mode == RenderMode::Scene)
 		{
-			renderTexType = RenderTextureType::GameScreen;
-			setTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_RenderTextures[renderTexType].m_BufferIndex);
-			context->BarrierTransition(
-				setTex->GetResource(),
-				D3D12_RESOURCE_STATE_RENDER_TARGET,
-				D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
-			);
-			// パイプラインセット
-			context->SetGraphicsPipelineState(m_PipelineManager->GetScreenCopyPSO().pso.Get());
-			// ルートシグネチャセット
-			context->SetGraphicsRootSignature(m_PipelineManager->GetScreenCopyPSO().rootSignature.Get());
-			// オフスクリーンレンダリングテクスチャをセット
-			context->SetGraphicsRootDescriptorTable(0, setTex->GetSRVGpuHandle());
-			// DrawCall
-			context->DrawInstanced(3, 1, 0, 0);
+			if (isSetTarget)
+			{
+				// StateをRenderTargetに変更	
+				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_SceneRenderTextures[SceneRenderTextureType::ScenePostProcessTexture].m_BufferIndex);
+				context->BarrierTransition(
+					renderTex->GetResource(),
+					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+					D3D12_RESOURCE_STATE_RENDER_TARGET
+				);
+				// RTVの設定
+				rtvHandle = renderTex->GetRTVCpuHandle();
+				context->SetRenderTarget(&rtvHandle);
+				context->ClearRenderTarget(rtvHandle);
+			}
+			else
+			{
+				// StateをPixelShaderResourceに変更
+				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_SceneRenderTextures[SceneRenderTextureType::ScenePostProcessTexture].m_BufferIndex);
+				context->BarrierTransition(
+					renderTex->GetResource(),
+					D3D12_RESOURCE_STATE_RENDER_TARGET,
+					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+				);
+			}
 		}
 		break;
 	case PassCount:
@@ -391,219 +526,180 @@ void GraphicsEngine::SetRenderState(CommandContext* context, ViewportType type)
 
 void GraphicsEngine::DrawGBuffers(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode)
 {
-	// コンテキスト取得
-	CommandContext* context = GetCommandContext();
-	// コマンドリスト開始
-	BeginCommandContext(context);
-	// レンダーターゲットの設定
-	SetRenderTargets(context, DrawPass::GBuffers,mode);
-	// 描画設定
-	SetRenderState(context,ViewportGame);
-	if (mode != RenderMode::Editor)
-	{
-		// パイプラインセット
-		context->SetGraphicsPipelineState(m_PipelineManager->GetIntegratePSO().pso.Get());
-		// ルートシグネチャセット
-		context->SetGraphicsRootSignature(m_PipelineManager->GetIntegratePSO().rootSignature.Get());
-		// シーンに存在するメッシュを所持しているオブジェクトを全て描画
-		for (ModelData& modelData : resourceManager.GetModelManager()->GetModelDataContainer())
-		{
-			IConstantBuffer* cameraBuffer = nullptr;
-			// メインカメラを取得
-			if (mode == RenderMode::Game||mode == RenderMode::Release)
-			{
-				// カメラオブジェクトを取得
-				GameObject* cameraObject = gameCore.GetGameWorld()->GetMainCamera();
-				if (!cameraObject) { continue; }
-				// カメラのバッファインデックスを取得
-				CameraComponent* cameraComponent = gameCore.GetECSManager()->GetComponent<CameraComponent>(cameraObject->GetHandle().entity);
-				if (!cameraComponent) { continue; }
-				// カメラのバッファを取得
-				cameraBuffer = resourceManager.GetBuffer<IConstantBuffer>(cameraComponent->bufferIndex);
-				// カメラがないならスキップ
-				if (!cameraBuffer) { continue; }
-			} else// デバッグカメラ
-			{
-				// カメラのバッファを取得
-				cameraBuffer = resourceManager.GetDebugCameraBuffer();
-				// カメラがないならスキップ
-				if (!cameraBuffer) { continue; }
-			}
-			// 登録されているTransformがないならスキップ
-			if (modelData.useTransformList.empty()) { continue; }
-			// 頂点バッファビューをセット
-			D3D12_VERTEX_BUFFER_VIEW* vbv = resourceManager.GetBuffer<IVertexBuffer>(modelData.meshes[0].vertexBufferIndex)->GetVertexBufferView();
-			context->SetVertexBuffers(0, 1, vbv);
-			// インデックスバッファビューをセット
-			D3D12_INDEX_BUFFER_VIEW* ibv = resourceManager.GetBuffer<IIndexBuffer>(modelData.meshes[0].indexBufferIndex)->GetIndexBufferView();
-			context->SetIndexBuffer(ibv);
-			// 引数バッファを更新
-			//IndirectArgs indirectArgs = {};
-			// カメラバッファをセット
-			context->SetGraphicsRootConstantBufferView(0, cameraBuffer->GetResource()->GetGPUVirtualAddress());
-			// トランスフォーム統合バッファをセット
-			IStructuredBuffer* transformBuffer = resourceManager.GetIntegrationBuffer(IntegrationDataType::Transform);
-			context->SetGraphicsRootShaderResourceView(1, transformBuffer->GetResource()->GetGPUVirtualAddress());
-			// UseTransformBufferをセット
-			IStructuredBuffer* useTransformBuffer = resourceManager.GetBuffer<IStructuredBuffer>(modelData.useTransformBufferIndex);
-			context->SetGraphicsRootShaderResourceView(2, useTransformBuffer->GetResource()->GetGPUVirtualAddress());
-			// モデルのボーン行列Bufferをセット
-			IStructuredBuffer* boneBuffer = resourceManager.GetBuffer<IStructuredBuffer>(modelData.boneMatrixBufferIndex);
-			context->SetGraphicsRootShaderResourceView(3, boneBuffer->GetResource()->GetGPUVirtualAddress());
-			// SkinningInfluenceBufferをセット
-			IStructuredBuffer* skinningInfluenceBuffer = resourceManager.GetBuffer<IStructuredBuffer>(modelData.influenceBufferIndex);
-			context->SetGraphicsRootShaderResourceView(4, skinningInfluenceBuffer->GetResource()->GetGPUVirtualAddress());
-			// SkinningInfoBufferをセット
-			IConstantBuffer* skinningInfoBuffer = resourceManager.GetBuffer<IConstantBuffer>(modelData.skinInfoBufferIndex);
-			context->SetGraphicsRootConstantBufferView(5, skinningInfoBuffer->GetResource()->GetGPUVirtualAddress());
-			// ライトバッファをセット
-			IConstantBuffer* lightBuffer = resourceManager.GetLightBuffer();
-			context->SetGraphicsRootConstantBufferView(6, lightBuffer->GetResource()->GetGPUVirtualAddress());
-			// 環境情報バッファをセット
-			IConstantBuffer* envBuffer = resourceManager.GetEnvironmentBuffer();
-			context->SetGraphicsRootConstantBufferView(7, envBuffer->GetResource()->GetGPUVirtualAddress());
-			// PS用トランスフォーム統合バッファをセット
-			context->SetGraphicsRootShaderResourceView(8, transformBuffer->GetResource()->GetGPUVirtualAddress());
-			// マテリアル統合バッファをセット
-			IStructuredBuffer* materialBuffer = resourceManager.GetIntegrationBuffer(IntegrationDataType::Material);
-			context->SetGraphicsRootShaderResourceView(9, materialBuffer->GetResource()->GetGPUVirtualAddress());
-			/*indirectArgs.cbv_ViewProjection = cameraBuffer->GetResource()->GetGPUVirtualAddress();
-			indirectArgs.srv_IntegrationTF = transformBuffer->GetResource()->GetGPUVirtualAddress();
-			indirectArgs.srv_UseTransformList = useTransformBuffer->GetResource()->GetGPUVirtualAddress();
-			indirectArgs.srv_BoneMatrix = boneBuffer->GetResource()->GetGPUVirtualAddress();
-			indirectArgs.srv_SkinningInfluence = skinningInfluenceBuffer->GetResource()->GetGPUVirtualAddress();
-			indirectArgs.cbv_SkinningInfo = skinningInfoBuffer->GetResource()->GetGPUVirtualAddress();
-			indirectArgs.cbv_Lights = lightBuffer->GetResource()->GetGPUVirtualAddress();
-			indirectArgs.cbv_Environment = envBuffer->GetResource()->GetGPUVirtualAddress();
-			indirectArgs.srv_IntegrationMTL = materialBuffer->GetResource()->GetGPUVirtualAddress();
-			indirectArgs.drawIndexedArgs.IndexCountPerInstance = static_cast<UINT>(modelData.meshes[0].indices.size());
-			indirectArgs.drawIndexedArgs.InstanceCount = static_cast<UINT>(modelData.useTransformList.size());
-			indirectArgs.drawIndexedArgs.StartIndexLocation = 0;
-			indirectArgs.drawIndexedArgs.BaseVertexLocation = 0;
-			indirectArgs.drawIndexedArgs.StartInstanceLocation = 0;
-			m_PipelineManager->GetIntegratePSO().indirectArgsBuffer->UpdateData(indirectArgs);*/
-			// 配列テクスチャのためヒープをセット
-			context->SetGraphicsRootDescriptorTable(10, resourceManager.GetSUVDHeap()->GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
-			// インスタンス数を取得
-			UINT numInstance = static_cast<UINT>(modelData.useTransformList.size());
-			// DrawCall
-			context->DrawIndexedInstanced(static_cast<UINT>(modelData.meshes[0].indices.size()), numInstance, 0, 0, 0);
-			// IndirectDrawCall
-			/*context->ExecuteIndirect(
-				m_PipelineManager->GetIntegratePSO().commandSignature.Get(), 
-				1,
-				m_PipelineManager->GetIntegratePSO().indirectArgsBuffer->GetResource(),
-				0,
-				nullptr,
-				0);*/
-		}
-		// ラインの描画
-		for (uint32_t i = 0;i < 1;i++)
-		{
-			// プリミティブトポロジの設定
-			context->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
-			// パイプラインセット
-			context->SetGraphicsPipelineState(m_PipelineManager->GetLinePSO().pso.Get());
-			// ルートシグネチャセット
-			context->SetGraphicsRootSignature(m_PipelineManager->GetLinePSO().rootSignature.Get());
-			IConstantBuffer* cameraBuffer = nullptr;
-			// メインカメラを取得
-			if (mode == RenderMode::Game||mode==RenderMode::Release)
-			{
-				// カメラオブジェクトを取得
-				GameObject* cameraObject = gameCore.GetGameWorld()->GetMainCamera();
-				if (!cameraObject) { continue; }
-				// カメラのバッファインデックスを取得
-				CameraComponent* cameraComponent = gameCore.GetECSManager()->GetComponent<CameraComponent>(cameraObject->GetHandle().entity);
-				if (!cameraComponent) { continue; }
-				// カメラのバッファを取得
-				cameraBuffer = resourceManager.GetBuffer<IConstantBuffer>(cameraComponent->bufferIndex);
-				// カメラがないならスキップ
-				if (!cameraBuffer) { continue; }
-			} else// デバッグカメラ
-			{
-				// カメラのバッファを取得
-				cameraBuffer = resourceManager.GetDebugCameraBuffer();
-				// カメラがないならスキップ
-				if (!cameraBuffer) { continue; }
-			}
-			// MapIDが0（使われていない）ならスキップ
-			if (!resourceManager.GetIntegrationData(IntegrationDataType::Line)->GetActiveCount()) { continue; }
-			// 頂点バッファビューをセット
-			D3D12_VERTEX_BUFFER_VIEW* vbv = resourceManager.GetLineIntegrationBuffer()->GetVertexBufferView();
-			context->SetVertexBuffers(0, 1, vbv);
-			// カメラバッファをセット
-			context->SetGraphicsRootConstantBufferView(0, cameraBuffer->GetResource()->GetGPUVirtualAddress());
-			// DrawCall
-			context->DrawInstanced(static_cast<UINT>(resourceManager.GetIntegrationData(IntegrationDataType::Line)->GetActiveCount()) * 2, 1, 0, 0);
-		}
-		// パーティクル
-		DrawParticles(context, resourceManager, gameCore, mode);
-		// EffectEditor
-		EffectEditorDraw(context, resourceManager, gameCore, mode);
-		// UI
-		DrawUI(context, resourceManager, gameCore, mode);
-		// Skyboxの描画
-		SkyboxRender(context, resourceManager, gameCore, mode);
-	} else
-	{
-		// パイプラインセット
-		
-		// ルートシグネチャセット
-		
-		// カメラのバッファを取得
-		IConstantBuffer* cameraBuffer = nullptr;
-		// カメラのバッファを取得
-		cameraBuffer = resourceManager.GetDebugCameraBuffer();
-		// カメラがあったら処理する
-		if (cameraBuffer)
-		{
-			// 頂点バッファビューをセット
-
-			// インデックスバッファビューをセット
-			
-			// カメラバッファをセット
-
-			// リソースのバインド
-
-			// DrawCall
-
-		}
-	}
-	
-	// コマンドリスト終了
-	EndCommandContext(context,Graphics);
-	// GPUの完了待ち
-	WaitForGPU(Graphics);
+	resourceManager;
+	gameCore;
+	mode;
 }
 
 void GraphicsEngine::DrawLighting(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode)
 {
 	resourceManager;
 	gameCore;
-	if (mode == Release)
-	{
-		return;
-	}
+	mode;
+}
+
+void GraphicsEngine::DrawForward(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode)
+{
 	// コンテキスト取得
 	CommandContext* context = GetCommandContext();
 	// コマンドリスト開始
 	BeginCommandContext(context);
 	// レンダーターゲットの設定
-	SetRenderTargets(context, DrawPass::Lighting,mode);
+	SetRenderTargets(context, DrawPass::Forward, mode, true);
 	// 描画設定
-	SetRenderState(context,ViewportGame);
+	SetRenderState(context, ViewportGame);
+	// パイプラインセット
+	context->SetGraphicsPipelineState(m_PipelineManager->GetIntegratePSO().pso.Get());
+	// ルートシグネチャセット
+	context->SetGraphicsRootSignature(m_PipelineManager->GetIntegratePSO().rootSignature.Get());
+	// シーンに存在するメッシュを所持しているオブジェクトを全て描画
+	for (ModelData& modelData : resourceManager.GetModelManager()->GetModelDataContainer())
+	{
+		IConstantBuffer* cameraBuffer = nullptr;
+		// メインカメラを取得
+		if (mode == RenderMode::Game || mode == RenderMode::Release)
+		{
+			// カメラオブジェクトを取得
+			GameObject* cameraObject = gameCore.GetGameWorld()->GetMainCamera();
+			if (!cameraObject) { continue; }
+			// カメラのバッファインデックスを取得
+			CameraComponent* cameraComponent = gameCore.GetECSManager()->GetComponent<CameraComponent>(cameraObject->GetHandle().entity);
+			if (!cameraComponent) { continue; }
+			// カメラのバッファを取得
+			cameraBuffer = resourceManager.GetBuffer<IConstantBuffer>(cameraComponent->bufferIndex);
+			// カメラがないならスキップ
+			if (!cameraBuffer) { continue; }
+		}
+		else// デバッグカメラ
+		{
+			// カメラのバッファを取得
+			cameraBuffer = resourceManager.GetDebugCameraBuffer();
+			// カメラがないならスキップ
+			if (!cameraBuffer) { continue; }
+		}
+		// 登録されているTransformがないならスキップ
+		if (modelData.useTransformList.empty()) { continue; }
+		// 頂点バッファビューをセット
+		D3D12_VERTEX_BUFFER_VIEW* vbv = resourceManager.GetBuffer<IVertexBuffer>(modelData.meshes[0].vertexBufferIndex)->GetVertexBufferView();
+		context->SetVertexBuffers(0, 1, vbv);
+		// インデックスバッファビューをセット
+		D3D12_INDEX_BUFFER_VIEW* ibv = resourceManager.GetBuffer<IIndexBuffer>(modelData.meshes[0].indexBufferIndex)->GetIndexBufferView();
+		context->SetIndexBuffer(ibv);
+		// 引数バッファを更新
+		//IndirectArgs indirectArgs = {};
+		// カメラバッファをセット
+		context->SetGraphicsRootConstantBufferView(0, cameraBuffer->GetResource()->GetGPUVirtualAddress());
+		// トランスフォーム統合バッファをセット
+		IStructuredBuffer* transformBuffer = resourceManager.GetIntegrationBuffer(IntegrationDataType::Transform);
+		context->SetGraphicsRootShaderResourceView(1, transformBuffer->GetResource()->GetGPUVirtualAddress());
+		// UseTransformBufferをセット
+		IStructuredBuffer* useTransformBuffer = resourceManager.GetBuffer<IStructuredBuffer>(modelData.useTransformBufferIndex);
+		context->SetGraphicsRootShaderResourceView(2, useTransformBuffer->GetResource()->GetGPUVirtualAddress());
+		// モデルのボーン行列Bufferをセット
+		IStructuredBuffer* boneBuffer = resourceManager.GetBuffer<IStructuredBuffer>(modelData.boneMatrixBufferIndex);
+		context->SetGraphicsRootShaderResourceView(3, boneBuffer->GetResource()->GetGPUVirtualAddress());
+		// SkinningInfluenceBufferをセット
+		IStructuredBuffer* skinningInfluenceBuffer = resourceManager.GetBuffer<IStructuredBuffer>(modelData.influenceBufferIndex);
+		context->SetGraphicsRootShaderResourceView(4, skinningInfluenceBuffer->GetResource()->GetGPUVirtualAddress());
+		// SkinningInfoBufferをセット
+		IConstantBuffer* skinningInfoBuffer = resourceManager.GetBuffer<IConstantBuffer>(modelData.skinInfoBufferIndex);
+		context->SetGraphicsRootConstantBufferView(5, skinningInfoBuffer->GetResource()->GetGPUVirtualAddress());
+		// ライトバッファをセット
+		IConstantBuffer* lightBuffer = resourceManager.GetLightBuffer();
+		context->SetGraphicsRootConstantBufferView(6, lightBuffer->GetResource()->GetGPUVirtualAddress());
+		// 環境情報バッファをセット
+		IConstantBuffer* envBuffer = resourceManager.GetEnvironmentBuffer();
+		context->SetGraphicsRootConstantBufferView(7, envBuffer->GetResource()->GetGPUVirtualAddress());
+		// PS用トランスフォーム統合バッファをセット
+		context->SetGraphicsRootShaderResourceView(8, transformBuffer->GetResource()->GetGPUVirtualAddress());
+		// マテリアル統合バッファをセット
+		IStructuredBuffer* materialBuffer = resourceManager.GetIntegrationBuffer(IntegrationDataType::Material);
+		context->SetGraphicsRootShaderResourceView(9, materialBuffer->GetResource()->GetGPUVirtualAddress());
+		/*indirectArgs.cbv_ViewProjection = cameraBuffer->GetResource()->GetGPUVirtualAddress();
+		indirectArgs.srv_IntegrationTF = transformBuffer->GetResource()->GetGPUVirtualAddress();
+		indirectArgs.srv_UseTransformList = useTransformBuffer->GetResource()->GetGPUVirtualAddress();
+		indirectArgs.srv_BoneMatrix = boneBuffer->GetResource()->GetGPUVirtualAddress();
+		indirectArgs.srv_SkinningInfluence = skinningInfluenceBuffer->GetResource()->GetGPUVirtualAddress();
+		indirectArgs.cbv_SkinningInfo = skinningInfoBuffer->GetResource()->GetGPUVirtualAddress();
+		indirectArgs.cbv_Lights = lightBuffer->GetResource()->GetGPUVirtualAddress();
+		indirectArgs.cbv_Environment = envBuffer->GetResource()->GetGPUVirtualAddress();
+		indirectArgs.srv_IntegrationMTL = materialBuffer->GetResource()->GetGPUVirtualAddress();
+		indirectArgs.drawIndexedArgs.IndexCountPerInstance = static_cast<UINT>(modelData.meshes[0].indices.size());
+		indirectArgs.drawIndexedArgs.InstanceCount = static_cast<UINT>(modelData.useTransformList.size());
+		indirectArgs.drawIndexedArgs.StartIndexLocation = 0;
+		indirectArgs.drawIndexedArgs.BaseVertexLocation = 0;
+		indirectArgs.drawIndexedArgs.StartInstanceLocation = 0;
+		m_PipelineManager->GetIntegratePSO().indirectArgsBuffer->UpdateData(indirectArgs);*/
+		// 配列テクスチャのためヒープをセット
+		context->SetGraphicsRootDescriptorTable(10, resourceManager.GetSUVDHeap()->GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
+		// インスタンス数を取得
+		UINT numInstance = static_cast<UINT>(modelData.useTransformList.size());
+		// DrawCall
+		context->DrawIndexedInstanced(static_cast<UINT>(modelData.meshes[0].indices.size()), numInstance, 0, 0, 0);
+		// IndirectDrawCall
+		/*context->ExecuteIndirect(
+			m_PipelineManager->GetIntegratePSO().commandSignature.Get(),
+			1,
+			m_PipelineManager->GetIntegratePSO().indirectArgsBuffer->GetResource(),
+			0,
+			nullptr,
+			0);*/
+	}
+	// ラインの描画
+	for (uint32_t i = 0; i < 1; i++)
+	{
+		// プリミティブトポロジの設定
+		context->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
+		// パイプラインセット
+		context->SetGraphicsPipelineState(m_PipelineManager->GetLinePSO().pso.Get());
+		// ルートシグネチャセット
+		context->SetGraphicsRootSignature(m_PipelineManager->GetLinePSO().rootSignature.Get());
+		IConstantBuffer* cameraBuffer = nullptr;
+		// メインカメラを取得
+		if (mode == RenderMode::Game || mode == RenderMode::Release)
+		{
+			// カメラオブジェクトを取得
+			GameObject* cameraObject = gameCore.GetGameWorld()->GetMainCamera();
+			if (!cameraObject) { continue; }
+			// カメラのバッファインデックスを取得
+			CameraComponent* cameraComponent = gameCore.GetECSManager()->GetComponent<CameraComponent>(cameraObject->GetHandle().entity);
+			if (!cameraComponent) { continue; }
+			// カメラのバッファを取得
+			cameraBuffer = resourceManager.GetBuffer<IConstantBuffer>(cameraComponent->bufferIndex);
+			// カメラがないならスキップ
+			if (!cameraBuffer) { continue; }
+		}
+		else// デバッグカメラ
+		{
+			// カメラのバッファを取得
+			cameraBuffer = resourceManager.GetDebugCameraBuffer();
+			// カメラがないならスキップ
+			if (!cameraBuffer) { continue; }
+		}
+		// MapIDが0（使われていない）ならスキップ
+		if (!resourceManager.GetIntegrationData(IntegrationDataType::Line)->GetActiveCount()) { continue; }
+		// 頂点バッファビューをセット
+		D3D12_VERTEX_BUFFER_VIEW* vbv = resourceManager.GetLineIntegrationBuffer()->GetVertexBufferView();
+		context->SetVertexBuffers(0, 1, vbv);
+		// カメラバッファをセット
+		context->SetGraphicsRootConstantBufferView(0, cameraBuffer->GetResource()->GetGPUVirtualAddress());
+		// DrawCall
+		context->DrawInstanced(static_cast<UINT>(resourceManager.GetIntegrationData(IntegrationDataType::Line)->GetActiveCount()) * 2, 1, 0, 0);
+	}
+	// パーティクル
+	DrawParticles(context, resourceManager, gameCore, mode);
+	// EffectEditor
+	EffectEditorDraw(context, resourceManager, gameCore, mode);
+	// UI
+	DrawUI(context, resourceManager, gameCore, mode);
+	// Skyboxの描画
+	SkyboxRender(context, resourceManager, gameCore, mode);
+	// レンダーターゲットのStateを戻す
+	SetRenderTargets(context, DrawPass::Forward, mode, false);
 	// コマンドリスト終了
 	EndCommandContext(context, Graphics);
 	// GPUの完了待ち
 	WaitForGPU(Graphics);
-}
-
-void GraphicsEngine::DrawForward(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode)
-{
-	resourceManager;
-	gameCore;
-	mode;
 }
 
 void GraphicsEngine::DrawPostProcess(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode)
@@ -613,44 +709,22 @@ void GraphicsEngine::DrawPostProcess(ResourceManager& resourceManager, GameCore&
 	// コマンドリスト開始
 	BeginCommandContext(context);
 	// レンダーターゲットの設定
-	SetRenderTargets(context, DrawPass::PostProcess, mode);
+	SetRenderTargets(context, DrawPass::PostProcess, mode, true);
 	// 描画設定
 	SetRenderState(context, ViewportGame);
-	if (mode != RenderMode::Editor)
-	{
-		// プリミティブトポロジの設定
-		context->SetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		// パイプラインセット
-		context->SetGraphicsPipelineState(m_PipelineManager->GetIntegratePSO().pso.Get());
-		// ルートシグネチャセット
-		context->SetGraphicsRootSignature(m_PipelineManager->GetIntegratePSO().rootSignature.Get());
-		IConstantBuffer* cameraBuffer = nullptr;
-		// メインカメラを取得
-		if (mode == RenderMode::Game)
-		{
-			// カメラオブジェクトを取得
-			GameObject* cameraObject = gameCore.GetGameWorld()->GetMainCamera();
-			if (!cameraObject) { return; }
-			// カメラのバッファインデックスを取得
-			CameraComponent* cameraComponent = gameCore.GetECSManager()->GetComponent<CameraComponent>(cameraObject->GetHandle().entity);
-			if (!cameraComponent) { return; }
-			// カメラのバッファを取得
-			cameraBuffer = resourceManager.GetBuffer<IConstantBuffer>(cameraComponent->bufferIndex);
-			// カメラがないならスキップ
-			if (!cameraBuffer) { return; }
-		} else// デバッグカメラ
-		{
-			// カメラのバッファを取得
-			cameraBuffer = resourceManager.GetDebugCameraBuffer();
-			// カメラがないならスキップ
-			if (!cameraBuffer) { return; }
-		}
-		// オフスクリーンレンダリングテクスチャをセット
-		//context->SetGraphicsRootDescriptorTable(0, m_ResourceManager->GetBuffer<ColorBuffer>(m_RenderTextures[renderTexType].m_BufferIndex)->GetSRVGpuHandle());
-		// DrawCall
-		//context->DrawInstanced(3, 1, 0, 0);
-	}
-
+	// パイプラインセット
+	context->SetGraphicsPipelineState(m_PipelineManager->GetScreenCopyPSO().pso.Get());
+	// ルートシグネチャセット
+	context->SetGraphicsRootSignature(m_PipelineManager->GetScreenCopyPSO().rootSignature.Get());
+	// フォワードの結果をセット
+	ColorBuffer* forwardTex = nullptr;
+	
+	// オフスクリーンレンダリングテクスチャをセット
+	context->SetGraphicsRootDescriptorTable(0, setTex->GetSRVGpuHandle());
+	// DrawCall
+	context->DrawInstanced(3, 1, 0, 0);
+	// レンダーターゲットのStateを戻す
+	SetRenderTargets(context, DrawPass::PostProcess, mode, false);
 	// コマンドリスト終了
 	EndCommandContext(context, Graphics);
 	// GPUの完了待ち
@@ -691,12 +765,21 @@ void GraphicsEngine::CreateOffscreenBuffer()
 	clearValue.Color[1] = kClearColor[1];
 	clearValue.Color[2] = kClearColor[2];
 	clearValue.Color[3] = kClearColor[3];
-	for (int i = 0; i < static_cast<int>(RenderTextureType::RenderTextureTypeCount); i++)
+	// Game用
+	for (int i = 0; i < static_cast<int>(GameRenderTextureType::GameRenderTextureTypeCount); i++)
 	{
-		RenderTextureType renderTexType = static_cast<RenderTextureType>(i);
-		m_RenderTextures[renderTexType].m_BufferIndex = m_ResourceManager->CreateColorBuffer(resourceDesc, &clearValue, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-		m_RenderTextures[renderTexType].m_Width = resourceDesc.Width;
-		m_RenderTextures[renderTexType].m_Height = resourceDesc.Height;
+		GameRenderTextureType renderTexType = static_cast<GameRenderTextureType>(i);
+		m_GameRenderTextures[renderTexType].m_BufferIndex = m_ResourceManager->CreateColorBuffer(resourceDesc, &clearValue, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		m_GameRenderTextures[renderTexType].m_Width = resourceDesc.Width;
+		m_GameRenderTextures[renderTexType].m_Height = resourceDesc.Height;
+	}
+	// Scene用
+	for (int i = 0; i < static_cast<int>(SceneRenderTextureType::SceneRenderTextureTypeCount); i++)
+	{
+		SceneRenderTextureType renderTexType = static_cast<SceneRenderTextureType>(i);
+		m_SceneRenderTextures[renderTexType].m_BufferIndex = m_ResourceManager->CreateColorBuffer(resourceDesc, &clearValue, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		m_SceneRenderTextures[renderTexType].m_Width = resourceDesc.Width;
+		m_SceneRenderTextures[renderTexType].m_Height = resourceDesc.Height;
 	}
 }
 
