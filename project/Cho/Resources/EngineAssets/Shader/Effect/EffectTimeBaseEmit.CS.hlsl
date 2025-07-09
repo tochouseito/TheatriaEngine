@@ -89,11 +89,39 @@ void main(uint3 DTid : SV_DispatchThreadID, uint3 Gid : SV_GroupID) {
         uint nodeID = FetchEffectNodeID(root, i);
         EffectNode node = gNodes[nodeID];
         // 生成するパーティクル数を計算
-        float spawnTime = 0.0f;
-        uint spawnCount = CalcSpawnCount(node.common, elapsed,spawnTime);
+        uint spawnCount = 0; // 生成するパーティクル数
+        uint emitCount = 0; // 発生回数
+        if (elapsed >= node.common.emitStartTime.median)
+        {
+            // 発生回数
+            // 間隔が0なら一回の発生ですべてのパーティクルを生成
+            if (node.common.emitInterval.median != 0.0f)
+            {
+                uint inv = 1 / node.common.emitInterval.median;
+                emitCount = (elapsed - node.common.emitStartTime.median) * inv + 1; // 発生回数は 0 から始まるので +1
+                // 同時発生数と発生回数から生成するパーティクル数を計算
+                spawnCount = node.common.emitCount * emitCount;
+            }
+            else
+            {
+                emitCount = 1;
+                spawnCount = node.common.emitCountMax; // 間隔が0なら一度に最大数を生成
+            }
+        }
+        else
+        {
+            // 発生開始時間を超えていなければ0
+            spawnCount = 0;
+        }
         // 生成するパーティクル数が 0 ならスキップ
-        if (spawnCount == 0) {
+        if (spawnCount == 0)
+        {
             continue;
+        }
+        // 生成するパーティクルの数が最大数より多いなら範囲内に収める
+        if (spawnCount > node.common.emitCountMax)
+        {
+            spawnCount = node.common.emitCountMax;
         }
         // 生成
         for (uint pi = 0; pi < spawnCount; ++pi) {
@@ -217,6 +245,10 @@ void main(uint3 DTid : SV_DispatchThreadID, uint3 Gid : SV_GroupID) {
                 // LifeTime
             particle.lifeTime = GenerateRandomInRange(generator.Generate1d(), node.common.lifeTime.median, node.common.lifeTime.amplitude);
             particle.isAlive = 1;
+            // スポーンした時間を設定
+            float spawnTime = 0.0f;
+            uint emitIndex = pi / node.common.emitCount;
+            spawnTime = node.common.emitStartTime.median + emitIndex * node.common.emitInterval.median;
             particle.spawnTime = spawnTime;
             particle.rootID = rootID;
             particle.nodeID = nodeID;

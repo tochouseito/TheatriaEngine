@@ -387,57 +387,49 @@ bool AddAnimationComponent::Undo(EngineCommand* edit)
 
 bool CreateEffectCommand::Execute(EngineCommand* edit)
 {
-	edit;
-	//// CurrentSceneがないなら失敗
-	//if (!edit->m_GameCore->GetSceneManager()->GetMainScene())
-	//{
-	//	Log::Write(LogLevel::Assert, "Current Scene is nullptr");
-	//	return false;
-	//}
-	//// 作成中のEffectObjectがあるなら失敗
-	//if (edit->GetEffectEntity().has_value()) { return false; }
-	//// 各IDの取得
-	//// Entity
-	//Entity entity = edit->m_GameCore->GetECSManager()->GenerateEntity();
-	//m_Entity = entity;
-	//// デフォルトの名前
-	//std::wstring name = L"EditorEffect";
-	//// 重複回避
-	//name = GenerateUniqueName(name, edit->m_GameCore->GetObjectContainer()->GetNameToObjectID());
-	//// EffectComponentを追加
-	//EffectComponent* effect = edit->m_GameCore->GetECSManager()->AddComponent<EffectComponent>(entity);
-	//if (!effect) { return false; }
-	////effect->isRun = false;
-	////effect->isLoop = true;
-	//edit->SetEffectEntity(entity);
-	//// Rootを取得
-	//uint32_t rootID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::EffectRootInt)->GetMapID();
-	//effect->root = std::make_pair(rootID, EffectRootData());
-	//std::random_device rd;
-	//std::mt19937 gen(rd());
-	//std::uniform_int_distribution<> dist(1, 1000);
-	//effect->root.second.globalSeed = static_cast<uint32_t>(dist(gen));
-	//// UseListに登録
-	//edit->m_ResourceManager->AddEffectRootUseList(rootID);
-	//// Nodeを一つ追加
-	//uint32_t nodeID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::EffectNodeInt)->GetMapID();
-	//effect->root.second.nodeCount++;
-	//EffectNodeData nodedata;
-	//nodedata.nodeID = nodeID;
-	//// Rootを親に設定
-	//nodedata.isRootParent = 1;
-	//// 初期はSprite
-	//uint32_t spriteID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::EffectSpriteInt)->GetMapID();
-	//nodedata.draw.meshDataIndex = spriteID;
-	//nodedata.draw.meshType = static_cast<uint32_t>(EFFECT_MESH_TYPE::SPRITE);
-	//EffectSprite sprite;
-	//nodedata.drawMesh = sprite;
-	//nodedata.name = "NewNode";
-	//nodedata.scale.value = Vector3(1.0f, 1.0f, 1.0f);
-	//nodedata.scale.pva.value.x.median = 1.0f;
-	//nodedata.scale.pva.value.y.median = 1.0f;
-	//nodedata.scale.pva.value.z.median = 1.0f;
-	//effect->root.second.nodes.push_back(std::move(nodedata));
+	// 作成中のEffectObjectがあるなら失敗
+	if (edit->GetEditorManager()->GetEffectEntity().has_value()) { return false; }
+	// 各IDの取得
+	// Entity
+	Entity entity = edit->m_GameCore->GetECSManager()->GenerateEntity();
+	m_Entity = entity;
+	// デフォルトの名前
+	std::wstring name = L"EditorEffect";
+	// EffectComponentを追加
+	EffectComponent* effect = edit->m_GameCore->GetECSManager()->AddComponent<EffectComponent>(entity);
+	if (!effect) { return false; }
+	edit->GetEditorManager()->SetEffectEntity(entity);
+	// Rootを取得
+	uint32_t rootID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::EffectRootInt)->GetMapID();
+	effect->root = std::make_pair(rootID, EffectRootData());
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_int_distribution<> dist(1, 1000);
+	effect->root.second.globalSeed = static_cast<uint32_t>(dist(gen));
+	// UseListに登録
+	edit->m_ResourceManager->AddEffectRootUseList(rootID);
+	// Nodeを一つ追加
+	uint32_t nodeID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::EffectNodeInt)->GetMapID();
+	effect->root.second.nodeCount++;
+	EffectNodeData nodedata;
+	nodedata.nodeID = nodeID;
+	// Rootを親に設定
+	nodedata.isRootParent = 1;
+	// 初期はSprite
+	uint32_t spriteID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::EffectSpriteInt)->GetMapID();
+	nodedata.draw.meshDataIndex = spriteID;
+	nodedata.draw.meshType = static_cast<uint32_t>(EFFECT_MESH_TYPE::SPRITE);
+	EffectSprite sprite;
+	nodedata.drawMesh = sprite;
+	nodedata.name = "NewNode";
+	// 各パラメータの初期値
+	nodedata.common.lifeTime.median = 60.0f;
+	nodedata.common.emitCountMax = 20;
+	nodedata.scale.value = Vector3(1.0f, 1.0f, 1.0f);
+	nodedata.scale.pva.value.x.median = 1.0f;
+	nodedata.scale.pva.value.y.median = 1.0f;
+	nodedata.scale.pva.value.z.median = 1.0f;
+	effect->root.second.nodes.push_back(std::move(nodedata));
 	return true;
 }
 
@@ -449,51 +441,43 @@ bool CreateEffectCommand::Undo(EngineCommand* edit)
 
 bool AddEffectNodeCommand::Execute(EngineCommand* edit)
 {
-	edit;
-	//// CurrentSceneがないなら失敗
-	//if (!edit->m_GameCore->GetSceneManager()->GetMainScene())
-	//{
-	//	Log::Write(LogLevel::Assert, "Current Scene is nullptr");
-	//	return false;
-	//}
-	//// 作成中のEffectObjectがないなら失敗
-	//if (!edit->GetEffectEntity().has_value()) { return false; }
-	//// EffectComponentを取得
-	//EffectComponent* effect = edit->m_GameCore->GetECSManager()->GetComponent<EffectComponent>(edit->GetEffectEntity().value());
-	//if (!effect) { return false; }
-	//// 新しいNodeのIDを取得
-	//uint32_t nodeID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::EffectNodeInt)->GetMapID();
-	////std::span<EffectRoot> rootSpan = dynamic_cast<StructuredBuffer<EffectRoot>*>(edit->m_ResourceManager->GetIntegrationBuffer(IntegrationDataType::EffectRootInt))->GetMappedData();
-	//// EffectRootのNodeIDに追加
-	//effect->root.second.nodeCount++;
-	//EffectNodeData nodedata;
-	//nodedata.nodeID = nodeID;
-	//// 選択中のNodeを親に設定
-	//if (edit->m_EffectNodeID.has_value())
-	//{
-	//	nodedata.isRootParent = 0;
-	//	nodedata.parentIndex = effect->root.second.nodes[edit->m_EffectNodeID.value()].nodeID;
-	//}
-	//else
-	//{
-	//	// 親がないならRootを親に設定
-	//	nodedata.isRootParent = 1;
-	//}
-	//// 初期はSprite
-	//uint32_t spriteID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::EffectSpriteInt)->GetMapID();
-	//nodedata.draw.meshDataIndex = spriteID;
-	//nodedata.draw.meshType = static_cast<uint32_t>(EFFECT_MESH_TYPE::SPRITE);
-	//EffectSprite sprite;
-	//nodedata.drawMesh = sprite;
-	//nodedata.name = "NewNode";
-	//nodedata.scale.value = Vector3(1.0f, 1.0f, 1.0f);
-	//nodedata.scale.pva.value.x.median = 1.0f;
-	//nodedata.scale.pva.value.y.median = 1.0f;
-	//nodedata.scale.pva.value.z.median = 1.0f;
-	//// Nodeを追加
-	//effect->root.second.nodes.push_back(std::move(nodedata));
-	//// 追加したNodeを選択中に設定
-	//edit->SetEffectNodeIndex(nodeID);
+	// 作成中のEffectObjectがないなら失敗
+	if (!edit->GetEditorManager()->GetEffectEntity().has_value()) { return false; }
+	// EffectComponentを取得
+	EffectComponent* effect = edit->m_GameCore->GetECSManager()->GetComponent<EffectComponent>(edit->GetEditorManager()->GetEffectEntity().value());
+	if (!effect) { return false; }
+	// 新しいNodeのIDを取得
+	uint32_t nodeID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::EffectNodeInt)->GetMapID();
+	// EffectRootのNodeIDに追加
+	effect->root.second.nodeCount++;
+	EffectNodeData nodedata;
+	nodedata.nodeID = nodeID;
+	// 選択中のNodeを親に設定
+	if (edit->GetEditorManager()->GetEffectNodeID().has_value())
+	{
+		nodedata.isRootParent = 0;
+		nodedata.parentIndex = effect->root.second.nodes[edit->GetEditorManager()->GetEffectNodeID().value()].nodeID;
+	}
+	else
+	{
+		// 親がないならRootを親に設定
+		nodedata.isRootParent = 1;
+	}
+	// 初期はSprite
+	uint32_t spriteID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::EffectSpriteInt)->GetMapID();
+	nodedata.draw.meshDataIndex = spriteID;
+	nodedata.draw.meshType = static_cast<uint32_t>(EFFECT_MESH_TYPE::SPRITE);
+	EffectSprite sprite;
+	nodedata.drawMesh = sprite;
+	nodedata.name = "NewNode";
+	nodedata.scale.value = Vector3(1.0f, 1.0f, 1.0f);
+	nodedata.scale.pva.value.x.median = 1.0f;
+	nodedata.scale.pva.value.y.median = 1.0f;
+	nodedata.scale.pva.value.z.median = 1.0f;
+	// Nodeを追加
+	effect->root.second.nodes.push_back(std::move(nodedata));
+	// 追加したNodeを選択中に設定
+	edit->GetEditorManager()->SetEffectNodeIndex(nodeID);
 	return true;
 }
 
