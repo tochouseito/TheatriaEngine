@@ -472,7 +472,6 @@ public:
 			},
 			[&](Entity e, EffectComponent& effect)
 			{
-				e;
 				FinalizeComponent(e, effect);
 			})
 	{

@@ -63,6 +63,8 @@ struct IIComponentEventListener
     virtual void OnComponentCopied(Entity src, Entity dst, CompID compType) = 0;
     virtual void OnComponentRemoved(Entity e, CompID compType) = 0;
     virtual void OnComponentRemovedInstance(Entity e, CompID compType, void* rawVec, size_t idx) = 0;
+	// Prefabからの復元時に呼ばれる
+    virtual void OnComponentRestoredFromPrefab(Entity, CompID) {}
 };
 
 struct IEntityEventListener
@@ -78,6 +80,7 @@ struct IEntityEventListener
 
 class ECSManager
 {
+    friend class IPrefab;
 public:
     /*---------------------------------------------------------------------
         エンティティ管理
@@ -309,6 +312,35 @@ public:
         }
 
         return comp; // コンポーネントを返す
+    }
+
+    /// Prefab復元時だけ使う、イベントを起こさずコンポーネントを追加
+    template<ComponentType T>
+    void PrefabAddComponent(Entity e, T const& comp)
+    {
+        // 1) プールを生成 or 取得
+        CompID id = ComponentPool<T>::GetID();
+        auto [it, _] = m_TypeToComponents.try_emplace(
+            id,
+            std::make_shared<ComponentPool<T>>()
+        );
+        auto pool = static_cast<ComponentPool<T>*>(it->second.get());
+
+        // 2) 生コピー
+        pool->PrefabCloneRaw(e, const_cast<T*>(&comp));
+
+        // 3) Archetype の更新だけ行う（通知はしない）
+        if (m_EntityToArchetype.size() <= e)
+            m_EntityToArchetype.resize(e + 1);
+        Archetype& arch = m_EntityToArchetype[e];
+        if (!arch.test(id))
+        {
+            m_ArchToEntities[arch].Remove(e);
+            arch.set(id);
+            m_ArchToEntities[arch].Add(e);
+        }
+
+        NotifyComponentRestoredFromPrefab(e, ComponentPool<T>::GetID());
     }
 
     /*-------------------- Get component -------------------------------*/
@@ -568,6 +600,8 @@ public:
         virtual std::shared_ptr<void> CloneComponent(CompID id, void* ptr) = 0;
         virtual bool IsMultiComponentTrait(CompID id) const = 0;
         virtual size_t GetComponentCount(Entity e) const = 0;
+        /// 生ポインタから直接エンティティ dst にクローンして追加
+        virtual void CloneRawComponentTo(Entity dst, void* raw) = 0;
     };
 
     IComponentPool* GetRawComponentPool(CompID id)
@@ -723,6 +757,44 @@ public:
             }
         }
 
+        void CloneRawComponentTo(Entity dst, void* raw) override
+        {
+            if constexpr (IsMultiComponent<T>::value)
+            {
+                // マルチコンポーネントなら vector<T> 全体をコピー
+                auto* srcVec = static_cast<std::vector<T>*>(raw);
+                m_Multi[dst] = *srcVec;
+            }
+            else
+            {
+                // 単一コンポーネントなら AddComponent＋コピー代入
+                T* dstComp = AddComponent(dst);
+                *dstComp = *static_cast<T*>(raw);
+            }
+        }
+
+        /// Prefab復元時だけ使う、「生のコピー」を行う
+        void PrefabCloneRaw(Entity e, void* rawPtr)
+        {
+            if constexpr (IsMultiComponent<T>::value)
+            {
+                // マルチコンポーネントなら vector<T> 全体を直接コピー
+                auto* srcVec = static_cast<std::vector<T>*>(rawPtr);
+                m_Multi[e] = *srcVec;  // コピーコンストラクタを使う
+            }
+            else
+            {
+                // 単一コンポーネントなら storage に直接 emplace_back
+                // （operator= ではなく、T のコピーコンストラクタで構築される）
+                if (m_EntityToIndex.size() <= e) m_EntityToIndex.resize(e + 1, kInvalid);
+                uint32_t idx = static_cast<uint32_t>(m_Storage.size());
+                m_Storage.emplace_back(*static_cast<T*>(rawPtr));
+                if (m_IndexToEntity.size() <= idx) m_IndexToEntity.resize(idx + 1, kInvalid);
+                m_EntityToIndex[e] = idx;
+                m_IndexToEntity[idx] = e;
+            }
+        }
+
         /*-------------------- static ID --------------*/
         static CompID GetID() { static CompID id = ++ECSManager::m_NextCompTypeID; return id; }
 
@@ -786,6 +858,17 @@ public:
         auto it = m_TypeToComponents.find(ComponentPool<T>::GetID());
         if (it == m_TypeToComponents.end()) return nullptr;
         return static_cast<ComponentPool<T>*>(it->second.get());
+    }
+
+    template<ComponentType T>
+    ComponentPool<T>& EnsurePool()
+    {
+        CompID id = ComponentPool<T>::GetID();
+        auto [it, inserted] = m_TypeToComponents.try_emplace(
+            id,
+            std::make_shared<ComponentPool<T>>(4096)
+        );
+        return *static_cast<ComponentPool<T>*>(it->second.get());
     }
 
     class ISystem
@@ -1018,6 +1101,12 @@ private:
         for (auto& wp : m_ComponentListeners) if (auto sp = wp.lock())
             sp->OnComponentRemovedInstance(e, c, v, i);
     }
+    void NotifyComponentRestoredFromPrefab(Entity e, CompID c)
+    {
+        for (auto& wp : m_ComponentListeners)
+            if (auto sp = wp.lock())
+                sp->OnComponentRestoredFromPrefab(e, c);
+    }
     bool IsMultiComponentByID(CompID id) const
     {
         auto it = m_TypeToComponents.find(id);
@@ -1156,6 +1245,32 @@ public:
             }
         );
     }
+    // 単一コンポーネント向け
+    template<ComponentType T>
+    void RegisterOnRestore(std::function<void(Entity, T*)> f)
+    {
+        static_assert(!IsMultiComponent<T>::value, "Use multi for multi-component");
+        CompID id = ECSManager::ComponentPool<T>::GetID();
+        onRestoreSingle[id].push_back(
+            [f](Entity e, IComponentTag* raw) {
+                f(e, static_cast<T*>(raw));
+            }
+        );
+    }
+
+    // マルチコンポーネント向け
+    template<ComponentType T>
+    void RegisterOnRestore(std::function<void(Entity, T*, size_t)> f)
+    {
+        static_assert(IsMultiComponent<T>::value, "Use single for single-component");
+        CompID id = ECSManager::ComponentPool<T>::GetID();
+        onRestoreMulti[id].push_back(
+            [f](Entity e, void* rawVec, size_t idx) {
+                auto* vec = static_cast<std::vector<T>*>(rawVec);
+                f(e, &(*vec)[idx], idx);
+            }
+        );
+    }
 private:
     // ECS側から呼ばれる
     void OnComponentAdded(Entity e, CompID compType) override
@@ -1237,6 +1352,27 @@ private:
             }
         }
     }
+
+    void OnComponentRestoredFromPrefab(Entity e, CompID compType) override
+    {
+        // 単一
+        if (auto it = onRestoreSingle.find(compType); it != onRestoreSingle.end())
+        {
+            void* raw = m_pEcs->GetRawComponentPool(compType)->GetRawComponent(e);
+            for (auto& cb : it->second)
+                cb(e, static_cast<IComponentTag*>(raw));
+        }
+        // マルチ
+        if (auto it2 = onRestoreMulti.find(compType); it2 != onRestoreMulti.end())
+        {
+            auto* pool = m_pEcs->GetRawComponentPool(compType);
+            void* rawVec = pool->GetRawComponent(e);
+            size_t count = pool->GetComponentCount(e);
+            for (size_t idx = 0; idx < count; ++idx)
+                for (auto& cb : it2->second)
+                    cb(e, rawVec, idx);
+        }
+    }
 private:
     ECSManager* m_pEcs = nullptr;
 protected:
@@ -1252,6 +1388,9 @@ protected:
     std::unordered_map<CompID, std::vector<std::function<void(Entity, IComponentTag*)>>> onRemoveSingle;
     // マルチ用
     std::unordered_map<CompID, std::vector<std::function<void(Entity, void*, size_t)>>> onRemoveMulti;
+    // Restore（Prefab 復元）用マップ
+    std::unordered_map<CompID, std::vector<std::function<void(Entity, IComponentTag*)>>> onRestoreSingle;
+    std::unordered_map<CompID, std::vector<std::function<void(Entity, void*, size_t)>>>    onRestoreMulti;
 };
 
 class IPrefab
@@ -1286,6 +1425,24 @@ public:
                 *dst = *static_cast<T*>(raw);
                 };
         }
+    }
+
+    template<ComponentType T>
+    static void RegisterPrefabRestore()
+    {
+        CompID id = ECSManager::ComponentPool<T>::GetID();
+
+        // 単一コンポーネント用
+        m_PrefabRestoreFuncs[id] = [](Entity e, ECSManager& ecs, void* raw) {
+            ecs.PrefabAddComponent<T>(e, *static_cast<T*>(raw));
+            };
+
+        // マルチコンポーネント用
+        m_PrefabRestoreMultiFuncs[id] = [](Entity e, ECSManager& ecs, void* rawVec) {
+            auto& vec = *static_cast<std::vector<T>*>(rawVec);
+            for (auto& inst : vec)
+                ecs.PrefabAddComponent<T>(e, inst);
+            };
     }
 
     //――――――――――――――――――
@@ -1524,14 +1681,19 @@ protected:
     // (2) m_Components/m_MultiComponents を使って既存の復元ロジック
     virtual void InstantiateComponents(Entity e, ECSManager& ecs) const
     {
-        for (auto const& [id, raw] : m_Components)
+        // 単一コンポーネント
+        for (auto const& [id, rawPtr] : m_Components)
         {
-            if (auto it = m_CopyFuncs.find(id); it != m_CopyFuncs.end())
-                it->second(e, ecs, raw.get());
+            auto it = m_PrefabRestoreFuncs.find(id);
+            if (it != m_PrefabRestoreFuncs.end())
+                it->second(e, ecs, rawPtr.get());
         }
+
+        // マルチコンポーネント
         for (auto const& [id, rawVec] : m_MultiComponents)
         {
-            if (auto it = m_MultiCopyFuncs.find(id); it != m_MultiCopyFuncs.end())
+            auto it = m_PrefabRestoreMultiFuncs.find(id);
+            if (it != m_PrefabRestoreMultiFuncs.end())
                 it->second(e, ecs, rawVec.get());
         }
     }
@@ -1572,4 +1734,9 @@ private:
         std::function<void(Entity, ECSManager&, void*)>> m_CopyFuncs;
     inline static std::unordered_map<CompID,
         std::function<void(Entity, ECSManager&, void*)>> m_MultiCopyFuncs;
+    // 復元処理マップ
+    inline static std::unordered_map<CompID,
+        std::function<void(Entity, ECSManager&, void*)>> m_PrefabRestoreFuncs;
+    inline static std::unordered_map<CompID,
+        std::function<void(Entity, ECSManager&, void*)>> m_PrefabRestoreMultiFuncs;
 };

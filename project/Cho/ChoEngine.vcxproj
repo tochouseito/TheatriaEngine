@@ -761,7 +761,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /bigobj %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\Externals\assimp\include;$(ProjectDir)\Externals\DirectXTex;$(ProjectDir)\Externals\\imgui;$(ProjectDir)\Externals\nlohmann;$(ProjectDir)\Externals\ChoMath;$(ProjectDir)\GameCore\IScript;$(ProjectDir)\GameCore\ScriptContext;$(ProjectDir)\Core\Utility;$(ProjectDir)\Externals\box2d\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -815,7 +815,7 @@ xcopy "$(SolutionDir)Cho\Core\Utility\SoundData.h" "$(TargetDir)Cho\Core\Utility
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /bigobj %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\Externals\assimp\include;$(ProjectDir)\Externals\DirectXTex;$(ProjectDir)\Externals\\imgui;$(ProjectDir)\Externals\nlohmann;$(ProjectDir)\Externals\ChoMath;$(ProjectDir)\GameCore\IScript;$(ProjectDir)\GameCore\ScriptContext;$(ProjectDir)\Core\Utility;$(ProjectDir)\Externals\box2d\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
