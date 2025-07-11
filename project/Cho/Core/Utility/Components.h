@@ -843,7 +843,7 @@ struct AnimationComponent : public IComponentTag
 	std::optional<uint32_t> boneOffsetID = std::nullopt;	// ボーンオフセットID
 
 	std::optional<Skeleton> skeleton = std::nullopt;	// スケルトンデータ
-	std::optional<SkinCluster> skinCluster = std::nullopt;	// スキンクラスター
+	std::vector<SkinCluster> skinClusters;	// スキンクラスター
 
 	//std::optional<uint32_t> paletteBufferIndex = std::nullopt;	// パレットバッファーインデックス
 	//std::optional<uint32_t> influenceBufferIndex = std::nullopt;// インフルエンスバッファーインデックス
