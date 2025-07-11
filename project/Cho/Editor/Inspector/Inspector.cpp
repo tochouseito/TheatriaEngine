@@ -180,6 +180,7 @@ void Inspector::MaterialComponentView(GameObject* object)
 		// ドロップターゲット
 		if (ImGui::BeginDragDropTarget())
 		{
+			// テクスチャならそのまま使う
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Texture"))
 			{
 				// ドロップされたテクスチャのIDを取得
@@ -188,6 +189,10 @@ void Inspector::MaterialComponentView(GameObject* object)
 				material->textureName = ConvertString(textureName);
 				// テクスチャIDを取得
 				material->textureID = m_EngineCommand->GetResourceManager()->GetTextureManager()->GetTextureID(material->textureName);
+			}
+
+			if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TextureID"))
+			{
 			}
 			ImGui::EndDragDropTarget();
 		}

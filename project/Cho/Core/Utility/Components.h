@@ -188,6 +188,10 @@ struct MeshFilterComponent : public IComponentTag
 };
 
 // 描画コンポーネント
+struct SubMesh
+{
+
+};
 struct MeshRendererComponent : public IComponentTag
 {
 	// デフォルト ctor はそのまま

@@ -28,6 +28,7 @@ struct VSOut
     float3 worldPosition : POSITION0;
     float3 cameraPosition : CAMERAPOS0;
     uint materialID : MATERIALID0;
+    float4 color : COLOR0;
 };
 
 struct ViewProjection
