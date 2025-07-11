@@ -47,15 +47,6 @@ bool AddMeshFilterComponent::Execute(EngineCommand* edit)
 {
 	// MeshFilterComponentを追加
 	edit->m_GameCore->GetECSManager()->AddComponent<MeshFilterComponent>(m_Entity);
-	//// Transformとの連携
-	//TransformComponent* transform = edit->m_GameCore->GetECSManager()->GetComponent<TransformComponent>(m_Entity);
-	//// デフォルトモデルとしてCube
-	//mesh->modelName = L"Cube";
-	//// モデルのIDを取得
-	//mesh->modelID = edit->m_ResourceManager->GetModelManager()->GetModelDataIndex(mesh->modelName);
-	//// モデルのUseListに登録
-	//edit->m_ResourceManager->GetModelManager()->RegisterModelUseList(mesh->modelID.value(), transform->mapID.value());
-
 	return true;
 }
 
@@ -101,9 +92,6 @@ bool AddScriptComponent::Execute(EngineCommand* edit)
 {
 	// ScriptComponentを追加
 	edit->m_GameCore->GetECSManager()->AddComponent<ScriptComponent>(m_Entity);
-	// Entityを設定
-	//script->entity = m_Entity;
-	//script->objectID = m_ObjectID;
 	return true;
 }
 
@@ -117,10 +105,6 @@ bool AddLineRendererComponent::Execute(EngineCommand* edit)
 {
 	// LineRendererComponentを追加
 	edit->m_GameCore->GetECSManager()->AddComponent<LineRendererComponent>(m_Entity);
-	// mapIDを取得
-	//uint32_t mapID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::Line)->GetMapID();
-	// mapIDを設定
-	//line->mapID = mapID;
 	return false;
 }
 
@@ -134,7 +118,6 @@ bool AddRigidbody2DComponent::Execute(EngineCommand* edit)
 {
 	// Rigidbody2DComponentを追加
 	edit->m_GameCore->GetECSManager()->AddComponent<Rigidbody2DComponent>(m_Entity);
-	//rb->selfObjectID = m_ObjectID;
 	return true;
 }
 
@@ -195,17 +178,6 @@ bool AddMaterialComponent::Execute(EngineCommand* edit)
 {
 	// MaterialComponentを追加
 	edit->m_GameCore->GetECSManager()->AddComponent<MaterialComponent>(m_Entity);
-	//// 初期値
-	//Color color;
-	//material->color = color.From255(200, 200, 200);
-	//material->enableLighting = true;
-	//material->matUV = Matrix4::Identity();
-	//material->shininess = 50.0f;
-	//// Material統合バッファからmapIDを取得
-	//uint32_t mapID = edit->m_ResourceManager->GetIntegrationData(IntegrationDataType::Material)->GetMapID();
-	//TransformComponent* transform = edit->m_GameCore->GetECSManager()->GetComponent<TransformComponent>(m_Entity);
-	//transform->materialID = mapID;
-	//material->mapID = mapID;
 	return true;
 }
 
@@ -241,8 +213,6 @@ bool AddEmitterComponent::Execute(EngineCommand* edit)
 {
 	// EmitterComponentを追加
 	edit->m_GameCore->GetECSManager()->AddComponent<EmitterComponent>(m_Entity);
-	//if (!emitter) { return false; }
-	//emitter->bufferIndex = edit->m_ResourceManager->CreateStructuredBuffer<BUFFER_DATA_EMITTER>(1);
 	return true;
 }
 
@@ -256,16 +226,6 @@ bool AddParticleComponent::Execute(EngineCommand* edit)
 {
 	// ParticleComponentを追加
 	edit->m_GameCore->GetECSManager()->AddComponent<ParticleComponent>(m_Entity);
-	//if (!particle) { return false; }
-	// Resourceの生成
-	// パーティクル
-	//particle->bufferIndex = edit->m_ResourceManager->CreateRWStructuredBuffer<BUFFER_DATA_PARTICLE>(particle->count);
-	// PerFrame
-	//particle->perFrameBufferIndex = edit->m_ResourceManager->CreateConstantBuffer<BUFFER_DATA_PARTICLE_PERFRAME>();
-	// FreeListIndex
-	//particle->freeListIndexBufferIndex = edit->m_ResourceManager->CreateRWStructuredBuffer<int32_t>(1);
-	// FreeList
-	//particle->freeListBufferIndex = edit->m_ResourceManager->CreateRWStructuredBuffer<uint32_t>(particle->count,true);
 	return true;
 }
 

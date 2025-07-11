@@ -997,14 +997,17 @@ void AnimationSystem::SkinClusterUpdate(AnimationComponent& animation, ModelData
 	StructuredBuffer<ConstBufferDataWell>* paletteBuffer = dynamic_cast<StructuredBuffer<ConstBufferDataWell>*>(m_pResourceManager->GetBuffer<IStructuredBuffer>(model->boneMatrixBufferIndex));
 	for (uint32_t jointIndex = 0; jointIndex < model->skeleton.joints.size(); ++jointIndex)
 	{
-		assert(jointIndex < model->skinCluster.inverseBindPoseMatrices.size());
-		uint32_t offset = static_cast<uint32_t>(model->skeleton.joints.size() * animation.boneOffsetID.value());
-		ConstBufferDataWell data = {};
-		data.skeletonSpaceMatrix =
-			animation.skinCluster->inverseBindPoseMatrices[jointIndex] * animation.skeleton->joints[jointIndex].skeletonSpaceMatrix;
-		data.skeletonSpaceInverseTransposeMatrix =
-			ChoMath::Transpose(Matrix4::Inverse(data.skeletonSpaceMatrix));
-		paletteBuffer->UpdateData(data, jointIndex + offset);
+		for (MeshData& mesh : model->meshes)
+		{
+			assert(jointIndex < mesh.skinCluster.inverseBindPoseMatrices.size());
+			uint32_t offset = static_cast<uint32_t>(model->skeleton.joints.size() * animation.boneOffsetID.value());
+			ConstBufferDataWell data = {};
+			data.skeletonSpaceMatrix =
+				animation.skinCluster->inverseBindPoseMatrices[jointIndex] * animation.skeleton->joints[jointIndex].skeletonSpaceMatrix;
+			data.skeletonSpaceInverseTransposeMatrix =
+				ChoMath::Transpose(Matrix4::Inverse(data.skeletonSpaceMatrix));
+			paletteBuffer->UpdateData(data, jointIndex + offset);
+		}
 	}
 }
 

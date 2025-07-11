@@ -52,10 +52,13 @@ struct MeshData
 	std::vector<uint32_t> indices;
 	std::vector<MaterialData> materials;
 	std::map<std::string, JointWeightData>skinClusterData;
-	//std::optional<uint32_t> influenceBufferIndex = std::nullopt; // スキニング情報のバッファインデックス
-	//std::optional<uint32_t> skinInfoBufferIndex = std::nullopt;	// スキニング情報バッファーインデックス
 	std::optional<uint32_t> vertexBufferIndex = std::nullopt;
 	std::optional<uint32_t> indexBufferIndex = std::nullopt;
+	SkinCluster skinCluster;
+
+	// スキニング情報のバッファインデックス
+	std::optional<uint32_t> influenceBufferIndex = std::nullopt; // スキニング情報のバッファインデックス
+	std::optional<uint32_t> skinInfoBufferIndex = std::nullopt;	// スキニング情報バッファーインデックス
 };
 struct ModelData
 {
@@ -69,13 +72,10 @@ struct ModelData
 	bool isBone = false;
 	std::vector<AnimationData> animations;
 	Skeleton skeleton;
-	SkinCluster skinCluster;
 	// ボーン行列統合バッファインデックス
 	std::optional<uint32_t> boneMatrixBufferIndex = std::nullopt;
 	uint32_t nextBoneOffsetIndex = 0; // 次のボーンオフセットインデックス
 	std::vector<uint32_t> removedBoneOffsetIndices; // 削除されたボーンオフセットインデックスのリスト
-	std::optional<uint32_t> influenceBufferIndex = std::nullopt; // スキニング情報のバッファインデックス
-	std::optional<uint32_t> skinInfoBufferIndex = std::nullopt;	// スキニング情報バッファーインデックス
 
 	uint32_t AllocateBoneOffsetIdx()
 	{

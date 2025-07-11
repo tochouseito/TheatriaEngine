@@ -391,7 +391,7 @@ void GameCore::RegisterECSEvents()
 			if (model->isBone)
 			{
 				c->skeleton = model->skeleton;
-				c->skinCluster = model->skinCluster;
+				c->skinCluster = model->meshes[0].skinCluster;
 				c->modelName = model->name;
 				c->boneOffsetID = model->AllocateBoneOffsetIdx();
 			}
@@ -408,7 +408,7 @@ void GameCore::RegisterECSEvents()
 			if (model->isBone)
 			{
 				c->skeleton = model->skeleton;
-				c->skinCluster = model->skinCluster;
+				c->skinCluster = model->meshes[0].skinCluster;
 				c->modelName = model->name;
 				c->boneOffsetID = model->AllocateBoneOffsetIdx();
 			}

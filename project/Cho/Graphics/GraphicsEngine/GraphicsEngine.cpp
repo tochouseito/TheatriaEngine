@@ -643,71 +643,74 @@ void GraphicsEngine::DrawForward(ResourceManager& resourceManager, GameCore& gam
 		}
 		// 登録されているTransformがないならスキップ
 		if (modelData.useTransformList.empty()) { continue; }
-		// 頂点バッファビューをセット
-		D3D12_VERTEX_BUFFER_VIEW* vbv = resourceManager.GetBuffer<IVertexBuffer>(modelData.meshes[0].vertexBufferIndex)->GetVertexBufferView();
-		context->SetVertexBuffers(0, 1, vbv);
-		// インデックスバッファビューをセット
-		D3D12_INDEX_BUFFER_VIEW* ibv = resourceManager.GetBuffer<IIndexBuffer>(modelData.meshes[0].indexBufferIndex)->GetIndexBufferView();
-		context->SetIndexBuffer(ibv);
-		// 引数バッファを更新
-		//IndirectArgs indirectArgs = {};
-		// カメラバッファをセット
-		context->SetGraphicsRootConstantBufferView(0, cameraBuffer->GetResource()->GetGPUVirtualAddress());
-		// トランスフォーム統合バッファをセット
-		IStructuredBuffer* transformBuffer = resourceManager.GetIntegrationBuffer(IntegrationDataType::Transform);
-		context->SetGraphicsRootShaderResourceView(1, transformBuffer->GetResource()->GetGPUVirtualAddress());
-		// UseTransformBufferをセット
-		IStructuredBuffer* useTransformBuffer = resourceManager.GetBuffer<IStructuredBuffer>(modelData.useTransformBufferIndex);
-		context->SetGraphicsRootShaderResourceView(2, useTransformBuffer->GetResource()->GetGPUVirtualAddress());
-		// モデルのボーン行列Bufferをセット
-		IStructuredBuffer* boneBuffer = resourceManager.GetBuffer<IStructuredBuffer>(modelData.boneMatrixBufferIndex);
-		context->SetGraphicsRootShaderResourceView(3, boneBuffer->GetResource()->GetGPUVirtualAddress());
-		// SkinningInfluenceBufferをセット
-		IStructuredBuffer* skinningInfluenceBuffer = resourceManager.GetBuffer<IStructuredBuffer>(modelData.influenceBufferIndex);
-		context->SetGraphicsRootShaderResourceView(4, skinningInfluenceBuffer->GetResource()->GetGPUVirtualAddress());
-		// SkinningInfoBufferをセット
-		IConstantBuffer* skinningInfoBuffer = resourceManager.GetBuffer<IConstantBuffer>(modelData.skinInfoBufferIndex);
-		context->SetGraphicsRootConstantBufferView(5, skinningInfoBuffer->GetResource()->GetGPUVirtualAddress());
-		// ライトバッファをセット
-		IConstantBuffer* lightBuffer = resourceManager.GetLightBuffer();
-		context->SetGraphicsRootConstantBufferView(6, lightBuffer->GetResource()->GetGPUVirtualAddress());
-		// 環境情報バッファをセット
-		IConstantBuffer* envBuffer = resourceManager.GetEnvironmentBuffer();
-		context->SetGraphicsRootConstantBufferView(7, envBuffer->GetResource()->GetGPUVirtualAddress());
-		// PS用トランスフォーム統合バッファをセット
-		context->SetGraphicsRootShaderResourceView(8, transformBuffer->GetResource()->GetGPUVirtualAddress());
-		// マテリアル統合バッファをセット
-		IStructuredBuffer* materialBuffer = resourceManager.GetIntegrationBuffer(IntegrationDataType::Material);
-		context->SetGraphicsRootShaderResourceView(9, materialBuffer->GetResource()->GetGPUVirtualAddress());
-		/*indirectArgs.cbv_ViewProjection = cameraBuffer->GetResource()->GetGPUVirtualAddress();
-		indirectArgs.srv_IntegrationTF = transformBuffer->GetResource()->GetGPUVirtualAddress();
-		indirectArgs.srv_UseTransformList = useTransformBuffer->GetResource()->GetGPUVirtualAddress();
-		indirectArgs.srv_BoneMatrix = boneBuffer->GetResource()->GetGPUVirtualAddress();
-		indirectArgs.srv_SkinningInfluence = skinningInfluenceBuffer->GetResource()->GetGPUVirtualAddress();
-		indirectArgs.cbv_SkinningInfo = skinningInfoBuffer->GetResource()->GetGPUVirtualAddress();
-		indirectArgs.cbv_Lights = lightBuffer->GetResource()->GetGPUVirtualAddress();
-		indirectArgs.cbv_Environment = envBuffer->GetResource()->GetGPUVirtualAddress();
-		indirectArgs.srv_IntegrationMTL = materialBuffer->GetResource()->GetGPUVirtualAddress();
-		indirectArgs.drawIndexedArgs.IndexCountPerInstance = static_cast<UINT>(modelData.meshes[0].indices.size());
-		indirectArgs.drawIndexedArgs.InstanceCount = static_cast<UINT>(modelData.useTransformList.size());
-		indirectArgs.drawIndexedArgs.StartIndexLocation = 0;
-		indirectArgs.drawIndexedArgs.BaseVertexLocation = 0;
-		indirectArgs.drawIndexedArgs.StartInstanceLocation = 0;
-		m_PipelineManager->GetIntegratePSO().indirectArgsBuffer->UpdateData(indirectArgs);*/
-		// 配列テクスチャのためヒープをセット
-		context->SetGraphicsRootDescriptorTable(10, resourceManager.GetSUVDHeap()->GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
-		// インスタンス数を取得
-		UINT numInstance = static_cast<UINT>(modelData.useTransformList.size());
-		// DrawCall
-		context->DrawIndexedInstanced(static_cast<UINT>(modelData.meshes[0].indices.size()), numInstance, 0, 0, 0);
-		// IndirectDrawCall
-		/*context->ExecuteIndirect(
-			m_PipelineManager->GetIntegratePSO().commandSignature.Get(),
-			1,
-			m_PipelineManager->GetIntegratePSO().indirectArgsBuffer->GetResource(),
-			0,
-			nullptr,
-			0);*/
+		for (int i = 0; i < modelData.meshes.size(); i++)
+		{
+			// 頂点バッファビューをセット
+			D3D12_VERTEX_BUFFER_VIEW* vbv = resourceManager.GetBuffer<IVertexBuffer>(modelData.meshes[i].vertexBufferIndex)->GetVertexBufferView();
+			context->SetVertexBuffers(0, 1, vbv);
+			// インデックスバッファビューをセット
+			D3D12_INDEX_BUFFER_VIEW* ibv = resourceManager.GetBuffer<IIndexBuffer>(modelData.meshes[i].indexBufferIndex)->GetIndexBufferView();
+			context->SetIndexBuffer(ibv);
+			// 引数バッファを更新
+			//IndirectArgs indirectArgs = {};
+			// カメラバッファをセット
+			context->SetGraphicsRootConstantBufferView(0, cameraBuffer->GetResource()->GetGPUVirtualAddress());
+			// トランスフォーム統合バッファをセット
+			IStructuredBuffer* transformBuffer = resourceManager.GetIntegrationBuffer(IntegrationDataType::Transform);
+			context->SetGraphicsRootShaderResourceView(1, transformBuffer->GetResource()->GetGPUVirtualAddress());
+			// UseTransformBufferをセット
+			IStructuredBuffer* useTransformBuffer = resourceManager.GetBuffer<IStructuredBuffer>(modelData.useTransformBufferIndex);
+			context->SetGraphicsRootShaderResourceView(2, useTransformBuffer->GetResource()->GetGPUVirtualAddress());
+			// モデルのボーン行列Bufferをセット
+			IStructuredBuffer* boneBuffer = resourceManager.GetBuffer<IStructuredBuffer>(modelData.boneMatrixBufferIndex);
+			context->SetGraphicsRootShaderResourceView(3, boneBuffer->GetResource()->GetGPUVirtualAddress());
+			// SkinningInfluenceBufferをセット
+			IStructuredBuffer* skinningInfluenceBuffer = resourceManager.GetBuffer<IStructuredBuffer>(modelData.meshes[i].influenceBufferIndex);
+			context->SetGraphicsRootShaderResourceView(4, skinningInfluenceBuffer->GetResource()->GetGPUVirtualAddress());
+			// SkinningInfoBufferをセット
+			IConstantBuffer* skinningInfoBuffer = resourceManager.GetBuffer<IConstantBuffer>(modelData.meshes[i].skinInfoBufferIndex);
+			context->SetGraphicsRootConstantBufferView(5, skinningInfoBuffer->GetResource()->GetGPUVirtualAddress());
+			// ライトバッファをセット
+			IConstantBuffer* lightBuffer = resourceManager.GetLightBuffer();
+			context->SetGraphicsRootConstantBufferView(6, lightBuffer->GetResource()->GetGPUVirtualAddress());
+			// 環境情報バッファをセット
+			IConstantBuffer* envBuffer = resourceManager.GetEnvironmentBuffer();
+			context->SetGraphicsRootConstantBufferView(7, envBuffer->GetResource()->GetGPUVirtualAddress());
+			// PS用トランスフォーム統合バッファをセット
+			context->SetGraphicsRootShaderResourceView(8, transformBuffer->GetResource()->GetGPUVirtualAddress());
+			// マテリアル統合バッファをセット
+			IStructuredBuffer* materialBuffer = resourceManager.GetIntegrationBuffer(IntegrationDataType::Material);
+			context->SetGraphicsRootShaderResourceView(9, materialBuffer->GetResource()->GetGPUVirtualAddress());
+			/*indirectArgs.cbv_ViewProjection = cameraBuffer->GetResource()->GetGPUVirtualAddress();
+			indirectArgs.srv_IntegrationTF = transformBuffer->GetResource()->GetGPUVirtualAddress();
+			indirectArgs.srv_UseTransformList = useTransformBuffer->GetResource()->GetGPUVirtualAddress();
+			indirectArgs.srv_BoneMatrix = boneBuffer->GetResource()->GetGPUVirtualAddress();
+			indirectArgs.srv_SkinningInfluence = skinningInfluenceBuffer->GetResource()->GetGPUVirtualAddress();
+			indirectArgs.cbv_SkinningInfo = skinningInfoBuffer->GetResource()->GetGPUVirtualAddress();
+			indirectArgs.cbv_Lights = lightBuffer->GetResource()->GetGPUVirtualAddress();
+			indirectArgs.cbv_Environment = envBuffer->GetResource()->GetGPUVirtualAddress();
+			indirectArgs.srv_IntegrationMTL = materialBuffer->GetResource()->GetGPUVirtualAddress();
+			indirectArgs.drawIndexedArgs.IndexCountPerInstance = static_cast<UINT>(modelData.meshes[0].indices.size());
+			indirectArgs.drawIndexedArgs.InstanceCount = static_cast<UINT>(modelData.useTransformList.size());
+			indirectArgs.drawIndexedArgs.StartIndexLocation = 0;
+			indirectArgs.drawIndexedArgs.BaseVertexLocation = 0;
+			indirectArgs.drawIndexedArgs.StartInstanceLocation = 0;
+			m_PipelineManager->GetIntegratePSO().indirectArgsBuffer->UpdateData(indirectArgs);*/
+			// 配列テクスチャのためヒープをセット
+			context->SetGraphicsRootDescriptorTable(10, resourceManager.GetSUVDHeap()->GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
+			// インスタンス数を取得
+			UINT numInstance = static_cast<UINT>(modelData.useTransformList.size());
+			// DrawCall
+			context->DrawIndexedInstanced(static_cast<UINT>(modelData.meshes[i].indices.size()), numInstance, 0, 0, 0);
+			// IndirectDrawCall
+			/*context->ExecuteIndirect(
+				m_PipelineManager->GetIntegratePSO().commandSignature.Get(),
+				1,
+				m_PipelineManager->GetIntegratePSO().indirectArgsBuffer->GetResource(),
+				0,
+				nullptr,
+				0);*/
+		}
 	}
 	// ラインの描画
 	for (uint32_t i = 0; i < 1; i++)

@@ -188,11 +188,6 @@ bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 		if (mesh->mNumBones)
 		{
 			modelData.isBone = true;
-			if (scene->mNumMeshes > 1)
-			{
-				// 複数メッシュのボーンは非対応
-				Log::Write(LogLevel::Assert, std::format("Model {} has multiple meshes with bones, which is not supported.", ConvertString(modelData.name)).c_str());
-			}
 			// ボーンの情報を取得
 			Skeleton skeleton;
 			skeleton.root = CreateJoint(modelData.rootNode, {}, skeleton.joints);
@@ -210,7 +205,7 @@ bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 			/*InverseBindPoseMatrixの保存領域を作成*/
 			skinCluster.inverseBindPoseMatrices.resize(modelData.skeleton.joints.size());
 			std::generate(skinCluster.inverseBindPoseMatrices.begin(), skinCluster.inverseBindPoseMatrices.end(), []() { return ChoMath::MakeIdentity4x4(); });
-			modelData.skinCluster = skinCluster;
+			meshData.skinCluster = skinCluster;
 
 			for (uint32_t boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex)
 			{
@@ -245,10 +240,10 @@ bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 					continue;
 				}
 				/*(*it).secondにはJointのIndexが入っているので、該当のindexのInverseBindPoseMatrixを代入*/
-				modelData.skinCluster.inverseBindPoseMatrices[(*it).second] = jointWeight.second.inverseBindPoseMatrix;
+				meshData.skinCluster.inverseBindPoseMatrices[(*it).second] = jointWeight.second.inverseBindPoseMatrix;
 				for (const auto& vertexWeight : jointWeight.second.vertexWeights)
 				{
-					auto& currentInfluence = modelData.skinCluster.influenceData.data[vertexWeight.vertexIndex];// 該当のvertexIndexのinfluence情報を参照しておく
+					auto& currentInfluence = meshData.skinCluster.influenceData.data[vertexWeight.vertexIndex];// 該当のvertexIndexのinfluence情報を参照しておく
 					for (uint32_t index = 0; index < kNumMaxInfluence; ++index)
 					{
 						// 空いてるところに入れる
@@ -1062,10 +1057,8 @@ void ModelManager::AddModelData(ModelData& modelData)
 		vertexBuffer->MappedDataCopy(mesh.vertices);
 		indexBuffer->MappedDataCopy(mesh.indices);
 
-		//if (modelData.isBone)
-		//{
-		modelData.skinInfoBufferIndex = m_pResourceManager->CreateConstantBuffer<SkinningInformation>();
-		ConstantBuffer<SkinningInformation>* skinInfoBuffer = dynamic_cast<ConstantBuffer<SkinningInformation>*>(m_pResourceManager->GetBuffer<IConstantBuffer>(modelData.skinInfoBufferIndex));
+		mesh.skinInfoBufferIndex = m_pResourceManager->CreateConstantBuffer<SkinningInformation>();
+		ConstantBuffer<SkinningInformation>* skinInfoBuffer = dynamic_cast<ConstantBuffer<SkinningInformation>*>(m_pResourceManager->GetBuffer<IConstantBuffer>(mesh.skinInfoBufferIndex));
 		// SkinningInformationの初期化
 		SkinningInformation skinInfo;
 		skinInfo.numVertices = static_cast<uint32_t>(mesh.vertices.size());
@@ -1080,14 +1073,13 @@ void ModelManager::AddModelData(ModelData& modelData)
 			skinInfo.isSkinned = 0; // スキニングを無効にする
 			skinInfoBuffer->UpdateData(skinInfo);
 		}
-		//}
-		modelData.influenceBufferIndex = m_pResourceManager->CreateStructuredBuffer<ConstBufferDataVertexInfluence>(static_cast<UINT>(mesh.vertices.size())); // 影響度バッファを作成（最大4つのボーン影響を持つと仮定）
+		mesh.influenceBufferIndex = m_pResourceManager->CreateStructuredBuffer<ConstBufferDataVertexInfluence>(static_cast<UINT>(mesh.vertices.size())); // 影響度バッファを作成（最大4つのボーン影響を持つと仮定）
 		if (modelData.isBone)
 		{
-			StructuredBuffer<ConstBufferDataVertexInfluence>* influenceBuffer = dynamic_cast<StructuredBuffer<ConstBufferDataVertexInfluence>*>(m_pResourceManager->GetBuffer<IStructuredBuffer>(modelData.influenceBufferIndex));
+			StructuredBuffer<ConstBufferDataVertexInfluence>* influenceBuffer = dynamic_cast<StructuredBuffer<ConstBufferDataVertexInfluence>*>(m_pResourceManager->GetBuffer<IStructuredBuffer>(mesh.influenceBufferIndex));
 			// 影響度バッファの初期化
 			std::span<ConstBufferDataVertexInfluence> influences = influenceBuffer->GetMappedData();
-			std::memcpy(influences.data(), modelData.skinCluster.influenceData.data.data(), sizeof(ConstBufferDataVertexInfluence) * influences.size());
+			std::memcpy(influences.data(), mesh.skinCluster.influenceData.data.data(), sizeof(ConstBufferDataVertexInfluence) * influences.size());
 		}
 	}
 	// UseTransformのリソースを作成
