@@ -4,6 +4,7 @@
 #include "OS/Windows/WinApp/WinApp.h"
 #include "Editor/EditorManager/EditorManager.h"
 #include "GameCore/GameCore.h"
+#include "GameCore/Systems/SingleSystems.h"
 #include "EngineCommand/EngineCommands.h"
 #include "GameCore/GameObject/GameObject.h"
 #include "Platform/FileSystem/FileSystem.h"
@@ -259,6 +260,10 @@ void MainMenu::EngineInfoMenu()
         // フレームレートを表示
         ImGuiIO& io = ImGui::GetIO();
         ImGui::Text("FPS: %.1f", io.Framerate);
+
+		ECSManager* ecs = m_EngineCommand->GetGameCore()->GetECSManager();
+		// double型msのECSのシステム計測時間を表示
+		ImGui::Text("ECS Animation System Time: %.2f ms", ecs->GetLastSystemUpdateTimeMs<AnimationSystem>());
 
 		ImGui::EndMenu();
 	}

@@ -464,9 +464,11 @@ void GameCore::RegisterECSEvents()
 			ModelData* model = m_EngineCommand->GetResourceManager()->GetModelManager()->GetModelData(meshFilter->modelID.value());
 			if (!model) { return; }
 			if (model->animations.empty()) { return; }
+			c->numAnimation = static_cast<uint32_t>(model->animations.size());
 			if (model->isBone)
 			{
 				c->skeleton = model->skeleton;
+				c->skinClusters.clear();
 				for (auto& mesh : model->meshes)
 				{
 					c->skinClusters.push_back(mesh.skinCluster);
@@ -484,9 +486,11 @@ void GameCore::RegisterECSEvents()
 			ModelData* model = m_EngineCommand->GetResourceManager()->GetModelManager()->GetModelData(meshFilter->modelID.value());
 			if (!model) { return; }
 			if (model->animations.empty()) { return; }
+			c->numAnimation = static_cast<uint32_t>(model->animations.size());
 			if (model->isBone)
 			{
 				c->skeleton = model->skeleton;
+				c->skinClusters.clear();
 				for (auto& mesh : model->meshes)
 				{
 					c->skinClusters.push_back(mesh.skinCluster);
@@ -507,9 +511,11 @@ void GameCore::RegisterECSEvents()
 			ModelData* model = m_EngineCommand->GetResourceManager()->GetModelManager()->GetModelData(meshFilter->modelID.value());
 			if (!model) { return; }
 			if (model->animations.empty()) { return; }
+			c->numAnimation = static_cast<uint32_t>(model->animations.size());
 			if (model->isBone)
 			{
 				c->skeleton = model->skeleton;
+				c->skinClusters.clear();
 				for (auto& mesh : model->meshes)
 				{
 					c->skinClusters.push_back(mesh.skinCluster);

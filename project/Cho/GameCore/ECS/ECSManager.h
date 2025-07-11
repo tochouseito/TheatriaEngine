@@ -27,6 +27,10 @@
 #include <type_traits>
 #include <stdexcept>
 
+// Timer
+#include <chrono>
+#include <typeindex>
+
 using Entity = uint32_t;
 using CompID = size_t;
 using Archetype = std::bitset<256>;
@@ -185,6 +189,7 @@ public:
             {
                 NotifyComponentRemoved(e, id);
             }
+			pool->Cleanup(e); // クリーンアップ呼び出し
             pool->RemoveComponent(e);
         }
 
@@ -318,6 +323,15 @@ public:
     template<ComponentType T>
     void PrefabAddComponent(Entity e, T const& comp)
     {
+        // 更新中なら遅延
+        if (m_IsUpdating)
+        {
+            Defer([this, e, &comp]() {
+                this->PrefabAddComponent<T>(e, comp);
+                });
+            return;
+        }
+
         // 1) プールを生成 or 取得
         CompID id = ComponentPool<T>::GetID();
         auto [it, _] = m_TypeToComponents.try_emplace(
@@ -430,7 +444,9 @@ public:
         {
             auto* vec = static_cast<std::vector<T>*>(rawVec);
             if (vec && index < vec->size())
+            {
                 NotifyComponentRemovedInstance(e, id, rawVec, index);
+            }
         }
 
         if (pool) pool->RemoveInstance(e, index);
@@ -509,11 +525,31 @@ public:
     // ① ゲーム開始前に一度だけ
     void InitializeAllSystems()
     {
+        using Clock = std::chrono::steady_clock;
+        // 全体計測開始
+        auto t0_total = Clock::now();
+
         std::sort(m_Systems.begin(), m_Systems.end(),
             [](auto& a, auto& b) { return a->GetPriority() < b->GetPriority(); });
         for (auto& sys : m_Systems)
+        {
             if (sys->IsEnabled())
+            {
+                // 各システム計測開始
+                auto t0 = Clock::now();
                 sys->Initialize();
+                auto t1 = Clock::now();
+                // 型情報をキーに時間を保存
+                std::type_index ti(typeid(*sys));
+                m_LastSystemInitializeTimeMs[ti] =
+                    std::chrono::duration<double, std::milli>(t1 - t0).count();
+            }
+        }
+
+        // 全体計測終了
+        auto t1_total = Clock::now();
+        m_LastTotalInitializeTimeMs =
+            std::chrono::duration<double, std::milli>(t1_total - t0_total).count();
     }
 
     //――――――――――――――――――
@@ -521,17 +557,37 @@ public:
     //――――――――――――――――――
     void UpdateAllSystems()
     {
+        using Clock = std::chrono::steady_clock;
         m_IsUpdating = true;
+
+        // 総合計測開始
+        auto t0_total = Clock::now();
 
         // システム更新
         std::sort(m_Systems.begin(), m_Systems.end(),
             [](auto& a, auto& b) { return a->GetPriority() < b->GetPriority(); });
         for (auto& sys : m_Systems)
+        {
             if (sys->IsEnabled())
+            {
+                // 各システム計測開始
+                auto t0 = Clock::now();
                 sys->Update();
+                auto t1 = Clock::now();
+                // 型情報をキーに時間を保存
+                std::type_index ti(typeid(*sys));
+                m_LastSystemUpdateTimeMs[ti] =
+                    std::chrono::duration<double, std::milli>(t1 - t0).count();
+            }
+        }
 
         m_IsUpdating = false;
         FlushDeferred();
+
+        // 総合計測終了
+        auto t1_total = Clock::now();
+        m_LastTotalUpdateTimeMs =
+            std::chrono::duration<double, std::milli>(t1_total - t0_total).count();
 
         //    各システムの InitializeEntity() を呼ぶ
         for (Entity e : m_PendingInitEntities)
@@ -548,11 +604,73 @@ public:
     // ③ ゲーム終了後に一度だけ
     void FinalizeAllSystems()
     {
+        using Clock = std::chrono::steady_clock;
+        // 全体計測開始
+        auto t0_total = Clock::now();
+
         std::sort(m_Systems.begin(), m_Systems.end(),
             [](auto& a, auto& b) { return a->GetPriority() < b->GetPriority(); });
         for (auto& sys : m_Systems)
+        {
             if (sys->IsEnabled())
+            {
+                // 各システム計測開始
+                auto t0 = Clock::now();
                 sys->Finalize();
+                auto t1 = Clock::now();
+
+                std::type_index ti(typeid(*sys));
+                m_LastSystemFinalizeTimeMs[ti] =
+                    std::chrono::duration<double, std::milli>(t1 - t0).count();
+            }
+        }
+
+        // 全体計測終了
+        auto t1_total = Clock::now();
+        m_LastTotalFinalizeTimeMs =
+            std::chrono::duration<double, std::milli>(t1_total - t0_total).count();
+    }
+
+    /// 最後のフレームで更新に要した「全システム分」の時間を取得(ms)
+    double GetLastTotalUpdateTimeMs() const
+    {
+        return m_LastTotalUpdateTimeMs;
+    }
+
+    /// 最後のフレームで更新に要した、システム型 S の時間を取得(ms)
+    template<typename S>
+    double GetLastSystemUpdateTimeMs() const
+    {
+        std::type_index ti(typeid(S));
+        auto it = m_LastSystemUpdateTimeMs.find(ti);
+        if (it == m_LastSystemUpdateTimeMs.end()) return 0.0;
+        return it->second;
+    }
+
+    // Initialize
+    double GetLastTotalInitializeTimeMs() const
+    {
+        return m_LastTotalInitializeTimeMs;
+    }
+
+    template<typename S>
+    double GetLastSystemInitializeTimeMs() const
+    {
+        auto it = m_LastSystemInitializeTimeMs.find(typeid(S));
+        return it == m_LastSystemInitializeTimeMs.end() ? 0.0 : it->second;
+    }
+
+    // Finalize
+    double GetLastTotalFinalizeTimeMs() const
+    {
+        return m_LastTotalFinalizeTimeMs;
+    }
+
+    template<typename S>
+    double GetLastSystemFinalizeTimeMs() const
+    {
+        auto it = m_LastSystemFinalizeTimeMs.find(typeid(S));
+        return it == m_LastSystemFinalizeTimeMs.end() ? 0.0 : it->second;
     }
 
     /*---------------------------------------------------------------------
@@ -602,6 +720,8 @@ public:
         virtual size_t GetComponentCount(Entity e) const = 0;
         /// 生ポインタから直接エンティティ dst にクローンして追加
         virtual void CloneRawComponentTo(Entity dst, void* raw) = 0;
+        /// 削除前のクリーンアップ呼び出し用
+        virtual void Cleanup(Entity) {}
     };
 
     IComponentPool* GetRawComponentPool(CompID id)
@@ -792,6 +912,26 @@ public:
                 if (m_IndexToEntity.size() <= idx) m_IndexToEntity.resize(idx + 1, kInvalid);
                 m_EntityToIndex[e] = idx;
                 m_IndexToEntity[idx] = e;
+            }
+        }
+
+        // ─── 削除前のクリーンアップ
+        void Cleanup(Entity e) override
+        {
+            if constexpr (IsMultiComponent<T>::value)
+            {
+                auto it = m_Multi.find(e);
+                if (it != m_Multi.end())
+                {
+                    for (auto& inst : it->second)
+                        inst.Initialize();
+                }
+            }
+            else
+            {
+                T* comp = GetComponent(e);
+                if (comp)
+                    comp->Initialize();
             }
         }
 
@@ -1157,6 +1297,19 @@ private:
     std::vector<std::weak_ptr<IIComponentEventListener>>      m_ComponentListeners;
     std::unordered_map<Archetype, EntityContainer>              m_ArchToEntities;
     std::unordered_map<CompID, std::shared_ptr<IComponentPool>> m_TypeToComponents;
+
+    // 最後に計測した全システム更新の所要時間（ms）
+    double m_LastTotalUpdateTimeMs = 0.0;
+
+    // 各システム型ごとに最後に計測した更新時間（ms）
+    std::unordered_map<std::type_index, double> m_LastSystemUpdateTimeMs;
+
+    // Initialize／Finalize の計測用
+    double m_LastTotalInitializeTimeMs = 0.0;
+    double m_LastTotalFinalizeTimeMs = 0.0;
+
+    std::unordered_map<std::type_index, double> m_LastSystemInitializeTimeMs;
+    std::unordered_map<std::type_index, double> m_LastSystemFinalizeTimeMs;
 };
 
 struct IComponentEventListener : public IIComponentEventListener

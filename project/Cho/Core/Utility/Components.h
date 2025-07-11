@@ -811,7 +811,13 @@ struct AnimationComponent : public IComponentTag
 	// デフォルト ctor はそのまま
 	AnimationComponent() = default;
 	// コピーコンストラクタ
-	AnimationComponent(const AnimationComponent&) = default;
+	AnimationComponent(const AnimationComponent& other)
+	{
+		transitionDuration = other.transitionDuration;
+		numAnimation = other.numAnimation;
+		animationIndex = other.animationIndex;
+		modelName = other.modelName;
+	}
 	// ムーブコンストラクタ（移動）
 	AnimationComponent(AnimationComponent&&) noexcept = default;
 
@@ -819,12 +825,16 @@ struct AnimationComponent : public IComponentTag
 	AnimationComponent& operator=(const AnimationComponent& other)
 	{
 		if (this == &other) return *this;
+		transitionDuration = other.transitionDuration;
+		numAnimation = other.numAnimation;
 		animationIndex = other.animationIndex;
+		modelName = other.modelName;
 		return *this;
 	}
 
 	// ムーブ代入を明示的に生成
 	AnimationComponent& operator=(AnimationComponent&&) noexcept = default;
+
 	float time = 0.0f;// 現在のアニメーションの時間
 	float transitionTime = 0.0f;// 遷移中経過時間
 	float transitionDuration = 1.0f;// 遷移にかける時間
@@ -845,9 +855,26 @@ struct AnimationComponent : public IComponentTag
 	std::optional<Skeleton> skeleton = std::nullopt;	// スケルトンデータ
 	std::vector<SkinCluster> skinClusters;	// スキンクラスター
 
-	//std::optional<uint32_t> paletteBufferIndex = std::nullopt;	// パレットバッファーインデックス
-	//std::optional<uint32_t> influenceBufferIndex = std::nullopt;// インフルエンスバッファーインデックス
-	//std::optional<uint32_t> skinningBufferIndex = std::nullopt;	// スキニングバッファーインデックス
+	// 初期化
+	void Initialize()
+	{
+		time = 0.0f;
+		transitionTime = 0.0f;
+		transitionDuration = 1.0f;
+		lerpTime = 0.0f;
+		transition = false;
+		isEnd = false;
+		isRun = true;
+		isRestart = true;
+		numAnimation = 0;
+		animationIndex = 0;
+		prevAnimationIndex = 0;
+		transitionIndex = 0;
+		modelName = L"";
+		boneOffsetID = std::nullopt;
+		skeleton = std::nullopt;
+		skinClusters.clear();
+	}
 	
 };
 
