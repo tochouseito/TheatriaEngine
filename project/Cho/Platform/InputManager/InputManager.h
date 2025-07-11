@@ -1,6 +1,6 @@
 #pragma once
 #include "SDK/DirectX/DirectX12/stdafx/stdafx.h"
-#include "ChoMath.h"
+#include "Externals/ChoMath/ChoMath.h"
 #include "Core/Utility/InputStruct.h"
 
 class InputManager

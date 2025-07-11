@@ -102,7 +102,7 @@ void Hierarchy::Window()
 					if (!wNewName.empty())
 					{
 						// オブジェクトの名前を更新
-						std::unique_ptr<RenameObjectCommand> renameCommand = std::make_unique<RenameObjectCommand>(object->GetHandle(),object->GetName());
+						std::unique_ptr<RenameObjectCommand> renameCommand = std::make_unique<RenameObjectCommand>(object->GetHandle(), wNewName);
 						m_EngineCommand->ExecuteCommand(std::move(renameCommand));
 
 						editing = false;  // 編集終了

@@ -2,6 +2,7 @@
 #include "Engine/Engine.h"
 #include "APIExportsMacro.h"
 #include "Externals/ChoMath/ChoMath.h"
+#include "Platform/InputManager/InputManager.h"
 #include <variant>
 #include <optional>
 using GameParameterVariant = std::variant<int, float, bool, Vector3>;
@@ -52,5 +53,42 @@ namespace ChoSystem
 		CHO_API void ChangeMainScene(const std::wstring& sceneName);
 	};
 	CHO_API extern SceneManagerAPI sceneManager;
+
+	// InputManager
+	struct InputManagerAPI
+	{
+		// キーの押下をチェック
+		CHO_API bool PushKey(const uint8_t& keyNumber);
+		// キーのトリガーをチェック
+		CHO_API bool TriggerKey(const uint8_t& keyNumber);
+		// 全マウス情報取得
+		CHO_API const DIMOUSESTATE2& GetAllMouse();
+		// マウス移動量を取得
+		CHO_API MouseMove GetMouseMove();
+		// マウスの押下をチェック
+		CHO_API bool IsPressMouse(const int32_t& mouseNumber);
+		// マウスのトリガーをチェック。押した瞬間だけtrueになる
+		CHO_API bool IsTriggerMouse(const int32_t& buttonNumber);
+		// マウスの位置を取得する（ウィンドウ座標系）
+		CHO_API const Vector2& GetMouseWindowPosition();
+		// マウスの位置を取得する（ウィンドウ座標系）
+		CHO_API Vector2 GetMouseScreenPosition();
+		// 現在のジョイスティック状態を取得する
+		CHO_API bool GetJoystickState(const int32_t& stickNo, XINPUT_STATE& out);
+		// 前回のジョイスティック状態を取得する
+		CHO_API bool GetJoystickStatePrevious(const int32_t& stickNo, XINPUT_STATE& out);
+		// デッドゾーンを設定する
+		CHO_API void SetJoystickDeadZone(const int32_t& stickNo, const int32_t& deadZoneL, const int32_t& deadZoneR);
+		// デッドゾーンを取得する
+		CHO_API size_t GetNumberOfJoysticks();
+		// 接続されているジョイスティック数を取得する
+		CHO_API bool IsTriggerPadButton(const PadButton& button, int32_t stickNo);
+		// 接続されているジョイスティック数を取得する
+		CHO_API bool IsPressPadButton(const PadButton& button, int32_t stickNo);
+		// 接続されているジョイスティック数を取得する
+		CHO_API Vector2 GetStickValue(const LR& padStick, int32_t stickNo);
+		// 接続されているジョイスティック数を取得する
+		CHO_API float GetLRTrigger(const LR& LorR, int32_t stickNo);
+	};
 #endif
 }

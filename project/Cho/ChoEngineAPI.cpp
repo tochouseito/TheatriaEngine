@@ -85,3 +85,83 @@ void ChoSystem::SceneManagerAPI::ChangeMainScene(const std::wstring& sceneName)
 {
 	sceneName;
 }
+
+bool ChoSystem::InputManagerAPI::PushKey(const uint8_t& keyNumber)
+{
+	return g_Engine->GetEngineCommand()->GetInputManager()->PushKey(keyNumber);
+}
+
+bool ChoSystem::InputManagerAPI::TriggerKey(const uint8_t& keyNumber)
+{
+	return g_Engine->GetEngineCommand()->GetInputManager()->TriggerKey(keyNumber);
+}
+
+const DIMOUSESTATE2& ChoSystem::InputManagerAPI::GetAllMouse()
+{
+	return g_Engine->GetEngineCommand()->GetInputManager()->GetAllMouse();
+}
+
+MouseMove ChoSystem::InputManagerAPI::GetMouseMove()
+{
+	return g_Engine->GetEngineCommand()->GetInputManager()->GetMouseMove();
+}
+
+bool ChoSystem::InputManagerAPI::IsPressMouse(const int32_t& mouseNumber)
+{
+	return g_Engine->GetEngineCommand()->GetInputManager()->IsPressMouse(mouseNumber);
+}
+
+bool ChoSystem::InputManagerAPI::IsTriggerMouse(const int32_t& mouseNumber)
+{
+	return g_Engine->GetEngineCommand()->GetInputManager()->IsTriggerMouse(mouseNumber);
+}
+
+const Vector2& ChoSystem::InputManagerAPI::GetMouseWindowPosition()
+{
+	return g_Engine->GetEngineCommand()->GetInputManager()->GetMouseWindowPosition();
+}
+
+Vector2 ChoSystem::InputManagerAPI::GetMouseScreenPosition()
+{
+	return g_Engine->GetEngineCommand()->GetInputManager()->GetMouseScreenPosition();
+}
+
+bool ChoSystem::InputManagerAPI::GetJoystickState(const int32_t& stickNo, XINPUT_STATE& out)
+{
+	return g_Engine->GetEngineCommand()->GetInputManager()->GetJoystickState(stickNo, out);
+}
+
+bool GetJoystickStatePrevious(const int32_t& stickNo, XINPUT_STATE& out)
+{
+	return g_Engine->GetEngineCommand()->GetInputManager()->GetJoystickStatePrevious(stickNo, out);
+}
+
+void SetJoystickDeadZone(const int32_t& stickNo, const int32_t& deadZoneL, const int32_t& deadZoneR)
+{
+	g_Engine->GetEngineCommand()->GetInputManager()->SetJoystickDeadZone(stickNo, deadZoneL, deadZoneR);
+}
+
+size_t GetNumberOfJoysticks()
+{
+	return g_Engine->GetEngineCommand()->GetInputManager()->GetNumberOfJoysticks();
+}
+
+bool IsTriggerPadButton(const PadButton& button, int32_t stickNo)
+{
+	return g_Engine->GetEngineCommand()->GetInputManager()->IsTriggerPadButton(button, stickNo);
+}
+
+bool IsPressPadButton(const PadButton& button, int32_t stickNo)
+{
+	return g_Engine->GetEngineCommand()->GetInputManager()->IsPressPadButton(button, stickNo);
+}
+
+Vector2 GetStickValue(const LR& padStick, int32_t stickNo)
+{
+	return g_Engine->GetEngineCommand()->GetInputManager()->GetStickValue(padStick, stickNo);
+}
+
+float GetLRTrigger(const LR& LorR, int32_t stickNo)
+{
+	return g_Engine->GetEngineCommand()->GetInputManager()->GetLRTrigger(LorR, stickNo);
+}

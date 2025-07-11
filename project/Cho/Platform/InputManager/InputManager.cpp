@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "InputManager.h"
 #include "OS/Windows/WinApp/WinApp.h"
+#include "ChoEngineAPI.h"
 
 void InputManager::Initialize()
 {
