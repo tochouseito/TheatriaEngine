@@ -529,6 +529,8 @@ void Inspector::AnimationComponentView(GameObject* object)
 		}
 		ImGui::EndCombo();
 	}
+	// 遷移時間の設定
+	ImGui::DragFloat("Transition Time", &animation->transitionDuration, 0.01f, 0.0f, 10.0f, "%.2f s");
 }
 
 

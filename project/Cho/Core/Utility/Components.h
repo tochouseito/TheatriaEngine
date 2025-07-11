@@ -827,7 +827,7 @@ struct AnimationComponent : public IComponentTag
 	AnimationComponent& operator=(AnimationComponent&&) noexcept = default;
 	float time = 0.0f;// 現在のアニメーションの時間
 	float transitionTime = 0.0f;// 遷移中経過時間
-	float transitionDuration = 0.1f;// 遷移にかける時間
+	float transitionDuration = 1.0f;// 遷移にかける時間
 	float lerpTime = 0.0f;// 線形補間の時間
 	bool transition = false;
 	bool isEnd = false;// ループするかどうか
