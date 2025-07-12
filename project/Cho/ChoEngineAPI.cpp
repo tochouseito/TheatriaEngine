@@ -9,6 +9,7 @@
 namespace ChoSystem
 {
 	SceneManagerAPI sceneManager;
+	InputManagerAPI inputManager;
 }
 
 CHO_API Engine* Cho::CreateEngine(RuntimeMode mode)

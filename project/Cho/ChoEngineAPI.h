@@ -90,5 +90,6 @@ namespace ChoSystem
 		// 接続されているジョイスティック数を取得する
 		CHO_API float GetLRTrigger(const LR& LorR, int32_t stickNo);
 	};
+	CHO_API extern InputManagerAPI inputManager;
 #endif
 }

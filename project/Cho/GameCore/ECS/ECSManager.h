@@ -31,6 +31,9 @@
 #include <chrono>
 #include <typeindex>
 
+// ComponentIDHelper.h
+#include "ComponentIDHelper.h"
+
 using Entity = uint32_t;
 using CompID = size_t;
 using Archetype = std::bitset<256>;
@@ -936,7 +939,11 @@ public:
         }
 
         /*-------------------- static ID --------------*/
-        static CompID GetID() { static CompID id = ++ECSManager::m_NextCompTypeID; return id; }
+        static CompID GetID()
+        { 
+            //static CompID id = ++ECSManager::m_NextCompTypeID; return id;
+            return ComponentID<T>();
+        }
 
         /*-------------------- expose map -------------*/
         auto& Map() { return m_Multi; }
@@ -1288,7 +1295,7 @@ private:
     std::vector<bool>       m_EntityToActive;
     std::vector<Entity>     m_RecycleEntities;
     std::vector<Entity>  m_PendingInitEntities;
-    static inline CompID    m_NextCompTypeID = 0;
+    //static inline CompID    m_NextCompTypeID = 0;
     std::vector<Archetype>  m_EntityToArchetype;
     std::unordered_map<CompID, int> m_DeletePriority;   // デフォルトは 0 (CompID 昇順になる)
     std::vector<std::function<void()>>          m_DeferredCommands;

@@ -125,6 +125,31 @@ namespace Cho
         {
             using Component = MaterialComponent;
         };
+
+		// Animation
+        class Animation : public IComponentInterface
+        {
+            friend class Marionnette;
+        public:
+            Animation(Entity e, ECSManager* ecs) : IComponentInterface(e,ecs) {}
+            ~Animation() = default;
+            AnimationComponent* operator->() 
+            { 
+                UpdatePtr();
+                return data;
+            }
+        private:
+            void UpdatePtr()
+            {
+				data = m_ECS->GetComponent<AnimationComponent>(m_Entity);
+            }
+            AnimationComponent* data = nullptr;
+        };
+        template<>
+        struct InterfaceTraits<Cho::ComponentInterface::Animation>
+        {
+            using Component = AnimationComponent;
+		};
 	}
 }
 

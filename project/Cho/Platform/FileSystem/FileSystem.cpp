@@ -2149,7 +2149,7 @@ std::wstring Cho::FileSystem::GameBuilder::SelectFolderDialog()
     return selectedPath;
 }
 
-void Cho::FileSystem::GameBuilder::CopyFilesToBuildFolder(EngineCommand* engineCommand, const std::wstring& folderPath)
+void Cho::FileSystem::GameBuilder::CopyFilesToBuildFolder([[maybe_unused]]EngineCommand* engineCommand, const std::wstring& folderPath)
 {
     namespace fs = std::filesystem;
     fs::path buildRoot = fs::path(folderPath) / m_sProjectName;
@@ -2170,11 +2170,9 @@ void Cho::FileSystem::GameBuilder::CopyFilesToBuildFolder(EngineCommand* engineC
             L"dxil_GameRuntime.dll",
             L"GameTemplate.exe",
             L"imgui.ini", // 後で消す
-            fs::path(L"GameProjects") / m_sProjectName / fs::path(L"resourseData"),
+            fs::path(L"GameProjects") / m_sProjectName / fs::path(L"Assets"),
             fs::path(L"GameProjects") / m_sProjectName / fs::path(L"bin"),
-            //fs::path(L"GameProjects") / m_sProjectName / fs::path(L"MainScene.json"),
-            fs::path(L"GameProjects") / m_sProjectName / fs::path(L"ScriptData.json"),
-            fs::path(L"GameProjects") / m_sProjectName / fs::path(L"GameSettings.json"),
+            fs::path(L"GameProjects") / m_sProjectName / fs::path(L"ProjectSettings"),
             L"Cho/Engine",
             L"Cho/Resources/EngineAssets",
             L"Cho/Externals/ChoMath",
@@ -2183,10 +2181,10 @@ void Cho::FileSystem::GameBuilder::CopyFilesToBuildFolder(EngineCommand* engineC
             L"Cho/ChoEngineAPI.h",
         };
 
-        for (const auto& scene : engineCommand->GetGameCore()->GetSceneManager()->GetScenes())
+        /*for (const auto& scene : engineCommand->GetGameCore()->GetSceneManager()->GetScenes())
         {
 			sources.push_back(fs::path(L"GameProjects") / m_sProjectName / fs::path(scene.GetName()).replace_extension(L".json"));
-        }
+        }*/
 
         for (const auto& src : sources)
         {

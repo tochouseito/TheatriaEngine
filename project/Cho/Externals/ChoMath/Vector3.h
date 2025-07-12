@@ -103,15 +103,16 @@ struct Vector3 final {
     }
 
     // 正規化
-    void Normalize() {
+    Vector3& Normalize() {
         float len = Length();
         if (len == 0.0f) {
             Initialize();
-            return;
+			return *this; // ゼロベクトルの場合、初期化
         }
         x = x / len;
         y = y / len;
         z = z / len;
+		return *this;
     }
 
     // 内積
@@ -120,10 +121,11 @@ struct Vector3 final {
     }
 
     // 外積
-    void Cross(const Vector3& other) {
+    Vector3& Cross(const Vector3& other) {
         x = y * other.z - z * other.y;
         y = z * other.x - x * other.z;
         z = x * other.y - y * other.x;
+		return *this;
     }
 
     // 距離計算

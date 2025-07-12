@@ -35,6 +35,8 @@ void Inspector::Window()
 		ImGui::Text("Name: %s", ConvertString(objectName).c_str());
 		// タイプを表示
 		ImGui::Text("Type: %s", ObjectTypeToWString(objectType));
+		// Entity IDを表示
+		ImGui::Text("Entity ID: %d", object->GetHandle().entity);
 		// コンポーネントの情報を表示
 		ComponentsView(object);
 		// コンポーネントの追加ボタンを表示
