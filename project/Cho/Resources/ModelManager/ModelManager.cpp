@@ -108,11 +108,6 @@ bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 			if (AI_SUCCESS == aiMat->Get(AI_MATKEY_COLOR_DIFFUSE, diffuseColor))
 			{
 				materialData.color = { diffuseColor.r, diffuseColor.g, diffuseColor.b, diffuseColor.a };
-				for (uint32_t vi = 0; vi < vertexCount; ++vi)
-				{
-					VertexData& dst = meshData.vertices[vi];
-					dst.color = materialData.color;
-				}
 			} else
 			{
 				// デフォルトの色を設定

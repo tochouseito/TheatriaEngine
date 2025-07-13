@@ -31,11 +31,11 @@ PixelShaderOutput main(VSOut input) {
     float4 vertexColor = input.color;
     // マテリアル
     Material material = gIMaterial[input.materialID];
-    if (input.materialID == 0)
-    {
-        // ID0なら頂点カラーを使用
-        material.color.rgb = vertexColor.rgb;
-    }
+    //if (input.materialID == 0)
+    //{
+    //    // ID0なら頂点カラーを使用
+    //    material.color.rgb = vertexColor.rgb;
+    //}
     // テクスチャカラー
     float4 textureColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
     // ライティング結果
@@ -65,7 +65,7 @@ PixelShaderOutput main(VSOut input) {
         }
     }
     // ライティングが有効ならライティングを計算
-    //if (material.enableLighting != 0) {
+    if (material.enableLighting != 0) {
         // ライトのタイプごとにライティング
         for (int i = 0; i < MAX_LIGHTS; i++) {
             Light light = gLights.lights[i];
@@ -125,12 +125,12 @@ PixelShaderOutput main(VSOut input) {
         // 合計
         finalColor.rgb = material.color.rgb * textureColor.rgb * lig.rgb;
         finalColor.a = material.color.a * textureColor.a;
-    //}
-    //else {
-    //    // 合計
-    //    finalColor.rgb = material.color.rgb * textureColor.rgb;
-    //    finalColor.a = material.color.a * textureColor.a;
-    //}
+    }
+    else {
+        // 合計
+        finalColor.rgb = material.color.rgb * textureColor.rgb;
+        finalColor.a = material.color.a * textureColor.a;
+    }
     // 最終出力
     output.color = finalColor;
 
