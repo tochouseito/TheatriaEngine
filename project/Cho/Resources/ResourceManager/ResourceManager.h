@@ -34,6 +34,49 @@ enum IntegrationDataType
 class GraphicsEngine;
 class SwapChain;
 class GraphicsEngine;
+
+// 遅延破棄キュー
+class DeferredDestroyQueue
+{
+public:
+	void Register(const std::shared_ptr<GpuResource>& resource, const std::vector<std::pair<ID3D12Fence*, uint64_t>>& fences)
+	{
+		std::lock_guard<std::mutex> lock(m_Mutex);
+		m_Queue.push_back({ resource, fences });
+	}
+
+	void Process()
+	{
+		std::lock_guard<std::mutex> lock(m_Mutex);
+		auto it = m_Queue.begin();
+		while (it != m_Queue.end())
+		{
+			if (IsAllFencesCompleted(*it))
+			{
+				it = m_Queue.erase(it);
+			}
+			else
+			{
+				++it;
+			}
+		}
+	}
+private:
+	bool IsAllFencesCompleted(const PendingDestroyGpuResource& pending)
+	{
+		for (const auto& [fence, value] : pending.fences)
+		{
+			if (fence->GetCompletedValue() < value)
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+	std::mutex m_Mutex;
+	std::vector<PendingDestroyGpuResource> m_Queue;
+};
+
 class ResourceManager
 {
 	friend class GraphicsEngine;
@@ -399,9 +442,8 @@ private:
 	std::unique_ptr<AudioManager> m_AudioManager = nullptr;
 	// UIコンテナ
 	std::unique_ptr<UIContainer> m_UIContainer = nullptr;
-	//// GPUResourceUpdate用のマッピングデータ
-	//FVector<BUFFER_DATA_TF*> m_MappedTF;
-	//FVector<BUFFER_DATA_VIEWPROJECTION*> m_MappedViewProjection;
+	// 遅延破棄キュー
+	DeferredDestroyQueue m_DeferredDestroyQueue;
 	// 定数バッファ
 	FVector<std::unique_ptr<IConstantBuffer>> m_ConstantBuffers;
 	// 構造化バッファ
