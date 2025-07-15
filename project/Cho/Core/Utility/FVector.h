@@ -108,11 +108,44 @@ public:
         return nextIndex++;
     }
 
+    template <typename... Args>
+    size_t emplace_back(Args&&... args)
+    {
+        if (!freeList.empty())
+        {
+            size_t index = freeList.back();
+            freeList.pop_back();
+
+            // 配置newで再構築
+            new (&data[index]) T(std::forward<Args>(args)...);
+            return index;
+        }
+
+        if (nextIndex >= data.size())
+        {
+            data.emplace_back(std::forward<Args>(args)...);
+        }
+        else
+        {
+            new (&data[nextIndex]) T(std::forward<Args>(args)...);
+        }
+
+        return nextIndex++;
+    }
+
     // 指定インデックスの要素を削除（フリーリストに追加）
     void erase(size_t index) {
-        if (index >= nextIndex) {
-			Log::Write(LogLevel::Assert, "Invalid index out_of_range");
+        if (index >= nextIndex)
+        {
+            Log::Write(LogLevel::Assert, "Invalid index out_of_range");
+            return;
         }
+
+        if (!isValid(index)) return;
+
+        // 明示的にデストラクタ呼び出し
+        data[index].~T();
+
         freeList.push_back(index);
     }
 
@@ -153,6 +186,13 @@ public:
 
     // クリア
     void clear() {
+        for (size_t i = 0; i < nextIndex; ++i)
+        {
+            if (isValid(i))
+            {
+                data[i].~T();
+            }
+        }
         data.clear();
         freeList.clear();
         nextIndex = 0;
