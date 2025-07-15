@@ -27,8 +27,15 @@ PixelShaderOutput main(VSOut input) {
     float4 finalColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
     // 環境光
     float4 ambientColor = gEnvironment.ambientColor;
+    // 頂点カラー
+    float4 vertexColor = input.color;
     // マテリアル
     Material material = gIMaterial[input.materialID];
+    //if (input.materialID == 0)
+    //{
+    //    // ID0なら頂点カラーを使用
+    //    material.color.rgb = vertexColor.rgb;
+    //}
     // テクスチャカラー
     float4 textureColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
     // ライティング結果
@@ -37,7 +44,10 @@ PixelShaderOutput main(VSOut input) {
     float3 toEye = normalize(input.cameraPosition - input.position.xyz);
     // 法線
     float3 normal = normalize(input.normal);
-    
+    // alphaが0ならdiscard
+    if(material.color.a <= 0.0f) {
+        discard;
+    }
     // テクスチャが有効ならテクスチャカラーを取得
     if (material.enableTexture != 0)
     {
@@ -49,6 +59,10 @@ PixelShaderOutput main(VSOut input) {
         // テクスチャ
         float4 transformedUV = mul(float4(texcoord, 0.0f, 1.0f), gIMaterial[input.materialID].matUV);
         textureColor = gTextures[material.textureID].Sample(gSampler, transformedUV.xy);
+        // alphaが0ならdiscard
+        if(textureColor.a <= 0.0f) {
+            discard;
+        }
     }
     // ライティングが有効ならライティングを計算
     if (material.enableLighting != 0) {

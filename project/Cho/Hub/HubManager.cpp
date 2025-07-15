@@ -6,6 +6,7 @@
 #include "Resources/ResourceManager/ResourceManager.h"
 #include "Graphics/GraphicsEngine/GraphicsEngine.h"
 #include "GameCore/GameCore.h"
+#include "Editor/EditorManager/EditorManager.h"
 #include "EngineCommand/EngineCommand.h"
 using namespace Cho;
 
@@ -22,7 +23,7 @@ void HubManager::Update()
     }
     if (m_IsGameRuntime)
     {
-        std::wstring selectedProjectName = L"RefLaser";
+        std::wstring selectedProjectName = L"Test";
         // プロジェクトの読み込み
         FileSystem::LoadProjectFolder(selectedProjectName, m_pEngineCommand);
         // プロジェクトのパスを保存
@@ -107,13 +108,14 @@ void HubManager::ShowSidebar()
             {
 				// デフォルトのシーンを作成
                 GameScene scene = m_pEngineCommand->GetGameCore()->GetSceneManager()->CreateDefaultScene();
-                // デフォルトのシーンを保存
-                std::filesystem::path projectPath = std::filesystem::path(L"GameProjects") / name;
-                FileSystem::SaveSceneFile(projectPath, &scene, m_pEngineCommand->GetGameCore()->GetECSManager());
+                // エディタにセット、ロード
+                m_pEngineCommand->GetEditorManager()->ChangeEditingScene(scene.GetName());
                 // プロジェクト名を保存
                 FileSystem::m_sProjectName = name;
 				// プロジェクトフォルダを作成
                 FileSystem::ScriptProject::GenerateSolutionAndProject();
+                // プロジェクトを保存
+                FileSystem::SaveProject(m_pEngineCommand->GetEditorManager(), m_pEngineCommand->GetGameCore()->GetSceneManager(), m_pEngineCommand->GetGameCore()->GetGameWorld(), m_pEngineCommand->GetGameCore()->GetECSManager());
 				m_IsRun = false; // プロジェクト作成後、Hubを終了
             } else
             {

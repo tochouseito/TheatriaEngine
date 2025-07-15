@@ -2,7 +2,7 @@
 
 #include "SDK/DirectX/DirectX12/DescriptorHeap/DescriptorHeap.h"
 
-class GpuResource
+class GpuResource : public std::enable_shared_from_this<GpuResource>
 {
 public:
     // Constructor
@@ -37,6 +37,13 @@ public:
     ID3D12Resource** GetAddressOf() { return m_pResource.GetAddressOf(); }
 	// リソースのバージョンIDを取得
     uint32_t GetVersionID() const { return m_VersionID; }
+
+    // 遅延破棄用に自分を shared_ptr 化する
+    std::shared_ptr<GpuResource> GetShared()
+    {
+        return shared_from_this();
+    }
+
 	// リソースを作成
     void CreateResource(
         ID3D12Device* device,
@@ -44,8 +51,7 @@ public:
         D3D12_HEAP_FLAGS heapFlags,
         D3D12_RESOURCE_DESC& desc,
         D3D12_RESOURCE_STATES InitialState,
-        D3D12_CLEAR_VALUE* pClearValue = nullptr
-    );
+        D3D12_CLEAR_VALUE* pClearValue = nullptr);
     // リソースを再生成
 	void RemakeResource(
 		ID3D12Device* device,
@@ -53,8 +59,17 @@ public:
 		D3D12_HEAP_FLAGS heapFlags,
 		D3D12_RESOURCE_DESC& desc,
 		D3D12_RESOURCE_STATES InitialState,
-		D3D12_CLEAR_VALUE* pClearValue = nullptr
-	);
+		D3D12_CLEAR_VALUE* pClearValue = nullptr);
+
+    // リソースのサイズを変更して再作成
+    static void ResizeResource(
+        ID3D12Device* device,
+        ID3D12Resource** ppResource,
+        D3D12_HEAP_PROPERTIES& heapProperties,
+        D3D12_HEAP_FLAGS heapFlags,
+        D3D12_RESOURCE_DESC& desc,
+        D3D12_RESOURCE_STATES InitialState,
+		D3D12_CLEAR_VALUE* pClearValue = nullptr);
 protected:
     // リソース
     ComPtr<ID3D12Resource> m_pResource = nullptr;
@@ -64,3 +79,9 @@ protected:
 	uint32_t m_VersionID = 0;
 };
 
+// フェンス待ち破棄の構造体
+struct PendingDestroyGpuResource
+{
+    std::shared_ptr<GpuResource> resource;
+    std::vector<std::pair<ID3D12Fence*, uint64_t>> fences;// 複数フェンス
+};

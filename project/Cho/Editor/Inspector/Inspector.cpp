@@ -35,6 +35,8 @@ void Inspector::Window()
 		ImGui::Text("Name: %s", ConvertString(objectName).c_str());
 		// タイプを表示
 		ImGui::Text("Type: %s", ObjectTypeToWString(objectType));
+		// Entity IDを表示
+		ImGui::Text("Entity ID: %d", object->GetHandle().entity);
 		// コンポーネントの情報を表示
 		ComponentsView(object);
 		// コンポーネントの追加ボタンを表示
@@ -180,6 +182,7 @@ void Inspector::MaterialComponentView(GameObject* object)
 		// ドロップターゲット
 		if (ImGui::BeginDragDropTarget())
 		{
+			// テクスチャならそのまま使う
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Texture"))
 			{
 				// ドロップされたテクスチャのIDを取得
@@ -188,6 +191,10 @@ void Inspector::MaterialComponentView(GameObject* object)
 				material->textureName = ConvertString(textureName);
 				// テクスチャIDを取得
 				material->textureID = m_EngineCommand->GetResourceManager()->GetTextureManager()->GetTextureID(material->textureName);
+			}
+
+			if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TextureID"))
+			{
 			}
 			ImGui::EndDragDropTarget();
 		}
@@ -524,6 +531,8 @@ void Inspector::AnimationComponentView(GameObject* object)
 		}
 		ImGui::EndCombo();
 	}
+	// 遷移時間の設定
+	ImGui::DragFloat("Transition Time", &animation->transitionDuration, 0.01f, 0.0f, 10.0f, "%.2f s");
 }
 
 

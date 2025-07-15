@@ -326,3 +326,35 @@ private:
 	ObjectHandle m_Src;
 	ObjectHandle m_Dst;
 };
+
+// Objectをコピーするコマンド
+class CopyObjectCommand : public IEngineCommand
+{
+	public:
+	CopyObjectCommand(const ObjectHandle& handle) :
+		m_Src(handle)
+	{
+	}
+	bool Execute(EngineCommand* edit)override;
+	bool Undo(EngineCommand* edit)override;
+	// コピー先のオブジェクトのハンドルを取得
+	ObjectHandle GetDstHandle() const { return m_Dst; }
+private:
+	ObjectHandle m_Src; // コピー元のオブジェクトのハンドル
+	ObjectHandle m_Dst; // コピー先のオブジェクトのハンドル
+};
+
+// EditorのSceneを変えるコマンド
+class ChangeEditorSceneCommand : public IEngineCommand
+{
+	public:
+	ChangeEditorSceneCommand(const std::wstring& sceneName) :
+		m_SceneName(sceneName)
+	{
+	}
+	bool Execute(EngineCommand* edit)override;
+	bool Undo(EngineCommand* edit)override;
+private:
+	std::wstring m_SceneName;
+	std::wstring m_PreSceneName; // 前のシーン名を保持
+};

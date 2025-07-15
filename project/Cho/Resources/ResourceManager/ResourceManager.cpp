@@ -2,6 +2,7 @@
 #include "ResourceManager.h"
 #include "OS/Windows/WinApp/WinApp.h"
 #include "SDK/DirectX/DirectX12/SwapChain/SwapChain.h"
+#include "Graphics/GraphicsEngine/GraphicsEngine.h"
 
 ResourceManager::ResourceManager(ID3D12Device8* device)
 {
@@ -60,69 +61,79 @@ void ResourceManager::GenerateManager(GraphicsEngine* graphicsEngine)
 	m_ModelManager = std::make_unique<ModelManager>(this);
 	m_AudioManager = std::make_unique<AudioManager>(this);
 	m_UIContainer = std::make_unique<UIContainer>(this);
+	m_CommandManager = graphicsEngine->GetCommandManager();
 }
 
 uint32_t ResourceManager::CreateColorBuffer(D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES state)
 {
-	std::unique_ptr<ColorBuffer> buffer = std::make_unique<ColorBuffer>();
-	buffer->CreatePixelBufferResource(m_Device, desc, clearValue, state);
-	// SRVの設定
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-	srvDesc.Format = desc.Format;
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MipLevels = 1;
-	// Viewの生成
-	buffer->CreateSRV(m_Device, srvDesc, m_SUVDescriptorHeap.get());
-	// RTVの設定
-	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
-	rtvDesc.Format = desc.Format;
-	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-	// Viewの生成
-	buffer->CreateRTV(m_Device, rtvDesc, m_RTVDescriptorHeap.get());
-	// コンテナに移動
-	uint32_t index = static_cast<uint32_t>(m_ColorBuffers.push_back(std::move(buffer)));
+	// カラーバッファの生成
+	uint32_t index = static_cast<uint32_t>(m_ColorBuffers.emplace_back(std::make_shared<ColorBuffer>()));
+	std::weak_ptr<ColorBuffer> buffer = m_ColorBuffers[index].load();
+	if (auto ptr = buffer.lock())
+	{
+		ptr->CreatePixelBufferResource(m_Device, desc, clearValue, state);
+		// SRVの設定
+		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+		srvDesc.Format = desc.Format;
+		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		srvDesc.Texture2D.MipLevels = 1;
+		// Viewの生成
+		ptr->CreateSRV(m_Device, srvDesc, m_SUVDescriptorHeap.get());
+		// RTVの設定
+		D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
+		rtvDesc.Format = desc.Format;
+		rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+		// Viewの生成
+		ptr->CreateRTV(m_Device, rtvDesc, m_RTVDescriptorHeap.get());
+	}
 	return index;
 }
 
 uint32_t ResourceManager::CreateDepthBuffer(D3D12_RESOURCE_DESC& desc, D3D12_RESOURCE_STATES state)
 {
-	std::unique_ptr<DepthBuffer> buffer = std::make_unique<DepthBuffer>();
-	buffer->CreateDepthBufferResource(m_Device, desc, state);
-	// DSVの設定
-	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
-	dsvDesc.Format = desc.Format;
-	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-	// Viewの生成
-	buffer->CreateDSV(m_Device, dsvDesc, m_DSVDescriptorHeap.get());
-	// コンテナに移動
-	uint32_t index = static_cast<uint32_t>(m_DepthBuffers.push_back(std::move(buffer)));
+	// 深度バッファの生成
+	uint32_t index = static_cast<uint32_t>(m_DepthBuffers.emplace_back(std::make_shared<DepthBuffer>()));
+	std::weak_ptr<DepthBuffer> buffer = m_DepthBuffers[index].load();
+	if (auto ptr = buffer.lock())
+	{
+		ptr->CreateDepthBufferResource(m_Device, desc, state);
+		// DSVの設定
+		D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+		dsvDesc.Format = desc.Format;
+		dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+		// Viewの生成
+		ptr->CreateDSV(m_Device, dsvDesc, m_DSVDescriptorHeap.get());
+	}
 	return index;
 }
 
 uint32_t ResourceManager::CreateTextureBuffer(D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES state, const bool& isTextureCube)
 {
-	std::unique_ptr<PixelBuffer> buffer = std::make_unique<PixelBuffer>();
-	buffer->CreatePixelBufferResource(m_Device, desc, clearValue, state);
-	// SRVの設定
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-	srvDesc.Format = desc.Format;
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.ViewDimension = isTextureCube ? D3D12_SRV_DIMENSION_TEXTURECUBE : D3D12_SRV_DIMENSION_TEXTURE2D;
-	if (isTextureCube)
+	// テクスチャバッファの生成
+	uint32_t index = static_cast<uint32_t>(m_TextureBuffers.emplace_back(std::make_shared<PixelBuffer>()));
+	std::weak_ptr<PixelBuffer> buffer = m_TextureBuffers[index].load();
+	if (auto ptr = buffer.lock())
 	{
-		srvDesc.TextureCube.MostDetailedMip = 0;
-		srvDesc.TextureCube.MipLevels = UINT_MAX;
-		srvDesc.TextureCube.ResourceMinLODClamp = 0.0f;
+		ptr->CreatePixelBufferResource(m_Device, desc, clearValue, state);
+		// SRVの設定
+		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+		srvDesc.Format = desc.Format;
+		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		srvDesc.ViewDimension = isTextureCube ? D3D12_SRV_DIMENSION_TEXTURECUBE : D3D12_SRV_DIMENSION_TEXTURE2D;
+		if (isTextureCube)
+		{
+			srvDesc.TextureCube.MostDetailedMip = 0;
+			srvDesc.TextureCube.MipLevels = UINT_MAX;
+			srvDesc.TextureCube.ResourceMinLODClamp = 0.0f;
+		}
+		else
+		{
+			srvDesc.Texture2D.MipLevels = static_cast<UINT>(desc.MipLevels);
+		}
+		// Viewの生成
+		ptr->CreateSRV(m_Device, srvDesc, m_SUVDescriptorHeap.get());
 	}
-	else
-	{
-		srvDesc.Texture2D.MipLevels = static_cast<UINT>(desc.MipLevels);
-	}
-	// Viewの生成
-	buffer->CreateSRV(m_Device, srvDesc, m_SUVDescriptorHeap.get());
-	// コンテナに移動
-	uint32_t index = static_cast<uint32_t>(m_TextureBuffers.push_back(std::move(buffer)));
 	return index;
 }
 
@@ -170,6 +181,9 @@ void ResourceManager::CreateIntegrationBuffers()
 	// EffectSprite統合バッファ
 	std::optional<uint32_t> effectSpriteIndex = CreateStructuredBuffer<EffectSprite>(kIntegrationEffectSpriteBufferSize);
 	m_IntegrationData[IntegrationDataType::EffectSpriteInt] = std::make_unique<IntegrationData<EffectSprite>>(effectSpriteIndex, kIntegrationEffectSpriteBufferSize);
+	// EffectRing統合バッファ
+	std::optional<uint32_t> effectRingIndex = CreateStructuredBuffer<EffectRing>(kIntegrationEffectRingBufferSize);
+	m_IntegrationData[IntegrationDataType::EffectRingInt] = std::make_unique<IntegrationData<EffectRing>>(effectRingIndex, kIntegrationEffectRingBufferSize);
 }
 
 void ResourceManager::CreateLightBuffer()
@@ -233,5 +247,18 @@ void ResourceManager::CreateDummyMaterial()
 	data.shininess = 0.0f;
 	data.textureId = 0;*/
 	pIntegrationBuffer->UpdateData(data, mapID);
+}
+
+// 遅延キューに登録
+void ResourceManager::RegisterDeferredDestroy(const std::shared_ptr<GpuResource>& resource)
+{
+	// 遅延キュー用のFenceを取得
+	std::vector<std::pair<ID3D12Fence*, uint64_t>> fences;
+	for (auto& queue : m_CommandManager->GetQueueContexts())
+	{
+		std::pair<ID3D12Fence*, uint64_t> fence = std::make_pair(queue->GetFence(), queue->GetFenceValue());
+		fences.push_back(fence);
+	}
+	m_DeferredDestroyQueue.Register(resource, fences);
 }
 

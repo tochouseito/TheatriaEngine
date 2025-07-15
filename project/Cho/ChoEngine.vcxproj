@@ -20,8 +20,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameCore\CPrefab\CPrefab.cpp" />
+    <ClCompile Include="GameCore\ECS\EngineComponentID.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="GameCore\GameWorld\GameWorld.cpp" />
     <ClCompile Include="GameCore\GameScene\GameScene.cpp" />
+    <ClCompile Include="Editor\Manipulate\Manipulate.cpp" />
     <ClCompile Include="Resources\AudioManager\AudioManager.cpp" />
     <ClCompile Include="ChoEngineAPI.cpp" />
     <ClCompile Include="Core\ChoLog\ChoLog.cpp">
@@ -243,7 +248,7 @@
     <ClCompile Include="GameCore\ECS\ECSManager.cpp" />
     <ClCompile Include="GameCore\GameCore.cpp" />
     <ClCompile Include="GameCore\GameObject\GameObject.cpp" />
-    <ClCompile Include="GameCore\IScript\IScript.cpp">
+    <ClCompile Include="GameCore\Marionnette\Marionnette.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
@@ -294,11 +299,14 @@
   <ItemGroup>
     <ClInclude Include="APIExportsMacro.h" />
     <ClInclude Include="Core\Utility\AnimationStruct.h" />
+    <ClInclude Include="Core\Utility\atomic_shared_ptr.h" />
     <ClInclude Include="GameCore\CPrefab\CPrefab.h" />
     <ClInclude Include="Externals\AIUtilityLib\chunk_vector.h" />
     <ClInclude Include="Core\Utility\SoundData.h" />
+    <ClInclude Include="GameCore\ECS\ComponentIDHelper.h" />
     <ClInclude Include="GameCore\GameWorld\GameWorld.h" />
     <ClInclude Include="GameCore\GameScene\GameScene.h" />
+    <ClInclude Include="Editor\Manipulate\Manipulate.h" />
     <ClInclude Include="Resources\AudioManager\AudioManager.h" />
     <ClInclude Include="ChoEngineAPI.h" />
     <ClInclude Include="Core\ChoLog\ChoLog.h" />
@@ -356,7 +364,7 @@
     <ClInclude Include="GameCore\ECS\ECSManager.h" />
     <ClInclude Include="GameCore\GameCore.h" />
     <ClInclude Include="GameCore\GameObject\GameObject.h" />
-    <ClInclude Include="GameCore\IScript\IScript.h" />
+    <ClInclude Include="GameCore\Marionnette\Marionnette.h" />
     <ClInclude Include="GameCore\SceneManager\SceneManager.h" />
     <ClInclude Include="GameCore\ScriptAPI\ScriptAPI.h" />
     <ClInclude Include="GameCore\Systems\MultiSystems.h" />
@@ -407,6 +415,7 @@
     <None Include="Resources\EngineAssets\Shader\header\EffectMeshCommon.hlsli" />
     <None Include="Resources\EngineAssets\Shader\header\EffectNode.hlsli" />
     <None Include="Resources\EngineAssets\Shader\header\EffectParticle.hlsli" />
+    <None Include="Resources\EngineAssets\Shader\header\EffectRing.hlsli" />
     <None Include="Resources\EngineAssets\Shader\header\EffectRoot.hlsli" />
     <None Include="Resources\EngineAssets\Shader\header\EffectSprite.hlsli" />
     <None Include="Resources\EngineAssets\Shader\header\EffectSRT.hlsli" />
@@ -435,6 +444,18 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="Resources\EngineAssets\Shader\Culling\Culling.CS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="Resources\EngineAssets\Shader\EffectEditor\EffectEditor.PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
@@ -496,6 +517,22 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Resources\EngineAssets\Shader\Effect\Effect_Ring.PS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Resources\EngineAssets\Shader\Effect\Effect_Ring.VS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
@@ -742,7 +779,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /bigobj %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\Externals\assimp\include;$(ProjectDir)\Externals\DirectXTex;$(ProjectDir)\Externals\\imgui;$(ProjectDir)\Externals\nlohmann;$(ProjectDir)\Externals\ChoMath;$(ProjectDir)\GameCore\IScript;$(ProjectDir)\GameCore\ScriptContext;$(ProjectDir)\Core\Utility;$(ProjectDir)\Externals\box2d\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -767,9 +804,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxcompiler.dll" "$(Target
 copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dxil_GameRuntime.dll"
 xcopy "$(SolutionDir)Cho\Resources\EngineAssets" "$(TargetDir)Cho\Resources\EngineAssets" /E /I /Y
 copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"
-xcopy "$(SolutionDir)Cho\GameCore\IScript" "$(TargetDir)Cho\GameCore\IScript" /E /I /Y
+xcopy "$(SolutionDir)Cho\GameCore\Marionnette" "$(TargetDir)Cho\GameCore\Marionnette" /E /I /Y
 xcopy "$(SolutionDir)Cho\Externals\ChoMath" "$(TargetDir)Cho\Externals\ChoMath" /E /I /Y
 xcopy "$(SolutionDir)Cho\GameCore\ScriptAPI" "$(TargetDir)Cho\GameCore\ScriptAPI" /E /I /Y
+xcopy "$(SolutionDir)Cho\Platform\InputManager" "$(TargetDir)Cho\Platform\InputManager" /E /I /Y
 xcopy "$(SolutionDir)Cho\Core\Utility\Components.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Core\Utility\Color.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Externals\box2d" "$(TargetDir)Cho\Externals\box2d" /E /I /Y
@@ -780,9 +818,10 @@ xcopy "$(SolutionDir)Cho\ChoEngineAPI.h" "$(TargetDir)Cho\" /E /I /Y
 xcopy "$(SolutionDir)Cho\APIExportsMacro.h" "$(TargetDir)Cho\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Engine\Engine.h" "$(TargetDir)Cho\Engine\" /E /I /Y
 xcopy "$(SolutionDir)Cho\GameCore\GameObject\GameObject.h" "$(TargetDir)Cho\GameCore\GameObject" /E /I /Y
-xcopy "$(SolutionDir)Cho\GameCore\ObjectContainer" "$(TargetDir)Cho\GameCore\ObjectContainer" /E /I /Y
+xcopy "$(SolutionDir)Cho\GameCore\GameWorld" "$(TargetDir)Cho\GameCore\GameWorld" /E /I /Y
 xcopy "$(SolutionDir)Cho\Core\Utility\AnimationStruct.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
-xcopy "$(SolutionDir)Cho\Core\Utility\SoundData.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y</Command>
+xcopy "$(SolutionDir)Cho\Core\Utility\SoundData.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
+xcopy "$(SolutionDir)Cho\GameCore\ECS" "$(TargetDir)Cho\GameCore\ECS" /E /I /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -796,7 +835,7 @@ xcopy "$(SolutionDir)Cho\Core\Utility\SoundData.h" "$(TargetDir)Cho\Core\Utility
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /bigobj %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\Externals\assimp\include;$(ProjectDir)\Externals\DirectXTex;$(ProjectDir)\Externals\\imgui;$(ProjectDir)\Externals\nlohmann;$(ProjectDir)\Externals\ChoMath;$(ProjectDir)\GameCore\IScript;$(ProjectDir)\GameCore\ScriptContext;$(ProjectDir)\Core\Utility;$(ProjectDir)\Externals\box2d\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -822,9 +861,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxcompiler.dll" "$(Target
 copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dxil_GameRuntime.dll"
 xcopy "$(SolutionDir)Cho\Resources\EngineAssets" "$(TargetDir)Cho\Resources\EngineAssets" /E /I /Y
 copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"
-xcopy "$(SolutionDir)Cho\GameCore\IScript" "$(TargetDir)Cho\GameCore\IScript" /E /I /Y
+xcopy "$(SolutionDir)Cho\GameCore\Marionnette" "$(TargetDir)Cho\GameCore\Marionnette" /E /I /Y
 xcopy "$(SolutionDir)Cho\Externals\ChoMath" "$(TargetDir)Cho\Externals\ChoMath" /E /I /Y
 xcopy "$(SolutionDir)Cho\GameCore\ScriptAPI" "$(TargetDir)Cho\GameCore\ScriptAPI" /E /I /Y
+xcopy "$(SolutionDir)Cho\Platform\InputManager" "$(TargetDir)Cho\Platform\InputManager" /E /I /Y
 xcopy "$(SolutionDir)Cho\Core\Utility\Components.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Core\Utility\Color.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Externals\box2d" "$(TargetDir)Cho\Externals\box2d" /E /I /Y
@@ -835,9 +875,10 @@ xcopy "$(SolutionDir)Cho\ChoEngineAPI.h" "$(TargetDir)Cho\" /E /I /Y
 xcopy "$(SolutionDir)Cho\APIExportsMacro.h" "$(TargetDir)Cho\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Engine\Engine.h" "$(TargetDir)Cho\Engine\" /E /I /Y
 xcopy "$(SolutionDir)Cho\GameCore\GameObject\GameObject.h" "$(TargetDir)Cho\GameCore\GameObject" /E /I /Y
-xcopy "$(SolutionDir)Cho\GameCore\ObjectContainer" "$(TargetDir)Cho\GameCore\ObjectContainer" /E /I /Y
+xcopy "$(SolutionDir)Cho\GameCore\GameWorld" "$(TargetDir)Cho\GameCore\GameWorld" /E /I /Y
 xcopy "$(SolutionDir)Cho\Core\Utility\AnimationStruct.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
-xcopy "$(SolutionDir)Cho\Core\Utility\SoundData.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y</Command>
+xcopy "$(SolutionDir)Cho\Core\Utility\SoundData.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
+xcopy "$(SolutionDir)Cho\GameCore\ECS" "$(TargetDir)Cho\GameCore\ECS" /E /I /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

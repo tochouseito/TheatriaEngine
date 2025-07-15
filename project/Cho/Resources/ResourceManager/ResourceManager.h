@@ -16,6 +16,7 @@
 #include "Resources/ScriptContainer/ScriptContainer.h"
 #include "Resources/AudioManager/AudioManager.h"
 #include "Core/Utility/CompBufferData.h"
+#include "Core/Utility/atomic_shared_ptr.h"
 #include "Resources/UIContainer/UIContainer.h"
 
 enum IntegrationDataType
@@ -27,12 +28,56 @@ enum IntegrationDataType
 	EffectRootInt,
 	EffectNodeInt,
 	EffectSpriteInt,
+	EffectRingInt,
 	kCount,
 };
 
 class GraphicsEngine;
+class CommandManager;
 class SwapChain;
-class GraphicsEngine;
+
+// 遅延破棄キュー
+class DeferredDestroyQueue
+{
+public:
+	void Register(const std::shared_ptr<GpuResource>& resource, const std::vector<std::pair<ID3D12Fence*, uint64_t>>& fences)
+	{
+		std::lock_guard<std::mutex> lock(m_Mutex);
+		m_Queue.push_back({ resource, fences });
+	}
+
+	void Process()
+	{
+		std::lock_guard<std::mutex> lock(m_Mutex);
+		auto it = m_Queue.begin();
+		while (it != m_Queue.end())
+		{
+			if (IsAllFencesCompleted(*it))
+			{
+				it = m_Queue.erase(it);
+			}
+			else
+			{
+				++it;
+			}
+		}
+	}
+private:
+	bool IsAllFencesCompleted(const PendingDestroyGpuResource& pending)
+	{
+		for (const auto& [fence, value] : pending.fences)
+		{
+			if (fence->GetCompletedValue() < value)
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+	std::mutex m_Mutex;
+	std::vector<PendingDestroyGpuResource> m_Queue;
+};
+
 class ResourceManager
 {
 	friend class GraphicsEngine;
@@ -56,17 +101,118 @@ public:
 	uint32_t CreateConstantBuffer()
 	{
 		// 定数バッファの生成
-		std::unique_ptr<ConstantBuffer<T>> buffer = std::make_unique<ConstantBuffer<T>>();
-		buffer->CreateConstantBufferResource(m_Device);
-		uint32_t index = static_cast<uint32_t>(m_ConstantBuffers.push_back(std::move(buffer)));
+		uint32_t index = static_cast<uint32_t>(m_ConstantBuffers.emplace_back(std::make_shared<ConstantBuffer<T>>()));
+		std::weak_ptr<IConstantBuffer> buffer = m_ConstantBuffers[index].load();
+		if (auto ptr = buffer.lock())
+		{
+			ptr->CreateConstantBufferResource(m_Device);
+		}
 		return index;
 	}
 	template<typename T>
 	uint32_t CreateStructuredBuffer(const UINT& numElements)
 	{
 		// 構造化バッファの生成
-		std::unique_ptr<StructuredBuffer<T>> buffer = std::make_unique<StructuredBuffer<T>>();
-		buffer->CreateStructuredBufferResource(m_Device,numElements);
+		uint32_t index = static_cast<uint32_t>(m_StructuredBuffers.emplace_back(std::make_shared<StructuredBuffer<T>>()));
+		std::weak_ptr<IStructuredBuffer> buffer = m_StructuredBuffers[index].load();
+		if (auto ptr = buffer.lock())
+		{
+			ptr->CreateStructuredBufferResource(m_Device, numElements);
+			// SRVの生成
+			D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+			srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+			srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+			srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+			srvDesc.Buffer.FirstElement = 0;
+			srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+			srvDesc.Buffer.NumElements = ptr->GetNumElements();
+			srvDesc.Buffer.StructureByteStride = ptr->GetStructureByteStride();
+			ptr->CreateSRV(m_Device, srvDesc, m_SUVDescriptorHeap.get());
+		}
+		return index;
+	}
+	template<typename T>
+	uint32_t CreateRWStructuredBuffer(const UINT& numElements, bool useCounter = false)
+	{
+		// 構造化バッファの生成
+		uint32_t index = static_cast<uint32_t>(m_UAVBuffers.emplace_back(std::make_shared<RWStructuredBuffer<T>>()));
+		std::weak_ptr<IRWStructuredBuffer> buffer = m_UAVBuffers[index].load();
+		if (auto ptr = buffer.lock())
+		{
+			ptr->CreateRWStructuredBufferResource(m_Device, numElements);
+			// UAVの生成
+			D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
+			uavDesc.Format = DXGI_FORMAT_UNKNOWN;
+			uavDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
+			uavDesc.Buffer.FirstElement = 0;
+			uavDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
+			uavDesc.Buffer.NumElements = ptr->GetNumElements();
+			uavDesc.Buffer.StructureByteStride = ptr->GetStructureByteStride();
+			ptr->CreateUAV(m_Device, uavDesc, m_SUVDescriptorHeap.get(), useCounter);
+		}
+		return index;
+	}
+	template<typename T>
+	uint32_t CreateVertexBuffer(const UINT& numElements,bool isSkinning = false)
+	{
+		// 頂点バッファの生成
+		uint32_t index = static_cast<uint32_t>(m_VertexBuffers.emplace_back(std::make_shared<VertexBuffer<T>>()));
+		std::weak_ptr<IVertexBuffer> buffer = m_VertexBuffers[index].load();
+		if(auto ptr = buffer.lock())
+		{
+			ptr->CreateVertexBufferResource(m_Device, numElements, isSkinning);
+			// CreateVBV
+			ptr->CreateVBV();
+			if (isSkinning)
+			{
+				// スキニング用SRVを作成
+				D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+				srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+				srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+				srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+				srvDesc.Buffer.FirstElement = 0;
+				srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+				srvDesc.Buffer.NumElements = ptr->GetNumElements();
+				srvDesc.Buffer.StructureByteStride = ptr->GetStructureByteStride();
+				ptr->CreateSRV(m_Device, srvDesc, m_SUVDescriptorHeap.get());
+				// スキニング用UAVを作成
+				D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
+				uavDesc.Format = DXGI_FORMAT_UNKNOWN;
+				uavDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
+				uavDesc.Buffer.FirstElement = 0;
+				uavDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
+				uavDesc.Buffer.NumElements = ptr->GetNumElements();
+				uavDesc.Buffer.StructureByteStride = ptr->GetStructureByteStride();
+				ptr->CreateUAV(m_Device, uavDesc, m_SUVDescriptorHeap.get());
+			}
+		}
+		return index;
+	}
+	template<typename T>
+	uint32_t CreateIndexBuffer(const UINT& numElements)
+	{
+		// インデックスバッファの生成
+		uint32_t index = static_cast<uint32_t>(m_IndexBuffers.emplace_back(std::make_shared<IndexBuffer<T>>()));
+		std::weak_ptr<IIndexBuffer> buffer = m_IndexBuffers[index].load();
+		if(auto ptr = buffer.lock())
+		{
+			ptr->CreateIndexBufferResource(m_Device, numElements);
+			// CreateIBV
+			ptr->CreateIBV();
+		}
+		return index;
+	}
+	uint32_t CreateColorBuffer(D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES state);
+	uint32_t CreateDepthBuffer(D3D12_RESOURCE_DESC& desc, D3D12_RESOURCE_STATES state);
+	uint32_t CreateTextureBuffer(D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES state,const bool& isTextureCube = false);
+
+	// ResizeBuffer
+	template<typename T>
+	bool ResizeStructuredBuffer(const uint32_t& idx, const UINT& numElements)
+	{
+		// 新しい構造化バッファの生成
+		std::shared_ptr<StructuredBuffer<T>> newBuffer = std::make_shared<StructuredBuffer<T>>();
+		newBuffer->CreateStructuredBufferResource(m_Device, numElements);
 		// SRVの生成
 		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 		srvDesc.Format = DXGI_FORMAT_UNKNOWN;
@@ -74,78 +220,14 @@ public:
 		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
 		srvDesc.Buffer.FirstElement = 0;
 		srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-		srvDesc.Buffer.NumElements = buffer->GetNumElements();
-		srvDesc.Buffer.StructureByteStride = buffer->GetStructureByteStride();
-		buffer->CreateSRV(m_Device, srvDesc, m_SUVDescriptorHeap.get());
-		uint32_t index = static_cast<uint32_t>(m_StructuredBuffers.push_back(std::move(buffer)));
-		return index;
+		srvDesc.Buffer.NumElements = newBuffer->GetNumElements();
+		srvDesc.Buffer.StructureByteStride = newBuffer->GetStructureByteStride();
+		newBuffer->CreateSRV(m_Device, srvDesc, m_SUVDescriptorHeap.get());
+		// 既存のバッファを置き換え、古いポインタを取得
+		std::shared_ptr<T> oldBuffer = m_StructuredBuffers[idx].exchange(newBuffer);
+		// 遅延キューに登録
+		RegisterDeferredDestroy(oldBuffer);
 	}
-	template<typename T>
-	uint32_t CreateRWStructuredBuffer(const UINT& numElements, bool useCounter = false)
-	{
-		// 構造化バッファの生成
-		std::unique_ptr<RWStructuredBuffer<T>> buffer = std::make_unique<RWStructuredBuffer<T>>();
-		buffer->CreateRWStructuredBufferResource(m_Device, numElements);
-		// UAVの生成
-		D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
-		uavDesc.Format = DXGI_FORMAT_UNKNOWN;
-		uavDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
-		uavDesc.Buffer.FirstElement = 0;
-		uavDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
-		uavDesc.Buffer.NumElements = buffer->GetNumElements();
-		uavDesc.Buffer.StructureByteStride = buffer->GetStructureByteStride();
-		buffer->CreateUAV(m_Device, uavDesc, m_SUVDescriptorHeap.get(), useCounter);
-		uint32_t index = static_cast<uint32_t>(m_UAVBuffers.push_back(std::move(buffer)));
-		return index;
-	}
-	template<typename T>
-	uint32_t CreateVertexBuffer(const UINT& numElements,bool isSkinning = false)
-	{
-		// 頂点バッファの生成
-		std::unique_ptr<VertexBuffer<T>> buffer = std::make_unique<VertexBuffer<T>>();
-		buffer->CreateVertexBufferResource(m_Device, numElements,isSkinning);
-		// CreateVBV
-		buffer->CreateVBV();
-		if (isSkinning)
-		{
-			// スキニング用SRVを作成
-			D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-			srvDesc.Format = DXGI_FORMAT_UNKNOWN;
-			srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-			srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-			srvDesc.Buffer.FirstElement = 0;
-			srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-			srvDesc.Buffer.NumElements = buffer->GetNumElements();
-			srvDesc.Buffer.StructureByteStride = buffer->GetStructureByteStride();
-			buffer->CreateSRV(m_Device, srvDesc, m_SUVDescriptorHeap.get());
-			// スキニング用UAVを作成
-			D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
-			uavDesc.Format = DXGI_FORMAT_UNKNOWN;
-			uavDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
-			uavDesc.Buffer.FirstElement = 0;
-			uavDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
-			uavDesc.Buffer.NumElements = buffer->GetNumElements();
-			uavDesc.Buffer.StructureByteStride = buffer->GetStructureByteStride();
-			buffer->CreateUAV(m_Device, uavDesc, m_SUVDescriptorHeap.get());
-		}
-		uint32_t index = static_cast<uint32_t>(m_VertexBuffers.push_back(std::move(buffer)));
-		return index;
-	}
-	template<typename T>
-	uint32_t CreateIndexBuffer(const UINT& numElements)
-	{
-		// インデックスバッファの生成
-		std::unique_ptr<IndexBuffer<T>> buffer = std::make_unique<IndexBuffer<T>>();
-		buffer->CreateIndexBufferResource(m_Device, numElements);
-		// CreateIBV
-		buffer->CreateIBV();
-		uint32_t index = static_cast<uint32_t>(m_IndexBuffers.push_back(std::move(buffer)));
-		return index;
-	}
-	uint32_t CreateColorBuffer(D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES state);
-	uint32_t CreateDepthBuffer(D3D12_RESOURCE_DESC& desc, D3D12_RESOURCE_STATES state);
-	uint32_t CreateTextureBuffer(D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES state,const bool& isTextureCube = false);
-
 
 	// RemakeBuffer
 	bool RemakeColorBuffer(std::optional<uint32_t>& index, D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES state);
@@ -176,6 +258,9 @@ public:
 		case IntegrationDataType::EffectSpriteInt:
 			return GetBuffer<IStructuredBuffer>(m_IntegrationData[IntegrationDataType::EffectSpriteInt]->GetBufferIndex());
 			break;
+		case IntegrationDataType::EffectRingInt:
+			return GetBuffer<IStructuredBuffer>(m_IntegrationData[IntegrationDataType::EffectRingInt]->GetBufferIndex());
+			break;
 		default:
 			break;
 		}
@@ -196,37 +281,31 @@ public:
 		}
 		if constexpr (std::is_same_v<T, ColorBuffer>)
 		{
-			return m_ColorBuffers[index.value()].get();
+			return m_ColorBuffers[index.value()].load().get();
 		} else if constexpr (std::is_same_v<T, DepthBuffer>)
 		{
-			return m_DepthBuffers[index.value()].get();
+			return m_DepthBuffers[index.value()].load().get();
 		} else if constexpr (std::is_same_v<T, IVertexBuffer>)
 		{
-			return m_VertexBuffers[index.value()].get();
+			return m_VertexBuffers[index.value()].load().get();
 		} else if constexpr (std::is_same_v<T, IIndexBuffer>)
 		{
-			return m_IndexBuffers[index.value()].get();
+			return m_IndexBuffers[index.value()].load().get();
 		} else if constexpr (std::is_same_v<T, IConstantBuffer>)
 		{
-			return m_ConstantBuffers[index.value()].get();
+			return m_ConstantBuffers[index.value()].load().get();
 		} else if constexpr (std::is_same_v<T, IStructuredBuffer>)
 		{
-			return m_StructuredBuffers[index.value()].get();
+			return m_StructuredBuffers[index.value()].load().get();
 		} else if constexpr (std::is_same_v<T, PixelBuffer>)
 		{
-			return m_TextureBuffers[index.value()].get();
+			return m_TextureBuffers[index.value()].load().get();
 		} else if constexpr (std::is_same_v<T, IRWStructuredBuffer>)
 		{
-			return m_UAVBuffers[index.value()].get();
+			return m_UAVBuffers[index.value()].load().get();
 		}else
 			assert(false && "Invalid buffer type");
 	}
-
-	// MapMethod
-	/*uint32_t CreateMappedTF() { m_MappedTF.push_back(nullptr); }
-	BUFFER_DATA_TF* GetMappedTF(const uint32_t& index) { return m_MappedTF[index]; }
-	uint32_t CreateMappedViewProjection(const uint32_t& bufferIndex);
-	BUFFER_DATA_VIEWPROJECTION* GetMappedViewProjection(const uint32_t& index) { return m_MappedViewProjection[index]; }*/
 
 	//Getters
 	SUVDescriptorHeap* GetSUVDHeap() const { return m_SUVDescriptorHeap.get(); }
@@ -376,9 +455,13 @@ private:
 	static const uint32_t kMaxDSVDescriptorHeapSize = 2;
 	// ダミーマテリアル作成
 	void CreateDummyMaterial();
+	// 遅延キューに登録
+	void RegisterDeferredDestroy(const std::shared_ptr<GpuResource>& resource);
 
 	// Device
 	ID3D12Device8* m_Device = nullptr;
+	// CommnadManager
+	CommandManager* m_CommandManager = nullptr;
 	// SUVディスクリプタヒープ
 	std::unique_ptr<SUVDescriptorHeap> m_SUVDescriptorHeap = nullptr;
 	// RTVディスクリプタヒープ
@@ -395,25 +478,24 @@ private:
 	std::unique_ptr<AudioManager> m_AudioManager = nullptr;
 	// UIコンテナ
 	std::unique_ptr<UIContainer> m_UIContainer = nullptr;
-	//// GPUResourceUpdate用のマッピングデータ
-	//FVector<BUFFER_DATA_TF*> m_MappedTF;
-	//FVector<BUFFER_DATA_VIEWPROJECTION*> m_MappedViewProjection;
+	// 遅延破棄キュー
+	DeferredDestroyQueue m_DeferredDestroyQueue;
 	// 定数バッファ
-	FVector<std::unique_ptr<IConstantBuffer>> m_ConstantBuffers;
+	FVector<cho::atomic_shared_ptr<IConstantBuffer>> m_ConstantBuffers;
 	// 構造化バッファ
-	FVector<std::unique_ptr<IStructuredBuffer>> m_StructuredBuffers;
+	FVector<cho::atomic_shared_ptr<IStructuredBuffer>> m_StructuredBuffers;
 	// 頂点バッファ
-	FVector<std::unique_ptr<IVertexBuffer>> m_VertexBuffers;
+	FVector<cho::atomic_shared_ptr<IVertexBuffer>> m_VertexBuffers;
 	// インデックスバッファ
-	FVector<std::unique_ptr<IIndexBuffer>> m_IndexBuffers;
+	FVector<cho::atomic_shared_ptr<IIndexBuffer>> m_IndexBuffers;
 	// カラーバッファ
-	FVector<std::unique_ptr<ColorBuffer>> m_ColorBuffers;
+	FVector<cho::atomic_shared_ptr<ColorBuffer>> m_ColorBuffers;
 	// 深度バッファ
-	FVector<std::unique_ptr<DepthBuffer>> m_DepthBuffers;
+	FVector<cho::atomic_shared_ptr<DepthBuffer>> m_DepthBuffers;
 	// テクスチャバッファ
-	FVector<std::unique_ptr<PixelBuffer>> m_TextureBuffers;
+	FVector<cho::atomic_shared_ptr<PixelBuffer>> m_TextureBuffers;
 	// UAVバッファ
-	FVector<std::unique_ptr<IRWStructuredBuffer>> m_UAVBuffers;
+	FVector<cho::atomic_shared_ptr<IRWStructuredBuffer>> m_UAVBuffers;
 	// 統合バッファ
 	std::array<std::unique_ptr<IIntegrationData>, IntegrationDataType::kCount> m_IntegrationData;
 	// デバッグカメラバッファ
@@ -448,6 +530,7 @@ private:
 	static const uint32_t kIntegrationEffectRootBufferSize = 128;// EffectRootの統合バッファのサイズ
 	static const uint32_t kIntegrationEffectNodeBufferSize = 1024;// EffectNodeの統合バッファのサイズ
 	static const uint32_t kIntegrationEffectSpriteBufferSize = 1024;// EffectSpriteの統合バッファのサイズ
+	static const uint32_t kIntegrationEffectRingBufferSize = 1024;// EffectRingの統合バッファのサイズ
 	// Texture最大数
 	static const uint32_t kMaxTextureCount = 256;
 };

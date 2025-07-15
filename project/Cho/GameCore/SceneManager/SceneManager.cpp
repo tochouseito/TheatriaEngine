@@ -1,12 +1,14 @@
 #include "pch.h"
 #include "SceneManager.h"
 #include "GameCore/GameWorld/GameWorld.h"
-
+#include "Core/Utility/GenerateUnique.h"
 
 // デフォルトのシーンを作成
-GameScene SceneManager::CreateDefaultScene()
+GameScene SceneManager::CreateDefaultScene(const std::wstring& name)
 {
-	GameScene scene(L"MainScene");
+	// シーン名を生成
+	std::wstring sceneName = GenerateUniqueName<std::unordered_map<std::wstring, SceneID>>(name, m_SceneNameToID);
+	GameScene scene(sceneName);
 	// デフォルトのObjectを追加
 	// Cube
 	CPrefab cube(L"Cube", ObjectType::MeshObject);
@@ -40,8 +42,7 @@ GameScene SceneManager::CreateDefaultScene()
 	// mainCameraを設定
 	scene.SetStartCameraName(L"MainCamera");
 	AddScene(scene);
-	LoadScene(L"MainScene",true);
-	return m_Scenes[0]; // 最初のシーンを返す
+	return m_Scenes[m_SceneNameToID[sceneName]]; // シーンを返す
 }
 
 // 読み込まれているシーンを破棄して指定したシーンをロード
@@ -62,4 +63,75 @@ GameSceneInstance* SceneManager::LoadScene(const std::wstring& sceneName, const 
 	m_pSceneInstances.push_back(std::make_unique<GameSceneInstance>(this, id));
 	// シーンインスタンスを返す
 	return m_pSceneInstances.back().get();
+}
+
+GameSceneInstance* SceneManager::LoadTemporaryScene(const GameScene& scene, const bool& updateMaincamera)
+{
+	// 読み込まれているシーンをすべて破棄
+	m_pGameWorld->ClearAllScenes(); // ゲームワールドのシーンをクリア
+	// シーンインスタンスを破棄
+	m_pSceneInstances.clear();
+	// ロード
+	SceneID id = m_pGameWorld->AddGameObjectFromScene(scene, updateMaincamera);
+	// シーンインスタンスを作成
+	m_pSceneInstances.push_back(std::make_unique<GameSceneInstance>(this, id));
+	// シーンインスタンスを返す
+	return m_pSceneInstances.back().get();
+}
+
+// シーンをアンロード
+void SceneManager::UnLoadScene(GameSceneInstance* pSceneInstance)
+{
+	pSceneInstance->UnloadScene(); // シーンインスタンスのアンロード
+}
+
+// シーンを追加
+void SceneManager::AddScene(GameScene scene)
+{
+	if (m_SceneNameToID.contains(scene.GetName()))
+	{
+		return; // 既に存在する場合は何もしない
+	}
+	std::wstring sceneName = scene.GetName();
+	SceneID id = static_cast<SceneID>(m_Scenes.push_back(std::move(scene)));
+	m_SceneNameToID[sceneName] = id; // シーン名とIDを紐付け
+}
+
+// コンテナからシーンを取得
+GameScene* SceneManager::GetScene(const SceneID& sceneID) noexcept
+{
+	if (m_Scenes.isValid(sceneID))
+	{
+		return &m_Scenes[sceneID];
+	}
+	return nullptr;
+}
+
+GameScene* SceneManager::GetScene(const std::wstring& sceneName) noexcept
+{
+	if (m_SceneNameToID.contains(sceneName))
+	{
+		return &m_Scenes[m_SceneNameToID.at(sceneName)];
+	}
+	return nullptr;
+}
+
+// シーン名からシーンIDを取得
+SceneID SceneManager::GetSceneID(const std::wstring& sceneName) const noexcept
+{
+	if (m_SceneNameToID.contains(sceneName))
+	{
+		return m_SceneNameToID.at(sceneName);
+	}
+	return 0;
+}
+
+// シーン名からシーンを取得
+GameScene* SceneManager::GetSceneToName(const std::wstring& sceneName) noexcept
+{
+	if (m_SceneNameToID.contains(sceneName))
+	{
+		return &m_Scenes[m_SceneNameToID.at(sceneName)];
+	}
+	return nullptr;
 }

@@ -2,6 +2,7 @@
 #include "FileSystem.h"
 #include "GameCore/GameCore.h"
 #include "Resources/ResourceManager/ResourceManager.h"
+#include "Editor/EditorManager/EditorManager.h"
 #include "EngineCommand/EngineCommand.h"
 #include <cstdlib>
 #include "Core/ChoLog/ChoLog.h"
@@ -306,20 +307,28 @@ bool Cho::FileSystem::LoadGameSettings(const std::wstring& filePath)
     }
 }
 
-bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, GameScene* scene, ECSManager* ecs)
+bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::wstring& srcFileName, GameScene* scene, ECSManager* ecs)
 {
     ecs;
 	// アセットフォルダが存在しない場合は作成
-    std::filesystem::path path = std::filesystem::path(directory) / L"Assets";
-    if (!std::filesystem::exists(path))
+    std::filesystem::path dirPath = std::filesystem::path(directory) / L"Assets";
+    if (!std::filesystem::exists(dirPath))
     {
-        if (!std::filesystem::create_directory(path))
+        if (!std::filesystem::create_directory(dirPath))
         {
             return false; // フォルダの作成に失敗
         }
 	}
-    std::filesystem::path fileName = scene->GetName() + L".json";
-	path /= fileName;
+    std::filesystem::path fileName = srcFileName + L".json";
+    std::filesystem::path path = dirPath / fileName;
+    // ファイルが存在する場合はファイル名を変更して上書き、ないなら新規作成
+    if (std::filesystem::exists(path))
+    {
+        std::filesystem::path newFileName = scene->GetName() + L".json";
+        std::filesystem::path newPath = dirPath / newFileName;
+        std::filesystem::rename(path, newPath);
+        path = newPath; // 新しいパスを設定
+    }
 
     nlohmann::ordered_json j;
     j["fileType"] = "SceneFile";
@@ -1138,23 +1147,26 @@ FileType Cho::FileSystem::GetJsonFileType(const std::filesystem::path& path)
     }
 }
 
-void Cho::FileSystem::SaveProject(SceneManager* sceneManager, GameWorld* gameWorld, ECSManager* ecs)
+void Cho::FileSystem::SaveProject(EditorManager* editorManager, SceneManager* sceneManager, GameWorld* gameWorld, ECSManager* ecs)
 {
-    gameWorld;
+    gameWorld; sceneManager;
     if (m_sProjectName.empty()) { return; }
     // セーブ
 	std::filesystem::path projectPath = std::filesystem::path(L"GameProjects") / m_sProjectName;
 	// GameSettingsFile
     Cho::FileSystem::SaveGameSettings(projectPath, g_GameSettings);
     // SceneFile
-    for (auto& scene : sceneManager->GetScenes())
+	// 編集されたシーンを保存
+    editorManager->SaveEditingScene();
+    for (auto& scene : editorManager->GetSceneMap())
     {
-        // シーンファイルを保存
+		// シーンファイルを保存
         Cho::FileSystem::SaveSceneFile(
             projectPath,
-            &scene,
+            scene.first,
+            editorManager->GetEditScene(scene.first),
             ecs
-        );
+		);
     }
 }
 
@@ -1168,7 +1180,7 @@ bool Cho::FileSystem::LoadProjectFolder(const std::wstring& projectName, EngineC
     // 全ファイル走査（サブディレクトリ含む）
     ScanFolder(projectPath,engineCommand);
 	// 最初のシーンをロード
-    engineCommand->GetGameCore()->GetSceneManager()->LoadScene(g_GameSettings.startScene);
+    engineCommand->GetEditorManager()->ChangeEditingScene(g_GameSettings.startScene);
     return true;
 }
 
@@ -1287,7 +1299,7 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
     fs::path includeBase = fs::relative(currentPath, projectDir);
     fs::path systemPath = includeBase / "Cho";
     fs::path mathLibPath = includeBase / "Cho/Externals/ChoMath";
-    fs::path scriptPath = includeBase / "Cho/GameCore/IScript";
+    fs::path scriptPath = includeBase / "Cho/GameCore/Marionnette";
 	fs::path contextPath = includeBase / "Cho/GameCore/ScriptAPI";
     fs::path projectDirPath = "$(ProjectDir)";
 
@@ -2137,7 +2149,7 @@ std::wstring Cho::FileSystem::GameBuilder::SelectFolderDialog()
     return selectedPath;
 }
 
-void Cho::FileSystem::GameBuilder::CopyFilesToBuildFolder(EngineCommand* engineCommand, const std::wstring& folderPath)
+void Cho::FileSystem::GameBuilder::CopyFilesToBuildFolder([[maybe_unused]]EngineCommand* engineCommand, const std::wstring& folderPath)
 {
     namespace fs = std::filesystem;
     fs::path buildRoot = fs::path(folderPath) / m_sProjectName;
@@ -2158,11 +2170,9 @@ void Cho::FileSystem::GameBuilder::CopyFilesToBuildFolder(EngineCommand* engineC
             L"dxil_GameRuntime.dll",
             L"GameTemplate.exe",
             L"imgui.ini", // 後で消す
-            fs::path(L"GameProjects") / m_sProjectName / fs::path(L"resourseData"),
+            fs::path(L"GameProjects") / m_sProjectName / fs::path(L"Assets"),
             fs::path(L"GameProjects") / m_sProjectName / fs::path(L"bin"),
-            //fs::path(L"GameProjects") / m_sProjectName / fs::path(L"MainScene.json"),
-            fs::path(L"GameProjects") / m_sProjectName / fs::path(L"ScriptData.json"),
-            fs::path(L"GameProjects") / m_sProjectName / fs::path(L"GameSettings.json"),
+            fs::path(L"GameProjects") / m_sProjectName / fs::path(L"ProjectSettings"),
             L"Cho/Engine",
             L"Cho/Resources/EngineAssets",
             L"Cho/Externals/ChoMath",
@@ -2171,10 +2181,10 @@ void Cho::FileSystem::GameBuilder::CopyFilesToBuildFolder(EngineCommand* engineC
             L"Cho/ChoEngineAPI.h",
         };
 
-        for (const auto& scene : engineCommand->GetGameCore()->GetSceneManager()->GetScenes())
+        /*for (const auto& scene : engineCommand->GetGameCore()->GetSceneManager()->GetScenes())
         {
 			sources.push_back(fs::path(L"GameProjects") / m_sProjectName / fs::path(scene.GetName()).replace_extension(L".json"));
-        }
+        }*/
 
         for (const auto& src : sources)
         {

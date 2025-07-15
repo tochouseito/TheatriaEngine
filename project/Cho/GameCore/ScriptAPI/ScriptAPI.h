@@ -4,7 +4,7 @@
 #include "APIExportsMacro.h"
 
 #define REGISTER_SCRIPT_FACTORY(SCRIPTNAME) \
-    extern "C" __declspec(dllexport) IScript* Create##SCRIPTNAME##Script(GameObject& object) { \
+    extern "C" __declspec(dllexport) Marionnette* Create##SCRIPTNAME##Script(GameObject& object) { \
         return new SCRIPTNAME(object);}
 //// メンバ登録マクロ
 //#define REFLECT_SCRIPT_MEMBER(CLASS, MEMBER) \
@@ -72,6 +72,86 @@
 
 class ECSManager;
 class ResourceManager;
+
+namespace Cho
+{
+    namespace ComponentInterface
+    {
+		// スクリプトから取得可能なコンポーネントのインターフェース
+        // 基底クラス
+        class IComponentInterface
+        {
+        public:
+			IComponentInterface(Entity e, ECSManager* ecs) :m_Entity(e), m_ECS(ecs) {}
+			virtual ~IComponentInterface() = default;
+        protected:
+			Entity m_Entity; // Entity
+			ECSManager* m_ECS = nullptr; // ECSManager
+        };
+
+        // Marionnette用特殊
+        template<typename T>
+        concept MarionnetteInterface = std::derived_from<T, Marionnette>;
+
+        // インターフェース型の許可
+        template<typename T>
+		concept Type = std::derived_from<T, IComponentInterface>;
+
+        // Traits pattern
+        template<typename Interface>
+        struct InterfaceTraits;
+
+        // Material
+        class Material : public IComponentInterface
+        {
+            friend class Marionnette;
+        public:
+            Material(Entity e, ECSManager* ecs) : IComponentInterface(e,ecs) {}
+			~Material() = default;
+            MaterialComponent* operator->() 
+            { 
+                UpdatePtr();
+				return data;
+			}
+        private:
+            void UpdatePtr()
+            {
+				data = m_ECS->GetComponent<MaterialComponent>(m_Entity);
+            }
+			MaterialComponent* data = nullptr;
+        };
+        template<>
+        struct InterfaceTraits<Cho::ComponentInterface::Material>
+        {
+            using Component = MaterialComponent;
+        };
+
+		// Animation
+        class Animation : public IComponentInterface
+        {
+            friend class Marionnette;
+        public:
+            Animation(Entity e, ECSManager* ecs) : IComponentInterface(e,ecs) {}
+            ~Animation() = default;
+            AnimationComponent* operator->() 
+            { 
+                UpdatePtr();
+                return data;
+            }
+        private:
+            void UpdatePtr()
+            {
+				data = m_ECS->GetComponent<AnimationComponent>(m_Entity);
+            }
+            AnimationComponent* data = nullptr;
+        };
+        template<>
+        struct InterfaceTraits<Cho::ComponentInterface::Animation>
+        {
+            using Component = AnimationComponent;
+		};
+	}
+}
 
 //struct CHO_API TransformAPI
 //{

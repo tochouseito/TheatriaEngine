@@ -22,6 +22,8 @@ void SceneView::Window()
 
     // ウィンドウ内で利用可能な領域のサイズを取得
     ImVec2 availableSize = ImGui::GetContentRegionAvail();
+	ImVec2 contentPos = ImGui::GetCursorScreenPos(); // コンテンツの位置を取得
+	m_Manipulate->SetContent(Vector2(contentPos.x, contentPos.y), Vector2(availableSize.x, availableSize.y));
 
     //ImVec2 windowPos = ImGui::GetWindowPos(); // 現在のImGuiウィンドウの位置を取得
     //float diffY = ImGui::GetWindowSize().y- ImGui::GetContentRegionAvail().y;
@@ -43,7 +45,7 @@ void SceneView::Window()
 
     ImVec4 tintColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);  // アルファ値を無視
     ImVec4 borderColor = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
-
+    
     ImGui::Image(textureID, availableSize, ImVec2(0, 0), ImVec2(1, 1), tintColor, borderColor);
 
     //// "Debug View" 上にカーソルがあるとき、右クリックメニューを開かないようにする
@@ -82,6 +84,8 @@ void SceneView::Window()
     {
         m_DebugCamera->UpdateMatrix();
     }
+
+    m_Manipulate->Update();
 
     ImGui::End();
 

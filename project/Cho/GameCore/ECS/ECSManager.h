@@ -27,6 +27,13 @@
 #include <type_traits>
 #include <stdexcept>
 
+// Timer
+#include <chrono>
+#include <typeindex>
+
+// ComponentIDHelper.h
+#include "ComponentIDHelper.h"
+
 using Entity = uint32_t;
 using CompID = size_t;
 using Archetype = std::bitset<256>;
@@ -63,6 +70,8 @@ struct IIComponentEventListener
     virtual void OnComponentCopied(Entity src, Entity dst, CompID compType) = 0;
     virtual void OnComponentRemoved(Entity e, CompID compType) = 0;
     virtual void OnComponentRemovedInstance(Entity e, CompID compType, void* rawVec, size_t idx) = 0;
+	// Prefabからの復元時に呼ばれる
+    virtual void OnComponentRestoredFromPrefab(Entity, CompID) {}
 };
 
 struct IEntityEventListener
@@ -78,6 +87,7 @@ struct IEntityEventListener
 
 class ECSManager
 {
+    friend class IPrefab;
 public:
     /*---------------------------------------------------------------------
         エンティティ管理
@@ -149,14 +159,29 @@ public:
     inline void ClearEntity(const Entity& e)
     {
         if (e >= m_EntityToArchetype.size()) return;
-
         Archetype old = m_EntityToArchetype[e];
 
-        // コンポーネントごとの削除イベント
-        for (CompID id = 0; id < old.size(); ++id) if (old.test(id))
+        // ① 削除対象の CompID を collect
+        std::vector<CompID> toRemove;
+        for (CompID id = 0; id < old.size(); ++id)
+            if (old.test(id))
+                toRemove.push_back(id);
+
+        // ② 優先度→CompID でソート
+        std::sort(toRemove.begin(), toRemove.end(),
+            [&](CompID a, CompID b) {
+                int pa = m_DeletePriority.count(a) ? m_DeletePriority[a] : 0;
+                int pb = m_DeletePriority.count(b) ? m_DeletePriority[b] : 0;
+                if (pa != pb) return pa < pb;
+                return a < b;
+            });
+
+        // ③ ソート後の順で通知＆削除
+        for (CompID id : toRemove)
         {
             auto* pool = m_TypeToComponents[id].get();
             size_t cnt = pool->GetComponentCount(e);
+
             if (pool->IsMultiComponentTrait(id))
             {
                 void* raw = pool->GetRawComponent(e);
@@ -167,6 +192,7 @@ public:
             {
                 NotifyComponentRemoved(e, id);
             }
+			pool->Cleanup(e); // クリーンアップ呼び出し
             pool->RemoveComponent(e);
         }
 
@@ -296,6 +322,44 @@ public:
         return comp; // コンポーネントを返す
     }
 
+    /// Prefab復元時だけ使う、イベントを起こさずコンポーネントを追加
+    template<ComponentType T>
+    void PrefabAddComponent(Entity e, T const& comp)
+    {
+        // 更新中なら遅延
+        if (m_IsUpdating)
+        {
+            Defer([this, e, &comp]() {
+                this->PrefabAddComponent<T>(e, comp);
+                });
+            return;
+        }
+
+        // 1) プールを生成 or 取得
+        CompID id = ComponentPool<T>::GetID();
+        auto [it, _] = m_TypeToComponents.try_emplace(
+            id,
+            std::make_shared<ComponentPool<T>>()
+        );
+        auto pool = static_cast<ComponentPool<T>*>(it->second.get());
+
+        // 2) 生コピー
+        pool->PrefabCloneRaw(e, const_cast<T*>(&comp));
+
+        // 3) Archetype の更新だけ行う（通知はしない）
+        if (m_EntityToArchetype.size() <= e)
+            m_EntityToArchetype.resize(e + 1);
+        Archetype& arch = m_EntityToArchetype[e];
+        if (!arch.test(id))
+        {
+            m_ArchToEntities[arch].Remove(e);
+            arch.set(id);
+            m_ArchToEntities[arch].Add(e);
+        }
+
+        NotifyComponentRestoredFromPrefab(e, ComponentPool<T>::GetID());
+    }
+
     /*-------------------- Get component -------------------------------*/
     template<ComponentType T>
     T* GetComponent(const Entity& entity)
@@ -383,7 +447,9 @@ public:
         {
             auto* vec = static_cast<std::vector<T>*>(rawVec);
             if (vec && index < vec->size())
+            {
                 NotifyComponentRemovedInstance(e, id, rawVec, index);
+            }
         }
 
         if (pool) pool->RemoveInstance(e, index);
@@ -396,6 +462,13 @@ public:
             arch.reset(id);
             m_ArchToEntities[arch].Add(e);
         }
+    }
+
+    // コンポーネント別に「削除時の優先度」を設定できるように
+    template<ComponentType T>
+    void SetDeletionPriority(int priority)
+    {
+        m_DeletePriority[ComponentPool<T>::GetID()] = priority;
     }
 
     /*-------------------- Accessors ----------------------------------*/
@@ -455,11 +528,31 @@ public:
     // ① ゲーム開始前に一度だけ
     void InitializeAllSystems()
     {
+        using Clock = std::chrono::steady_clock;
+        // 全体計測開始
+        auto t0_total = Clock::now();
+
         std::sort(m_Systems.begin(), m_Systems.end(),
             [](auto& a, auto& b) { return a->GetPriority() < b->GetPriority(); });
         for (auto& sys : m_Systems)
+        {
             if (sys->IsEnabled())
+            {
+                // 各システム計測開始
+                auto t0 = Clock::now();
                 sys->Initialize();
+                auto t1 = Clock::now();
+                // 型情報をキーに時間を保存
+                std::type_index ti(typeid(*sys));
+                m_LastSystemInitializeTimeMs[ti] =
+                    std::chrono::duration<double, std::milli>(t1 - t0).count();
+            }
+        }
+
+        // 全体計測終了
+        auto t1_total = Clock::now();
+        m_LastTotalInitializeTimeMs =
+            std::chrono::duration<double, std::milli>(t1_total - t0_total).count();
     }
 
     //――――――――――――――――――
@@ -467,17 +560,37 @@ public:
     //――――――――――――――――――
     void UpdateAllSystems()
     {
+        using Clock = std::chrono::steady_clock;
         m_IsUpdating = true;
+
+        // 総合計測開始
+        auto t0_total = Clock::now();
 
         // システム更新
         std::sort(m_Systems.begin(), m_Systems.end(),
             [](auto& a, auto& b) { return a->GetPriority() < b->GetPriority(); });
         for (auto& sys : m_Systems)
+        {
             if (sys->IsEnabled())
+            {
+                // 各システム計測開始
+                auto t0 = Clock::now();
                 sys->Update();
+                auto t1 = Clock::now();
+                // 型情報をキーに時間を保存
+                std::type_index ti(typeid(*sys));
+                m_LastSystemUpdateTimeMs[ti] =
+                    std::chrono::duration<double, std::milli>(t1 - t0).count();
+            }
+        }
 
         m_IsUpdating = false;
         FlushDeferred();
+
+        // 総合計測終了
+        auto t1_total = Clock::now();
+        m_LastTotalUpdateTimeMs =
+            std::chrono::duration<double, std::milli>(t1_total - t0_total).count();
 
         //    各システムの InitializeEntity() を呼ぶ
         for (Entity e : m_PendingInitEntities)
@@ -494,11 +607,73 @@ public:
     // ③ ゲーム終了後に一度だけ
     void FinalizeAllSystems()
     {
+        using Clock = std::chrono::steady_clock;
+        // 全体計測開始
+        auto t0_total = Clock::now();
+
         std::sort(m_Systems.begin(), m_Systems.end(),
             [](auto& a, auto& b) { return a->GetPriority() < b->GetPriority(); });
         for (auto& sys : m_Systems)
+        {
             if (sys->IsEnabled())
+            {
+                // 各システム計測開始
+                auto t0 = Clock::now();
                 sys->Finalize();
+                auto t1 = Clock::now();
+
+                std::type_index ti(typeid(*sys));
+                m_LastSystemFinalizeTimeMs[ti] =
+                    std::chrono::duration<double, std::milli>(t1 - t0).count();
+            }
+        }
+
+        // 全体計測終了
+        auto t1_total = Clock::now();
+        m_LastTotalFinalizeTimeMs =
+            std::chrono::duration<double, std::milli>(t1_total - t0_total).count();
+    }
+
+    /// 最後のフレームで更新に要した「全システム分」の時間を取得(ms)
+    double GetLastTotalUpdateTimeMs() const
+    {
+        return m_LastTotalUpdateTimeMs;
+    }
+
+    /// 最後のフレームで更新に要した、システム型 S の時間を取得(ms)
+    template<typename S>
+    double GetLastSystemUpdateTimeMs() const
+    {
+        std::type_index ti(typeid(S));
+        auto it = m_LastSystemUpdateTimeMs.find(ti);
+        if (it == m_LastSystemUpdateTimeMs.end()) return 0.0;
+        return it->second;
+    }
+
+    // Initialize
+    double GetLastTotalInitializeTimeMs() const
+    {
+        return m_LastTotalInitializeTimeMs;
+    }
+
+    template<typename S>
+    double GetLastSystemInitializeTimeMs() const
+    {
+        auto it = m_LastSystemInitializeTimeMs.find(typeid(S));
+        return it == m_LastSystemInitializeTimeMs.end() ? 0.0 : it->second;
+    }
+
+    // Finalize
+    double GetLastTotalFinalizeTimeMs() const
+    {
+        return m_LastTotalFinalizeTimeMs;
+    }
+
+    template<typename S>
+    double GetLastSystemFinalizeTimeMs() const
+    {
+        auto it = m_LastSystemFinalizeTimeMs.find(typeid(S));
+        return it == m_LastSystemFinalizeTimeMs.end() ? 0.0 : it->second;
     }
 
     /*---------------------------------------------------------------------
@@ -546,6 +721,10 @@ public:
         virtual std::shared_ptr<void> CloneComponent(CompID id, void* ptr) = 0;
         virtual bool IsMultiComponentTrait(CompID id) const = 0;
         virtual size_t GetComponentCount(Entity e) const = 0;
+        /// 生ポインタから直接エンティティ dst にクローンして追加
+        virtual void CloneRawComponentTo(Entity dst, void* raw) = 0;
+        /// 削除前のクリーンアップ呼び出し用
+        virtual void Cleanup(Entity) {}
     };
 
     IComponentPool* GetRawComponentPool(CompID id)
@@ -701,8 +880,70 @@ public:
             }
         }
 
+        void CloneRawComponentTo(Entity dst, void* raw) override
+        {
+            if constexpr (IsMultiComponent<T>::value)
+            {
+                // マルチコンポーネントなら vector<T> 全体をコピー
+                auto* srcVec = static_cast<std::vector<T>*>(raw);
+                m_Multi[dst] = *srcVec;
+            }
+            else
+            {
+                // 単一コンポーネントなら AddComponent＋コピー代入
+                T* dstComp = AddComponent(dst);
+                *dstComp = *static_cast<T*>(raw);
+            }
+        }
+
+        /// Prefab復元時だけ使う、「生のコピー」を行う
+        void PrefabCloneRaw(Entity e, void* rawPtr)
+        {
+            if constexpr (IsMultiComponent<T>::value)
+            {
+                // マルチコンポーネントなら vector<T> 全体を直接コピー
+                auto* srcVec = static_cast<std::vector<T>*>(rawPtr);
+                m_Multi[e] = *srcVec;  // コピーコンストラクタを使う
+            }
+            else
+            {
+                // 単一コンポーネントなら storage に直接 emplace_back
+                // （operator= ではなく、T のコピーコンストラクタで構築される）
+                if (m_EntityToIndex.size() <= e) m_EntityToIndex.resize(e + 1, kInvalid);
+                uint32_t idx = static_cast<uint32_t>(m_Storage.size());
+                m_Storage.emplace_back(*static_cast<T*>(rawPtr));
+                if (m_IndexToEntity.size() <= idx) m_IndexToEntity.resize(idx + 1, kInvalid);
+                m_EntityToIndex[e] = idx;
+                m_IndexToEntity[idx] = e;
+            }
+        }
+
+        // ─── 削除前のクリーンアップ
+        void Cleanup(Entity e) override
+        {
+            if constexpr (IsMultiComponent<T>::value)
+            {
+                auto it = m_Multi.find(e);
+                if (it != m_Multi.end())
+                {
+                    for (auto& inst : it->second)
+                        inst.Initialize();
+                }
+            }
+            else
+            {
+                T* comp = GetComponent(e);
+                if (comp)
+                    comp->Initialize();
+            }
+        }
+
         /*-------------------- static ID --------------*/
-        static CompID GetID() { static CompID id = ++ECSManager::m_NextCompTypeID; return id; }
+        static CompID GetID()
+        { 
+            //static CompID id = ++ECSManager::m_NextCompTypeID; return id;
+            return ComponentID<T>();
+        }
 
         /*-------------------- expose map -------------*/
         auto& Map() { return m_Multi; }
@@ -764,6 +1005,17 @@ public:
         auto it = m_TypeToComponents.find(ComponentPool<T>::GetID());
         if (it == m_TypeToComponents.end()) return nullptr;
         return static_cast<ComponentPool<T>*>(it->second.get());
+    }
+
+    template<ComponentType T>
+    ComponentPool<T>& EnsurePool()
+    {
+        CompID id = ComponentPool<T>::GetID();
+        auto [it, inserted] = m_TypeToComponents.try_emplace(
+            id,
+            std::make_shared<ComponentPool<T>>(4096)
+        );
+        return *static_cast<ComponentPool<T>*>(it->second.get());
     }
 
     class ISystem
@@ -996,6 +1248,12 @@ private:
         for (auto& wp : m_ComponentListeners) if (auto sp = wp.lock())
             sp->OnComponentRemovedInstance(e, c, v, i);
     }
+    void NotifyComponentRestoredFromPrefab(Entity e, CompID c)
+    {
+        for (auto& wp : m_ComponentListeners)
+            if (auto sp = wp.lock())
+                sp->OnComponentRestoredFromPrefab(e, c);
+    }
     bool IsMultiComponentByID(CompID id) const
     {
         auto it = m_TypeToComponents.find(id);
@@ -1032,22 +1290,33 @@ private:
 
     /*-------------------- data members --------------------------------*/
 
-
-
-
     bool                    m_IsUpdating = false;
     Entity                  m_NextEntityID = 0;
     std::vector<bool>       m_EntityToActive;
     std::vector<Entity>     m_RecycleEntities;
     std::vector<Entity>  m_PendingInitEntities;
-    static inline CompID    m_NextCompTypeID = 0;
+    //static inline CompID    m_NextCompTypeID = 0;
     std::vector<Archetype>  m_EntityToArchetype;
+    std::unordered_map<CompID, int> m_DeletePriority;   // デフォルトは 0 (CompID 昇順になる)
     std::vector<std::function<void()>>          m_DeferredCommands;
     std::vector<std::weak_ptr<IEntityEventListener>>          m_EntityListeners;
     std::vector<std::unique_ptr<ISystem>>       m_Systems;
     std::vector<std::weak_ptr<IIComponentEventListener>>      m_ComponentListeners;
     std::unordered_map<Archetype, EntityContainer>              m_ArchToEntities;
     std::unordered_map<CompID, std::shared_ptr<IComponentPool>> m_TypeToComponents;
+
+    // 最後に計測した全システム更新の所要時間（ms）
+    double m_LastTotalUpdateTimeMs = 0.0;
+
+    // 各システム型ごとに最後に計測した更新時間（ms）
+    std::unordered_map<std::type_index, double> m_LastSystemUpdateTimeMs;
+
+    // Initialize／Finalize の計測用
+    double m_LastTotalInitializeTimeMs = 0.0;
+    double m_LastTotalFinalizeTimeMs = 0.0;
+
+    std::unordered_map<std::type_index, double> m_LastSystemInitializeTimeMs;
+    std::unordered_map<std::type_index, double> m_LastSystemFinalizeTimeMs;
 };
 
 struct IComponentEventListener : public IIComponentEventListener
@@ -1136,6 +1405,32 @@ public:
             }
         );
     }
+    // 単一コンポーネント向け
+    template<ComponentType T>
+    void RegisterOnRestore(std::function<void(Entity, T*)> f)
+    {
+        static_assert(!IsMultiComponent<T>::value, "Use multi for multi-component");
+        CompID id = ECSManager::ComponentPool<T>::GetID();
+        onRestoreSingle[id].push_back(
+            [f](Entity e, IComponentTag* raw) {
+                f(e, static_cast<T*>(raw));
+            }
+        );
+    }
+
+    // マルチコンポーネント向け
+    template<ComponentType T>
+    void RegisterOnRestore(std::function<void(Entity, T*, size_t)> f)
+    {
+        static_assert(IsMultiComponent<T>::value, "Use single for single-component");
+        CompID id = ECSManager::ComponentPool<T>::GetID();
+        onRestoreMulti[id].push_back(
+            [f](Entity e, void* rawVec, size_t idx) {
+                auto* vec = static_cast<std::vector<T>*>(rawVec);
+                f(e, &(*vec)[idx], idx);
+            }
+        );
+    }
 private:
     // ECS側から呼ばれる
     void OnComponentAdded(Entity e, CompID compType) override
@@ -1217,6 +1512,27 @@ private:
             }
         }
     }
+
+    void OnComponentRestoredFromPrefab(Entity e, CompID compType) override
+    {
+        // 単一
+        if (auto it = onRestoreSingle.find(compType); it != onRestoreSingle.end())
+        {
+            void* raw = m_pEcs->GetRawComponentPool(compType)->GetRawComponent(e);
+            for (auto& cb : it->second)
+                cb(e, static_cast<IComponentTag*>(raw));
+        }
+        // マルチ
+        if (auto it2 = onRestoreMulti.find(compType); it2 != onRestoreMulti.end())
+        {
+            auto* pool = m_pEcs->GetRawComponentPool(compType);
+            void* rawVec = pool->GetRawComponent(e);
+            size_t count = pool->GetComponentCount(e);
+            for (size_t idx = 0; idx < count; ++idx)
+                for (auto& cb : it2->second)
+                    cb(e, rawVec, idx);
+        }
+    }
 private:
     ECSManager* m_pEcs = nullptr;
 protected:
@@ -1232,6 +1548,9 @@ protected:
     std::unordered_map<CompID, std::vector<std::function<void(Entity, IComponentTag*)>>> onRemoveSingle;
     // マルチ用
     std::unordered_map<CompID, std::vector<std::function<void(Entity, void*, size_t)>>> onRemoveMulti;
+    // Restore（Prefab 復元）用マップ
+    std::unordered_map<CompID, std::vector<std::function<void(Entity, IComponentTag*)>>> onRestoreSingle;
+    std::unordered_map<CompID, std::vector<std::function<void(Entity, void*, size_t)>>>    onRestoreMulti;
 };
 
 class IPrefab
@@ -1268,10 +1587,28 @@ public:
         }
     }
 
+    template<ComponentType T>
+    static void RegisterPrefabRestore()
+    {
+        CompID id = ECSManager::ComponentPool<T>::GetID();
+
+        // 単一コンポーネント用
+        m_PrefabRestoreFuncs[id] = [](Entity e, ECSManager& ecs, void* raw) {
+            ecs.PrefabAddComponent<T>(e, *static_cast<T*>(raw));
+            };
+
+        // マルチコンポーネント用
+        m_PrefabRestoreMultiFuncs[id] = [](Entity e, ECSManager& ecs, void* rawVec) {
+            auto& vec = *static_cast<std::vector<T>*>(rawVec);
+            for (auto& inst : vec)
+                ecs.PrefabAddComponent<T>(e, inst);
+            };
+    }
+
     //――――――――――――――――――
     // ② 既存エンティティから Prefab を作る
     //――――――――――――――――――
-    static IPrefab FromEntity(ECSManager& ecs, Entity e) 
+    static IPrefab FromEntity(ECSManager& ecs, Entity e)
     {
         IPrefab prefab;
         const Archetype& arch = ecs.GetArchetype(e);
@@ -1504,14 +1841,19 @@ protected:
     // (2) m_Components/m_MultiComponents を使って既存の復元ロジック
     virtual void InstantiateComponents(Entity e, ECSManager& ecs) const
     {
-        for (auto const& [id, raw] : m_Components)
+        // 単一コンポーネント
+        for (auto const& [id, rawPtr] : m_Components)
         {
-            if (auto it = m_CopyFuncs.find(id); it != m_CopyFuncs.end())
-                it->second(e, ecs, raw.get());
+            auto it = m_PrefabRestoreFuncs.find(id);
+            if (it != m_PrefabRestoreFuncs.end())
+                it->second(e, ecs, rawPtr.get());
         }
+
+        // マルチコンポーネント
         for (auto const& [id, rawVec] : m_MultiComponents)
         {
-            if (auto it = m_MultiCopyFuncs.find(id); it != m_MultiCopyFuncs.end())
+            auto it = m_PrefabRestoreMultiFuncs.find(id);
+            if (it != m_PrefabRestoreMultiFuncs.end())
                 it->second(e, ecs, rawVec.get());
         }
     }
@@ -1552,4 +1894,9 @@ private:
         std::function<void(Entity, ECSManager&, void*)>> m_CopyFuncs;
     inline static std::unordered_map<CompID,
         std::function<void(Entity, ECSManager&, void*)>> m_MultiCopyFuncs;
+    // 復元処理マップ
+    inline static std::unordered_map<CompID,
+        std::function<void(Entity, ECSManager&, void*)>> m_PrefabRestoreFuncs;
+    inline static std::unordered_map<CompID,
+        std::function<void(Entity, ECSManager&, void*)>> m_PrefabRestoreMultiFuncs;
 };

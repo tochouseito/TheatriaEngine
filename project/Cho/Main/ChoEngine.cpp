@@ -78,10 +78,9 @@ void ChoEngine::Finalize()
 		if (gameCore->IsRunning())
 		{
 			gameCore->GameStop();
-			//gameCore->SceneUpdate();
-			//gameCore->Update(*resourceManager, *graphicsEngine);
+			editorManager->ReloadEditingScene();
 		}
-		FileSystem::SaveProject(gameCore->GetSceneManager(), gameCore->GetGameWorld(), gameCore->GetECSManager());
+		FileSystem::SaveProject(editorManager.get(), gameCore->GetSceneManager(), gameCore->GetGameWorld(), gameCore->GetECSManager());
 	}
 	// ImGuiManager終了処理
 	imGuiManager->Finalize();
@@ -161,9 +160,7 @@ void ChoEngine::Draw()
 		// 描画
 		graphicsEngine->Render(*resourceManager, *gameCore, RenderMode::Game);
 		// シーン描画
-		graphicsEngine->Render(*resourceManager, *gameCore, RenderMode::Debug);
-		// EffectEditView描画
-		graphicsEngine->Render(*resourceManager, *gameCore, RenderMode::Editor);
+		graphicsEngine->Render(*resourceManager, *gameCore, RenderMode::Scene);
 		// 描画後片付け
 		graphicsEngine->PostRender(imGuiManager.get(), RenderMode::Game);
 	}
@@ -174,7 +171,6 @@ void ChoEngine::Draw()
 		// 描画後片付け
 		graphicsEngine->PostRender(imGuiManager.get(), RenderMode::Release);
 	}
-	//graphicsEngine->PostRenderWithImGui(imGuiManager.get());
 }
 
 void ChoEngine::Start()
@@ -191,7 +187,7 @@ void ChoEngine::Start()
 	{
 		if (runtimeMode == RuntimeMode::Editor&&!gameCore->IsRunning())
 		{
-			FileSystem::SaveProject(gameCore->GetSceneManager(), gameCore->GetGameWorld(), gameCore->GetECSManager());
+			FileSystem::SaveProject(editorManager.get(), gameCore->GetSceneManager(), gameCore->GetGameWorld(), gameCore->GetECSManager());
 		}
 	}
 	// ブランチが変更されたかどうか

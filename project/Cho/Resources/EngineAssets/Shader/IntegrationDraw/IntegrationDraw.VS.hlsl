@@ -65,6 +65,8 @@ VSOut main(VSIn input, uint instanceId : SV_InstanceID) {
     output.cameraPosition = gVP.cameraPosition;
     // 
     output.materialID = tf.materialID;
+    //
+    output.color = input.color;
 
     return output;
 }

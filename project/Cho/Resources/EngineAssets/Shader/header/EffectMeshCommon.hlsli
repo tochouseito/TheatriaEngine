@@ -1,3 +1,5 @@
+#pragma once
+
 static const uint MESH_TYPE_NONE = 0;
 static const uint MESH_TYPE_SPRITE = 1;
 static const uint MESH_TYPE_RIBBON = 2;

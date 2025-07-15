@@ -9,55 +9,45 @@
 #include "SDK/DirectX/DirectX12/ColorBuffer/ColorBuffer.h"
 #include <array>
 
-enum RenderTextureType
+enum GameRenderTextureType
 {
-	GameScreen = 0,				// ゲーム画面用描画結果
-	SceneScreen,				// シーン画面用描画結果
-	EffectEditScreen,			// エフェクトエディタ用描画結果
-	PostProcessScreen,			// ポストプロセス用描画結果
-	ScenePostProcessScreen,		// シーンポストプロセス用描画結果
-	RenderTextureTypeCount,		// 種類数(使用禁止)
+	GameScreenTexture = 0,			// ゲーム画面用描画テクスチャ
+	GameGBufferTexture,				// ゲームのGバッファ用描画テクスチャ
+	GameLightingTexture,			// ゲームのライティング用描画テクスチャ
+	GameForwardTexture,				// ゲームのフォワード描画用描画テクスチャ
+	GamePostProcessTexture,			// ゲームのポストプロセス用描画テクスチャ
+	GameRenderTextureTypeCount,		// 種類数(使用禁止)
 };
 
-//enum GameRenderTextureType
-//{
-//	GameScreenTexture = 0,			// ゲーム画面用描画テクスチャ
-//	GameGBufferTexture,				// ゲームのGバッファ用描画テクスチャ
-//	GameLightingTexture,			// ゲームのライティング用描画テクスチャ
-//	GameForwardTexture,				// ゲームのフォワード描画用描画テクスチャ
-//	GamePostProcessTexture,			// ゲームのポストプロセス用描画テクスチャ
-//	GameRenderTextureTypeCount,		// 種類数(使用禁止)
-//};
-//
-//// Editor時のみ使用
-//enum SceneRenderTextureType
-//{
-//	SceneScreenTexture = 0,			// シーン画面用描画テクスチャ
-//	SceneGBufferTexture,			// シーンのGバッファ用描画テクスチャ
-//	SceneLightingTexture,			// シーンのライティング用描画テクスチャ
-//	SceneForwardTexture,			// シーンのフォワード描画用テクスチャ
-//	ScenePostProcessTexture,		// シーンのポストプロセス用描画テクスチャ
-//	EffectEditTexture,				// エフェクトエディタ用描画テクスチャ
-//	DebugDrawTexture,				// デバッグ用描画テクスチャ
-//	SceneRenderTextureTypeCount,	// 種類数(使用禁止)
-//};
+// Editor時のみ使用
+enum SceneRenderTextureType
+{
+	SceneScreenTexture = 0,			// シーン画面用描画テクスチャ
+	SceneGBufferTexture,			// シーンのGバッファ用描画テクスチャ
+	SceneLightingTexture,			// シーンのライティング用描画テクスチャ
+	SceneForwardTexture,			// シーンのフォワード描画用テクスチャ
+	ScenePostProcessTexture,		// シーンのポストプロセス用描画テクスチャ
+	EffectEditorTexture,			// エフェクトエディタ用描画テクスチャ
+	DebugDrawTexture,				// デバッグ用描画テクスチャ
+	SceneRenderTextureTypeCount,	// 種類数(使用禁止)
+};
 
 enum DrawPass
 {
 	GBuffers = 0,
 	Lighting,
 	Forward,
-	PostProcess,// ポストプロセス、最終描画
-	SwapChainPass,// SwapChainのバックバッファへの描画
+	PostProcess,
+	SwapChainPass,
+	EditorView,
 	PassCount,
 };
 
 enum RenderMode
 {
 	Game=0,
-	Debug,
+	Scene,
 	Release,
-	Editor,
 	RenderModeCount,
 };
 
@@ -82,6 +72,7 @@ class GraphicsEngine : public Engine
 {
 	friend class TextureManager;
 	friend class PipelineManager;
+	friend class ResourceManager;
 	friend class EngineCommand;
 	friend class ParticleEmitterSystem;
 	friend class EffectEditorSystem;
@@ -110,21 +101,22 @@ public:
 	void PreRender();
 	void Render(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode = RenderMode::Game);
 	void PostRender(ImGuiManager* imgui, RenderMode mode);
-	void PostRenderWithImGui(ImGuiManager* imgui);
 	// レンダーターゲットテクスチャ、ImGui、スワップチェーンのリサイズ
 	void ScreenResize();
 
 	PipelineManager* GetPipelineManager() { return m_PipelineManager.get(); }
 
 	// GameTextureのBufferIDを取得
-	uint32_t GetGameTextureBufferID() { return m_RenderTextures[GameScreen].m_BufferIndex.value(); }
+	uint32_t GetGameTextureBufferID() { return m_GameRenderTextures[GameScreenTexture].m_BufferIndex.value(); }
 	// SceneTextureのBufferIDを取得
-	uint32_t GetSceneTextureBufferID() { return m_RenderTextures[SceneScreen].m_BufferIndex.value(); }
+	uint32_t GetSceneTextureBufferID() { return m_SceneRenderTextures[SceneScreenTexture].m_BufferIndex.value(); }
 	// EffectEditTextureのBufferIDを取得
-	uint32_t GetEffectEditTextureBufferID() { return m_RenderTextures[EffectEditScreen].m_BufferIndex.value(); }
+	uint32_t GetEffectEditTextureBufferID() { return m_SceneRenderTextures[EffectEditorTexture].m_BufferIndex.value(); }
 private:
 	// コマンドコンテキストの取得
 	CommandContext* GetCommandContext() { return m_GraphicsCore->GetCommandManager()->GetCommandContext(); }
+	// コマンドマネージャー取得
+	CommandManager* GetCommandManager() { return m_GraphicsCore->GetCommandManager(); }
 	// 記録開始
 	void BeginCommandContext(CommandContext* context);
 	// 記録終了
@@ -132,13 +124,14 @@ private:
 	// GPU待機
 	void WaitForGPU(const QueueType& queue);
 	// レンダーターゲットの設定
-	void SetRenderTargets(CommandContext* context,DrawPass pass,RenderMode mode = RenderMode::Game);
+	void SetRenderTargets(CommandContext* context, DrawPass pass, RenderMode mode,bool isSetTarget);
 	// 描画設定コマンド
 	void SetRenderState(CommandContext* context,ViewportType type);
 	void DrawGBuffers(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode);
 	void DrawLighting(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode);
 	void DrawForward(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode);
 	void DrawPostProcess(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode);
+	void DrawEditorView(ResourceManager& resourceManager, GameCore& gameCore, RenderMode mode);
 	// 深度バッファの生成
 	void CreateDepthBuffer();
 	// オフスクリーンバッファの生成
@@ -161,7 +154,8 @@ private:
 	std::unique_ptr<DepthManager> m_DepthManager = nullptr;
 	std::unique_ptr<PipelineManager> m_PipelineManager = nullptr;
 
-	std::array<RenderTexture, RenderTextureType::RenderTextureTypeCount> m_RenderTextures;
+	std::array<RenderTexture, GameRenderTextureType::GameRenderTextureTypeCount> m_GameRenderTextures;
+	std::array<RenderTexture, SceneRenderTextureType::SceneRenderTextureTypeCount> m_SceneRenderTextures;
 
 	UINT64 m_ResolutionWidth = 1920;
 	UINT m_ResolutionHeight = 1080;

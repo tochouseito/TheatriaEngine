@@ -19,7 +19,11 @@ PSOutput main(VSOutput input)
     
     // マテリアル
     Material material = gIMaterial[input.materialID];
-    float2 texcoord = input.texcoord;
+    // alpha Test
+    if (material.color.a <= 0.0f) {
+        discard;
+    }
+        float2 texcoord = input.texcoord;
     if (material.uvFlipY)
     {
         texcoord.y = 1.0f - texcoord.y;
@@ -27,7 +31,7 @@ PSOutput main(VSOutput input)
     float4 transformedUV = mul(float4(texcoord, 0.0f, 1.0f), material.matUV);
     float4 textureColor = gTextures[material.textureID].Sample(gSampler, transformedUV.xy);
     
-    if (textureColor.a == 0.0)
+    if (textureColor.a <= 0.0f)
     {
         discard;
     }

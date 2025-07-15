@@ -6,6 +6,7 @@
 #include "Core/Utility/AnimationStruct.h"
 #include <unordered_map>
 #include <filesystem>
+#include <memory>
 #include <list>
 #include <map>
 // assimp
@@ -52,10 +53,13 @@ struct MeshData
 	std::vector<uint32_t> indices;
 	std::vector<MaterialData> materials;
 	std::map<std::string, JointWeightData>skinClusterData;
-	//std::optional<uint32_t> influenceBufferIndex = std::nullopt; // スキニング情報のバッファインデックス
-	//std::optional<uint32_t> skinInfoBufferIndex = std::nullopt;	// スキニング情報バッファーインデックス
 	std::optional<uint32_t> vertexBufferIndex = std::nullopt;
 	std::optional<uint32_t> indexBufferIndex = std::nullopt;
+	SkinCluster skinCluster;
+
+	// スキニング情報のバッファインデックス
+	std::optional<uint32_t> influenceBufferIndex = std::nullopt; // スキニング情報のバッファインデックス
+	std::optional<uint32_t> skinInfoBufferIndex = std::nullopt;	// スキニング情報バッファーインデックス
 };
 struct ModelData
 {
@@ -69,13 +73,10 @@ struct ModelData
 	bool isBone = false;
 	std::vector<AnimationData> animations;
 	Skeleton skeleton;
-	SkinCluster skinCluster;
 	// ボーン行列統合バッファインデックス
 	std::optional<uint32_t> boneMatrixBufferIndex = std::nullopt;
 	uint32_t nextBoneOffsetIndex = 0; // 次のボーンオフセットインデックス
 	std::vector<uint32_t> removedBoneOffsetIndices; // 削除されたボーンオフセットインデックスのリスト
-	std::optional<uint32_t> influenceBufferIndex = std::nullopt; // スキニング情報のバッファインデックス
-	std::optional<uint32_t> skinInfoBufferIndex = std::nullopt;	// スキニング情報バッファーインデックス
 
 	uint32_t AllocateBoneOffsetIdx()
 	{
@@ -136,6 +137,9 @@ public:
 	void RegisterModelUseList(const std::variant<uint32_t,std::wstring>& key, const uint32_t& transformMapID);
 	// モデルのUseListから削除する
 	void RemoveModelUseList(const std::variant<uint32_t, std::wstring>& key, const uint32_t& transformMapID);
+
+	// Effect用のメッシュデータを取得する
+	MeshData& GetEffectRingMeshData() { return m_EffectRingMeshData; }
 private:
 	// Assimpのオプションチェック
 	void CheckAssimpOption();
@@ -153,6 +157,8 @@ private:
 	void CreateCylinder();
 	// Skyboxの生成
 	void CreateSkybox();
+	// EffectRingの生成
+	void CreateEffectRing();
 
 	// 
 	Node ReadNode(aiNode* node, const std::string& parentName);
@@ -168,6 +174,9 @@ private:
 	FVector<ModelData> m_Models;
 	// モデルのキーを名前で管理するコンテナ
 	std::unordered_map<std::wstring, uint32_t> m_ModelNameContainer;
+
+	// Effect用メッシュデータ
+	MeshData m_EffectRingMeshData;
 
 	// モデルの使用可能なTransformの数のオフセット
 	static const uint32_t kUseTransformOffset = 1024;

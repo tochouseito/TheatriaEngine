@@ -102,7 +102,7 @@ void Hierarchy::Window()
 					if (!wNewName.empty())
 					{
 						// オブジェクトの名前を更新
-						std::unique_ptr<RenameObjectCommand> renameCommand = std::make_unique<RenameObjectCommand>(object->GetHandle(),object->GetName());
+						std::unique_ptr<RenameObjectCommand> renameCommand = std::make_unique<RenameObjectCommand>(object->GetHandle(), wNewName);
 						m_EngineCommand->ExecuteCommand(std::move(renameCommand));
 
 						editing = false;  // 編集終了
@@ -171,9 +171,9 @@ void Hierarchy::Window()
 		}
 		if (ImGui::MenuItem("複製"))
 		{
-			//// 選択中のオブジェクトを複製
-			//std::unique_ptr<CopyGameObjectCommand> copyCommand = std::make_unique<CopyGameObjectCommand>(m_EngineCommand->GetSelectedObject()->GetID().value());
-			//m_EngineCommand->ExecuteCommand(std::move(copyCommand));
+			// 選択中のオブジェクトを複製
+			std::unique_ptr<CopyObjectCommand> copyCommand = std::make_unique<CopyObjectCommand>(m_EditorManager->GetSelectedGameObject()->GetHandle());
+			m_EngineCommand->ExecuteCommand(std::move(copyCommand));
 			// ポップアップメニューを閉じる
 			ImGui::CloseCurrentPopup();
 		}

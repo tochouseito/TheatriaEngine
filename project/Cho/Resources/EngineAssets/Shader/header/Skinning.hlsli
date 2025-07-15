@@ -1,3 +1,5 @@
+#pragma once
+
 struct VertexInfluence {
     float4 weight;
     int4 index;

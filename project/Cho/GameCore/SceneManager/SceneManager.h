@@ -22,12 +22,12 @@ public:
 	~SceneManager()
 	{
 	}
-
 	// デフォルトのシーンを作成
-	GameScene CreateDefaultScene();
-
+	GameScene CreateDefaultScene(const std::wstring& name = L"MainScene");
 	// 読み込まれているシーンを破棄して指定したシーンをロード
 	GameSceneInstance* LoadScene(const std::wstring& sceneName, const bool& updateMaincamera = false);
+	// 一時的に作成したシーンをロードする
+	GameSceneInstance* LoadTemporaryScene(const GameScene& scene, const bool& updateMaincamera = false);
 	// 非同期でシーンをロード
 	GameSceneInstance* LoadSceneAsync(const std::wstring& sceneName, const LoadSceneMode& mode)
 	{
@@ -35,67 +35,18 @@ public:
 		mode; // 使用しない引数
 	}
 	// シーンをアンロード
-	void UnLoadScene(GameSceneInstance* pSceneInstance)
-	{
-		pSceneInstance->UnloadScene(); // シーンインスタンスのアンロード
-	}
+	void UnLoadScene(GameSceneInstance* pSceneInstance);
 	// シーンを追加
-	void AddScene(GameScene scene)
-	{
-		if (m_SceneNameToID.contains(scene.GetName()))
-		{
-			return; // 既に存在する場合は何もしない
-		}
-		std::wstring sceneName = scene.GetName();
-		SceneID id = static_cast<SceneID>(m_Scenes.push_back(std::move(scene)));
-		m_SceneNameToID[sceneName] = id; // シーン名とIDを紐付け
-	}
+	void AddScene(GameScene scene);
 	// コンテナからシーンを取得
-	GameScene* GetScene(const SceneID& sceneID) noexcept
-	{
-		if (m_Scenes.isValid(sceneID))
-		{
-			return &m_Scenes[sceneID];
-		}
-		return nullptr;
-	}
-	GameScene* GetScene(const std::wstring& sceneName) noexcept
-	{
-		if (m_SceneNameToID.contains(sceneName))
-		{
-			return &m_Scenes[m_SceneNameToID.at(sceneName)];
-		}
-		return nullptr;
-	}
+	GameScene* GetScene(const SceneID& sceneID) noexcept;
+	GameScene* GetScene(const std::wstring& sceneName) noexcept;
 	// シーンコンテナを取得
 	FVector<GameScene>& GetScenes() noexcept { return m_Scenes; }
-	// シーンを取得
-	GameScene* GetGameScene(const SceneID& index) noexcept
-	{
-		if (m_Scenes.isValid(index))
-		{
-			return &m_Scenes[index];
-		}
-		return nullptr;
-	}
 	// シーン名からシーンIDを取得
-	SceneID GetSceneID(const std::wstring& sceneName) const noexcept
-	{
-		if (m_SceneNameToID.contains(sceneName))
-		{
-			return m_SceneNameToID.at(sceneName);
-		}
-		return 0;
-	}
+	SceneID GetSceneID(const std::wstring& sceneName) const noexcept;
 	// シーン名からシーンを取得
-	GameScene* GetSceneToName(const std::wstring& sceneName) noexcept
-	{
-		if (m_SceneNameToID.contains(sceneName))
-		{
-			return &m_Scenes[m_SceneNameToID.at(sceneName)];
-		}
-		return nullptr;
-	}
+	GameScene* GetSceneToName(const std::wstring& sceneName) noexcept;
 private:
 	GameWorld* m_pGameWorld = nullptr; // ゲームワールドへのポインタ
 

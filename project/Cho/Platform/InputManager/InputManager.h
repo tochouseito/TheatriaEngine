@@ -1,7 +1,9 @@
 #pragma once
-#include "SDK/DirectX/DirectX12/stdafx/stdafx.h"
-#include "ChoMath.h"
+#include "Externals/ChoMath/ChoMath.h"
 #include "Core/Utility/InputStruct.h"
+#include <vector>
+#include <wrl.h>
+using namespace Microsoft::WRL;
 
 class InputManager
 {

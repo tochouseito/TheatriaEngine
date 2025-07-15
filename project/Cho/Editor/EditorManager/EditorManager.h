@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <imgui.h>
+#include <ImGuizmo/ImGuizmo.h>
 #include "EngineCommand/EngineCommand.h"
 #include "Editor/MainMenu/MainMenu.h"
 #include "Editor/Toolbar/Toolbar.h"
@@ -14,6 +15,9 @@
 #include "Editor/EffectEditor/EffectEditor.h"
 #include "Editor/EffectView/EffectView.h"
 #include "Editor/EffectHierarchy/EffectHierarchy.h"
+#include "Editor/Manipulate/Manipulate.h"
+
+#include "GameCore/GameScene/GameScene.h"
 
 enum WorkSpaceType
 {
@@ -37,14 +41,28 @@ public:
 	void SetWorkSpaceType(const std::string& typeName);
 	WorkSpaceType GetWorkSpaceType() { return m_WorkSpaceType; }
 
-	GameObject* GetSelectedGameObject() const { return m_SelectedGameObject; }
-	void SetSelectedGameObject(GameObject* gameObject) { m_SelectedGameObject = gameObject; }
+	GameObject* GetSelectedGameObject() const;
+	void SetSelectedGameObject(GameObject* gameObject);
 
 	// EffectEditor
 	std::optional<uint32_t> GetEffectEntity() const { return m_EffectEntity; }
 	void SetEffectEntity(std::optional<uint32_t> entity) { m_EffectEntity = entity; }
 	std::optional<uint32_t> GetEffectNodeID() const { return m_EffectNodeID; }
 	void SetEffectNodeIndex(std::optional<uint32_t> nodeID) { m_EffectNodeID = nodeID; }
+
+	// 編集中のSceneの名前を取得
+	std::wstring GetEditingSceneName() const { return m_EditingSceneName; }
+	// 編集中のSceneの名前を設定
+	void ChangeEditingScene(const std::wstring& sceneName);
+	// Sceneのマップを取得
+	std::unordered_map<std::wstring, size_t>& GetSceneMap() { return m_pSceneMap; }
+	// 編集中のSceneを保存
+	void SaveEditingScene();
+	// 編集中の読み込みなおす
+	void ReloadEditingScene();
+	// Sceneを取得
+	GameScene* GetEditScene(const std::wstring& sceneName);
+	 
 private:
 	EngineCommand* m_EngineCommand = nullptr;
 	InputManager* m_InputManager = nullptr;
@@ -60,14 +78,19 @@ private:
 	std::unique_ptr<EffectEditor> m_EffectEditor = nullptr;
 	std::unique_ptr<EffectView> m_EffectView = nullptr;
 	std::unique_ptr<EffectHierarchy> m_EffectHierarchy = nullptr;
+	std::unique_ptr<Manipulate> m_Manipulate = nullptr;
 
-	// 選択中のオブジェクト
-	GameObject* m_SelectedGameObject = nullptr;
+	// 選択中のオブジェクトの名前
+	std::wstring m_SelectedGameObjectName = L"";
 	// 編集中のエフェクトEntity
 	std::optional<uint32_t> m_EffectEntity = std::nullopt;
 	// 選択中のEffectNode
 	std::optional<uint32_t> m_EffectNodeID = std::nullopt;
-
+	FVector<GameScene> m_SceneList; // Sceneのリスト
+	// 編集元のSceneの名前と編集したSceneのマップ
+	std::unordered_map<std::wstring, size_t> m_pSceneMap;
+	// 編集中のSceneの名前
+	std::wstring m_EditingSceneName = L"";
 	// ワークスペース
 	WorkSpaceType m_WorkSpaceType = WorkSpaceType::SceneEdit;
 };

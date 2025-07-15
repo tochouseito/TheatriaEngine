@@ -3,6 +3,7 @@
 #include "Core/Utility/FVector.h"
 #include <unordered_map>
 #include <string>
+#include <memory>
 #include <list>
 
 struct UIVertexData

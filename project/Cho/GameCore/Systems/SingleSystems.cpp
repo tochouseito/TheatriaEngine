@@ -4,7 +4,7 @@
 #include "Graphics/GraphicsEngine/GraphicsEngine.h"
 #include "GameCore/GameWorld/GameWorld.h"
 #include "EngineCommand/EngineCommand.h"
-#include "GameCore/IScript/IScript.h"
+#include "GameCore/Marionnette/Marionnette.h"
 #include "Platform/FileSystem/FileSystem.h"
 #include "OS/Windows/WinApp/WinApp.h"
 #include "Core/ChoLog/ChoLog.h"
@@ -90,27 +90,37 @@ void TransformSystem::priorityUpdate()
 
 void TransformSystem::UpdateComponent(Entity e, TransformComponent& transform)
 {
-	// 度数からラジアンに変換
-	Vector3 radians = ChoMath::DegreesToRadians(transform.degrees);
+	//// 変更がなければワールド行列を更新しない
+	//if(transform.prePos == transform.position &&
+	//   transform.preRot == ChoMath::DegreesToRadians(transform.degrees) &&
+	//   transform.preScale == transform.scale)
+	//{
+	//	
+	//}
+	//else
+	//{
+		// 度数からラジアンに変換
+		Vector3 radians = ChoMath::DegreesToRadians(transform.degrees);
 
-	if (m_isQuaternion)
-	{
-		// クォータニオンを使用する場合
-		transform.rotation = MakeQuaternionRotation(radians, transform);
-	}
-	else
-	{
-		// オイラー角を使用する場合
-		transform.rotation = MakeEulerRotation(radians);
-	};
+		if (m_isQuaternion)
+		{
+			// クォータニオンを使用する場合
+			transform.rotation = MakeQuaternionRotation(radians, transform);
+		}
+		else
+		{
+			// オイラー角を使用する場合
+			transform.rotation = MakeEulerRotation(radians);
+		};
 
-	// アフィン変換
-	transform.matWorld = ChoMath::MakeAffineMatrix(transform.scale, transform.rotation, transform.position);
+		// アフィン変換
+		transform.matWorld = ChoMath::MakeAffineMatrix(transform.scale, transform.rotation, transform.position);
 
-	// 次のフレーム用に保存する
-	transform.prePos = transform.position;
-	transform.preRot = radians;
-	transform.preScale = transform.scale;
+		// 次のフレーム用に保存する
+		transform.prePos = transform.position;
+		transform.preRot = radians;
+		transform.preScale = transform.scale;
+	//}
 
 	// 親があれば親のワールド行列を掛ける
 	if (transform.parent.has_value())
@@ -221,6 +231,8 @@ void CameraSystem::InitializeComponent(Entity e, TransformComponent& transform, 
 void CameraSystem::UpdateComponent(Entity e, TransformComponent& transform, CameraComponent& camera)
 {
 	e;
+	camera.viewMatrix = Matrix4::Inverse(transform.matWorld);
+	camera.projectionMatrix = ChoMath::MakePerspectiveFovMatrix(camera.fovAngleY, camera.aspectRatio, camera.nearZ, camera.farZ);
 	TransferMatrix(transform, camera);
 }
 
@@ -228,8 +240,8 @@ void CameraSystem::TransferMatrix(TransformComponent& transform, CameraComponent
 {
 	BUFFER_DATA_VIEWPROJECTION data = {};
 	data.matWorld = transform.matWorld;
-	data.view = Matrix4::Inverse(transform.matWorld);
-	data.projection = ChoMath::MakePerspectiveFovMatrix(camera.fovAngleY, camera.aspectRatio, camera.nearZ, camera.farZ);
+	data.view = camera.viewMatrix;
+	data.projection = camera.projectionMatrix;
 	data.projectionInverse = Matrix4::Inverse(data.projection);
 	data.cameraPosition = transform.position;
 	ConstantBuffer<BUFFER_DATA_VIEWPROJECTION>* cameraBuffer = dynamic_cast<ConstantBuffer<BUFFER_DATA_VIEWPROJECTION>*>(m_pResourceManager->GetBuffer<IConstantBuffer>(camera.bufferIndex.value()));
@@ -251,7 +263,7 @@ void ScriptInstanceGenerateSystem::GenerateInstance(Entity e, ScriptComponent& s
 	std::string funcName = "Create" + script.scriptName + "Script";
 	funcName.erase(std::remove_if(funcName.begin(), funcName.end(), ::isspace), funcName.end());
 	// CreateScript関数を取得
-	typedef IScript* (*CreateScriptFunc)(GameObject&);
+	typedef Marionnette* (*CreateScriptFunc)(GameObject&);
 	CreateScriptFunc createScript = (CreateScriptFunc)GetProcAddress(Cho::FileSystem::ScriptProject::m_DllHandle, funcName.c_str());
 	if (!createScript)
 	{
@@ -260,12 +272,16 @@ void ScriptInstanceGenerateSystem::GenerateInstance(Entity e, ScriptComponent& s
 	}
 	// スクリプトを生成
 	GameObject* object = m_pGameWorld->GetGameObject(e);
-	IScript* scriptInstance = createScript(*object);
+	Marionnette* scriptInstance = createScript(*object);
 	if (!scriptInstance)
 	{
 		script.isActive = false;
 		return;
 	}
+	// Handleを取得
+	script.objectHandle = object->GetHandle();
+	// ECSをセット
+	scriptInstance->SetECSPtr(m_pEcs);
 	// TransformComponentを取得
 	scriptInstance->transform = m_pEcs->GetComponent<TransformComponent>(e);
 	// スクリプトのStart関数とUpdate関数をラップ
@@ -981,14 +997,17 @@ void AnimationSystem::SkinClusterUpdate(AnimationComponent& animation, ModelData
 	StructuredBuffer<ConstBufferDataWell>* paletteBuffer = dynamic_cast<StructuredBuffer<ConstBufferDataWell>*>(m_pResourceManager->GetBuffer<IStructuredBuffer>(model->boneMatrixBufferIndex));
 	for (uint32_t jointIndex = 0; jointIndex < model->skeleton.joints.size(); ++jointIndex)
 	{
-		assert(jointIndex < model->skinCluster.inverseBindPoseMatrices.size());
-		uint32_t offset = static_cast<uint32_t>(model->skeleton.joints.size() * animation.boneOffsetID.value());
-		ConstBufferDataWell data = {};
-		data.skeletonSpaceMatrix =
-			animation.skinCluster->inverseBindPoseMatrices[jointIndex] * animation.skeleton->joints[jointIndex].skeletonSpaceMatrix;
-		data.skeletonSpaceInverseTransposeMatrix =
-			ChoMath::Transpose(Matrix4::Inverse(data.skeletonSpaceMatrix));
-		paletteBuffer->UpdateData(data, jointIndex + offset);
+		for (int i = 0;i<animation.skinClusters.size();i++)
+		{
+			assert(jointIndex < model->meshes[i].skinCluster.inverseBindPoseMatrices.size());
+			uint32_t offset = static_cast<uint32_t>(model->skeleton.joints.size() * animation.boneOffsetID.value());
+			ConstBufferDataWell data = {};
+			data.skeletonSpaceMatrix =
+				animation.skinClusters[i].inverseBindPoseMatrices[jointIndex] * animation.skeleton->joints[jointIndex].skeletonSpaceMatrix;
+			data.skeletonSpaceInverseTransposeMatrix =
+				ChoMath::Transpose(Matrix4::Inverse(data.skeletonSpaceMatrix));
+			paletteBuffer->UpdateData(data, jointIndex + offset);
+		}
 	}
 }
 

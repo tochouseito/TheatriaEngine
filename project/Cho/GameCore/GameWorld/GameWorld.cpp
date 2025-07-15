@@ -117,12 +117,12 @@ SceneID GameWorld::AddGameObjectFromScene(const GameScene& scene, const bool& up
 }
 
 // ワールドからGameSceneを生成
-GameScene GameWorld::CreateGameSceneFromWorld(SceneManager& sceneManager) const
+GameScene GameWorld::CreateGameSceneFromWorld(SceneManager& sceneManager, const std::wstring& editSceneName) const
 {
 	// 編集対象のシーンをGameSceneに変換
 	// とりあえず0番目のシーンを対象にする
 	// クローンは除外
-	std::wstring sceneName = sceneManager.GetGameScene(0)->GetName();
+	std::wstring sceneName = sceneManager.GetScene(editSceneName)->GetName();
 	GameScene gameScene(sceneName);
 	for (auto& object : m_pGameObjects[0])
 	{
@@ -134,7 +134,14 @@ GameScene GameWorld::CreateGameSceneFromWorld(SceneManager& sceneManager) const
 		gameScene.AddPrefab(prefab);
 	}
 	// シーンのカメラを設定
-	gameScene.SetStartCameraName(m_pMainCamera->GetName());
+	if (m_pMainCamera)
+	{
+		gameScene.SetStartCameraName(m_pMainCamera->GetName());
+	}
+	else
+	{
+		gameScene.SetStartCameraName(L"None");
+	}
 
 	return gameScene;
 }
@@ -148,7 +155,16 @@ void GameWorld::RemoveGameObject(const ObjectHandle& handle)
 	// ECSから削除
 	m_pECSManager->RemoveEntity(handle.entity);
 	// コンテナから削除
-	m_pGameObjects[handle.sceneID][handle.objectID].erase(handle.cloneID);
+	// クローンならクローンリストから削除
+	if (handle.isClone)
+	{
+		// クローンリストから削除
+		m_pGameObjects[handle.sceneID][handle.objectID].erase(handle.cloneID);
+	}
+	else // クローンでないならオブジェクトリストから削除
+	{
+		m_pGameObjects[handle.sceneID].erase(handle.objectID);
+	}
 	// 辞書から削除
 	m_ObjectHandleMap.erase(gameObject->GetName());
 	m_ObjectHandleMapFromEntity.erase(handle.entity);
@@ -182,6 +198,8 @@ ObjectHandle GameWorld::AddGameObjectClone(const ObjectHandle& src)
 	// クローンフラグ
 	handle.isClone = true;
 	handle.sceneID = src.sceneID; // srcのSceneに追加
+	// クローン元のオブジェクトIDを設定
+	handle.originalID = src.objectID;
 	// Entityを取得
 	Entity entity = m_pECSManager->CopyEntity(src.entity);
 	handle.entity = entity;
@@ -193,6 +211,29 @@ ObjectHandle GameWorld::AddGameObjectClone(const ObjectHandle& src)
 	handle.cloneID = static_cast<uint32_t>(m_pGameObjects[src.sceneID][src.objectID].push_back(std::make_unique<GameObject>(handle, newName, srcGameObject->GetType())));
 	// Entityにコンポーネントを追加
 	AddDefaultComponentsToGameObject(handle, srcGameObject->GetType());
+	// 辞書に登録
+	m_ObjectHandleMap[newName] = handle;
+	m_ObjectHandleMapFromEntity[entity] = handle;
+	return handle;
+}
+
+ObjectHandle GameWorld::CreateGameObjectCopy(const ObjectHandle& src)
+{
+	// srcのGameObjectを取得
+	GameObject* srcGameObject = GetGameObject(src);
+	// handleを作成
+	ObjectHandle handle;
+	handle.sceneID = 0; 
+	// Entityを取得
+	Entity entity = m_pECSManager->CopyEntity(src.entity);
+	handle.entity = entity;
+	// オブジェクトIDを取得
+	uint32_t objectID = static_cast<uint32_t>(m_pGameObjects[0].push_back(FVector<std::unique_ptr<GameObject>>()));
+	handle.objectID = objectID;
+	// 名前被り防止
+	std::wstring newName = GenerateUniqueName<std::unordered_map<std::wstring, ObjectHandle>>(srcGameObject->GetName(), m_ObjectHandleMap);
+	// GameObjectを作成
+	m_pGameObjects[0][objectID].push_back(std::make_unique<GameObject>(handle, newName, srcGameObject->GetType()));
 	// 辞書に登録
 	m_ObjectHandleMap[newName] = handle;
 	m_ObjectHandleMapFromEntity[entity] = handle;
@@ -221,4 +262,42 @@ void GameWorld::ClearAllScenes()
 	m_ObjectHandleMapFromEntity.clear();
 	// メインカメラをクリア
 	m_pMainCamera = nullptr;
+}
+
+// タイプごとの初期コンポーネントを追加
+void GameWorld::AddDefaultComponentsToGameObject(ObjectHandle handle, ObjectType type)
+{
+	// 基本コンポーネントを追加
+	m_pECSManager->AddComponent<TransformComponent>(handle.entity);
+	switch (type)
+	{
+	case ObjectType::MeshObject:
+		m_pECSManager->AddComponent<MeshFilterComponent>(handle.entity);
+		m_pECSManager->AddComponent<MeshRendererComponent>(handle.entity);
+		break;
+	case ObjectType::Camera:
+		m_pECSManager->AddComponent<CameraComponent>(handle.entity);
+		break;
+	case ObjectType::ParticleSystem:
+		m_pECSManager->AddComponent<MeshFilterComponent>(handle.entity);
+		m_pECSManager->AddComponent<MeshRendererComponent>(handle.entity);
+		m_pECSManager->AddComponent<MaterialComponent>(handle.entity);
+		m_pECSManager->AddComponent<ParticleComponent>(handle.entity);
+		m_pECSManager->AddComponent<EmitterComponent>(handle.entity);
+		break;
+	case ObjectType::Effect:
+		break;
+	case ObjectType::Light:
+		break;
+	case ObjectType::UI:
+		m_pECSManager->AddComponent<UISpriteComponent>(handle.entity);
+		m_pECSManager->AddComponent<MaterialComponent>(handle.entity);
+		break;
+	case ObjectType::None:
+		break;
+	case ObjectType::Count:
+		break;
+	default:
+		break;
+	}
 }

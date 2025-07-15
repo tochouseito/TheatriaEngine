@@ -4,6 +4,7 @@
 #include "OS/Windows/WinApp/WinApp.h"
 #include "Editor/EditorManager/EditorManager.h"
 #include "GameCore/GameCore.h"
+#include "GameCore/Systems/SingleSystems.h"
 #include "EngineCommand/EngineCommands.h"
 #include "GameCore/GameObject/GameObject.h"
 #include "Platform/FileSystem/FileSystem.h"
@@ -260,6 +261,10 @@ void MainMenu::EngineInfoMenu()
         ImGuiIO& io = ImGui::GetIO();
         ImGui::Text("FPS: %.1f", io.Framerate);
 
+		ECSManager* ecs = m_EngineCommand->GetGameCore()->GetECSManager();
+		// double型msのECSのシステム計測時間を表示
+		ImGui::Text("ECS Animation System Time: %.2f ms", ecs->GetLastSystemUpdateTimeMs<AnimationSystem>());
+
 		ImGui::EndMenu();
 	}
 }
@@ -307,15 +312,23 @@ void MainMenu::PopupScriptName()
 {
     // スクリプト名バッファ
     static char scriptNameBuffer[64] = "";
+	static bool ScriptFocusInput = false; // フォーカス状態を保持
     if (m_OpenScriptPopup)
     {
         std::memset(scriptNameBuffer, 0, sizeof(scriptNameBuffer)); // 初期化
         ImGui::OpenPopup("ScriptNamePopup");
         m_OpenScriptPopup = false; // 一度だけ開くように
+		ScriptFocusInput = true; // ポップアップが開かれたら入力フィールドにフォーカスを当てる
     }
     if (ImGui::BeginPopupModal("ScriptNamePopup", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
         ImGui::Text("スクリプト名を入力してください（A-Z, a-z）:");
+		// フォーカスを当てる
+        if (ScriptFocusInput)
+        {
+            ImGui::SetKeyboardFocusHere(); // 次のInputTextにフォーカス
+            ScriptFocusInput = false;
+        }
         ImGui::InputText("##ScriptName", scriptNameBuffer, IM_ARRAYSIZE(scriptNameBuffer),
             ImGuiInputTextFlags_CallbackCharFilter,
             [](ImGuiInputTextCallbackData* data) -> int {
@@ -347,15 +360,23 @@ void MainMenu::PopupNewSceneName()
 {
 	// シーン名バッファ
 	static char sceneNameBuffer[64] = "";
+	static bool sceneFocusInput = false; // フォーカス状態を保持
 	if (m_OpenScenePopup)
 	{
 		std::memset(sceneNameBuffer, 0, sizeof(sceneNameBuffer)); // 初期化
 		ImGui::OpenPopup("SceneNamePopup");
 		m_OpenScenePopup = false; // 一度だけ開くように
+		sceneFocusInput = true; // ポップアップが開かれたら入力フィールドにフォーカスを当てる
 	}
 	if (ImGui::BeginPopupModal("SceneNamePopup", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
 	{
 		ImGui::Text("シーン名を入力してください（A-Z, a-z）:");
+		// フォーカスを当てる
+        if (sceneFocusInput)
+        {
+            ImGui::SetKeyboardFocusHere(); // 次のInputTextにフォーカス
+            sceneFocusInput = false;
+		}
 		ImGui::InputText("##SceneName", sceneNameBuffer, IM_ARRAYSIZE(sceneNameBuffer),
 			ImGuiInputTextFlags_CallbackCharFilter,
 			[](ImGuiInputTextCallbackData* data) -> int {
@@ -369,8 +390,8 @@ void MainMenu::PopupNewSceneName()
 		if (ImGui::Button("OK"))
 		{
 			std::string sceneName = sceneNameBuffer;
-            GameScene gameScene(ConvertString(sceneName));
-			m_EngineCommand->GetGameCore()->GetSceneManager()->AddScene(gameScene);
+            m_EngineCommand->GetGameCore()->GetSceneManager()->CreateDefaultScene(ConvertString(sceneName));
+			m_EditorManager->ChangeEditingScene(ConvertString(sceneName));
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::SameLine();
@@ -428,28 +449,22 @@ void MainMenu::SettingWindow()
         ImGui::EndCombo();
     }
     ImGui::Text("シーンを切り替え");
-	//std::wstring sceneName = L"シーンがありません";
- //   if (m_EngineCommand->GetGameCore()->GetSceneManager()->GetMainScene())
- //   {
- //       sceneName = m_EngineCommand->GetGameCore()->GetSceneManager()->GetMainScene()->GetSceneName();
- //   }
-	//if (ImGui::BeginCombo("##SceneSelector", ConvertString(sceneName).c_str()))
-	//{
-	//	for (const auto& scene : m_EngineCommand->GetGameCore()->GetSceneManager()->GetScenes().GetVector())
-	//	{
- //           if (ImGui::Selectable(ConvertString(scene->GetSceneName()).c_str()))
- //           {
- //               if (m_EngineCommand->GetGameCore()->GetSceneManager()->GetMainScene()->GetSceneName() !=
- //                   scene->GetSceneName())
- //               {
- //                   //m_EngineCommand->GetGameCore()->GetSceneManager()->ChangeSceneRequest(scene->GetSceneID());
- //                   m_EngineCommand->GetGameCore()->GetSceneManager()->ChangeMainScene(scene->GetSceneName());
-	//				m_EngineCommand->SetSelectedObject(std::nullopt);
- //               }
- //           }
-	//	}
-	//	ImGui::EndCombo();
-	//}
+    std::wstring sceneName = m_EditorManager->GetEditingSceneName();
+	if (ImGui::BeginCombo("##SceneSelector", ConvertString(sceneName).c_str()))
+	{
+		for (const auto& scene : m_EngineCommand->GetGameCore()->GetSceneManager()->GetScenes())
+		{
+            if (ImGui::Selectable(ConvertString(scene.GetName()).c_str()))
+            {
+                if (sceneName != scene.GetName())
+                {
+					m_EditorManager->ChangeEditingScene(scene.GetName());
+                    m_EditorManager->SetSelectedGameObject(nullptr);
+                }
+            }
+		}
+		ImGui::EndCombo();
+	}
 
 	// SkyboxTextureの選択
 	ImGui::Text("Skybox Texture");

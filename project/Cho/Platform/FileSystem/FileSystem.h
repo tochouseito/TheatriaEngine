@@ -17,6 +17,7 @@ class GameWorld;
 class SceneManager;
 class ECSManager;
 class ResourceManager;
+class EditorManager;
 class EngineCommand;
 namespace Cho
 {
@@ -141,7 +142,7 @@ namespace Cho
 		// ゲーム設定ファイルを読み込む
         static bool LoadGameSettings(const std::wstring& filePath);
 		// シーンファイルを保存
-        static bool SaveSceneFile(const std::wstring& directory, GameScene* scene, ECSManager* ecs);
+        static bool SaveSceneFile(const std::wstring& directory,const std::wstring& srcFileName, GameScene* scene, ECSManager* ecs);
 		// シーンファイルを読み込む
         static bool LoadSceneFile(const std::wstring& filePath,EngineCommand* engineCommand);
         // スクリプトのファイルを保存
@@ -164,7 +165,7 @@ namespace Cho
         static FileType GetJsonFileType(const std::filesystem::path& path);
 
         // プロジェクトを保存
-		static void SaveProject(SceneManager* sceneManager, GameWorld* gameWorld, ECSManager* ecs);
+		static void SaveProject(EditorManager* editorManager, SceneManager* sceneManager, GameWorld* gameWorld, ECSManager* ecs);
         // プロジェクトフォルダを読み込む
         static bool LoadProjectFolder(const std::wstring& projectName, EngineCommand* engineCommand);
         // 

@@ -20,10 +20,6 @@ void DebugCamera::Initialize()
 
 void DebugCamera::Update()
 {
-	// 各フラグ
-	static bool isLeftClicked = false;
-	static bool isWheelClicked = false;
-
 	// 回転を考慮する
 	Matrix4 rotationMatrix = ChoMath::MakeRotateMatrix(m_TransformComponent.rotation);
 	Vector3 X = { 1.0f, 0.0f, 0.0f };
@@ -117,10 +113,12 @@ void DebugCamera::UpdateMatrix()
 void DebugCamera::TransferMatrix()
 {
 	// カメラの行列を転送
-	m_ViewProjectionData.matWorld = m_TransformComponent.matWorld;
-	m_ViewProjectionData.view = Matrix4::Inverse(m_TransformComponent.matWorld);
-	m_ViewProjectionData.projection = ChoMath::MakePerspectiveFovMatrix(
+	m_CameraComponent.viewMatrix = Matrix4::Inverse(m_TransformComponent.matWorld);
+	m_CameraComponent.projectionMatrix = ChoMath::MakePerspectiveFovMatrix(
 		m_CameraComponent.fovAngleY, m_CameraComponent.aspectRatio, m_CameraComponent.nearZ, m_CameraComponent.farZ);
+	m_ViewProjectionData.matWorld = m_TransformComponent.matWorld;
+	m_ViewProjectionData.view = m_CameraComponent.viewMatrix;
+	m_ViewProjectionData.projection = m_CameraComponent.projectionMatrix;
 	m_ViewProjectionData.projectionInverse = Matrix4::Inverse(m_ViewProjectionData.projection);
 	m_ViewProjectionData.cameraPosition = m_TransformComponent.position;
 	// 転送

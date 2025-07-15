@@ -44,51 +44,17 @@ public:
 	void RenameGameObject(const ObjectHandle& handle, const std::wstring& newName);
 	// クローンを追加
 	ObjectHandle AddGameObjectClone(const ObjectHandle& src);
+	// コピーを追加
+	ObjectHandle CreateGameObjectCopy(const ObjectHandle& src);
+	// ワールドからGameSceneを生成
+	GameScene CreateGameSceneFromWorld(SceneManager& sceneManager, const std::wstring& editSceneName) const;
 private:
 	// シーンデータからオブジェクトを作成
 	SceneID AddGameObjectFromScene(const GameScene& scene,const bool& updateMaincamera = false);
-	// ワールドからGameSceneを生成
-	GameScene CreateGameSceneFromWorld(SceneManager& sceneManager) const;
-	
 	// 全シーン破棄
 	void ClearAllScenes();
 	// タイプごとの初期コンポーネントを追加
-	void AddDefaultComponentsToGameObject(ObjectHandle handle, ObjectType type)
-	{
-		// 基本コンポーネントを追加
-		m_pECSManager->AddComponent<TransformComponent>(handle.entity);
-		switch (type)
-		{
-		case ObjectType::MeshObject:
-			m_pECSManager->AddComponent<MeshFilterComponent>(handle.entity);
-			m_pECSManager->AddComponent<MeshRendererComponent>(handle.entity);
-			break;
-		case ObjectType::Camera:
-			m_pECSManager->AddComponent<CameraComponent>(handle.entity);
-			break;
-		case ObjectType::ParticleSystem:
-			m_pECSManager->AddComponent<MeshFilterComponent>(handle.entity);
-			m_pECSManager->AddComponent<MeshRendererComponent>(handle.entity);
-			m_pECSManager->AddComponent<MaterialComponent>(handle.entity);
-			m_pECSManager->AddComponent<ParticleComponent>(handle.entity);
-			m_pECSManager->AddComponent<EmitterComponent>(handle.entity);
-			break;
-		case ObjectType::Effect:
-			break;
-		case ObjectType::Light:
-			break;
-		case ObjectType::UI:
-			m_pECSManager->AddComponent<UISpriteComponent>(handle.entity);
-			m_pECSManager->AddComponent<MaterialComponent>(handle.entity);
-			break;
-		case ObjectType::None:
-			break;
-		case ObjectType::Count:
-			break;
-		default:
-			break;
-		}
-	}
+	void AddDefaultComponentsToGameObject(ObjectHandle handle, ObjectType type);
 
 	ECSManager* m_pECSManager = nullptr;	
 	// GameObjectコンテナ

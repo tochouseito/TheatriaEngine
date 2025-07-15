@@ -6,8 +6,8 @@
 #include <memory>
 #include <functional>
 #include "Core/Utility/FVector.h"
-#include "GameCore/IScript/IScript.h"
-using ScriptFactoryFunc = std::function<std::unique_ptr<IScript>()>;
+#include "GameCore/Marionnette/Marionnette.h"
+using ScriptFactoryFunc = std::function<std::unique_ptr<Marionnette>()>;
 
 // スクリプトを格納するコンテナクラス
 class ScriptContainer
@@ -54,7 +54,7 @@ public:
 	FVector<std::string>& GetScriptNameContainer() { return m_ScriptNameContainer; } // スクリプト名コンテナを取得
 
 	void RegisterScript(const std::string& scriptName, ScriptFactoryFunc func);
-	std::unique_ptr<IScript> CreateScript(const std::string& scriptName);
+	std::unique_ptr<Marionnette> CreateScript(const std::string& scriptName);
 private:
 	FVector<std::string> m_ScriptNameContainer; // スクリプトデータを格納するベクター
 	// 名前で検索する用のコンテナ

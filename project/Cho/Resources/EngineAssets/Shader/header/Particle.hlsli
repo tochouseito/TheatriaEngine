@@ -1,3 +1,5 @@
+#pragma once
+
 struct ParticlePVA {
     float3 value;
     float3 velocity;

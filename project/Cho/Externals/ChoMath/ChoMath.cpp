@@ -688,4 +688,63 @@ Vector3 ChoMath::GetForwardVectorFromMatrix(const Matrix4& rotMatrix)
 	);
 }
 
+// Matrix4 から SRT を取り出す関数
+ChoMath::SRT ChoMath::DecomposeMatrix(const Matrix4& in)
+{
+	ChoMath::SRT out;
+
+	Matrix4 mat = in; // コピーして操作する
+	mat.Transpose(); // 行列を転置（左手座標系用）
+
+	// 1) 平行移動成分は m[row][col] の (2,3)
+	out.translation.x = mat.m[0][3];
+	out.translation.y = mat.m[1][3];
+	out.translation.z = mat.m[2][3];
+
+	// 2) スケール成分は各カラムベクトルの長さ
+	Vector3 col0 = { mat.m[0][0], mat.m[1][0], mat.m[2][0] };
+	Vector3 col1 = { mat.m[0][1], mat.m[1][1], mat.m[2][1] };
+	Vector3 col2 = { mat.m[0][2], mat.m[1][2], mat.m[2][2] };
+	out.scale.x = std::sqrt(col0.x * col0.x + col0.y * col0.y + col0.z * col0.z);
+	out.scale.y = std::sqrt(col1.x * col1.x + col1.y * col1.y + col1.z * col1.z);
+	out.scale.z = std::sqrt(col2.x * col2.x + col2.y * col2.y + col2.z * col2.z);
+
+	// 3) 純粋な回転行列を取り出す
+	Matrix4 rotMat = mat;
+	// 各軸ベクトルを正規化
+	if (out.scale.x != 0) { rotMat.m[0][0] /= out.scale.x; rotMat.m[1][0] /= out.scale.x; rotMat.m[2][0] /= out.scale.x; }
+	if (out.scale.y != 0) { rotMat.m[0][1] /= out.scale.y; rotMat.m[1][1] /= out.scale.y; rotMat.m[2][1] /= out.scale.y; }
+	if (out.scale.z != 0) { rotMat.m[0][2] /= out.scale.z; rotMat.m[1][2] /= out.scale.z; rotMat.m[2][2] /= out.scale.z; }
+
+	// 回転行列 → オイラー角（XYZ 順）
+	{
+		// まず Y 軸回転 β を取得（列0, 行2）
+		float sy = rotMat.m[0][2];
+		// asin の入力範囲をクリップしておく（数値誤差対策）
+		if (sy > 1.0f) sy = 1.0f;
+		if (sy < -1.0f) sy = -1.0f;
+		out.rotationEuler.y = std::asin(sy);
+
+		// cos(β) でジンバルロック判定
+		float cosY = std::cos(out.rotationEuler.y);
+		if (std::fabs(cosY) > 1e-6f)
+		{
+			// β が ±90° でないときは通常分解
+			// α (X 軸回転) = atan2( -m[1][2], m[2][2] )
+			out.rotationEuler.x = std::atan2(-rotMat.m[1][2], rotMat.m[2][2]);
+			// γ (Z 軸回転) = atan2( -m[0][1], m[0][0] )
+			out.rotationEuler.z = std::atan2(-rotMat.m[0][1], rotMat.m[0][0]);
+		}
+		else
+		{
+			// ジンバルロック時：β = ±90° のとき
+			// α を 0 に固定し、γ を別式で算出
+			out.rotationEuler.x = 0.0f;
+			out.rotationEuler.z = std::atan2(rotMat.m[1][0], rotMat.m[1][1]);
+		}
+	}
+
+	return out;
+}
+
 

@@ -1,3 +1,5 @@
+#pragma once
+
 struct VSOutput
 {
     float4 position : SV_POSITION;

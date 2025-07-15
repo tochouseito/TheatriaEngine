@@ -106,6 +106,14 @@ void GameCore::RegisterECSEvents()
 			// Transform統合バッファからmapIDを削除
 			m_EngineCommand->GetResourceManager()->GetIntegrationData(IntegrationDataType::Transform)->RemoveMapID(c->mapID.value());
 		});
+	m_pComponentEventDispatcher->RegisterOnRestore<TransformComponent>(
+		[&]([[maybe_unused]] Entity e, [[maybe_unused]] TransformComponent* c) {
+			// Transform統合バッファからmapIDを取得
+			uint32_t mapID = m_EngineCommand->GetResourceManager()->GetIntegrationData(IntegrationDataType::Transform)->GetMapID();
+			c->mapID = mapID;
+		});
+	// TransformComponentの削除イベントの優先度を下げる
+	m_pECSManager->SetDeletionPriority<TransformComponent>(500);
 	// CameraComponent
 	m_pComponentEventDispatcher->RegisterOnAdd<CameraComponent>(
 		[&]([[maybe_unused]] Entity e, [[maybe_unused]] CameraComponent* c) {
@@ -122,12 +130,18 @@ void GameCore::RegisterECSEvents()
 	m_pComponentEventDispatcher->RegisterOnRemove<CameraComponent>(
 		[&]([[maybe_unused]] Entity e, [[maybe_unused]] CameraComponent* c) {
 			// シーンのMainCameraを削除
-			if (m_EngineCommand->GetGameCore()->GetGameWorld()->GetMainCamera()->GetHandle().entity == e)
+			if (m_EngineCommand->GetGameCore()->GetGameWorld()->GetMainCamera()&&
+				m_EngineCommand->GetGameCore()->GetGameWorld()->GetMainCamera()->GetHandle().entity == e)
 			{
 				m_EngineCommand->GetGameCore()->GetGameWorld()->ClearMainCamera();
 			}
 			// Bufferの削除
 			//m_EngineCommand->GetResourceManager()->DeleteConstantBuffer(c->bufferIndex.value());
+		});
+	m_pComponentEventDispatcher->RegisterOnRestore<CameraComponent>(
+		[&]([[maybe_unused]] Entity e, [[maybe_unused]] CameraComponent* c) {
+			// Bufferの生成
+			c->bufferIndex = m_EngineCommand->GetResourceManager()->CreateConstantBuffer<BUFFER_DATA_VIEWPROJECTION>();
 		});
 	// MeshFilterComponent
 	m_pComponentEventDispatcher->RegisterOnAdd<MeshFilterComponent>(
@@ -154,6 +168,14 @@ void GameCore::RegisterECSEvents()
 			TransformComponent* transform = m_pECSManager->GetComponent<TransformComponent>(e);
 			m_EngineCommand->GetResourceManager()->GetModelManager()->RemoveModelUseList(c->modelID.value(),transform->mapID.value());
 		});
+	m_pComponentEventDispatcher->RegisterOnRestore<MeshFilterComponent>(
+		[&]([[maybe_unused]] Entity e, [[maybe_unused]] MeshFilterComponent* c) {
+			// モデルのIDを取得
+			c->modelID = m_EngineCommand->GetResourceManager()->GetModelManager()->GetModelDataIndex(c->modelName);
+			// モデルのUseListに登録
+			TransformComponent* transform = m_pECSManager->GetComponent<TransformComponent>(e);
+			m_EngineCommand->GetResourceManager()->GetModelManager()->RegisterModelUseList(c->modelID.value(), transform->mapID.value());
+		});
 	// MeshRendererComponent
 	m_pComponentEventDispatcher->RegisterOnAdd<MeshRendererComponent>(
 		[&]([[maybe_unused]] Entity e, [[maybe_unused]] MeshRendererComponent* c) {
@@ -172,21 +194,30 @@ void GameCore::RegisterECSEvents()
 			// 可視化
 			c->visible = false;
 		});
+	m_pComponentEventDispatcher->RegisterOnRestore<MeshRendererComponent>(
+		[&]([[maybe_unused]] Entity e, [[maybe_unused]] MeshRendererComponent* c) {
+			// 可視化
+			c->visible = true;
+		});
 	// ScriptComponent
 	m_pComponentEventDispatcher->RegisterOnAdd<ScriptComponent>(
 		[&]([[maybe_unused]] Entity e, [[maybe_unused]] ScriptComponent* c) {
-			c->objectHandle = m_EngineCommand->GetGameCore()->GetGameWorld()->GetGameObject(e)->GetHandle();
+			//c->objectHandle = m_EngineCommand->GetGameCore()->GetGameWorld()->GetGameObject(e)->GetHandle();
 		});
 	m_pComponentEventDispatcher->RegisterOnCopy<ScriptComponent>(
 		[&]([[maybe_unused]] Entity src, [[maybe_unused]] Entity dst, [[maybe_unused]] ScriptComponent* c) {
 			ScriptComponent& srcScript = *m_pECSManager->GetComponent<ScriptComponent>(src);
 			*c = srcScript;
-			c->objectHandle = m_EngineCommand->GetGameCore()->GetGameWorld()->GetGameObject(dst)->GetHandle();
+			//c->objectHandle = m_EngineCommand->GetGameCore()->GetGameWorld()->GetGameObject(dst)->GetHandle();
 		});
 	m_pComponentEventDispatcher->RegisterOnRemove<ScriptComponent>(
 		[&]([[maybe_unused]] Entity e, [[maybe_unused]] ScriptComponent* c) {
 			// スクリプトのインスタンスを削除
 			//m_pObjectContainer->DeleteScriptInstance(c->objectID);
+		});
+	m_pComponentEventDispatcher->RegisterOnRestore<ScriptComponent>(
+		[&]([[maybe_unused]] Entity e, [[maybe_unused]] ScriptComponent* c) {
+			//c->objectHandle = m_EngineCommand->GetGameCore()->GetGameWorld()->GetGameObject(e)->GetHandle();
 		});
 	// MaterialComponent
 	m_pComponentEventDispatcher->RegisterOnAdd<MaterialComponent>(
@@ -215,6 +246,13 @@ void GameCore::RegisterECSEvents()
 			// Material統合バッファからmapIDを削除
 			m_EngineCommand->GetResourceManager()->GetIntegrationData(IntegrationDataType::Material)->RemoveMapID(c->mapID.value());
 		});
+	m_pComponentEventDispatcher->RegisterOnRestore<MaterialComponent>(
+		[&]([[maybe_unused]] Entity e, [[maybe_unused]] MaterialComponent* c) {
+			uint32_t mapID = m_EngineCommand->GetResourceManager()->GetIntegrationData(IntegrationDataType::Material)->GetMapID();
+			c->mapID = mapID;
+			TransformComponent* transform = m_pECSManager->GetComponent<TransformComponent>(e);
+			transform->materialID = mapID;
+		});
 	// ParticleComponent
 	m_pComponentEventDispatcher->RegisterOnAdd<ParticleComponent>(
 		[&]([[maybe_unused]] Entity e, [[maybe_unused]] ParticleComponent* c) {
@@ -239,6 +277,12 @@ void GameCore::RegisterECSEvents()
 			//m_EngineCommand->GetResourceManager()->DeleteConstantBuffer(c->perFrameBufferIndex.value());
 			//m_EngineCommand->GetResourceManager()->DeleteRWStructuredBuffer(c->freeListBufferIndex.value());
 		});
+	m_pComponentEventDispatcher->RegisterOnRestore<ParticleComponent>(
+		[&]([[maybe_unused]] Entity e, [[maybe_unused]] ParticleComponent* c) {
+			c->bufferIndex = m_EngineCommand->GetResourceManager()->CreateRWStructuredBuffer<BUFFER_DATA_PARTICLE>(c->count);
+			c->perFrameBufferIndex = m_EngineCommand->GetResourceManager()->CreateConstantBuffer<BUFFER_DATA_PARTICLE_PERFRAME>();
+			c->freeListBufferIndex = m_EngineCommand->GetResourceManager()->CreateRWStructuredBuffer<uint32_t>(c->count, true);
+		});
 	// EmitterComponent
 	m_pComponentEventDispatcher->RegisterOnAdd<EmitterComponent>(
 		[&]([[maybe_unused]] Entity e, [[maybe_unused]] EmitterComponent* c) {
@@ -256,6 +300,10 @@ void GameCore::RegisterECSEvents()
 			//m_EngineCommand->GetResourceManager()->GetIntegrationData(IntegrationDataType::Emitter)->RemoveMapID(c->bufferIndex.value());
 			// StructuredBufferの削除
 			//m_EngineCommand->GetResourceManager()->DeleteStructuredBuffer(c->bufferIndex.value());
+		});
+	m_pComponentEventDispatcher->RegisterOnRestore<EmitterComponent>(
+		[&]([[maybe_unused]] Entity e, [[maybe_unused]] EmitterComponent* c) {
+			c->bufferIndex = m_EngineCommand->GetResourceManager()->CreateStructuredBuffer<BUFFER_DATA_EMITTER>(1);
 		});
 	// LineRendererComponent
 	m_pComponentEventDispatcher->RegisterOnAdd<LineRendererComponent>(
@@ -275,6 +323,11 @@ void GameCore::RegisterECSEvents()
 			// Line統合バッファからmapIDを削除
 			m_EngineCommand->GetResourceManager()->GetIntegrationData(IntegrationDataType::Line)->RemoveMapID(c->mapID.value());
 		});
+	m_pComponentEventDispatcher->RegisterOnRestore<LineRendererComponent>(
+		[&]([[maybe_unused]] Entity e, [[maybe_unused]] LineRendererComponent* c, [[maybe_unused]] size_t idx) {
+			uint32_t mapID = m_EngineCommand->GetResourceManager()->GetIntegrationData(IntegrationDataType::Line)->GetMapID();
+			c->mapID = mapID;
+		});
 	// Rigidbody2DComponent
 	m_pComponentEventDispatcher->RegisterOnAdd<Rigidbody2DComponent>(
 		[&]([[maybe_unused]] Entity e, [[maybe_unused]] Rigidbody2DComponent* c) {
@@ -289,6 +342,10 @@ void GameCore::RegisterECSEvents()
 	m_pComponentEventDispatcher->RegisterOnRemove<Rigidbody2DComponent>(
 		[&]([[maybe_unused]] Entity e, [[maybe_unused]] Rigidbody2DComponent* c) {
 		});
+	m_pComponentEventDispatcher->RegisterOnRestore<Rigidbody2DComponent>(
+		[&]([[maybe_unused]] Entity e, [[maybe_unused]] Rigidbody2DComponent* c) {
+			c->selfEntity = e;
+		});
 	// BoxCollider2DComponent
 	m_pComponentEventDispatcher->RegisterOnAdd<BoxCollider2DComponent>(
 		[&]([[maybe_unused]] Entity e, [[maybe_unused]] BoxCollider2DComponent* c) {
@@ -299,6 +356,9 @@ void GameCore::RegisterECSEvents()
 			*c = srcBox;
 		});
 	m_pComponentEventDispatcher->RegisterOnRemove<BoxCollider2DComponent>(
+		[&]([[maybe_unused]] Entity e, [[maybe_unused]] BoxCollider2DComponent* c) {
+		});
+	m_pComponentEventDispatcher->RegisterOnRestore<BoxCollider2DComponent>(
 		[&]([[maybe_unused]] Entity e, [[maybe_unused]] BoxCollider2DComponent* c) {
 		});
 	// EffectComponent
@@ -318,6 +378,11 @@ void GameCore::RegisterECSEvents()
 		[&]([[maybe_unused]] Entity e, [[maybe_unused]] EffectComponent* c) {
 			// Effect統合バッファからmapIDを削除
 			//m_EngineCommand->GetResourceManager()->GetIntegrationData(IntegrationDataType::Effect)->RemoveMapID(c->mapID.value());
+		});
+	m_pComponentEventDispatcher->RegisterOnRestore<EffectComponent>(
+		[&]([[maybe_unused]] Entity e, [[maybe_unused]] EffectComponent* c) {
+			c->isRun = false;
+			c->isLoop = true;
 		});
 	// UISpriteComponent
 	m_pComponentEventDispatcher->RegisterOnAdd<UISpriteComponent>(
@@ -340,6 +405,12 @@ void GameCore::RegisterECSEvents()
 			m_EngineCommand->GetResourceManager()->GetIntegrationData(IntegrationDataType::UISprite)->RemoveMapID(c->mapID.value());
 			m_EngineCommand->GetResourceManager()->GetUIContainer()->RemoveUI(c->mapID.value());
 		});
+	m_pComponentEventDispatcher->RegisterOnRestore<UISpriteComponent>(
+		[&]([[maybe_unused]] Entity e, [[maybe_unused]] UISpriteComponent* c) {
+			uint32_t mapID = m_EngineCommand->GetResourceManager()->GetIntegrationData(IntegrationDataType::UISprite)->GetMapID();
+			c->mapID = mapID;
+			m_EngineCommand->GetResourceManager()->GetUIContainer()->AddUI(mapID);
+		});
 	// LightComponent
 	m_pComponentEventDispatcher->RegisterOnAdd<LightComponent>(
 		[&]([[maybe_unused]] Entity e, [[maybe_unused]] LightComponent* c) {
@@ -357,6 +428,11 @@ void GameCore::RegisterECSEvents()
 		[&]([[maybe_unused]] Entity e, [[maybe_unused]] LightComponent* c) {
 			// Light統合バッファからmapIDを削除
 			m_EngineCommand->GetResourceManager()->RecycleLightIndex(c->mapID.value());
+		});
+	m_pComponentEventDispatcher->RegisterOnRestore<LightComponent>(
+		[&]([[maybe_unused]] Entity e, [[maybe_unused]] LightComponent* c) {
+			uint32_t mapID = m_EngineCommand->GetResourceManager()->GetLightIndex();
+			c->mapID = mapID;
 		});
 	// AudioComponent
 	m_pComponentEventDispatcher->RegisterOnAdd<AudioComponent>(
@@ -377,6 +453,9 @@ void GameCore::RegisterECSEvents()
 				}
 			}
 		});
+	m_pComponentEventDispatcher->RegisterOnRestore<AudioComponent>(
+		[&]([[maybe_unused]] Entity e, [[maybe_unused]] AudioComponent* c) {
+		});
 	// AnimationComponent
 	m_pComponentEventDispatcher->RegisterOnAdd<AnimationComponent>(
 		[&]([[maybe_unused]] Entity e, [[maybe_unused]] AnimationComponent* c) {
@@ -385,10 +464,15 @@ void GameCore::RegisterECSEvents()
 			ModelData* model = m_EngineCommand->GetResourceManager()->GetModelManager()->GetModelData(meshFilter->modelID.value());
 			if (!model) { return; }
 			if (model->animations.empty()) { return; }
+			c->numAnimation = static_cast<uint32_t>(model->animations.size());
 			if (model->isBone)
 			{
 				c->skeleton = model->skeleton;
-				c->skinCluster = model->skinCluster;
+				c->skinClusters.clear();
+				for (auto& mesh : model->meshes)
+				{
+					c->skinClusters.push_back(mesh.skinCluster);
+				}
 				c->modelName = model->name;
 				c->boneOffsetID = model->AllocateBoneOffsetIdx();
 			}
@@ -402,10 +486,15 @@ void GameCore::RegisterECSEvents()
 			ModelData* model = m_EngineCommand->GetResourceManager()->GetModelManager()->GetModelData(meshFilter->modelID.value());
 			if (!model) { return; }
 			if (model->animations.empty()) { return; }
+			c->numAnimation = static_cast<uint32_t>(model->animations.size());
 			if (model->isBone)
 			{
 				c->skeleton = model->skeleton;
-				c->skinCluster = model->skinCluster;
+				c->skinClusters.clear();
+				for (auto& mesh : model->meshes)
+				{
+					c->skinClusters.push_back(mesh.skinCluster);
+				}
 				c->modelName = model->name;
 				c->boneOffsetID = model->AllocateBoneOffsetIdx();
 			}
@@ -414,6 +503,26 @@ void GameCore::RegisterECSEvents()
 		[&]([[maybe_unused]] Entity e, [[maybe_unused]] AnimationComponent* c) {
 			ModelData* model = m_EngineCommand->GetResourceManager()->GetModelManager()->GetModelData(c->modelName);
 			model->RemoveBoneOffsetIdx(c->boneOffsetID.value());
+		});
+	m_pComponentEventDispatcher->RegisterOnRestore<AnimationComponent>(
+		[&]([[maybe_unused]] Entity e, [[maybe_unused]] AnimationComponent* c) {
+			MeshFilterComponent* meshFilter = m_pECSManager->GetComponent<MeshFilterComponent>(e);
+			if (!meshFilter) { return; }
+			ModelData* model = m_EngineCommand->GetResourceManager()->GetModelManager()->GetModelData(meshFilter->modelID.value());
+			if (!model) { return; }
+			if (model->animations.empty()) { return; }
+			c->numAnimation = static_cast<uint32_t>(model->animations.size());
+			if (model->isBone)
+			{
+				c->skeleton = model->skeleton;
+				c->skinClusters.clear();
+				for (auto& mesh : model->meshes)
+				{
+					c->skinClusters.push_back(mesh.skinCluster);
+				}
+				c->modelName = model->name;
+				c->boneOffsetID = model->AllocateBoneOffsetIdx();
+			}
 		});
 	// Prefabにコンポーネントを登録
 	IPrefab::RegisterCopyFunc<TransformComponent>();
@@ -432,6 +541,22 @@ void GameCore::RegisterECSEvents()
 	IPrefab::RegisterCopyFunc<LightComponent>();
 	IPrefab::RegisterCopyFunc<AudioComponent>();
 	IPrefab::RegisterCopyFunc<AnimationComponent>();
+	IPrefab::RegisterPrefabRestore<TransformComponent>();
+	IPrefab::RegisterPrefabRestore<CameraComponent>();
+	IPrefab::RegisterPrefabRestore<MeshFilterComponent>();
+	IPrefab::RegisterPrefabRestore<MeshRendererComponent>();
+	IPrefab::RegisterPrefabRestore<ScriptComponent>();
+	IPrefab::RegisterPrefabRestore<MaterialComponent>();
+	IPrefab::RegisterPrefabRestore<ParticleComponent>();
+	IPrefab::RegisterPrefabRestore<EmitterComponent>();
+	IPrefab::RegisterPrefabRestore<LineRendererComponent>();
+	IPrefab::RegisterPrefabRestore<Rigidbody2DComponent>();
+	IPrefab::RegisterPrefabRestore<BoxCollider2DComponent>();
+	IPrefab::RegisterPrefabRestore<EffectComponent>();
+	IPrefab::RegisterPrefabRestore<UISpriteComponent>();
+	IPrefab::RegisterPrefabRestore<LightComponent>();
+	IPrefab::RegisterPrefabRestore<AudioComponent>();
+	IPrefab::RegisterPrefabRestore<AnimationComponent>();
 }
 
 void GameCore::RegisterECSSystems(ResourceManager* resourceManager, GraphicsEngine* graphicsEngine)
