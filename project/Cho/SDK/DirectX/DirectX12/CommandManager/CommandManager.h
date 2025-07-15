@@ -58,6 +58,8 @@ public:
 
     // コマンドキュー取得
 	ID3D12CommandQueue* GetCommandQueue(QueueType type);
+	// コマンドキューコンテナ取得
+	std::array<std::unique_ptr<QueueContext>, kQueueTypeCount>& GetQueueContexts() { return m_QueueContexts; }
     // コマンドリストの実行
     uint64_t ExecuteCommandList(ID3D12GraphicsCommandList6* commandList, QueueType type);
 	// シグナル

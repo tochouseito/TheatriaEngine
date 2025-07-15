@@ -2,8 +2,6 @@
 #include <vector>
 #include <cstdint>
 #include <memory>
-#include "Core/ChoLog/ChoLog.h"
-using namespace Cho;
 
 // フリーリスト付き可変長配列
 template <typename T>
@@ -101,7 +99,8 @@ public:
         if (nextIndex >= data.size())
         {
             data.push_back(std::move(value));
-        } else
+        }
+        else
         {
             data[nextIndex] = std::move(value);
         }
@@ -116,8 +115,7 @@ public:
             size_t index = freeList.back();
             freeList.pop_back();
 
-            // 配置newで再構築
-            new (&data[index]) T(std::forward<Args>(args)...);
+            data[index] = std::move(T(std::forward<Args>(args)...));
             return index;
         }
 
@@ -134,10 +132,11 @@ public:
     }
 
     // 指定インデックスの要素を削除（フリーリストに追加）
-    void erase(size_t index) {
+    void erase(size_t index)
+    {
         if (index >= nextIndex)
         {
-            Log::Write(LogLevel::Assert, "Invalid index out_of_range");
+            throw std::out_of_range("Index out of range in FVector::erase");
             return;
         }
 
@@ -150,42 +149,48 @@ public:
     }
 
     // インデックスアクセス
-    T& operator[](size_t index) {
-        if (index >= nextIndex) {
-			Log::Write(LogLevel::Assert, "Index out of range");
+    T& operator[](size_t index)
+    {
+        if (index >= nextIndex)
+        {
+            throw std::out_of_range("Index out of range in FVector::erase");
         }
         return data[index];
     }
 
-    const T& operator[](size_t index) const {
-        if (index >= nextIndex) {
-			Log::Write(LogLevel::Assert, "Index out of range");
+    const T& operator[](size_t index) const
+    {
+        if (index >= nextIndex)
+        {
+            throw std::out_of_range("Index out of range in FVector::erase");
         }
         return data[index];
     }
 
-	// 要素が有効かどうか
-	bool isValid(size_t index) const
-	{
+    // 要素が有効かどうか
+    bool isValid(size_t index) const
+    {
         // フリーリストにあったら無効な要素
-		for (const auto& freeIndex : freeList)
-		{
-			if (index == freeIndex)
-			{
-				return false;
-			}
-		}
-		// 有効な要素
-		return index < nextIndex;
-	}
+        for (const auto& freeIndex : freeList)
+        {
+            if (index == freeIndex)
+            {
+                return false;
+            }
+        }
+        // 有効な要素
+        return index < nextIndex;
+    }
 
     // 予約容量
-    size_t capacity() const {
+    size_t capacity() const
+    {
         return data.capacity();
     }
 
     // クリア
-    void clear() {
+    void clear()
+    {
         for (size_t i = 0; i < nextIndex; ++i)
         {
             if (isValid(i))
@@ -199,12 +204,13 @@ public:
     }
 
     // 予約
-    void reserve(size_t newCapacity) {
+    void reserve(size_t newCapacity)
+    {
         data.reserve(newCapacity);
     }
 
-	// vectorの取得
-	std::vector<T>& GetVector() { return data; }
+    // vectorの取得
+    std::vector<T>& GetVector() { return data; }
 
     T& back()
     {
@@ -215,10 +221,7 @@ public:
                 return data[i];
             }
         }
-        Log::Write(LogLevel::Assert, "FVector::back() called on empty or invalid container");
-        // 万が一に備えて return（未定義動作防止のために例外投げるほうが適切かも）
-        static T dummy{};
-        return dummy;
+        throw std::out_of_range("FVector::back() called on empty or invalid container");
     }
 
     const T& back() const
@@ -230,12 +233,10 @@ public:
                 return data[i];
             }
         }
-        Log::Write(LogLevel::Assert, "FVector::back() const called on empty or invalid container");
-        static const T dummy{};
-        return dummy;
+        throw std::out_of_range("FVector::back() called on empty or invalid container");
     }
 
-	// 非const iterator
+    // 非const iterator
     iterator begin()
     {
         return iterator(this, 0);

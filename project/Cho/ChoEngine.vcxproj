@@ -299,6 +299,7 @@
   <ItemGroup>
     <ClInclude Include="APIExportsMacro.h" />
     <ClInclude Include="Core\Utility\AnimationStruct.h" />
+    <ClInclude Include="Core\Utility\atomic_shared_ptr.h" />
     <ClInclude Include="GameCore\CPrefab\CPrefab.h" />
     <ClInclude Include="Externals\AIUtilityLib\chunk_vector.h" />
     <ClInclude Include="Core\Utility\SoundData.h" />

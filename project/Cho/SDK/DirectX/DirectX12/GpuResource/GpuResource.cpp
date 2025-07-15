@@ -35,3 +35,21 @@ void GpuResource::RemakeResource(ID3D12Device* device, D3D12_HEAP_PROPERTIES& he
 	m_UseState = InitialState;
 	Log::Write(LogLevel::Assert, "CreateCommittedResource", hr);
 }
+
+void GpuResource::ResizeResource(ID3D12Device* device, ID3D12Resource** ppResource, D3D12_HEAP_PROPERTIES& heapProperties, D3D12_HEAP_FLAGS heapFlags, D3D12_RESOURCE_DESC& desc, D3D12_RESOURCE_STATES InitialState, D3D12_CLEAR_VALUE* pClearValue)
+{
+	if (*ppResource) {
+		// 既存のリソースを破棄
+		(*ppResource)->Release();
+		*ppResource = nullptr;
+	}
+	HRESULT hr = device->CreateCommittedResource(
+		&heapProperties,
+		heapFlags,
+		&desc,
+		InitialState,
+		pClearValue,
+		IID_PPV_ARGS(ppResource)
+	);
+	Log::Write(LogLevel::Assert, "CreateCommittedResource", hr);
+}

@@ -60,6 +60,16 @@ public:
 		D3D12_RESOURCE_DESC& desc,
 		D3D12_RESOURCE_STATES InitialState,
 		D3D12_CLEAR_VALUE* pClearValue = nullptr);
+
+    // リソースのサイズを変更して再作成
+    static void ResizeResource(
+        ID3D12Device* device,
+        ID3D12Resource** ppResource,
+        D3D12_HEAP_PROPERTIES& heapProperties,
+        D3D12_HEAP_FLAGS heapFlags,
+        D3D12_RESOURCE_DESC& desc,
+        D3D12_RESOURCE_STATES InitialState,
+		D3D12_CLEAR_VALUE* pClearValue = nullptr);
 protected:
     // リソース
     ComPtr<ID3D12Resource> m_pResource = nullptr;

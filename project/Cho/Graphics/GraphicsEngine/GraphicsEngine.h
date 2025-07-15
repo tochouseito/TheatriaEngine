@@ -9,16 +9,6 @@
 #include "SDK/DirectX/DirectX12/ColorBuffer/ColorBuffer.h"
 #include <array>
 
-//enum RenderTextureType
-//{
-//	GameScreen = 0,				// ゲーム画面用描画結果
-//	SceneScreen,				// シーン画面用描画結果
-//	EffectEditScreen,			// エフェクトエディタ用描画結果
-//	PostProcessScreen,			// ポストプロセス用描画結果
-//	ScenePostProcessScreen,		// シーンポストプロセス用描画結果
-//	RenderTextureTypeCount,		// 種類数(使用禁止)
-//};
-
 enum GameRenderTextureType
 {
 	GameScreenTexture = 0,			// ゲーム画面用描画テクスチャ
@@ -82,6 +72,7 @@ class GraphicsEngine : public Engine
 {
 	friend class TextureManager;
 	friend class PipelineManager;
+	friend class ResourceManager;
 	friend class EngineCommand;
 	friend class ParticleEmitterSystem;
 	friend class EffectEditorSystem;
@@ -124,6 +115,8 @@ public:
 private:
 	// コマンドコンテキストの取得
 	CommandContext* GetCommandContext() { return m_GraphicsCore->GetCommandManager()->GetCommandContext(); }
+	// コマンドマネージャー取得
+	CommandManager* GetCommandManager() { return m_GraphicsCore->GetCommandManager(); }
 	// 記録開始
 	void BeginCommandContext(CommandContext* context);
 	// 記録終了
@@ -161,7 +154,6 @@ private:
 	std::unique_ptr<DepthManager> m_DepthManager = nullptr;
 	std::unique_ptr<PipelineManager> m_PipelineManager = nullptr;
 
-	//std::array<RenderTexture, RenderTextureType::RenderTextureTypeCount> m_RenderTextures;
 	std::array<RenderTexture, GameRenderTextureType::GameRenderTextureTypeCount> m_GameRenderTextures;
 	std::array<RenderTexture, SceneRenderTextureType::SceneRenderTextureTypeCount> m_SceneRenderTextures;
 

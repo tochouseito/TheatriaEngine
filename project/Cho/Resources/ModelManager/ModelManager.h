@@ -6,6 +6,7 @@
 #include "Core/Utility/AnimationStruct.h"
 #include <unordered_map>
 #include <filesystem>
+#include <memory>
 #include <list>
 #include <map>
 // assimp
