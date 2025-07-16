@@ -282,8 +282,6 @@ void ScriptInstanceGenerateSystem::GenerateInstance(Entity e, ScriptComponent& s
 	script.objectHandle = object->GetHandle();
 	// ECSをセット
 	scriptInstance->SetECSPtr(m_pEcs);
-	// TransformComponentを取得
-	scriptInstance->transform = m_pEcs->GetComponent<TransformComponent>(e);
 	// スクリプトのStart関数とUpdate関数をラップ
 	script.startFunc = [scriptInstance]() {
 		scriptInstance->Start();
@@ -309,13 +307,12 @@ void ScriptInstanceGenerateSystem::GenerateInstance(Entity e, ScriptComponent& s
 	script.isActive = true;
 }
 
-void ScriptSystem::InitializeComponent(Entity e, ScriptComponent& script)
+void ScriptSystem::InitializeComponent(Entity, ScriptComponent& script)
 {
 	if (!script.isActive || !script.instance) return;
 	try
 	{
 		// スクリプトのStart関数を呼び出す
-		script.instance->transform = m_pEcs->GetComponent<TransformComponent>(e);
 		script.startFunc();
 	}
 	catch (const std::exception& e)
@@ -332,13 +329,12 @@ void ScriptSystem::InitializeComponent(Entity e, ScriptComponent& script)
 	}
 }
 
-void ScriptSystem::UpdateComponent(Entity e, ScriptComponent& script)
+void ScriptSystem::UpdateComponent(Entity, ScriptComponent& script)
 {
 	if (!script.isActive || !script.instance) return;
 	try
 	{
 		// スクリプトのUpdate関数を呼び出す
-		script.instance->transform = m_pEcs->GetComponent<TransformComponent>(e);
 		script.updateFunc();
 	}
 	catch (const std::exception& e)

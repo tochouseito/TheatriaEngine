@@ -9,7 +9,6 @@
 namespace ChoSystem
 {
 	SceneManagerAPI sceneManager;
-	InputManagerAPI inputManager;
 }
 
 CHO_API Engine* cho::CreateEngine(RuntimeMode mode)
@@ -104,47 +103,47 @@ void ChoSystem::SceneManagerAPI::ChangeMainScene(const std::wstring& sceneName)
 	sceneName;
 }
 
-bool ChoSystem::InputManagerAPI::PushKey(const uint8_t& keyNumber)
+bool ChoSystem::Input::PushKey(const uint8_t& keyNumber)
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->PushKey(keyNumber);
 }
 
-bool ChoSystem::InputManagerAPI::TriggerKey(const uint8_t& keyNumber)
+bool ChoSystem::Input::TriggerKey(const uint8_t& keyNumber)
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->TriggerKey(keyNumber);
 }
 
-const DIMOUSESTATE2& ChoSystem::InputManagerAPI::GetAllMouse()
+const DIMOUSESTATE2& ChoSystem::Input::GetAllMouse()
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->GetAllMouse();
 }
 
-MouseMove ChoSystem::InputManagerAPI::GetMouseMove()
+MouseMove ChoSystem::Input::GetMouseMove()
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->GetMouseMove();
 }
 
-bool ChoSystem::InputManagerAPI::IsPressMouse(const int32_t& mouseNumber)
+bool ChoSystem::Input::IsPressMouse(const int32_t& mouseNumber)
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->IsPressMouse(mouseNumber);
 }
 
-bool ChoSystem::InputManagerAPI::IsTriggerMouse(const int32_t& mouseNumber)
+bool ChoSystem::Input::IsTriggerMouse(const int32_t& mouseNumber)
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->IsTriggerMouse(mouseNumber);
 }
 
-const Vector2& ChoSystem::InputManagerAPI::GetMouseWindowPosition()
+const Vector2& ChoSystem::Input::GetMouseWindowPosition()
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->GetMouseWindowPosition();
 }
 
-Vector2 ChoSystem::InputManagerAPI::GetMouseScreenPosition()
+Vector2 ChoSystem::Input::GetMouseScreenPosition()
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->GetMouseScreenPosition();
 }
 
-bool ChoSystem::InputManagerAPI::GetJoystickState(const int32_t& stickNo, XINPUT_STATE& out)
+bool ChoSystem::Input::GetJoystickState(const int32_t& stickNo, XINPUT_STATE& out)
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->GetJoystickState(stickNo, out);
 }

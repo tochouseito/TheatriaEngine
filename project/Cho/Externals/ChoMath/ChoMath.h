@@ -100,4 +100,6 @@ namespace ChoMath {
 
 	// Matrix4 から SRT を取り出す関数
 	SRT DecomposeMatrix(const Matrix4& in);
+
+	float Lerp(const float& start, const float& end, const float& t);
 };

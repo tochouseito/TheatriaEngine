@@ -747,4 +747,9 @@ ChoMath::SRT ChoMath::DecomposeMatrix(const Matrix4& in)
 	return out;
 }
 
+float ChoMath::Lerp(const float& start, const float& end, const float& t)
+{
+	return start + (end - start) * t;
+}
+
 

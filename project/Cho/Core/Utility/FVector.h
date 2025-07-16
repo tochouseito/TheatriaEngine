@@ -191,13 +191,6 @@ public:
     // クリア
     void clear()
     {
-        for (size_t i = 0; i < nextIndex; ++i)
-        {
-            if (isValid(i))
-            {
-                data[i].~T();
-            }
-        }
         data.clear();
         freeList.clear();
         nextIndex = 0;

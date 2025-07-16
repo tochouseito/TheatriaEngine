@@ -50,7 +50,7 @@ namespace ChoSystem
 	CHO_API float DeltaTime();
 	// Marionnette取得
 	CHO_API Marionnette* GetMarionnettePtr(const std::wstring& name);
-	template<cho::ComponentInterface::MarionnetteInterface T>
+	template<ChoSystem::MarionnetteInterface T>
 	T* GetMarionnette(const std::wstring& name)
 	{
 		return static_cast<T*>(GetMarionnettePtr(name));
@@ -66,7 +66,7 @@ namespace ChoSystem
 	CHO_API extern SceneManagerAPI sceneManager;
 
 	// InputManager
-	struct InputManagerAPI
+	namespace Input
 	{
 		// キーの押下をチェック
 		CHO_API bool PushKey(const uint8_t& keyNumber);
@@ -101,6 +101,5 @@ namespace ChoSystem
 		// 接続されているジョイスティック数を取得する
 		CHO_API float GetLRTrigger(const LR& LorR, int32_t stickNo);
 	};
-	CHO_API extern InputManagerAPI inputManager;
 #endif
 }
