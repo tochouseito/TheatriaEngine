@@ -3,7 +3,7 @@
 #include "Resources/ResourceManager/ResourceManager.h"
 #include "Graphics/GraphicsEngine/GraphicsEngine.h"
 #include "Core/ChoLog/ChoLog.h"
-using namespace Cho;
+using namespace cho;
 
 void TextureManager::LoadTextureFile(const fs::path& filePath)
 {

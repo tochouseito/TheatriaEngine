@@ -6,7 +6,7 @@
 #include "Editor/EditorManager/EditorManager.h"
 #include "Core/Utility/GenerateUnique.h"
 #include "Core/ChoLog/ChoLog.h"
-using namespace Cho;
+using namespace cho;
 #include <random>
 
 bool Add3DObjectCommand::Execute(EngineCommand* edit)

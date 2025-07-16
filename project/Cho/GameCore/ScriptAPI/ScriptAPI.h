@@ -73,7 +73,7 @@
 class ECSManager;
 class ResourceManager;
 
-namespace Cho
+namespace cho
 {
     namespace ComponentInterface
     {
@@ -121,7 +121,7 @@ namespace Cho
 			MaterialComponent* data = nullptr;
         };
         template<>
-        struct InterfaceTraits<Cho::ComponentInterface::Material>
+        struct InterfaceTraits<cho::ComponentInterface::Material>
         {
             using Component = MaterialComponent;
         };
@@ -146,7 +146,7 @@ namespace Cho
             AnimationComponent* data = nullptr;
         };
         template<>
-        struct InterfaceTraits<Cho::ComponentInterface::Animation>
+        struct InterfaceTraits<cho::ComponentInterface::Animation>
         {
             using Component = AnimationComponent;
 		};

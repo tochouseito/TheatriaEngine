@@ -1,8 +1,8 @@
 #include "ChoLog.h"
 #include <cassert>
 
-std::string Cho::Log::LogFileName = "ChoEngineLog.txt";
-std::mutex Cho::Log::logMutex;
+std::string cho::Log::LogFileName = "ChoEngineLog.txt";
+std::mutex cho::Log::logMutex;
 
 std::wstring ConvertString(const std::string& str)
 {
@@ -38,7 +38,7 @@ std::string ConvertString(const std::wstring& str)
     return result;
 }
 
-void Cho::Log::Write(LogLevel level,
+void cho::Log::Write(LogLevel level,
     const std::string& message,
     std::optional<std::variant<bool, HRESULT>> flag,
     const std::source_location location)
@@ -121,7 +121,7 @@ void Cho::Log::Write(LogLevel level,
 #endif
 }
 
-void Cho::Log::WriteToFile(const std::string& message)
+void cho::Log::WriteToFile(const std::string& message)
 {
     std::lock_guard<std::mutex> lock(logMutex);
     std::ofstream logFile("ChoEngineLog.txt", std::ios::app);
@@ -136,7 +136,7 @@ void Cho::Log::WriteToFile(const std::string& message)
     }
 }
 
-std::string Cho::Log::ToString(LogLevel level)
+std::string cho::Log::ToString(LogLevel level)
 {
     switch (level)
     {

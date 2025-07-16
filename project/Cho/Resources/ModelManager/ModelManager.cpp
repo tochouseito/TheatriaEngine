@@ -7,7 +7,7 @@
 #include "Core/ChoLog/ChoLog.h"
 #include "Core/Utility/GenerateUnique.h"
 #include <filesystem>
-using namespace Cho;
+using namespace cho;
 
 bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 {

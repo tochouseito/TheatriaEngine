@@ -12,29 +12,29 @@ namespace ChoSystem
 	InputManagerAPI inputManager;
 }
 
-CHO_API Engine* Cho::CreateEngine(RuntimeMode mode)
+CHO_API Engine* cho::CreateEngine(RuntimeMode mode)
 {
     return new ChoEngine(mode);
 }
 
-CHO_API void Cho::DestroyEngine(Engine* engine)
+CHO_API void cho::DestroyEngine(Engine* engine)
 {
 	delete engine;
 }
 
-CHO_API void Cho::SetEngine(Engine* engine)
+CHO_API void cho::SetEngine(Engine* engine)
 {
 	g_Engine = static_cast<ChoEngine*>(engine);
 }
 
 CHO_API bool ChoSystem::SaveGameParameter(const std::wstring& filePath, const std::string& group, const std::string& item, const std::string& dataName, const GameParameterVariant& value)
 {
-	return Cho::FileSystem::SaveGameParameter(filePath, group, item, dataName, value);
+	return cho::FileSystem::SaveGameParameter(filePath, group, item, dataName, value);
 }
 
 CHO_API bool ChoSystem::LoadGameParameter(const std::wstring& filePath, const std::string& group, const std::string& item, const std::string& dataName, GameParameterVariant& outValue)
 {
-	return Cho::FileSystem::LoadGameParameter(filePath, group, item, dataName, outValue);
+	return cho::FileSystem::LoadGameParameter(filePath, group, item, dataName, outValue);
 }
 
 // ゲームオブジェクト取得
@@ -70,6 +70,23 @@ CHO_API GameObject* ChoSystem::CloneGameObject(const GameObject* srcObj, Vector3
 CHO_API float ChoSystem::DeltaTime()
 {
 	return Timer::GetDeltaTime();
+}
+
+CHO_API Marionnette* ChoSystem::GetMarionnettePtr(const std::wstring& name)
+{
+	GameObject* obj = FindGameObjectByName(name);
+	if (!obj) { return nullptr; }
+	ScriptComponent* script = g_Engine->GetEngineCommand()->GetGameCore()->GetECSManager()->GetComponent<ScriptComponent>(obj->GetHandle().entity);
+	if (!script) { return nullptr; }
+	if (script->instance)
+	{
+		return script->instance;
+	}
+	else
+	{
+		//Log::Write(LogLevel::Error, L"Marionnette instance is nullptr for object: " + name);
+		return nullptr;
+	}
 }
 
 void ChoSystem::SceneManagerAPI::LoadScene(const std::wstring& sceneName)

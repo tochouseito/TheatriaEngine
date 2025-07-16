@@ -4,7 +4,7 @@
 #include "EngineCommand/EngineCommands.h"
 #include "GameCore/GameCore.h"
 #include "Core/ChoLog/ChoLog.h"
-using namespace Cho;
+using namespace cho;
 #include "Resources/ResourceManager/ResourceManager.h"
 
 void Inspector::Initialize()

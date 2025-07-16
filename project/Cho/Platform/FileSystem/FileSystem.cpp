@@ -14,19 +14,19 @@
 #include <ole2.h>
 #include <DbgHelp.h>
 #pragma comment(lib, "Dbghelp.lib")
-using namespace Cho;
+using namespace cho;
 
-std::wstring Cho::FileSystem::m_sProjectName = L"";
+std::wstring cho::FileSystem::m_sProjectName = L"";
 // GUID 生成
-std::string Cho::FileSystem::ScriptProject::m_SlnGUID = GenerateGUID();
-std::string Cho::FileSystem::ScriptProject::m_ProjGUID = GenerateGUID();
-std::string Cho::FileSystem::ScriptProject::m_SlnPath = "";
-std::string Cho::FileSystem::ScriptProject::m_ProjPath = "";
-HMODULE Cho::FileSystem::ScriptProject::m_DllHandle = nullptr;
-DWORD64 Cho::FileSystem::ScriptProject::m_PDBBaseAddress = 0;
+std::string cho::FileSystem::ScriptProject::m_SlnGUID = GenerateGUID();
+std::string cho::FileSystem::ScriptProject::m_ProjGUID = GenerateGUID();
+std::string cho::FileSystem::ScriptProject::m_SlnPath = "";
+std::string cho::FileSystem::ScriptProject::m_ProjPath = "";
+HMODULE cho::FileSystem::ScriptProject::m_DllHandle = nullptr;
+DWORD64 cho::FileSystem::ScriptProject::m_PDBBaseAddress = 0;
 
 // プロジェクトフォルダを探す
-std::optional<std::filesystem::path> Cho::FileSystem::FindOrCreateGameProjects()
+std::optional<std::filesystem::path> cho::FileSystem::FindOrCreateGameProjects()
 {
     namespace fs = std::filesystem;
     fs::path execPath = fs::current_path();
@@ -44,7 +44,7 @@ std::optional<std::filesystem::path> Cho::FileSystem::FindOrCreateGameProjects()
 }
 
 // プロジェクトフォルダを取得
-std::vector<std::wstring> Cho::FileSystem::GetProjectFolders()
+std::vector<std::wstring> cho::FileSystem::GetProjectFolders()
 {
     std::vector<std::wstring> result;
 
@@ -63,7 +63,7 @@ std::vector<std::wstring> Cho::FileSystem::GetProjectFolders()
 }
 
 // 新しいプロジェクトを作成
-bool Cho::FileSystem::CreateNewProjectFolder(const std::wstring& projectName)
+bool cho::FileSystem::CreateNewProjectFolder(const std::wstring& projectName)
 {
     auto rootOpt = FindOrCreateGameProjects();
     if (!rootOpt) return false;
@@ -96,7 +96,7 @@ bool Cho::FileSystem::CreateNewProjectFolder(const std::wstring& projectName)
 }
 
 // プロジェクトファイルを保存
-bool Cho::FileSystem::SaveProjectFile(const std::wstring& projectName, const std::vector<std::wstring>& sceneFiles)
+bool cho::FileSystem::SaveProjectFile(const std::wstring& projectName, const std::vector<std::wstring>& sceneFiles)
 {
     std::filesystem::path path = std::filesystem::path(projectName) / "ChoProject.json";
 
@@ -132,7 +132,7 @@ bool Cho::FileSystem::SaveProjectFile(const std::wstring& projectName, const std
 }
 
 // プロジェクトファイルを読み込む
-std::optional<Cho::ProjectInfo> Cho::FileSystem::LoadProjectFile(const std::wstring& projectName)
+std::optional<cho::ProjectInfo> cho::FileSystem::LoadProjectFile(const std::wstring& projectName)
 {
     std::filesystem::path path = std::filesystem::path(projectName) / "ChoProject.json";
 
@@ -152,7 +152,7 @@ std::optional<Cho::ProjectInfo> Cho::FileSystem::LoadProjectFile(const std::wstr
             return std::nullopt; // ファイル種別違い
         }
 
-        Cho::ProjectInfo info;
+        cho::ProjectInfo info;
         info.name = j.value("name", "");
         info.version = j.value("version", "");
 
@@ -171,7 +171,7 @@ std::optional<Cho::ProjectInfo> Cho::FileSystem::LoadProjectFile(const std::wstr
 }
 
 // エンジン設定ファイルを保存
-bool Cho::FileSystem::SaveEngineConfig(const std::wstring& projectName, const EngineConfigInfo& config)
+bool cho::FileSystem::SaveEngineConfig(const std::wstring& projectName, const EngineConfigInfo& config)
 {
     std::filesystem::path path = std::filesystem::path(projectName) / "EngineConfig.json";
 
@@ -201,7 +201,7 @@ bool Cho::FileSystem::SaveEngineConfig(const std::wstring& projectName, const En
 }
 
 // エンジン設定ファイルを読み込む
-std::optional<Cho::EngineConfigInfo> Cho::FileSystem::LoadEngineConfig(const std::wstring& projectName)
+std::optional<cho::EngineConfigInfo> cho::FileSystem::LoadEngineConfig(const std::wstring& projectName)
 {
     std::filesystem::path path = std::filesystem::path(projectName) / "EngineConfig.json";
 
@@ -239,7 +239,7 @@ std::optional<Cho::EngineConfigInfo> Cho::FileSystem::LoadEngineConfig(const std
 }
 
 // ゲーム設定ファイルを保存
-bool Cho::FileSystem::SaveGameSettings(const std::wstring& projectName, const Cho::GameSettingsInfo& settings)
+bool cho::FileSystem::SaveGameSettings(const std::wstring& projectName, const cho::GameSettingsInfo& settings)
 {
     std::filesystem::path path = std::filesystem::path(projectName) / "ProjectSettings";
 	std::filesystem::path fileName = "GameSettings.json";
@@ -277,7 +277,7 @@ bool Cho::FileSystem::SaveGameSettings(const std::wstring& projectName, const Ch
 }
 
 // ゲーム設定ファイルを読み込む
-bool Cho::FileSystem::LoadGameSettings(const std::wstring& filePath)
+bool cho::FileSystem::LoadGameSettings(const std::wstring& filePath)
 {
     try
     {
@@ -292,12 +292,12 @@ bool Cho::FileSystem::LoadGameSettings(const std::wstring& filePath)
             return false;
         }
 
-        Cho::GameSettingsInfo settings;
+        cho::GameSettingsInfo settings;
         settings.startScene = std::filesystem::path(j.value("startScene", "MainScene")).wstring();
         settings.frameRate = j.value("frameRate", 60);
         settings.fixedDeltaTime = j.value("fixedDeltaTime", 1.0f / 60.0f);
         settings.debugMode = j.value("debugMode", false);
-		Cho::FileSystem::g_GameSettings = settings;
+		cho::FileSystem::g_GameSettings = settings;
 
         return true;
     }
@@ -307,7 +307,7 @@ bool Cho::FileSystem::LoadGameSettings(const std::wstring& filePath)
     }
 }
 
-bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::wstring& srcFileName, GameScene* scene, ECSManager* ecs)
+bool cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::wstring& srcFileName, GameScene* scene, ECSManager* ecs)
 {
     ecs;
 	// アセットフォルダが存在しない場合は作成
@@ -348,7 +348,7 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
         {
             if (const auto* t = prefab.GetComponentPtr<TransformComponent>())
             {
-                comps["Transform"] = Cho::Serialization::ToJson(*t);
+                comps["Transform"] = cho::Serialization::ToJson(*t);
             }
         }
 		// MeshFilterComponentの保存
@@ -356,7 +356,7 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
         {
             if (const auto* m = prefab.GetComponentPtr<MeshFilterComponent>())
             {
-                comps["MeshFilter"] = Cho::Serialization::ToJson(*m);
+                comps["MeshFilter"] = cho::Serialization::ToJson(*m);
             }
 		}
         // MeshRendererComponentの保存
@@ -364,7 +364,7 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
         {
             if (const auto* r = prefab.GetComponentPtr<MeshRendererComponent>())
             {
-                comps["MeshRenderer"] = Cho::Serialization::ToJson(*r);
+                comps["MeshRenderer"] = cho::Serialization::ToJson(*r);
             }
 		}
         // MaterialComponentの保存
@@ -372,7 +372,7 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
         {
             if (const auto* m = prefab.GetComponentPtr<MaterialComponent>())
             {
-                comps["Material"] = Cho::Serialization::ToJson(*m);
+                comps["Material"] = cho::Serialization::ToJson(*m);
 			}
             }
         // ScriptComponentの保存
@@ -380,7 +380,7 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
         {
             if (const auto* s = prefab.GetComponentPtr<ScriptComponent>())
             {
-                comps["Script"] = Cho::Serialization::ToJson(*s);
+                comps["Script"] = cho::Serialization::ToJson(*s);
             }
         }
         // LineRendererComponentの保存
@@ -389,7 +389,7 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
             const auto* lineRenderers = prefab.GetAllComponentsPtr<LineRendererComponent>();
             if (lineRenderers)
             {
-                comps["LineRenderer"] = Cho::Serialization::ToJson(*lineRenderers);
+                comps["LineRenderer"] = cho::Serialization::ToJson(*lineRenderers);
 			}
             }
         // Rigidbody2DComponentの保存
@@ -397,7 +397,7 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
         {
             if (const auto* rb = prefab.GetComponentPtr<Rigidbody2DComponent>())
             {
-                comps["Rigidbody2D"] = Cho::Serialization::ToJson(*rb);
+                comps["Rigidbody2D"] = cho::Serialization::ToJson(*rb);
             }
         }
         // BoxCollider2DComponentの保存
@@ -405,7 +405,7 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
         {
             if (const auto* bc = prefab.GetComponentPtr<BoxCollider2DComponent>())
             {
-                comps["BoxCollider2D"] = Cho::Serialization::ToJson(*bc);
+                comps["BoxCollider2D"] = cho::Serialization::ToJson(*bc);
             }
         }
         // CameraComponentの保存
@@ -413,7 +413,7 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
         {
             if (const auto* c = prefab.GetComponentPtr<CameraComponent>())
             {
-                comps["Camera"] = Cho::Serialization::ToJson(*c);
+                comps["Camera"] = cho::Serialization::ToJson(*c);
 			}
             }
         // ParticleComponentの保存
@@ -421,7 +421,7 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
         {
             if (const auto* p = prefab.GetComponentPtr<ParticleComponent>())
             {
-                comps["Particle"] = Cho::Serialization::ToJson(*p);
+                comps["Particle"] = cho::Serialization::ToJson(*p);
             }
         }
         // EmitterComponentの保存
@@ -429,7 +429,7 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
         {
             if (const auto* e = prefab.GetComponentPtr<EmitterComponent>())
             {
-                comps["Emitter"] = Cho::Serialization::ToJson(*e);
+                comps["Emitter"] = cho::Serialization::ToJson(*e);
 			}
         }
         // UISpriteComponentの保存
@@ -437,7 +437,7 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
         {
             if (const auto* ui = prefab.GetComponentPtr<UISpriteComponent>())
             {
-                comps["UISprite"] = Cho::Serialization::ToJson(*ui);
+                comps["UISprite"] = cho::Serialization::ToJson(*ui);
 			}
         }
 		// LightComponentの保存
@@ -445,7 +445,7 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
         {
             if (const auto* l = prefab.GetComponentPtr<LightComponent>())
             {
-                comps["Light"] = Cho::Serialization::ToJson(*l);
+                comps["Light"] = cho::Serialization::ToJson(*l);
             }
         }
 		// AudioComponentの保存
@@ -453,7 +453,7 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
         {
             if (const auto* a = prefab.GetComponentPtr<AudioComponent>())
             {
-                comps["Audio"] = Cho::Serialization::ToJson(*a);
+                comps["Audio"] = cho::Serialization::ToJson(*a);
             }
 		}
         // AnimationComponentの保存
@@ -461,7 +461,7 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
         {
             if (const auto* anim = prefab.GetComponentPtr<AnimationComponent>())
             {
-                comps["Animation"] = Cho::Serialization::ToJson(*anim);
+                comps["Animation"] = cho::Serialization::ToJson(*anim);
             }
 		}
         prefabJson["components"] = comps;
@@ -489,7 +489,7 @@ bool Cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
     }
 }
 
-bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand* engineCommand)
+bool cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand* engineCommand)
 {
     if (!engineCommand) { Log::Write(LogLevel::Assert, "EngineCommand is nullptr"); }
     try
@@ -803,7 +803,7 @@ bool Cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
 //    }
 //}
 
-bool Cho::FileSystem::SaveGameParameter(const std::wstring& filePath, const std::string& group, const std::string& item, const std::string& dataName, const GameParameterVariant& value)
+bool cho::FileSystem::SaveGameParameter(const std::wstring& filePath, const std::string& group, const std::string& item, const std::string& dataName, const GameParameterVariant& value)
 {
     json root;
 
@@ -847,7 +847,7 @@ bool Cho::FileSystem::SaveGameParameter(const std::wstring& filePath, const std:
     return true;
 }
 
-bool Cho::FileSystem::LoadGameParameter(const std::wstring& filePath, const std::string& group, const std::string& item, const std::string& dataName, GameParameterVariant& outValue)
+bool cho::FileSystem::LoadGameParameter(const std::wstring& filePath, const std::string& group, const std::string& item, const std::string& dataName, GameParameterVariant& outValue)
 {
     json root;
 	// ファイルを開く
@@ -887,7 +887,7 @@ bool Cho::FileSystem::LoadGameParameter(const std::wstring& filePath, const std:
 }
 
 // コンポーネントを保存
-json Cho::Serialization::ToJson(const TransformComponent& t)
+json cho::Serialization::ToJson(const TransformComponent& t)
 {
     json j;
     j["translation"] = { t.position.x, t.position.y, t.position.z };
@@ -897,7 +897,7 @@ json Cho::Serialization::ToJson(const TransformComponent& t)
     return j;
 }
 
-json Cho::Serialization::ToJson(const CameraComponent& c)
+json cho::Serialization::ToJson(const CameraComponent& c)
 {
     json j;
     j["fovAngleY"] = c.fovAngleY;
@@ -907,7 +907,7 @@ json Cho::Serialization::ToJson(const CameraComponent& c)
     return j;
 }
 
-json Cho::Serialization::ToJson(const MeshFilterComponent& m)
+json cho::Serialization::ToJson(const MeshFilterComponent& m)
 {
     json j;
     if (m.modelID.has_value())
@@ -918,14 +918,14 @@ json Cho::Serialization::ToJson(const MeshFilterComponent& m)
     return j;
 }
 
-json Cho::Serialization::ToJson(const MeshRendererComponent& r)
+json cho::Serialization::ToJson(const MeshRendererComponent& r)
 {
     json j;
     j["visible"] = r.visible;
     return j;
 }
 
-json Cho::Serialization::ToJson(const MaterialComponent& m)
+json cho::Serialization::ToJson(const MaterialComponent& m)
 {
     json j;
 	j["Color"] = { m.color.r, m.color.g, m.color.b, m.color.a };
@@ -938,14 +938,14 @@ json Cho::Serialization::ToJson(const MaterialComponent& m)
 	return j;
 }
 
-json Cho::Serialization::ToJson(const ScriptComponent& s)
+json cho::Serialization::ToJson(const ScriptComponent& s)
 {
 	json j;
 	j["scriptName"] = s.scriptName;
 	return j;
 }
 
-json Cho::Serialization::ToJson(const std::vector<LineRendererComponent>& ls)
+json cho::Serialization::ToJson(const std::vector<LineRendererComponent>& ls)
 {
     json jArray = json::array();
     for (const auto& l : ls)
@@ -959,7 +959,7 @@ json Cho::Serialization::ToJson(const std::vector<LineRendererComponent>& ls)
     return jArray;
 }
 
-json Cho::Serialization::ToJson(const Rigidbody2DComponent& rb)
+json cho::Serialization::ToJson(const Rigidbody2DComponent& rb)
 {
 	json j;
 	j["isActive"] = rb.isActive;
@@ -971,7 +971,7 @@ json Cho::Serialization::ToJson(const Rigidbody2DComponent& rb)
 	return j;
 }
 
-json Cho::Serialization::ToJson(const BoxCollider2DComponent& bc)
+json cho::Serialization::ToJson(const BoxCollider2DComponent& bc)
 {
 	json j;
 	j["offsetX"] = bc.offsetX;
@@ -985,7 +985,7 @@ json Cho::Serialization::ToJson(const BoxCollider2DComponent& bc)
 	return j;
 }
 
-json Cho::Serialization::ToJson(const EmitterComponent& e)
+json cho::Serialization::ToJson(const EmitterComponent& e)
 {
     json j;
     j["lifeTime"] = { e.lifeTime.median,e.lifeTime.amplitude };
@@ -1065,14 +1065,14 @@ json Cho::Serialization::ToJson(const EmitterComponent& e)
 	return j;
 }
 
-json Cho::Serialization::ToJson(const ParticleComponent& p)
+json cho::Serialization::ToJson(const ParticleComponent& p)
 {
     json j;
 	j["count"] = p.count;
 	return j;
 }
 
-json Cho::Serialization::ToJson(const UISpriteComponent& ui)
+json cho::Serialization::ToJson(const UISpriteComponent& ui)
 {
     json j;
 	j["position"] = { ui.position.x, ui.position.y };
@@ -1085,7 +1085,7 @@ json Cho::Serialization::ToJson(const UISpriteComponent& ui)
 	return j;
 }
 
-json Cho::Serialization::ToJson(const LightComponent& l)
+json cho::Serialization::ToJson(const LightComponent& l)
 {
 	json j;
 	j["color"] = { l.color.r, l.color.g, l.color.b, l.color.a };
@@ -1099,7 +1099,7 @@ json Cho::Serialization::ToJson(const LightComponent& l)
 	return j;
 }
 
-json Cho::Serialization::ToJson(const AudioComponent& a)
+json cho::Serialization::ToJson(const AudioComponent& a)
 {
     json j;
 	//j["audioName"] = a.audioName;
@@ -1107,7 +1107,7 @@ json Cho::Serialization::ToJson(const AudioComponent& a)
 	return j;
 }
 
-json Cho::Serialization::ToJson(const AnimationComponent& a)
+json cho::Serialization::ToJson(const AnimationComponent& a)
 {
 	json j;
     j["transitionDuration"] = a.transitionDuration;
@@ -1118,7 +1118,7 @@ json Cho::Serialization::ToJson(const AnimationComponent& a)
 	return j;
 }
 
-FileType Cho::FileSystem::GetJsonFileType(const std::filesystem::path& path)
+FileType cho::FileSystem::GetJsonFileType(const std::filesystem::path& path)
 {
     try
     {
@@ -1147,21 +1147,21 @@ FileType Cho::FileSystem::GetJsonFileType(const std::filesystem::path& path)
     }
 }
 
-void Cho::FileSystem::SaveProject(EditorManager* editorManager, SceneManager* sceneManager, GameWorld* gameWorld, ECSManager* ecs)
+void cho::FileSystem::SaveProject(EditorManager* editorManager, SceneManager* sceneManager, GameWorld* gameWorld, ECSManager* ecs)
 {
     gameWorld; sceneManager;
     if (m_sProjectName.empty()) { return; }
     // セーブ
 	std::filesystem::path projectPath = std::filesystem::path(L"GameProjects") / m_sProjectName;
 	// GameSettingsFile
-    Cho::FileSystem::SaveGameSettings(projectPath, g_GameSettings);
+    cho::FileSystem::SaveGameSettings(projectPath, g_GameSettings);
     // SceneFile
 	// 編集されたシーンを保存
     editorManager->SaveEditingScene();
     for (auto& scene : editorManager->GetSceneMap())
     {
 		// シーンファイルを保存
-        Cho::FileSystem::SaveSceneFile(
+        cho::FileSystem::SaveSceneFile(
             projectPath,
             scene.first,
             editorManager->GetEditScene(scene.first),
@@ -1171,7 +1171,7 @@ void Cho::FileSystem::SaveProject(EditorManager* editorManager, SceneManager* sc
 }
 
 // プロジェクトフォルダを読み込む
-bool Cho::FileSystem::LoadProjectFolder(const std::wstring& projectName, EngineCommand* engineCommand)
+bool cho::FileSystem::LoadProjectFolder(const std::wstring& projectName, EngineCommand* engineCommand)
 {
 	m_sProjectName = projectName;
     std::filesystem::path projectPath = std::filesystem::path(L"GameProjects") / projectName;
@@ -1184,7 +1184,7 @@ bool Cho::FileSystem::LoadProjectFolder(const std::wstring& projectName, EngineC
     return true;
 }
 
-std::string Cho::FileSystem::GenerateGUID()
+std::string cho::FileSystem::GenerateGUID()
 {
     GUID guid;
     HRESULT hr;
@@ -1216,7 +1216,7 @@ std::string Cho::FileSystem::GenerateGUID()
     return oss.str();
 }
 
-void Cho::FileSystem::ScriptProject::GenerateSolutionAndProject()
+void cho::FileSystem::ScriptProject::GenerateSolutionAndProject()
 {
     std::string projectNameStr = ConvertString(m_sProjectName);
     // 出力先
@@ -1268,7 +1268,7 @@ void Cho::FileSystem::ScriptProject::GenerateSolutionAndProject()
     }
 }
 
-void Cho::FileSystem::ScriptProject::UpdateVcxproj()
+void cho::FileSystem::ScriptProject::UpdateVcxproj()
 {
     std::vector<std::string> scriptFiles;
 
@@ -1374,6 +1374,7 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
     vcxFile << "    <ClCompile>\n";
     vcxFile << "      <WarningLevel>Level3</WarningLevel>\n";
     vcxFile << "      <Optimization>Disabled</Optimization>\n";
+    vcxFile << "      <MultiProcessorCompilation>true</MultiProcessorCompilation>\n";
     vcxFile << "      <PreprocessorDefinitions>_DEBUG;EXPORT_SCRIPT_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>\n";
     vcxFile << "      <AdditionalIncludeDirectories>" << projectDirPath.string() << ";" << contextPath.string() << ";" << scriptPath.string() << ";" << mathLibPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
     vcxFile << "      <LanguageStandard>stdcpp20</LanguageStandard>\n";
@@ -1394,6 +1395,7 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
     vcxFile << "      <WarningLevel>Level3</WarningLevel>\n";
     //vcxFile << "      <Optimization>MaxSpeed</Optimization>\n";
     vcxFile << "      <Optimization>Disabled</Optimization>\n";
+    vcxFile << "      <MultiProcessorCompilation>true</MultiProcessorCompilation>\n";
     vcxFile << "      <PreprocessorDefinitions>NDEBUG;EXPORT_SCRIPT_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>\n";
     vcxFile << "      <AdditionalIncludeDirectories>" << projectDirPath.string() << ";" << contextPath.string() << ";" << scriptPath.string() << ";" << mathLibPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
     vcxFile << "      <LanguageStandard>stdcpp20</LanguageStandard>\n";
@@ -1437,7 +1439,7 @@ void Cho::FileSystem::ScriptProject::UpdateVcxproj()
     vcxFile.close();
 }
 
-void Cho::FileSystem::ScriptProject::UpdateFilters(const std::string& filterPath)
+void cho::FileSystem::ScriptProject::UpdateFilters(const std::string& filterPath)
 {
     std::vector<std::string> scriptFiles;
 
@@ -1495,7 +1497,7 @@ void Cho::FileSystem::ScriptProject::UpdateFilters(const std::string& filterPath
     filtersFile.close();
 }
 
-void Cho::FileSystem::ScriptProject::GenerateScriptFiles(const std::string& scriptName)
+void cho::FileSystem::ScriptProject::GenerateScriptFiles(const std::string& scriptName)
 {
     std::filesystem::path outputDir = "GameProjects/" + ConvertString(m_sProjectName);
 
@@ -1545,7 +1547,7 @@ void Cho::FileSystem::ScriptProject::GenerateScriptFiles(const std::string& scri
     }
 }
 
-void Cho::FileSystem::ScriptProject::LoadProjectPath(const std::wstring& projectName)
+void cho::FileSystem::ScriptProject::LoadProjectPath(const std::wstring& projectName)
 {
     std::string projectNameStr = ConvertString(projectName);
     // 出力先
@@ -1556,7 +1558,7 @@ void Cho::FileSystem::ScriptProject::LoadProjectPath(const std::wstring& project
     m_ProjPath = outputPath + "/" + projectNameStr + ".vcxproj";
 }
 
-void Cho::FileSystem::ScriptProject::LoadScriptDLL()
+void cho::FileSystem::ScriptProject::LoadScriptDLL()
 {
 	// DLLのパス
 	std::string dllPath = "GameProjects/" + ConvertString(m_sProjectName) + "/bin/" + ConvertString(m_sProjectName) + ".dll";
@@ -1571,7 +1573,7 @@ void Cho::FileSystem::ScriptProject::LoadScriptDLL()
     }
 }
 
-void Cho::FileSystem::ScriptProject::UnloadScriptDLL()
+void cho::FileSystem::ScriptProject::UnloadScriptDLL()
 {
 	// PDBのアンロード
     UnloadPDB();
@@ -1597,7 +1599,7 @@ void Cho::FileSystem::ScriptProject::UnloadScriptDLL()
 //    }
 //}
 
-bool Cho::FileSystem::ScriptProject::BuildScriptDLL()
+bool cho::FileSystem::ScriptProject::BuildScriptDLL()
 {
     std::string projectPath = "GameProjects/" + ConvertString(m_sProjectName) + "/" + ConvertString(m_sProjectName) + ".vcxproj";
     std::string command = "msbuild \"" + projectPath + "\" /p:Configuration=Debug /p:Platform=x64";
@@ -1633,7 +1635,7 @@ bool Cho::FileSystem::ScriptProject::BuildScriptDLL()
     }
 }
 
-std::vector<std::string> Cho::FileSystem::ScriptProject::GetScriptFiles()
+std::vector<std::string> cho::FileSystem::ScriptProject::GetScriptFiles()
 {
     std::vector<std::string> scriptNames;
     fs::path exePath = fs::current_path(); // 実行ファイルがある場所
@@ -1662,7 +1664,7 @@ std::vector<std::string> Cho::FileSystem::ScriptProject::GetScriptFiles()
 	return scriptNames;
 }
 
-bool Cho::FileSystem::ScriptProject::LoadPDB(const std::string& dllPath)
+bool cho::FileSystem::ScriptProject::LoadPDB(const std::string& dllPath)
 {
     HANDLE process = GetCurrentProcess();
 
@@ -1706,13 +1708,13 @@ bool Cho::FileSystem::ScriptProject::LoadPDB(const std::string& dllPath)
     return true;
 }
 
-void Cho::FileSystem::ScriptProject::UnloadPDB()
+void cho::FileSystem::ScriptProject::UnloadPDB()
 {
     SymUnloadModule64(GetCurrentProcess(), m_PDBBaseAddress);
 	SymCleanup(GetCurrentProcess());
 }
 
-void Cho::Deserialization::FromJson(const json& j, TransformComponent& t)
+void cho::Deserialization::FromJson(const json& j, TransformComponent& t)
 {
 	t.position = { j["translation"][0], j["translation"][1], j["translation"][2] };
 	t.rotation = { j["rotation"][0], j["rotation"][1], j["rotation"][2], j["rotation"][3] };
@@ -1720,7 +1722,7 @@ void Cho::Deserialization::FromJson(const json& j, TransformComponent& t)
 	t.degrees = { j["degrees"][0], j["degrees"][1], j["degrees"][2] };
 }
 
-void Cho::Deserialization::FromJson(const json& j, CameraComponent& c)
+void cho::Deserialization::FromJson(const json& j, CameraComponent& c)
 {
 	c.fovAngleY = j.value("fovAngleY", 45.0f);
 	c.aspectRatio = j.value("aspectRatio", 1.777f);
@@ -1728,7 +1730,7 @@ void Cho::Deserialization::FromJson(const json& j, CameraComponent& c)
 	c.farZ = j.value("farZ", 1000.0f);
 }
 
-void Cho::Deserialization::FromJson(const json& j, MeshFilterComponent& m)
+void cho::Deserialization::FromJson(const json& j, MeshFilterComponent& m)
 {
     j;m;
 	/*if (j.contains("modelName"))
@@ -1742,12 +1744,12 @@ void Cho::Deserialization::FromJson(const json& j, MeshFilterComponent& m)
 	}*/
 }
 
-void Cho::Deserialization::FromJson(const json& j, MeshRendererComponent& r)
+void cho::Deserialization::FromJson(const json& j, MeshRendererComponent& r)
 {
 	r.visible = j.value("visible", true);
 }
 
-void Cho::Deserialization::FromJson(const json& j, MaterialComponent& m)
+void cho::Deserialization::FromJson(const json& j, MaterialComponent& m)
 {
 	m.color = { j["Color"][0], j["Color"][1], j["Color"][2], j["Color"][3] };
 	m.textureName = ConvertString(j.value("textureName",""));
@@ -1757,7 +1759,7 @@ void Cho::Deserialization::FromJson(const json& j, MaterialComponent& m)
 	m.uvFlipY = j.value("uvFlipY", false);
 }
 
-void Cho::Deserialization::FromJson(const json& j, ScriptComponent& s)
+void cho::Deserialization::FromJson(const json& j, ScriptComponent& s)
 {
     j;s;
 	/*s.scriptName = j.value("scriptName", "");
@@ -1777,7 +1779,7 @@ void Cho::Deserialization::FromJson(const json& j, ScriptComponent& s)
 	}*/
 }
 
-void Cho::Deserialization::FromJson(const json& j, std::vector<LineRendererComponent>& ls)
+void cho::Deserialization::FromJson(const json& j, std::vector<LineRendererComponent>& ls)
 {
     j;ls;
 	/*if (j.is_array())
@@ -1793,7 +1795,7 @@ void Cho::Deserialization::FromJson(const json& j, std::vector<LineRendererCompo
 	}*/
 }
 
-void Cho::Deserialization::FromJson(const json& j, Rigidbody2DComponent& rb)
+void cho::Deserialization::FromJson(const json& j, Rigidbody2DComponent& rb)
 {
     j;rb;
 	/*rb.isKinematic = j.value("isKinematic", false);
@@ -1803,7 +1805,7 @@ void Cho::Deserialization::FromJson(const json& j, Rigidbody2DComponent& rb)
 	rb.fixedRotation = j.value("fixedRotation", false);*/
 }
 
-void Cho::Deserialization::FromJson(const json& j, BoxCollider2DComponent& bc)
+void cho::Deserialization::FromJson(const json& j, BoxCollider2DComponent& bc)
 {
 	bc.offsetX = j.value("offsetX", 0.0f);
 	bc.offsetY = j.value("offsetY", 0.0f);
@@ -1814,7 +1816,7 @@ void Cho::Deserialization::FromJson(const json& j, BoxCollider2DComponent& bc)
 	bc.restitution = j.value("restitution", 0.0f);
 }
 
-void Cho::Deserialization::FromJson(const json& j, EmitterComponent& e)
+void cho::Deserialization::FromJson(const json& j, EmitterComponent& e)
 {
     // lifeTime
     if (j.contains("lifeTime") && j["lifeTime"].is_array() && j["lifeTime"].size() == 2)
@@ -1866,12 +1868,12 @@ void Cho::Deserialization::FromJson(const json& j, EmitterComponent& e)
     e.isBillboard = j.value("isBillboard", true);
 }
 
-void Cho::Deserialization::FromJson(const json& j, ParticleComponent& p)
+void cho::Deserialization::FromJson(const json& j, ParticleComponent& p)
 {
 	p.count = j.value("count", 1024);
 }
 
-void Cho::Deserialization::FromJson(const json& j, UISpriteComponent& ui)
+void cho::Deserialization::FromJson(const json& j, UISpriteComponent& ui)
 {
 	ui.position = { j["position"][0], j["position"][1] };
 	ui.rotation = j.value("rotation", 0.0f);
@@ -1882,7 +1884,7 @@ void Cho::Deserialization::FromJson(const json& j, UISpriteComponent& ui)
 	ui.textureSize = { j["textureSize"][0], j["textureSize"][1] };
 }
 
-void Cho::Deserialization::FromJson(const json& j, LightComponent& l)
+void cho::Deserialization::FromJson(const json& j, LightComponent& l)
 {
 	l.color = { j["color"][0], j["color"][1], j["color"][2], j["color"][3] };
 	l.intensity = j.value("intensity", 1.0f);
@@ -1894,13 +1896,13 @@ void Cho::Deserialization::FromJson(const json& j, LightComponent& l)
 	l.active = j.value("active", true);
 }
 
-void Cho::Deserialization::FromJson(const json& j, AudioComponent& a)
+void cho::Deserialization::FromJson(const json& j, AudioComponent& a)
 {
 	//a.audioName = j.value("audioName", "");
 	a.isLoop = j.value("isLoop", false);
 }
 
-void Cho::Deserialization::FromJson(const json& j, AnimationComponent& a)
+void cho::Deserialization::FromJson(const json& j, AnimationComponent& a)
 {
 	a.transitionDuration = j.value("transitionDuration", 0.2f);
 	a.animationIndex = j.value("animationIndex", 0);
@@ -1908,12 +1910,12 @@ void Cho::Deserialization::FromJson(const json& j, AnimationComponent& a)
 	a.modelName = ConvertString(modelName);
 }
 
-void Cho::FileSystem::ScanFolder(const path& rootPath, EngineCommand* engineCommand)
+void cho::FileSystem::ScanFolder(const path& rootPath, EngineCommand* engineCommand)
 {
     g_ProjectFiles = ScanRecursive(rootPath,engineCommand);
 }
 
-FolderNode Cho::FileSystem::ScanRecursive(const path& path, EngineCommand* engineCommand)
+FolderNode cho::FileSystem::ScanRecursive(const path& path, EngineCommand* engineCommand)
 {
     FolderNode node;        // 一番上のノード
 	node.folderPath = path; // フォルダパス
@@ -1947,7 +1949,7 @@ FolderNode Cho::FileSystem::ScanRecursive(const path& path, EngineCommand* engin
 }
 
 // フォルダノードをパスで検索
-FolderNode* Cho::FileSystem::FindFolderNodeByPath(FolderNode& node, const std::filesystem::path& target)
+FolderNode* cho::FileSystem::FindFolderNodeByPath(FolderNode& node, const std::filesystem::path& target)
 {
     if (node.folderPath == target)
         return &node;
@@ -1960,7 +1962,7 @@ FolderNode* Cho::FileSystem::FindFolderNodeByPath(FolderNode& node, const std::f
     return nullptr;
 }
 
-bool Cho::FileSystem::ProcessFile(const path& filePath, EngineCommand* engineCommand)
+bool cho::FileSystem::ProcessFile(const path& filePath, EngineCommand* engineCommand)
 {
 	std::wstring wFileName = filePath.filename().wstring();
 	std::wstring scriptName = wFileName.substr(0, wFileName.find_last_of('.')); // 拡張子を除いたファイル名
@@ -1999,38 +2001,38 @@ bool Cho::FileSystem::ProcessFile(const path& filePath, EngineCommand* engineCom
 
         switch (type)
         {
-        case Cho::ChoProject:
+        case cho::ChoProject:
             break;
-        case Cho::EngineConfig:
+        case cho::EngineConfig:
             break;
-        case Cho::GameSettings:
+        case cho::GameSettings:
         {
             return LoadGameSettings(filePath);
         }
             break;
-        case Cho::SceneFile:// シーンファイル
+        case cho::SceneFile:// シーンファイル
         {
 			return LoadSceneFile(filePath,engineCommand);
         }
             break;
-        case Cho::ModelFile:
+        case cho::ModelFile:
             break;
-        case Cho::ImageFile:
+        case cho::ImageFile:
             break;
-        case Cho::SoundFile:
+        case cho::SoundFile:
             break;
-        case Cho::EffectFile:
+        case cho::EffectFile:
             break;
-		case Cho::ScriptFile:// スクリプトファイル
+		case cho::ScriptFile:// スクリプトファイル
         {
 			//return LoadScriptFile(filePath, engineCommand);
         }
             break;
-        case Cho::GameParameter:
+        case cho::GameParameter:
             break;
-        case Cho::PrefabFile:
+        case cho::PrefabFile:
             break;
-        case Cho::Unknown:
+        case cho::Unknown:
             break;
         default:
             break;
@@ -2040,7 +2042,7 @@ bool Cho::FileSystem::ProcessFile(const path& filePath, EngineCommand* engineCom
 	return false;
 }
 
-bool Cho::FileSystem::AddFile(const path& filePath, FolderNode& folderNode, EngineCommand* engineCommand)
+bool cho::FileSystem::AddFile(const path& filePath, FolderNode& folderNode, EngineCommand* engineCommand)
 {
     namespace fs = std::filesystem;
     if (filePath.empty() || !fs::exists(filePath)) return false;
@@ -2100,13 +2102,13 @@ bool Cho::FileSystem::AddFile(const path& filePath, FolderNode& folderNode, Engi
     catch (const fs::filesystem_error& e)
     {
         // ログ出力などがあれば追加
-        Cho::Log::Write(LogLevel::Assert,"AddFile failed: " + filePath.string() + " (" + e.what() + ")");
+        cho::Log::Write(LogLevel::Assert,"AddFile failed: " + filePath.string() + " (" + e.what() + ")");
     }
 
     return false;
 }
 
-std::wstring Cho::FileSystem::GameBuilder::SelectFolderDialog()
+std::wstring cho::FileSystem::GameBuilder::SelectFolderDialog()
 {
     std::wstring selectedPath;
     HRESULT hr;
@@ -2149,7 +2151,7 @@ std::wstring Cho::FileSystem::GameBuilder::SelectFolderDialog()
     return selectedPath;
 }
 
-void Cho::FileSystem::GameBuilder::CopyFilesToBuildFolder([[maybe_unused]]EngineCommand* engineCommand, const std::wstring& folderPath)
+void cho::FileSystem::GameBuilder::CopyFilesToBuildFolder([[maybe_unused]]EngineCommand* engineCommand, const std::wstring& folderPath)
 {
     namespace fs = std::filesystem;
     fs::path buildRoot = fs::path(folderPath) / m_sProjectName;
@@ -2192,7 +2194,7 @@ void Cho::FileSystem::GameBuilder::CopyFilesToBuildFolder([[maybe_unused]]Engine
 
             if (!fs::exists(sourcePath))
             {
-                Cho::Log::Write(LogLevel::Assert, "Source file or directory does not exist: " + sourcePath.string());
+                cho::Log::Write(LogLevel::Assert, "Source file or directory does not exist: " + sourcePath.string());
                 continue;
             }
 
@@ -2213,11 +2215,11 @@ void Cho::FileSystem::GameBuilder::CopyFilesToBuildFolder([[maybe_unused]]Engine
             }
         }
 
-        Cho::Log::Write(LogLevel::Info, "CopyFilesToBuildFolder completed successfully.");
+        cho::Log::Write(LogLevel::Info, "CopyFilesToBuildFolder completed successfully.");
     }
     catch (const std::exception& e)
     {
-        Cho::Log::Write(LogLevel::Assert, "CopyFilesToBuildFolder failed: " + std::string(e.what()));
+        cho::Log::Write(LogLevel::Assert, "CopyFilesToBuildFolder failed: " + std::string(e.what()));
     }
 
     std::vector<std::pair<fs::path, fs::path>> renameList = {
@@ -2238,18 +2240,18 @@ void Cho::FileSystem::GameBuilder::CopyFilesToBuildFolder([[maybe_unused]]Engine
                 fs::rename(from, to);
             } else
             {
-                Cho::Log::Write(LogLevel::Assert, "File not found to rename: " + from.string());
+                cho::Log::Write(LogLevel::Assert, "File not found to rename: " + from.string());
             }
         }
         catch (const std::exception& e)
         {
-            Cho::Log::Write(LogLevel::Assert, "Rename failed: " + from.string() + " → " + to.string() + " : " + e.what());
+            cho::Log::Write(LogLevel::Assert, "Rename failed: " + from.string() + " → " + to.string() + " : " + e.what());
         }
     }
 
 }
 
-std::wstring Cho::FileSystem::GameBuilder::GetEnvVar(const wchar_t* name)
+std::wstring cho::FileSystem::GameBuilder::GetEnvVar(const wchar_t* name)
 {
     wchar_t buffer[512];
     size_t len = 0;

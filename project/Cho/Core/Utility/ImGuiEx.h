@@ -1,5 +1,5 @@
 #pragma once
-namespace Cho
+namespace cho
 {
 	// カスタムImGui
 	namespace ImGuiEx

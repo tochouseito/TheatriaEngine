@@ -15,13 +15,13 @@ public:
     virtual void OnCollisionEnter(GameObject&) {}
     virtual void OnCollisionStay(GameObject&) {}
     virtual void OnCollisionExit(GameObject&) {}
-    template<Cho::ComponentInterface::Type T>
+    template<cho::ComponentInterface::Type T>
     T GetComponent() const
     {
         T comp(gameObject.GetHandle().entity, ecsManager);
         return comp;
     }
-	template<Cho::ComponentInterface::MarionnetteInterface T>
+	/*template<cho::ComponentInterface::MarionnetteInterface T>
     T* GetMarionnette() const
     {
         if(ScriptComponent* script = ecsManager->GetComponent<ScriptComponent>(gameObject.GetHandle().entity))
@@ -32,7 +32,7 @@ public:
         {
 			return nullptr;
         }
-    }
+    }*/
 protected:
 	GameObject& gameObject;
 	TransformComponent* transform = nullptr;

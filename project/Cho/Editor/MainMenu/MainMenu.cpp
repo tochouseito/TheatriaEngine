@@ -429,7 +429,7 @@ void MainMenu::SettingWindow()
 	m_EngineCommand->GetInputManager()->SetJoystickDeadZone(0,leftDeadZone, rightDeadZone);
 
 	ImGui::Text("最初のシーン");
-    static std::wstring selectFirstScene = Cho::FileSystem::g_GameSettings.startScene;
+    static std::wstring selectFirstScene = cho::FileSystem::g_GameSettings.startScene;
 	std::wstring startScene = L"シーンがありません";
     if (!selectFirstScene.empty())
     {
@@ -443,7 +443,7 @@ void MainMenu::SettingWindow()
             {
 				selectFirstScene = scene.GetName(); // 選択されたシーン名を保存
                 // ゲーム設定に保存
-                Cho::FileSystem::g_GameSettings.startScene = selectFirstScene;
+                cho::FileSystem::g_GameSettings.startScene = selectFirstScene;
             }
         }
         ImGui::EndCombo();
@@ -504,7 +504,7 @@ void MainMenu::BuildSettingWindow()
     if (ImGui::Button("フォルダを選択してビルド"))
     {
         std::wstring folderPath;
-        folderPath = Cho::FileSystem::GameBuilder::SelectFolderDialog();
+        folderPath = cho::FileSystem::GameBuilder::SelectFolderDialog();
 		if (!folderPath.empty())
 		{
 			// フォルダが選択された場合、ビルドを実行

@@ -93,12 +93,12 @@ SceneID GameWorld::AddGameObjectFromScene(const GameScene& scene, const bool& up
 		// GameObjectを作成
 		if (prefab.GetName().empty())
 		{
-			Cho::Log::Write(Cho::LogLevel::Assert, "Prefab name is empty. Please set a valid name for the prefab.");
+			cho::Log::Write(cho::LogLevel::Assert, "Prefab name is empty. Please set a valid name for the prefab.");
 			return sceneID;
 		}
 		if(prefab.GetType() == ObjectType::None)
 		{
-			Cho::Log::Write(Cho::LogLevel::Assert, "Prefab type is None. Please set a valid type for the prefab.");
+			cho::Log::Write(cho::LogLevel::Assert, "Prefab type is None. Please set a valid type for the prefab.");
 			return sceneID;
 		}
 		m_pGameObjects[sceneID][objectID].push_back(std::make_unique<GameObject>(handle, prefab.GetName(), prefab.GetType()));

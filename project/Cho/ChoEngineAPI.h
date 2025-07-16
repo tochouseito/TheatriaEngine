@@ -3,12 +3,15 @@
 #include "APIExportsMacro.h"
 #include "Externals/ChoMath/ChoMath.h"
 #include "Platform/InputManager/InputManager.h"
+#ifdef USE_CHOENGINE_SCRIPT
+#include "GameCore/ScriptAPI/ScriptAPI.h"
+#endif
 #include <variant>
 #include <optional>
 using GameParameterVariant = std::variant<int, float, bool, Vector3>;
 class GameObject;
 class ChoEngine;
-namespace Cho
+namespace cho
 {
 	// エディタとゲーム実行ファイルしか許可しない
 #ifdef ENGINECREATE_FUNCTION
@@ -20,6 +23,7 @@ namespace Cho
 	CHO_API void SetEngine(Engine* engine);
 	// Engineのポインタ
 	static ChoEngine* g_Engine = nullptr;
+
 #endif
 }
 namespace ChoSystem
@@ -44,6 +48,13 @@ namespace ChoSystem
 	CHO_API GameObject* CloneGameObject(const GameObject* srcObj, Vector3 generatePosition);
 	// デルタタイム取得
 	CHO_API float DeltaTime();
+	// Marionnette取得
+	CHO_API Marionnette* GetMarionnettePtr(const std::wstring& name);
+	template<cho::ComponentInterface::MarionnetteInterface T>
+	T* GetMarionnette(const std::wstring& name)
+	{
+		return static_cast<T*>(GetMarionnettePtr(name));
+	}
 
 	// SceneManager
 	struct SceneManagerAPI

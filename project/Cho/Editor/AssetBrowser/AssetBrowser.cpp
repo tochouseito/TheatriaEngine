@@ -20,12 +20,12 @@ void AssetBrowser::Window()
 	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove;
 	ImGui::Begin("AssetBrowser", nullptr, windowFlags);
     // 左：フォルダー階層
-    FolderTree(Cho::FileSystem::g_ProjectFiles);
+    FolderTree(cho::FileSystem::g_ProjectFiles);
 	ImGui::End();
 	// ファイルの表示
 	ImGui::Begin("FileGrid");
     // 右：ファイル表示
-    FileGrid(Cho::FileSystem::g_ProjectFiles);
+    FileGrid(cho::FileSystem::g_ProjectFiles);
     ImGui::End();
 }
 
@@ -50,7 +50,7 @@ void AssetBrowser::FolderTree(FolderNode& node)
 
 void AssetBrowser::FileGrid(FolderNode& root)
 {
-    FolderNode* target = Cho::FileSystem::FindFolderNodeByPath(root, m_SelectedFolder);
+    FolderNode* target = cho::FileSystem::FindFolderNodeByPath(root, m_SelectedFolder);
     if (!target) return;
 
 	// ウィンドウからファイル名のドロップがあった場合
@@ -60,7 +60,7 @@ void AssetBrowser::FileGrid(FolderNode& root)
 		{
 			// ドロップされたファイルを処理する
 			std::filesystem::path dropPath = filePath;
-			Cho::FileSystem::AddFile(dropPath, *target, m_EditorManager->GetEngineCommand());
+			cho::FileSystem::AddFile(dropPath, *target, m_EditorManager->GetEngineCommand());
 		}
     }
     
