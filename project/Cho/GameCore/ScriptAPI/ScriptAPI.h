@@ -73,84 +73,132 @@
 class ECSManager;
 class ResourceManager;
 
-namespace Cho
+namespace ChoSystem
 {
-    namespace ComponentInterface
+    // スクリプトから取得可能なコンポーネントのインターフェース
+    // 基底クラス
+    class CHO_API IComponentInterface
     {
-		// スクリプトから取得可能なコンポーネントのインターフェース
-        // 基底クラス
-        class IComponentInterface
-        {
+    public:
+        IComponentInterface(Entity e, ECSManager* ecs) :m_Entity(e), m_ECS(ecs) {}
+        virtual ~IComponentInterface() = default;
+    protected:
+        Entity m_Entity; // Entity
+        ECSManager* m_ECS = nullptr; // ECSManager
+    };
+
+    // Marionnette用特殊
+    template<typename T>
+    concept MarionnetteInterface = std::derived_from<T, Marionnette>;
+
+    // インターフェース型の許可
+    template<typename T>
+    concept Type = std::derived_from<T, IComponentInterface>;
+
+    // Traits pattern
+    template<typename Interface>
+    struct InterfaceTraits;
+
+	// Transform
+    class CHO_API Transform : public IComponentInterface
+    {
+		friend class Marionnette;
         public:
-			IComponentInterface(Entity e, ECSManager* ecs) :m_Entity(e), m_ECS(ecs) {}
-			virtual ~IComponentInterface() = default;
-        protected:
-			Entity m_Entity; // Entity
-			ECSManager* m_ECS = nullptr; // ECSManager
-        };
-
-        // Marionnette用特殊
-        template<typename T>
-        concept MarionnetteInterface = std::derived_from<T, Marionnette>;
-
-        // インターフェース型の許可
-        template<typename T>
-		concept Type = std::derived_from<T, IComponentInterface>;
-
-        // Traits pattern
-        template<typename Interface>
-        struct InterfaceTraits;
-
-        // Material
-        class Material : public IComponentInterface
+        Transform(Entity e, ECSManager* ecs) : IComponentInterface(e, ecs) {}
+        ~Transform() = default;
+        TransformComponent* operator->()
         {
-            friend class Marionnette;
-        public:
-            Material(Entity e, ECSManager* ecs) : IComponentInterface(e,ecs) {}
-			~Material() = default;
-            MaterialComponent* operator->() 
-            { 
-                UpdatePtr();
-				return data;
-			}
+            UpdatePtr();
+            return data;
+		}
         private:
-            void UpdatePtr()
-            {
-				data = m_ECS->GetComponent<MaterialComponent>(m_Entity);
-            }
-			MaterialComponent* data = nullptr;
-        };
-        template<>
-        struct InterfaceTraits<Cho::ComponentInterface::Material>
+        void UpdatePtr()
         {
-            using Component = MaterialComponent;
-        };
+            data = m_ECS->GetComponent<TransformComponent>(m_Entity);
+        }
+        TransformComponent* data = nullptr;
+	};
+	template<>
+    struct InterfaceTraits<ChoSystem::Transform>
+    {
+        using Component = TransformComponent;
+	};
 
-		// Animation
-        class Animation : public IComponentInterface
+    // Camera
+    class CHO_API Camera : public IComponentInterface
+    {
+        friend class Marionnette;
+    public:
+        Camera(Entity e, ECSManager* ecs) : IComponentInterface(e, ecs) {}
+        ~Camera() = default;
+        CameraComponent* operator->()
         {
-            friend class Marionnette;
-        public:
-            Animation(Entity e, ECSManager* ecs) : IComponentInterface(e,ecs) {}
-            ~Animation() = default;
-            AnimationComponent* operator->() 
-            { 
-                UpdatePtr();
-                return data;
-            }
-        private:
-            void UpdatePtr()
-            {
-				data = m_ECS->GetComponent<AnimationComponent>(m_Entity);
-            }
-            AnimationComponent* data = nullptr;
-        };
-        template<>
-        struct InterfaceTraits<Cho::ComponentInterface::Animation>
+            UpdatePtr();
+            return data;
+        }
+    private:
+        void UpdatePtr()
         {
-            using Component = AnimationComponent;
-		};
-	}
+            data = m_ECS->GetComponent<CameraComponent>(m_Entity);
+        }
+        CameraComponent* data = nullptr;
+    };
+    template<>
+    struct InterfaceTraits<ChoSystem::Camera>
+    {
+        using Component = CameraComponent;
+    };
+
+
+    // Material
+    class CHO_API Material : public IComponentInterface
+    {
+        friend class Marionnette;
+    public:
+        Material(Entity e, ECSManager* ecs) : IComponentInterface(e, ecs) {}
+        ~Material() = default;
+        MaterialComponent* operator->()
+        {
+            UpdatePtr();
+            return data;
+        }
+    private:
+        void UpdatePtr()
+        {
+            data = m_ECS->GetComponent<MaterialComponent>(m_Entity);
+        }
+        MaterialComponent* data = nullptr;
+    };
+    template<>
+    struct InterfaceTraits<ChoSystem::Material>
+    {
+        using Component = MaterialComponent;
+    };
+
+    // Animation
+    class CHO_API Animation : public IComponentInterface
+    {
+        friend class Marionnette;
+    public:
+        Animation(Entity e, ECSManager* ecs) : IComponentInterface(e, ecs) {}
+        ~Animation() = default;
+        AnimationComponent* operator->()
+        {
+            UpdatePtr();
+            return data;
+        }
+    private:
+        void UpdatePtr()
+        {
+            data = m_ECS->GetComponent<AnimationComponent>(m_Entity);
+        }
+        AnimationComponent* data = nullptr;
+    };
+    template<>
+    struct InterfaceTraits<ChoSystem::Animation>
+    {
+        using Component = AnimationComponent;
+    };
 }
 
 //struct CHO_API TransformAPI

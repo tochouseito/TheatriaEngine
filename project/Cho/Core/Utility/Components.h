@@ -37,7 +37,7 @@ struct TransformComponent : public IComponentTag
 	TransformComponent(TransformComponent&&) noexcept = default;
 
 	Vector3 position = { 0.0f, 0.0f, 0.0f };			// 位置
-	Quaternion rotation = { 0.0f, 0.0f, 0.0f,1.0f };	// 回転
+	Quaternion quaternion = { 0.0f, 0.0f, 0.0f,1.0f };	// 回転
 	Scale scale = { 1.0f, 1.0f, 1.0f };					// スケール
 	Matrix4 matWorld = ChoMath::MakeIdentity4x4();		// ワールド行列
 	Matrix4 rootMatrix = ChoMath::MakeIdentity4x4();	// ルートのワールド行列
@@ -53,24 +53,25 @@ struct TransformComponent : public IComponentTag
 	Matrix4 matScale = ChoMath::MakeIdentity4x4();	// スケール行列
 	int tickPriority = 0;								// Tick優先度
 	Vector3 forward = { 0.0f, 0.0f, 1.0f };			// 前方向ベクトル
-	//uint32_t bufferIndex = UINT32_MAX;				// バッファーインデックス
 	std::optional<uint32_t> mapID = std::nullopt;		// マップインデックス
 	TransformStartValue startValue;						// 初期値保存用
 	std::optional<uint32_t> materialID = std::nullopt;	// マテリアルID
 	std::optional<uint32_t> boneOffsetID = std::nullopt;	// ボーンオフセットID
+	bool isBillboard = false;				// ビルボードフラグ
 
 	TransformComponent& operator=(const TransformComponent& other)
 	{
 		if (this == &other) return *this;
 
 		position = other.position;
-		rotation = other.rotation;
+		quaternion = other.quaternion;
 		scale = other.scale;
 		degrees = other.degrees;
 		prePos = other.prePos;
 		preRot = other.preRot;
 		preScale = other.preScale;
 		tickPriority = other.tickPriority;
+		isBillboard = other.isBillboard;
 
 		// optionalな要素は、コピー可能な値として処理
 		parent = other.parent;
@@ -94,7 +95,7 @@ struct TransformComponent : public IComponentTag
 	void Initialize()
 	{
 		position.Initialize();
-		rotation.Initialize();
+		quaternion.Initialize();
 		scale.Initialize();
 		matWorld = ChoMath::MakeIdentity4x4();
 		rootMatrix = ChoMath::MakeIdentity4x4();
@@ -106,6 +107,8 @@ struct TransformComponent : public IComponentTag
 		parent = std::nullopt;
 		mapID = std::nullopt;
 		materialID = std::nullopt;
+		boneOffsetID = std::nullopt;
+		isBillboard = false;
 	}
 };
 

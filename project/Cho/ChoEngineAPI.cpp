@@ -9,32 +9,31 @@
 namespace ChoSystem
 {
 	SceneManagerAPI sceneManager;
-	InputManagerAPI inputManager;
 }
 
-CHO_API Engine* Cho::CreateEngine(RuntimeMode mode)
+CHO_API Engine* cho::CreateEngine(RuntimeMode mode)
 {
     return new ChoEngine(mode);
 }
 
-CHO_API void Cho::DestroyEngine(Engine* engine)
+CHO_API void cho::DestroyEngine(Engine* engine)
 {
 	delete engine;
 }
 
-CHO_API void Cho::SetEngine(Engine* engine)
+CHO_API void cho::SetEngine(Engine* engine)
 {
 	g_Engine = static_cast<ChoEngine*>(engine);
 }
 
 CHO_API bool ChoSystem::SaveGameParameter(const std::wstring& filePath, const std::string& group, const std::string& item, const std::string& dataName, const GameParameterVariant& value)
 {
-	return Cho::FileSystem::SaveGameParameter(filePath, group, item, dataName, value);
+	return cho::FileSystem::SaveGameParameter(filePath, group, item, dataName, value);
 }
 
 CHO_API bool ChoSystem::LoadGameParameter(const std::wstring& filePath, const std::string& group, const std::string& item, const std::string& dataName, GameParameterVariant& outValue)
 {
-	return Cho::FileSystem::LoadGameParameter(filePath, group, item, dataName, outValue);
+	return cho::FileSystem::LoadGameParameter(filePath, group, item, dataName, outValue);
 }
 
 // ゲームオブジェクト取得
@@ -72,6 +71,23 @@ CHO_API float ChoSystem::DeltaTime()
 	return Timer::GetDeltaTime();
 }
 
+CHO_API Marionnette* ChoSystem::GetMarionnettePtr(const std::wstring& name)
+{
+	GameObject* obj = FindGameObjectByName(name);
+	if (!obj) { return nullptr; }
+	ScriptComponent* script = g_Engine->GetEngineCommand()->GetGameCore()->GetECSManager()->GetComponent<ScriptComponent>(obj->GetHandle().entity);
+	if (!script) { return nullptr; }
+	if (script->instance)
+	{
+		return script->instance;
+	}
+	else
+	{
+		//Log::Write(LogLevel::Error, L"Marionnette instance is nullptr for object: " + name);
+		return nullptr;
+	}
+}
+
 void ChoSystem::SceneManagerAPI::LoadScene(const std::wstring& sceneName)
 {
 	g_Engine->GetEngineCommand()->GetGameCore()->GetSceneManager()->LoadScene(sceneName);
@@ -87,47 +103,47 @@ void ChoSystem::SceneManagerAPI::ChangeMainScene(const std::wstring& sceneName)
 	sceneName;
 }
 
-bool ChoSystem::InputManagerAPI::PushKey(const uint8_t& keyNumber)
+bool ChoSystem::Input::PushKey(const uint8_t& keyNumber)
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->PushKey(keyNumber);
 }
 
-bool ChoSystem::InputManagerAPI::TriggerKey(const uint8_t& keyNumber)
+bool ChoSystem::Input::TriggerKey(const uint8_t& keyNumber)
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->TriggerKey(keyNumber);
 }
 
-const DIMOUSESTATE2& ChoSystem::InputManagerAPI::GetAllMouse()
+const DIMOUSESTATE2& ChoSystem::Input::GetAllMouse()
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->GetAllMouse();
 }
 
-MouseMove ChoSystem::InputManagerAPI::GetMouseMove()
+MouseMove ChoSystem::Input::GetMouseMove()
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->GetMouseMove();
 }
 
-bool ChoSystem::InputManagerAPI::IsPressMouse(const int32_t& mouseNumber)
+bool ChoSystem::Input::IsPressMouse(const int32_t& mouseNumber)
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->IsPressMouse(mouseNumber);
 }
 
-bool ChoSystem::InputManagerAPI::IsTriggerMouse(const int32_t& mouseNumber)
+bool ChoSystem::Input::IsTriggerMouse(const int32_t& mouseNumber)
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->IsTriggerMouse(mouseNumber);
 }
 
-const Vector2& ChoSystem::InputManagerAPI::GetMouseWindowPosition()
+const Vector2& ChoSystem::Input::GetMouseWindowPosition()
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->GetMouseWindowPosition();
 }
 
-Vector2 ChoSystem::InputManagerAPI::GetMouseScreenPosition()
+Vector2 ChoSystem::Input::GetMouseScreenPosition()
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->GetMouseScreenPosition();
 }
 
-bool ChoSystem::InputManagerAPI::GetJoystickState(const int32_t& stickNo, XINPUT_STATE& out)
+bool ChoSystem::Input::GetJoystickState(const int32_t& stickNo, XINPUT_STATE& out)
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->GetJoystickState(stickNo, out);
 }

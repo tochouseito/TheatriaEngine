@@ -32,7 +32,7 @@ void GameCore::Initialize(ResourceManager* resourceManager, GraphicsEngine* grap
 void GameCore::Start()
 {
 	// スクリプト読み込み（場所変更予定）
-	Cho::FileSystem::ScriptProject::LoadScriptDLL();
+	cho::FileSystem::ScriptProject::LoadScriptDLL();
 	// StartSystemの実行
 	m_pECSManager->InitializeAllSystems();
 }
@@ -52,7 +52,7 @@ void GameCore::GameRun()
 		return;
 	}
 	// スクリプト読み込み（場所変更予定）
-	Cho::FileSystem::ScriptProject::LoadScriptDLL();
+	cho::FileSystem::ScriptProject::LoadScriptDLL();
 	// StartSystemの実行
 	m_pECSManager->InitializeAllSystems();
 	// 実行中フラグを立てる
@@ -68,7 +68,7 @@ void GameCore::GameStop()
 	// FinalizeSystemの実行
 	m_pECSManager->FinalizeAllSystems();
 	// スクリプトのアンロード（場所変更予定）
-	Cho::FileSystem::ScriptProject::UnloadScriptDLL();
+	cho::FileSystem::ScriptProject::UnloadScriptDLL();
 	// 実行中フラグを下ろす
 	isRunning = false;
 }
@@ -572,6 +572,7 @@ void GameCore::RegisterECSSystems(ResourceManager* resourceManager, GraphicsEngi
 	// TransformComponentSystem
 	m_pECSManager->AddSystem<TransformSystem>();
 	TransformSystem* transformSystem = m_pECSManager->GetSystem<TransformSystem>();
+	transformSystem->SetGameWorld(m_pGameWorld.get());
 	transformSystem->SetBuffer(static_cast<StructuredBuffer<BUFFER_DATA_TF>*>(resourceManager->GetIntegrationBuffer(IntegrationDataType::Transform)));
 	// AnimationComponentSystem
 	m_pECSManager->AddSystem<AnimationSystem>();

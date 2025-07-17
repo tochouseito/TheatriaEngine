@@ -99,6 +99,15 @@ struct ModelData
 	}
 };
 
+struct IntegrationMesh
+{
+	std::vector<VertexData> vertices;
+	std::vector<uint32_t> indices;
+	uint32_t vertexBufferIndex = 0;
+	uint32_t indexBufferIndex = 0;
+	std::unordered_map<std::wstring, std::pair<uint32_t, uint32_t>> offsetMap;
+};
+
 class ResourceManager;
 class ModelManager
 {
@@ -180,5 +189,7 @@ private:
 
 	// モデルの使用可能なTransformの数のオフセット
 	static const uint32_t kUseTransformOffset = 1024;
+
+	std::vector<IntegrationMesh> m_IntegrationMeshes; // 統合メッシュデータ
 };
 

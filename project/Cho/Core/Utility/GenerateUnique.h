@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <set>
 
-namespace Cho
+namespace cho
 {
     // ユーティリティ：`container` に `key` が含まれているかチェック（ADLで見つかる `find` を使う）
     template<typename Container, typename Key>

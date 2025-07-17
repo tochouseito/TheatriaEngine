@@ -2,7 +2,7 @@
 #include "ImGuiEx.h"
 #include <imgui.h>
 
-bool Cho::ImGuiEx::ColoredDragFloat3(const char* label, float* v, float v_speed, float v_min, float v_max, const char* format)
+bool cho::ImGuiEx::ColoredDragFloat3(const char* label, float* v, float v_speed, float v_min, float v_max, const char* format)
 {
     ImGui::PushID(label); // 識別子をプッシュ（同じ名前のコントロールが競合しないようにする）
 

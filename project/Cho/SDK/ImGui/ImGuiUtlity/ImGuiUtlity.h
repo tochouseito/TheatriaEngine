@@ -1,7 +1,7 @@
 #pragma once
 #include <imgui.h>
 
-namespace Cho
+namespace cho
 {
 	class ImGuiUtility
 	{

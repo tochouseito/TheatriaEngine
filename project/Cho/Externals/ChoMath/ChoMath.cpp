@@ -747,4 +747,59 @@ ChoMath::SRT ChoMath::DecomposeMatrix(const Matrix4& in)
 	return out;
 }
 
+Quaternion ChoMath::MakeQuaternionRotation(const Vector3& rad, const Vector3& preRad, const Quaternion& quaternion)
+{
+	// 差分計算
+	Vector3 diff = rad - preRad;
+
+	// 各軸のクオータニオンを作成
+	Quaternion qx = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(1.0f, 0.0f, 0.0f), diff.x);
+	Quaternion qy = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0.0f, 1.0f, 0.0f), diff.y);
+	Quaternion qz = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0.0f, 0.0f, 1.0f), diff.z);
+
+	// 同時回転を累積
+	Quaternion q = quaternion * qx * qy * qz;
+	return q.Normalize(); // 正規化して返す
+}
+
+Quaternion ChoMath::MakeEulerRotation(const Vector3& rad)
+{
+	// オイラー角からクォータニオンを作成
+	// 各軸のクオータニオンを作成
+	Quaternion qx = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(1.0f, 0.0f, 0.0f), rad.x);
+	Quaternion qy = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0.0f, 1.0f, 0.0f), rad.y);
+	Quaternion qz = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0.0f, 0.0f, 1.0f), rad.z);
+
+	// 同時回転を累積
+	Quaternion q = qx * qy * qz;
+	return q.Normalize(); // 正規化して返す
+}
+
+// ALLBillboard
+Matrix4 ChoMath::BillboardMatrix(const Matrix4 cameraMatrix)
+{
+	Matrix4 result;
+
+	float cosY = cos(PiF);
+	float sinY = sin(PiF);
+
+	Matrix4 backToFrontMatrix = {
+		cosY, 0.0f, -sinY, 0.0f,
+		0.0f, 1.0f, 0.0f, 0.0f,
+		sinY, 0.0f, cosY, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f };
+
+	result = Multiply(backToFrontMatrix, cameraMatrix);
+	result.m[3][0] = 0.0f;
+	result.m[3][1] = 0.0f;
+	result.m[3][2] = 0.0f;
+
+	return result;
+}
+
+float ChoMath::Lerp(const float& start, const float& end, const float& t)
+{
+	return start + (end - start) * t;
+}
+
 

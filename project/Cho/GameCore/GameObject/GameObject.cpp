@@ -114,8 +114,8 @@ ScriptComponent* GameObject::GetScriptComponent() const noexcept
 	return nullptr;
 }
 
-GameObject::GameObject(const ObjectHandle& handle, const std::wstring& name, const ObjectType& type) :
-	m_Handle(handle), m_Type(type)
+GameObject::GameObject(const ObjectHandle& handle, const std::wstring& name, const ObjectType& type,const ChoSystem::Transform& tf) :
+	m_Handle(handle), m_Type(type), transform(tf)
 {
 	m_Active = true;
 	implGameObject = new ImplGameObject();

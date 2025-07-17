@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "DXShaderCompiler.h"
 #include "Core/ChoLog/ChoLog.h"
-using namespace Cho;
+using namespace cho;
 
 void DXShaderCompiler::Initialize(ID3D12Device8* device)
 {

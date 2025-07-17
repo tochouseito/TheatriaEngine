@@ -47,14 +47,14 @@ D3D12_GPU_DESCRIPTOR_HANDLE EngineCommand::GetTextureHandle(const std::wstring& 
 
 void EngineCommand::SaveProjectFile()
 {
-	Cho::FileSystem::SaveProject(m_EditorManager,m_GameCore->GetSceneManager(), m_GameCore->GetGameWorld(), m_GameCore->GetECSManager());
+	cho::FileSystem::SaveProject(m_EditorManager,m_GameCore->GetSceneManager(), m_GameCore->GetGameWorld(), m_GameCore->GetECSManager());
 }
 
 void EngineCommand::GenerateScript(const std::string& scriptName)
 {
-	Cho::FileSystem::ScriptProject::GenerateScriptFiles(scriptName);
+	cho::FileSystem::ScriptProject::GenerateScriptFiles(scriptName);
 	// プロジェクトファイルを更新
-	Cho::FileSystem::ScriptProject::UpdateVcxproj();
+	cho::FileSystem::ScriptProject::UpdateVcxproj();
 	// スクリプトコンテナに追加
 	m_ResourceManager->GetScriptContainer()->AddScriptData(scriptName);
 }

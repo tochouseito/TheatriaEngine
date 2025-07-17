@@ -8,20 +8,22 @@ class CHO_API Marionnette
     friend class ScriptInstanceGenerateSystem;
     friend class ScriptSystem;
 public:
-	Marionnette(GameObject& object) : gameObject(object) {}
+    Marionnette(GameObject& object) : gameObject(object),transform(object.GetHandle().entity, nullptr)
+    {
+	}
     virtual ~Marionnette() = default;
     virtual void Start() = 0;
     virtual void Update() = 0;
     virtual void OnCollisionEnter(GameObject&) {}
     virtual void OnCollisionStay(GameObject&) {}
     virtual void OnCollisionExit(GameObject&) {}
-    template<Cho::ComponentInterface::Type T>
+    template<ChoSystem::Type T>
     T GetComponent() const
     {
         T comp(gameObject.GetHandle().entity, ecsManager);
         return comp;
     }
-	template<Cho::ComponentInterface::MarionnetteInterface T>
+	/*template<cho::ComponentInterface::MarionnetteInterface T>
     T* GetMarionnette() const
     {
         if(ScriptComponent* script = ecsManager->GetComponent<ScriptComponent>(gameObject.GetHandle().entity))
@@ -32,11 +34,15 @@ public:
         {
 			return nullptr;
         }
-    }
-protected:
+    }*/
+public:
 	GameObject& gameObject;
-	TransformComponent* transform = nullptr;
+	ChoSystem::Transform transform;
 private:
-	void SetECSPtr(ECSManager* ecs) { ecsManager = ecs; }
+	void SetECSPtr(ECSManager* ecs) 
+    { 
+        ecsManager = ecs;
+		transform.m_ECS = ecs;
+    }
 	ECSManager* ecsManager = nullptr;
 };

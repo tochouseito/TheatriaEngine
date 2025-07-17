@@ -100,4 +100,13 @@ namespace ChoMath {
 
 	// Matrix4 から SRT を取り出す関数
 	SRT DecomposeMatrix(const Matrix4& in);
+
+	float Lerp(const float& start, const float& end, const float& t);
+
+	Quaternion MakeQuaternionRotation(const Vector3& rad, const Vector3& preRad, const Quaternion& quaternion);
+
+	Quaternion MakeEulerRotation(const Vector3& rad);
+
+	// ALLBillboard
+	Matrix4 BillboardMatrix(const Matrix4 cameraMatrix);
 };
