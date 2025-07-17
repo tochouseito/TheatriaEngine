@@ -57,13 +57,16 @@ ObjectHandle GameWorld::CreateGameObject(const std::wstring& name, ObjectType ty
 	// Entityを取得
 	Entity entity = m_pECSManager->GenerateEntity();
 	handle.entity = entity;
+	// 基本コンポーネントを追加
+	m_pECSManager->AddComponent<TransformComponent>(handle.entity);
+	ChoSystem::Transform transform(entity, m_pECSManager);
 	// オブジェクトIDを取得
 	uint32_t objectID = static_cast<uint32_t>(m_pGameObjects[0].push_back(FVector<std::unique_ptr<GameObject>>()));
 	handle.objectID = objectID;
 	// 名前被り防止
 	std::wstring newName = GenerateUniqueName<std::unordered_map<std::wstring, ObjectHandle>>(name,m_ObjectHandleMap);
 	// GameObjectを作成
-	m_pGameObjects[0][objectID].push_back(std::make_unique<GameObject>(handle, newName, type));
+	m_pGameObjects[0][objectID].push_back(std::make_unique<GameObject>(handle, newName, type,transform));
 	// Entityにコンポーネントを追加
 	AddDefaultComponentsToGameObject(handle, type);
 	// 辞書に登録
@@ -87,6 +90,9 @@ SceneID GameWorld::AddGameObjectFromScene(const GameScene& scene, const bool& up
 		// PrefabからEntityを生成
 		Entity entity = prefab.Instantiate(*m_pECSManager);
 		handle.entity = entity;
+		// 基本コンポーネントを追加
+		m_pECSManager->AddComponent<TransformComponent>(handle.entity);
+		ChoSystem::Transform transform(entity, m_pECSManager);
 		// オブジェクトIDを取得
 		uint32_t objectID = static_cast<uint32_t>(m_pGameObjects[sceneID].push_back(FVector<std::unique_ptr<GameObject>>()));
 		handle.objectID = objectID;
@@ -101,7 +107,7 @@ SceneID GameWorld::AddGameObjectFromScene(const GameScene& scene, const bool& up
 			cho::Log::Write(cho::LogLevel::Assert, "Prefab type is None. Please set a valid type for the prefab.");
 			return sceneID;
 		}
-		m_pGameObjects[sceneID][objectID].push_back(std::make_unique<GameObject>(handle, prefab.GetName(), prefab.GetType()));
+		m_pGameObjects[sceneID][objectID].push_back(std::make_unique<GameObject>(handle, prefab.GetName(), prefab.GetType(),transform));
 		// 辞書に登録
 		m_ObjectHandleMap[prefab.GetName()] = handle;
 		m_ObjectHandleMapFromEntity[entity] = handle;
@@ -154,6 +160,9 @@ void GameWorld::RemoveGameObject(const ObjectHandle& handle)
 	GameObject* gameObject = GetGameObject(handle);
 	// ECSから削除
 	m_pECSManager->RemoveEntity(handle.entity);
+	// 辞書から削除
+	m_ObjectHandleMap.erase(gameObject->GetName());
+	m_ObjectHandleMapFromEntity.erase(handle.entity);
 	// コンテナから削除
 	// クローンならクローンリストから削除
 	if (handle.isClone)
@@ -165,9 +174,6 @@ void GameWorld::RemoveGameObject(const ObjectHandle& handle)
 	{
 		m_pGameObjects[handle.sceneID].erase(handle.objectID);
 	}
-	// 辞書から削除
-	m_ObjectHandleMap.erase(gameObject->GetName());
-	m_ObjectHandleMapFromEntity.erase(handle.entity);
 }
 
 // 名前変更
@@ -203,12 +209,15 @@ ObjectHandle GameWorld::AddGameObjectClone(const ObjectHandle& src)
 	// Entityを取得
 	Entity entity = m_pECSManager->CopyEntity(src.entity);
 	handle.entity = entity;
+	// 基本コンポーネントを追加
+	m_pECSManager->AddComponent<TransformComponent>(handle.entity);
+	ChoSystem::Transform transform(entity, m_pECSManager);
 	// objectIDを取得
 	handle.objectID = src.objectID; // srcのobjectIDを使用
 	// 名前被り防止
 	std::wstring newName = GenerateUniqueName<std::unordered_map<std::wstring, ObjectHandle>>(srcGameObject->GetName(), m_ObjectHandleMap);
 	// srcのクローンリストに追加
-	handle.cloneID = static_cast<uint32_t>(m_pGameObjects[src.sceneID][src.objectID].push_back(std::make_unique<GameObject>(handle, newName, srcGameObject->GetType())));
+	handle.cloneID = static_cast<uint32_t>(m_pGameObjects[src.sceneID][src.objectID].push_back(std::make_unique<GameObject>(handle, newName, srcGameObject->GetType(),transform)));
 	// Entityにコンポーネントを追加
 	AddDefaultComponentsToGameObject(handle, srcGameObject->GetType());
 	// 辞書に登録
@@ -227,13 +236,16 @@ ObjectHandle GameWorld::CreateGameObjectCopy(const ObjectHandle& src)
 	// Entityを取得
 	Entity entity = m_pECSManager->CopyEntity(src.entity);
 	handle.entity = entity;
+	// 基本コンポーネントを追加
+	m_pECSManager->AddComponent<TransformComponent>(handle.entity);
+	ChoSystem::Transform transform(entity, m_pECSManager);
 	// オブジェクトIDを取得
 	uint32_t objectID = static_cast<uint32_t>(m_pGameObjects[0].push_back(FVector<std::unique_ptr<GameObject>>()));
 	handle.objectID = objectID;
 	// 名前被り防止
 	std::wstring newName = GenerateUniqueName<std::unordered_map<std::wstring, ObjectHandle>>(srcGameObject->GetName(), m_ObjectHandleMap);
 	// GameObjectを作成
-	m_pGameObjects[0][objectID].push_back(std::make_unique<GameObject>(handle, newName, srcGameObject->GetType()));
+	m_pGameObjects[0][objectID].push_back(std::make_unique<GameObject>(handle, newName, srcGameObject->GetType(),transform));
 	// 辞書に登録
 	m_ObjectHandleMap[newName] = handle;
 	m_ObjectHandleMapFromEntity[entity] = handle;
@@ -267,8 +279,6 @@ void GameWorld::ClearAllScenes()
 // タイプごとの初期コンポーネントを追加
 void GameWorld::AddDefaultComponentsToGameObject(ObjectHandle handle, ObjectType type)
 {
-	// 基本コンポーネントを追加
-	m_pECSManager->AddComponent<TransformComponent>(handle.entity);
 	switch (type)
 	{
 	case ObjectType::MeshObject:

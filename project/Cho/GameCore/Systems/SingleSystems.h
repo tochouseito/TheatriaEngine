@@ -37,9 +37,6 @@ private:
 	// 優先度順に更新する
 	void priorityUpdate();
 	void UpdateComponent([[maybe_unused]] Entity e, TransformComponent& transform);
-	// オイラー回転
-	Quaternion MakeEulerRotation(const Vector3& rad);
-	Quaternion MakeQuaternionRotation(const Vector3& rad,const TransformComponent& c);;
 	// 転送
 	void TransferMatrix(TransformComponent& transform);
 	void FinalizeComponent([[maybe_unused]] Entity e, [[maybe_unused]] TransformComponent& transform);
@@ -49,7 +46,13 @@ private:
 		m_pIntegrationBuffer = buffer;
 	}
 
+	void SetGameWorld(GameWorld* gameWorld)
+	{
+		m_pGameWorld = gameWorld;
+	}
+
 	StructuredBuffer<BUFFER_DATA_TF>* m_pIntegrationBuffer = nullptr;
+	GameWorld* m_pGameWorld = nullptr; // GameWorldへのポインタ
 	bool m_isQuaternion = false; // クォータニオンを使用するかどうか
 };
 
@@ -88,6 +91,7 @@ private:
 	{
 		m_pResourceManager = resourceManager;
 	}
+	bool m_isQuaternion = false; // クォータニオンを使用するかどうか
 	ResourceManager* m_pResourceManager = nullptr;
 	StructuredBuffer<BUFFER_DATA_TF>* m_pIntegrationBuffer = nullptr;
 };

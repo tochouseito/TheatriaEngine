@@ -572,6 +572,7 @@ void GameCore::RegisterECSSystems(ResourceManager* resourceManager, GraphicsEngi
 	// TransformComponentSystem
 	m_pECSManager->AddSystem<TransformSystem>();
 	TransformSystem* transformSystem = m_pECSManager->GetSystem<TransformSystem>();
+	transformSystem->SetGameWorld(m_pGameWorld.get());
 	transformSystem->SetBuffer(static_cast<StructuredBuffer<BUFFER_DATA_TF>*>(resourceManager->GetIntegrationBuffer(IntegrationDataType::Transform)));
 	// AnimationComponentSystem
 	m_pECSManager->AddSystem<AnimationSystem>();

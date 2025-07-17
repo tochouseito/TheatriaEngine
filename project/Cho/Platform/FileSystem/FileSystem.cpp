@@ -891,9 +891,10 @@ json cho::Serialization::ToJson(const TransformComponent& t)
 {
     json j;
     j["translation"] = { t.position.x, t.position.y, t.position.z };
-    j["rotation"] = { t.rotation.x, t.rotation.y, t.rotation.z, t.rotation.w };
+    j["rotation"] = { t.quaternion.x, t.quaternion.y, t.quaternion.z, t.quaternion.w };
     j["scale"] = { t.scale.x, t.scale.y, t.scale.z };
 	j["degrees"] = { t.degrees.x, t.degrees.y, t.degrees.z };
+	j["isBillboard"] = t.isBillboard;
     return j;
 }
 
@@ -1717,9 +1718,10 @@ void cho::FileSystem::ScriptProject::UnloadPDB()
 void cho::Deserialization::FromJson(const json& j, TransformComponent& t)
 {
 	t.position = { j["translation"][0], j["translation"][1], j["translation"][2] };
-	t.rotation = { j["rotation"][0], j["rotation"][1], j["rotation"][2], j["rotation"][3] };
+	t.quaternion = { j["rotation"][0], j["rotation"][1], j["rotation"][2], j["rotation"][3] };
 	t.scale = { j["scale"][0], j["scale"][1], j["scale"][2] };
 	t.degrees = { j["degrees"][0], j["degrees"][1], j["degrees"][2] };
+	t.isBillboard = j.value("isBillboard", false);
 }
 
 void cho::Deserialization::FromJson(const json& j, CameraComponent& c)

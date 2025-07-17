@@ -15,7 +15,7 @@ void TransformSystem::InitializeComponent(Entity e, TransformComponent& transfor
 	e;
 	// 初期値保存
 	transform.startValue.translation = transform.position;
-	transform.startValue.rotation = transform.rotation;
+	transform.startValue.rotation = transform.quaternion;
 	transform.startValue.scale = transform.scale;
 	transform.startValue.degrees = transform.degrees;
 
@@ -28,13 +28,13 @@ void TransformSystem::InitializeComponent(Entity e, TransformComponent& transfor
 	Quaternion qz = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0.0f, 0.0f, 1.0f), radians.z);
 
 	// 同時回転を累積
-	transform.rotation = qx * qy * qz;
+	transform.quaternion = qx * qy * qz;
 
 	// 精度を維持するための正規化
-	transform.rotation.Normalize();
+	transform.quaternion.Normalize();
 
 	// アフィン変換
-	transform.matWorld = ChoMath::MakeAffineMatrix(transform.scale, transform.rotation, transform.position);
+	transform.matWorld = ChoMath::MakeAffineMatrix(transform.scale, transform.quaternion, transform.position);
 
 	// 次のフレーム用に保存する
 	transform.prePos = transform.position;
@@ -90,37 +90,40 @@ void TransformSystem::priorityUpdate()
 
 void TransformSystem::UpdateComponent(Entity e, TransformComponent& transform)
 {
-	//// 変更がなければワールド行列を更新しない
-	//if(transform.prePos == transform.position &&
-	//   transform.preRot == ChoMath::DegreesToRadians(transform.degrees) &&
-	//   transform.preScale == transform.scale)
-	//{
-	//	
-	//}
-	//else
-	//{
-		// 度数からラジアンに変換
-		Vector3 radians = ChoMath::DegreesToRadians(transform.degrees);
+	// 度数からラジアンに変換
+	Vector3 radians = ChoMath::DegreesToRadians(transform.degrees);
 
-		if (m_isQuaternion)
-		{
-			// クォータニオンを使用する場合
-			transform.rotation = MakeQuaternionRotation(radians, transform);
-		}
-		else
-		{
-			// オイラー角を使用する場合
-			transform.rotation = MakeEulerRotation(radians);
-		};
+	if (m_isQuaternion)
+	{
+		// クォータニオンを使用する場合
+		transform.quaternion = ChoMath::MakeQuaternionRotation(radians, transform.preRot,transform.quaternion);
+	}
+	else
+	{
+		// オイラー角を使用する場合
+		transform.quaternion = ChoMath::MakeEulerRotation(radians);
+	};
 
-		// アフィン変換
-		transform.matWorld = ChoMath::MakeAffineMatrix(transform.scale, transform.rotation, transform.position);
+	// スケール行列
+	transform.matScale = ChoMath::MakeScaleMatrix(transform.scale);
+	// 回転行列
+	Matrix4 matRotation = ChoMath::MakeRotateMatrix(transform.quaternion);
+	transform.matRotation = matRotation;
+	if (transform.isBillboard)
+	{
+		// メインカメラのTransformを取得
+		TransformComponent* cameraTransform = m_pEcs->GetComponent<TransformComponent>(m_pGameWorld->GetMainCamera()->GetHandle().entity);
+		matRotation = ChoMath::BillboardMatrix(cameraTransform->matWorld);
+	}
+	// 平行移動行列
+	transform.matLocal = ChoMath::MakeTranslateMatrix(transform.position);
+	// ワールド行列
+	transform.matWorld = transform.matScale * matRotation * transform.matLocal;
 
-		// 次のフレーム用に保存する
-		transform.prePos = transform.position;
-		transform.preRot = radians;
-		transform.preScale = transform.scale;
-	//}
+	// 次のフレーム用に保存する
+	transform.prePos = transform.position;
+	transform.preRot = radians;
+	transform.preScale = transform.scale;
 
 	// 親があれば親のワールド行列を掛ける
 	if (transform.parent.has_value())
@@ -144,7 +147,7 @@ void TransformSystem::UpdateComponent(Entity e, TransformComponent& transform)
 
 	// 各行列
 	transform.matLocal = ChoMath::MakeTranslateMatrix(transform.position);
-	transform.matRotation = ChoMath::MakeRotateMatrix(transform.rotation);
+	transform.matRotation = ChoMath::MakeRotateMatrix(transform.quaternion);
 	transform.matScale = ChoMath::MakeScaleMatrix(transform.scale);
 
 	// 前方ベクトル
@@ -153,35 +156,6 @@ void TransformSystem::UpdateComponent(Entity e, TransformComponent& transform)
 
 	// 行列の転送
 	TransferMatrix(transform);
-}
-
-// オイラー回転
-Quaternion TransformSystem::MakeEulerRotation(const Vector3& rad)
-{
-	// オイラー角からクォータニオンを作成
-	// 各軸のクオータニオンを作成
-	Quaternion qx = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(1.0f, 0.0f, 0.0f), rad.x);
-	Quaternion qy = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0.0f, 1.0f, 0.0f), rad.y);
-	Quaternion qz = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0.0f, 0.0f, 1.0f), rad.z);
-
-	// 同時回転を累積
-	Quaternion q = qx * qy * qz;
-	return q.Normalize(); // 正規化して返す
-}
-
-Quaternion TransformSystem::MakeQuaternionRotation(const Vector3& rad, const TransformComponent& c)
-{
-	// 差分計算
-	Vector3 diff = rad - c.preRot;
-
-	// 各軸のクオータニオンを作成
-	Quaternion qx = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(1.0f, 0.0f, 0.0f), diff.x);
-	Quaternion qy = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0.0f, 1.0f, 0.0f), diff.y);
-	Quaternion qz = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0.0f, 0.0f, 1.0f), diff.z);
-
-	// 同時回転を累積
-	Quaternion q = c.rotation * qx * qy * qz;
-	return q.Normalize(); // 正規化して返す
 }
 
 // 転送
@@ -218,7 +192,7 @@ void TransformSystem::FinalizeComponent(Entity e, TransformComponent& transform)
 	e;
 	// 初期値に戻す
 	transform.position = transform.startValue.translation;
-	transform.rotation = transform.startValue.rotation;
+	transform.quaternion = transform.startValue.rotation;
 	transform.scale = transform.startValue.scale;
 	transform.degrees = transform.startValue.degrees;
 }
@@ -230,7 +204,46 @@ void CameraSystem::InitializeComponent(Entity e, TransformComponent& transform, 
 
 void CameraSystem::UpdateComponent(Entity e, TransformComponent& transform, CameraComponent& camera)
 {
-	e;
+	// 度数からラジアンに変換
+	Vector3 radians = ChoMath::DegreesToRadians(transform.degrees);
+
+	if (m_isQuaternion)
+	{
+		// クォータニオンを使用する場合
+		transform.quaternion = ChoMath::MakeQuaternionRotation(radians, transform.preRot, transform.quaternion);
+	}
+	else
+	{
+		// オイラー角を使用する場合
+		transform.quaternion = ChoMath::MakeEulerRotation(radians);
+	};
+
+	// アフィン変換
+	transform.matWorld = ChoMath::MakeAffineMatrix(transform.scale, transform.quaternion, transform.position);
+
+	// 次のフレーム用に保存する
+	transform.prePos = transform.position;
+	transform.preRot = radians;
+	transform.preScale = transform.scale;
+
+	// 親があれば親のワールド行列を掛ける
+	if (transform.parent.has_value())
+	{
+		transform.matWorld = ChoMath::Multiply(transform.matWorld, m_pEcs->GetComponent<TransformComponent>(transform.parent.value())->matWorld);
+	}
+
+	// 物理コンポーネントがあれば、物理ボディの位置を更新
+	Rigidbody2DComponent* rb = m_pEcs->GetComponent<Rigidbody2DComponent>(e);
+	if (rb && rb->runtimeBody)
+	{
+		rb->runtimeBody->SetLinearVelocity(b2Vec2(rb->velocity.x, rb->velocity.y));
+	}
+
+	// 各行列
+	transform.matLocal = ChoMath::MakeTranslateMatrix(transform.position);
+	transform.matRotation = ChoMath::MakeRotateMatrix(transform.quaternion);
+	transform.matScale = ChoMath::MakeScaleMatrix(transform.scale);
+
 	camera.viewMatrix = Matrix4::Inverse(transform.matWorld);
 	camera.projectionMatrix = ChoMath::MakePerspectiveFovMatrix(camera.fovAngleY, camera.aspectRatio, camera.nearZ, camera.farZ);
 	TransferMatrix(transform, camera);

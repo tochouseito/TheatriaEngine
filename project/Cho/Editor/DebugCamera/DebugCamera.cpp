@@ -21,7 +21,7 @@ void DebugCamera::Initialize()
 void DebugCamera::Update()
 {
 	// 回転を考慮する
-	Matrix4 rotationMatrix = ChoMath::MakeRotateMatrix(m_TransformComponent.rotation);
+	Matrix4 rotationMatrix = ChoMath::MakeRotateMatrix(m_TransformComponent.quaternion);
 	Vector3 X = { 1.0f, 0.0f, 0.0f };
 	Vector3 Y = { 0.0f, 1.0f, 0.0f };
 	Vector3 Z = { 0.0f, 0.0f, -1.0f };
@@ -98,10 +98,10 @@ void DebugCamera::UpdateMatrix()
 
 	// 同時回転を累積
 	//m_TransformComponent.rotation = m_TransformComponent.rotation * qx * qy * qz;//*compo.rotation;
-	m_TransformComponent.rotation = qYaw * qPitch;
+	m_TransformComponent.quaternion = qYaw * qPitch;
 
 	// アフィン変換
-	m_TransformComponent.matWorld = ChoMath::MakeAffineMatrix(Scale(1.0f, 1.0f, 1.0f), m_TransformComponent.rotation, m_TransformComponent.position);
+	m_TransformComponent.matWorld = ChoMath::MakeAffineMatrix(Scale(1.0f, 1.0f, 1.0f), m_TransformComponent.quaternion, m_TransformComponent.position);
 
 	// 次のフレーム用に保存する
 	m_TransformComponent.prePos = m_TransformComponent.position;
