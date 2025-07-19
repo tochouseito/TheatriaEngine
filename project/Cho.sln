@@ -20,7 +20,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ChoEditor", "ChoEditor.vcxp
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameTemplate", "GameTemplate.vcxproj", "{96FA39BA-BFEE-445B-9916-39DBB940F908}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ChoFileSystem", "..\ChoFileSystem\ChoFileSystem.vcxproj", "{B6FEC0CD-4EC8-48EC-9DAD-A0BE9D4DE089}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ChoFileSystem", "ChoFileSystem\ChoFileSystem.vcxproj", "{B6FEC0CD-4EC8-48EC-9DAD-A0BE9D4DE089}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PhysicsEngine", "PhysicsEngine\PhysicsEngine.vcxproj", "{65D0069A-9075-49D7-9CC7-DECF7CE300C2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -71,6 +73,12 @@ Global
 		{B6FEC0CD-4EC8-48EC-9DAD-A0BE9D4DE089}.Profile|x64.Build.0 = Release|x64
 		{B6FEC0CD-4EC8-48EC-9DAD-A0BE9D4DE089}.Release|x64.ActiveCfg = Release|x64
 		{B6FEC0CD-4EC8-48EC-9DAD-A0BE9D4DE089}.Release|x64.Build.0 = Release|x64
+		{65D0069A-9075-49D7-9CC7-DECF7CE300C2}.Debug|x64.ActiveCfg = Debug|x64
+		{65D0069A-9075-49D7-9CC7-DECF7CE300C2}.Debug|x64.Build.0 = Debug|x64
+		{65D0069A-9075-49D7-9CC7-DECF7CE300C2}.Profile|x64.ActiveCfg = Release|x64
+		{65D0069A-9075-49D7-9CC7-DECF7CE300C2}.Profile|x64.Build.0 = Release|x64
+		{65D0069A-9075-49D7-9CC7-DECF7CE300C2}.Release|x64.ActiveCfg = Release|x64
+		{65D0069A-9075-49D7-9CC7-DECF7CE300C2}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
