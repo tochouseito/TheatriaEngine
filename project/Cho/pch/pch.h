@@ -10,6 +10,6 @@
 #define DIRECTINPUT_VERSION 0x0800
 #endif
 #include "ChoMath.h"
-using namespace ChoMath;
+using namespace chomath;
 #include "Core/ChoLog/ChoLog.h"
 using namespace cho;

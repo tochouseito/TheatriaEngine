@@ -61,28 +61,29 @@
 // ------------------------
 // #include <wrl.h> // Microsoft::WRL::ComPtr
 
+// ------------------------
+// 数学ライブラリ
+// ------------------------
+#include "ChoMath.h"
+
+// ------------------------
+// デバッグ
+// ------------------------
 #ifdef _DEBUG
     #define ENABLE_ASSERT
     #include <cassert>
     #define DEBUG_LOG(x) std::cout << "[DEBUG] " << x << std::endl;
     #include <crtdbg.h>        // メモリリーク検出 
-#else
+#endif // _DEBUG
+
+// ------------------------
+// リリース
+// ------------------------
+
+#ifdef NDEBUG
     // リリースビルドでは無効化
     #define assert(x) ((void)0)
     #define DEBUG_LOG(x) ((void)0)
-#endif
-
-// ------------------------
-// DLLExportMacro
-// ------------------------
-#ifdef PHYSICSENGINE_EXPORTS
-    #define PHYSI_API __declspec(dllexport)
-//#define REGISTER_SCRIPT_FACTORY(SCRIPTNAME) \
-//    extern "C" __declspec(dllexport) Marionnette* Create##SCRIPTNAME##Script(GameObject& object) { \
-//        return new SCRIPTNAME(object);}
-#else
-    #define PHYSI_API __declspec(dllimport)
-#endif
-
+#endif // NDEBUG
 
 #endif // CHOPHYSICS_PCH_H

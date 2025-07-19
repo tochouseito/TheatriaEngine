@@ -2,18 +2,17 @@
 //
 
 #include "chomath_pch.h"
-#include "framework.h"
 #include "ChoMath.h"
-#include <assert.h>
+using namespace chomath;
 
 // 行列のチェック関数
 
-float ChoMath::Pi()
+float chomath::Pi()
 {
 	return std::numbers::pi_v<float>;
 }
 
-int ChoMath::Check(double mat[MatCount][MatCount], double inv[MatCount][MatCount])
+int chomath::Check(double mat[MatCount][MatCount], double inv[MatCount][MatCount])
 {
 	double inner_product;
 	int i, j, k;
@@ -36,12 +35,12 @@ int ChoMath::Check(double mat[MatCount][MatCount], double inv[MatCount][MatCount
 	return 1;
 }
 
-float ChoMath::Clamp(float x, float min, float max)
+float chomath::Clamp(float x, float min, float max)
 {
 	return (x < min) ? min : (x > max) ? max : x;
 }
 
-Matrix4 ChoMath::Transpose(const Matrix4& m)
+Matrix4 chomath::Transpose(const Matrix4& m)
 {
 	Matrix4 result = { 0 };
 	for (int i = 0; i < MatCount; ++i) {
@@ -52,7 +51,7 @@ Matrix4 ChoMath::Transpose(const Matrix4& m)
 	return result;
 }
 
-Vector3 ChoMath::TransformNormal(const Vector3& v, const Matrix4& m) {
+Vector3 chomath::TransformNormal(const Vector3& v, const Matrix4& m) {
 	Vector3 result{
 		v.x * m.m[0][0] + v.y * m.m[1][0] + v.z * m.m[2][0],
 		v.x * m.m[0][1] + v.y * m.m[1][1] + v.z * m.m[2][1],
@@ -61,7 +60,7 @@ Vector3 ChoMath::TransformNormal(const Vector3& v, const Matrix4& m) {
 	return result;
 }
 
-Vector3 ChoMath::Transform(const Vector3& vector, const Matrix4& matrix) {
+Vector3 chomath::Transform(const Vector3& vector, const Matrix4& matrix) {
 	Vector3 result;
 	result.x = vector.x * matrix.m[0][0] + vector.y * matrix.m[1][0] + vector.z * matrix.m[2][0] + matrix.m[3][0];
 	result.y = vector.x * matrix.m[0][1] + vector.y * matrix.m[1][1] + vector.z * matrix.m[2][1] + matrix.m[3][1];
@@ -74,7 +73,7 @@ Vector3 ChoMath::Transform(const Vector3& vector, const Matrix4& matrix) {
 	return result;
 }
 
-Matrix4 ChoMath::MakeIdentity4x4()
+Matrix4 chomath::MakeIdentity4x4()
 {
 	Matrix4 result = { 0 };
 	for (int i = 0; i < MatCount; ++i) {
@@ -83,7 +82,7 @@ Matrix4 ChoMath::MakeIdentity4x4()
 	return result;
 }
 
-Matrix4 ChoMath::Multiply(const Matrix4& m1, const Matrix4& m2)
+Matrix4 chomath::Multiply(const Matrix4& m1, const Matrix4& m2)
 {
 	Matrix4 result = { 0 };
 	for (int i = 0; i < MatCount; ++i) {
@@ -96,7 +95,7 @@ Matrix4 ChoMath::Multiply(const Matrix4& m1, const Matrix4& m2)
 	return result;
 }
 
-Matrix4 ChoMath::MakeTranslateMatrix(const Vector3& translate)
+Matrix4 chomath::MakeTranslateMatrix(const Vector3& translate)
 {
 	Matrix4 translationMatrix = {
 		1.0f, 0.0f, 0.0f, 0.0f,
@@ -107,7 +106,7 @@ Matrix4 ChoMath::MakeTranslateMatrix(const Vector3& translate)
 	return translationMatrix;
 }
 
-Matrix4 ChoMath::MakeScaleMatrix(const Scale& scale)
+Matrix4 chomath::MakeScaleMatrix(const Scale& scale)
 {
 	Matrix4 scaleMatrix = {
 		scale.x, 0.0f,    0.0f,    0.0f,
@@ -118,7 +117,7 @@ Matrix4 ChoMath::MakeScaleMatrix(const Scale& scale)
 	return scaleMatrix;
 }
 
-Matrix4 ChoMath::MakeScaleMatrix(const Vector3& scale)
+Matrix4 chomath::MakeScaleMatrix(const Vector3& scale)
 {
 	Matrix4 scaleMatrix = {
 		scale.x, 0.0f,    0.0f,    0.0f,
@@ -129,7 +128,7 @@ Matrix4 ChoMath::MakeScaleMatrix(const Vector3& scale)
 	return scaleMatrix;
 }
 
-Matrix4 ChoMath::MakeRotateXMatrix(float radian)
+Matrix4 chomath::MakeRotateXMatrix(float radian)
 {
 	float cosX = cosf(radian);
 	float sinX = sinf(radian);
@@ -142,7 +141,7 @@ Matrix4 ChoMath::MakeRotateXMatrix(float radian)
 	return result;
 }
 
-Matrix4 ChoMath::MakeRotateYMatrix(float radian)
+Matrix4 chomath::MakeRotateYMatrix(float radian)
 {
 	float cosY = cosf(radian);
 	float sinY = sinf(radian);
@@ -155,7 +154,7 @@ Matrix4 ChoMath::MakeRotateYMatrix(float radian)
 	return result;
 }
 
-Matrix4 ChoMath::MakeRotateZMatrix(float radian)
+Matrix4 chomath::MakeRotateZMatrix(float radian)
 {
 	float cosZ = cosf(radian);
 	float sinZ = sinf(radian);
@@ -168,7 +167,7 @@ Matrix4 ChoMath::MakeRotateZMatrix(float radian)
 	return result;
 }
 
-Matrix4 ChoMath::MakeRotateXYZMatrix(const Vector3& rotate)
+Matrix4 chomath::MakeRotateXYZMatrix(const Vector3& rotate)
 {
 	Matrix4 rotateXMatrix = MakeRotateXMatrix(rotate.x);
 	Matrix4 rotateYMatrix = MakeRotateYMatrix(rotate.y);
@@ -180,7 +179,7 @@ Matrix4 ChoMath::MakeRotateXYZMatrix(const Vector3& rotate)
 
 
 // ビューポート変換行列
-Matrix4 ChoMath::MakeViewportMatrix(float left, float top, float width, float height, float minDepth, float maxDepth) {
+Matrix4 chomath::MakeViewportMatrix(float left, float top, float width, float height, float minDepth, float maxDepth) {
 	Matrix4 result;
 	result.m[0][0] = width / 2;
 	result.m[1][0] = 0.0f;
@@ -201,7 +200,7 @@ Matrix4 ChoMath::MakeViewportMatrix(float left, float top, float width, float he
 	return result;
 }
 
-Matrix4 ChoMath::MakePerspectiveFovMatrix(float fovY, float aspectRatio, float nearClip, float farClip)
+Matrix4 chomath::MakePerspectiveFovMatrix(float fovY, float aspectRatio, float nearClip, float farClip)
 {
 	float tanHalfFovY = std::tanf(fovY / 2.0f);
 	return Matrix4{
@@ -213,7 +212,7 @@ Matrix4 ChoMath::MakePerspectiveFovMatrix(float fovY, float aspectRatio, float n
 }
 
 // 正射影行列
-Matrix4 ChoMath::MakeOrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip) {
+Matrix4 chomath::MakeOrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip) {
 	Matrix4 result;
 	result.m[0][0] = 2 / (right - left);
 	result.m[1][0] = 0.0f;
@@ -235,7 +234,7 @@ Matrix4 ChoMath::MakeOrthographicMatrix(float left, float top, float right, floa
 }
 
 //// ベクトルの正規化
-float ChoMath::Normalize(float x, float min, float max)
+float chomath::Normalize(float x, float min, float max)
 {
 	if (max - min == 0)
 	{
@@ -245,14 +244,14 @@ float ChoMath::Normalize(float x, float min, float max)
 	return Clamp(normalized, 0.0f, 1.0f); // 結果を [0, 1] にクランプ
 }
 
-float ChoMath::Dot(const Vector3& v1, const Vector3& v2)
+float chomath::Dot(const Vector3& v1, const Vector3& v2)
 {
 	float result;
 	result = (v1.x * v2.x) + (v1.y * v2.y) + (v1.z * v2.z);
 	return result;
 }
 
-Matrix4 ChoMath::MakeRotateAxisAngle(const Vector3& axis, float angle)
+Matrix4 chomath::MakeRotateAxisAngle(const Vector3& axis, float angle)
 {
 	Vector3 normAxis = axis;
 	float axisLength = std::sqrt(axis.x * axis.x + axis.y * axis.y + axis.z * axis.z);
@@ -293,7 +292,7 @@ Matrix4 ChoMath::MakeRotateAxisAngle(const Vector3& axis, float angle)
 	return rotateMatrix;
 }
 
-Matrix4 ChoMath::DirectionToDirection(const Vector3& from, const Vector3& to) {
+Matrix4 chomath::DirectionToDirection(const Vector3& from, const Vector3& to) {
 	// 入力ベクトルを正規化
 	Vector3 normalizedFrom = Vector3::Normalize(from);
 	Vector3 normalizedTo = Vector3::Normalize(to);
@@ -327,12 +326,12 @@ Matrix4 ChoMath::DirectionToDirection(const Vector3& from, const Vector3& to) {
 	return rotateMatrix;
 }
 
-float ChoMath::DegreesToRadians(const float& degrees)
+float chomath::DegreesToRadians(const float& degrees)
 {
 	return degrees * std::numbers::pi_v<float> / 180.0f;
 }
 
-Vector3 ChoMath::DegreesToRadians(const Vector3& degrees)
+Vector3 chomath::DegreesToRadians(const Vector3& degrees)
 {
 	Vector3 result;
 
@@ -344,12 +343,12 @@ Vector3 ChoMath::DegreesToRadians(const Vector3& degrees)
 }
 
 
-float ChoMath::RadiansToDegrees(const float& radians)
+float chomath::RadiansToDegrees(const float& radians)
 {
 	return radians * 180.0f / std::numbers::pi_v<float>;
 }
 
-Vector3 ChoMath::RadiansToDegrees(const Vector3& radians)
+Vector3 chomath::RadiansToDegrees(const Vector3& radians)
 {
 	Vector3 result;
 
@@ -360,7 +359,7 @@ Vector3 ChoMath::RadiansToDegrees(const Vector3& radians)
 	return result;
 }
 
-Quaternion ChoMath::MakeRotateAxisAngleQuaternion(const Vector3& axis, float angle)
+Quaternion chomath::MakeRotateAxisAngleQuaternion(const Vector3& axis, float angle)
 {
 	Vector3 normAxis = axis;
 
@@ -374,7 +373,7 @@ Quaternion ChoMath::MakeRotateAxisAngleQuaternion(const Vector3& axis, float ang
 	return { normAxis.x * sinHalfAngle, normAxis.y * sinHalfAngle, normAxis.z * sinHalfAngle, cosHalfAngle };
 }
 
-Vector3 ChoMath::RotateVector(const Vector3& vector, const Quaternion& quaternion)
+Vector3 chomath::RotateVector(const Vector3& vector, const Quaternion& quaternion)
 {
 	// q * v * q^-1 を計算する
 	Quaternion qv = { vector.x, vector.y, vector.z, 0.0f };
@@ -402,7 +401,7 @@ Vector3 ChoMath::RotateVector(const Vector3& vector, const Quaternion& quaternio
 	return { result.x, result.y, result.z };
 }
 
-Matrix4 ChoMath::MakeRotateMatrix(const Quaternion& quaternion) {
+Matrix4 chomath::MakeRotateMatrix(const Quaternion& quaternion) {
 	Matrix4 matrix;
 
 	// クォータニオン成分の積
@@ -443,7 +442,7 @@ Matrix4 ChoMath::MakeRotateMatrix(const Quaternion& quaternion) {
 
 
 
-float ChoMath::Dot(const Quaternion& q0, const Quaternion& q1)
+float chomath::Dot(const Quaternion& q0, const Quaternion& q1)
 {
 	return q0.x * q1.x + q0.y * q1.y + q0.z * q1.z + q0.w * q1.w;
 }
@@ -453,7 +452,7 @@ float ChoMath::Dot(const Quaternion& q0, const Quaternion& q1)
 
 // オイラー角からクォータニオンを生成
 
-Quaternion ChoMath::FromEulerAngles(const Vector3& eulerAngles) {
+Quaternion chomath::FromEulerAngles(const Vector3& eulerAngles) {
 	Quaternion qx = MakeRotateAxisAngleQuaternion(Vector3(1.0f, 0.0f, 0.0f), eulerAngles.x);
 	Quaternion qy = MakeRotateAxisAngleQuaternion(Vector3(0.0f, 1.0f, 0.0f), eulerAngles.y);
 	Quaternion qz = MakeRotateAxisAngleQuaternion(Vector3(0.0f, 0.0f, 1.0f), eulerAngles.z);
@@ -485,7 +484,7 @@ Quaternion ChoMath::FromEulerAngles(const Vector3& eulerAngles) {
 
 // クォータニオンからオイラー角を計算（回転順序を指定）
 
-Vector3 ChoMath::ToEulerAngles(const Quaternion& q, RotationOrder order) {
+Vector3 chomath::ToEulerAngles(const Quaternion& q, RotationOrder order) {
 	Vector3 angles;
 
 	switch (order) {
@@ -598,7 +597,7 @@ Vector3 ChoMath::ToEulerAngles(const Quaternion& q, RotationOrder order) {
 	return angles;
 }
 
-Matrix4 ChoMath::MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate)
+Matrix4 chomath::MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate)
 {
 	Matrix4 result;
 	Matrix4 scaleMatrix = MakeScaleMatrix(scale);
@@ -615,7 +614,7 @@ Matrix4 ChoMath::MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, c
 	return result;
 }
 
-Matrix4 ChoMath::MakeAffineMatrix(const Scale& scale, const Quaternion& rotate, const Vector3& translate)
+Matrix4 chomath::MakeAffineMatrix(const Scale& scale, const Quaternion& rotate, const Vector3& translate)
 {
 	Matrix4 result;
 	Matrix4 scaleMatrix = MakeScaleMatrix(scale);
@@ -625,7 +624,7 @@ Matrix4 ChoMath::MakeAffineMatrix(const Scale& scale, const Quaternion& rotate, 
 	return result;
 }
 
-Vector3 ChoMath::TransformDirection(const Vector3& v, const Matrix4& m)
+Vector3 chomath::TransformDirection(const Vector3& v, const Matrix4& m)
 {
 	return {
 		m.m[0][0] * v.x + m.m[1][0] * v.y + m.m[2][0] * v.z,
@@ -634,7 +633,7 @@ Vector3 ChoMath::TransformDirection(const Vector3& v, const Matrix4& m)
 	};
 }
 
-float ChoMath::LerpShortAngle(float startAngle, float endAngle, float t) {
+float chomath::LerpShortAngle(float startAngle, float endAngle, float t) {
 	// 角度の差を計算
 	float delta = std::fmod(endAngle - startAngle, 2 * std::numbers::pi_v<float>);
 
@@ -658,7 +657,7 @@ float ChoMath::LerpShortAngle(float startAngle, float endAngle, float t) {
 	return result;
 }
 
-Quaternion ChoMath::MakeLookRotation(const Vector3& forward, const Vector3& up)
+Quaternion chomath::MakeLookRotation(const Vector3& forward, const Vector3& up)
 {
 	Vector3 f = forward;
 	f.Normalize();
@@ -679,7 +678,7 @@ Quaternion ChoMath::MakeLookRotation(const Vector3& forward, const Vector3& up)
 	return Quaternion::FromMatrix(rotMat); // 回転行列 → クォータニオン変換
 }
 
-Vector3 ChoMath::GetForwardVectorFromMatrix(const Matrix4& rotMatrix)
+Vector3 chomath::GetForwardVectorFromMatrix(const Matrix4& rotMatrix)
 {
 	return Vector3(
 		rotMatrix.m[0][2], // x
@@ -689,9 +688,9 @@ Vector3 ChoMath::GetForwardVectorFromMatrix(const Matrix4& rotMatrix)
 }
 
 // Matrix4 から SRT を取り出す関数
-ChoMath::SRT ChoMath::DecomposeMatrix(const Matrix4& in)
+chomath::SRT chomath::DecomposeMatrix(const Matrix4& in)
 {
-	ChoMath::SRT out;
+	chomath::SRT out;
 
 	Matrix4 mat = in; // コピーして操作する
 	mat.Transpose(); // 行列を転置（左手座標系用）
@@ -747,28 +746,28 @@ ChoMath::SRT ChoMath::DecomposeMatrix(const Matrix4& in)
 	return out;
 }
 
-Quaternion ChoMath::MakeQuaternionRotation(const Vector3& rad, const Vector3& preRad, const Quaternion& quaternion)
+Quaternion chomath::MakeQuaternionRotation(const Vector3& rad, const Vector3& preRad, const Quaternion& quaternion)
 {
 	// 差分計算
 	Vector3 diff = rad - preRad;
 
 	// 各軸のクオータニオンを作成
-	Quaternion qx = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(1.0f, 0.0f, 0.0f), diff.x);
-	Quaternion qy = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0.0f, 1.0f, 0.0f), diff.y);
-	Quaternion qz = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0.0f, 0.0f, 1.0f), diff.z);
+	Quaternion qx = chomath::MakeRotateAxisAngleQuaternion(Vector3(1.0f, 0.0f, 0.0f), diff.x);
+	Quaternion qy = chomath::MakeRotateAxisAngleQuaternion(Vector3(0.0f, 1.0f, 0.0f), diff.y);
+	Quaternion qz = chomath::MakeRotateAxisAngleQuaternion(Vector3(0.0f, 0.0f, 1.0f), diff.z);
 
 	// 同時回転を累積
 	Quaternion q = quaternion * qx * qy * qz;
 	return q.Normalize(); // 正規化して返す
 }
 
-Quaternion ChoMath::MakeEulerRotation(const Vector3& rad)
+Quaternion chomath::MakeEulerRotation(const Vector3& rad)
 {
 	// オイラー角からクォータニオンを作成
 	// 各軸のクオータニオンを作成
-	Quaternion qx = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(1.0f, 0.0f, 0.0f), rad.x);
-	Quaternion qy = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0.0f, 1.0f, 0.0f), rad.y);
-	Quaternion qz = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0.0f, 0.0f, 1.0f), rad.z);
+	Quaternion qx = chomath::MakeRotateAxisAngleQuaternion(Vector3(1.0f, 0.0f, 0.0f), rad.x);
+	Quaternion qy = chomath::MakeRotateAxisAngleQuaternion(Vector3(0.0f, 1.0f, 0.0f), rad.y);
+	Quaternion qz = chomath::MakeRotateAxisAngleQuaternion(Vector3(0.0f, 0.0f, 1.0f), rad.z);
 
 	// 同時回転を累積
 	Quaternion q = qx * qy * qz;
@@ -776,7 +775,7 @@ Quaternion ChoMath::MakeEulerRotation(const Vector3& rad)
 }
 
 // ALLBillboard
-Matrix4 ChoMath::BillboardMatrix(const Matrix4 cameraMatrix)
+Matrix4 chomath::BillboardMatrix(const Matrix4 cameraMatrix)
 {
 	Matrix4 result;
 
@@ -797,7 +796,7 @@ Matrix4 ChoMath::BillboardMatrix(const Matrix4 cameraMatrix)
 	return result;
 }
 
-float ChoMath::Lerp(const float& start, const float& end, const float& t)
+float chomath::Lerp(const float& start, const float& end, const float& t)
 {
 	return start + (end - start) * t;
 }

@@ -3,9 +3,8 @@
 //
 
 #include "chomath_pch.h"
-#include "framework.h"
 
-namespace ChoMath {
+namespace chomath {
 
 	// SRT をまとめた構造体
 	struct SRT
