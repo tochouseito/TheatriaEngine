@@ -2,7 +2,7 @@
 // ChoMath.cpp : スタティック ライブラリ用の関数を定義します。
 //
 
-#include "pch.h"
+#include "chomath_pch.h"
 #include "framework.h"
 
 namespace ChoMath {

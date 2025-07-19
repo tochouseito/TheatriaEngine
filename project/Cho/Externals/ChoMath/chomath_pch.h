@@ -4,8 +4,8 @@
 // ただし、ここに一覧表示されているファイルは、ビルド間でいずれかが更新されると、すべてが再コンパイルされます。
 // 頻繁に更新するファイルをここに追加しないでください。追加すると、パフォーマンス上の利点がなくなります。
 
-#ifndef PCH_H
-#define PCH_H
+#ifndef CHOMATH_PCH_H
+#define CHOMATH_PCH_H
 
 // プリコンパイルするヘッダーをここに追加します
 
@@ -20,4 +20,4 @@
 #include"Matrix4.h"
 #include"mathShapes.h"
 
-#endif //PCH_H
+#endif // CHOMATH_PCH_H
