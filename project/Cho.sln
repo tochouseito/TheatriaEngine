@@ -22,7 +22,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameTemplate", "GameTemplat
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ChoFileSystem", "ChoFileSystem\ChoFileSystem.vcxproj", "{B6FEC0CD-4EC8-48EC-9DAD-A0BE9D4DE089}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PhysicsEngine", "PhysicsEngine\PhysicsEngine.vcxproj", "{65D0069A-9075-49D7-9CC7-DECF7CE300C2}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ChoPhysics", "ChoPhysics\ChoPhysics.vcxproj", "{65D0069A-9075-49D7-9CC7-DECF7CE300C2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

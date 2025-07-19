@@ -4,8 +4,8 @@
 // ただし、ここに一覧表示されているファイルは、ビルド間でいずれかが更新されると、すべてが再コンパイルされます。
 // 頻繁に更新するファイルをここに追加しないでください。追加すると、パフォーマンス上の利点がなくなります。
 
-#ifndef PHYSICS_PCH_H
-#define PHYSICS_PCH_H
+#ifndef CHOPHYSICS_PCH_H
+#define CHOPHYSICS_PCH_H
 
 // プリコンパイルするヘッダーをここに追加します
 #define WIN32_LEAN_AND_MEAN					// Windows ヘッダーからほとんど使用されていない部分を除外する
@@ -45,6 +45,8 @@
 #include <tuple>
 #include <limits>
 #include <chrono>
+#include <stdexcept>
+#include <exception>
 
 // ------------------------
 // マルチスレッド用(予定)
@@ -83,4 +85,4 @@
 #endif
 
 
-#endif // PHYSICS_PCH_H
+#endif // CHOPHYSICS_PCH_H
