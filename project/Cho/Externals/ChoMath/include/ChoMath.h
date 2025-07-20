@@ -3,8 +3,28 @@
 //
 
 #include "chomath_pch.h"
+#include "Vector2.h"
+#include "Vector3.h"
+#include "Scale.h"
+#include "Vector4.h"
+#include "Quaternion.h"
+#include "Matrix4.h"
+#include "mathShapes.h"
 
 namespace chomath {
+
+		constexpr float PiF = std::numbers::pi_v<float>; // float型のπを定数として定義
+		const uint32_t MatCount = 4; //逆行列を求める行列の行数・列数
+		enum class RotationOrder
+		{
+			XYZ,
+			YXZ,
+			ZXY,
+			ZYX,
+			YZX,
+			XZY
+		};
+
 
 	// SRT をまとめた構造体
 	struct SRT

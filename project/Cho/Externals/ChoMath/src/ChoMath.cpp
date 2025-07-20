@@ -2,7 +2,7 @@
 //
 
 #include "chomath_pch.h"
-#include "ChoMath.h"
+#include "chomath.h"
 using namespace chomath;
 
 // 行列のチェック関数

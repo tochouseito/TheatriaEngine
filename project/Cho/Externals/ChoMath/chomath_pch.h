@@ -62,40 +62,4 @@
 #define DEBUG_LOG(x) ((void)0)
 #endif // NDEBUG
 
-// ------------------------
-// DLLExportMacro
-// ------------------------
-#ifdef CHOMATH_EXPORTS
-#define CHOMATH_API __declspec(dllexport)
-//#define REGISTER_SCRIPT_FACTORY(SCRIPTNAME) \
-//    extern "C" __declspec(dllexport) Marionnette* Create##SCRIPTNAME##Script(GameObject& object) { \
-//        return new SCRIPTNAME(object);}
-#else
-#define CHOMATH_API __declspec(dllimport)
-#endif
-
-#include"Vector2.h"
-#include"Vector3.h"
-#include"Scale.h"
-#include"Vector4.h"
-#include"Quaternion.h"
-#include"Matrix4.h"
-#include"mathShapes.h"
-
-namespace chomath
-{
-	constexpr float PiF = std::numbers::pi_v<float>; // float型のπを定数として定義
-	const uint32_t MatCount = 4; //逆行列を求める行列の行数・列数
-	enum class RotationOrder
-	{
-		XYZ,
-		YXZ,
-		ZXY,
-		ZYX,
-		YZX,
-		XZY
-	};
-
-}
-
 #endif // CHOMATH_PCH_H

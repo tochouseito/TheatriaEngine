@@ -158,6 +158,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\chomath.h" />
+    <ClInclude Include="include\cm_api.h" />
     <ClInclude Include="include\mathShapes.h" />
     <ClInclude Include="include\Matrix4.h" />
     <ClInclude Include="chomath_pch.h" />
@@ -168,7 +169,7 @@
     <ClInclude Include="include\Vector4.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\ChoMath.cpp" />
+    <ClCompile Include="src\chomath.cpp" />
     <ClCompile Include="chomath_pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
