@@ -425,6 +425,12 @@
     <None Include="Resources\EngineAssets\Shader\header\ViewProjection.hlsli" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\External\assimp\assimp.vcxproj">
+      <Project>{a6d704e6-3b06-3b7c-a488-6a6bfa5352cf}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\PhysicsEngine\PhysicsEngine.vcxproj">
+      <Project>{9900bf4d-d7fc-4feb-868e-65fbad0d6a2d}</Project>
+    </ProjectReference>
     <ProjectReference Include="Externals\ChoMath\ChoMath.vcxproj">
       <Project>{3cf8afa4-25ac-4b52-92f3-3af6824d3643}</Project>
     </ProjectReference>
