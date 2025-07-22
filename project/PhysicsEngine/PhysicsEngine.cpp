@@ -2,7 +2,6 @@
 //
 
 #include "physicsengine_pch.h"
-#include "framework.h"
 
 // TODO: これは、ライブラリ関数の例です
 void fnPhysicsEngine()

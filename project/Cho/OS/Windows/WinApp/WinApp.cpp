@@ -4,7 +4,7 @@
 #include <shellapi.h>
 #include <imgui.h>
 #include <imgui_impl_win32.h>
-#include <resource.h>
+//#include <resource.h>
 #include "Core/ChoLog/ChoLog.h"
 using namespace cho;
 extern IMGUI_IMPL_API LRESULT

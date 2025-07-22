@@ -2,7 +2,7 @@
 #define CP_COLLISION_H
 
 #include "cp_api.h"
-#include <ChoMath.h>
+#include <chomath.h>
 
 namespace chop
 {

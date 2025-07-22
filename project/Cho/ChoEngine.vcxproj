@@ -339,7 +339,6 @@
     <ClInclude Include="Editor\EffectEditor\EffectEditor.h" />
     <ClInclude Include="Editor\EffectView\EffectView.h" />
     <ClInclude Include="Editor\EffectHierarchy\EffectHierarchy.h" />
-    <ClInclude Include="resource.h" />
     <ClInclude Include="Resources\EffectContainer\EffectContainer.h" />
     <ClInclude Include="EngineCommand\EngineCommand.h" />
     <ClInclude Include="EngineCommand\EngineCommands.h" />
@@ -425,20 +424,23 @@
     <None Include="Resources\EngineAssets\Shader\header\ViewProjection.hlsli" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ChoMath\ChoMath.vcxproj">
+      <Project>{3cf8afa4-25ac-4b52-92f3-3af6824d3643}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\ChoPhysics\ChoPhysics.vcxproj">
+      <Project>{65d0069a-9075-49d7-9cc7-decf7ce300c2}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\External\assimp\assimp.vcxproj">
       <Project>{a6d704e6-3b06-3b7c-a488-6a6bfa5352cf}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\PhysicsEngine\PhysicsEngine.vcxproj">
-      <Project>{9900bf4d-d7fc-4feb-868e-65fbad0d6a2d}</Project>
-    </ProjectReference>
-    <ProjectReference Include="Externals\ChoMath\ChoMath.vcxproj">
-      <Project>{3cf8afa4-25ac-4b52-92f3-3af6824d3643}</Project>
-    </ProjectReference>
-    <ProjectReference Include="Externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">
+    <ProjectReference Include="..\External\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">
       <Project>{371b9fa9-4c90-4ac6-a123-aced756d6c77}</Project>
     </ProjectReference>
-    <ProjectReference Include="Externals\imgui\imgui.vcxproj">
+    <ProjectReference Include="..\External\imgui\imgui.vcxproj">
       <Project>{b4e3cfd6-cd84-4565-84e7-03feb4c6881e}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\PhysicsEngine\PhysicsEngine.vcxproj">
+      <Project>{9900bf4d-d7fc-4feb-868e-65fbad0d6a2d}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -603,9 +605,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
   </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="EngineResource.rc" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -640,13 +639,13 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)..\..\generated\outputs\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)..\..\generated\obj\$(ProjectName)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)..\generated\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)intermediate\$(Configuration)\</IntDir>
     <MultiProcFXC>true</MultiProcFXC>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)..\..\generated\outputs\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)..\..\generated\obj\$(ProjectName)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)..\generated\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)intermediate\$(Configuration)\</IntDir>
     <MultiProcFXC>true</MultiProcFXC>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -659,7 +658,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 /bigobj %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Externals\assimp\include;$(ProjectDir)Externals\DirectXTex;$(ProjectDir)Externals\imgui;$(ProjectDir)Externals\nlohmann;$(ProjectDir)Externals\ChoMath\include;$(ProjectDir)GameCore\Marionnette;$(ProjectDir)Core\Utility;$(ProjectDir)Externals\box2d\include;$(ProjectDir)pch\;$(ProjectDir)Externals\ChoMath;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)External\assimp\include;$(SolutionDir)External\imgui\include;$(SolutionDir)External\nlohmann;$(SolutionDir)ChoMath\include;$(ProjectDir)GameCore\Marionnette;$(ProjectDir)Core\Utility;$(ProjectDir)Externals\box2d\include;$(ProjectDir)pch\;$(SolutionDir)ChoMath;$(SolutionDir)External\DirectXTex\;$(SolutionDir)External\imgui_Extensions;$(SolutionDir)External\assimp\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -669,9 +668,9 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\..\generated\outputs\$(Configuration)\;$(ProjectDir)Externals\assimp\lib\Debug</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\generated\$(Configuration)\;$(SolutionDir)External\assimp\lib\$(Configuration);$(SolutionDir)External\DirectXTex\lib\$(Configuration);$(SolutionDir)External\imgui\lib\$(Configuration);$(SolutionDir)External\imgui_Extensions\lib\$(Configuration)</AdditionalLibraryDirectories>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
-      <AdditionalDependencies>dxcompiler.lib;d3dcompiler.lib;dxguid.lib;d3d12.lib;dxgi.lib;ChoMath.lib;dinput8.lib;xinput.lib;xaudio2.lib;assimp-vc143-mtd.lib;zlibstaticd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>dxcompiler.lib;d3dcompiler.lib;dxguid.lib;d3d12.lib;dxgi.lib;ChoMath.lib;dinput8.lib;xinput.lib;xaudio2.lib;imgui.lib;imgui_Extensions.lib;DirectXTex.lib;assimp-vc143-mdd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/ignore:4049 /ignore:4048 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
@@ -719,7 +718,7 @@ xcopy "$(SolutionDir)Cho\GameCore\ECS" "$(TargetDir)Cho\GameCore\ECS" /E /I /Y</
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 /bigobj %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Externals\assimp\include;$(ProjectDir)Externals\DirectXTex;$(ProjectDir)Externals\imgui;$(ProjectDir)Externals\nlohmann;$(ProjectDir)Externals\ChoMath\include;$(ProjectDir)GameCore\Marionnette;$(ProjectDir)Core\Utility;$(ProjectDir)Externals\box2d\include;$(ProjectDir)pch\;$(ProjectDir)Externals\ChoMath;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)External\assimp\include;$(SolutionDir)External\imgui\include;$(SolutionDir)External\nlohmann;$(SolutionDir)ChoMath\include;$(ProjectDir)GameCore\Marionnette;$(ProjectDir)Core\Utility;$(ProjectDir)Externals\box2d\include;$(ProjectDir)pch\;$(SolutionDir)ChoMath;$(SolutionDir)External\DirectXTex\;$(SolutionDir)External\imgui_Extensions;$(SolutionDir)External\assimp\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -731,8 +730,8 @@ xcopy "$(SolutionDir)Cho\GameCore\ECS" "$(TargetDir)Cho\GameCore\ECS" /E /I /Y</
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\..\generated\outputs\$(Configuration)\;$(ProjectDir)Externals\assimp\lib\Release</AdditionalLibraryDirectories>
-      <AdditionalDependencies>dxcompiler.lib;d3dcompiler.lib;dxguid.lib;d3d12.lib;dxgi.lib;ChoMath.lib;dinput8.lib;xinput.lib;xaudio2.lib;assimp-vc143-mt.lib;zlibstatic.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\generated\$(Configuration)\;$(SolutionDir)External\assimp\lib\$(Configuration);$(SolutionDir)External\DirectXTex\lib\$(Configuration);$(SolutionDir)External\imgui\lib\$(Configuration);$(SolutionDir)External\imgui_Extensions\lib\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>dxcompiler.lib;d3dcompiler.lib;dxguid.lib;d3d12.lib;dxgi.lib;ChoMath.lib;dinput8.lib;xinput.lib;xaudio2.lib;imgui.lib;imgui_Extensions.lib;DirectXTex.lib;assimp-vc143-md.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/ignore:4049 /ignore:4048 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>

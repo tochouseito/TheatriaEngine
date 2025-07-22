@@ -18,14 +18,18 @@ mono_crash.*
 
 # Build results
 generated/
+intermediate/
+logs/
+runtime/
+temp/
+tmp/
+cache/
+GameProjects/
+Compiled/
 project/ChoEngineLog.txt
 project/Cho/Externals/DirectXTex/Shaders/Compiled/
-GameProjects/
 project/Cho/Externals/assimp/lib/
-.cache/
-.nuget/
-.dotnet/
-.insomniac/
+project/External/assimp/lib/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/

@@ -1,7 +1,7 @@
 #pragma once
 #include "Engine/Engine.h"
 #include "APIExportsMacro.h"
-#include  "Externals/ChoMath/include/chomath.h"
+#include  <chomath.h>
 #include "Platform/InputManager/InputManager.h"
 #ifdef USE_CHOENGINE_SCRIPT
 #include "GameCore/ScriptAPI/ScriptAPI.h"

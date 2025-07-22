@@ -14,6 +14,20 @@ void ImGuiManager::Initialize(ID3D12Device8* device, ResourceManager* resourceMa
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Dockingを有効化
+
+	// プラットフォームとレンダラーのバックエンドを設定する
+	ImGui_ImplWin32_Init(WinApp::GetHWND());
+
+	/*ImGui_ImplDX12_InitInfo init_info = {};
+	init_info.Device = device;*/
+	m_DescriptorHeapIndex = resourceManager->GetSUVDHeap()->Allocate();
+	ImGui_ImplDX12_Init(
+		device, 2,
+		PixelFormat, resourceManager->GetSUVDHeap()->GetDescriptorHeap(),
+		resourceManager->GetSUVDHeap()->GetCPUDescriptorHandle(m_DescriptorHeapIndex.value()),
+		resourceManager->GetSUVDHeap()->GetGPUDescriptorHandle(m_DescriptorHeapIndex.value())
+	);
+
 	// 日本語フォント
 	ImFontConfig font_config;
 	font_config.MergeMode = false;
@@ -21,7 +35,7 @@ void ImGuiManager::Initialize(ID3D12Device8* device, ResourceManager* resourceMa
 	io.Fonts->AddFontFromFileTTF(//"C:/Windows/Fonts/msgothic.ttc",
 		"Cho/Resources/EngineAssets/Fonts/NotoSansJP-Regular.ttf",// フォントファイルのパス
 		16.0f,// フォントファイルのパスとフォントサイズ
-		&font_config, io.Fonts->GetGlyphRangesJapanese()// フォントの範囲
+		&font_config
 	);
 	// アイコンフォントをマージ
 	font_config.MergeMode = true;
@@ -38,25 +52,12 @@ void ImGuiManager::Initialize(ID3D12Device8* device, ResourceManager* resourceMa
 		&font_config,
 		materialSymbolRanges
 	);
-
-	unsigned char* texPixels = nullptr;
-	int texWidth, texHeight;
-	io.Fonts->GetTexDataAsAlpha8(&texPixels, &texWidth, &texHeight);
 	// 標準フォントを追加する
 	io.Fonts->AddFontDefault();
-	//io.Fonts->Build();
+	io.Fonts->Build(); // フォントをビルド
+	
 	// ImGuiのスタイルを設定
 	ImGui::StyleColorsDark();
-
-	// プラットフォームとレンダラーのバックエンドを設定する
-	ImGui_ImplWin32_Init(WinApp::GetHWND());
-	m_DescriptorHeapIndex = resourceManager->GetSUVDHeap()->Allocate();
-	ImGui_ImplDX12_Init(
-		device, 2,
-		PixelFormat, resourceManager->GetSUVDHeap()->GetDescriptorHeap(),
-		resourceManager->GetSUVDHeap()->GetCPUDescriptorHandle(m_DescriptorHeapIndex.value()),
-		resourceManager->GetSUVDHeap()->GetGPUDescriptorHandle(m_DescriptorHeapIndex.value())
-	);
 }
 
 void ImGuiManager::Finalize()
