@@ -204,7 +204,7 @@ bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 			std::memset(skinCluster.influenceData.data.data(), 0, sizeof(ConstBufferDataVertexInfluence) * vertexCount);// Influenceの初期化
 			/*InverseBindPoseMatrixの保存領域を作成*/
 			skinCluster.inverseBindPoseMatrices.resize(modelData.skeleton.joints.size());
-			std::generate(skinCluster.inverseBindPoseMatrices.begin(), skinCluster.inverseBindPoseMatrices.end(), []() { return ChoMath::MakeIdentity4x4(); });
+			std::generate(skinCluster.inverseBindPoseMatrices.begin(), skinCluster.inverseBindPoseMatrices.end(), []() { return chomath::MakeIdentity4x4(); });
 			meshData.skinCluster = skinCluster;
 
 			for (uint32_t boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex)
@@ -218,7 +218,7 @@ bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 				aiQuaternion rotate;
 				bindPoseMatrixAssimp.Decompose(scale, rotate, translate);// 成分を抽出
 				/*左手系のBindPoseMatrixを作る*/
-				Matrix4 bindPoseMatrix = ChoMath::MakeAffineMatrix(
+				Matrix4 bindPoseMatrix = chomath::MakeAffineMatrix(
 					{ scale.x,scale.y,scale.z }, { rotate.x,-rotate.y,-rotate.z,rotate.w }, { -translate.x,translate.y,translate.z });
 				/*InverseBindPoseMatrixにする*/
 				jointWeightData.inverseBindPoseMatrix = Matrix4::Inverse(bindPoseMatrix);
@@ -1008,7 +1008,7 @@ Node ModelManager::ReadNode(aiNode* node,const std::string& parentName)
 	result.transform.scale = { scale.x,scale.y,scale.z };// scaleはそのまま
 	result.transform.rotation = { rotate.x,-rotate.y,-rotate.z,rotate.w };// x軸を反転。さらに回転方向が逆なので軸を反転させる
 	result.transform.translation = { -translate.x,translate.y,translate.z };// x軸を反転
-	result.localMatrix = ChoMath::MakeAffineMatrix(result.transform.scale, result.transform.rotation, result.transform.translation);
+	result.localMatrix = chomath::MakeAffineMatrix(result.transform.scale, result.transform.rotation, result.transform.translation);
 	result.name = node->mName.C_Str();// Node名を格納
 	result.parentName = parentName;// 親Node名を格納
 	result.children.resize(node->mNumChildren);// 子供の数だけ確保
@@ -1025,7 +1025,7 @@ int32_t ModelManager::CreateJoint(const Node& node, const std::optional<int32_t>
 	Joint joint;
 	joint.name = node.name;
 	joint.localMatrix = node.localMatrix;
-	joint.skeletonSpaceMatrix = ChoMath::MakeIdentity4x4();
+	joint.skeletonSpaceMatrix = chomath::MakeIdentity4x4();
 	joint.transform = node.transform;
 	joint.index = static_cast<int32_t>(joints.size());// 現在登録されている数をIndexに
 	joint.parent = parent;

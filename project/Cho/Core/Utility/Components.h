@@ -39,8 +39,8 @@ struct TransformComponent : public IComponentTag
 	Vector3 position = { 0.0f, 0.0f, 0.0f };			// 位置
 	Quaternion quaternion = { 0.0f, 0.0f, 0.0f,1.0f };	// 回転
 	Scale scale = { 1.0f, 1.0f, 1.0f };					// スケール
-	Matrix4 matWorld = ChoMath::MakeIdentity4x4();		// ワールド行列
-	Matrix4 rootMatrix = ChoMath::MakeIdentity4x4();	// ルートのワールド行列
+	Matrix4 matWorld = chomath::MakeIdentity4x4();		// ワールド行列
+	Matrix4 rootMatrix = chomath::MakeIdentity4x4();	// ルートのワールド行列
 	Vector3 degrees = { 0.0f,0.0f,0.0f };				// 度数表示,操作用変数
 	Vector3 prePos = { 0.0f,0.0f,0.0f };				// 位置差分計算用
 	Vector3 preRot = { 0.0f,0.0f,0.0f };				// 回転差分計算用
@@ -48,9 +48,9 @@ struct TransformComponent : public IComponentTag
 	std::wstring parentName = L"";						// 親の名前
 	std::vector<std::wstring> childNames;				// 子供の名前
 	std::optional<uint32_t> parent = std::nullopt;		// 親のEntity
-	Matrix4 matLocal = ChoMath::MakeIdentity4x4();	// ローカル行列
-	Matrix4 matRotation = ChoMath::MakeIdentity4x4();	// 回転行列
-	Matrix4 matScale = ChoMath::MakeIdentity4x4();	// スケール行列
+	Matrix4 matLocal = chomath::MakeIdentity4x4();	// ローカル行列
+	Matrix4 matRotation = chomath::MakeIdentity4x4();	// 回転行列
+	Matrix4 matScale = chomath::MakeIdentity4x4();	// スケール行列
 	int tickPriority = 0;								// Tick優先度
 	Vector3 forward = { 0.0f, 0.0f, 1.0f };			// 前方向ベクトル
 	std::optional<uint32_t> mapID = std::nullopt;		// マップインデックス
@@ -97,8 +97,8 @@ struct TransformComponent : public IComponentTag
 		position.Initialize();
 		quaternion.Initialize();
 		scale.Initialize();
-		matWorld = ChoMath::MakeIdentity4x4();
-		rootMatrix = ChoMath::MakeIdentity4x4();
+		matWorld = chomath::MakeIdentity4x4();
+		rootMatrix = chomath::MakeIdentity4x4();
 		degrees.Initialize();
 		prePos.Initialize();
 		preRot.Initialize();
@@ -130,9 +130,9 @@ struct CameraComponent : public IComponentTag
     // 深度限界（奥側）
     float farZ = 1000.0f;
 	// View行列
-	Matrix4 viewMatrix = ChoMath::MakeIdentity4x4();
+	Matrix4 viewMatrix = chomath::MakeIdentity4x4();
 	// Projection行列
-	Matrix4 projectionMatrix = ChoMath::MakeIdentity4x4();
+	Matrix4 projectionMatrix = chomath::MakeIdentity4x4();
 	// バッファーインデックス
 	std::optional<uint32_t> bufferIndex = std::nullopt;
 
@@ -512,7 +512,7 @@ struct MaterialComponent : public IComponentTag
 		enableLighting = true;
 		enableTexture = false;
 		uvFlipY = false;
-		matUV = ChoMath::MakeIdentity4x4();
+		matUV = chomath::MakeIdentity4x4();
 		shininess = 50.0f;
 		textureName = L"";
 		textureID = std::nullopt;
@@ -592,7 +592,7 @@ struct ParticleComponent : public IComponentTag
 	ParticleComponent(ParticleComponent&&) noexcept = default;
 
 	uint32_t count = 1024;// パーティクル数
-	Matrix4 matBillboard = ChoMath::MakeIdentity4x4();
+	Matrix4 matBillboard = chomath::MakeIdentity4x4();
 	float time = 0.0f;
 	float deltaTime = 0.0f;
 	// バッファーインデックス
@@ -617,7 +617,7 @@ struct ParticleComponent : public IComponentTag
 	void Initialize()
 	{
 		count = 1024;
-		matBillboard = ChoMath::MakeIdentity4x4();
+		matBillboard = chomath::MakeIdentity4x4();
 		time = 0.0f;
 		deltaTime = 0.0f;
 		bufferIndex = std::nullopt;
@@ -665,7 +665,7 @@ struct UISpriteComponent : public IComponentTag
 	Vector2 position{ 0.0f,0.0f };// 位置
 	float rotation = 0.0f;// Z軸回転
 	Vector2 scale = { 1.0f,1.0f };// スケール
-	Matrix4 matWorld = ChoMath::MakeIdentity4x4();
+	Matrix4 matWorld = chomath::MakeIdentity4x4();
 	Vector2 uvPos = { 0.0f,0.0f };
 	float uvRot = 0.0f;
 	Vector2 uvScale = { 1.0f,1.0f };
@@ -701,7 +701,7 @@ struct UISpriteComponent : public IComponentTag
 		position.Initialize();
 		rotation = 0.0f;
 		scale.Initialize();
-		matWorld = ChoMath::MakeIdentity4x4();
+		matWorld = chomath::MakeIdentity4x4();
 		uvPos.Initialize();
 		uvRot = 0.0f;
 		uvScale.Initialize();

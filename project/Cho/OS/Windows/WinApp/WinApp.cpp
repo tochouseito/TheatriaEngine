@@ -4,7 +4,7 @@
 #include <shellapi.h>
 #include <imgui.h>
 #include <imgui_impl_win32.h>
-#include <resource.h>
+//#include <resource.h>
 #include "Core/ChoLog/ChoLog.h"
 using namespace cho;
 extern IMGUI_IMPL_API LRESULT
@@ -146,10 +146,6 @@ void WinApp::CreateGameWindow() {
 bool WinApp::ProcessMessage() {
 	MSG msg{};
 	// Windowにメッセージが来てたら最優先で処理させる
-	/*if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
-	}*/
 	while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 	{
 		TranslateMessage(&msg);

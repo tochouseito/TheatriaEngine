@@ -1,5 +1,5 @@
 #pragma once
-#include "Externals/ChoMath/ChoMath.h"
+#include <chomath.h>
 #include "Core/Utility/InputStruct.h"
 #include <vector>
 #include <wrl.h>
