@@ -21,6 +21,13 @@ void GameCore::Initialize(ResourceManager* resourceManager, GraphicsEngine* grap
 	m_pPhysicsWorld = std::make_unique<b2World>(gravity);
 	m_pContactListener = std::make_unique<ContactListener2D>(m_pECSManager.get(), m_pGameWorld.get());
 	m_pPhysicsWorld->SetContactListener(m_pContactListener.get());
+	// bulletphysicsの生成
+	m_pBroadphase = std::make_unique<btDbvtBroadphase>();
+	m_pCollisionConfiguration = std::make_unique<btDefaultCollisionConfiguration>();
+	m_pDispatcher = std::make_unique<btCollisionDispatcher>(m_pCollisionConfiguration.get());
+	m_pSolver = std::make_unique<btSequentialImpulseConstraintSolver>();
+	m_pDynamicsWorld = std::make_unique<btDiscreteDynamicsWorld>(m_pDispatcher.get(), m_pBroadphase.get(), m_pSolver.get(), m_pCollisionConfiguration.get());
+	m_pDynamicsWorld->setGravity(btVector3(0.0f, -9.8f, 0.0f));
 	// システムの生成
 	// ECSイベントの登録
 	RegisterECSEvents();

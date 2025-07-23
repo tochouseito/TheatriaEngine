@@ -1292,3 +1292,23 @@ void EffectEditorSystem::UpdateShader()
 	// クローズ
 	m_pGraphicsEngine->EndCommandContext(context, QueueType::Compute);
 }
+
+void Rigidbody3DSystem::InitializeComponent(Entity e, TransformComponent& transform, Rigidbody3DComponent& rb)
+{
+	e; transform; rb;
+}
+
+void Rigidbody3DSystem::UpdateComponent(Entity e, TransformComponent& transform, Rigidbody3DComponent& rb)
+{
+	e; transform; rb;
+}
+
+void Rigidbody3DSystem::Reset(Rigidbody3DComponent& rb)
+{
+	rb;
+}
+
+void Rigidbody3DSystem::FinalizeComponent(Entity e, TransformComponent& transform, Rigidbody3DComponent& rb)
+{
+	e; transform; rb;
+}

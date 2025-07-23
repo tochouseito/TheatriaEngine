@@ -64,7 +64,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\External\box2d\include;$(ProjectDir)..\External\bulletphysics\include;$(SolutionDir)External\ChoMath;$(SolutionDir)External\ChoMath\include;$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\External\box2d\include;$(ProjectDir)..\External\bulletphysics\include;$(SolutionDir)ChoMath;$(SolutionDir)ChoMath\include;$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -74,6 +74,12 @@
       <AdditionalDependencies>box2d.lib;Bullet3Common.lib;BulletCollision.lib;BulletDynamics.lib;BulletInverseDynamics.lib;BulletSoftBody.lib;LinearMath.lib;ChoMath.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)..\generated\$(Configuration)\;$(SolutionDir)External\box2d\lib;$(SolutionDir)External\bulletphysics\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <Lib>
+      <AdditionalDependencies>ChoMath.lib;box2d.lib;Bullet3Common.lib;BulletCollision.lib;BulletDynamics.lib;BulletInverseDynamics.lib;BulletSoftBody.lib;LinearMath.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
+    <Lib>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\generated\$(Configuration)\;$(SolutionDir)External\box2d\lib;$(SolutionDir)External\bulletphysics\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -90,7 +96,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\External\box2d\include;$(ProjectDir)..\External\bulletphysics\include;$(SolutionDir)External\ChoMath;$(SolutionDir)External\ChoMath\include;$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\External\box2d\include;$(ProjectDir)..\External\bulletphysics\include;$(SolutionDir)ChoMath;$(SolutionDir)ChoMath\include;$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -100,8 +106,17 @@
       <AdditionalDependencies>box2d.lib;Bullet3Common.lib;BulletCollision.lib;BulletDynamics.lib;BulletInverseDynamics.lib;BulletSoftBody.lib;LinearMath.lib;ChoMath.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)..\generated\$(Configuration)\;$(SolutionDir)External\box2d\lib;$(SolutionDir)External\bulletphysics\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <Lib>
+      <AdditionalDependencies>ChoMath.lib;box2d.lib;Bullet3Common.lib;BulletCollision.lib;BulletDynamics.lib;BulletInverseDynamics.lib;BulletSoftBody.lib;LinearMath.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
+    <Lib>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\generated\$(Configuration)\;$(SolutionDir)External\box2d\lib;$(SolutionDir)External\bulletphysics\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\2D\d2_converter.h" />
+    <ClInclude Include="include\2D\d2_shape.h" />
+    <ClInclude Include="include\2D\d2_fixture.h" />
     <ClInclude Include="include\2D\d2_body.h" />
     <ClInclude Include="include\2D\d2_common.h" />
     <ClInclude Include="include\2D\d2_world.h" />
@@ -110,6 +125,9 @@
     <ClInclude Include="physicsengine_pch.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\2D\d2_converter.cpp" />
+    <ClCompile Include="src\2D\d2_shape.cpp" />
+    <ClCompile Include="src\2D\d2_fixture.cpp" />
     <ClCompile Include="src\2D\d2_body.cpp" />
     <ClCompile Include="physicsengine_pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

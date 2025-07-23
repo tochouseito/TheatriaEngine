@@ -262,6 +262,39 @@ private:
 	void FinalizeComponent([[maybe_unused]] Entity e, [[maybe_unused]] TransformComponent& transform, [[maybe_unused]] Rigidbody2DComponent& rb, [[maybe_unused]] BoxCollider2DComponent& box);
 };
 
+class Rigidbody3DSystem : public ECSManager::System<TransformComponent, Rigidbody3DComponent>
+{
+	friend class GameCore;
+public:
+	Rigidbody3DSystem():
+		ECSManager::System<TransformComponent, Rigidbody3DComponent>(
+			[this](Entity e, TransformComponent& transform, Rigidbody3DComponent& rb)
+			{
+				UpdateComponent(e, transform, rb);
+			},
+			[this](Entity e, TransformComponent& transform, Rigidbody3DComponent& rb)
+			{
+				InitializeComponent(e, transform, rb);
+			},
+			[this](Entity e, TransformComponent& transform, Rigidbody3DComponent& rb)
+			{
+				FinalizeComponent(e, transform, rb);
+			})
+	{
+	}
+	~Rigidbody3DSystem() = default;
+private:
+	void InitializeComponent([[maybe_unused]] Entity e, TransformComponent& transform, Rigidbody3DComponent& rb);
+	void UpdateComponent([[maybe_unused]] Entity e, TransformComponent& transform, Rigidbody3DComponent& rb);
+	void Reset(Rigidbody3DComponent& rb);
+	void FinalizeComponent([[maybe_unused]] Entity e, TransformComponent& transform, Rigidbody3DComponent& rb);
+	void SetPhysicsWorld(btDiscreteDynamicsWorld* world)
+	{
+		m_World = world;
+	}
+	btDiscreteDynamicsWorld* m_World = nullptr;
+};
+
 class MaterialSystem : public ECSManager::System<MaterialComponent>
 {
 	friend class GameCore;

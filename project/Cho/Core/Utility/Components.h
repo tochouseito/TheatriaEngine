@@ -2,6 +2,7 @@
 #include "ChoMath.h"// ChoEngine数学ライブラリ
 #include <Externals/box2d/include/box2d/box2d.h>
 #include <Externals/AIUtilityLib/chunk_vector.h>
+#include <btBulletDynamicsCommon.h>
 #include "Core/Utility/Color.h"
 #include "Core/Utility/IDType.h"
 #include "Core/Utility/EffectStruct.h"
@@ -470,6 +471,98 @@ struct PolygonCollider2DComponent : public IComponentTag
 	float restitution = 0.0f;
 	b2Fixture* runtimeFixture = nullptr;
 };
+
+// 3D物理コンポーネント
+struct Rigidbody3DComponent : public IComponentTag
+{
+	// デフォルト ctor はそのまま
+	Rigidbody3DComponent() = default;
+	// コピーコンストラクタ
+	Rigidbody3DComponent(const Rigidbody3DComponent&) = default;
+	// ムーブコンストラクタ（移動）
+	Rigidbody3DComponent(Rigidbody3DComponent&&) noexcept = default;
+	bool isActive = true; // 有効フラグ
+	float mass = 1.0f;
+	float gravityScale = 1.0f;
+	bool isKinematic = false;
+	bool fixedRotation = false;
+	btCollisionShape* collisionShape = nullptr; // 衝突形状
+	btRigidBody* runtimeBody = nullptr; // Bullet RigidBodyへのポインタ
+	btDiscreteDynamicsWorld* world = nullptr; // Bullet Worldへのポインタ
+	bool isCollisionStay = false; // 衝突中フラグ
+	std::optional<Entity> otherEntity = std::nullopt; // 衝突したオブジェクトID
+	std::optional<Entity> selfEntity = std::nullopt; // 自分のオブジェクトID
+	Rigidbody3DComponent& operator=(const Rigidbody3DComponent& other)
+	{
+		if (this == &other) return *this;
+		isActive = other.isActive;
+		mass = other.mass;
+		gravityScale = other.gravityScale;
+		isKinematic = other.isKinematic;
+		fixedRotation = other.fixedRotation;
+		return *this;
+	}
+	// ムーブ代入を明示的に生成
+	Rigidbody3DComponent& operator=(Rigidbody3DComponent&&) noexcept = default;
+	// 初期化
+	void Initialize()
+	{
+		if (runtimeBody)
+		{
+			world->removeRigidBody(runtimeBody);
+			delete runtimeBody->getMotionState();
+			delete runtimeBody;
+			runtimeBody = nullptr;
+			collisionShape = nullptr;
+		}
+		isActive = true;
+		mass = 1.0f;
+		gravityScale = 1.0f;
+		isKinematic = false;
+		fixedRotation = false;
+		world = nullptr;
+		isCollisionStay = false;
+		otherEntity = std::nullopt;
+		selfEntity = std::nullopt;
+	}
+};
+
+// 3Dボックスコライダー
+struct BoxCollider3DComponent : public IComponentTag
+{
+	// デフォルト ctor はそのまま
+	BoxCollider3DComponent() = default;
+	// コピーコンストラクタ
+	BoxCollider3DComponent(const BoxCollider3DComponent&) = default;
+	// ムーブコンストラクタ（移動）
+	BoxCollider3DComponent(BoxCollider3DComponent&&) noexcept = default;
+	Vector3 halfExtents = { 0.5f, 0.5f, 0.5f }; // 半径
+	float density = 1.0f; // 密度
+	float friction = 0.3f; // 摩擦係数
+	float restitution = 0.0f; // 反発係数
+	btCollisionShape* collisionShape = nullptr; // 衝突形状
+	BoxCollider3DComponent& operator=(const BoxCollider3DComponent& other)
+	{
+		if (this == &other) return *this;
+		halfExtents = other.halfExtents;
+		density = other.density;
+		friction = other.friction;
+		restitution = other.restitution;
+		return *this;
+	}
+	// ムーブ代入を明示的に生成
+	BoxCollider3DComponent& operator=(BoxCollider3DComponent&&) noexcept = default;
+	// 初期化
+	void Initialize()
+	{
+		halfExtents.Initialize();
+		density = 1.0f;
+		friction = 0.3f;
+		restitution = 0.0f;
+		collisionShape = nullptr;
+	}
+};
+
 // マテリアルコンポーネント
 struct MaterialComponent : public IComponentTag
 {
