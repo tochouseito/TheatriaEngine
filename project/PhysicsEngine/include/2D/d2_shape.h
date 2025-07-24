@@ -23,7 +23,8 @@ namespace physics
 		{
 		public:
 			virtual ~Id2Shape() = default;
-			virtual void CreatePolygonShape(Id2Body* body, Id2ShapeDef* shapeDef, Id2Polygon* polygon) = 0;
+			virtual void CreatePolygonShape(Id2Body*, Id2ShapeDef*, Id2Polygon*) {}
+			virtual void Destroy() {} // 形状を削除
 		};
 
 		class box2dShape : public Id2Shape
@@ -32,6 +33,7 @@ namespace physics
 			box2dShape();
 			~box2dShape() override = default;
 			void CreatePolygonShape(Id2Body* body, Id2ShapeDef* shapeDef, Id2Polygon* polygon) override;
+			void Destroy() override;
 		private:
 			struct Impl; // 実装の詳細を隠蔽するための前方宣言
 			std::unique_ptr<Impl> impl; // 実装のポインタ
@@ -45,6 +47,10 @@ namespace physics
 			void CreatePolygonShape(Id2Body* body, Id2ShapeDef* shapeDef, Id2Polygon* polygon) override
 			{
 				body; shapeDef; polygon; // ここで実際の処理を実装する
+			}
+			void Destroy() override
+			{
+				// ChoPhysicsの形状を削除する処理を実装
 			}
 		};
 	}

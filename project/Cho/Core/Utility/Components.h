@@ -1,8 +1,6 @@
 #pragma once
 #include "ChoMath.h"// ChoEngine数学ライブラリ
-#include <Externals/box2d/include/box2d/box2d.h>
 #include <Externals/AIUtilityLib/chunk_vector.h>
-#include <btBulletDynamicsCommon.h>
 #include "Core/Utility/Color.h"
 #include "Core/Utility/IDType.h"
 #include "Core/Utility/EffectStruct.h"
@@ -16,6 +14,8 @@
 #include <ranges>         // C++20
 #include <numbers>        // C++20
 #include <variant>
+
+#include <2D/d2_common.h>
 
 class GameObject;
 
@@ -332,13 +332,12 @@ struct Rigidbody2DComponent : public IComponentTag
 	float gravityScale = 1.0f;
 	bool isKinematic = false;
 	bool fixedRotation = false;
-	b2BodyType bodyType = b2_dynamicBody;
-	b2Body* runtimeBody = nullptr; // Box2D Bodyへのポインタ
-	b2World* world = nullptr; // Box2D Worldへのポインタ
+	physics::d2::Id2BodyType bodyType = physics::d2::Id2BodyType::Id2_dynamicBody;
+	physics::d2::Id2Body runtimeBody;
 	bool isCollisionStay = false; // 衝突中フラグ
 	std::optional<Entity> otherEntity = std::nullopt; // 衝突したオブジェクトID
 	std::optional<Entity> selfEntity = std::nullopt; // 自分のオブジェクトID
-	std::optional<b2Vec2> requestedPosition = std::nullopt; // 位置リクエスト
+	std::optional<Vector2> requestedPosition = std::nullopt; // 位置リクエスト
 	//std::optional<b2Vec2> requestedVelocity = std::nullopt; // 速度リクエスト
 	Vector2 velocity = { 0.0f, 0.0f }; // 速度
 
@@ -360,18 +359,12 @@ struct Rigidbody2DComponent : public IComponentTag
 	// 初期化
 	void Initialize()
 	{
-		if (runtimeBody)
-		{
-			world->DestroyBody(runtimeBody);
-			runtimeBody = nullptr;
-		}
 		isActive = true;
 		mass = 1.0f;
 		gravityScale = 1.0f;
 		isKinematic = false;
 		fixedRotation = false;
-		bodyType = b2_dynamicBody;
-		world = nullptr;
+		bodyType = physics::d2::Id2_dynamicBody;
 		isCollisionStay = false;
 		otherEntity = std::nullopt;
 		selfEntity = std::nullopt;
@@ -398,7 +391,7 @@ struct BoxCollider2DComponent : public IComponentTag
 	float restitution = 0.0f;
 	bool isSensor = false;
 	bool isActive = true;
-	b2Fixture* runtimeFixture = nullptr;
+	physics::d2::Id2Shape runtimeShape;
 
 	BoxCollider2DComponent& operator=(const BoxCollider2DComponent& other)
 	{
@@ -429,7 +422,6 @@ struct BoxCollider2DComponent : public IComponentTag
 		restitution = 0.0f;
 		isSensor = false;
 		isActive = true;
-		runtimeFixture = nullptr;
 	}
 };
 // 2D円形コライダー
@@ -451,7 +443,6 @@ struct CircleCollider2DComponent : public IComponentTag
 	float density = 1.0f;
 	float friction = 0.3f;
 	float restitution = 0.0f;
-	b2Fixture* runtimeFixture = nullptr;
 };
 // 2D任意形状コライダー
 struct PolygonCollider2DComponent : public IComponentTag
@@ -465,11 +456,9 @@ struct PolygonCollider2DComponent : public IComponentTag
 
 	// ムーブ代入を明示的に生成
 	PolygonCollider2DComponent& operator=(PolygonCollider2DComponent&&) noexcept = default;
-	std::vector<b2Vec2> points;
 	float density = 1.0f;
 	float friction = 0.3f;
 	float restitution = 0.0f;
-	b2Fixture* runtimeFixture = nullptr;
 };
 
 // 3D物理コンポーネント
@@ -486,9 +475,6 @@ struct Rigidbody3DComponent : public IComponentTag
 	float gravityScale = 1.0f;
 	bool isKinematic = false;
 	bool fixedRotation = false;
-	btCollisionShape* collisionShape = nullptr; // 衝突形状
-	btRigidBody* runtimeBody = nullptr; // Bullet RigidBodyへのポインタ
-	btDiscreteDynamicsWorld* world = nullptr; // Bullet Worldへのポインタ
 	bool isCollisionStay = false; // 衝突中フラグ
 	std::optional<Entity> otherEntity = std::nullopt; // 衝突したオブジェクトID
 	std::optional<Entity> selfEntity = std::nullopt; // 自分のオブジェクトID
@@ -507,20 +493,11 @@ struct Rigidbody3DComponent : public IComponentTag
 	// 初期化
 	void Initialize()
 	{
-		if (runtimeBody)
-		{
-			world->removeRigidBody(runtimeBody);
-			delete runtimeBody->getMotionState();
-			delete runtimeBody;
-			runtimeBody = nullptr;
-			collisionShape = nullptr;
-		}
 		isActive = true;
 		mass = 1.0f;
 		gravityScale = 1.0f;
 		isKinematic = false;
 		fixedRotation = false;
-		world = nullptr;
 		isCollisionStay = false;
 		otherEntity = std::nullopt;
 		selfEntity = std::nullopt;
@@ -540,7 +517,6 @@ struct BoxCollider3DComponent : public IComponentTag
 	float density = 1.0f; // 密度
 	float friction = 0.3f; // 摩擦係数
 	float restitution = 0.0f; // 反発係数
-	btCollisionShape* collisionShape = nullptr; // 衝突形状
 	BoxCollider3DComponent& operator=(const BoxCollider3DComponent& other)
 	{
 		if (this == &other) return *this;
@@ -559,7 +535,6 @@ struct BoxCollider3DComponent : public IComponentTag
 		density = 1.0f;
 		friction = 0.3f;
 		restitution = 0.0f;
-		collisionShape = nullptr;
 	}
 };
 

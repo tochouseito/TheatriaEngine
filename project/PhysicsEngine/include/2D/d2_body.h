@@ -38,11 +38,11 @@ namespace physics
 		public:
 			virtual ~Id2Body() = default;
 			// 作成
-			virtual void Create(Id2World* world, const Id2BodyDef& bodyDef) = 0;
+			virtual void Create(Id2World*, const Id2BodyDef&) {}
 			// 削除
-			virtual void Destroy() = 0;
+			virtual void Destroy() {}
 			// 
-			virtual void SetAwake(bool flag) = 0;
+			virtual void SetAwake(bool) {}
 		};
 
 		// box2d, ChoPhysicsのボディクラス
@@ -52,7 +52,7 @@ namespace physics
 			friend class box2dPolygon;
 		public:
 			box2dBody();
-			~box2dBody() override = default;
+			~box2dBody() override;
 			// Id2Body を介して継承されました
 			void Create(Id2World* world, const Id2BodyDef& bodyDef) override;
 			void Destroy() override;
@@ -69,6 +69,18 @@ namespace physics
 			public:
 			choPhysicsBody() = default;
 			~choPhysicsBody() override = default;
+			void Create(Id2World* world, const Id2BodyDef& bodyDef) override
+			{
+				world; bodyDef; // ここで実際の処理を実装する
+			}
+			void Destroy() override
+			{
+				// ChoPhysicsのボディを削除する処理を実装
+			}
+			void SetAwake(bool flag) override
+			{
+				flag; // ここで実際の処理を実装する
+			}
 		};
 
 	}

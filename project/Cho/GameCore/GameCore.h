@@ -59,14 +59,8 @@ private:
 	// 環境情報
 	BUFFER_DATA_ENVIRONMENT m_EnvironmentData;
 	// box2d
-	std::unique_ptr<b2World> m_pPhysicsWorld = nullptr;
+	std::unique_ptr<physics::d2::Id2World> m_pPy2dWorld = nullptr;
 	std::unique_ptr<ContactListener2D> m_pContactListener = nullptr;
-	// bulletphysics
-	std::unique_ptr<btBroadphaseInterface> m_pBroadphase;
-	std::unique_ptr<btDefaultCollisionConfiguration> m_pCollisionConfiguration;
-	std::unique_ptr<btCollisionDispatcher> m_pDispatcher;
-	std::unique_ptr<btSequentialImpulseConstraintSolver> m_pSolver;
-	std::unique_ptr<btDiscreteDynamicsWorld> m_pDynamicsWorld;
 	// ECSイベントディスパッチャー
 	std::shared_ptr<ComponentEventDispatcher> m_pComponentEventDispatcher = nullptr;
 };

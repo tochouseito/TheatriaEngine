@@ -19,6 +19,11 @@ physics::d2::box2dBody::box2dBody()
 {
 }
 
+physics::d2::box2dBody::~box2dBody()
+{
+	Destroy();
+}
+
 void physics::d2::box2dBody::Create(Id2World* world, const Id2BodyDef& bodyDef)
 {
 	pWorld = static_cast<box2dWorld*>(world); // 所属するワールドを設定

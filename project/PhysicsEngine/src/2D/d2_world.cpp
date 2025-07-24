@@ -18,6 +18,11 @@ physics::d2::box2dWorld::box2dWorld(d2Backend be)
 	backend = be;	
 }
 
+physics::d2::box2dWorld::~box2dWorld()
+{
+	Destroy();
+}
+
 void physics::d2::box2dWorld::Create()
 {
 	b2WorldDef worldDef = b2DefaultWorldDef();
@@ -30,9 +35,9 @@ void physics::d2::box2dWorld::Destroy()
 	b2DestroyWorld(impl->world); // Box2Dのワールドを破棄
 }
 
-void physics::d2::box2dWorld::Step(const float& deltaTime)
+void physics::d2::box2dWorld::Step(const float& deltaTime, const uint32_t& subStepCount)
 {
-	deltaTime;
+	b2World_Step(impl->world, deltaTime, subStepCount); // Box2Dのワールドをステップ
 }
 
 Vector2 physics::d2::box2dWorld::GetGravity() const
@@ -66,9 +71,9 @@ void physics::d2::choPhysicsWorld::Destroy()
 {
 }
 
-void physics::d2::choPhysicsWorld::Step(const float& deltaTime)
+void physics::d2::choPhysicsWorld::Step(const float& deltaTime, const uint32_t& subStepCount)
 {
-	deltaTime;
+	deltaTime; subStepCount;
 }
 
 Vector2 physics::d2::choPhysicsWorld::GetGravity() const

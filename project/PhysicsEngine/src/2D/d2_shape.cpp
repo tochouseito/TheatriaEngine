@@ -28,3 +28,8 @@ void physics::d2::box2dShape::CreatePolygonShape(Id2Body* body, Id2ShapeDef* sha
 	def.isSensor = shapeDef->isSensor; // センサーかどうかの設定
 	impl->shape = b2CreatePolygonShape(box2dBodyPtr->GetBody(),  &def, box2dPolygonPtr->GetPolygon());
 }
+
+void physics::d2::box2dShape::Destroy()
+{
+	b2DestroyShape(impl->shape, true); // 形状を削除
+}

@@ -34,7 +34,7 @@ namespace physics
 			// ワールド削除
 			virtual void Destroy() = 0;
 			// シュミレーションのステップ
-			virtual void Step(const float& deltaTime) = 0;
+			virtual void Step(const float& deltaTime,const uint32_t& subStepCount) = 0;
 			// 重力を取得、設定
 			virtual Vector2 GetGravity() const = 0;
 			virtual void SetGravity(const Vector2& gravity) = 0;
@@ -48,11 +48,11 @@ namespace physics
 			friend class box2dBody;
 		public:
 			box2dWorld(d2Backend be);
-			~box2dWorld() = default;
+			~box2dWorld();
 			// Id2World を介して継承されました
 			void Create() override;
 			void Destroy() override;
-			void Step(const float& deltaTime) override;
+			void Step(const float& deltaTime, const uint32_t& subStepCount) override;
 			Vector2 GetGravity() const override;
 			void SetGravity(const Vector2& gravity) override;
 			b2WorldId GetWorld() const; // Box2Dのワールドを取得
@@ -70,7 +70,7 @@ namespace physics
 			// Id2World を介して継承されました
 			void Create() override;
 			void Destroy() override;
-			void Step(const float& deltaTime) override;
+			void Step(const float& deltaTime, const uint32_t& subStepCount) override;
 			Vector2 GetGravity() const override;
 			void SetGravity(const Vector2& gravity) override;
 		private:
