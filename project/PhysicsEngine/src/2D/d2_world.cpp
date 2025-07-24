@@ -53,9 +53,17 @@ Id2Body* physics::d2::box2dWorld::CreateBody(const Id2BodyDef& bodyDef)
 	return new box2dBody(*world, &b2BodyDef);
 }
 
-void physics::d2::box2dWorld::DestroyBody(Id2Body* body)
+void physics::d2::Id2World::DestroyBody(Id2Body* body)
 {
-	delete body; // ボディの破棄
+	if (body)
+	{
+		delete body; // ボディの破棄
+	}
+	else
+	{
+		// エラーハンドリング: ボディがnullptrの場合
+		throw std::runtime_error("Attempted to destroy a null body.");
+	}
 }
 
 void physics::d2::box2dWorld::Step(const float& deltaTime)
@@ -74,10 +82,6 @@ void physics::d2::box2dWorld::SetGravity(const Vector2& gravity)
 Id2Body* physics::d2::choPhysicsWorld::CreateBody(const Id2BodyDef& bodyDef)
 {
 	return nullptr;
-}
-
-void physics::d2::choPhysicsWorld::DestroyBody(Id2Body* body)
-{
 }
 
 void physics::d2::choPhysicsWorld::Step(const float& deltaTime)

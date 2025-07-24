@@ -32,7 +32,7 @@ namespace physics
 			// 物理ボディの作成
 			virtual Id2Body* CreateBody(const Id2BodyDef& bodyDef) = 0;
 			// 物理ボディの削除
-			virtual void DestroyBody(Id2Body* body) = 0;
+			void DestroyBody(Id2Body* body);
 			// シュミレーションのステップ
 			virtual void Step(const float& deltaTime) = 0;
 			// 重力を取得、設定
@@ -50,7 +50,6 @@ namespace physics
 			~box2dWorld();
 			// Id2World を介して継承されました
 			Id2Body* CreateBody(const Id2BodyDef& bodyDef) override;
-			void DestroyBody(Id2Body* body) override;
 			void Step(const float& deltaTime) override;
 			Vector2 GetGravity() const override;
 			void SetGravity(const Vector2& gravity) override;
@@ -65,7 +64,6 @@ namespace physics
 			choPhysicsWorld(d2Backend be) { backend = be; }
 			// Id2World を介して継承されました
 			Id2Body* CreateBody(const Id2BodyDef& bodyDef) override;
-			void DestroyBody(Id2Body* body) override;
 			void Step(const float& deltaTime) override;
 			Vector2 GetGravity() const override;
 			void SetGravity(const Vector2& gravity) override;
