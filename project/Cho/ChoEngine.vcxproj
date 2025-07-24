@@ -439,6 +439,9 @@
     <ProjectReference Include="..\External\imgui\imgui.vcxproj">
       <Project>{b4e3cfd6-cd84-4565-84e7-03feb4c6881e}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\External\imgui_Extensions\imgui_Extensions.vcxproj">
+      <Project>{cc238f44-9c9b-4f73-849c-61b4cef32ffe}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\PhysicsEngine\PhysicsEngine.vcxproj">
       <Project>{9900bf4d-d7fc-4feb-868e-65fbad0d6a2d}</Project>
     </ProjectReference>

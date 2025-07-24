@@ -2,7 +2,7 @@
 #ifndef zfstream_h
 #define zfstream_h
 
-#include <fstream.h>
+#include <fstream>
 #include "zlib.h"
 
 class gzfilebuf : public streambuf {
