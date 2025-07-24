@@ -286,11 +286,6 @@ inline const b2FixtureUserData& b2Fixture::GetUserData() const
 	return m_userData;
 }
 
-inline b2Body* b2Fixture::GetBody()
-{
-	return m_body;
-}
-
 inline const b2Body* b2Fixture::GetBody() const
 {
 	return m_body;

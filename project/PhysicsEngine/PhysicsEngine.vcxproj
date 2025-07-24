@@ -114,9 +114,9 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\2D\d2_polygon.h" />
     <ClInclude Include="include\2D\d2_converter.h" />
     <ClInclude Include="include\2D\d2_shape.h" />
-    <ClInclude Include="include\2D\d2_fixture.h" />
     <ClInclude Include="include\2D\d2_body.h" />
     <ClInclude Include="include\2D\d2_common.h" />
     <ClInclude Include="include\2D\d2_world.h" />
@@ -125,9 +125,9 @@
     <ClInclude Include="physicsengine_pch.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\2D\d2_polygon.cpp" />
     <ClCompile Include="src\2D\d2_converter.cpp" />
     <ClCompile Include="src\2D\d2_shape.cpp" />
-    <ClCompile Include="src\2D\d2_fixture.cpp" />
     <ClCompile Include="src\2D\d2_body.cpp" />
     <ClCompile Include="physicsengine_pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

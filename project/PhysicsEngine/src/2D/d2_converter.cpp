@@ -1,9 +1,5 @@
 #include "physicsengine_pch.h"
 #include "2D/d2_converter.h"
-#include "2D/d2_body.h"
-
-// box2d
-#include <box2d.h>
 
 using namespace physics::d2;
 

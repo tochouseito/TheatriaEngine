@@ -5,7 +5,7 @@
 #include <memory>
 
 // box2d, ChoPhysics
-class b2WorldId;
+struct b2WorldId;
 
 namespace physics
 {
@@ -29,10 +29,10 @@ namespace physics
 			virtual ~Id2World() = default;
 			// 物理ワールドのバックエンドを取得
 			d2Backend GetBackend() const { return backend; }
-			// 物理ボディの作成
-			virtual Id2Body* CreateBody(const Id2BodyDef& bodyDef) = 0;
-			// 物理ボディの削除
-			void DestroyBody(Id2Body* body);
+			// ワールド作成
+			virtual void Create() = 0;
+			// ワールド削除
+			virtual void Destroy() = 0;
 			// シュミレーションのステップ
 			virtual void Step(const float& deltaTime) = 0;
 			// 重力を取得、設定
@@ -45,34 +45,38 @@ namespace physics
 		// Box2D
 		class box2dWorld : public Id2World
 		{
+			friend class box2dBody;
 		public:
 			box2dWorld(d2Backend be);
-			~box2dWorld();
+			~box2dWorld() = default;
 			// Id2World を介して継承されました
-			Id2Body* CreateBody(const Id2BodyDef& bodyDef) override;
+			void Create() override;
+			void Destroy() override;
 			void Step(const float& deltaTime) override;
 			Vector2 GetGravity() const override;
 			void SetGravity(const Vector2& gravity) override;
+			b2WorldId GetWorld() const; // Box2Dのワールドを取得
 		private:
-			b2WorldId* world; // Box2Dのワールド
+			struct Impl; // 実装の詳細を隠蔽するための前方宣言
+			std::unique_ptr<Impl> impl; // 実装のポインタ
 		};
 
 		// ChoPhysics
 		class choPhysicsWorld : public Id2World
 		{
 		public:
-			choPhysicsWorld(d2Backend be) { backend = be; }
+			choPhysicsWorld(d2Backend be);
+
 			// Id2World を介して継承されました
-			Id2Body* CreateBody(const Id2BodyDef& bodyDef) override;
+			void Create() override;
+			void Destroy() override;
 			void Step(const float& deltaTime) override;
 			Vector2 GetGravity() const override;
 			void SetGravity(const Vector2& gravity) override;
+		private:
+			struct Impl; // 実装の詳細を隠蔽するための前方宣言
+			std::unique_ptr<Impl> impl; // 実装のポインタ
 		};
-
-		// ワールド作成
-		Id2World* CreateWorld(d2Backend backend = d2Backend::box2d);
-		// ワールド削除
-		void DestroyWorld(Id2World* world);
 	}
 }
 

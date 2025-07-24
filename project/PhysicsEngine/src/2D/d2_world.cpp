@@ -7,67 +7,32 @@
 
 using namespace physics::d2;
 
-// ワールド作成
-Id2World* physics::d2::CreateWorld(d2Backend backend)
+struct box2dWorld::Impl
 {
-	switch (backend)
-	{
-	case physics::d2::d2Backend::box2d:
-		return new box2dWorld(backend);
-		break;
-	case physics::d2::d2Backend::chophysics:
-		return new choPhysicsWorld(backend);
-		break;
-	default:
-		break;
-	}
-}
-
-void physics::d2::DestroyWorld(Id2World* world)
-{
-	delete world; // ワールドの破棄
-}
+	b2WorldId world;
+};
 
 physics::d2::box2dWorld::box2dWorld(d2Backend be)
+	: impl(std::make_unique<box2dWorld::Impl>())
 {
 	backend = be;	
+}
+
+void physics::d2::box2dWorld::Create()
+{
 	b2WorldDef worldDef = b2DefaultWorldDef();
 	worldDef.gravity = b2Vec2(0.0f, -9.8f); // 重力の設定
-	world = &b2CreateWorld(&worldDef);
+	impl->world = b2CreateWorld(&worldDef); // Box2Dのワールドを作成
 }
 
-physics::d2::box2dWorld::~box2dWorld()
+void physics::d2::box2dWorld::Destroy()
 {
-	b2DestroyWorld(*world); // ワールドの破棄
-}
-
-Id2Body* physics::d2::box2dWorld::CreateBody(const Id2BodyDef& bodyDef)
-{
-	b2BodyDef b2BodyDef = b2DefaultBodyDef();
-	b2BodyDef.userData = bodyDef.userData; // ユーザーデータの設定
-	b2BodyDef.type = ConvertBodyType(bodyDef.type); // ボディタイプの変換
-	b2BodyDef.gravityScale = bodyDef.gravityScale; // 重力スケールの設定
-	b2BodyDef.fixedRotation = bodyDef.fixedRotation; // 回転の固定設定
-	b2BodyDef.position = b2Vec2(bodyDef.position.x, bodyDef.position.y); // 位置の設定
-	b2BodyDef.rotation = b2MakeRot(bodyDef.angle); // 角度の設定
-	return new box2dBody(*world, &b2BodyDef);
-}
-
-void physics::d2::Id2World::DestroyBody(Id2Body* body)
-{
-	if (body)
-	{
-		delete body; // ボディの破棄
-	}
-	else
-	{
-		// エラーハンドリング: ボディがnullptrの場合
-		throw std::runtime_error("Attempted to destroy a null body.");
-	}
+	b2DestroyWorld(impl->world); // Box2Dのワールドを破棄
 }
 
 void physics::d2::box2dWorld::Step(const float& deltaTime)
 {
+	deltaTime;
 }
 
 Vector2 physics::d2::box2dWorld::GetGravity() const
@@ -77,15 +42,33 @@ Vector2 physics::d2::box2dWorld::GetGravity() const
 
 void physics::d2::box2dWorld::SetGravity(const Vector2& gravity)
 {
+	gravity;
 }
 
-Id2Body* physics::d2::choPhysicsWorld::CreateBody(const Id2BodyDef& bodyDef)
+b2WorldId physics::d2::box2dWorld::GetWorld() const { return impl->world; }
+
+struct choPhysicsWorld::Impl
 {
-	return nullptr;
+	int dummy = 0; // ChoPhysicsの実装に必要なダミー変数
+};
+
+physics::d2::choPhysicsWorld::choPhysicsWorld(d2Backend be)
+	: impl(std::make_unique<choPhysicsWorld::Impl>())
+{
+	backend = be;
+}
+
+void physics::d2::choPhysicsWorld::Create()
+{
+}
+
+void physics::d2::choPhysicsWorld::Destroy()
+{
 }
 
 void physics::d2::choPhysicsWorld::Step(const float& deltaTime)
 {
+	deltaTime;
 }
 
 Vector2 physics::d2::choPhysicsWorld::GetGravity() const
@@ -95,4 +78,5 @@ Vector2 physics::d2::choPhysicsWorld::GetGravity() const
 
 void physics::d2::choPhysicsWorld::SetGravity(const Vector2& gravity)
 {
+	gravity;
 }

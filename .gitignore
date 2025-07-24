@@ -19,6 +19,8 @@ mono_crash.*
 # Build results
 generated/
 intermediate/
+Release/
+Debug/
 logs/
 runtime/
 temp/

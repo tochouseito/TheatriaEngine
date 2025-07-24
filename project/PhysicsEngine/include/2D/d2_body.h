@@ -5,16 +5,16 @@
 #include <chomath.h>
 
 // Box2D, ChoPhysics
-class b2BodyId;
-class b2WorldId;
+struct b2BodyId;
+struct b2WorldId;
 struct b2BodyDef;
 
 namespace physics
 {
 	namespace d2
 	{
-		class Id2Fixture;
-		struct Id2FixtureDef;
+		class Id2World;
+		class box2dWorld;
 
 		enum Id2BodyType
 		{
@@ -35,14 +35,12 @@ namespace physics
 
 		class Id2Body
 		{
-			friend class Id2World; // Id2Worldからのみアクセス可能
-		protected:
-			virtual ~Id2Body() = default;// 外部からのデストラクタを不可
 		public:
-			// Fixtureの作成
-			virtual Id2Fixture* CreateFixture(const Id2FixtureDef& fixtureDef) = 0;
-			// Fixtureの削除
-			virtual void DestroyFixture(Id2Fixture* fixture) = 0;
+			virtual ~Id2Body() = default;
+			// 作成
+			virtual void Create(Id2World* world, const Id2BodyDef& bodyDef) = 0;
+			// 削除
+			virtual void Destroy() = 0;
 			// 
 			virtual void SetAwake(bool flag) = 0;
 		};
@@ -50,14 +48,20 @@ namespace physics
 		// box2d, ChoPhysicsのボディクラス
 		class box2dBody : public Id2Body
 		{
+			friend class box2dShape;
+			friend class box2dPolygon;
 		public:
-			box2dBody(b2WorldId worldId, const b2BodyDef* def);
+			box2dBody();
 			~box2dBody() override = default;
-			Id2Fixture* CreateFixture(const Id2FixtureDef& fixtureDef) override;
-			void DestroyFixture(Id2Fixture* fixture) override;
+			// Id2Body を介して継承されました
+			void Create(Id2World* world, const Id2BodyDef& bodyDef) override;
+			void Destroy() override;
 			void SetAwake(bool flag) override;
-		public:
-			b2BodyId* m_body; // Box2Dのボディ
+		private:
+			b2BodyId GetBody();
+			struct Impl; // 実装の詳細を隠蔽するための前方宣言
+			std::unique_ptr<Impl> impl;// 実装のポインタ
+			box2dWorld* pWorld = nullptr; // 所属するワールド
 		};
 
 		class choPhysicsBody : public Id2Body
@@ -65,9 +69,6 @@ namespace physics
 			public:
 			choPhysicsBody() = default;
 			~choPhysicsBody() override = default;
-			Id2Fixture* CreateFixture(const Id2FixtureDef& fixtureDef) override;
-			void DestroyFixture(Id2Fixture* fixture) override;
-			void SetAwake(bool flag) override;
 		};
 
 	}

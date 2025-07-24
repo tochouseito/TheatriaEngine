@@ -2,22 +2,51 @@
 #define D2_SHAPE_H
 
 #include <chomath.h>
+#include <memory>
 
 namespace physics
 {
 	namespace d2
 	{
-		//class Id2Shape
-		//{
-		//	virtual ~Id2Shape() = default;
-		//};
+		class Id2Body;
+		class Id2Polygon;
 
-		//class Id2PolygonShape : public Id2Shape
-		//{
-		//	public:
-		//	// ポリゴンの頂点を設定
-		//	virtual void SetAsBox(const float& hx, const float& hy, const Vector2& angle) = 0;
-		//};
+		struct Id2ShapeDef
+		{
+			float density = 1.0f; // 密度
+			float friction = 0.5f; // 摩擦係数
+			float restitution = 0.0f; // 反発係数
+			bool isSensor = false; // センサーかどうか
+		};
+
+		class Id2Shape
+		{
+		public:
+			virtual ~Id2Shape() = default;
+			virtual void CreatePolygonShape(Id2Body* body, Id2ShapeDef* shapeDef, Id2Polygon* polygon) = 0;
+		};
+
+		class box2dShape : public Id2Shape
+		{
+			public:
+			box2dShape();
+			~box2dShape() override = default;
+			void CreatePolygonShape(Id2Body* body, Id2ShapeDef* shapeDef, Id2Polygon* polygon) override;
+		private:
+			struct Impl; // 実装の詳細を隠蔽するための前方宣言
+			std::unique_ptr<Impl> impl; // 実装のポインタ
+		};
+
+		class choPhysicsShape : public Id2Shape
+		{
+			public:
+			choPhysicsShape() = default;
+			~choPhysicsShape() override = default;
+			void CreatePolygonShape(Id2Body* body, Id2ShapeDef* shapeDef, Id2Polygon* polygon) override
+			{
+				body; shapeDef; polygon; // ここで実際の処理を実装する
+			}
+		};
 	}
 }
 
