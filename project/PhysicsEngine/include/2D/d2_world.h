@@ -35,7 +35,9 @@ namespace physics
 			template <typename T1, typename T2>
 			std::size_t operator()(const std::pair<T1, T2>& p) const
 			{
-				return std::hash<T1>()(p.first.idx) ^ std::hash<T2>()(p.second.idx);
+				size_t h1 = std::hash<T1>{}(p.first);
+				size_t h2 = std::hash<T2>{}(p.second);
+				return h1 ^ (h2 << 1);
 			}
 		};
 
@@ -101,8 +103,8 @@ namespace physics
 			OnContactFunc beginContactCallback; // 衝突開始時のコールバック
 			OnContactFunc endContactCallback;   // 衝突終了時のコールバック
 			OnContactFunc stayContactCallback;  // 衝突継続時のコールバック
-			std::unordered_set<std::pair<int32_t, int32_t>, PairHash> currentContacts;
-			std::unordered_set<std::pair<int32_t, int32_t>, PairHash> previousContacts;
+			std::unordered_set<std::pair<b2ShapeId, b2ShapeId>, PairHash> currentContacts;
+			std::unordered_set<std::pair<b2ShapeId, b2ShapeId>, PairHash> previousContacts;
 		};
 
 		// ChoPhysics

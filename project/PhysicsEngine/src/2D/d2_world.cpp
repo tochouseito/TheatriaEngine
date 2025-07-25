@@ -7,10 +7,39 @@
 
 using namespace physics::d2;
 
+inline bool operator==(const b2ShapeId& a, const b2ShapeId& b)
+{
+	return a.index1 == b.index1 &&
+		a.world0 == b.world0 &&
+		a.generation == b.generation;
+}
+
+inline bool operator<(const b2ShapeId& a, const b2ShapeId& b)
+{
+	if (a.index1 != b.index1) return a.index1 < b.index1;
+	if (a.world0 != b.world0) return a.world0 < b.world0;
+	return a.generation < b.generation;
+}
+
+namespace std
+{
+	template <>
+	struct hash<b2ShapeId>
+	{
+		std::size_t operator()(const b2ShapeId& id) const noexcept
+		{
+			size_t h1 = std::hash<int32_t>{}(id.index1);
+			size_t h2 = std::hash<uint16_t>{}(id.world0);
+			size_t h3 = std::hash<uint16_t>{}(id.generation);
+			return h1 ^ (h2 << 1) ^ (h3 << 2);
+		}
+	};
+}
+
 struct box2dWorld::Impl
 {
 	b2WorldId world;
-	std::unordered_set<int32_t> aliveShapes; // 有効な形状のセット
+	std::unordered_set<b2ShapeId> aliveShapes; // 有効な形状のセット
 };
 
 physics::d2::box2dWorld::box2dWorld(d2Backend be)
@@ -67,7 +96,7 @@ void physics::d2::box2dWorld::ProcessEvents()
 	for(int i = 0; i < events.beginCount; ++i)
 	{
 		const b2ContactBeginTouchEvent& ev = events.beginEvents[i];
-		auto pair = std::minmax(ev.shapeIdA.index1, ev.shapeIdB.index1);// ソートして重複防止
+		auto pair = std::minmax(ev.shapeIdA, ev.shapeIdB);// ソートして重複防止
 		currentContacts.insert(pair);
 
 		if (beginContactCallback)
@@ -99,7 +128,7 @@ void physics::d2::box2dWorld::ProcessEvents()
 			{
 				if (impl->aliveShapes.count(pair.first) && impl->aliveShapes.count(pair.second))
 				{
-					auto a = b2Body_GetUserData(b2Shape_GetBody(b2GetSah));
+					auto a = b2Body_GetUserData(b2Shape_GetBody(pair.first));
 					auto b = b2Body_GetUserData(b2Shape_GetBody(pair.second));
 					stayContactCallback(a, b);
 				}
