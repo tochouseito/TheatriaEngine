@@ -8,6 +8,7 @@
 struct b2BodyId;
 struct b2WorldId;
 struct b2BodyDef;
+struct b2ShapeId;
 
 namespace physics
 {
@@ -59,6 +60,9 @@ namespace physics
 			void SetAwake(bool flag) override;
 		private:
 			b2BodyId GetBody();
+			box2dWorld* GetWorld() const;
+			void SetShapeId(b2ShapeId* shapeId); // 形状IDを設定
+			void RemoveShapeId(); // 形状IDを削除
 			struct Impl; // 実装の詳細を隠蔽するための前方宣言
 			std::unique_ptr<Impl> impl;// 実装のポインタ
 			box2dWorld* pWorld = nullptr; // 所属するワールド

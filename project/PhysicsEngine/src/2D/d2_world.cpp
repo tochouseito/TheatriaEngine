@@ -10,6 +10,7 @@ using namespace physics::d2;
 struct box2dWorld::Impl
 {
 	b2WorldId world;
+	std::unordered_set<int32_t> aliveShapes; // 有効な形状のセット
 };
 
 physics::d2::box2dWorld::box2dWorld(d2Backend be)
@@ -38,6 +39,8 @@ void physics::d2::box2dWorld::Destroy()
 void physics::d2::box2dWorld::Step(const float& deltaTime, const uint32_t& subStepCount)
 {
 	b2World_Step(impl->world, deltaTime, subStepCount); // Box2Dのワールドをステップ
+
+	ProcessEvents();
 }
 
 Vector2 physics::d2::box2dWorld::GetGravity() const
@@ -51,6 +54,72 @@ void physics::d2::box2dWorld::SetGravity(const Vector2& gravity)
 }
 
 b2WorldId physics::d2::box2dWorld::GetWorld() const { return impl->world; }
+
+// Box2Dのワールドを取得
+void physics::d2::box2dWorld::ProcessEvents()
+{
+	b2ContactEvents events = b2World_GetContactEvents(impl->world);
+
+	// 事前にクリア
+	currentContacts.clear();
+
+	// BeginContact
+	for(int i = 0; i < events.beginCount; ++i)
+	{
+		const b2ContactBeginTouchEvent& ev = events.beginEvents[i];
+		auto pair = std::minmax(ev.shapeIdA.index1, ev.shapeIdB.index1);// ソートして重複防止
+		currentContacts.insert(pair);
+
+		if (beginContactCallback)
+		{
+			auto a = b2Body_GetUserData(b2Shape_GetBody(ev.shapeIdA));
+			auto b = b2Body_GetUserData(b2Shape_GetBody(ev.shapeIdB));
+			beginContactCallback(a, b);
+		}
+	}
+	// EndContact
+	for(int i = 0; i < events.endCount; ++i)
+	{
+		const b2ContactEndTouchEvent& ev = events.endEvents[i];
+		auto pair = std::minmax(ev.shapeIdA, ev.shapeIdB);
+		// EndはStayでも処理しない
+		if (endContactCallback)
+		{
+			auto a = b2Body_GetUserData(b2Shape_GetBody(ev.shapeIdA));
+			auto b = b2Body_GetUserData(b2Shape_GetBody(ev.shapeIdB));
+			endContactCallback(a, b);
+		}
+	}
+	// Stay 判定（previous にあって current にもあるもの）
+	if (stayContactCallback)
+	{
+		for (const auto& pair : previousContacts)
+		{
+			if (currentContacts.count(pair))
+			{
+				if (impl->aliveShapes.count(pair.first) && impl->aliveShapes.count(pair.second))
+				{
+					auto a = b2Body_GetUserData(b2Shape_GetBody(b2GetSah));
+					auto b = b2Body_GetUserData(b2Shape_GetBody(pair.second));
+					stayContactCallback(a, b);
+				}
+			}
+		}
+	}
+
+	// 次回比較用に保存
+	std::swap(previousContacts, currentContacts);
+}
+
+void physics::d2::box2dWorld::InsertShapeId(const b2ShapeId& shapeId)
+{
+	impl->aliveShapes.insert(shapeId); // 有効な形状のセットに追加
+}
+
+void physics::d2::box2dWorld::RemoveShapeId(const b2ShapeId& shapeId)
+{
+	impl->aliveShapes.erase(shapeId); // 有効な形状のセットから削除
+}
 
 struct choPhysicsWorld::Impl
 {
@@ -74,6 +143,7 @@ void physics::d2::choPhysicsWorld::Destroy()
 void physics::d2::choPhysicsWorld::Step(const float& deltaTime, const uint32_t& subStepCount)
 {
 	deltaTime; subStepCount;
+	ProcessEvents();
 }
 
 Vector2 physics::d2::choPhysicsWorld::GetGravity() const

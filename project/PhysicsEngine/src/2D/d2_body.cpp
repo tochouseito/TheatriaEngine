@@ -11,7 +11,7 @@ using namespace physics::d2;
 struct box2dBody::Impl
 {
 	b2BodyId body;
-
+	b2ShapeId* pShapeId = nullptr; // 形状IDのポインタ
 };
 
 physics::d2::box2dBody::box2dBody()
@@ -39,6 +39,11 @@ void physics::d2::box2dBody::Create(Id2World* world, const Id2BodyDef& bodyDef)
 
 void physics::d2::box2dBody::Destroy()
 {
+	if(impl->pShapeId)
+	{
+		pWorld->RemoveShapeId(*impl->pShapeId); // ワールドから形状IDを削除
+		impl->pShapeId = nullptr; // ポインタをnullptrに設定
+	}
 	b2DestroyBody(impl->body);
 }
 
@@ -51,3 +56,13 @@ b2BodyId physics::d2::box2dBody::GetBody()
 {
 	return impl->body;
 }
+
+box2dWorld* physics::d2::box2dBody::GetWorld() const
+{
+	return pWorld; // 所属するワールドを取得
+}
+
+void physics::d2::box2dBody::SetShapeId(b2ShapeId* shapeId) { impl->pShapeId = shapeId; }
+
+// 形状IDを設定
+void physics::d2::box2dBody::RemoveShapeId() { impl->pShapeId = nullptr; }

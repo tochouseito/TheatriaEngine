@@ -10,9 +10,12 @@ namespace physics
 	{
 		class Id2Body;
 		class Id2Polygon;
+		class Id2World;
+		class box2dWorld;
 
 		struct Id2ShapeDef
 		{
+			void* userData = nullptr; // ユーザーデータ
 			float density = 1.0f; // 密度
 			float friction = 0.5f; // 摩擦係数
 			float restitution = 0.0f; // 反発係数
@@ -37,6 +40,7 @@ namespace physics
 		private:
 			struct Impl; // 実装の詳細を隠蔽するための前方宣言
 			std::unique_ptr<Impl> impl; // 実装のポインタ
+			box2dWorld* pWorld = nullptr; // 所属するワールド
 		};
 
 		class choPhysicsShape : public Id2Shape
