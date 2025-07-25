@@ -35,7 +35,7 @@ public:
 	bool IsRunning() const { return isRunning; }
 	void GameRun();
 	void GameStop();
-	b2World* GetPhysicsWorld() { return m_pPhysicsWorld.get(); }
+	physics::d2::Id2World* GetPhysicsWorld() { return m_pPy2dWorld.get(); }
 	// 環境設定更新
 	void UpdateEnvironmentSetting();
 
