@@ -28,6 +28,10 @@ namespace physics
 			virtual ~Id2Shape() = default;
 			virtual void CreatePolygonShape(Id2Body*, Id2ShapeDef*, Id2Polygon*) {}
 			virtual void Destroy() {} // 形状を削除
+			bool IsActive() const { return isActive; } // 有効フラグの取得
+
+		protected:
+			bool isActive = true; // 有効フラグ
 		};
 
 		class box2dShape : public Id2Shape

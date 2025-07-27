@@ -34,6 +34,7 @@ void physics::d2::box2dShape::CreatePolygonShape(Id2Body* body, Id2ShapeDef* sha
 	impl->shape = b2CreatePolygonShape(box2dBodyPtr->GetBody(),  &def, box2dPolygonPtr->GetPolygon());
 	box2dBodyPtr->SetShapeId(&impl->shape); // 形状IDをボディに設定
 	pWorld->InsertShapeId(impl->shape); // ワールドに形状IDを追加
+	isActive = true; // 有効フラグを設定
 }
 
 void physics::d2::box2dShape::Destroy()
@@ -42,4 +43,5 @@ void physics::d2::box2dShape::Destroy()
 	impl->pBody = nullptr; // ポインタをnullptrに設定
 	pWorld->RemoveShapeId(impl->shape); // ワールドから形状IDを削除
 	b2DestroyShape(impl->shape, true); // 形状を削除
+	isActive = false; // 有効フラグを無効に設定
 }

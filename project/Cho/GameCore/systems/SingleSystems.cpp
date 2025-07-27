@@ -133,9 +133,9 @@ void TransformSystem::UpdateComponent(Entity e, TransformComponent& transform)
 
 	// 物理コンポーネントがあれば、物理ボディの位置を更新
 	Rigidbody2DComponent* rb = m_pEcs->GetComponent<Rigidbody2DComponent>(e);
-	if (rb && rb->runtimeBody)
+	if (rb && rb->runtimeBody.IsActive())
 	{
-		rb->runtimeBody->SetLinearVelocity(b2Vec2(rb->velocity.x, rb->velocity.y));
+		rb->runtimeBody.SetLinearVelocity(Vector2(rb->velocity.x, rb->velocity.y));
 	}
 
 	// アニメーションコンポーネントがあればスキニングの確認
@@ -234,9 +234,9 @@ void CameraSystem::UpdateComponent(Entity e, TransformComponent& transform, Came
 
 	// 物理コンポーネントがあれば、物理ボディの位置を更新
 	Rigidbody2DComponent* rb = m_pEcs->GetComponent<Rigidbody2DComponent>(e);
-	if (rb && rb->runtimeBody)
+	if (rb && rb->runtimeBody.IsActive())
 	{
-		rb->runtimeBody->SetLinearVelocity(b2Vec2(rb->velocity.x, rb->velocity.y));
+		rb->runtimeBody.SetLinearVelocity(Vector2(rb->velocity.x, rb->velocity.y));
 	}
 
 	// 各行列
@@ -390,62 +390,61 @@ void ScriptSystem::FinalizeComponent(Entity e, ScriptComponent& script)
 void Rigidbody2DSystem::InitializeComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb)
 {
 	e;
-	if (rb.runtimeBody != nullptr) return;
-	b2BodyDef bodyDef;
-	bodyDef.userData.pointer = static_cast<uintptr_t>(rb.selfEntity.value());
+	if (!rb.runtimeBody.IsActive()) return;
+	physics::d2::Id2BodyDef bodyDef;
+	bodyDef.userData = static_cast<void*>(&rb.selfEntity.value());
 	bodyDef.type = rb.bodyType;
 	bodyDef.gravityScale = rb.gravityScale;
 	bodyDef.fixedRotation = rb.fixedRotation;
-	bodyDef.position = b2Vec2(transform.position.x, transform.position.y);
+	bodyDef.position = Vector2(transform.position.x, transform.position.y);
 	float angleZ = chomath::DegreesToRadians(transform.degrees).z;
 	bodyDef.angle = angleZ;
-	rb.runtimeBody = m_World->CreateBody(&bodyDef);
-	rb.runtimeBody->SetAwake(true);
-	rb.world = m_World;
+	rb.runtimeBody.Create(m_World, bodyDef);
+	rb.runtimeBody.SetAwake(true);
 	rb.velocity.Initialize();
 
 	// Transformと同期（optional）
-	transform.position.x = rb.runtimeBody->GetPosition().x;
-	transform.position.y = rb.runtimeBody->GetPosition().y;
+	transform.position.x = rb.runtimeBody.GetPosition().x;
+	transform.position.y = rb.runtimeBody.GetPosition().y;
 }
 
 void Rigidbody2DSystem::StepSimulation()
 {
 	float timeStep = Timer::GetDeltaTime();
-	constexpr int velocityIterations = 6;
-	constexpr int positionIterations = 2;
-	m_World->Step(timeStep, velocityIterations, positionIterations);
+	/*constexpr int velocityIterations = 6;
+	constexpr int positionIterations = 2;*/
+	m_World->Step(timeStep, 4);
 }
 
 void Rigidbody2DSystem::UpdateComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb)
 {
 	e;
-	if (rb.runtimeBody == nullptr) return;
+	if (!rb.runtimeBody.IsActive()) return;
 
 	if (rb.requestedPosition)
 	{
 		if (rb.fixedRotation)
 		{
-			rb.runtimeBody->SetTransform(*rb.requestedPosition, chomath::DegreesToRadians(transform.degrees).z);
+			rb.runtimeBody.SetTransform(*rb.requestedPosition, rb.runtimeBody.GetAngle());
 		}
 		else
 		{
-			rb.runtimeBody->SetTransform(*rb.requestedPosition, rb.runtimeBody->GetAngle());
+			rb.runtimeBody.SetTransform(*rb.requestedPosition, chomath::DegreesToRadians(transform.degrees).z);
 		}
 		rb.requestedPosition.reset();
 	}
-	const b2Vec2& pos = rb.runtimeBody->GetPosition();
+	const Vector2& pos = rb.runtimeBody.GetPosition();
 	transform.position.x = pos.x;
 	transform.position.y = pos.y;
 
-	b2Vec2 velocity = rb.runtimeBody->GetLinearVelocity();
+	Vector2 velocity = rb.runtimeBody.GetLinearVelocity();
 	rb.velocity.x = velocity.x;
 	rb.velocity.y = velocity.y;
 
 	Vector3 radians = {};
 	if (!rb.fixedRotation)
 	{
-		radians.z = rb.runtimeBody->GetAngle(); // radians
+		radians.z = rb.runtimeBody.GetAngle(); // radians
 	}
 	else
 	{
@@ -468,10 +467,9 @@ void Rigidbody2DSystem::UpdateComponent(Entity e, TransformComponent& transform,
 void Rigidbody2DSystem::Reset(Rigidbody2DComponent& rb)
 {
 	// Bodyがあるなら削除
-	if (rb.runtimeBody)
+	if (rb.runtimeBody.IsActive())
 	{
-		m_World->DestroyBody(rb.runtimeBody);
-		rb.runtimeBody = nullptr;
+		rb.runtimeBody.Destroy();
 	}
 	rb.isCollisionStay = false;
 	rb.otherEntity.reset();
@@ -496,41 +494,25 @@ void CollisionSystem::CollisionStay(ScriptComponent& script, Rigidbody2DComponen
 	}
 }
 
-float Collider2DSystem::ComputePolygonArea(const b2PolygonShape* shape)
-{
-	float area = 0.0f;
-	const int count = shape->m_count;
-	const b2Vec2* verts = shape->m_vertices;
-
-	for (int i = 0; i < count; ++i)
-	{
-		const b2Vec2& a = verts[i];
-		const b2Vec2& b = verts[(i + 1) % count];
-		area += a.x * b.y - a.y * b.x;
-	}
-	return 0.5f * std::abs(area);
-}
-
 void Collider2DSystem::InitializeComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb, BoxCollider2DComponent& box)
 {
 	transform;
 	e;
-	if (!rb.runtimeBody || box.runtimeFixture != nullptr) return;
+	if (!rb.runtimeBody.IsActive()&&box.runtimeShape.IsActive()) return;
 
-	b2PolygonShape shape;
-	shape.SetAsBox(box.width / 2.0f, box.height / 2.0f, b2Vec2(box.offsetX, box.offsetY), 0.0f);
-
+	
+	physics::d2::Id2Polygon polygonShape;
+	polygonShape.MakeBox(box.width * 0.5f, box.height * 0.5f);
+	box.preHeight = box.height;
+	box.preWidth = box.width;
 	// 面積を計算
-	float area = ComputePolygonArea(&shape);
-
-	b2FixtureDef fixtureDef;
-	fixtureDef.shape = &shape;
-	fixtureDef.density = rb.mass / area;
-	fixtureDef.friction = box.friction;
-	fixtureDef.restitution = box.restitution;
-	fixtureDef.isSensor = box.isSensor;
-
-	box.runtimeFixture = rb.runtimeBody->CreateFixture(&fixtureDef);
+	float area = box.width * box.height;
+	physics::d2::Id2ShapeDef shapeDef;
+	shapeDef.density = rb.mass / area;
+	shapeDef.friction = box.friction;
+	shapeDef.restitution = box.restitution;
+	shapeDef.isSensor = box.isSensor;
+	box.runtimeShape.CreatePolygonShape(&rb.runtimeBody, &shapeDef, &polygonShape);
 }
 
 void Collider2DSystem::UpdateComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb, BoxCollider2DComponent& box)
@@ -538,19 +520,22 @@ void Collider2DSystem::UpdateComponent(Entity e, TransformComponent& transform, 
 	e;
 	transform;
 	// サイズの変更があった場合、フィクスチャを再作成
-	if (box.runtimeFixture == nullptr) { return; }
-	if (box.width != box.runtimeFixture->GetShape()->m_radius || box.height != box.runtimeFixture->GetShape()->m_radius)
+	if (!box.runtimeShape.IsActive()) { return; }
+	if (box.width != box.preWidth || box.height != box.preHeight)
 	{
-		rb.runtimeBody->DestroyFixture(box.runtimeFixture);
-		b2PolygonShape shape;
-		shape.SetAsBox(box.width / 2.0f, box.height / 2.0f, b2Vec2(box.offsetX, box.offsetY), 0.0f);
-		b2FixtureDef fixtureDef;
-		fixtureDef.shape = &shape;
-		fixtureDef.density = box.density;
-		fixtureDef.friction = box.friction;
-		fixtureDef.restitution = box.restitution;
-		fixtureDef.isSensor = box.isSensor;
-		box.runtimeFixture = rb.runtimeBody->CreateFixture(&fixtureDef);
+		box.runtimeShape.Destroy();
+		physics::d2::Id2Polygon polygonShape;
+		polygonShape.MakeBox(box.width * 0.5f, box.height * 0.5f);
+		box.preHeight = box.height;
+		box.preWidth = box.width;
+		// 面積を計算
+		float area = box.width * box.height;
+		physics::d2::Id2ShapeDef shapeDef;
+		shapeDef.density = rb.mass / area;
+		shapeDef.friction = box.friction;
+		shapeDef.restitution = box.restitution;
+		shapeDef.isSensor = box.isSensor;
+		box.runtimeShape.CreatePolygonShape(&rb.runtimeBody, &shapeDef, &polygonShape);
 	}
 }
 

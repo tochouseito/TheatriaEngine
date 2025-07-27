@@ -2,8 +2,9 @@
 #include "GameCore/SceneManager/SceneManager.h"
 #include "GameCore/ECS/ECSManager.h"
 #include "GameCore/GameWorld/GameWorld.h"
-#include "GameCore/PhysicsEngine/PhysicsEngine.h"
 #include "Core/Utility/CompBufferData.h"
+#include <2D/d2_common.h>
+
 class InputManager;
 class ResourceManager;
 class GraphicsEngine;
@@ -45,6 +46,7 @@ public:
 private:
 	void RegisterECSEvents();
 	void RegisterECSSystems(ResourceManager* resourceManager, GraphicsEngine* graphicsEngine);
+	void RegisterContactEvents();
 	
 	EngineCommand* m_EngineCommand = nullptr;
 

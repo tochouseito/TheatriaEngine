@@ -17,22 +17,19 @@ void GameCore::Initialize(ResourceManager* resourceManager, GraphicsEngine* grap
 	m_pSceneManager = std::make_unique<SceneManager>(m_pGameWorld.get());
 	// box2dの生成
 	//b2Vec2 gravity(0.0f, -9.8f);
-	b2Vec2 gravity(0.0f, 0.0f);
+	/*b2Vec2 gravity(0.0f, 0.0f);
 	m_pPhysicsWorld = std::make_unique<b2World>(gravity);
 	m_pContactListener = std::make_unique<ContactListener2D>(m_pECSManager.get(), m_pGameWorld.get());
-	m_pPhysicsWorld->SetContactListener(m_pContactListener.get());
-	// bulletphysicsの生成
-	m_pBroadphase = std::make_unique<btDbvtBroadphase>();
-	m_pCollisionConfiguration = std::make_unique<btDefaultCollisionConfiguration>();
-	m_pDispatcher = std::make_unique<btCollisionDispatcher>(m_pCollisionConfiguration.get());
-	m_pSolver = std::make_unique<btSequentialImpulseConstraintSolver>();
-	m_pDynamicsWorld = std::make_unique<btDiscreteDynamicsWorld>(m_pDispatcher.get(), m_pBroadphase.get(), m_pSolver.get(), m_pCollisionConfiguration.get());
-	m_pDynamicsWorld->setGravity(btVector3(0.0f, -9.8f, 0.0f));
+	m_pPhysicsWorld->SetContactListener(m_pContactListener.get());*/
+	m_pPy2dWorld = std::make_unique<physics::d2::box2dWorld>();
+	m_pPy2dWorld->Create();
 	// システムの生成
 	// ECSイベントの登録
 	RegisterECSEvents();
 	// ECSシステムの登録
 	RegisterECSSystems(resourceManager, graphicsEngine);
+	// 衝突関数の登録
+	RegisterContactEvents();
 	m_EnvironmentData.ambientColor = { 0.01f,0.01f,0.01f,1.0f };
 }
 
@@ -631,4 +628,92 @@ void GameCore::RegisterECSSystems(ResourceManager* resourceManager, GraphicsEngi
 	lineRendererSystem->SetResourceManager(resourceManager);
 	lineRendererSystem->SetBuffer(static_cast<VertexBuffer<BUFFER_DATA_LINE>*>(resourceManager->GetLineIntegrationBuffer()));
 
+}
+
+void GameCore::RegisterContactEvents()
+{
+	m_pPy2dWorld->SetBeginContactCallback([this](void* a, void* b)
+	{
+			// 接触開始処理
+			if (a && b)
+			{
+				Entity entityA = *static_cast<Entity*>(a);
+				Entity entityB = *static_cast<Entity*>(b);
+
+				// CollisionEnter
+				ScriptComponent* scriptA = m_pECSManager->GetComponent<ScriptComponent>(entityA);
+				ScriptComponent* scriptB = m_pECSManager->GetComponent<ScriptComponent>(entityB);
+				Rigidbody2DComponent* rigidbodyA = m_pECSManager->GetComponent<Rigidbody2DComponent>(entityA);
+				Rigidbody2DComponent* rigidbodyB = m_pECSManager->GetComponent<Rigidbody2DComponent>(entityB);
+				if (rigidbodyA && rigidbodyA->isActive && rigidbodyB && rigidbodyB->isActive)
+				{
+					if (scriptA)
+					{
+						GameObject* gameObjectB = m_pGameWorld->GetGameObject(entityB);
+						scriptA->onCollisionEnterFunc(*gameObjectB);
+					}
+					if(scriptB)
+					{
+						GameObject* gameObjectA = m_pGameWorld->GetGameObject(entityA);
+						scriptB->onCollisionEnterFunc(*gameObjectA);
+					}
+				}
+			}
+		});
+	m_pPy2dWorld->SetEndContactCallback([this](void* a, void* b)
+	{
+			// 接触終了処理
+			if (a && b)
+			{
+				Entity entityA = *static_cast<Entity*>(a);
+				Entity entityB = *static_cast<Entity*>(b);
+
+				// CollisionEnter
+				ScriptComponent* scriptA = m_pECSManager->GetComponent<ScriptComponent>(entityA);
+				ScriptComponent* scriptB = m_pECSManager->GetComponent<ScriptComponent>(entityB);
+				Rigidbody2DComponent* rigidbodyA = m_pECSManager->GetComponent<Rigidbody2DComponent>(entityA);
+				Rigidbody2DComponent* rigidbodyB = m_pECSManager->GetComponent<Rigidbody2DComponent>(entityB);
+				if (rigidbodyA && rigidbodyA->isActive && rigidbodyB && rigidbodyB->isActive)
+				{
+					if (scriptA)
+					{
+						GameObject* gameObjectB = m_pGameWorld->GetGameObject(entityB);
+						scriptA->onCollisionExitFunc(*gameObjectB);
+					}
+					if (scriptB)
+					{
+						GameObject* gameObjectA = m_pGameWorld->GetGameObject(entityA);
+						scriptB->onCollisionExitFunc(*gameObjectA);
+					}
+				}
+			}
+		});
+	m_pPy2dWorld->SetStayContactCallback([this](void* a, void* b)
+	{
+			// 接触中処理
+			if (a && b)
+			{
+				Entity entityA = *static_cast<Entity*>(a);
+				Entity entityB = *static_cast<Entity*>(b);
+
+				// CollisionEnter
+				ScriptComponent* scriptA = m_pECSManager->GetComponent<ScriptComponent>(entityA);
+				ScriptComponent* scriptB = m_pECSManager->GetComponent<ScriptComponent>(entityB);
+				Rigidbody2DComponent* rigidbodyA = m_pECSManager->GetComponent<Rigidbody2DComponent>(entityA);
+				Rigidbody2DComponent* rigidbodyB = m_pECSManager->GetComponent<Rigidbody2DComponent>(entityB);
+				if (rigidbodyA && rigidbodyA->isActive && rigidbodyB && rigidbodyB->isActive)
+				{
+					if (scriptA)
+					{
+						GameObject* gameObjectB = m_pGameWorld->GetGameObject(entityB);
+						scriptA->onCollisionStayFunc(*gameObjectB);
+					}
+					if (scriptB)
+					{
+						GameObject* gameObjectA = m_pGameWorld->GetGameObject(entityA);
+						scriptB->onCollisionStayFunc(*gameObjectA);
+					}
+				}
+			}
+		});
 }

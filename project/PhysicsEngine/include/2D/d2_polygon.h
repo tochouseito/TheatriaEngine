@@ -15,7 +15,8 @@ namespace physics
 		{
 			public:
 			virtual ~Id2Polygon() = default;
-			virtual void MakeBox(const float& halfWidth, const float& halfHeight) = 0;
+			virtual void MakeBox(const float&, const float&) {};
+
 		};
 
 		class box2dPolygon : public Id2Polygon

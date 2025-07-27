@@ -386,6 +386,8 @@ struct BoxCollider2DComponent : public IComponentTag
 	float offsetY = 0.0f;
 	float width = 1.0f;
 	float height = 1.0f;
+	float preWidth = 1.0f; // 前回の幅
+	float preHeight = 1.0f; // 前回の高さ
 	float density = 1.0f;
 	float friction = 0.3f;
 	float restitution = 0.0f;
@@ -400,6 +402,8 @@ struct BoxCollider2DComponent : public IComponentTag
 		offsetY = other.offsetY;
 		width = other.width;
 		height = other.height;
+		preWidth = other.preWidth;
+		preHeight = other.preHeight;
 		density = other.density;
 		friction = other.friction;
 		restitution = other.restitution;

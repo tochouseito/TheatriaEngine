@@ -3,6 +3,7 @@
 #include "SDK/DirectX/DirectX12/GpuBuffer/GpuBuffer.h"
 #include "Core/Utility/CompBufferData.h"
 #include "Core/Utility/Components.h"
+#include <2D/d2_common.h>
 
 // 前方宣言
 class ResourceManager;
@@ -195,12 +196,12 @@ private:
 	}
 	void FinalizeComponent([[maybe_unused]] Entity e, TransformComponent& transform, Rigidbody2DComponent& rb);
 
-	void SetPhysicsWorld(b2World* world)
+	void SetPhysicsWorld(physics::d2::Id2World* world)
 	{
 		m_World = world;
 	}
 
-	b2World* m_World = nullptr;
+	physics::d2::Id2World* m_World = nullptr;
 };
 
 class CollisionSystem : public ECSManager::System<ScriptComponent, Rigidbody2DComponent>
@@ -256,7 +257,6 @@ public:
 	}
 	~Collider2DSystem() = default;
 private:
-	float ComputePolygonArea(const b2PolygonShape* shape);
 	void InitializeComponent([[maybe_unused]] Entity e, TransformComponent& transform, Rigidbody2DComponent& rb, BoxCollider2DComponent& box);
 	void UpdateComponent([[maybe_unused]] Entity e, [[maybe_unused]] TransformComponent& transform, Rigidbody2DComponent& rb, BoxCollider2DComponent& box);
 	void FinalizeComponent([[maybe_unused]] Entity e, [[maybe_unused]] TransformComponent& transform, [[maybe_unused]] Rigidbody2DComponent& rb, [[maybe_unused]] BoxCollider2DComponent& box);
@@ -288,11 +288,11 @@ private:
 	void UpdateComponent([[maybe_unused]] Entity e, TransformComponent& transform, Rigidbody3DComponent& rb);
 	void Reset(Rigidbody3DComponent& rb);
 	void FinalizeComponent([[maybe_unused]] Entity e, TransformComponent& transform, Rigidbody3DComponent& rb);
-	void SetPhysicsWorld(btDiscreteDynamicsWorld* world)
+	/*void SetPhysicsWorld(btDiscreteDynamicsWorld* world)
 	{
 		m_World = world;
 	}
-	btDiscreteDynamicsWorld* m_World = nullptr;
+	btDiscreteDynamicsWorld* m_World = nullptr;*/
 };
 
 class MaterialSystem : public ECSManager::System<MaterialComponent>

@@ -35,6 +35,7 @@ void physics::d2::box2dBody::Create(Id2World* world, const Id2BodyDef& bodyDef)
 	b2BodyDef.position = b2Vec2(bodyDef.position.x, bodyDef.position.y); // 位置の設定
 	b2BodyDef.rotation = b2MakeRot(bodyDef.angle); // 角度の設定
 	impl->body = b2CreateBody(pWorld->GetWorld(), &b2BodyDef); // Box2Dのボディを作成
+	isActive = true; // 有効フラグを設定
 }
 
 void physics::d2::box2dBody::Destroy()
@@ -45,12 +46,38 @@ void physics::d2::box2dBody::Destroy()
 		impl->pShapeId = nullptr; // ポインタをnullptrに設定
 	}
 	b2DestroyBody(impl->body);
+	isActive = false; // 有効フラグを無効に設定
 }
 
 void physics::d2::box2dBody::SetAwake(bool flag)
 {
-	flag;
+	b2Body_SetAwake(impl->body, flag); // ボディを起こす
 }
+
+Vector2 physics::d2::box2dBody::GetPosition() const
+{
+	b2Vec2 pos = b2Body_GetPosition(impl->body);
+	return Vector2(pos.x, pos.y);
+}
+
+Vector2 physics::d2::box2dBody::GetLinearVelocity() const
+{
+	b2Vec2 velocity = b2Body_GetLinearVelocity(impl->body);
+	Vector2 result(velocity.x, velocity.y);
+	return result;
+}
+
+void physics::d2::box2dBody::SetLinearVelocity(const Vector2& velocity)
+{
+	b2Body_SetLinearVelocity(impl->body, b2Vec2(velocity.x, velocity.y));
+}
+
+void physics::d2::box2dBody::SetTransform(const Vector2& position, float angle)
+{
+	b2Body_SetTransform(impl->body , b2Vec2(position.x, position.y), b2MakeRot(angle));
+}
+
+float physics::d2::box2dBody::GetAngle() const { return  b2Rot_GetAngle(b2Body_GetRotation(impl->body)); }
 
 b2BodyId physics::d2::box2dBody::GetBody()
 {
