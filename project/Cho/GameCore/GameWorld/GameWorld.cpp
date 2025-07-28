@@ -90,8 +90,10 @@ SceneID GameWorld::AddGameObjectFromScene(const GameScene& scene, const bool& up
 		// PrefabからEntityを生成
 		Entity entity = prefab.Instantiate(*m_pECSManager);
 		handle.entity = entity;
+		MeshFilterComponent* meshFilter = m_pECSManager->GetComponent<MeshFilterComponent>(entity);
+		meshFilter;
 		// 基本コンポーネントを追加
-		m_pECSManager->AddComponent<TransformComponent>(handle.entity);
+		// m_pECSManager->AddComponent<TransformComponent>(handle.entity);
 		ChoSystem::Transform transform(entity, m_pECSManager);
 		// オブジェクトIDを取得
 		uint32_t objectID = static_cast<uint32_t>(m_pGameObjects[sceneID].push_back(FVector<std::unique_ptr<GameObject>>()));

@@ -17,8 +17,8 @@ void AssetBrowser::Update()
 void AssetBrowser::Window()
 {
 	// 移動を無効にするフラグ
-	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove;
-	ImGui::Begin("AssetBrowser", nullptr, windowFlags);
+	//ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove;
+	ImGui::Begin("AssetBrowser", nullptr);
     if (ImGui::BeginTable("TreeTable", 1, ImGuiTableFlags_BordersInnerV))
     {
         // 左：フォルダー階層

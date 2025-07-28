@@ -21,8 +21,8 @@ void Hierarchy::Update()
 void Hierarchy::Window()
 {
 	// 移動を無効にするフラグ
-	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove;
-	ImGui::Begin("Hierarchy", nullptr, windowFlags);
+	//ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove;
+	ImGui::Begin("Hierarchy", nullptr);
 	// ドロップターゲット
 	//if (ImGui::BeginDragDropTarget())
 	//{

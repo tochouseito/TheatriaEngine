@@ -19,8 +19,8 @@ void Inspector::Update()
 void Inspector::Window()
 {
 	// 移動を無効にするフラグ
-	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove;
-	ImGui::Begin("Inspector", nullptr, windowFlags);
+	//ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove;
+	ImGui::Begin("Inspector", nullptr);
 
 	// 選択中のオブジェクトがある場合に情報を表示
 	if (m_EditorManager->GetSelectedGameObject())
