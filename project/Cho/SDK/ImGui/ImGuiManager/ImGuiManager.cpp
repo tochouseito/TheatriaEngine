@@ -11,10 +11,11 @@ void ImGuiManager::Initialize(ID3D12Device8* device, ResourceManager* resourceMa
 {
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
+	std::string version = IMGUI_VERSION;
+	Log::Write(LogLevel::Info, version);
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Dockingを有効化
-
 	// プラットフォームとレンダラーのバックエンドを設定する
 	ImGui_ImplWin32_Init(WinApp::GetHWND());
 
@@ -66,6 +67,9 @@ void ImGuiManager::Initialize(ID3D12Device8* device, ResourceManager* resourceMa
 	
 	// ImGuiのスタイルを設定
 	ImGui::StyleColorsDark();
+
+	ImGuiStyle& style = ImGui::GetStyle();
+	style.TreeLinesFlags = ImGuiTreeNodeFlags_DrawLinesFull;
 }
 
 void ImGuiManager::Finalize()
