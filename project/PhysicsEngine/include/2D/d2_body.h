@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <chomath.h>
+#include <memory>
 
 // Box2D, ChoPhysics
 struct b2BodyId;
@@ -106,7 +107,6 @@ namespace physics
 				return Vector2(0.0f, 0.0f); // 仮の値を返す
 			}
 		};
-
 	}
 }
 

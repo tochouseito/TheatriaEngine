@@ -28,6 +28,9 @@ void GameCore::Initialize(ResourceManager* resourceManager, GraphicsEngine* grap
 	RegisterECSEvents();
 	// ECSシステムの登録
 	RegisterECSSystems(resourceManager, graphicsEngine);
+	// 物理エンジンシステムの無効化
+	Rigidbody2DSystem* rigidbody2DSystem = m_pECSManager->GetSystem<Rigidbody2DSystem>();
+	rigidbody2DSystem->SetEnabled(false);
 	// 衝突関数の登録
 	RegisterContactEvents();
 	m_EnvironmentData.ambientColor = { 0.01f,0.01f,0.01f,1.0f };
@@ -57,6 +60,9 @@ void GameCore::GameRun()
 	}
 	// スクリプト読み込み（場所変更予定）
 	cho::FileSystem::ScriptProject::LoadScriptDLL();
+	// 物理演算システムの有効化
+	Rigidbody2DSystem* rigidbody2DSystem = m_pECSManager->GetSystem<Rigidbody2DSystem>();
+	rigidbody2DSystem->SetEnabled(true);
 	// StartSystemの実行
 	m_pECSManager->InitializeAllSystems();
 	// 実行中フラグを立てる
@@ -71,6 +77,9 @@ void GameCore::GameStop()
 	}
 	// FinalizeSystemの実行
 	m_pECSManager->FinalizeAllSystems();
+	// 物理演算システムの無効化
+	Rigidbody2DSystem* rigidbody2DSystem = m_pECSManager->GetSystem<Rigidbody2DSystem>();
+	rigidbody2DSystem->SetEnabled(false);
 	// スクリプトのアンロード（場所変更予定）
 	cho::FileSystem::ScriptProject::UnloadScriptDLL();
 	// 実行中フラグを下ろす
