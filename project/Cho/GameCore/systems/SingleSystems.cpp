@@ -133,9 +133,9 @@ void TransformSystem::UpdateComponent(Entity e, TransformComponent& transform)
 
 	// 物理コンポーネントがあれば、物理ボディの位置を更新
 	Rigidbody2DComponent* rb = m_pEcs->GetComponent<Rigidbody2DComponent>(e);
-	if (rb && rb->runtimeBody.IsActive())
+	if (rb && rb->runtimeBody)
 	{
-		rb->runtimeBody.SetLinearVelocity(Vector2(rb->velocity.x, rb->velocity.y));
+		rb->runtimeBody->SetLinearVelocity(Vector2(rb->velocity.x, rb->velocity.y));
 	}
 
 	// アニメーションコンポーネントがあればスキニングの確認
@@ -234,9 +234,9 @@ void CameraSystem::UpdateComponent(Entity e, TransformComponent& transform, Came
 
 	// 物理コンポーネントがあれば、物理ボディの位置を更新
 	Rigidbody2DComponent* rb = m_pEcs->GetComponent<Rigidbody2DComponent>(e);
-	if (rb && rb->runtimeBody.IsActive())
+	if (rb && rb->runtimeBody)
 	{
-		rb->runtimeBody.SetLinearVelocity(Vector2(rb->velocity.x, rb->velocity.y));
+		rb->runtimeBody->SetLinearVelocity(Vector2(rb->velocity.x, rb->velocity.y));
 	}
 
 	// 各行列
@@ -390,7 +390,7 @@ void ScriptSystem::FinalizeComponent(Entity e, ScriptComponent& script)
 void Rigidbody2DSystem::InitializeComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb)
 {
 	e;
-	if (!rb.runtimeBody.IsActive()) return;
+	if (!rb.runtimeBody) return;
 	physics::d2::Id2BodyDef bodyDef;
 	bodyDef.userData = static_cast<void*>(&rb.selfEntity.value());
 	bodyDef.type = rb.bodyType;
@@ -399,6 +399,7 @@ void Rigidbody2DSystem::InitializeComponent(Entity e, TransformComponent& transf
 	bodyDef.position = Vector2(transform.position.x, transform.position.y);
 	float angleZ = chomath::DegreesToRadians(transform.degrees).z;
 	bodyDef.angle = angleZ;
+	rb.runtimeBody = std::make_unique<physics::d2::box2dBody>();
 	rb.runtimeBody.Create(m_World, bodyDef);
 	rb.runtimeBody.SetAwake(true);
 	rb.velocity.Initialize();
