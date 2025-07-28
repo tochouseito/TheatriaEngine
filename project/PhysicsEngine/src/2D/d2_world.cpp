@@ -65,6 +65,24 @@ void physics::d2::box2dWorld::Destroy()
 	b2DestroyWorld(impl->world); // Box2Dのワールドを破棄
 }
 
+Id2Body* physics::d2::box2dWorld::CreateBody(const Id2BodyDef& bodyDef)
+{
+	auto body = std::make_unique<box2dBody>();
+	body->Create(this, bodyDef);
+	Id2Body* raw = body.get();
+	bodies.emplace_back(std::move(body));
+	return raw;
+}
+
+void physics::d2::box2dWorld::DestroyBody(Id2Body* body)
+{
+	if (!body) return;
+	body->Destroy();
+	std::erase_if(bodies, [body](const std::unique_ptr<Id2Body>& ptr) {
+		return ptr.get() == body;
+		});
+}
+
 void physics::d2::box2dWorld::Step(const float& deltaTime, const uint32_t& subStepCount)
 {
 	b2World_Step(impl->world, deltaTime, subStepCount); // Box2Dのワールドをステップ

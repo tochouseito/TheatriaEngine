@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <chomath.h>
 #include <memory>
+#include <vector>
 
 // Box2D, ChoPhysics
 struct b2BodyId;
@@ -17,6 +18,9 @@ namespace physics
 	{
 		class Id2World;
 		class box2dWorld;
+		class Id2Polygon;
+		class Id2Shape;
+		struct Id2ShapeDef;
 
 		enum Id2BodyType
 		{
@@ -43,6 +47,11 @@ namespace physics
 			virtual void Create(Id2World*, const Id2BodyDef&) {}
 			// 削除
 			virtual void Destroy() {}
+			virtual Id2Shape* CreateShape(Id2ShapeDef*, Id2Polygon*)
+			{
+				return nullptr; // 形状を作成
+			}
+			virtual void DestroyShape() {} // 形状を削除
 			// 
 			virtual void SetAwake(bool) {}
 
@@ -55,6 +64,7 @@ namespace physics
 			bool IsActive() const { return isActive; } // 有効フラグの取得
 		protected:
 			bool isActive = true; // 有効フラグ
+			std::unique_ptr<Id2Shape> m_Shape; // 形状のポインタ
 		};
 
 		// box2d, ChoPhysicsのボディクラス
@@ -68,6 +78,10 @@ namespace physics
 			// Id2Body を介して継承されました
 			void Create(Id2World* world, const Id2BodyDef& bodyDef) override;
 			void Destroy() override;
+			// 形状を作成
+			Id2Shape* CreateShape(Id2ShapeDef* shapeDef, Id2Polygon* polygon) override;
+			// 形状を削除
+			void DestroyShape() override;
 			void SetAwake(bool flag) override;
 			Vector2 GetPosition() const override;
 			Vector2 GetLinearVelocity() const override;

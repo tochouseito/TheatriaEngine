@@ -333,7 +333,7 @@ struct Rigidbody2DComponent : public IComponentTag
 	bool isKinematic = false;
 	bool fixedRotation = false;
 	physics::d2::Id2BodyType bodyType = physics::d2::Id2BodyType::Id2_dynamicBody;
-	std::unique_ptr<physics::d2::Id2Body> runtimeBody = nullptr;
+	physics::d2::Id2Body* runtimeBody = nullptr;
 	bool isCollisionStay = false; // 衝突中フラグ
 	std::optional<Entity> otherEntity = std::nullopt; // 衝突したオブジェクトID
 	std::optional<Entity> selfEntity = std::nullopt; // 自分のオブジェクトID
@@ -394,7 +394,7 @@ struct BoxCollider2DComponent : public IComponentTag
 	float restitution = 0.0f;
 	bool isSensor = false;
 	bool isActive = true;
-	std::unique_ptr<physics::d2::Id2Shape> runtimeShape = nullptr;
+	physics::d2::Id2Shape* runtimeShape = nullptr;
 
 	BoxCollider2DComponent& operator=(const BoxCollider2DComponent& other)
 	{

@@ -2,6 +2,7 @@
 #include "2D/d2_body.h"
 #include "2D/d2_world.h"
 #include "2D/d2_converter.h"
+#include "2D/d2_shape.h"
 
 // box2d
 #include <box2d.h>
@@ -47,6 +48,23 @@ void physics::d2::box2dBody::Destroy()
 	}
 	b2DestroyBody(impl->body);
 	isActive = false; // 有効フラグを無効に設定
+}
+
+Id2Shape* physics::d2::box2dBody::CreateShape(Id2ShapeDef* shapeDef, Id2Polygon* polygon)
+{
+	m_Shape = std::make_unique<box2dShape>();
+	m_Shape->CreatePolygonShape(this, shapeDef, polygon); // 形状を作成
+	Id2Shape* rawShape = m_Shape.get();
+	return rawShape; // 生のポインタを返す
+}
+
+void physics::d2::box2dBody::DestroyShape()
+{
+	if (m_Shape)
+	{
+		m_Shape->Destroy(); // 形状を削除
+		m_Shape.reset(); // 形状のポインタをリセット
+	}
 }
 
 void physics::d2::box2dBody::SetAwake(bool flag)

@@ -399,14 +399,13 @@ void Rigidbody2DSystem::InitializeComponent(Entity e, TransformComponent& transf
 	bodyDef.position = Vector2(transform.position.x, transform.position.y);
 	float angleZ = chomath::DegreesToRadians(transform.degrees).z;
 	bodyDef.angle = angleZ;
-	rb.runtimeBody = std::make_unique<physics::d2::box2dBody>();
-	rb.runtimeBody.Create(m_World, bodyDef);
-	rb.runtimeBody.SetAwake(true);
+	rb.runtimeBody = m_World->CreateBody(bodyDef);
+	rb.runtimeBody->SetAwake(true);
 	rb.velocity.Initialize();
 
 	// Transformと同期（optional）
-	transform.position.x = rb.runtimeBody.GetPosition().x;
-	transform.position.y = rb.runtimeBody.GetPosition().y;
+	transform.position.x = rb.runtimeBody->GetPosition().x;
+	transform.position.y = rb.runtimeBody->GetPosition().y;
 }
 
 void Rigidbody2DSystem::StepSimulation()
@@ -420,32 +419,32 @@ void Rigidbody2DSystem::StepSimulation()
 void Rigidbody2DSystem::UpdateComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb)
 {
 	e;
-	if (!rb.runtimeBody.IsActive()) return;
+	if (!rb.runtimeBody) return;
 
 	if (rb.requestedPosition)
 	{
 		if (rb.fixedRotation)
 		{
-			rb.runtimeBody.SetTransform(*rb.requestedPosition, rb.runtimeBody.GetAngle());
+			rb.runtimeBody->SetTransform(*rb.requestedPosition, rb.runtimeBody->GetAngle());
 		}
 		else
 		{
-			rb.runtimeBody.SetTransform(*rb.requestedPosition, chomath::DegreesToRadians(transform.degrees).z);
+			rb.runtimeBody->SetTransform(*rb.requestedPosition, chomath::DegreesToRadians(transform.degrees).z);
 		}
 		rb.requestedPosition.reset();
 	}
-	const Vector2& pos = rb.runtimeBody.GetPosition();
+	const Vector2& pos = rb.runtimeBody->GetPosition();
 	transform.position.x = pos.x;
 	transform.position.y = pos.y;
 
-	Vector2 velocity = rb.runtimeBody.GetLinearVelocity();
+	Vector2 velocity = rb.runtimeBody->GetLinearVelocity();
 	rb.velocity.x = velocity.x;
 	rb.velocity.y = velocity.y;
 
 	Vector3 radians = {};
 	if (!rb.fixedRotation)
 	{
-		radians.z = rb.runtimeBody.GetAngle(); // radians
+		radians.z = rb.runtimeBody->GetAngle(); // radians
 	}
 	else
 	{
@@ -468,10 +467,11 @@ void Rigidbody2DSystem::UpdateComponent(Entity e, TransformComponent& transform,
 void Rigidbody2DSystem::Reset(Rigidbody2DComponent& rb)
 {
 	// Bodyがあるなら削除
-	if (rb.runtimeBody.IsActive())
+	if (rb.runtimeBody)
 	{
-		rb.runtimeBody.Destroy();
+		m_World->DestroyBody(rb.runtimeBody);
 	}
+	rb.runtimeBody = nullptr;
 	rb.isCollisionStay = false;
 	rb.otherEntity.reset();
 }
@@ -498,7 +498,7 @@ void Collider2DSystem::InitializeComponent(Entity e, TransformComponent& transfo
 {
 	transform;
 	e;
-	if (!rb.runtimeBody.IsActive()&&box.runtimeShape.IsActive()) return;
+	if (!rb.runtimeBody&&box.runtimeShape) return;
 
 	
 	physics::d2::Id2Polygon polygonShape;
@@ -512,7 +512,7 @@ void Collider2DSystem::InitializeComponent(Entity e, TransformComponent& transfo
 	shapeDef.friction = box.friction;
 	shapeDef.restitution = box.restitution;
 	shapeDef.isSensor = box.isSensor;
-	box.runtimeShape.CreatePolygonShape(&rb.runtimeBody, &shapeDef, &polygonShape);
+	box.runtimeShape = rb.runtimeBody->CreateShape(&shapeDef, &polygonShape);
 }
 
 void Collider2DSystem::UpdateComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb, BoxCollider2DComponent& box)
@@ -520,10 +520,11 @@ void Collider2DSystem::UpdateComponent(Entity e, TransformComponent& transform, 
 	e;
 	transform;
 	// サイズの変更があった場合、フィクスチャを再作成
-	if (!box.runtimeShape.IsActive()) { return; }
+	if (!box.runtimeShape) { return; }
 	if (box.width != box.preWidth || box.height != box.preHeight)
 	{
-		box.runtimeShape.Destroy();
+		rb.runtimeBody->DestroyShape();
+		rb.runtimeBody = nullptr;
 		physics::d2::Id2Polygon polygonShape;
 		polygonShape.MakeBox(box.width * 0.5f, box.height * 0.5f);
 		box.preHeight = box.height;
@@ -535,13 +536,18 @@ void Collider2DSystem::UpdateComponent(Entity e, TransformComponent& transform, 
 		shapeDef.friction = box.friction;
 		shapeDef.restitution = box.restitution;
 		shapeDef.isSensor = box.isSensor;
-		box.runtimeShape.CreatePolygonShape(&rb.runtimeBody, &shapeDef, &polygonShape);
+		box.runtimeShape = rb.runtimeBody->CreateShape(&shapeDef, &polygonShape);
 	}
 }
 
 void Collider2DSystem::FinalizeComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb, BoxCollider2DComponent& box)
 {
 	e; transform; rb; box;
+	if (box.runtimeShape)
+	{
+		rb.runtimeBody->DestroyShape();
+		box.runtimeShape = nullptr;
+	}
 }
 
 void MaterialSystem::InitializeComponent(Entity e, MaterialComponent& material)

@@ -7,6 +7,7 @@
 #include <set>
 #include <unordered_set>
 #include <xhash>
+#include <vector>
 
 // box2d, ChoPhysics
 struct b2WorldId;
@@ -51,6 +52,10 @@ namespace physics
 			virtual void Create() = 0;
 			// ワールド削除
 			virtual void Destroy() = 0;
+			// ボディを作成
+			virtual Id2Body* CreateBody(const Id2BodyDef& bodyDef) = 0;
+			// ボディを削除
+			virtual void DestroyBody(Id2Body* body) = 0;
 			// シュミレーションのステップ
 			virtual void Step(const float& deltaTime,const uint32_t& subStepCount) = 0;
 			// 重力を取得、設定
@@ -64,6 +69,7 @@ namespace physics
 			virtual void SetStayContactCallback(OnContactFunc) {}
 		protected:
 			d2Backend backend; // 物理エンジンのバックエンド
+			std::vector<std::unique_ptr<Id2Body>> bodies; // ワールド内のボディリスト
 		};
 
 		// Box2D
@@ -76,6 +82,8 @@ namespace physics
 			// Id2World を介して継承されました
 			void Create() override;
 			void Destroy() override;
+			Id2Body* CreateBody(const Id2BodyDef& bodyDef) override;
+			void DestroyBody(Id2Body* body) override;
 			void Step(const float& deltaTime, const uint32_t& subStepCount) override;
 			Vector2 GetGravity() const override;
 			void SetGravity(const Vector2& gravity) override;
@@ -116,6 +124,11 @@ namespace physics
 			// Id2World を介して継承されました
 			void Create() override;
 			void Destroy() override;
+			Id2Body* CreateBody(const Id2BodyDef&) override
+			{
+				return nullptr; // ChoPhysicsの実装ではボディを作成しない
+			}
+			void DestroyBody(Id2Body*) override {}
 			void Step(const float& deltaTime, const uint32_t& subStepCount) override;
 			Vector2 GetGravity() const override;
 			void SetGravity(const Vector2& gravity) override;
