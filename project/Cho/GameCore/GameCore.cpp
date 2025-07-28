@@ -21,7 +21,7 @@ void GameCore::Initialize(ResourceManager* resourceManager, GraphicsEngine* grap
 	m_pPhysicsWorld = std::make_unique<b2World>(gravity);
 	m_pContactListener = std::make_unique<ContactListener2D>(m_pECSManager.get(), m_pGameWorld.get());
 	m_pPhysicsWorld->SetContactListener(m_pContactListener.get());*/
-	m_pPy2dWorld = std::make_unique<physics::d2::box2dWorld>();
+	m_pPy2dWorld = std::make_unique<physics::d2::box2dWorld>(physics::d2::d2Backend::box2d);
 	m_pPy2dWorld->Create();
 	// システムの生成
 	// ECSイベントの登録
@@ -615,7 +615,7 @@ void GameCore::RegisterECSSystems(ResourceManager* resourceManager, GraphicsEngi
 	// rigidbody2DComponentSystem
 	m_pECSManager->AddSystem<Rigidbody2DSystem>();
 	Rigidbody2DSystem* rigidbody2DSystem = m_pECSManager->GetSystem<Rigidbody2DSystem>();
-	rigidbody2DSystem->SetPhysicsWorld(m_pPhysicsWorld.get());
+	rigidbody2DSystem->SetPhysicsWorld(m_pPy2dWorld.get());
 	// Collider2DComponentSystem
 	m_pECSManager->AddSystem<Collider2DSystem>();
 	// CollisionSystem

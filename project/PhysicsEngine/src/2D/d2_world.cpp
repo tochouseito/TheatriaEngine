@@ -74,12 +74,14 @@ void physics::d2::box2dWorld::Step(const float& deltaTime, const uint32_t& subSt
 
 Vector2 physics::d2::box2dWorld::GetGravity() const
 {
-	return Vector2();
+	b2Vec2 gravity = b2World_GetGravity(impl->world);
+	return Vector2(gravity.x, gravity.y); // Box2Dの重力を取得してVector2に変換
 }
 
 void physics::d2::box2dWorld::SetGravity(const Vector2& gravity)
 {
-	gravity;
+	b2Vec2 b2Gravity(gravity.x, gravity.y);
+	b2World_SetGravity(impl->world, b2Gravity); // Box2Dの重力を設定
 }
 
 b2WorldId physics::d2::box2dWorld::GetWorld() const { return impl->world; }

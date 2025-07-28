@@ -72,7 +72,7 @@ void physics::d2::box2dBody::SetLinearVelocity(const Vector2& velocity)
 	b2Body_SetLinearVelocity(impl->body, b2Vec2(velocity.x, velocity.y));
 }
 
-void physics::d2::box2dBody::SetTransform(const Vector2& position, float angle)
+void physics::d2::box2dBody::SetTransform(const Vector2& position, const float& angle)
 {
 	b2Body_SetTransform(impl->body , b2Vec2(position.x, position.y), b2MakeRot(angle));
 }

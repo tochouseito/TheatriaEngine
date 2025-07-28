@@ -477,9 +477,8 @@ void Rigidbody2DSystem::Reset(Rigidbody2DComponent& rb)
 
 void Rigidbody2DSystem::FinalizeComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb)
 {
-	transform;
+	transform; e;
 	Reset(rb);
-	ResetCollider<BoxCollider2DComponent>(e);
 }
 
 void CollisionSystem::CollisionStay(ScriptComponent& script, Rigidbody2DComponent& rb)

@@ -62,7 +62,6 @@ private:
 	BUFFER_DATA_ENVIRONMENT m_EnvironmentData;
 	// box2d
 	std::unique_ptr<physics::d2::Id2World> m_pPy2dWorld = nullptr;
-	std::unique_ptr<ContactListener2D> m_pContactListener = nullptr;
 	// ECSイベントディスパッチャー
 	std::shared_ptr<ComponentEventDispatcher> m_pComponentEventDispatcher = nullptr;
 };

@@ -412,7 +412,7 @@ void MainMenu::SettingWindow()
 
     ImGui::Text("重力");
     ImGui::SameLine();
-    b2Vec2 gravity = m_EngineCommand->GetGameCore()->GetPhysicsWorld()->GetGravity();
+    Vector2 gravity = m_EngineCommand->GetGameCore()->GetPhysicsWorld()->GetGravity();
     if (ImGui::InputFloat2("##Gravity", &gravity.x))
     {
 		// 変更されたら重力を設定

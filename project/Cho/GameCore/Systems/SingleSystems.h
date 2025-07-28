@@ -185,15 +185,6 @@ private:
 	void StepSimulation();
 	void UpdateComponent([[maybe_unused]] Entity e, TransformComponent& transform, Rigidbody2DComponent& rb);
 	void Reset(Rigidbody2DComponent& rb);
-	template<typename ColliderT>
-	void ResetCollider(Entity e)
-	{
-		ColliderT* col = m_pEcs->GetComponent<ColliderT>(e);
-		if (col && col->runtimeFixture)
-		{
-			col->runtimeFixture = nullptr;
-		}
-	}
 	void FinalizeComponent([[maybe_unused]] Entity e, TransformComponent& transform, Rigidbody2DComponent& rb);
 
 	void SetPhysicsWorld(physics::d2::Id2World* world)

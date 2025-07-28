@@ -32,10 +32,18 @@ void ImGuiManager::Initialize(ID3D12Device8* device, ResourceManager* resourceMa
 	ImFontConfig font_config;
 	font_config.MergeMode = false;
 	font_config.PixelSnapH = true;
+	static const ImWchar japaneseRanges[] = {
+	0x0020, 0x00FF,  // ASCII
+	0x3000, 0x30FF,  // 句読点・ひらがな・カタカナ
+	0x4E00, 0x9FFF,  // 漢字
+	0xFF00, 0xFFEF,  // 全角英数
+	0,
+	};
 	io.Fonts->AddFontFromFileTTF(//"C:/Windows/Fonts/msgothic.ttc",
 		"Cho/Resources/EngineAssets/Fonts/NotoSansJP-Regular.ttf",// フォントファイルのパス
 		16.0f,// フォントファイルのパスとフォントサイズ
-		&font_config
+		&font_config,
+		japaneseRanges
 	);
 	// アイコンフォントをマージ
 	font_config.MergeMode = true;
@@ -53,7 +61,7 @@ void ImGuiManager::Initialize(ID3D12Device8* device, ResourceManager* resourceMa
 		materialSymbolRanges
 	);
 	// 標準フォントを追加する
-	io.Fonts->AddFontDefault();
+	// io.Fonts->AddFontDefault();
 	io.Fonts->Build(); // フォントをビルド
 	
 	// ImGuiのスタイルを設定

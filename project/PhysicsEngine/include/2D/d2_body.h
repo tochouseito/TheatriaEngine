@@ -45,10 +45,10 @@ namespace physics
 			// 
 			virtual void SetAwake(bool) {}
 
-			virtual Vector2 GetPosition() const = 0;
+			virtual Vector2 GetPosition() const { return Vector2(0.0f, 0.0f); }
 			virtual Vector2 GetLinearVelocity() const { return Vector2(0.0f, 0.0f); } // 速度を取得（デフォルトは(0,0)）
-			virtual void SetLinearVelocity(const Vector2& velocity) {} // 速度を設定
-			virtual void SetTransform(const Vector2& position, float angle) {} // 位置と角度を設定
+			virtual void SetLinearVelocity(const Vector2&) {} // 速度を設定
+			virtual void SetTransform(const Vector2&,const float&) {} // 位置と角度を設定
 			virtual float GetAngle() const { return 0.0f; } // 角度を取得（デフォルトは0.0f）
 
 			bool IsActive() const { return isActive; } // 有効フラグの取得
@@ -71,7 +71,7 @@ namespace physics
 			Vector2 GetPosition() const override;
 			Vector2 GetLinearVelocity() const override;
 			void SetLinearVelocity(const Vector2& velocity) override;
-			void SetTransform(const Vector2& position, float angle) override;
+			void SetTransform(const Vector2& position, const float& angle) override;
 			float GetAngle() const override; // 角度を取得
 		private:
 			b2BodyId GetBody();

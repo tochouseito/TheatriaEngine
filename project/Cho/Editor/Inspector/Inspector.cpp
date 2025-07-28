@@ -327,7 +327,7 @@ void Inspector::Rigidbody2DComponentView(GameObject* object)
 		int currentType = static_cast<int>(rigidbody->bodyType);
 		if (ImGui::Combo("Body Type", &currentType, bodyTypeItems, IM_ARRAYSIZE(bodyTypeItems)))
 		{
-			rigidbody->bodyType = static_cast<b2BodyType>(currentType);
+			rigidbody->bodyType = static_cast<physics::d2::Id2BodyType>(currentType);
 		}
 
 		// mass

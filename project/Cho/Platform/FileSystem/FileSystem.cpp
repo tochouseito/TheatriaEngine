@@ -618,11 +618,9 @@ bool cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
                     r.isKinematic = jr.value("isKinematic", false);
                     r.gravityScale = jr.value("gravityScale", 1.0f);
                     r.mass = jr.value("mass", 1.0f);
-                    r.bodyType = static_cast<b2BodyType>(jr.value("bodyType", 2)); // default: b2_dynamicBody
+                    r.bodyType = static_cast<physics::d2::Id2BodyType>(jr.value("bodyType", 2)); // default: b2_dynamicBody
                     r.fixedRotation = jr.value("fixedRotation", false);
 					r.isCollisionStay = false;
-					r.runtimeBody = nullptr;
-					r.world = nullptr;
 					r.otherEntity = std::nullopt;
 
 					// Rigidbody2DComponentの保存
