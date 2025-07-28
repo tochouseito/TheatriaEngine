@@ -13,10 +13,15 @@ namespace physics
 	{
 		class Id2Polygon
 		{
+			//friend class box2dShape; // box2dShapeがId2Polygonの内部実装にアクセスできるようにする
 			public:
 			virtual ~Id2Polygon() = default;
 			virtual void MakeBox(const float&, const float&) {};
-
+			void SetSize(const float& w, const float& h) { width = w; height = h; }
+			Vector2 GetSize() const { return Vector2(width, height); } // サイズを取得
+		protected:
+			float width = 0.0f; // 幅
+			float height = 0.0f; // 高さ
 		};
 
 		class box2dPolygon : public Id2Polygon

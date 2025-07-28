@@ -390,7 +390,6 @@ void ScriptSystem::FinalizeComponent(Entity e, ScriptComponent& script)
 void Rigidbody2DSystem::InitializeComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb)
 {
 	e;
-	if (!rb.runtimeBody) return;
 	physics::d2::Id2BodyDef bodyDef;
 	bodyDef.userData = static_cast<void*>(&rb.selfEntity.value());
 	bodyDef.type = rb.bodyType;
@@ -452,16 +451,6 @@ void Rigidbody2DSystem::UpdateComponent(Entity e, TransformComponent& transform,
 	}
 	Vector3 degrees = chomath::RadiansToDegrees(radians);
 	transform.degrees.z = degrees.z;
-
-	//Vector3 radians = ChoMath::DegreesToRadians(transform.degrees);
-	//radians.z = rb.runtimeBody->GetAngle(); // radians
-	//Vector3 diff = radians - transform.preRot;
-	//Quaternion qx = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(1.0f, 0.0f, 0.0f), diff.x);
-	//Quaternion qy = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0.0f, 1.0f, 0.0f), diff.y);
-	//Quaternion qz = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0.0f, 0.0f, 1.0f), diff.z);
-	//transform.rotation = transform.rotation * qx * qy * qz;//;
-	//transform.rotation = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0, 0, 1), angle);
-
 }
 
 void Rigidbody2DSystem::Reset(Rigidbody2DComponent& rb)
@@ -469,6 +458,7 @@ void Rigidbody2DSystem::Reset(Rigidbody2DComponent& rb)
 	// Bodyがあるなら削除
 	if (rb.runtimeBody)
 	{
+		rb.runtimeBody->DestroyShape();
 		m_World->DestroyBody(rb.runtimeBody);
 	}
 	rb.runtimeBody = nullptr;
@@ -502,7 +492,7 @@ void Collider2DSystem::InitializeComponent(Entity e, TransformComponent& transfo
 
 	
 	physics::d2::Id2Polygon polygonShape;
-	polygonShape.MakeBox(box.width * 0.5f, box.height * 0.5f);
+	polygonShape.SetSize(box.width, box.height);
 	box.preHeight = box.height;
 	box.preWidth = box.width;
 	// 面積を計算
@@ -545,7 +535,6 @@ void Collider2DSystem::FinalizeComponent(Entity e, TransformComponent& transform
 	e; transform; rb; box;
 	if (box.runtimeShape)
 	{
-		rb.runtimeBody->DestroyShape();
 		box.runtimeShape = nullptr;
 	}
 }

@@ -77,7 +77,6 @@ Id2Body* physics::d2::box2dWorld::CreateBody(const Id2BodyDef& bodyDef)
 void physics::d2::box2dWorld::DestroyBody(Id2Body* body)
 {
 	if (!body) return;
-	body->Destroy();
 	std::erase_if(bodies, [body](const std::unique_ptr<Id2Body>& ptr) {
 		return ptr.get() == body;
 		});

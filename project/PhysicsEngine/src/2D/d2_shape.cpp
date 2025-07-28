@@ -24,7 +24,10 @@ void physics::d2::box2dShape::CreatePolygonShape(Id2Body* body, Id2ShapeDef* sha
 	box2dBody* box2dBodyPtr = static_cast<box2dBody*>(body);
 	impl->pBody = box2dBodyPtr; // 所属するボディを設定
 	pWorld = box2dBodyPtr->GetWorld(); // 所属するワールドを設定
-	box2dPolygon* box2dPolygonPtr = static_cast<box2dPolygon*>(polygon);
+	std::unique_ptr<box2dPolygon> box2dPolygonPtr = std::make_unique<box2dPolygon>();
+	float width = polygon->GetSize().x; // ポリゴンの幅を取得
+	float height = polygon->GetSize().y; // ポリゴンの高さを取得
+	box2dPolygonPtr->MakeBox(width * 0.5f, height * 0.5f); // ポリゴンのサイズを設定
 	b2ShapeDef def = b2DefaultShapeDef();
 	def.userData = shapeDef->userData; // ユーザーデータの設定
 	def.density = shapeDef->density; // 密度の設定
