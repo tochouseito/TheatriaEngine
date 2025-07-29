@@ -3,7 +3,10 @@
 #include "GameCore/ECS/ECSManager.h"
 #include "GameCore/GameWorld/GameWorld.h"
 #include "Core/Utility/CompBufferData.h"
+
+// PhysicsEngine
 #include <2D/d2_common.h>
+#include <3D/d3_common.h>
 
 class InputManager;
 class ResourceManager;
@@ -60,8 +63,10 @@ private:
 	bool isRunning = false;
 	// 環境情報
 	BUFFER_DATA_ENVIRONMENT m_EnvironmentData;
-	// box2d
+	// 2dPhysicsワールド
 	std::unique_ptr<physics::d2::Id2World> m_pPy2dWorld = nullptr;
+	// 3dPhysicsワールド
+	std::unique_ptr<physics::d3::Id3World> m_pPy3dWorld = nullptr;
 	// ECSイベントディスパッチャー
 	std::shared_ptr<ComponentEventDispatcher> m_pComponentEventDispatcher = nullptr;
 };

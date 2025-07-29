@@ -42,6 +42,15 @@
     <ClInclude Include="include\2D\d2_polygon.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="include\3D\d3_world.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="include\3D\d3_body.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="include\3D\d3_shape.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PhysicsEngine.cpp">
@@ -69,6 +78,15 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\2D\d2_polygon.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\3D\d3_world.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\3D\d3_body.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\3D\d3_shape.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

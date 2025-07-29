@@ -15,14 +15,11 @@ void GameCore::Initialize(ResourceManager* resourceManager, GraphicsEngine* grap
 	m_pGameWorld = std::make_unique<GameWorld>(m_pECSManager.get());
 	// シーンマネージャーの生成
 	m_pSceneManager = std::make_unique<SceneManager>(m_pGameWorld.get());
-	// box2dの生成
-	//b2Vec2 gravity(0.0f, -9.8f);
-	/*b2Vec2 gravity(0.0f, 0.0f);
-	m_pPhysicsWorld = std::make_unique<b2World>(gravity);
-	m_pContactListener = std::make_unique<ContactListener2D>(m_pECSManager.get(), m_pGameWorld.get());
-	m_pPhysicsWorld->SetContactListener(m_pContactListener.get());*/
+	// 2dPhysicsワールドの生成
 	m_pPy2dWorld = std::make_unique<physics::d2::box2dWorld>(physics::d2::d2Backend::box2d);
 	m_pPy2dWorld->Create();
+	// 3dPhysicsワールドの生成
+	m_pPy3dWorld.reset(physics::d3::CreateWorld(physics::d3::d3Backend::bullet));
 	// システムの生成
 	// ECSイベントの登録
 	RegisterECSEvents();

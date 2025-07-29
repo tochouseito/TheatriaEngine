@@ -62,9 +62,11 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /wd26495 /wd4127 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\External\box2d\include;$(ProjectDir)..\External\bulletphysics\include;$(SolutionDir)ChoMath;$(SolutionDir)ChoMath\include;$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>
+      </DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -94,9 +96,11 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /wd26495 /wd4127 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\External\box2d\include;$(ProjectDir)..\External\bulletphysics\include;$(SolutionDir)ChoMath;$(SolutionDir)ChoMath\include;$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>
+      </DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -114,6 +118,9 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\3D\d3_body.h" />
+    <ClInclude Include="include\3D\d3_shape.h" />
+    <ClInclude Include="include\3D\d3_world.h" />
     <ClInclude Include="include\2D\d2_polygon.h" />
     <ClInclude Include="include\2D\d2_converter.h" />
     <ClInclude Include="include\2D\d2_shape.h" />
@@ -125,6 +132,9 @@
     <ClInclude Include="physicsengine_pch.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\3D\d3_body.cpp" />
+    <ClCompile Include="src\3D\d3_shape.cpp" />
+    <ClCompile Include="src\3D\d3_world.cpp" />
     <ClCompile Include="src\2D\d2_polygon.cpp" />
     <ClCompile Include="src\2D\d2_converter.cpp" />
     <ClCompile Include="src\2D\d2_shape.cpp" />
