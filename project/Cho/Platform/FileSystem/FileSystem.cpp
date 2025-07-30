@@ -260,6 +260,7 @@ bool cho::FileSystem::SaveGameSettings(const std::wstring& projectName, const ch
     j["frameRate"] = settings.frameRate;
     j["fixedDeltaTime"] = settings.fixedDeltaTime;
     j["debugMode"] = settings.debugMode;
+	j["skyTexName"] = std::filesystem::path(settings.skyTexName).string();
 
     try
     {
@@ -297,6 +298,7 @@ bool cho::FileSystem::LoadGameSettings(const std::wstring& filePath)
         settings.frameRate = j.value("frameRate", 60);
         settings.fixedDeltaTime = j.value("fixedDeltaTime", 1.0f / 60.0f);
         settings.debugMode = j.value("debugMode", false);
+		settings.skyTexName = std::filesystem::path(j.value("skyTexName", "")).wstring();
 		cho::FileSystem::g_GameSettings = settings;
 
         return true;
@@ -1181,6 +1183,9 @@ void cho::FileSystem::SaveProject(EditorManager* editorManager, SceneManager* sc
     // セーブ
 	std::filesystem::path projectPath = std::filesystem::path(L"GameProjects") / m_sProjectName;
 	// GameSettingsFile
+    // Skyboxtexの保存
+    std::wstring skyTexName = editorManager->GetEngineCommand()->GetResourceManager()->GetSkyboxTextureName();
+    g_GameSettings.skyTexName = skyTexName;
     cho::FileSystem::SaveGameSettings(projectPath, g_GameSettings);
     // SceneFile
 	// 編集されたシーンを保存
@@ -1206,6 +1211,7 @@ bool cho::FileSystem::LoadProjectFolder(const std::wstring& projectName, EngineC
     // プロジェクトファイル類を読み込み
     // 全ファイル走査（サブディレクトリ含む）
     ScanFolder(projectPath,engineCommand);
+    engineCommand->GetResourceManager()->SetSkyboxTextureName(g_GameSettings.skyTexName);
 	// 最初のシーンをロード
     engineCommand->GetEditorManager()->ChangeEditingScene(g_GameSettings.startScene);
     return true;
@@ -1408,6 +1414,7 @@ void cho::FileSystem::ScriptProject::UpdateVcxproj()
     vcxFile << "      <PreprocessorDefinitions>_DEBUG;EXPORT_SCRIPT_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>\n";
     vcxFile << "      <AdditionalIncludeDirectories>" << projectDirPath.string() << ";" << physicsPath.string() << ";" << contextPath.string() << ";" << scriptPath.string() << ";" << mathLibPath.string() << ";" << mathPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
     vcxFile << "      <LanguageStandard>stdcpp20</LanguageStandard>\n";
+    vcxFile << "      <LanguageStandard_C>stdc17</LanguageStandard_C>\n";
     vcxFile << "      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>\n";
     vcxFile << "      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>\n"; // MDd
     vcxFile << "    </ClCompile>\n";
@@ -1429,6 +1436,7 @@ void cho::FileSystem::ScriptProject::UpdateVcxproj()
     vcxFile << "      <PreprocessorDefinitions>NDEBUG;EXPORT_SCRIPT_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>\n";
     vcxFile << "      <AdditionalIncludeDirectories>" << projectDirPath.string() << ";" << physicsPath.string() << ";" << contextPath.string() << ";" << scriptPath.string() << ";" << mathLibPath.string() << ";" << mathPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
     vcxFile << "      <LanguageStandard>stdcpp20</LanguageStandard>\n";
+    vcxFile << "      <LanguageStandard_C>stdc17</LanguageStandard_C>\n";
     vcxFile << "      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>\n";
     vcxFile << "      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>\n"; // MD
     vcxFile << "    </ClCompile>\n";

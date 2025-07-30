@@ -62,6 +62,7 @@ namespace cho
         int frameRate = 60;
         float fixedDeltaTime = 1.0f / 60.0f;
         bool debugMode = false;
+        std::wstring skyTexName;
     };
     struct FolderNode
     {
