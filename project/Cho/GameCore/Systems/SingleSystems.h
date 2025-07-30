@@ -4,6 +4,7 @@
 #include "Core/Utility/CompBufferData.h"
 #include "Core/Utility/Components.h"
 #include <2D/d2_common.h>
+#include <3D/d3_common.h>
 
 // 前方宣言
 class ResourceManager;
@@ -274,16 +275,25 @@ public:
 	{
 	}
 	~Rigidbody3DSystem() = default;
+	void Update() override
+	{
+		// Step は一回だけ呼ぶ（エンティティループより前）
+		StepSimulation();
+
+		// いつもの処理
+		ECSManager::System<TransformComponent, Rigidbody3DComponent>::Update();
+	}
 private:
 	void InitializeComponent([[maybe_unused]] Entity e, TransformComponent& transform, Rigidbody3DComponent& rb);
 	void UpdateComponent([[maybe_unused]] Entity e, TransformComponent& transform, Rigidbody3DComponent& rb);
 	void Reset(Rigidbody3DComponent& rb);
 	void FinalizeComponent([[maybe_unused]] Entity e, TransformComponent& transform, Rigidbody3DComponent& rb);
-	/*void SetPhysicsWorld(btDiscreteDynamicsWorld* world)
+	void StepSimulation();
+	void SetPhysicsWorld(physics::d3::Id3World* world)
 	{
 		m_World = world;
 	}
-	btDiscreteDynamicsWorld* m_World = nullptr;*/
+	physics::d3::Id3World* m_World = nullptr;
 };
 
 class MaterialSystem : public ECSManager::System<MaterialComponent>

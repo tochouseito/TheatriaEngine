@@ -36,6 +36,8 @@ namespace physics::d3
 		virtual void SetAngularVelocity(const Vector3&) {} // 角速度を設定（デフォルトは何もしない）
 		// 有効化
 		virtual bool IsActive() const = 0;
+		// 有効化・無効化
+		virtual void SetActive(bool active) = 0;
 	};
 
 	class bulletBody : public Id3Body
@@ -54,7 +56,7 @@ namespace physics::d3
 		void SetAngularVelocity(const Vector3& angularVelocity) override;
 		btRigidBody* GetRigidBody() const; // Bulletの剛体データを取得
 		bool IsActive() const override; // 有効かどうかを取得
-		void SetActive(bool active); // 有効化・無効化
+		void SetActive(bool active) override; // 有効化・無効化
 	private:
 		struct Impl; // 実装の詳細を隠蔽するための前方宣言
 		std::unique_ptr<Impl> impl; // Bulletのボディデータを保持
@@ -70,6 +72,7 @@ namespace physics::d3
 		Vector3 GetLinearVelocity() const override;
 		void SetLinearVelocity(const Vector3& velocity) override;
 		bool IsActive() const override;
+		void SetActive(bool active) override { active; }
 	};
 }
 

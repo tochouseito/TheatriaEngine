@@ -487,3 +487,16 @@ bool ChangeEditorSceneCommand::Undo(EngineCommand* edit)
 	edit;
 	return false;
 }
+
+bool AddRigidbody3DComponent::Execute(EngineCommand* edit)
+{
+	// Rigidbody3DComponentを追加
+	edit->m_GameCore->GetECSManager()->AddComponent<Rigidbody3DComponent>(m_Entity);
+	return true;
+}
+
+bool AddRigidbody3DComponent::Undo(EngineCommand* edit)
+{
+	edit;
+	return false;
+}

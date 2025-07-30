@@ -1275,20 +1275,93 @@ void EffectEditorSystem::UpdateShader()
 
 void Rigidbody3DSystem::InitializeComponent(Entity e, TransformComponent& transform, Rigidbody3DComponent& rb)
 {
-	e; transform; rb;
+	e;
+	physics::d3::Id3BodyDef bodyDef;
+	// Rigidbody3DComponentの初期化
+	bodyDef.position = Vector3(transform.position.x, transform.position.y, transform.position.z);
+	bodyDef.userData = static_cast<void*>(&rb.selfEntity.value());
+	bodyDef.friction = rb.friction;
+	bodyDef.restitution = rb.restitution;
+	bodyDef.halfsize = rb.halfsize;
+	/*physics::d2::Id2BodyDef bodyDef;
+	bodyDef.userData = static_cast<void*>(&rb.selfEntity.value());
+	bodyDef.type = rb.bodyType;
+	bodyDef.gravityScale = rb.gravityScale;
+	bodyDef.fixedRotation = rb.fixedRotation;
+	bodyDef.position = Vector2(transform.position.x, transform.position.y);
+	float angleZ = chomath::DegreesToRadians(transform.degrees).z;
+	bodyDef.angle = angleZ;
+	rb.runtimeBody = m_World->CreateBody(bodyDef);
+	rb.runtimeBody->SetAwake(true);*/
+	rb.velocity.Initialize();
+
+	rb.runtimeBody = m_World->CreateBody(bodyDef);
+
+	// Transformと同期（optional）
+	transform.position.x = rb.runtimeBody->GetPosition().x;
+	transform.position.y = rb.runtimeBody->GetPosition().y;
 }
 
 void Rigidbody3DSystem::UpdateComponent(Entity e, TransformComponent& transform, Rigidbody3DComponent& rb)
 {
-	e; transform; rb;
+	e;
+	if (!rb.runtimeBody) return;
+
+	/*if (rb.requestedPosition)
+	{
+		if (rb.fixedRotation)
+		{
+			rb.runtimeBody->SetTransform(*rb.requestedPosition, rb.runtimeBody->GetAngle());
+		}
+		else
+		{
+			rb.runtimeBody->SetTransform(*rb.requestedPosition, chomath::DegreesToRadians(transform.degrees).z);
+		}
+		rb.requestedPosition.reset();
+	}*/
+	const Vector3& pos = rb.runtimeBody->GetPosition();
+	transform.position.x = pos.x;
+	transform.position.y = pos.y;
+
+	Vector3 velocity = rb.runtimeBody->GetLinearVelocity();
+	rb.velocity.x = velocity.x;
+	rb.velocity.y = velocity.y;
+
+	//Vector3 radians = {};
+	//if (!rb.fixedRotation)
+	//{
+	//	radians.z = rb.runtimeBody->GetAngle(); // radians
+	//}
+	//else
+	//{
+	//	radians.z = chomath::DegreesToRadians(transform.degrees).z;
+	//}
+	//Vector3 degrees = chomath::RadiansToDegrees(radians);
+	//transform.degrees.z = degrees.z;
 }
 
 void Rigidbody3DSystem::Reset(Rigidbody3DComponent& rb)
 {
-	rb;
+	// Bodyがあるなら削除
+	if (rb.runtimeBody)
+	{
+		/*rb.runtimeBody->DestroyShape();
+		m_World->DestroyBody(rb.runtimeBody);*/
+		m_World->DestroyBody(rb.runtimeBody);
+	}
+	rb.runtimeBody = nullptr;
+	rb.otherEntity.reset();
 }
 
 void Rigidbody3DSystem::FinalizeComponent(Entity e, TransformComponent& transform, Rigidbody3DComponent& rb)
 {
-	e; transform; rb;
+	e; transform;
+	Reset(rb);
+}
+
+void Rigidbody3DSystem::StepSimulation()
+{
+	float deltaTime = DeltaTime();
+	if (deltaTime <= 0.0f) return; // 0以下は無視
+	m_World->Step(deltaTime);
 }

@@ -37,6 +37,8 @@ private:
 	void Rigidbody2DComponentView(GameObject* object);
 	// BoxCollider2DComponentの表示
 	void BoxCollider2DComponentView(GameObject* object);
+	// Rigidbody3DComponentの表示
+	void Rigidbody3DComponentView(GameObject* object);
 	// EmitterComponentの表示
 	void EmitterComponentView(GameObject* object);
 	// ParticleComponentの表示

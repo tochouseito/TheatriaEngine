@@ -48,6 +48,7 @@ class EngineCommand
 	friend class CreateEffectCommand;
 	friend class AddEffectNodeCommand;
 	friend class CloneObjectCommand;
+	friend class AddRigidbody3DComponent;
 	// Editor
 	friend class EffectEditorSystem;
 	friend class EffectEditor;

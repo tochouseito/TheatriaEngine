@@ -60,6 +60,8 @@ void GameCore::GameRun()
 	// 物理演算システムの有効化
 	Rigidbody2DSystem* rigidbody2DSystem = m_pECSManager->GetSystem<Rigidbody2DSystem>();
 	rigidbody2DSystem->SetEnabled(true);
+	Rigidbody3DSystem* rigidbody3DSystem = m_pECSManager->GetSystem<Rigidbody3DSystem>();
+	rigidbody3DSystem->SetEnabled(true);
 	// StartSystemの実行
 	m_pECSManager->InitializeAllSystems();
 	// 実行中フラグを立てる
@@ -77,6 +79,8 @@ void GameCore::GameStop()
 	// 物理演算システムの無効化
 	Rigidbody2DSystem* rigidbody2DSystem = m_pECSManager->GetSystem<Rigidbody2DSystem>();
 	rigidbody2DSystem->SetEnabled(false);
+	Rigidbody3DSystem* rigidbody3DSystem = m_pECSManager->GetSystem<Rigidbody3DSystem>();
+	rigidbody3DSystem->SetEnabled(false);
 	// スクリプトのアンロード（場所変更予定）
 	cho::FileSystem::ScriptProject::UnloadScriptDLL();
 	// 実行中フラグを下ろす
@@ -371,6 +375,24 @@ void GameCore::RegisterECSEvents()
 	m_pComponentEventDispatcher->RegisterOnRestore<BoxCollider2DComponent>(
 		[&]([[maybe_unused]] Entity e, [[maybe_unused]] BoxCollider2DComponent* c) {
 		});
+	// Rigidbody3DComponent
+	m_pComponentEventDispatcher->RegisterOnAdd<Rigidbody3DComponent>(
+		[&]([[maybe_unused]] Entity e, [[maybe_unused]] Rigidbody3DComponent* c) {
+			c->selfEntity = e;
+		});
+	m_pComponentEventDispatcher->RegisterOnCopy<Rigidbody3DComponent>(
+		[&]([[maybe_unused]] Entity src, [[maybe_unused]] Entity dst, [[maybe_unused]] Rigidbody3DComponent* c) {
+			Rigidbody3DComponent& srcRigidbody = *m_pECSManager->GetComponent<Rigidbody3DComponent>(src);
+			*c = srcRigidbody;
+			c->selfEntity = dst;
+		});
+	m_pComponentEventDispatcher->RegisterOnRemove<Rigidbody3DComponent>(
+		[&]([[maybe_unused]] Entity e, [[maybe_unused]] Rigidbody3DComponent* c) {
+		});
+	m_pComponentEventDispatcher->RegisterOnRestore<Rigidbody3DComponent>(
+		[&]([[maybe_unused]] Entity e, [[maybe_unused]] Rigidbody3DComponent* c) {
+			c->selfEntity = e;
+		});
 	// EffectComponent
 	m_pComponentEventDispatcher->RegisterOnAdd<EffectComponent>(
 		[&]([[maybe_unused]] Entity e, [[maybe_unused]] EffectComponent* c) {
@@ -546,6 +568,7 @@ void GameCore::RegisterECSEvents()
 	IPrefab::RegisterCopyFunc<LineRendererComponent>();
 	IPrefab::RegisterCopyFunc<Rigidbody2DComponent>();
 	IPrefab::RegisterCopyFunc<BoxCollider2DComponent>();
+	IPrefab::RegisterCopyFunc<Rigidbody3DComponent>();
 	IPrefab::RegisterCopyFunc<EffectComponent>();
 	IPrefab::RegisterCopyFunc<UISpriteComponent>();
 	IPrefab::RegisterCopyFunc<LightComponent>();
@@ -562,6 +585,7 @@ void GameCore::RegisterECSEvents()
 	IPrefab::RegisterPrefabRestore<LineRendererComponent>();
 	IPrefab::RegisterPrefabRestore<Rigidbody2DComponent>();
 	IPrefab::RegisterPrefabRestore<BoxCollider2DComponent>();
+	IPrefab::RegisterPrefabRestore<Rigidbody3DComponent>();
 	IPrefab::RegisterPrefabRestore<EffectComponent>();
 	IPrefab::RegisterPrefabRestore<UISpriteComponent>();
 	IPrefab::RegisterPrefabRestore<LightComponent>();
@@ -624,6 +648,10 @@ void GameCore::RegisterECSSystems(ResourceManager* resourceManager, GraphicsEngi
 	rigidbody2DSystem->SetPhysicsWorld(m_pPy2dWorld.get());
 	// Collider2DComponentSystem
 	m_pECSManager->AddSystem<Collider2DSystem>();
+	// rigidbody3DComponentSystem
+	m_pECSManager->AddSystem<Rigidbody3DSystem>();
+	Rigidbody3DSystem* rigidbody3DSystem = m_pECSManager->GetSystem<Rigidbody3DSystem>();
+	rigidbody3DSystem->SetPhysicsWorld(m_pPy3dWorld.get());
 	// CollisionSystem
 	m_pECSManager->AddSystem<CollisionSystem>();
 	CollisionSystem* collisionSystem = m_pECSManager->GetSystem<CollisionSystem>();

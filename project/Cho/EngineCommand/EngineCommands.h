@@ -175,6 +175,19 @@ public:
 private:
 	uint32_t m_Entity;
 };
+// Rigidbody3Dコンポーネントを追加するコマンド
+class AddRigidbody3DComponent :public IEngineCommand
+{
+	public:
+	AddRigidbody3DComponent(const uint32_t& entity) :
+		m_Entity(entity)
+	{
+	}
+	bool Execute(EngineCommand* edit)override;
+	bool Undo(EngineCommand* edit)override;
+private:
+	uint32_t m_Entity;
+};
 // オブジェクトを削除するコマンド
 class DeleteObjectCommand : public IEngineCommand
 {

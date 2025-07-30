@@ -408,6 +408,14 @@ bool cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
                 comps["BoxCollider2D"] = cho::Serialization::ToJson(*bc);
             }
         }
+		// Rigidbody3DComponentの保存
+        if(IsComponentAllowedAtRuntime<Rigidbody3DComponent>(prefab.GetType()))
+        {
+            if (const auto* rb3d = prefab.GetComponentPtr<Rigidbody3DComponent>())
+            {
+                comps["Rigidbody3D"] = cho::Serialization::ToJson(*rb3d);
+            }
+		}
         // CameraComponentの保存
         if (IsComponentAllowedAtRuntime<CameraComponent>(prefab.GetType()))
         {
@@ -644,6 +652,17 @@ bool cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
 					// BoxCollider2DComponentの保存
 					prefab.AddComponent<BoxCollider2DComponent>(b);
                 }
+
+				// Rigidbody3D
+                if (comps.contains("Rigidbody3D"))
+                {
+                    Rigidbody3DComponent r{};
+					auto& jr = comps["Rigidbody3D"];
+					// Rigidbody3DComponentの読み込み
+					Deserialization::FromJson(jr, r);
+					// Rigidbody3DComponentの保存
+                    prefab.AddComponent<Rigidbody3DComponent>(r);
+				}
 
                 // Emitter
                 if (comps.contains("Emitter"))
@@ -981,6 +1000,15 @@ json cho::Serialization::ToJson(const BoxCollider2DComponent& bc)
 	j["friction"] = bc.friction;   
 	j["restitution"] = bc.restitution;
 	j["isSensor"] = bc.isSensor;
+	return j;
+}
+
+json cho::Serialization::ToJson(const Rigidbody3DComponent& rb)
+{
+    json j;
+	j["halfsize"] = { rb.halfsize.x, rb.halfsize.y, rb.halfsize.z };
+	j["friction"] = rb.friction;
+	j["restitution"] = rb.restitution;
 	return j;
 }
 
@@ -1814,6 +1842,13 @@ void cho::Deserialization::FromJson(const json& j, BoxCollider2DComponent& bc)
 	bc.density = j.value("density", 1.0f);
 	bc.friction = j.value("friction", 0.5f);
 	bc.restitution = j.value("restitution", 0.0f);
+}
+
+void cho::Deserialization::FromJson(const json& j, Rigidbody3DComponent& rb)
+{
+	rb.friction = j.value("friction", 0.5f);
+	rb.restitution = j.value("restitution", 0.0f);
+	rb.halfsize = { j["halfsize"][0], j["halfsize"][1], j["halfsize"][2] };
 }
 
 void cho::Deserialization::FromJson(const json& j, EmitterComponent& e)
