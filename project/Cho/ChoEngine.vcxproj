@@ -110,7 +110,7 @@
     <ClInclude Include="Core\Utility\AnimationStruct.h" />
     <ClInclude Include="Core\Utility\atomic_shared_ptr.h" />
     <ClInclude Include="GameCore\CPrefab\CPrefab.h" />
-    <ClInclude Include="Externals\AIUtilityLib\chunk_vector.h" />
+    <ClInclude Include="Core\Utility\chunk_vector.h" />
     <ClInclude Include="Core\Utility\SoundData.h" />
     <ClInclude Include="GameCore\ECS\ComponentIDHelper.h" />
     <ClInclude Include="GameCore\GameWorld\GameWorld.h" />
@@ -494,12 +494,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
 xcopy "$(SolutionDir)Cho\Resources\EngineAssets" "$(TargetDir)Cho\Resources\EngineAssets" /E /I /Y
 copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"
 xcopy "$(SolutionDir)Cho\GameCore\Marionnette" "$(TargetDir)Cho\GameCore\Marionnette" /E /I /Y
-xcopy "$(SolutionDir)Cho\Externals\ChoMath" "$(TargetDir)Cho\Externals\ChoMath" /E /I /Y
+xcopy "$(SolutionDir)ChoMath\include" "$(TargetDir)ChoMath\include" /E /I /Y
+xcopy "$(SolutionDir)PhysicsEngine\include" "$(TargetDir)PhysicsEngine\include" /E /I /Y
 xcopy "$(SolutionDir)Cho\GameCore\ScriptAPI" "$(TargetDir)Cho\GameCore\ScriptAPI" /E /I /Y
 xcopy "$(SolutionDir)Cho\Platform\InputManager" "$(TargetDir)Cho\Platform\InputManager" /E /I /Y
 xcopy "$(SolutionDir)Cho\Core\Utility\Components.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Core\Utility\Color.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
-xcopy "$(SolutionDir)Cho\Externals\box2d" "$(TargetDir)Cho\Externals\box2d" /E /I /Y
 xcopy "$(SolutionDir)Cho\Core\Utility\InputStruct.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Core\Utility\IDType.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Core\Utility\EffectStruct.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
@@ -555,12 +555,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
 xcopy "$(SolutionDir)Cho\Resources\EngineAssets" "$(TargetDir)Cho\Resources\EngineAssets" /E /I /Y
 copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"
 xcopy "$(SolutionDir)Cho\GameCore\Marionnette" "$(TargetDir)Cho\GameCore\Marionnette" /E /I /Y
-xcopy "$(SolutionDir)Cho\Externals\ChoMath" "$(TargetDir)Cho\Externals\ChoMath" /E /I /Y
+xcopy "$(SolutionDir)ChoMath\include" "$(TargetDir)ChoMath\include" /E /I /Y
+xcopy "$(SolutionDir)PhysicsEngine\include" "$(TargetDir)PhysicsEngine\include" /E /I /Y
 xcopy "$(SolutionDir)Cho\GameCore\ScriptAPI" "$(TargetDir)Cho\GameCore\ScriptAPI" /E /I /Y
 xcopy "$(SolutionDir)Cho\Platform\InputManager" "$(TargetDir)Cho\Platform\InputManager" /E /I /Y
 xcopy "$(SolutionDir)Cho\Core\Utility\Components.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Core\Utility\Color.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
-xcopy "$(SolutionDir)Cho\Externals\box2d" "$(TargetDir)Cho\Externals\box2d" /E /I /Y
 xcopy "$(SolutionDir)Cho\Core\Utility\InputStruct.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Core\Utility\IDType.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Core\Utility\EffectStruct.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y

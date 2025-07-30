@@ -1,6 +1,5 @@
 #pragma once
 #include "ChoMath.h"// ChoEngine数学ライブラリ
-#include <Externals/AIUtilityLib/chunk_vector.h>
 #include "Core/Utility/Color.h"
 #include "Core/Utility/IDType.h"
 #include "Core/Utility/EffectStruct.h"

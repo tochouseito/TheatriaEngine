@@ -1325,7 +1325,9 @@ void cho::FileSystem::ScriptProject::UpdateVcxproj()
 	// スクリプトファイルのパス
     fs::path includeBase = fs::relative(currentPath, projectDir);
     fs::path systemPath = includeBase / "Cho";
-    fs::path mathLibPath = includeBase / "Cho/Externals/ChoMath";
+    fs::path mathLibPath = includeBase / "ChoMath/include";
+    fs::path mathPath = includeBase / "ChoMath";
+    fs::path physicsPath = includeBase / "PhysicsEngine/include";
     fs::path scriptPath = includeBase / "Cho/GameCore/Marionnette";
 	fs::path contextPath = includeBase / "Cho/GameCore/ScriptAPI";
     fs::path projectDirPath = "$(ProjectDir)";
@@ -1333,12 +1335,13 @@ void cho::FileSystem::ScriptProject::UpdateVcxproj()
     // ライブラリディレクトリ
     //fs::path libraryPath = currentPath / "../generated/outputs/$(Configuration)/";
     //fs::path libraryPath2 = includeBase / "../../";
-    fs::path libraryPath = "$(ProjectDir)../../../../generated/outputs/$(Configuration)/";
+    fs::path libraryPath = "$(ProjectDir)../../../generated/$(Configuration)/";
     fs::path libraryPath2 = "$(ProjectDir)../../";
 
     // パスの正規化
     systemPath.make_preferred();
     mathLibPath.make_preferred();
+    physicsPath.make_preferred();
 	scriptPath.make_preferred();
 	contextPath.make_preferred();
 
@@ -1403,7 +1406,7 @@ void cho::FileSystem::ScriptProject::UpdateVcxproj()
     vcxFile << "      <Optimization>Disabled</Optimization>\n";
     vcxFile << "      <MultiProcessorCompilation>true</MultiProcessorCompilation>\n";
     vcxFile << "      <PreprocessorDefinitions>_DEBUG;EXPORT_SCRIPT_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>\n";
-    vcxFile << "      <AdditionalIncludeDirectories>" << projectDirPath.string() << ";" << contextPath.string() << ";" << scriptPath.string() << ";" << mathLibPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
+    vcxFile << "      <AdditionalIncludeDirectories>" << projectDirPath.string() << ";" << physicsPath.string() << ";" << contextPath.string() << ";" << scriptPath.string() << ";" << mathLibPath.string() << ";" << mathPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
     vcxFile << "      <LanguageStandard>stdcpp20</LanguageStandard>\n";
     vcxFile << "      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>\n";
     vcxFile << "      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>\n"; // MDd
@@ -1424,7 +1427,7 @@ void cho::FileSystem::ScriptProject::UpdateVcxproj()
     vcxFile << "      <Optimization>Disabled</Optimization>\n";
     vcxFile << "      <MultiProcessorCompilation>true</MultiProcessorCompilation>\n";
     vcxFile << "      <PreprocessorDefinitions>NDEBUG;EXPORT_SCRIPT_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>\n";
-    vcxFile << "      <AdditionalIncludeDirectories>" << projectDirPath.string() << ";" << contextPath.string() << ";" << scriptPath.string() << ";" << mathLibPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
+    vcxFile << "      <AdditionalIncludeDirectories>" << projectDirPath.string() << ";" << physicsPath.string() << ";" << contextPath.string() << ";" << scriptPath.string() << ";" << mathLibPath.string() << ";" << mathPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
     vcxFile << "      <LanguageStandard>stdcpp20</LanguageStandard>\n";
     vcxFile << "      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>\n";
     vcxFile << "      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>\n"; // MD
