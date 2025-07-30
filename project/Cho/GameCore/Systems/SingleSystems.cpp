@@ -137,6 +137,11 @@ void TransformSystem::UpdateComponent(Entity e, TransformComponent& transform)
 	{
 		rb->runtimeBody->SetLinearVelocity(Vector2(rb->velocity.x, rb->velocity.y));
 	}
+	Rigidbody3DComponent* rb3d = m_pEcs->GetComponent<Rigidbody3DComponent>(e);
+	if(rb3d && rb3d->runtimeBody)
+	{
+		rb3d->runtimeBody->SetLinearVelocity(Vector3(rb3d->velocity.x, rb3d->velocity.y, rb3d->velocity.z));
+	}
 
 	// アニメーションコンポーネントがあればスキニングの確認
 	AnimationComponent* anim = m_pEcs->GetComponent<AnimationComponent>(e);

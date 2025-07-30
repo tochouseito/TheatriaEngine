@@ -750,4 +750,89 @@ void GameCore::RegisterContactEvents()
 				}
 			}
 		});
+
+	m_pPy3dWorld->SetBeginContactCallback([this](void* a, void* b)
+		{
+			// 接触開始処理
+			if (a && b)
+			{
+				Entity entityA = *static_cast<Entity*>(a);
+				Entity entityB = *static_cast<Entity*>(b);
+
+				// CollisionEnter
+				ScriptComponent* scriptA = m_pECSManager->GetComponent<ScriptComponent>(entityA);
+				ScriptComponent* scriptB = m_pECSManager->GetComponent<ScriptComponent>(entityB);
+				Rigidbody3DComponent* rigidbodyA = m_pECSManager->GetComponent<Rigidbody3DComponent>(entityA);
+				Rigidbody3DComponent* rigidbodyB = m_pECSManager->GetComponent<Rigidbody3DComponent>(entityB);
+				if (rigidbodyA && rigidbodyA->IsActive() && rigidbodyB && rigidbodyB->IsActive())
+				{
+					if (scriptA)
+					{
+						GameObject* gameObjectB = m_pGameWorld->GetGameObject(entityB);
+						scriptA->onCollisionEnterFunc(*gameObjectB);
+					}
+					if (scriptB)
+					{
+						GameObject* gameObjectA = m_pGameWorld->GetGameObject(entityA);
+						scriptB->onCollisionEnterFunc(*gameObjectA);
+					}
+				}
+			}
+		});
+	m_pPy3dWorld->SetEndContactCallback([this](void* a, void* b)
+		{
+			// 接触終了処理
+			if (a && b)
+			{
+				Entity entityA = *static_cast<Entity*>(a);
+				Entity entityB = *static_cast<Entity*>(b);
+
+				// CollisionEnter
+				ScriptComponent* scriptA = m_pECSManager->GetComponent<ScriptComponent>(entityA);
+				ScriptComponent* scriptB = m_pECSManager->GetComponent<ScriptComponent>(entityB);
+				Rigidbody3DComponent* rigidbodyA = m_pECSManager->GetComponent<Rigidbody3DComponent>(entityA);
+				Rigidbody3DComponent* rigidbodyB = m_pECSManager->GetComponent<Rigidbody3DComponent>(entityB);
+				if (rigidbodyA && rigidbodyA->IsActive() && rigidbodyB && rigidbodyB->IsActive())
+				{
+					if (scriptA)
+					{
+						GameObject* gameObjectB = m_pGameWorld->GetGameObject(entityB);
+						scriptA->onCollisionExitFunc(*gameObjectB);
+					}
+					if (scriptB)
+					{
+						GameObject* gameObjectA = m_pGameWorld->GetGameObject(entityA);
+						scriptB->onCollisionExitFunc(*gameObjectA);
+					}
+				}
+			}
+		});
+	m_pPy3dWorld->SetStayContactCallback([this](void* a, void* b)
+		{
+			// 接触中処理
+			if (a && b)
+			{
+				Entity entityA = *static_cast<Entity*>(a);
+				Entity entityB = *static_cast<Entity*>(b);
+
+				// CollisionEnter
+				ScriptComponent* scriptA = m_pECSManager->GetComponent<ScriptComponent>(entityA);
+				ScriptComponent* scriptB = m_pECSManager->GetComponent<ScriptComponent>(entityB);
+				Rigidbody3DComponent* rigidbodyA = m_pECSManager->GetComponent<Rigidbody3DComponent>(entityA);
+				Rigidbody3DComponent* rigidbodyB = m_pECSManager->GetComponent<Rigidbody3DComponent>(entityB);
+				if (rigidbodyA && rigidbodyA->IsActive() && rigidbodyB && rigidbodyB->IsActive())
+				{
+					if (scriptA)
+					{
+						GameObject* gameObjectB = m_pGameWorld->GetGameObject(entityB);
+						scriptA->onCollisionStayFunc(*gameObjectB);
+					}
+					if (scriptB)
+					{
+						GameObject* gameObjectA = m_pGameWorld->GetGameObject(entityA);
+						scriptB->onCollisionStayFunc(*gameObjectA);
+					}
+				}
+			}
+		});
 }

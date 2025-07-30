@@ -412,11 +412,11 @@ void MainMenu::SettingWindow()
 
     ImGui::Text("重力");
     ImGui::SameLine();
-    Vector2 gravity = m_EngineCommand->GetGameCore()->GetPhysicsWorld()->GetGravity();
-    if (ImGui::InputFloat2("##Gravity", &gravity.x))
+    Vector3 gravity = m_EngineCommand->GetGameCore()->GetPhysicsWorld3D()->GetGravity();
+    if (ImGui::InputFloat3("##Gravity", &gravity.x))
     {
 		// 変更されたら重力を設定
-		Vector3 gravityVector3(gravity.x, gravity.y, 0.0f);
+		Vector3 gravityVector3(gravity.x, gravity.y, gravity.z);
 		std::unique_ptr<SetGravityCommand> setGravity = std::make_unique<SetGravityCommand>(gravityVector3);
 		m_EngineCommand->ExecuteCommand(std::move(setGravity));
     }

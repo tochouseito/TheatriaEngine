@@ -7,6 +7,18 @@
 
 using namespace physics::d3;
 
+namespace std
+{
+	template <>
+	struct hash<std::pair<const btCollisionObject*, const btCollisionObject*>>
+	{
+		std::size_t operator()(const std::pair<const btCollisionObject*, const btCollisionObject*>& p) const noexcept
+		{
+			return reinterpret_cast<std::uintptr_t>(p.first) ^ (reinterpret_cast<std::uintptr_t>(p.second) << 1);
+		}
+	};
+}
+
 struct bulletWorld::Impl
 {
 	// Bulletのオブジェクト定義
@@ -15,6 +27,9 @@ struct bulletWorld::Impl
 	std::unique_ptr<btBroadphaseInterface> broadphase = nullptr;// ブロードフェーズ
 	std::unique_ptr<btSequentialImpulseConstraintSolver> solver = nullptr;// 制約ソルバー
 	std::unique_ptr<btDiscreteDynamicsWorld> world = nullptr;// 物理ワールド
+
+	std::unordered_set<std::pair<const btCollisionObject*, const btCollisionObject*>> currentContacts;
+	std::unordered_set<std::pair<const btCollisionObject*, const btCollisionObject*>> previousContacts;
 };
 
 physics::d3::bulletWorld::bulletWorld():
@@ -49,9 +64,22 @@ physics::d3::bulletWorld::~bulletWorld()
 	impl.reset();
 }
 
+// 重力の設定、取得
+Vector3 physics::d3::bulletWorld::GetGravity() const
+{
+	btVector3 gravity = impl->world->getGravity();
+	return Vector3(gravity.x(), gravity.y(), gravity.z());
+}
+
+void physics::d3::bulletWorld::SetGravity(const Vector3& gravity)
+{
+	impl->world->setGravity(btVector3(gravity.x, gravity.y, gravity.z));
+}
+
 void physics::d3::bulletWorld::Step(const float& deltaTime)
 {
 	impl->world->stepSimulation(deltaTime);
+	ProcessEvents();
 }
 
 Id3Body* physics::d3::bulletWorld::CreateBody(const Id3BodyDef& bodyDef)
@@ -73,6 +101,46 @@ void physics::d3::bulletWorld::DestroyBody(Id3Body* body)
 	std::erase_if(bodies, [body](const std::unique_ptr<Id3Body>& ptr) {
 		return ptr.get() == body;
 		});
+}
+
+void physics::d3::bulletWorld::ProcessEvents()
+{
+	using Pair = std::pair<const btCollisionObject*, const btCollisionObject*>;
+	impl->currentContacts.clear();
+
+	int numManifolds = impl->world->getDispatcher()->getNumManifolds();
+	for (int i = 0; i < numManifolds; ++i)
+	{
+		btPersistentManifold* manifold = impl->world->getDispatcher()->getManifoldByIndexInternal(i);
+		const btCollisionObject* a = static_cast<const btCollisionObject*>(manifold->getBody0());
+		const btCollisionObject* b = static_cast<const btCollisionObject*>(manifold->getBody1());
+
+		if (manifold->getNumContacts() > 0)
+		{
+			Pair pair = std::minmax(a, b);
+			impl->currentContacts.insert(pair);
+
+			if (!impl->previousContacts.contains(pair) && beginContactCallback)
+			{
+				beginContactCallback(a->getUserPointer(), b->getUserPointer());
+			}
+		}
+	}
+
+	for (const Pair& pair : impl->previousContacts)
+	{
+		if (!impl->currentContacts.contains(pair))
+		{
+			if (endContactCallback)
+				endContactCallback(pair.first->getUserPointer(), pair.second->getUserPointer());
+		}
+		else if (stayContactCallback)
+		{
+			stayContactCallback(pair.first->getUserPointer(), pair.second->getUserPointer());
+		}
+	}
+
+	impl->previousContacts = impl->currentContacts;
 }
 
 Id3World* physics::d3::CreateWorld(d3Backend backend)

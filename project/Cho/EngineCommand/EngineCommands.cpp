@@ -271,13 +271,16 @@ bool AddUIObjectCommand::Undo(EngineCommand* edit)
 
 bool SetGravityCommand::Execute(EngineCommand* edit)
 {
-	physics::d2::Id2World* world = edit->m_GameCore->GetPhysicsWorld();
+	physics::d2::Id2World* world = edit->m_GameCore->GetPhysicsWorld2D();
+	physics::d3::Id3World* world3D = edit->m_GameCore->GetPhysicsWorld3D();
 	if (!world) { return false; }
+	if (!world3D) { return false; }
 	// 重力を取得
-	Vector2 gravity = world->GetGravity();
-	m_PreGravity = Vector3(gravity.x, gravity.y, 0.0f);
+	Vector3 gravity = world3D->GetGravity();
+	m_PreGravity = Vector3(gravity.x, gravity.y,gravity.z);
 	// 重力を設定
 	world->SetGravity(Vector2(m_Gravity.x, m_Gravity.y));
+	world3D->SetGravity(m_Gravity);
 	return true;
 }
 
