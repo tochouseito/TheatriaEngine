@@ -400,13 +400,18 @@ void Inspector::Rigidbody3DComponentView(GameObject* object)
 	if (!rigidbody) { return; }
 	if (ImGui::TreeNode("Rigidbody3D"))
 	{
-		/*ImGui::Checkbox("Active", &rigidbody->isActive);
-		ImGui::DragFloat("Mass", &rigidbody->mass, 0.1f, 0.0f, 100.0f);
-		ImGui::DragFloat("Gravity Scale", &rigidbody->gravityScale, 0.1f, 0.0f, 100.0f);
+		// Active
+		bool active = rigidbody->IsActive();
+		ImGui::Checkbox("Active", &active);
+		rigidbody->SetActive(active);
+		// BodyParameters
+		// 質量
+		ImGui::DragFloat("質量", &rigidbody->mass, 0.1f, 0.0f, 100.0f);
+		//ImGui::DragFloat("Gravity Scale", &rigidbody->gravityScale, 0.1f, 0.0f, 100.0f);
 		ImGui::Checkbox("Is Kinematic", &rigidbody->isKinematic);
-		ImGui::Checkbox("Fixed Rotation", &rigidbody->fixedRotation);
-		ImGui::DragFloat3("Half Size", &rigidbody->halfsize.x, 0.1f, 0.01f, 100.0f);
-		ImGui::DragFloat3("Velocity", &rigidbody->velocity.x, 0.1f, -100.0f, 100.0f);*/
+		ImGui::Checkbox("Is Sensor", &rigidbody->isSensor);
+		ImGui::DragFloat3("Half Size", &rigidbody->halfsize.x, 0.1f, 0.0f, 100.0f);
+		ImGui::DragFloat3("Velocity", &rigidbody->velocity.x, 0.1f, -100.0f, 100.0f);
 		if (ImGui::Button("Remove Rigidbody3D Component"))
 		{
 			m_EngineCommand->GetGameCore()->GetECSManager()->RemoveComponent<Rigidbody3DComponent>(object->GetHandle().entity);

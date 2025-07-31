@@ -43,6 +43,8 @@ namespace physics::d3
 		virtual void SetActive(bool active) = 0;
 		// 運動剛体に設定
 		virtual void SetKinematic(bool isKinematic) = 0;
+		// センサーオブジェクト（すり抜け）設定
+		virtual void SetSensor(bool) {}
 	};
 
 	class bulletBody : public Id3Body
@@ -64,6 +66,7 @@ namespace physics::d3
 		bool IsActive() const override; // 有効かどうかを取得
 		void SetActive(bool active) override; // 有効化・無効化
 		void SetKinematic(bool isKinematic) override; // 運動剛体に設定（デフォルトは何もしない）
+		void SetSensor(bool isSensor) override; // センサーオブジェクト（すり抜け）設定
 	private:
 		struct Impl; // 実装の詳細を隠蔽するための前方宣言
 		std::unique_ptr<Impl> impl; // Bulletのボディデータを保持

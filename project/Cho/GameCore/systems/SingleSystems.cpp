@@ -1309,6 +1309,8 @@ void Rigidbody3DSystem::InitializeComponent(Entity e, TransformComponent& transf
 
 	rb.runtimeBody = m_World->CreateBody(bodyDef);
 
+	rb.runtimeBody->SetKinematic(rb.isKinematic);
+
 	// Transformと同期（optional）
 	transform.position.x = rb.runtimeBody->GetPosition().x;
 	transform.position.y = rb.runtimeBody->GetPosition().y;
@@ -1336,6 +1338,9 @@ void Rigidbody3DSystem::UpdateComponent(Entity e, TransformComponent& transform,
 		rb.runtimeBody = m_World->CreateBody(bodyDef);
 	}
 
+	rb.runtimeBody->SetKinematic(rb.isKinematic);
+	rb.runtimeBody->SetSensor(rb.isSensor);
+
 	if (rb.requestedPosition)
 	{
 		rb.runtimeBody->SetTransform(rb.requestedPosition.value(), rb.runtimeBody->GetRotation());
@@ -1345,10 +1350,12 @@ void Rigidbody3DSystem::UpdateComponent(Entity e, TransformComponent& transform,
 	const Vector3& pos = rb.runtimeBody->GetPosition();
 	transform.position.x = pos.x;
 	transform.position.y = pos.y;
+	transform.position.z = pos.z;
 
 	Vector3 velocity = rb.runtimeBody->GetLinearVelocity();
 	rb.velocity.x = velocity.x;
 	rb.velocity.y = velocity.y;
+	rb.velocity.z = velocity.z;
 
 	rb.quaternion = rb.runtimeBody->GetRotation();
 

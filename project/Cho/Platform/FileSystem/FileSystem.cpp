@@ -1011,6 +1011,11 @@ json cho::Serialization::ToJson(const Rigidbody3DComponent& rb)
 	j["halfsize"] = { rb.halfsize.x, rb.halfsize.y, rb.halfsize.z };
 	j["friction"] = rb.friction;
 	j["restitution"] = rb.restitution;
+	j["velocity"] = { rb.velocity.x, rb.velocity.y, rb.velocity.z };
+	j["isKinematic"] = rb.isKinematic;
+	j["mass"] = rb.mass;
+	j["isSensor"] = rb.isSensor;
+	j["quaternion"] = { rb.quaternion.x, rb.quaternion.y, rb.quaternion.z, rb.quaternion.w };
 	return j;
 }
 
@@ -1860,6 +1865,11 @@ void cho::Deserialization::FromJson(const json& j, Rigidbody3DComponent& rb)
 	rb.friction = j.value("friction", 0.5f);
 	rb.restitution = j.value("restitution", 0.0f);
 	rb.halfsize = { j["halfsize"][0], j["halfsize"][1], j["halfsize"][2] };
+	rb.isKinematic = j.value("isKinematic", false);
+	rb.mass = j.value("mass", 1.0f);
+	rb.isSensor = j.value("isSensor", false);
+	rb.velocity = { j["velocity"][0], j["velocity"][1], j["velocity"][2] };
+	rb.quaternion = { j["quaternion"][0], j["quaternion"][1], j["quaternion"][2], j["quaternion"][3] };
 }
 
 void cho::Deserialization::FromJson(const json& j, EmitterComponent& e)

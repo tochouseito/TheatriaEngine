@@ -49,7 +49,7 @@ physics::d3::bulletWorld::bulletWorld():
 		impl->solver.get(),
 		impl->collisionConfig.get()
 	);
-	impl->world->setGravity(btVector3(0, -9.8f, 0)); // 重力を設定
+	impl->world->setGravity(btVector3(0, 0.0f, 0)); // 重力を設定
 }
 
 physics::d3::bulletWorld::~bulletWorld()

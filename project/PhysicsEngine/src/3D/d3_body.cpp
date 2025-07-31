@@ -113,6 +113,19 @@ void physics::d3::bulletBody::SetKinematic(bool isKinematic)
 	}
 }
 
+void physics::d3::bulletBody::SetSensor(bool isSensor)
+{
+	// センサーオブジェクトの設定
+	if (isSensor)
+	{
+		impl->rigidBody->setCollisionFlags(impl->rigidBody->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
+	}
+	else
+	{
+		impl->rigidBody->setCollisionFlags(impl->rigidBody->getCollisionFlags() & ~btCollisionObject::CF_NO_CONTACT_RESPONSE);
+	}
+}
+
 void physics::d3::chophysicsBody::Create(const Id3BodyDef&)
 {
 }

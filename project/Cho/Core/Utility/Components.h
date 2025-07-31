@@ -479,9 +479,10 @@ struct Rigidbody3DComponent : public IComponentTag
 	//bool isActive = true; // 有効フラグ
 	//float mass = 1.0f;
 	//float gravityScale = 1.0f;
-	//bool isKinematic = false;
+	bool isKinematic = false;
 	//bool fixedRotation = false;
 	//bool isCollisionStay = false; // 衝突中フラグ
+	bool isSensor = false; // センサーかどうか
 	float friction = 0.3f; // 摩擦係数
 	float restitution = 0.0f; // 反発係数
 	float mass = 1.0f; // 質量
@@ -496,14 +497,15 @@ struct Rigidbody3DComponent : public IComponentTag
 	Rigidbody3DComponent& operator=(const Rigidbody3DComponent& other)
 	{
 		if (this == &other) return *this;
-		//isActive = other.isActive;
-		//mass = other.mass;
-		//gravityScale = other.gravityScale;
-		//isKinematic = other.isKinematic;
-		//fixedRotation = other.fixedRotation;
 		friction = other.friction;
 		restitution = other.restitution;
 		halfsize = other.halfsize;
+		preHalfsize = other.preHalfsize;
+		isKinematic = other.isKinematic;
+		mass = other.mass;
+		isSensor = other.isSensor;
+		velocity = other.velocity;
+		quaternion = other.quaternion;
 		return *this;
 	}
 	// ムーブ代入を明示的に生成
@@ -511,14 +513,15 @@ struct Rigidbody3DComponent : public IComponentTag
 	// 初期化
 	void Initialize()
 	{
-		//isActive = true;
-		//mass = 1.0f;
-		//gravityScale = 1.0f;
-		//isKinematic = false;
-		//fixedRotation = false;
 		friction = 0.3f;
 		restitution = 0.0f;
 		halfsize = { 0.5f, 0.5f, 0.5f };
+		preHalfsize = { 0.5f, 0.5f, 0.5f };
+		isKinematic = false;
+		mass = 1.0f;
+		isSensor = false;
+		velocity = { 0.0f, 0.0f, 0.0f }; // 速度
+		quaternion = { 0.0f, 0.0f, 0.0f, 1.0f }; // 回転
 		runtimeBody = nullptr; // 物理エンジンのボディ
 		otherEntity = std::nullopt;
 		selfEntity = std::nullopt;
