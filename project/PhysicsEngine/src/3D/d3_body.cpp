@@ -26,7 +26,7 @@ void physics::d3::bulletBody::Create(const Id3BodyDef& bodyDef)
 	transform.setIdentity();
 	transform.setOrigin(btVector3(bodyDef.position.x, bodyDef.position.y, bodyDef.position.z));
 	impl->motionState = std::make_unique<btDefaultMotionState>(transform);
-	btScalar mass = 1.0f; // 質量を設定
+	btScalar mass = bodyDef.mass; // 質量を設定
 	btVector3 inertia(0, 0, 0);
 	if(mass != 0.0f)
 	{
@@ -60,6 +60,15 @@ Quaternion physics::d3::bulletBody::GetRotation() const
 	return Quaternion(transform.getRotation().x(), transform.getRotation().y(), transform.getRotation().z(), transform.getRotation().w());
 }
 
+void physics::d3::bulletBody::SetTransform(const Vector3& position, const Quaternion& rotation)
+{
+	btTransform transform;
+	transform.setOrigin(btVector3(position.x, position.y, position.z));
+	transform.setRotation(btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w));
+	impl->rigidBody->getMotionState()->setWorldTransform(transform);
+	impl->rigidBody->setWorldTransform(transform); // 剛体のワールド変換を更新
+}
+
 Vector3 physics::d3::bulletBody::GetLinearVelocity() const
 {
 	btVector3 linVel = impl->rigidBody->getLinearVelocity();
@@ -89,6 +98,20 @@ bool physics::d3::bulletBody::IsActive() const { return impl->rigidBody->isActiv
 
 // 有効かどうかを取得
 void physics::d3::bulletBody::SetActive(bool active) { impl->rigidBody->activate(active); }
+
+void physics::d3::bulletBody::SetKinematic(bool isKinematic)
+{
+	if(isKinematic)
+	{
+		impl->rigidBody->setCollisionFlags(impl->rigidBody->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+		impl->rigidBody->setActivationState(DISABLE_DEACTIVATION); // 非アクティブ化を無効にする
+	}
+	else
+	{
+		impl->rigidBody->setCollisionFlags(impl->rigidBody->getCollisionFlags() & ~btCollisionObject::CF_KINEMATIC_OBJECT);
+		impl->rigidBody->setActivationState(ACTIVE_TAG); // アクティブ化状態に戻す
+	}
+}
 
 void physics::d3::chophysicsBody::Create(const Id3BodyDef&)
 {

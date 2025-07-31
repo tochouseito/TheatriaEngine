@@ -484,8 +484,12 @@ struct Rigidbody3DComponent : public IComponentTag
 	//bool isCollisionStay = false; // 衝突中フラグ
 	float friction = 0.3f; // 摩擦係数
 	float restitution = 0.0f; // 反発係数
+	float mass = 1.0f; // 質量
 	Vector3 halfsize = { 0.5f, 0.5f, 0.5f }; // 半径（ボックス形状の場合）
+	Vector3 preHalfsize = { 0.5f,0.5f,0.5f };
 	Vector3 velocity = { 0.0f, 0.0f, 0.0f }; // 速度
+	Quaternion quaternion = { 0.0f, 0.0f, 0.0f, 1.0f }; // 回転
+	std::optional<Vector3> requestedPosition = std::nullopt; // 位置リクエスト
 	physics::d3::Id3Body* runtimeBody = nullptr; // 物理エンジンのボディ
 	std::optional<Entity> otherEntity = std::nullopt; // 衝突したオブジェクトID
 	std::optional<Entity> selfEntity = std::nullopt; // 自分のオブジェクトID

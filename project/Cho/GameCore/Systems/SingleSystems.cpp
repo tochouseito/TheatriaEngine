@@ -92,11 +92,18 @@ void TransformSystem::UpdateComponent(Entity e, TransformComponent& transform)
 {
 	// 度数からラジアンに変換
 	Vector3 radians = chomath::DegreesToRadians(transform.degrees);
-
+	Rigidbody3DComponent* rb3d = m_pEcs->GetComponent<Rigidbody3DComponent>(e);
 	if (m_isQuaternion)
 	{
 		// クォータニオンを使用する場合
-		transform.quaternion = chomath::MakeQuaternionRotation(radians, transform.preRot,transform.quaternion);
+		if (rb3d&&rb3d->runtimeBody)
+		{
+			transform.quaternion = chomath::MakeQuaternionRotation(radians, transform.preRot, rb3d->quaternion);
+		}
+		else
+		{
+			transform.quaternion = chomath::MakeQuaternionRotation(radians, transform.preRot, transform.quaternion);
+		}
 	}
 	else
 	{
@@ -107,7 +114,8 @@ void TransformSystem::UpdateComponent(Entity e, TransformComponent& transform)
 	// スケール行列
 	transform.matScale = chomath::MakeScaleMatrix(transform.scale);
 	// 回転行列
-	Matrix4 matRotation = chomath::MakeRotateMatrix(transform.quaternion);
+	Matrix4 matRotation = Matrix4::Identity();
+	matRotation = chomath::MakeRotateMatrix(transform.quaternion);
 	transform.matRotation = matRotation;
 	if (transform.isBillboard)
 	{
@@ -137,7 +145,6 @@ void TransformSystem::UpdateComponent(Entity e, TransformComponent& transform)
 	{
 		rb->runtimeBody->SetLinearVelocity(Vector2(rb->velocity.x, rb->velocity.y));
 	}
-	Rigidbody3DComponent* rb3d = m_pEcs->GetComponent<Rigidbody3DComponent>(e);
 	if(rb3d && rb3d->runtimeBody)
 	{
 		rb3d->runtimeBody->SetLinearVelocity(Vector3(rb3d->velocity.x, rb3d->velocity.y, rb3d->velocity.z));
@@ -1312,18 +1319,29 @@ void Rigidbody3DSystem::UpdateComponent(Entity e, TransformComponent& transform,
 	e;
 	if (!rb.runtimeBody) return;
 
-	/*if (rb.requestedPosition)
+	// サイズが変更されていたらボディ再作成
+	if (rb.halfsize != rb.preHalfsize)
 	{
-		if (rb.fixedRotation)
-		{
-			rb.runtimeBody->SetTransform(*rb.requestedPosition, rb.runtimeBody->GetAngle());
-		}
-		else
-		{
-			rb.runtimeBody->SetTransform(*rb.requestedPosition, chomath::DegreesToRadians(transform.degrees).z);
-		}
+		// ボディを削除
+		m_World->DestroyBody(rb.runtimeBody);
+		rb.runtimeBody = nullptr;
+		// 新しいボディを作成
+		physics::d3::Id3BodyDef bodyDef;
+		bodyDef.position = Vector3(transform.position.x, transform.position.y, transform.position.z);
+		bodyDef.userData = static_cast<void*>(&rb.selfEntity.value());
+		bodyDef.friction = rb.friction;
+		bodyDef.restitution = rb.restitution;
+		bodyDef.mass = rb.mass;
+		bodyDef.halfsize = rb.halfsize;
+		rb.runtimeBody = m_World->CreateBody(bodyDef);
+	}
+
+	if (rb.requestedPosition)
+	{
+		rb.runtimeBody->SetTransform(rb.requestedPosition.value(), rb.runtimeBody->GetRotation());
 		rb.requestedPosition.reset();
-	}*/
+	}
+	
 	const Vector3& pos = rb.runtimeBody->GetPosition();
 	transform.position.x = pos.x;
 	transform.position.y = pos.y;
@@ -1332,17 +1350,9 @@ void Rigidbody3DSystem::UpdateComponent(Entity e, TransformComponent& transform,
 	rb.velocity.x = velocity.x;
 	rb.velocity.y = velocity.y;
 
-	//Vector3 radians = {};
-	//if (!rb.fixedRotation)
-	//{
-	//	radians.z = rb.runtimeBody->GetAngle(); // radians
-	//}
-	//else
-	//{
-	//	radians.z = chomath::DegreesToRadians(transform.degrees).z;
-	//}
-	//Vector3 degrees = chomath::RadiansToDegrees(radians);
-	//transform.degrees.z = degrees.z;
+	rb.quaternion = rb.runtimeBody->GetRotation();
+
+	rb.preHalfsize = rb.halfsize;
 }
 
 void Rigidbody3DSystem::Reset(Rigidbody3DComponent& rb)
