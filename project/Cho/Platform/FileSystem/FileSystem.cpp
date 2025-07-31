@@ -1868,8 +1868,22 @@ void cho::Deserialization::FromJson(const json& j, Rigidbody3DComponent& rb)
 	rb.isKinematic = j.value("isKinematic", false);
 	rb.mass = j.value("mass", 1.0f);
 	rb.isSensor = j.value("isSensor", false);
-	rb.velocity = { j["velocity"][0], j["velocity"][1], j["velocity"][2] };
-	rb.quaternion = { j["quaternion"][0], j["quaternion"][1], j["quaternion"][2], j["quaternion"][3] };
+    if (j.contains("velocity") && j["velocity"].is_array() && j["velocity"].size() == 3)
+    {
+        rb.velocity = { j["velocity"][0], j["velocity"][1], j["velocity"][2] };
+    }
+    else
+    {
+        rb.velocity = { 0.0f, 0.0f, 0.0f }; // デフォルト
+    }
+    if(j.contains("quaternion") && j["quaternion"].is_array() && j["quaternion"].size() == 4)
+    {
+        rb.quaternion = { j["quaternion"][0], j["quaternion"][1], j["quaternion"][2], j["quaternion"][3] };
+    }
+    else
+    {
+        rb.quaternion = { 0.0f, 0.0f, 0.0f, 1.0f }; // デフォルト
+	}
 }
 
 void cho::Deserialization::FromJson(const json& j, EmitterComponent& e)

@@ -16,6 +16,7 @@ void ImGuiManager::Initialize(ID3D12Device8* device, ResourceManager* resourceMa
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Dockingを有効化
+	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // マルチビューポートを有効化
 	// プラットフォームとレンダラーのバックエンドを設定する
 	ImGui_ImplWin32_Init(WinApp::GetHWND());
 
@@ -94,8 +95,8 @@ void ImGuiManager::End()
 {
 	// 描画前準備
 	ImGui::Render();
-	//ImGui::UpdatePlatformWindows();
-	//ImGui::RenderPlatformWindowsDefault();
+	ImGui::UpdatePlatformWindows();
+	ImGui::RenderPlatformWindowsDefault();
 }
 
 void ImGuiManager::Draw(ID3D12GraphicsCommandList6* commandList)

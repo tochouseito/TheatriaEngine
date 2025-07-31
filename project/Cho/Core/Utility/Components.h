@@ -476,12 +476,8 @@ struct Rigidbody3DComponent : public IComponentTag
 	Rigidbody3DComponent(const Rigidbody3DComponent&) = default;
 	// ムーブコンストラクタ（移動）
 	Rigidbody3DComponent(Rigidbody3DComponent&&) noexcept = default;
-	//bool isActive = true; // 有効フラグ
-	//float mass = 1.0f;
 	//float gravityScale = 1.0f;
 	bool isKinematic = false;
-	//bool fixedRotation = false;
-	//bool isCollisionStay = false; // 衝突中フラグ
 	bool isSensor = false; // センサーかどうか
 	float friction = 0.3f; // 摩擦係数
 	float restitution = 0.0f; // 反発係数
