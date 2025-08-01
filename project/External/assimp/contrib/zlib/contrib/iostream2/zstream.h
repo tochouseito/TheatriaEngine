@@ -24,7 +24,7 @@
  * $Id: zstream.h 1.1 1997-06-25 12:00:56+02 tyge Exp tyge $
  */
 
-#include <strstream.h>
+#include <sstream>
 #include <string.h>
 #include <stdio.h>
 #include "zlib.h"
