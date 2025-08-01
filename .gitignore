@@ -18,6 +18,8 @@ mono_crash.*
 
 # Build results
 generated/
+x64/
+x86/
 intermediate/
 logs/
 runtime/

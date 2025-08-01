@@ -16,6 +16,7 @@
 #include "Editor/EffectView/EffectView.h"
 #include "Editor/EffectHierarchy/EffectHierarchy.h"
 #include "Editor/Manipulate/Manipulate.h"
+#include "Editor/MaterialEditor/MaterialEditor.h"
 
 #include "GameCore/GameScene/GameScene.h"
 
@@ -79,6 +80,7 @@ private:
 	std::unique_ptr<EffectView> m_EffectView = nullptr;
 	std::unique_ptr<EffectHierarchy> m_EffectHierarchy = nullptr;
 	std::unique_ptr<Manipulate> m_Manipulate = nullptr;
+	std::unique_ptr<MaterialEditor> m_MaterialEditor = nullptr;
 
 	// 選択中のオブジェクトの名前
 	std::wstring m_SelectedGameObjectName = L"";

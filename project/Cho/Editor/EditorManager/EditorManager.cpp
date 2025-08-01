@@ -19,6 +19,7 @@ EditorManager::EditorManager(EngineCommand* engineCommand, InputManager* inputMa
 	m_EffectEditor = std::make_unique<EffectEditor>(this);
 	m_EffectView = std::make_unique<EffectView>(this, m_DebugCamera.get());
 	m_EffectHierarchy = std::make_unique<EffectHierarchy>(this);
+	m_MaterialEditor = std::make_unique<MaterialEditor>(this);
 	engineCommand->SetEditorManager(this);
 }
 
@@ -50,6 +51,8 @@ void EditorManager::Initialize()
 	m_EffectEditor->Initialize();
 	// EffectHierarchy
 	m_EffectHierarchy->Initialize();
+	// MaterialEditor
+	m_MaterialEditor->Initialize();
 }
 
 void EditorManager::Update()
@@ -71,6 +74,8 @@ void EditorManager::Update()
 		m_Hierarchy->Update();
 		// Inspector
 		m_Inspector->Update();
+		// MaterialEditor
+		m_MaterialEditor->Update();
 		break;
 	case EffectEdit:
 		// EffectView

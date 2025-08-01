@@ -24,6 +24,45 @@
     <ClInclude Include="ImGuizmo\ImGuizmo.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="imgui-node-editor\external\DXSDK\include\D3DX11.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui-node-editor\external\DXSDK\include\D3DX11async.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui-node-editor\external\DXSDK\include\D3DX11core.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui-node-editor\external\DXSDK\include\D3DX11tex.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui-node-editor\external\DXSDK\include\dxerr.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui-node-editor\external\ScopeGuard\ScopeGuard.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui-node-editor\external\stb_image\stb_image.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui-node-editor\crude_json.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui-node-editor\imgui_bezier_math.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui-node-editor\imgui_canvas.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui-node-editor\imgui_extra_math.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui-node-editor\imgui_node_editor.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui-node-editor\imgui_node_editor_internal.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="imgui_Extensions.cpp">
@@ -35,5 +74,34 @@
     <ClCompile Include="ImGuizmo\ImGuizmo.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="imgui-node-editor\external\DXSDK\src\dxerr.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui-node-editor\crude_json.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui-node-editor\imgui_canvas.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui-node-editor\imgui_node_editor.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui-node-editor\imgui_node_editor_api.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui-node-editor\examples\blueprints-example\blueprints-example.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="imgui-node-editor\imgui_bezier_math.inl">
+      <Filter>ヘッダー ファイル</Filter>
+    </None>
+    <None Include="imgui-node-editor\imgui_extra_math.inl">
+      <Filter>ヘッダー ファイル</Filter>
+    </None>
+    <None Include="imgui-node-editor\imgui_node_editor_internal.inl">
+      <Filter>ヘッダー ファイル</Filter>
+    </None>
   </ItemGroup>
 </Project>
