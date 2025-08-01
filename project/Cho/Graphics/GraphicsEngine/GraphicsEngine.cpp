@@ -700,6 +700,8 @@ void GraphicsEngine::DrawForward(ResourceManager& resourceManager, GameCore& gam
 			m_PipelineManager->GetIntegratePSO().indirectArgsBuffer->UpdateData(indirectArgs);*/
 			// 配列テクスチャのためヒープをセット
 			context->SetGraphicsRootDescriptorTable(10, resourceManager.GetSUVDHeap()->GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
+			// 配列CubeTexture
+			context->SetGraphicsRootDescriptorTable(11, resourceManager.GetSUVDHeap()->GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
 			// インスタンス数を取得
 			UINT numInstance = static_cast<UINT>(modelData.useTransformList.size());
 			// DrawCall

@@ -9,4 +9,6 @@ struct Material
     uint enableTexture;
     uint textureID;
     uint uvFlipY;
+    uint cubeTextureID;
+    float cubeUVScale;
 };

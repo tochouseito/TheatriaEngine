@@ -562,6 +562,7 @@ void MaterialSystem::UpdateComponent(Entity e, MaterialComponent& material)
 	BUFFER_DATA_MATERIAL data = {};
 	data.color = material.color;
 	data.enableLighting = material.enableLighting;
+	data.cubeUVScale = material.cubeUVScale;
 	if (material.enableTexture)
 	{
 		data.enableTexture = true;
@@ -579,6 +580,21 @@ void MaterialSystem::UpdateComponent(Entity e, MaterialComponent& material)
 		else
 		{
 			data.textureId = 0;
+		}
+		if(!material.cubeTextureName.empty() && m_pResourceManager->GetTextureManager()->IsTextureExist(material.cubeTextureName))
+		{
+			if (material.cubeTextureID.has_value())
+			{
+				data.cubeTextureId = material.cubeTextureID.value();
+			}
+			else
+			{
+				data.cubeTextureId = m_pResourceManager->GetTextureManager()->GetTextureID(material.cubeTextureName);
+			}
+		}
+		else
+		{
+			data.cubeTextureId = 0;
 		}
 	}
 	else
