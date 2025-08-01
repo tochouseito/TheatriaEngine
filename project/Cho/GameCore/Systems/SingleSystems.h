@@ -3,6 +3,8 @@
 #include "SDK/DirectX/DirectX12/GpuBuffer/GpuBuffer.h"
 #include "Core/Utility/CompBufferData.h"
 #include "Core/Utility/Components.h"
+#include <2D/d2_common.h>
+#include <3D/d3_common.h>
 
 // 前方宣言
 class ResourceManager;
@@ -184,23 +186,14 @@ private:
 	void StepSimulation();
 	void UpdateComponent([[maybe_unused]] Entity e, TransformComponent& transform, Rigidbody2DComponent& rb);
 	void Reset(Rigidbody2DComponent& rb);
-	template<typename ColliderT>
-	void ResetCollider(Entity e)
-	{
-		ColliderT* col = m_pEcs->GetComponent<ColliderT>(e);
-		if (col && col->runtimeFixture)
-		{
-			col->runtimeFixture = nullptr;
-		}
-	}
 	void FinalizeComponent([[maybe_unused]] Entity e, TransformComponent& transform, Rigidbody2DComponent& rb);
 
-	void SetPhysicsWorld(b2World* world)
+	void SetPhysicsWorld(physics::d2::Id2World* world)
 	{
 		m_World = world;
 	}
 
-	b2World* m_World = nullptr;
+	physics::d2::Id2World* m_World = nullptr;
 };
 
 class CollisionSystem : public ECSManager::System<ScriptComponent, Rigidbody2DComponent>
@@ -256,10 +249,51 @@ public:
 	}
 	~Collider2DSystem() = default;
 private:
-	float ComputePolygonArea(const b2PolygonShape* shape);
 	void InitializeComponent([[maybe_unused]] Entity e, TransformComponent& transform, Rigidbody2DComponent& rb, BoxCollider2DComponent& box);
 	void UpdateComponent([[maybe_unused]] Entity e, [[maybe_unused]] TransformComponent& transform, Rigidbody2DComponent& rb, BoxCollider2DComponent& box);
 	void FinalizeComponent([[maybe_unused]] Entity e, [[maybe_unused]] TransformComponent& transform, [[maybe_unused]] Rigidbody2DComponent& rb, [[maybe_unused]] BoxCollider2DComponent& box);
+};
+
+class Rigidbody3DSystem : public ECSManager::System<TransformComponent, Rigidbody3DComponent>
+{
+	friend class GameCore;
+public:
+	Rigidbody3DSystem():
+		ECSManager::System<TransformComponent, Rigidbody3DComponent>(
+			[this](Entity e, TransformComponent& transform, Rigidbody3DComponent& rb)
+			{
+				UpdateComponent(e, transform, rb);
+			},
+			[this](Entity e, TransformComponent& transform, Rigidbody3DComponent& rb)
+			{
+				InitializeComponent(e, transform, rb);
+			},
+			[this](Entity e, TransformComponent& transform, Rigidbody3DComponent& rb)
+			{
+				FinalizeComponent(e, transform, rb);
+			})
+	{
+	}
+	~Rigidbody3DSystem() = default;
+	void Update() override
+	{
+		// Step は一回だけ呼ぶ（エンティティループより前）
+		StepSimulation();
+
+		// いつもの処理
+		ECSManager::System<TransformComponent, Rigidbody3DComponent>::Update();
+	}
+private:
+	void InitializeComponent([[maybe_unused]] Entity e, TransformComponent& transform, Rigidbody3DComponent& rb);
+	void UpdateComponent([[maybe_unused]] Entity e, TransformComponent& transform, Rigidbody3DComponent& rb);
+	void Reset(Rigidbody3DComponent& rb);
+	void FinalizeComponent([[maybe_unused]] Entity e, TransformComponent& transform, Rigidbody3DComponent& rb);
+	void StepSimulation();
+	void SetPhysicsWorld(physics::d3::Id3World* world)
+	{
+		m_World = world;
+	}
+	physics::d3::Id3World* m_World = nullptr;
 };
 
 class MaterialSystem : public ECSManager::System<MaterialComponent>

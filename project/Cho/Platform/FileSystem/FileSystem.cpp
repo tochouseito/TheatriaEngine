@@ -260,6 +260,7 @@ bool cho::FileSystem::SaveGameSettings(const std::wstring& projectName, const ch
     j["frameRate"] = settings.frameRate;
     j["fixedDeltaTime"] = settings.fixedDeltaTime;
     j["debugMode"] = settings.debugMode;
+	j["skyTexName"] = std::filesystem::path(settings.skyTexName).string();
 
     try
     {
@@ -297,6 +298,7 @@ bool cho::FileSystem::LoadGameSettings(const std::wstring& filePath)
         settings.frameRate = j.value("frameRate", 60);
         settings.fixedDeltaTime = j.value("fixedDeltaTime", 1.0f / 60.0f);
         settings.debugMode = j.value("debugMode", false);
+		settings.skyTexName = std::filesystem::path(j.value("skyTexName", "")).wstring();
 		cho::FileSystem::g_GameSettings = settings;
 
         return true;
@@ -408,6 +410,14 @@ bool cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
                 comps["BoxCollider2D"] = cho::Serialization::ToJson(*bc);
             }
         }
+		// Rigidbody3DComponentの保存
+        if(IsComponentAllowedAtRuntime<Rigidbody3DComponent>(prefab.GetType()))
+        {
+            if (const auto* rb3d = prefab.GetComponentPtr<Rigidbody3DComponent>())
+            {
+                comps["Rigidbody3D"] = cho::Serialization::ToJson(*rb3d);
+            }
+		}
         // CameraComponentの保存
         if (IsComponentAllowedAtRuntime<CameraComponent>(prefab.GetType()))
         {
@@ -618,11 +628,9 @@ bool cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
                     r.isKinematic = jr.value("isKinematic", false);
                     r.gravityScale = jr.value("gravityScale", 1.0f);
                     r.mass = jr.value("mass", 1.0f);
-                    r.bodyType = static_cast<b2BodyType>(jr.value("bodyType", 2)); // default: b2_dynamicBody
+                    r.bodyType = static_cast<physics::d2::Id2BodyType>(jr.value("bodyType", 2)); // default: b2_dynamicBody
                     r.fixedRotation = jr.value("fixedRotation", false);
 					r.isCollisionStay = false;
-					r.runtimeBody = nullptr;
-					r.world = nullptr;
 					r.otherEntity = std::nullopt;
 
 					// Rigidbody2DComponentの保存
@@ -646,6 +654,17 @@ bool cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
 					// BoxCollider2DComponentの保存
 					prefab.AddComponent<BoxCollider2DComponent>(b);
                 }
+
+				// Rigidbody3D
+                if (comps.contains("Rigidbody3D"))
+                {
+                    Rigidbody3DComponent r{};
+					auto& jr = comps["Rigidbody3D"];
+					// Rigidbody3DComponentの読み込み
+					Deserialization::FromJson(jr, r);
+					// Rigidbody3DComponentの保存
+                    prefab.AddComponent<Rigidbody3DComponent>(r);
+				}
 
                 // Emitter
                 if (comps.contains("Emitter"))
@@ -986,6 +1005,20 @@ json cho::Serialization::ToJson(const BoxCollider2DComponent& bc)
 	return j;
 }
 
+json cho::Serialization::ToJson(const Rigidbody3DComponent& rb)
+{
+    json j;
+	j["halfsize"] = { rb.halfsize.x, rb.halfsize.y, rb.halfsize.z };
+	j["friction"] = rb.friction;
+	j["restitution"] = rb.restitution;
+	j["velocity"] = { rb.velocity.x, rb.velocity.y, rb.velocity.z };
+	j["isKinematic"] = rb.isKinematic;
+	j["mass"] = rb.mass;
+	j["isSensor"] = rb.isSensor;
+	j["quaternion"] = { rb.quaternion.x, rb.quaternion.y, rb.quaternion.z, rb.quaternion.w };
+	return j;
+}
+
 json cho::Serialization::ToJson(const EmitterComponent& e)
 {
     json j;
@@ -1155,6 +1188,9 @@ void cho::FileSystem::SaveProject(EditorManager* editorManager, SceneManager* sc
     // セーブ
 	std::filesystem::path projectPath = std::filesystem::path(L"GameProjects") / m_sProjectName;
 	// GameSettingsFile
+    // Skyboxtexの保存
+    std::wstring skyTexName = editorManager->GetEngineCommand()->GetResourceManager()->GetSkyboxTextureName();
+    g_GameSettings.skyTexName = skyTexName;
     cho::FileSystem::SaveGameSettings(projectPath, g_GameSettings);
     // SceneFile
 	// 編集されたシーンを保存
@@ -1180,6 +1216,7 @@ bool cho::FileSystem::LoadProjectFolder(const std::wstring& projectName, EngineC
     // プロジェクトファイル類を読み込み
     // 全ファイル走査（サブディレクトリ含む）
     ScanFolder(projectPath,engineCommand);
+    engineCommand->GetResourceManager()->SetSkyboxTextureName(g_GameSettings.skyTexName);
 	// 最初のシーンをロード
     engineCommand->GetEditorManager()->ChangeEditingScene(g_GameSettings.startScene);
     return true;
@@ -1299,7 +1336,9 @@ void cho::FileSystem::ScriptProject::UpdateVcxproj()
 	// スクリプトファイルのパス
     fs::path includeBase = fs::relative(currentPath, projectDir);
     fs::path systemPath = includeBase / "Cho";
-    fs::path mathLibPath = includeBase / "Cho/Externals/ChoMath";
+    fs::path mathLibPath = includeBase / "ChoMath/include";
+    fs::path mathPath = includeBase / "ChoMath";
+    fs::path physicsPath = includeBase / "PhysicsEngine/include";
     fs::path scriptPath = includeBase / "Cho/GameCore/Marionnette";
 	fs::path contextPath = includeBase / "Cho/GameCore/ScriptAPI";
     fs::path projectDirPath = "$(ProjectDir)";
@@ -1307,12 +1346,13 @@ void cho::FileSystem::ScriptProject::UpdateVcxproj()
     // ライブラリディレクトリ
     //fs::path libraryPath = currentPath / "../generated/outputs/$(Configuration)/";
     //fs::path libraryPath2 = includeBase / "../../";
-    fs::path libraryPath = "$(ProjectDir)../../../../generated/outputs/$(Configuration)/";
+    fs::path libraryPath = "$(ProjectDir)../../../generated/$(Configuration)/";
     fs::path libraryPath2 = "$(ProjectDir)../../";
 
     // パスの正規化
     systemPath.make_preferred();
     mathLibPath.make_preferred();
+    physicsPath.make_preferred();
 	scriptPath.make_preferred();
 	contextPath.make_preferred();
 
@@ -1377,8 +1417,9 @@ void cho::FileSystem::ScriptProject::UpdateVcxproj()
     vcxFile << "      <Optimization>Disabled</Optimization>\n";
     vcxFile << "      <MultiProcessorCompilation>true</MultiProcessorCompilation>\n";
     vcxFile << "      <PreprocessorDefinitions>_DEBUG;EXPORT_SCRIPT_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>\n";
-    vcxFile << "      <AdditionalIncludeDirectories>" << projectDirPath.string() << ";" << contextPath.string() << ";" << scriptPath.string() << ";" << mathLibPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
+    vcxFile << "      <AdditionalIncludeDirectories>" << projectDirPath.string() << ";" << physicsPath.string() << ";" << contextPath.string() << ";" << scriptPath.string() << ";" << mathLibPath.string() << ";" << mathPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
     vcxFile << "      <LanguageStandard>stdcpp20</LanguageStandard>\n";
+    vcxFile << "      <LanguageStandard_C>stdc17</LanguageStandard_C>\n";
     vcxFile << "      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>\n";
     vcxFile << "      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>\n"; // MDd
     vcxFile << "    </ClCompile>\n";
@@ -1398,8 +1439,9 @@ void cho::FileSystem::ScriptProject::UpdateVcxproj()
     vcxFile << "      <Optimization>Disabled</Optimization>\n";
     vcxFile << "      <MultiProcessorCompilation>true</MultiProcessorCompilation>\n";
     vcxFile << "      <PreprocessorDefinitions>NDEBUG;EXPORT_SCRIPT_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>\n";
-    vcxFile << "      <AdditionalIncludeDirectories>" << projectDirPath.string() << ";" << contextPath.string() << ";" << scriptPath.string() << ";" << mathLibPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
+    vcxFile << "      <AdditionalIncludeDirectories>" << projectDirPath.string() << ";" << physicsPath.string() << ";" << contextPath.string() << ";" << scriptPath.string() << ";" << mathLibPath.string() << ";" << mathPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
     vcxFile << "      <LanguageStandard>stdcpp20</LanguageStandard>\n";
+    vcxFile << "      <LanguageStandard_C>stdc17</LanguageStandard_C>\n";
     vcxFile << "      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>\n";
     vcxFile << "      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>\n"; // MD
     vcxFile << "    </ClCompile>\n";
@@ -1816,6 +1858,32 @@ void cho::Deserialization::FromJson(const json& j, BoxCollider2DComponent& bc)
 	bc.density = j.value("density", 1.0f);
 	bc.friction = j.value("friction", 0.5f);
 	bc.restitution = j.value("restitution", 0.0f);
+}
+
+void cho::Deserialization::FromJson(const json& j, Rigidbody3DComponent& rb)
+{
+	rb.friction = j.value("friction", 0.5f);
+	rb.restitution = j.value("restitution", 0.0f);
+	rb.halfsize = { j["halfsize"][0], j["halfsize"][1], j["halfsize"][2] };
+	rb.isKinematic = j.value("isKinematic", false);
+	rb.mass = j.value("mass", 1.0f);
+	rb.isSensor = j.value("isSensor", false);
+    if (j.contains("velocity") && j["velocity"].is_array() && j["velocity"].size() == 3)
+    {
+        rb.velocity = { j["velocity"][0], j["velocity"][1], j["velocity"][2] };
+    }
+    else
+    {
+        rb.velocity = { 0.0f, 0.0f, 0.0f }; // デフォルト
+    }
+    if(j.contains("quaternion") && j["quaternion"].is_array() && j["quaternion"].size() == 4)
+    {
+        rb.quaternion = { j["quaternion"][0], j["quaternion"][1], j["quaternion"][2], j["quaternion"][3] };
+    }
+    else
+    {
+        rb.quaternion = { 0.0f, 0.0f, 0.0f, 1.0f }; // デフォルト
+	}
 }
 
 void cho::Deserialization::FromJson(const json& j, EmitterComponent& e)

@@ -92,11 +92,18 @@ void TransformSystem::UpdateComponent(Entity e, TransformComponent& transform)
 {
 	// 度数からラジアンに変換
 	Vector3 radians = chomath::DegreesToRadians(transform.degrees);
-
+	Rigidbody3DComponent* rb3d = m_pEcs->GetComponent<Rigidbody3DComponent>(e);
 	if (m_isQuaternion)
 	{
 		// クォータニオンを使用する場合
-		transform.quaternion = chomath::MakeQuaternionRotation(radians, transform.preRot,transform.quaternion);
+		if (rb3d&&rb3d->runtimeBody)
+		{
+			transform.quaternion = chomath::MakeQuaternionRotation(radians, transform.preRot, rb3d->quaternion);
+		}
+		else
+		{
+			transform.quaternion = chomath::MakeQuaternionRotation(radians, transform.preRot, transform.quaternion);
+		}
 	}
 	else
 	{
@@ -107,7 +114,8 @@ void TransformSystem::UpdateComponent(Entity e, TransformComponent& transform)
 	// スケール行列
 	transform.matScale = chomath::MakeScaleMatrix(transform.scale);
 	// 回転行列
-	Matrix4 matRotation = chomath::MakeRotateMatrix(transform.quaternion);
+	Matrix4 matRotation = Matrix4::Identity();
+	matRotation = chomath::MakeRotateMatrix(transform.quaternion);
 	transform.matRotation = matRotation;
 	if (transform.isBillboard)
 	{
@@ -135,7 +143,11 @@ void TransformSystem::UpdateComponent(Entity e, TransformComponent& transform)
 	Rigidbody2DComponent* rb = m_pEcs->GetComponent<Rigidbody2DComponent>(e);
 	if (rb && rb->runtimeBody)
 	{
-		rb->runtimeBody->SetLinearVelocity(b2Vec2(rb->velocity.x, rb->velocity.y));
+		rb->runtimeBody->SetLinearVelocity(Vector2(rb->velocity.x, rb->velocity.y));
+	}
+	if(rb3d && rb3d->runtimeBody)
+	{
+		rb3d->runtimeBody->SetLinearVelocity(Vector3(rb3d->velocity.x, rb3d->velocity.y, rb3d->velocity.z));
 	}
 
 	// アニメーションコンポーネントがあればスキニングの確認
@@ -236,7 +248,7 @@ void CameraSystem::UpdateComponent(Entity e, TransformComponent& transform, Came
 	Rigidbody2DComponent* rb = m_pEcs->GetComponent<Rigidbody2DComponent>(e);
 	if (rb && rb->runtimeBody)
 	{
-		rb->runtimeBody->SetLinearVelocity(b2Vec2(rb->velocity.x, rb->velocity.y));
+		rb->runtimeBody->SetLinearVelocity(Vector2(rb->velocity.x, rb->velocity.y));
 	}
 
 	// 各行列
@@ -390,18 +402,16 @@ void ScriptSystem::FinalizeComponent(Entity e, ScriptComponent& script)
 void Rigidbody2DSystem::InitializeComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb)
 {
 	e;
-	if (rb.runtimeBody != nullptr) return;
-	b2BodyDef bodyDef;
-	bodyDef.userData.pointer = static_cast<uintptr_t>(rb.selfEntity.value());
+	physics::d2::Id2BodyDef bodyDef;
+	bodyDef.userData = static_cast<void*>(&rb.selfEntity.value());
 	bodyDef.type = rb.bodyType;
 	bodyDef.gravityScale = rb.gravityScale;
 	bodyDef.fixedRotation = rb.fixedRotation;
-	bodyDef.position = b2Vec2(transform.position.x, transform.position.y);
+	bodyDef.position = Vector2(transform.position.x, transform.position.y);
 	float angleZ = chomath::DegreesToRadians(transform.degrees).z;
 	bodyDef.angle = angleZ;
-	rb.runtimeBody = m_World->CreateBody(&bodyDef);
+	rb.runtimeBody = m_World->CreateBody(bodyDef);
 	rb.runtimeBody->SetAwake(true);
-	rb.world = m_World;
 	rb.velocity.Initialize();
 
 	// Transformと同期（optional）
@@ -412,33 +422,33 @@ void Rigidbody2DSystem::InitializeComponent(Entity e, TransformComponent& transf
 void Rigidbody2DSystem::StepSimulation()
 {
 	float timeStep = Timer::GetDeltaTime();
-	constexpr int velocityIterations = 6;
-	constexpr int positionIterations = 2;
-	m_World->Step(timeStep, velocityIterations, positionIterations);
+	/*constexpr int velocityIterations = 6;
+	constexpr int positionIterations = 2;*/
+	m_World->Step(timeStep, 4);
 }
 
 void Rigidbody2DSystem::UpdateComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb)
 {
 	e;
-	if (rb.runtimeBody == nullptr) return;
+	if (!rb.runtimeBody) return;
 
 	if (rb.requestedPosition)
 	{
 		if (rb.fixedRotation)
 		{
-			rb.runtimeBody->SetTransform(*rb.requestedPosition, chomath::DegreesToRadians(transform.degrees).z);
+			rb.runtimeBody->SetTransform(*rb.requestedPosition, rb.runtimeBody->GetAngle());
 		}
 		else
 		{
-			rb.runtimeBody->SetTransform(*rb.requestedPosition, rb.runtimeBody->GetAngle());
+			rb.runtimeBody->SetTransform(*rb.requestedPosition, chomath::DegreesToRadians(transform.degrees).z);
 		}
 		rb.requestedPosition.reset();
 	}
-	const b2Vec2& pos = rb.runtimeBody->GetPosition();
+	const Vector2& pos = rb.runtimeBody->GetPosition();
 	transform.position.x = pos.x;
 	transform.position.y = pos.y;
 
-	b2Vec2 velocity = rb.runtimeBody->GetLinearVelocity();
+	Vector2 velocity = rb.runtimeBody->GetLinearVelocity();
 	rb.velocity.x = velocity.x;
 	rb.velocity.y = velocity.y;
 
@@ -453,16 +463,6 @@ void Rigidbody2DSystem::UpdateComponent(Entity e, TransformComponent& transform,
 	}
 	Vector3 degrees = chomath::RadiansToDegrees(radians);
 	transform.degrees.z = degrees.z;
-
-	//Vector3 radians = ChoMath::DegreesToRadians(transform.degrees);
-	//radians.z = rb.runtimeBody->GetAngle(); // radians
-	//Vector3 diff = radians - transform.preRot;
-	//Quaternion qx = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(1.0f, 0.0f, 0.0f), diff.x);
-	//Quaternion qy = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0.0f, 1.0f, 0.0f), diff.y);
-	//Quaternion qz = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0.0f, 0.0f, 1.0f), diff.z);
-	//transform.rotation = transform.rotation * qx * qy * qz;//;
-	//transform.rotation = ChoMath::MakeRotateAxisAngleQuaternion(Vector3(0, 0, 1), angle);
-
 }
 
 void Rigidbody2DSystem::Reset(Rigidbody2DComponent& rb)
@@ -470,18 +470,18 @@ void Rigidbody2DSystem::Reset(Rigidbody2DComponent& rb)
 	// Bodyがあるなら削除
 	if (rb.runtimeBody)
 	{
+		rb.runtimeBody->DestroyShape();
 		m_World->DestroyBody(rb.runtimeBody);
-		rb.runtimeBody = nullptr;
 	}
+	rb.runtimeBody = nullptr;
 	rb.isCollisionStay = false;
 	rb.otherEntity.reset();
 }
 
 void Rigidbody2DSystem::FinalizeComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb)
 {
-	transform;
+	transform; e;
 	Reset(rb);
-	ResetCollider<BoxCollider2DComponent>(e);
 }
 
 void CollisionSystem::CollisionStay(ScriptComponent& script, Rigidbody2DComponent& rb)
@@ -496,41 +496,25 @@ void CollisionSystem::CollisionStay(ScriptComponent& script, Rigidbody2DComponen
 	}
 }
 
-float Collider2DSystem::ComputePolygonArea(const b2PolygonShape* shape)
-{
-	float area = 0.0f;
-	const int count = shape->m_count;
-	const b2Vec2* verts = shape->m_vertices;
-
-	for (int i = 0; i < count; ++i)
-	{
-		const b2Vec2& a = verts[i];
-		const b2Vec2& b = verts[(i + 1) % count];
-		area += a.x * b.y - a.y * b.x;
-	}
-	return 0.5f * std::abs(area);
-}
-
 void Collider2DSystem::InitializeComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb, BoxCollider2DComponent& box)
 {
 	transform;
 	e;
-	if (!rb.runtimeBody || box.runtimeFixture != nullptr) return;
+	if (!rb.runtimeBody&&box.runtimeShape) return;
 
-	b2PolygonShape shape;
-	shape.SetAsBox(box.width / 2.0f, box.height / 2.0f, b2Vec2(box.offsetX, box.offsetY), 0.0f);
-
+	
+	physics::d2::Id2Polygon polygonShape;
+	polygonShape.SetSize(box.width, box.height);
+	box.preHeight = box.height;
+	box.preWidth = box.width;
 	// 面積を計算
-	float area = ComputePolygonArea(&shape);
-
-	b2FixtureDef fixtureDef;
-	fixtureDef.shape = &shape;
-	fixtureDef.density = rb.mass / area;
-	fixtureDef.friction = box.friction;
-	fixtureDef.restitution = box.restitution;
-	fixtureDef.isSensor = box.isSensor;
-
-	box.runtimeFixture = rb.runtimeBody->CreateFixture(&fixtureDef);
+	float area = box.width * box.height;
+	physics::d2::Id2ShapeDef shapeDef;
+	shapeDef.density = rb.mass / area;
+	shapeDef.friction = box.friction;
+	shapeDef.restitution = box.restitution;
+	shapeDef.isSensor = box.isSensor;
+	box.runtimeShape = rb.runtimeBody->CreateShape(&shapeDef, &polygonShape);
 }
 
 void Collider2DSystem::UpdateComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb, BoxCollider2DComponent& box)
@@ -538,25 +522,33 @@ void Collider2DSystem::UpdateComponent(Entity e, TransformComponent& transform, 
 	e;
 	transform;
 	// サイズの変更があった場合、フィクスチャを再作成
-	if (box.runtimeFixture == nullptr) { return; }
-	if (box.width != box.runtimeFixture->GetShape()->m_radius || box.height != box.runtimeFixture->GetShape()->m_radius)
+	if (!box.runtimeShape) { return; }
+	if (box.width != box.preWidth || box.height != box.preHeight)
 	{
-		rb.runtimeBody->DestroyFixture(box.runtimeFixture);
-		b2PolygonShape shape;
-		shape.SetAsBox(box.width / 2.0f, box.height / 2.0f, b2Vec2(box.offsetX, box.offsetY), 0.0f);
-		b2FixtureDef fixtureDef;
-		fixtureDef.shape = &shape;
-		fixtureDef.density = box.density;
-		fixtureDef.friction = box.friction;
-		fixtureDef.restitution = box.restitution;
-		fixtureDef.isSensor = box.isSensor;
-		box.runtimeFixture = rb.runtimeBody->CreateFixture(&fixtureDef);
+		rb.runtimeBody->DestroyShape();
+		rb.runtimeBody = nullptr;
+		physics::d2::Id2Polygon polygonShape;
+		polygonShape.MakeBox(box.width * 0.5f, box.height * 0.5f);
+		box.preHeight = box.height;
+		box.preWidth = box.width;
+		// 面積を計算
+		float area = box.width * box.height;
+		physics::d2::Id2ShapeDef shapeDef;
+		shapeDef.density = rb.mass / area;
+		shapeDef.friction = box.friction;
+		shapeDef.restitution = box.restitution;
+		shapeDef.isSensor = box.isSensor;
+		box.runtimeShape = rb.runtimeBody->CreateShape(&shapeDef, &polygonShape);
 	}
 }
 
 void Collider2DSystem::FinalizeComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb, BoxCollider2DComponent& box)
 {
 	e; transform; rb; box;
+	if (box.runtimeShape)
+	{
+		box.runtimeShape = nullptr;
+	}
 }
 
 void MaterialSystem::InitializeComponent(Entity e, MaterialComponent& material)
@@ -1291,4 +1283,107 @@ void EffectEditorSystem::UpdateShader()
 	context->Dispatch(128, 1, 1);
 	// クローズ
 	m_pGraphicsEngine->EndCommandContext(context, QueueType::Compute);
+}
+
+void Rigidbody3DSystem::InitializeComponent(Entity e, TransformComponent& transform, Rigidbody3DComponent& rb)
+{
+	e;
+	physics::d3::Id3BodyDef bodyDef;
+	// Rigidbody3DComponentの初期化
+	bodyDef.position = Vector3(transform.position.x, transform.position.y, transform.position.z);
+	bodyDef.userData = static_cast<void*>(&rb.selfEntity.value());
+	bodyDef.friction = rb.friction;
+	bodyDef.restitution = rb.restitution;
+	bodyDef.halfsize = rb.halfsize;
+	/*physics::d2::Id2BodyDef bodyDef;
+	bodyDef.userData = static_cast<void*>(&rb.selfEntity.value());
+	bodyDef.type = rb.bodyType;
+	bodyDef.gravityScale = rb.gravityScale;
+	bodyDef.fixedRotation = rb.fixedRotation;
+	bodyDef.position = Vector2(transform.position.x, transform.position.y);
+	float angleZ = chomath::DegreesToRadians(transform.degrees).z;
+	bodyDef.angle = angleZ;
+	rb.runtimeBody = m_World->CreateBody(bodyDef);
+	rb.runtimeBody->SetAwake(true);*/
+	rb.velocity.Initialize();
+
+	rb.runtimeBody = m_World->CreateBody(bodyDef);
+
+	rb.runtimeBody->SetKinematic(rb.isKinematic);
+
+	// Transformと同期（optional）
+	transform.position.x = rb.runtimeBody->GetPosition().x;
+	transform.position.y = rb.runtimeBody->GetPosition().y;
+}
+
+void Rigidbody3DSystem::UpdateComponent(Entity e, TransformComponent& transform, Rigidbody3DComponent& rb)
+{
+	e;
+	if (!rb.runtimeBody) return;
+
+	// サイズが変更されていたらボディ再作成
+	if (rb.halfsize != rb.preHalfsize)
+	{
+		// ボディを削除
+		m_World->DestroyBody(rb.runtimeBody);
+		rb.runtimeBody = nullptr;
+		// 新しいボディを作成
+		physics::d3::Id3BodyDef bodyDef;
+		bodyDef.position = Vector3(transform.position.x, transform.position.y, transform.position.z);
+		bodyDef.userData = static_cast<void*>(&rb.selfEntity.value());
+		bodyDef.friction = rb.friction;
+		bodyDef.restitution = rb.restitution;
+		bodyDef.mass = rb.mass;
+		bodyDef.halfsize = rb.halfsize;
+		rb.runtimeBody = m_World->CreateBody(bodyDef);
+	}
+
+	rb.runtimeBody->SetKinematic(rb.isKinematic);
+	rb.runtimeBody->SetSensor(rb.isSensor);
+
+	if (rb.requestedPosition)
+	{
+		rb.runtimeBody->SetTransform(rb.requestedPosition.value(), rb.runtimeBody->GetRotation());
+		rb.requestedPosition.reset();
+	}
+	
+	const Vector3& pos = rb.runtimeBody->GetPosition();
+	transform.position.x = pos.x;
+	transform.position.y = pos.y;
+	transform.position.z = pos.z;
+
+	Vector3 velocity = rb.runtimeBody->GetLinearVelocity();
+	rb.velocity.x = velocity.x;
+	rb.velocity.y = velocity.y;
+	rb.velocity.z = velocity.z;
+
+	rb.quaternion = rb.runtimeBody->GetRotation();
+
+	rb.preHalfsize = rb.halfsize;
+}
+
+void Rigidbody3DSystem::Reset(Rigidbody3DComponent& rb)
+{
+	// Bodyがあるなら削除
+	if (rb.runtimeBody)
+	{
+		/*rb.runtimeBody->DestroyShape();
+		m_World->DestroyBody(rb.runtimeBody);*/
+		m_World->DestroyBody(rb.runtimeBody);
+	}
+	rb.runtimeBody = nullptr;
+	rb.otherEntity.reset();
+}
+
+void Rigidbody3DSystem::FinalizeComponent(Entity e, TransformComponent& transform, Rigidbody3DComponent& rb)
+{
+	e; transform;
+	Reset(rb);
+}
+
+void Rigidbody3DSystem::StepSimulation()
+{
+	float deltaTime = DeltaTime();
+	if (deltaTime <= 0.0f) return; // 0以下は無視
+	m_World->Step(deltaTime);
 }

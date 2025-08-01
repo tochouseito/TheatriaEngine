@@ -175,6 +175,26 @@ namespace ChoSystem
         using Component = MaterialComponent;
     };
 
+    // Rigidbody3D
+    class CHO_API Rigidbody3D : public IComponentInterface
+    {
+		friend class Marionnette;
+        public:
+        Rigidbody3D(Entity e, ECSManager* ecs) : IComponentInterface(e, ecs) {}
+        ~Rigidbody3D() = default;
+        Rigidbody3DComponent* operator->()
+        {
+            UpdatePtr();
+            return data;
+		}
+        private:
+        void UpdatePtr()
+        {
+            data = m_ECS->GetComponent<Rigidbody3DComponent>(m_Entity);
+        }
+		Rigidbody3DComponent* data = nullptr;
+	};
+
     // Animation
     class CHO_API Animation : public IComponentInterface
     {

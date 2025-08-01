@@ -2,7 +2,6 @@
 #include "ScriptAPI.h"
 #include "Platform/InputManager/InputManager.h"
 #include "GameCore/ECS/ECSManager.h"
-#include "GameCore/PhysicsEngine/PhysicsEngine.h"
 #include "Resources/ResourceManager/ResourceManager.h"
 #include "Resources/AudioManager/AudioManager.h"
 

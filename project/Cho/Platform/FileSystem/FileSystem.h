@@ -62,6 +62,7 @@ namespace cho
         int frameRate = 60;
         float fixedDeltaTime = 1.0f / 60.0f;
         bool debugMode = false;
+        std::wstring skyTexName;
     };
     struct FolderNode
     {
@@ -83,6 +84,7 @@ namespace cho
 		json ToJson(const std::vector<LineRendererComponent>& ls);
 		json ToJson(const Rigidbody2DComponent& rb);
 		json ToJson(const BoxCollider2DComponent& bc);
+		json ToJson(const Rigidbody3DComponent& rb);
 		json ToJson(const EmitterComponent& e);
 		json ToJson(const ParticleComponent& p);
 		json ToJson(const UISpriteComponent& ui);
@@ -103,6 +105,7 @@ namespace cho
 		void FromJson(const json& j, std::vector<LineRendererComponent>& ls);
 		void FromJson(const json& j, Rigidbody2DComponent& rb);
 		void FromJson(const json& j, BoxCollider2DComponent& bc);
+		void FromJson(const json& j, Rigidbody3DComponent& rb);
 		void FromJson(const json& j, EmitterComponent& e);
 		void FromJson(const json& j, ParticleComponent& p);
 		void FromJson(const json& j, UISpriteComponent& ui);

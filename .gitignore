@@ -18,6 +18,8 @@ mono_crash.*
 
 # Build results
 generated/
+x64/
+x86/
 intermediate/
 logs/
 runtime/
@@ -30,6 +32,10 @@ project/ChoEngineLog.txt
 project/Cho/Externals/DirectXTex/Shaders/Compiled/
 project/Cho/Externals/assimp/lib/
 project/External/assimp/lib/
+project/External/DirectXTex/lib/
+project/External/imgui/lib/
+project/External/imgui_Extensions/lib/
+project/ChoPhysics/lib/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/

@@ -146,6 +146,11 @@ struct Vector3 final {
     }
 
 public:// 静的メンバ
+	// ゼロベクトルの取得
+    static Vector3 Zero() {
+        return Vector3(0.0f, 0.0f, 0.0f);
+	}
+
     static Vector3 Normalize(const Vector3& v) {
         Vector3 result=v;
         float len = result.Length();

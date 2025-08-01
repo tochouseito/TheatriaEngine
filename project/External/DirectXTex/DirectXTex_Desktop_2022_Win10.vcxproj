@@ -41,13 +41,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">
     <OutDir>$(ProjectDir)lib\$(Configuration)\</OutDir>
-    <IntDir>$(ProjectDir)intermediate\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)..\generated\intermediate\External\DirectXTex\</IntDir>
     <TargetName>DirectXTex</TargetName>
     <GenerateManifest>true</GenerateManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|X64'">
     <OutDir>$(ProjectDir)lib\$(Configuration)\</OutDir>
-    <IntDir>$(ProjectDir)intermediate\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)..\generated\intermediate\External\DirectXTex\</IntDir>
     <TargetName>DirectXTex</TargetName>
     <GenerateManifest>true</GenerateManifest>
   </PropertyGroup>

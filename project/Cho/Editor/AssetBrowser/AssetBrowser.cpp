@@ -17,10 +17,14 @@ void AssetBrowser::Update()
 void AssetBrowser::Window()
 {
 	// 移動を無効にするフラグ
-	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove;
-	ImGui::Begin("AssetBrowser", nullptr, windowFlags);
-    // 左：フォルダー階層
-    FolderTree(cho::FileSystem::g_ProjectFiles);
+	//ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove;
+	ImGui::Begin("AssetBrowser", nullptr);
+    if (ImGui::BeginTable("TreeTable", 1, ImGuiTableFlags_BordersInnerV))
+    {
+        // 左：フォルダー階層
+        FolderTree(cho::FileSystem::g_ProjectFiles);
+		ImGui::EndTable();
+    }
 	ImGui::End();
 	// ファイルの表示
 	ImGui::Begin("FileGrid");
@@ -31,9 +35,12 @@ void AssetBrowser::Window()
 
 void AssetBrowser::FolderTree(FolderNode& node)
 {
+    ImGui::TableNextRow();
+    ImGui::TableNextColumn();
     std::string label = node.folderPath.filename().string();
     if (label.empty()) { label = "Assets"; }
-    bool opened = ImGui::TreeNode(label.c_str());
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAllColumns | ImGuiTreeNodeFlags_DrawLinesFull;
+    bool opened = ImGui::TreeNodeEx(label.c_str(),flags);
     if (ImGui::IsItemClicked())
     {
         m_SelectedFolder = node.folderPath;

@@ -2,8 +2,12 @@
 #include "GameCore/SceneManager/SceneManager.h"
 #include "GameCore/ECS/ECSManager.h"
 #include "GameCore/GameWorld/GameWorld.h"
-#include "GameCore/PhysicsEngine/PhysicsEngine.h"
 #include "Core/Utility/CompBufferData.h"
+
+// PhysicsEngine
+#include <2D/d2_common.h>
+#include <3D/d3_common.h>
+
 class InputManager;
 class ResourceManager;
 class GraphicsEngine;
@@ -35,7 +39,8 @@ public:
 	bool IsRunning() const { return isRunning; }
 	void GameRun();
 	void GameStop();
-	b2World* GetPhysicsWorld() { return m_pPhysicsWorld.get(); }
+	physics::d2::Id2World* GetPhysicsWorld2D() { return m_pPy2dWorld.get(); }
+	physics::d3::Id3World* GetPhysicsWorld3D() { return m_pPy3dWorld.get(); }
 	// 環境設定更新
 	void UpdateEnvironmentSetting();
 
@@ -45,6 +50,7 @@ public:
 private:
 	void RegisterECSEvents();
 	void RegisterECSSystems(ResourceManager* resourceManager, GraphicsEngine* graphicsEngine);
+	void RegisterContactEvents();
 	
 	EngineCommand* m_EngineCommand = nullptr;
 
@@ -58,9 +64,10 @@ private:
 	bool isRunning = false;
 	// 環境情報
 	BUFFER_DATA_ENVIRONMENT m_EnvironmentData;
-	// box2d
-	std::unique_ptr<b2World> m_pPhysicsWorld = nullptr;
-	std::unique_ptr<ContactListener2D> m_pContactListener = nullptr;
+	// 2dPhysicsワールド
+	std::unique_ptr<physics::d2::Id2World> m_pPy2dWorld = nullptr;
+	// 3dPhysicsワールド
+	std::unique_ptr<physics::d3::Id3World> m_pPy3dWorld = nullptr;
 	// ECSイベントディスパッチャー
 	std::shared_ptr<ComponentEventDispatcher> m_pComponentEventDispatcher = nullptr;
 };

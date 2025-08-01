@@ -4,17 +4,22 @@
 #include <imgui_impl_dx12.h>
 #include <imgui_impl_win32.h>
 #include <ImGuizmo/ImGuizmo.h>
+#include <imgui-node-editor/imgui_node_editor.h>
 #include "OS/Windows/WinApp/WinApp.h"
 #include "Resources/ResourceManager/ResourceManager.h"
+
+namespace ed = ax::NodeEditor;
 
 void ImGuiManager::Initialize(ID3D12Device8* device, ResourceManager* resourceManager)
 {
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
+	std::string version = IMGUI_VERSION;
+	Log::Write(LogLevel::Info, version);
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Dockingを有効化
-
+	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // マルチビューポートを有効化
 	// プラットフォームとレンダラーのバックエンドを設定する
 	ImGui_ImplWin32_Init(WinApp::GetHWND());
 
@@ -32,10 +37,18 @@ void ImGuiManager::Initialize(ID3D12Device8* device, ResourceManager* resourceMa
 	ImFontConfig font_config;
 	font_config.MergeMode = false;
 	font_config.PixelSnapH = true;
+	static const ImWchar japaneseRanges[] = {
+	0x0020, 0x00FF,  // ASCII
+	0x3000, 0x30FF,  // 句読点・ひらがな・カタカナ
+	0x4E00, 0x9FFF,  // 漢字
+	0xFF00, 0xFFEF,  // 全角英数
+	0,
+	};
 	io.Fonts->AddFontFromFileTTF(//"C:/Windows/Fonts/msgothic.ttc",
 		"Cho/Resources/EngineAssets/Fonts/NotoSansJP-Regular.ttf",// フォントファイルのパス
 		16.0f,// フォントファイルのパスとフォントサイズ
-		&font_config
+		&font_config,
+		japaneseRanges
 	);
 	// アイコンフォントをマージ
 	font_config.MergeMode = true;
@@ -53,11 +66,14 @@ void ImGuiManager::Initialize(ID3D12Device8* device, ResourceManager* resourceMa
 		materialSymbolRanges
 	);
 	// 標準フォントを追加する
-	io.Fonts->AddFontDefault();
+	// io.Fonts->AddFontDefault();
 	io.Fonts->Build(); // フォントをビルド
 	
 	// ImGuiのスタイルを設定
 	ImGui::StyleColorsDark();
+
+	ImGuiStyle& style = ImGui::GetStyle();
+	style.TreeLinesFlags = ImGuiTreeNodeFlags_DrawLinesFull;
 }
 
 void ImGuiManager::Finalize()
@@ -82,8 +98,8 @@ void ImGuiManager::End()
 {
 	// 描画前準備
 	ImGui::Render();
-	//ImGui::UpdatePlatformWindows();
-	//ImGui::RenderPlatformWindowsDefault();
+	ImGui::UpdatePlatformWindows();
+	ImGui::RenderPlatformWindowsDefault();
 }
 
 void ImGuiManager::Draw(ID3D12GraphicsCommandList6* commandList)

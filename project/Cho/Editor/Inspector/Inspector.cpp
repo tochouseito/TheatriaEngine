@@ -19,8 +19,8 @@ void Inspector::Update()
 void Inspector::Window()
 {
 	// 移動を無効にするフラグ
-	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove;
-	ImGui::Begin("Inspector", nullptr, windowFlags);
+	//ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove;
+	ImGui::Begin("Inspector", nullptr);
 
 	// 選択中のオブジェクトがある場合に情報を表示
 	if (m_EditorManager->GetSelectedGameObject())
@@ -58,6 +58,7 @@ void Inspector::ComponentsView(GameObject* object)
 	LineRendererComponentView(object);
 	Rigidbody2DComponentView(object);
 	BoxCollider2DComponentView(object);
+	Rigidbody3DComponentView(object);
 	LightComponentView(object);
 	EmitterComponentView(object);
 	ParticleComponentView(object);
@@ -327,7 +328,7 @@ void Inspector::Rigidbody2DComponentView(GameObject* object)
 		int currentType = static_cast<int>(rigidbody->bodyType);
 		if (ImGui::Combo("Body Type", &currentType, bodyTypeItems, IM_ARRAYSIZE(bodyTypeItems)))
 		{
-			rigidbody->bodyType = static_cast<b2BodyType>(currentType);
+			rigidbody->bodyType = static_cast<physics::d2::Id2BodyType>(currentType);
 		}
 
 		// mass
@@ -387,6 +388,34 @@ void Inspector::BoxCollider2DComponentView(GameObject* object)
 			m_EngineCommand->GetGameCore()->GetECSManager()->RemoveComponent<BoxCollider2DComponent>(object->GetHandle().entity);
 		}
 
+		ImGui::TreePop();
+	}
+}
+
+void Inspector::Rigidbody3DComponentView(GameObject* object)
+{
+	// 許可されているコンポーネントか確認
+	if (!IsComponentAllowedAtRuntime<Rigidbody3DComponent>(object->GetType())) { return; }
+	Rigidbody3DComponent* rigidbody = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<Rigidbody3DComponent>(object->GetHandle().entity);
+	if (!rigidbody) { return; }
+	if (ImGui::TreeNode("Rigidbody3D"))
+	{
+		// Active
+		bool active = rigidbody->IsActive();
+		ImGui::Checkbox("Active", &active);
+		rigidbody->SetActive(active);
+		// BodyParameters
+		// 質量
+		ImGui::DragFloat("質量", &rigidbody->mass, 0.1f, 0.0f, 100.0f);
+		//ImGui::DragFloat("Gravity Scale", &rigidbody->gravityScale, 0.1f, 0.0f, 100.0f);
+		ImGui::Checkbox("Is Kinematic", &rigidbody->isKinematic);
+		ImGui::Checkbox("Is Sensor", &rigidbody->isSensor);
+		ImGui::DragFloat3("Half Size", &rigidbody->halfsize.x, 0.1f, 0.0f, 100.0f);
+		ImGui::DragFloat3("Velocity", &rigidbody->velocity.x, 0.1f, -100.0f, 100.0f);
+		if (ImGui::Button("Remove Rigidbody3D Component"))
+		{
+			m_EngineCommand->GetGameCore()->GetECSManager()->RemoveComponent<Rigidbody3DComponent>(object->GetHandle().entity);
+		}
 		ImGui::TreePop();
 	}
 }
@@ -549,6 +578,7 @@ void Inspector::AddComponent(GameObject* object)
 	lines;
 	Rigidbody2DComponent* rigidbody;
 	BoxCollider2DComponent* boxCollider2d;
+	Rigidbody3DComponent* rigidbody3d;
 	EmitterComponent* emitter;
 	ParticleComponent* particle;
 	if (!isOpen)
@@ -569,6 +599,7 @@ void Inspector::AddComponent(GameObject* object)
 		bool canAddLineRenderer = IsComponentAllowedAtRuntime<LineRendererComponent>(objectType);
 		bool canAddRigidbody2D = IsComponentAllowedAtRuntime<Rigidbody2DComponent>(objectType);
 		bool canAddBoxCollider2D = IsComponentAllowedAtRuntime<BoxCollider2DComponent>(objectType);
+		bool canAddRigidbody3D = IsComponentAllowedAtRuntime<Rigidbody3DComponent>(objectType);
 		bool canAddEmitter = IsComponentAllowedAtRuntime<EmitterComponent>(objectType);
 		bool canAddParticle = IsComponentAllowedAtRuntime<ParticleComponent>(objectType);
 		bool canAddAnimation = IsComponentAllowedAtRuntime<AnimationComponent>(objectType);
@@ -664,6 +695,20 @@ void Inspector::AddComponent(GameObject* object)
 					// BoxCollider2DComponentを追加
 					std::unique_ptr<AddBoxCollider2DComponent> addBoxColliderComp = std::make_unique<AddBoxCollider2DComponent>(object->GetHandle().entity);
 					m_EngineCommand->ExecuteCommand(std::move(addBoxColliderComp));
+					isOpen = false;
+				}
+			}
+		}
+		if (canAddRigidbody3D)
+		{
+			rigidbody3d = m_EngineCommand->GetGameCore()->GetECSManager()->GetComponent<Rigidbody3DComponent>(object->GetHandle().entity);
+			if (!rigidbody3d)
+			{
+				if (ImGui::Selectable("Rigidbody3DComponent"))
+				{
+					// Rigidbody3DComponentを追加
+					std::unique_ptr<AddRigidbody3DComponent> addRigidBodyComp = std::make_unique<AddRigidbody3DComponent>(object->GetHandle().entity);
+					m_EngineCommand->ExecuteCommand(std::move(addRigidBodyComp));
 					isOpen = false;
 				}
 			}
