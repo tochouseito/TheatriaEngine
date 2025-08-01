@@ -701,7 +701,9 @@ void GraphicsEngine::DrawForward(ResourceManager& resourceManager, GameCore& gam
 			// 配列テクスチャのためヒープをセット
 			context->SetGraphicsRootDescriptorTable(10, resourceManager.GetSUVDHeap()->GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
 			// 配列CubeTexture
-			context->SetGraphicsRootDescriptorTable(11, resourceManager.GetSUVDHeap()->GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
+			PixelBuffer* skyboxTexture = resourceManager.GetBuffer<PixelBuffer>(resourceManager.GetTextureManager()->GetTextureID(resourceManager.GetSkyboxTextureName()));
+			context->SetGraphicsRootDescriptorTable(11, skyboxTexture->GetSRVGpuHandle());
+			//context->SetGraphicsRootDescriptorTable(11, resourceManager.GetSUVDHeap()->GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
 			// インスタンス数を取得
 			UINT numInstance = static_cast<UINT>(modelData.useTransformList.size());
 			// DrawCall

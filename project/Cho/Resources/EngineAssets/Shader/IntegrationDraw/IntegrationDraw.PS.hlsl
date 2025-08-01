@@ -14,7 +14,7 @@ StructuredBuffer<Material> gIMaterial : register(t1,space1);
 // テクスチャリソース(カラー)
 Texture2D<float4> gTextures[] : register(t2, space1);
 // キューブテクスチャ
-TextureCube<float4> gCubeTextures[] : register(t3, space2);
+TextureCube<float4> gCubeTextures : register(t3, space2);
 // サンプラー
 SamplerState gSampler : register(s0);
 
@@ -132,7 +132,7 @@ PixelShaderOutput main(VSOut input) {
         lig.rgb += ambientColor.rgb;
         // 環境マップ
         float3 reflectedVector = reflect(input.cameraPosition, normalize(input.normal));
-        float4 environmentColor = gCubeTextures[material.cubeTextureID].Sample(gSampler, input.normal);
+        float4 environmentColor = gCubeTextures.Sample(gSampler, input.normal);
         // 合計
         finalColor.rgb = material.color.rgb * textureColor.rgb * lig.rgb;
         if (material.cubeTextureID != 0)

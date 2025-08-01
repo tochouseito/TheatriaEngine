@@ -550,15 +550,25 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 	rootParameters[10].DescriptorTable.pDescriptorRanges = &textureRange;
 	rootParameters[10].DescriptorTable.NumDescriptorRanges = 1;
 	// CubeTexture
-	D3D12_DESCRIPTOR_RANGE textureRange1 = {};
-	textureRange1.BaseShaderRegister = 3;//t3
-	textureRange1.RegisterSpace = 2;// space2
-	textureRange1.NumDescriptors = 256;
-	textureRange1.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	textureRange1.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	//D3D12_DESCRIPTOR_RANGE textureRange1 = {};
+	//textureRange1.BaseShaderRegister = 3;//t3
+	//textureRange1.RegisterSpace = 2;// space2
+	//textureRange1.NumDescriptors = 256;
+	//textureRange1.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	//textureRange1.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	//rootParameters[11].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	//rootParameters[11].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	//rootParameters[11].DescriptorTable.pDescriptorRanges = &textureRange1;
+	//rootParameters[11].DescriptorTable.NumDescriptorRanges = 1;
+
+	D3D12_DESCRIPTOR_RANGE cubeTextureRenge = {};
+	cubeTextureRenge.BaseShaderRegister = 3;
+	cubeTextureRenge.RegisterSpace = 2;
+	cubeTextureRenge.NumDescriptors = 1;
+	cubeTextureRenge.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	rootParameters[11].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	rootParameters[11].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	rootParameters[11].DescriptorTable.pDescriptorRanges = &textureRange1;
+	rootParameters[11].DescriptorTable.pDescriptorRanges = &cubeTextureRenge;
 	rootParameters[11].DescriptorTable.NumDescriptorRanges = 1;
 
 	//D3D12_DESCRIPTOR_RANGE universalRange = {};
