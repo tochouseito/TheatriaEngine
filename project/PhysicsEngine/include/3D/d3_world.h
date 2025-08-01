@@ -42,7 +42,7 @@ namespace physics::d3
 		virtual void SetEndContactCallback(OnContactFunc) {}
 		virtual void SetStayContactCallback(OnContactFunc) {}
 	protected:
-		d3Backend backend; // 物理エンジンのバックエンド
+		d3Backend backend = {}; // 物理エンジンのバックエンド
 		std::vector<std::unique_ptr<Id3Body>> bodies; // ワールド内のボディリスト
 	};
 

@@ -1020,9 +1020,12 @@ void PipelineManager::CreatePipelineParticle(ID3D12Device8* device)
 	//blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;	// デスティネーションカラーに掛ける係数（1 - SrcAlpha）
 	//blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;				// カラー合成方法：加算
 
-	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_ONE;         // ソースカラーそのまま
-	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;        // デスティネーションカラーそのまま
-	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;       // 加算
+	//blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_ONE;         // ソースカラーそのまま
+	//blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;        // デスティネーションカラーそのまま
+	//blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;       // 加算
+	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;
 
 	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;			// アルファ値合成：SrcAlpha * 1
 	blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;		// アルファ値合成：DestAlpha * 0

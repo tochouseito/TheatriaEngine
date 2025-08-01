@@ -612,6 +612,8 @@ void GraphicsEngine::DrawForward(ResourceManager& resourceManager, GameCore& gam
 	SetRenderTargets(context, DrawPass::Forward, mode, true);
 	// 描画設定
 	SetRenderState(context, ViewportGame);
+	// Skyboxの描画
+	SkyboxRender(context, resourceManager, gameCore, mode);
 	// パイプラインセット
 	context->SetGraphicsPipelineState(m_PipelineManager->GetIntegratePSO().pso.Get());
 	// ルートシグネチャセット
@@ -759,8 +761,6 @@ void GraphicsEngine::DrawForward(ResourceManager& resourceManager, GameCore& gam
 	EffectEditorDraw(context, resourceManager, gameCore, mode);
 	// UI
 	DrawUI(context, resourceManager, gameCore, mode);
-	// Skyboxの描画
-	SkyboxRender(context, resourceManager, gameCore, mode);
 	// レンダーターゲットのStateを戻す
 	SetRenderTargets(context, DrawPass::Forward, mode, false);
 	// コマンドリスト終了
