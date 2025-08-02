@@ -241,7 +241,11 @@ void GameCore::RegisterECSEvents()
 	m_pComponentEventDispatcher->RegisterOnRemove<ScriptComponent>(
 		[&]([[maybe_unused]] Entity e, [[maybe_unused]] ScriptComponent* c) {
 			// スクリプトのインスタンスを削除
-			//m_pObjectContainer->DeleteScriptInstance(c->objectID);
+			if (c->instance)
+			{
+				c->cleanupFunc();
+				c->instance = nullptr;
+			}
 		});
 	m_pComponentEventDispatcher->RegisterOnRestore<ScriptComponent>(
 		[&]([[maybe_unused]] Entity e, [[maybe_unused]] ScriptComponent* c) {
