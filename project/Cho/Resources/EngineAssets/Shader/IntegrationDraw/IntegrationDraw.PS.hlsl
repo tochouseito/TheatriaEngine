@@ -13,6 +13,8 @@ StructuredBuffer<Transform> gITF : register(t0, space1);
 StructuredBuffer<Material> gIMaterial : register(t1,space1);
 // テクスチャリソース(カラー)
 Texture2D<float4> gTextures[] : register(t2, space1);
+// キューブテクスチャ
+TextureCube<float4> gCubeTextures : register(t3, space2);
 // サンプラー
 SamplerState gSampler : register(s0);
 
@@ -65,19 +67,23 @@ PixelShaderOutput main(VSOut input) {
         }
     }
     // ライティングが有効ならライティングを計算
-    if (material.enableLighting != 0) {
+    if (material.enableLighting != 0)
+    {
         // ライトのタイプごとにライティング
-        for (int i = 0; i < MAX_LIGHTS; i++) {
+        for (int i = 0; i < MAX_LIGHTS; i++)
+        {
             Light light = gLights.lights[i];
             // ライトが無効ならスキップ
             if (light.active == 0)
             {
                 continue;
             }
-            switch (light.type) {
+            switch (light.type)
+            {
                 case LIGHT_TYPE_DIRECTIONAL:{// 平行光源
                         // ライトの位置を取得
-                        float3 position = {
+                        float3 position =
+                        {
                             gITF[light.transformMapID].matWorld[3][0],
                             gITF[light.transformMapID].matWorld[3][1],
                             gITF[light.transformMapID].matWorld[3][2]
@@ -102,7 +108,8 @@ PixelShaderOutput main(VSOut input) {
                     }
                 case LIGHT_TYPE_POINT:{// 点光源
                         // ライトの位置を取得
-                        float3 position = {
+                        float3 position =
+                        {
                             gITF[light.transformMapID].matWorld[3][0],
                         gITF[light.transformMapID].matWorld[3][1],
                         gITF[light.transformMapID].matWorld[3][2]
@@ -111,7 +118,8 @@ PixelShaderOutput main(VSOut input) {
                     }
                 case LIGHT_TYPE_SPOT:{// スポットライト
                         // ライトの位置を取得
-                        float3 position = {
+                        float3 position =
+                        {
                             gITF[light.transformMapID].matWorld[3][0],
                         gITF[light.transformMapID].matWorld[3][1],
                         gITF[light.transformMapID].matWorld[3][2]
@@ -122,8 +130,16 @@ PixelShaderOutput main(VSOut input) {
         }
         // ライティング結果と環境光を加算
         lig.rgb += ambientColor.rgb;
+        // 環境マップ
+        float3 reflectedVector = reflect(input.cameraPosition, normalize(input.normal));
+        float4 environmentColor = gCubeTextures.Sample(gSampler, input.normal);
         // 合計
         finalColor.rgb = material.color.rgb * textureColor.rgb * lig.rgb;
+        if (material.cubeTextureID != 0)
+        {
+            // 環境マップが有効なら環境マップを加算
+            finalColor.rgb += environmentColor.rgb;
+        }
         finalColor.a = material.color.a * textureColor.a;
     }
     else {

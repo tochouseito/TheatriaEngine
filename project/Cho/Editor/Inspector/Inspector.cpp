@@ -168,6 +168,7 @@ void Inspector::MaterialComponentView(GameObject* object)
 	ImGui::Text("Material Component");
 	ImGui::ColorEdit4("Color", &material->color.r);
 	ImGui::DragFloat("Shininess", &material->shininess, 0.1f, 0.0f, 0.0f, "%.1f");
+	ImGui::DragFloat("cubeUVScale", &material->cubeUVScale, 0.01f, 0.0f, 0.0f, "%.2f");
 	ImGui::Checkbox("ライティング", &material->enableLighting);
 	ImGui::Checkbox("UseTexture", &material->enableTexture);
 	if (material->enableTexture)
@@ -198,6 +199,37 @@ void Inspector::MaterialComponentView(GameObject* object)
 
 			if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TextureID"))
 			{
+			}
+			ImGui::EndDragDropTarget();
+		}
+		// CubeTexture
+		if(material->textureName.empty())
+		{
+			ImGui::Text("Cube Texture Name: None");
+		} else
+		{
+			ImGui::Text("Cube Texture Name: %s", ConvertString(material->cubeTextureName).c_str());
+		}
+		// ドロップターゲット
+		if (ImGui::BeginDragDropTarget())
+		{
+			// キューブテクスチャならそのまま使う
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TextureID"))
+			{
+				// ドロップされたキューブテクスチャのIDを取得
+				const char* cubeTextureName = static_cast<const char*>(payload->Data);
+				// キューブテクスチャ名を設定
+				material->cubeTextureName = ConvertString(cubeTextureName);
+				// キューブテクスチャIDを取得
+				TextureData* texData = m_EngineCommand->GetResourceManager()->GetTextureManager()->GetTextureData(material->cubeTextureName);
+				if (texData->metadata.IsCubemap())
+				{
+					material->cubeTextureID = m_EngineCommand->GetResourceManager()->GetTextureManager()->GetTextureID(material->cubeTextureName);
+				}
+				else
+				{
+					material->cubeTextureID.reset();
+				}
 			}
 			ImGui::EndDragDropTarget();
 		}

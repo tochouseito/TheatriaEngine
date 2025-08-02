@@ -454,7 +454,7 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 	// ジェネリックに作成
-	D3D12_ROOT_PARAMETER rootParameters[11] = {};
+	D3D12_ROOT_PARAMETER rootParameters[12] = {};
 
 	// ViewProjection
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
@@ -549,6 +549,27 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 	rootParameters[10].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 	rootParameters[10].DescriptorTable.pDescriptorRanges = &textureRange;
 	rootParameters[10].DescriptorTable.NumDescriptorRanges = 1;
+	// CubeTexture
+	//D3D12_DESCRIPTOR_RANGE textureRange1 = {};
+	//textureRange1.BaseShaderRegister = 3;//t3
+	//textureRange1.RegisterSpace = 2;// space2
+	//textureRange1.NumDescriptors = 256;
+	//textureRange1.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	//textureRange1.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	//rootParameters[11].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	//rootParameters[11].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	//rootParameters[11].DescriptorTable.pDescriptorRanges = &textureRange1;
+	//rootParameters[11].DescriptorTable.NumDescriptorRanges = 1;
+
+	D3D12_DESCRIPTOR_RANGE cubeTextureRenge = {};
+	cubeTextureRenge.BaseShaderRegister = 3;
+	cubeTextureRenge.RegisterSpace = 2;
+	cubeTextureRenge.NumDescriptors = 1;
+	cubeTextureRenge.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	rootParameters[11].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[11].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[11].DescriptorTable.pDescriptorRanges = &cubeTextureRenge;
+	rootParameters[11].DescriptorTable.NumDescriptorRanges = 1;
 
 	//D3D12_DESCRIPTOR_RANGE universalRange = {};
 	//universalRange.BaseShaderRegister = 0;//t0
@@ -1020,9 +1041,12 @@ void PipelineManager::CreatePipelineParticle(ID3D12Device8* device)
 	//blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;	// デスティネーションカラーに掛ける係数（1 - SrcAlpha）
 	//blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;				// カラー合成方法：加算
 
-	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_ONE;         // ソースカラーそのまま
-	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;        // デスティネーションカラーそのまま
-	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;       // 加算
+	//blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_ONE;         // ソースカラーそのまま
+	//blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;        // デスティネーションカラーそのまま
+	//blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;       // 加算
+	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;
 
 	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;			// アルファ値合成：SrcAlpha * 1
 	blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;		// アルファ値合成：DestAlpha * 0

@@ -24,11 +24,11 @@ struct FormatChunk
 /*音声データ*/
 struct SoundData
 {
-	std::string name; /* 音声データの名前（ファイル名など） */
-	WAVEFORMATEX wfex;     /*波形フォーマット*/
-	BYTE* pBuffer;         /*バッファの先頭アドレス*/
-	unsigned int bufferSize;/*バッファのサイズ*/
-	IXAudio2SourceVoice* pSourceVoice; /* SourceVoice を保持 */
+	std::string name = {}; /* 音声データの名前（ファイル名など） */
+	WAVEFORMATEX wfex = {};     /*波形フォーマット*/
+	BYTE* pBuffer = nullptr;         /*バッファの先頭アドレス*/
+	unsigned int bufferSize = 0;/*バッファのサイズ*/
+	IXAudio2SourceVoice* pSourceVoice = nullptr; /* SourceVoice を保持 */
 	float currentVolume = 1.0f;    /* 現在のボリューム */
 	bool isPlaying = false; /* 再生中かどうか */
 };

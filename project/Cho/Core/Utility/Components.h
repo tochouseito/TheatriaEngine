@@ -574,8 +574,11 @@ struct MaterialComponent : public IComponentTag
 	bool uvFlipY = false;
 	Matrix4 matUV;
 	float shininess = 50.0f;
+	float cubeUVScale = 1.0f;	// キューブマップのUVスケール
 	std::wstring textureName = L"";	// テクスチャ名
 	std::optional<uint32_t> textureID = std::nullopt;	// テクスチャID
+	std::wstring cubeTextureName = L"";	// キューブマップテクスチャ名
+	std::optional<uint32_t> cubeTextureID = std::nullopt;	// キューブマップテクスチャID
 	std::optional<uint32_t> mapID = std::nullopt;
 
 	MaterialComponent& operator=(const MaterialComponent& other)

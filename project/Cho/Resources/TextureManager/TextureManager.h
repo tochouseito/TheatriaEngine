@@ -13,7 +13,7 @@ namespace fs = std::filesystem;
 struct TextureData
 {
 	std::wstring name;
-	DirectX::TexMetadata metadata;
+	DirectX::TexMetadata metadata = {};
 	uint32_t bufferIndex = UINT32_MAX;
 };
 class ResourceManager;

@@ -612,6 +612,8 @@ void GraphicsEngine::DrawForward(ResourceManager& resourceManager, GameCore& gam
 	SetRenderTargets(context, DrawPass::Forward, mode, true);
 	// 描画設定
 	SetRenderState(context, ViewportGame);
+	// Skyboxの描画
+	SkyboxRender(context, resourceManager, gameCore, mode);
 	// パイプラインセット
 	context->SetGraphicsPipelineState(m_PipelineManager->GetIntegratePSO().pso.Get());
 	// ルートシグネチャセット
@@ -698,6 +700,10 @@ void GraphicsEngine::DrawForward(ResourceManager& resourceManager, GameCore& gam
 			m_PipelineManager->GetIntegratePSO().indirectArgsBuffer->UpdateData(indirectArgs);*/
 			// 配列テクスチャのためヒープをセット
 			context->SetGraphicsRootDescriptorTable(10, resourceManager.GetSUVDHeap()->GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
+			// 配列CubeTexture
+			PixelBuffer* skyboxTexture = resourceManager.GetBuffer<PixelBuffer>(resourceManager.GetTextureManager()->GetTextureID(resourceManager.GetSkyboxTextureName()));
+			context->SetGraphicsRootDescriptorTable(11, skyboxTexture->GetSRVGpuHandle());
+			//context->SetGraphicsRootDescriptorTable(11, resourceManager.GetSUVDHeap()->GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
 			// インスタンス数を取得
 			UINT numInstance = static_cast<UINT>(modelData.useTransformList.size());
 			// DrawCall
@@ -759,8 +765,6 @@ void GraphicsEngine::DrawForward(ResourceManager& resourceManager, GameCore& gam
 	EffectEditorDraw(context, resourceManager, gameCore, mode);
 	// UI
 	DrawUI(context, resourceManager, gameCore, mode);
-	// Skyboxの描画
-	SkyboxRender(context, resourceManager, gameCore, mode);
 	// レンダーターゲットのStateを戻す
 	SetRenderTargets(context, DrawPass::Forward, mode, false);
 	// コマンドリスト終了

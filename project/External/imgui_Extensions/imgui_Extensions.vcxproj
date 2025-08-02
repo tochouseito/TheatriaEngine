@@ -184,7 +184,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="imgui-node-editor\crude_json.cpp" />
-    <ClCompile Include="imgui-node-editor\examples\blueprints-example\blueprints-example.cpp" />
     <ClCompile Include="imgui-node-editor\external\DXSDK\src\dxerr.cpp" />
     <ClCompile Include="imgui-node-editor\imgui_canvas.cpp" />
     <ClCompile Include="imgui-node-editor\imgui_node_editor.cpp" />

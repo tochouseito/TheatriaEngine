@@ -17,7 +17,7 @@ void main(uint3 DTid : SV_DispatchThreadID) {
     if (gEmitter[0].emit != 0) {
         RandomGenerator generator;
         generator.seed = (DTid + gPerFrame.time) * gPerFrame.time;
-
+        
         for (uint countIndex = 0; countIndex < gEmitter[0].emitCount; ++countIndex) {
             // パーティクルごとにシードを変える
             generator.seed = generator.Generate3d() + float3(countIndex, countIndex * 2, countIndex * 3);

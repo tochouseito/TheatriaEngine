@@ -15,6 +15,12 @@ VSOutput main(VSInput input)
 {
     VSOutput output;
     // worldViewProjection
+    // viewの平行移動成分を無視
+    float4x4 view = gVP.view;
+    view[0][0] = 0.0f;
+    view[0][1] = 0.0f;
+    view[0][2] = 0.0f;
+    view[0][3] = 1.0f;
     float4x4 WVP = mul(gVP.view, gVP.projection);
     // TranslateMatrix
     float4x4 translateMatrix = TranslateMatrix(gVP.cameraPosition);
