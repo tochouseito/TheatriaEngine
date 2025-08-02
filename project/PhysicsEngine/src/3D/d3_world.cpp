@@ -79,7 +79,15 @@ void physics::d3::bulletWorld::SetGravity(const Vector3& gravity)
 void physics::d3::bulletWorld::Step(const float& deltaTime)
 {
 	impl->world->stepSimulation(deltaTime);
-	ProcessEvents();
+	if (deltaTime != 0.0f)
+	{
+		ProcessEvents();
+	}
+	else
+	{
+		impl->previousContacts.clear(); // ゼロステップの場合は前回の接触をクリア
+		impl->currentContacts.clear(); // ゼロステップの場合は現在の接触もクリア
+	}
 }
 
 Id3Body* physics::d3::bulletWorld::CreateBody(const Id3BodyDef& bodyDef)

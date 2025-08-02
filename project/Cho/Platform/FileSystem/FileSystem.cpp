@@ -4,6 +4,7 @@
 #include "Resources/ResourceManager/ResourceManager.h"
 #include "Editor/EditorManager/EditorManager.h"
 #include "EngineCommand/EngineCommand.h"
+#include "EngineCommand/EngineCommands.h"
 #include <cstdlib>
 #include "Core/ChoLog/ChoLog.h"
 #include <windows.h>
@@ -261,6 +262,7 @@ bool cho::FileSystem::SaveGameSettings(const std::wstring& projectName, const ch
     j["fixedDeltaTime"] = settings.fixedDeltaTime;
     j["debugMode"] = settings.debugMode;
 	j["skyTexName"] = std::filesystem::path(settings.skyTexName).string();
+	j["gravity"] = { settings.gravity.x, settings.gravity.y, settings.gravity.z };
 
     try
     {
@@ -299,6 +301,20 @@ bool cho::FileSystem::LoadGameSettings(const std::wstring& filePath)
         settings.fixedDeltaTime = j.value("fixedDeltaTime", 1.0f / 60.0f);
         settings.debugMode = j.value("debugMode", false);
 		settings.skyTexName = std::filesystem::path(j.value("skyTexName", "")).wstring();
+		// 重力の読み込み,値がなければデフォルト値を使用
+        if (j.contains("gravity") && j["gravity"].is_array() && j["gravity"].size() >= 3)
+        {
+            settings.gravity = Vector3(
+                j["gravity"][0].get<float>(),
+                j["gravity"][1].get<float>(),
+                j["gravity"][2].get<float>()
+            );
+        }
+        else
+        {
+            settings.gravity = Vector3(0.0f, -9.81f, 0.0f);
+        }
+		// ゲーム設定をグローバルに保存
 		cho::FileSystem::g_GameSettings = settings;
 
         return true;
@@ -1191,6 +1207,8 @@ void cho::FileSystem::SaveProject(EditorManager* editorManager, SceneManager* sc
     // Skyboxtexの保存
     std::wstring skyTexName = editorManager->GetEngineCommand()->GetResourceManager()->GetSkyboxTextureName();
     g_GameSettings.skyTexName = skyTexName;
+	// 重力の保存
+	g_GameSettings.gravity = editorManager->GetEngineCommand()->GetGameCore()->GetPhysicsWorld3D()->GetGravity();
     cho::FileSystem::SaveGameSettings(projectPath, g_GameSettings);
     // SceneFile
 	// 編集されたシーンを保存
@@ -1217,6 +1235,9 @@ bool cho::FileSystem::LoadProjectFolder(const std::wstring& projectName, EngineC
     // 全ファイル走査（サブディレクトリ含む）
     ScanFolder(projectPath,engineCommand);
     engineCommand->GetResourceManager()->SetSkyboxTextureName(g_GameSettings.skyTexName);
+	Vector3 gravityVector3 = g_GameSettings.gravity;
+    std::unique_ptr<SetGravityCommand> setGravity = std::make_unique<SetGravityCommand>(gravityVector3);
+    engineCommand->ExecuteCommand(std::move(setGravity));
 	// 最初のシーンをロード
     engineCommand->GetEditorManager()->ChangeEditingScene(g_GameSettings.startScene);
     return true;

@@ -1399,6 +1399,11 @@ void Rigidbody3DSystem::FinalizeComponent(Entity e, TransformComponent& transfor
 
 void Rigidbody3DSystem::StepSimulation()
 {
+	if (m_Paused)
+	{
+		m_World->Step(0.0f);// ゼロステップで更新しない
+		return;
+	}
 	float deltaTime = DeltaTime();
 	if (deltaTime <= 0.0f) return; // 0以下は無視
 	m_World->Step(deltaTime);

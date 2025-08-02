@@ -238,8 +238,7 @@ ObjectHandle GameWorld::CreateGameObjectCopy(const ObjectHandle& src)
 	// Entityを取得
 	Entity entity = m_pECSManager->CopyEntity(src.entity);
 	handle.entity = entity;
-	// 基本コンポーネントを追加
-	m_pECSManager->AddComponent<TransformComponent>(handle.entity);
+
 	ChoSystem::Transform transform(entity, m_pECSManager);
 	// オブジェクトIDを取得
 	uint32_t objectID = static_cast<uint32_t>(m_pGameObjects[0].push_back(FVector<std::unique_ptr<GameObject>>()));

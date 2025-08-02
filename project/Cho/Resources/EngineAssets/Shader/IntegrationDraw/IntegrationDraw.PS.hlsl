@@ -130,14 +130,13 @@ PixelShaderOutput main(VSOut input) {
         }
         // ライティング結果と環境光を加算
         lig.rgb += ambientColor.rgb;
-        // 環境マップ
-        float3 reflectedVector = reflect(input.cameraPosition, normalize(input.normal));
-        float4 environmentColor = gCubeTextures.Sample(gSampler, input.normal);
         // 合計
         finalColor.rgb = material.color.rgb * textureColor.rgb * lig.rgb;
         if (material.cubeTextureID != 0)
         {
             // 環境マップが有効なら環境マップを加算
+            float3 reflectedVector = reflect(input.cameraPosition, normalize(input.normal));
+            float4 environmentColor = gCubeTextures.Sample(gSampler, input.normal);
             finalColor.rgb += environmentColor.rgb;
         }
         finalColor.a = material.color.a * textureColor.a;
