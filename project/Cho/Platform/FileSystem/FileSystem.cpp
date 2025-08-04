@@ -1367,7 +1367,7 @@ void cho::FileSystem::ScriptProject::UpdateVcxproj()
     // ライブラリディレクトリ
     //fs::path libraryPath = currentPath / "../generated/outputs/$(Configuration)/";
     //fs::path libraryPath2 = includeBase / "../../";
-    fs::path libraryPath = "$(ProjectDir)../../../generated/$(Configuration)/";
+    fs::path libraryPath = "$(ProjectDir)../../../generated/outputs/$(Configuration)/";
     fs::path libraryPath2 = "$(ProjectDir)../../";
 
     // パスの正規化
