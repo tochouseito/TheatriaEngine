@@ -186,6 +186,8 @@ void GameCore::RegisterECSEvents()
 		[&]([[maybe_unused]] Entity src, [[maybe_unused]] Entity dst, [[maybe_unused]] MeshFilterComponent* c) {
 			MeshFilterComponent& srcMeshFilter = *m_pECSManager->GetComponent<MeshFilterComponent>(src);
 			*c = srcMeshFilter;
+			// モデルのIDを取得
+			c->modelID = m_EngineCommand->GetResourceManager()->GetModelManager()->GetModelDataIndex(c->modelName);
 			// モデルのUseListに登録
 			TransformComponent* transform = m_pECSManager->GetComponent<TransformComponent>(dst);
 			m_EngineCommand->GetResourceManager()->GetModelManager()->RegisterModelUseList(c->modelID.value(), transform->mapID.value());

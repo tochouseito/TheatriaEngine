@@ -34,7 +34,7 @@
 // ComponentIDHelper.h
 #include "ComponentIDHelper.h"
 
-using Entity = int32_t;
+using Entity = uint32_t;
 using CompID = size_t;
 using Archetype = std::bitset<256>;
 
@@ -92,7 +92,7 @@ public:
     /*---------------------------------------------------------------------
         エンティティ管理
     ---------------------------------------------------------------------*/
-    ECSManager() : m_NextEntityID(-1) {}
+    ECSManager() : m_NextEntityID(static_cast<Entity>(-1)) {}
     ~ECSManager() = default;
 
     // 公開API
@@ -243,32 +243,101 @@ public:
     [[ nodiscard ]]
     Entity CopyEntity(const Entity& src)
     {
-        Archetype arch = GetArchetype(src);      // copy value
-        Entity   dst = GenerateEntity();
+        // ① 元のアーキタイプを取得
+        const Archetype arch = GetArchetype(src);
 
+        // ② 生成（ステージングなら GenerateEntity もステージングに入るよう修正済み）
+        Entity dst = GenerateEntity();
+
+        // ③ 各コンポーネントをコピー or ステージングコピー
         for (CompID id = 0; id < arch.size(); ++id)
         {
-            if (arch.test(id))
+            if (!arch.test(id)) continue;
+
+            auto* pool = m_TypeToComponents[id].get();
+            if (m_IsUpdating)
             {
-                m_TypeToComponents[id]->CopyComponent(src, dst);
+                // フレーム中はステージングバッファに積む
+                pool->CopyComponentStaging(src, dst);
+                // ステージングリストに積む
+                size_t idx = StagingIndexForEntity(dst);
+                m_StagingEntityArchetypes[idx] = arch;
+                NotifyComponentCopied(src, dst, id);
+            }
+            else
+            {
+                // フレーム外は即時コピー
+                pool->CopyComponent(src, dst);
+                NotifyComponentCopied(src, dst, id);
             }
         }
 
-        if (m_EntityToArchetype.size() <= dst)
+        // ④ アーキタイプの反映
+        if (m_IsUpdating)
         {
-            m_EntityToArchetype.resize(dst + 1);
+            for (auto& sys : m_Systems)
+                sys->InitializeEntity(dst);
         }
-        m_EntityToArchetype[dst] = arch;
-        m_ArchToEntities[arch].Add(dst);
-        Archetype dstArch = GetArchetype(dst);
-        for (CompID id = 0; id < dstArch.size(); ++id)
+        else
         {
-            if (dstArch.test(id))
+            // 即時反映
+            if (m_EntityToArchetype.size() <= dst)
+                m_EntityToArchetype.resize(dst + 1);
+            m_EntityToArchetype[dst] = arch;
+            m_ArchToEntities[arch].Add(dst);
+        }
+
+        return dst;
+    }
+
+    //-------------------- Copy into existing entity --------------------
+    void CopyEntity(const Entity& src, const Entity& dst)
+    {
+        // ① ソースのアーキタイプを取得
+        const Archetype arch = GetArchetype(src);
+
+        // ② 各コンポーネントをコピー or ステージングコピー
+        for (CompID id = 0; id < arch.size(); ++id)
+        {
+            if (!arch.test(id)) continue;
+            auto* pool = m_TypeToComponents[id].get();
+
+            if (m_IsUpdating)
             {
-                NotifyComponentCopied(src, dst, id); // Notify listeners
+                // ── ステージング中はステージングバッファに積む
+                pool->CopyComponentStaging(src, dst);
+
+                // ステージングエンティティリストにビットを反映
+                size_t idx = StagingIndexForEntity(dst);
+                m_StagingEntityArchetypes[idx].set(id);
+
+                // イベント通知
+                NotifyComponentCopied(src, dst, id);
+            }
+            else
+            {
+                // ── 通常フレームは即時コピー
+                pool->CopyComponent(src, dst);
+                NotifyComponentCopied(src, dst, id);
             }
         }
-        return dst;
+
+        // ③ アーキタイプ＆Initialize呼び出し
+        if (m_IsUpdating)
+        {
+            // ステージング状態でも、コピーされたコンポーネントごとに
+            // InitializeEntity を呼んで初期化処理を走らせる
+            for (auto& sys : m_Systems)
+                sys->InitializeEntity(dst);
+        }
+        else
+        {
+            // 本番バッファにアーキタイプを反映
+            if (m_EntityToArchetype.size() <= dst)
+                m_EntityToArchetype.resize(dst + 1);
+            m_EntityToArchetype[dst] = arch;
+            m_ArchToEntities[arch].Add(dst);
+        }
     }
 
     /// Entity e のステージングバッファ内インデックスを返す。

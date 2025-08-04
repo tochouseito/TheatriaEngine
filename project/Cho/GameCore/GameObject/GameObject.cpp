@@ -109,12 +109,11 @@ void GameObject::SetCurrentSceneName(const std::wstring& name) noexcept
 
 ScriptComponent* GameObject::GetScriptComponent() const noexcept
 {
-	//return m_ECS->GetComponent<ScriptComponent>(m_Entity);
-	return nullptr;
+	return m_ECS->GetComponent<ScriptComponent>(m_Handle.entity);
 }
 
-GameObject::GameObject(const ObjectHandle& handle, const std::wstring& name, const ObjectType& type,const ChoSystem::Transform& tf) :
-	m_Handle(handle), m_Type(type), transform(tf)
+GameObject::GameObject(ECSManager* ecsManager,const ObjectHandle& handle, const std::wstring& name, const ObjectType& type,const ChoSystem::Transform& tf) :
+	m_ECS(ecsManager), m_Handle(handle), m_Type(type), transform(tf)
 {
 	m_Active = true;
 	implGameObject = new ImplGameObject();
