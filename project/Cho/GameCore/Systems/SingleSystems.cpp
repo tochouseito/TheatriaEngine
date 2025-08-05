@@ -1330,6 +1330,8 @@ void Rigidbody3DSystem::InitializeComponent(Entity e, TransformComponent& transf
 	// Transformと同期（optional）
 	transform.position.x = rb.runtimeBody->GetPosition().x;
 	transform.position.y = rb.runtimeBody->GetPosition().y;
+
+	rb.runtimeBody->SetLinearVelocity(rb.velocity);
 }
 
 void Rigidbody3DSystem::UpdateComponent(Entity e, TransformComponent& transform, Rigidbody3DComponent& rb)
