@@ -1330,6 +1330,8 @@ void Rigidbody3DSystem::InitializeComponent(Entity e, TransformComponent& transf
 	// Transformと同期（optional）
 	transform.position.x = rb.runtimeBody->GetPosition().x;
 	transform.position.y = rb.runtimeBody->GetPosition().y;
+
+	rb.runtimeBody->SetLinearVelocity(rb.velocity);
 }
 
 void Rigidbody3DSystem::UpdateComponent(Entity e, TransformComponent& transform, Rigidbody3DComponent& rb)
@@ -1399,6 +1401,11 @@ void Rigidbody3DSystem::FinalizeComponent(Entity e, TransformComponent& transfor
 
 void Rigidbody3DSystem::StepSimulation()
 {
+	if (m_Paused)
+	{
+		m_World->Step(0.0f);// ゼロステップで更新しない
+		return;
+	}
 	float deltaTime = DeltaTime();
 	if (deltaTime <= 0.0f) return; // 0以下は無視
 	m_World->Step(deltaTime);

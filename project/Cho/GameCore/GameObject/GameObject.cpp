@@ -8,7 +8,13 @@ class GameObject::ImplGameObject
 {
 public:
 	ImplGameObject() = default;
-	~ImplGameObject() = default;
+	~ImplGameObject()
+	{
+		m_SrcEntity = std::nullopt; // クローン時のオリジナルのIDをクリア
+		m_SceneName = L""; // 管理しているSceneNameをクリア
+		// parameters.clear(); // スクリプト用パラメータをクリア
+		m_Name = L""; // ゲームオブジェクト名をクリア
+	}
 	std::function<std::optional<Entity>()> GetEntityFunc;	// スクリプト用ゲームオブジェクトID取得関数
 	std::function<void(const std::optional<Entity>& id)> SetEntityFunc;	// スクリプト用ゲームオブジェクトID設定関数
 	std::function<std::wstring()> GetNameFunc;	// スクリプト用ゲームオブジェクト名取得関数
@@ -109,12 +115,11 @@ void GameObject::SetCurrentSceneName(const std::wstring& name) noexcept
 
 ScriptComponent* GameObject::GetScriptComponent() const noexcept
 {
-	//return m_ECS->GetComponent<ScriptComponent>(m_Entity);
-	return nullptr;
+	return m_ECS->GetComponent<ScriptComponent>(m_Handle.entity);
 }
 
-GameObject::GameObject(const ObjectHandle& handle, const std::wstring& name, const ObjectType& type,const ChoSystem::Transform& tf) :
-	m_Handle(handle), m_Type(type), transform(tf)
+GameObject::GameObject(ECSManager* ecsManager,const ObjectHandle& handle, const std::wstring& name, const ObjectType& type,const ChoSystem::Transform& tf) :
+	m_ECS(ecsManager), m_Handle(handle), m_Type(type), transform(tf)
 {
 	m_Active = true;
 	implGameObject = new ImplGameObject();
@@ -147,5 +152,6 @@ GameObject::~GameObject()
 	if (implGameObject)
 	{
 		delete implGameObject;
+		implGameObject = nullptr;
 	}
 }

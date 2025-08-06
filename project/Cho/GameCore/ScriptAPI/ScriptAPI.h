@@ -179,7 +179,7 @@ namespace ChoSystem
     class CHO_API Rigidbody3D : public IComponentInterface
     {
 		friend class Marionnette;
-        public:
+    public:
         Rigidbody3D(Entity e, ECSManager* ecs) : IComponentInterface(e, ecs) {}
         ~Rigidbody3D() = default;
         Rigidbody3DComponent* operator->()
@@ -187,7 +187,9 @@ namespace ChoSystem
             UpdatePtr();
             return data;
 		}
-        private:
+
+
+    private:
         void UpdatePtr()
         {
             data = m_ECS->GetComponent<Rigidbody3DComponent>(m_Entity);

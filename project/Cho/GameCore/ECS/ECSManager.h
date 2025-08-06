@@ -70,7 +70,7 @@ struct IIComponentEventListener
     virtual void OnComponentCopied(Entity src, Entity dst, CompID compType) = 0;
     virtual void OnComponentRemoved(Entity e, CompID compType) = 0;
     virtual void OnComponentRemovedInstance(Entity e, CompID compType, void* rawVec, size_t idx) = 0;
-	// Prefabからの復元時に呼ばれる
+    // Prefabからの復元時に呼ばれる
     virtual void OnComponentRestoredFromPrefab(Entity, CompID) {}
 };
 
@@ -138,18 +138,27 @@ public:
                 if (auto sp = wp.lock())
                     sp->OnEntityCreated(entity);
             };
-        if (m_IsUpdating)
-            Defer(std::move(notify));
-        else
-            notify();
+        notify();
 
-        // ③ 新規エンティティは「初期化待ちリスト」に登録
         if (m_IsUpdating)
         {
-            auto enqueueInit = [this, entity]() {
-                m_PendingInitEntities.push_back(entity);
-                };
-            Defer(std::move(enqueueInit));
+            // Staging に積むだけ（本体に反映しない）
+            m_StagingEntities.push_back(entity);
+            m_StagingEntityActive.push_back(true);
+            m_StagingEntityArchetypes.push_back(Archetype{});
+        }
+        else
+        {
+            // 通常通り即時反映
+            if (m_EntityToActive.size() <= entity)
+                m_EntityToActive.resize(entity + 1, false);
+            m_EntityToActive[entity] = true;
+
+            if (m_EntityToArchetype.size() <= entity)
+                m_EntityToArchetype.resize(entity + 1);
+            m_EntityToArchetype[entity] = Archetype{};
+
+            m_ArchToEntities[Archetype{}].Add(entity);
         }
 
         return entity;
@@ -182,6 +191,11 @@ public:
             auto* pool = m_TypeToComponents[id].get();
             size_t cnt = pool->GetComponentCount(e);
 
+            for (auto& up : m_Systems)
+            {
+                up->FinalizeEntity(e);
+            }
+
             if (pool->IsMultiComponentTrait(id))
             {
                 void* raw = pool->GetRawComponent(e);
@@ -192,7 +206,7 @@ public:
             {
                 NotifyComponentRemoved(e, id);
             }
-			pool->Cleanup(e); // クリーンアップ呼び出し
+            pool->Cleanup(e); // クリーンアップ呼び出し
             pool->RemoveComponent(e);
         }
 
@@ -229,54 +243,176 @@ public:
     [[ nodiscard ]]
     Entity CopyEntity(const Entity& src)
     {
-        Archetype arch = GetArchetype(src);      // copy value
-        Entity   dst = GenerateEntity();
+        // ① 元のアーキタイプを取得
+        const Archetype arch = GetArchetype(src);
 
+        // ② 生成（ステージングなら GenerateEntity もステージングに入るよう修正済み）
+        Entity dst = GenerateEntity();
+
+        // ③ 各コンポーネントをコピー or ステージングコピー
         for (CompID id = 0; id < arch.size(); ++id)
         {
-            if (arch.test(id))
+            if (!arch.test(id)) continue;
+
+            auto* pool = m_TypeToComponents[id].get();
+            if (m_IsUpdating)
             {
-                m_TypeToComponents[id]->CopyComponent(src, dst);
+                // フレーム中はステージングバッファに積む
+                pool->CopyComponentStaging(src, dst);
+                // ステージングリストに積む
+                size_t idx = StagingIndexForEntity(dst);
+                m_StagingEntityArchetypes[idx] = arch;
+                NotifyComponentCopied(src, dst, id);
+            }
+            else
+            {
+                // フレーム外は即時コピー
+                pool->CopyComponent(src, dst);
+                NotifyComponentCopied(src, dst, id);
             }
         }
 
-        if (m_EntityToArchetype.size() <= dst)
+        // ④ アーキタイプの反映
+        if (m_IsUpdating)
         {
-            m_EntityToArchetype.resize(dst + 1);
+            for (auto& sys : m_Systems)
+                sys->InitializeEntity(dst);
         }
-        m_EntityToArchetype[dst] = arch;
-        m_ArchToEntities[arch].Add(dst);
-        Archetype dstArch = GetArchetype(dst);
-        for (CompID id = 0; id < dstArch.size(); ++id)
+        else
         {
-            if (dstArch.test(id))
+            // 即時反映
+            if (m_EntityToArchetype.size() <= dst)
+                m_EntityToArchetype.resize(dst + 1);
+            m_EntityToArchetype[dst] = arch;
+            m_ArchToEntities[arch].Add(dst);
+        }
+
+        return dst;
+    }
+
+    //-------------------- Copy into existing entity --------------------
+    void CopyEntity(const Entity& src, const Entity& dst)
+    {
+        // ① ソースのアーキタイプを取得
+        const Archetype arch = GetArchetype(src);
+
+        // ② 各コンポーネントをコピー or ステージングコピー
+        for (CompID id = 0; id < arch.size(); ++id)
+        {
+            if (!arch.test(id)) continue;
+            auto* pool = m_TypeToComponents[id].get();
+
+            if (m_IsUpdating)
             {
-                NotifyComponentCopied(src, dst, id); // Notify listeners
+                // ── ステージング中はステージングバッファに積む
+                pool->CopyComponentStaging(src, dst);
+
+                // ステージングエンティティリストにビットを反映
+                size_t idx = StagingIndexForEntity(dst);
+                m_StagingEntityArchetypes[idx].set(id);
+
+                // イベント通知
+                NotifyComponentCopied(src, dst, id);
+            }
+            else
+            {
+                // ── 通常フレームは即時コピー
+                pool->CopyComponent(src, dst);
+                NotifyComponentCopied(src, dst, id);
             }
         }
-        return dst;
+
+        // ③ アーキタイプ＆Initialize呼び出し
+        if (m_IsUpdating)
+        {
+            // ステージング状態でも、コピーされたコンポーネントごとに
+            // InitializeEntity を呼んで初期化処理を走らせる
+            for (auto& sys : m_Systems)
+                sys->InitializeEntity(dst);
+        }
+        else
+        {
+            // 本番バッファにアーキタイプを反映
+            if (m_EntityToArchetype.size() <= dst)
+                m_EntityToArchetype.resize(dst + 1);
+            m_EntityToArchetype[dst] = arch;
+            m_ArchToEntities[arch].Add(dst);
+        }
+    }
+
+    /// Entity e のステージングバッファ内インデックスを返す。
+    /// なければ追加して新しいインデックスを返す。
+    size_t StagingIndexForEntity(Entity e)
+    {
+        // 1) 既存エントリがあればその位置を返す
+        auto it = std::find(m_StagingEntities.begin(), m_StagingEntities.end(), e);
+        if (it != m_StagingEntities.end())
+        {
+            return static_cast<size_t>(std::distance(m_StagingEntities.begin(), it));
+        }
+
+        // 2) なければバッファ末尾に追加
+        size_t newIndex = m_StagingEntities.size();
+        m_StagingEntities.push_back(e);
+
+        // デフォルト active=true, archetype は空ビットセットで追加
+        m_StagingEntityActive.push_back(true);
+        m_StagingEntityArchetypes.push_back(Archetype{});
+
+        return newIndex;
     }
 
     /*-------------------- Copy selected components --------------------*/
     void CopyComponents(Entity src, Entity dst, bool overwrite = true)
     {
         const Archetype& archSrc = GetArchetype(src);
-        Archetype& archDst = m_EntityToArchetype[dst];
-        Archetype        oldArch = archDst;
 
+        // コピー先アーキタイプへの参照取得（ステージング中かどうかで使い分け）
+        Archetype* pArchDst;
+        Archetype  oldArch;
+        if (m_IsUpdating)
+        {
+            // dst がステージングリストにあればそのインデックスを取得、
+            // なければ追加してからインデックスを取得
+            size_t idx = StagingIndexForEntity(dst);
+            pArchDst = &m_StagingEntityArchetypes[idx];
+        }
+        else
+        {
+            if (m_EntityToArchetype.size() <= dst)
+                m_EntityToArchetype.resize(dst + 1);
+            pArchDst = &m_EntityToArchetype[dst];
+        }
+        oldArch = *pArchDst;
+
+        // ソースのビットセットを走査
         for (CompID id = 0; id < archSrc.size(); ++id)
         {
-            if (!archSrc.test(id)) continue;                // src 未保持
-            bool dstHas = archDst.test(id);
-            if (!overwrite && dstHas) continue;             // skip
-            m_TypeToComponents[id]->CopyComponent(src, dst);
-            NotifyComponentCopied(src, dst, id); // Notify listeners
-            if (!dstHas) archDst.set(id);
+            if (!archSrc.test(id)) continue;
+            if (!overwrite && pArchDst->test(id)) continue;
+
+            auto* pool = m_TypeToComponents[id].get();
+            if (m_IsUpdating)
+            {
+                // フレーム中はステージングコピー
+                pool->CopyComponentStaging(src, dst);
+            }
+            else
+            {
+                // フレーム外は即時コピー
+                pool->CopyComponent(src, dst);
+                NotifyComponentCopied(src, dst, id);
+            }
+
+            // アーキタイプのビットをセット
+            pArchDst->set(id);
         }
-        if (archDst != oldArch)
+
+        // 即時フレーム外ならバケット（EntityContainer）も更新
+        if (!m_IsUpdating && *pArchDst != oldArch)
         {
             m_ArchToEntities[oldArch].Remove(dst);
-            m_ArchToEntities[archDst].Add(dst);
+            m_ArchToEntities[*pArchDst].Add(dst);
         }
     }
 
@@ -284,19 +420,70 @@ public:
     template<ComponentType T>
     T* AddComponent(const Entity& entity)
     {
+        CompID type = ComponentPool<T>::GetID();
+
+        // プール取得 or 作成
+        auto [it, _] = m_TypeToComponents.try_emplace(
+            type,
+            std::make_shared<ComponentPool<T>>(4096)
+        );
+        auto pool = std::static_pointer_cast<ComponentPool<T>>(it->second);
+
+        // 更新中ならステージングに追加して即時参照可能にする
         if (m_IsUpdating)
         {
-            // 更新中ならコマンドを遅延キューへ
-            Defer([this, entity]() { AddComponent<T>(entity); });
-            return nullptr;
+            T* comp = pool->AddComponentStaging(entity); // ← 後述の新関数で staging に追加
+
+            // Archetype は staging にも保持しておく（後で FlushStagingEntities で反映）
+            if (std::find(m_StagingEntities.begin(), m_StagingEntities.end(), entity) == m_StagingEntities.end())
+            {
+                // Entity がまだ Staging に登録されていなければ追加
+                m_StagingEntities.push_back(entity);
+                m_StagingEntityActive.push_back(true);
+                m_StagingEntityArchetypes.push_back(Archetype{});
+            }
+
+            // Archetype を更新（set type ビット）
+            for (size_t i = 0; i < m_StagingEntities.size(); ++i)
+            {
+                if (m_StagingEntities[i] == entity)
+                {
+                    m_StagingEntityArchetypes[i].set(type);
+                    break;
+                }
+            }
+
+            if constexpr (HasInitialize<T>) comp->Initialize();
+            NotifyComponentAdded(entity, type);
+
+            // 対応するシステムだけを初期化
+            if constexpr (!IsMultiComponent<T>::value)
+            {
+                for (auto& up : m_Systems)
+                {
+                    if (auto sys = dynamic_cast<System<T>*>(up.get()))
+                    {
+                        sys->InitializeEntity(entity);
+                    }
+                }
+            }
+            else
+            {
+                for (auto& up : m_Systems)
+                {
+                    if (auto msys = dynamic_cast<MultiComponentSystem<T>*>(up.get()))
+                    {
+                        msys->InitializeEntity(entity);
+                    }
+                }
+            }
+
+            return comp; // 即時取得可能
         }
 
-        CompID type = ComponentPool<T>::GetID();
-        auto [it, _] = m_TypeToComponents.try_emplace(type, std::make_shared<ComponentPool<T>>(4096));
-        auto pool = std::static_pointer_cast<ComponentPool<T>>(it->second);
+        // 通常フロー（即時反映）
         T* comp = pool->AddComponent(entity);
 
-        // Archetype 更新
         if (m_EntityToArchetype.size() <= entity)
             m_EntityToArchetype.resize(entity + 1, Archetype{});
         Archetype& arch = m_EntityToArchetype[entity];
@@ -310,50 +497,57 @@ public:
         if constexpr (HasInitialize<T>) comp->Initialize();
         NotifyComponentAdded(entity, type);
 
-        // ③ コンポーネント追加後も「初期化待ちリスト」に登録
-        if (m_IsUpdating)
-        {
-            auto enqueueInit = [this, entity]() {
-                m_PendingInitEntities.push_back(entity);
-                };
-            Defer(std::move(enqueueInit));
-        }
-
-        return comp; // コンポーネントを返す
+        return comp;
     }
 
     /// Prefab復元時だけ使う、イベントを起こさずコンポーネントを追加
     template<ComponentType T>
     void PrefabAddComponent(Entity e, T const& comp)
     {
-        // 更新中なら遅延
+        CompID type = ComponentPool<T>::GetID();
+
+        // プール取得または生成
+        auto [it, _] = m_TypeToComponents.try_emplace(
+            type,
+            std::make_shared<ComponentPool<T>>(4096)
+        );
+        auto pool = std::static_pointer_cast<ComponentPool<T>>(it->second);
+
         if (m_IsUpdating)
         {
-            Defer([this, e, &comp]() {
-                this->PrefabAddComponent<T>(e, comp);
-                });
-            return;
+            // ▼ ステージングに即時追加
+            pool->AddPrefabComponentStaging(e, comp);
+
+            // ▼ Archetype も staging に反映
+            auto itE = std::find(m_StagingEntities.begin(), m_StagingEntities.end(), e);
+            if (itE != m_StagingEntities.end())
+            {
+                size_t i = std::distance(m_StagingEntities.begin(), itE);
+                m_StagingEntityArchetypes[i].set(type);
+            }
+            else
+            {
+                m_StagingEntities.push_back(e);
+                m_StagingEntityActive.push_back(true);
+                Archetype arch{};
+                arch.set(type);
+                m_StagingEntityArchetypes.push_back(arch);
+            }
+
+            return; // 遅延不要
         }
 
-        // 1) プールを生成 or 取得
-        CompID id = ComponentPool<T>::GetID();
-        auto [it, _] = m_TypeToComponents.try_emplace(
-            id,
-            std::make_shared<ComponentPool<T>>()
-        );
-        auto pool = static_cast<ComponentPool<T>*>(it->second.get());
+        // ▼ 通常の即時追加（更新中でない場合）
+        pool->AddPrefabComponent(e, comp);
 
-        // 2) 生コピー
-        pool->PrefabCloneRaw(e, const_cast<T*>(&comp));
-
-        // 3) Archetype の更新だけ行う（通知はしない）
         if (m_EntityToArchetype.size() <= e)
-            m_EntityToArchetype.resize(e + 1);
+            m_EntityToArchetype.resize(e + 1, Archetype{});
         Archetype& arch = m_EntityToArchetype[e];
-        if (!arch.test(id))
+
+        if (!arch.test(type))
         {
             m_ArchToEntities[arch].Remove(e);
-            arch.set(id);
+            arch.set(type);
             m_ArchToEntities[arch].Add(e);
         }
 
@@ -365,10 +559,39 @@ public:
     T* GetComponent(const Entity& entity)
     {
         CompID type = ComponentPool<T>::GetID();
-        if (entity >= m_EntityToArchetype.size() || !m_EntityToArchetype[entity].test(type)) return nullptr;
-        auto it = m_TypeToComponents.find(type);
-        if (it == m_TypeToComponents.end()) return nullptr;
-        auto pool = std::static_pointer_cast<ComponentPool<T>>(it->second);
+        bool has = false;
+
+        // ステージング中はステージングとメイン両方をチェック
+        if (m_IsUpdating)
+        {
+            // メイン側チェック
+            if (entity < m_EntityToArchetype.size() && m_EntityToArchetype[entity].test(type))
+            {
+                has = true;
+            }
+            else
+            {
+                // ステージングバッファ内のアーキタイプをチェック
+                auto it = std::find(m_StagingEntities.begin(),
+                    m_StagingEntities.end(), entity);
+                if (it != m_StagingEntities.end())
+                {
+                    size_t idx = it - m_StagingEntities.begin();
+                    has = m_StagingEntityArchetypes[idx].test(type);
+                }
+            }
+        }
+        else
+        {
+            // 通常フレームならメインのみチェック
+            has = (entity < m_EntityToArchetype.size() &&
+                m_EntityToArchetype[entity].test(type));
+        }
+
+        if (!has) return nullptr;
+
+        // プールから取得し、ステージング込みの GetComponent を呼ぶ
+        auto pool = static_cast<ComponentPool<T>*>(GetRawComponentPool(type));
         return pool->GetComponent(entity);
     }
 
@@ -398,6 +621,15 @@ public:
         auto pool = GetComponentPool<T>();
         if (!pool) return;
 
+        // ② 対応するシステムに「このコンポーネントを削除する前のFinalize」を呼ぶ
+        for (auto& up : m_Systems)
+        {
+            if (auto sys = dynamic_cast<System<T>*>(up.get()))
+            {
+                sys->FinalizeEntity(entity);
+            }
+        }
+
         NotifyComponentRemoved(entity, type);
         pool->RemoveComponent(entity);
 
@@ -419,6 +651,15 @@ public:
 
         auto* pool = GetComponentPool<T>();
         if (!pool) return;
+
+        // マルチ用 finalize 呼び
+        for (auto& up : m_Systems)
+        {
+            if (auto ms = dynamic_cast<MultiComponentSystem<T>*>(up.get()))
+            {
+                ms->FinalizeEntity(entity);
+            }
+        }
 
         NotifyComponentRemoved(entity, ComponentPool<T>::GetID());
         pool->RemoveAll(entity);
@@ -586,22 +827,13 @@ public:
 
         m_IsUpdating = false;
         FlushDeferred();
+        FlushStagingEntities();
+        FlushStagingComponents();
 
         // 総合計測終了
         auto t1_total = Clock::now();
         m_LastTotalUpdateTimeMs =
             std::chrono::duration<double, std::milli>(t1_total - t0_total).count();
-
-        //    各システムの InitializeEntity() を呼ぶ
-        for (Entity e : m_PendingInitEntities)
-        {
-            for (auto& sys : m_Systems)
-            {
-                if (sys->IsEnabled())
-                    sys->InitializeEntity(e);
-            }
-        }
-        m_PendingInitEntities.clear();
     }
 
     // ③ ゲーム終了後に一度だけ
@@ -676,6 +908,39 @@ public:
         return it == m_LastSystemFinalizeTimeMs.end() ? 0.0 : it->second;
     }
 
+    void FlushStagingEntities()
+    {
+        for (size_t i = 0; i < m_StagingEntities.size(); ++i)
+        {
+            Entity e = m_StagingEntities[i];
+
+            // m_EntityToActive を拡張して反映
+            if (m_EntityToActive.size() <= e)
+                m_EntityToActive.resize(e + 1, false);
+            m_EntityToActive[e] = m_StagingEntityActive[i];
+
+            // Archetype を反映
+            if (m_EntityToArchetype.size() <= e)
+                m_EntityToArchetype.resize(e + 1);
+            m_EntityToArchetype[e] = m_StagingEntityArchetypes[i];
+
+            // Archetype バケットに登録
+            m_ArchToEntities[m_StagingEntityArchetypes[i]].Add(e);
+        }
+
+        // 一時バッファをクリア
+        m_StagingEntities.clear();
+        m_StagingEntityActive.clear();
+        m_StagingEntityArchetypes.clear();
+    }
+    void FlushStagingComponents()
+    {
+        for (auto& [id, pool] : m_TypeToComponents)
+        {
+            pool->FlushStaging();
+        }
+    }
+
     /*---------------------------------------------------------------------
         EntityContainer (archetype bucket)
     ---------------------------------------------------------------------*/
@@ -725,6 +990,12 @@ public:
         virtual void CloneRawComponentTo(Entity dst, void* raw) = 0;
         /// 削除前のクリーンアップ呼び出し用
         virtual void Cleanup(Entity) {}
+        virtual void FlushStaging() {} // ステージングバッファをフラッシュ
+        virtual void CopyComponentStaging(Entity src, Entity dst)
+        {
+            // デフォルトでは通常コピーにフォールバック
+            CopyComponent(src, dst);
+        }
     };
 
     IComponentPool* GetRawComponentPool(CompID id)
@@ -773,16 +1044,41 @@ public:
             }
         }
 
+        T* AddComponentStaging(Entity e)
+        {
+            if constexpr (IsMultiComponent<T>::value)
+            {
+                return &m_StagingMulti[e].emplace_back();
+            }
+            else
+            {
+                // 上書きも可能
+                return &m_StagingSingle[e];
+            }
+        }
+
         /*-------------------- get ---------------------*/
         T* GetComponent(Entity e)
         {
             if constexpr (IsMultiComponent<T>::value)
             {
+                // ① 一時バッファにあるかチェック
+                auto itStaging = m_StagingMulti.find(e);
+                if (itStaging != m_StagingMulti.end() && !itStaging->second.empty())
+                    return &itStaging->second.front();
+
+                // ② 本番マップから取得
                 auto it = m_Multi.find(e);
                 return (it != m_Multi.end() && !it->second.empty()) ? &it->second.front() : nullptr;
             }
             else
             {
+                // ① 一時バッファにあるかチェック
+                auto itStaging = m_StagingSingle.find(e);
+                if (itStaging != m_StagingSingle.end())
+                    return &itStaging->second;
+
+                // ② 本番ストレージから取得
                 if (e >= m_EntityToIndex.size()) return nullptr;
                 uint32_t idx = m_EntityToIndex[e];
                 return (idx != kInvalid) ? &m_Storage[idx] : nullptr;
@@ -818,8 +1114,18 @@ public:
         /*-------------------- multi helpers -----------*/
         std::vector<T>* GetAllComponents(Entity e) requires IsMultiComponent<T>::value
         {
-            auto it = m_Multi.find(e);
-            return (it != m_Multi.end()) ? &it->second : nullptr;
+            // ① ステージングバッファ中のマルチコンポーネントを優先
+            auto itStaging = m_StagingMulti.find(e);
+            if (itStaging != m_StagingMulti.end() && !itStaging->second.empty())
+            {
+                return &itStaging->second;
+            }
+
+            // ② なければ本番マップを返す
+            auto itMain = m_Multi.find(e);
+            return (itMain != m_Multi.end() && !itMain->second.empty())
+                ? &itMain->second
+                : nullptr;
         }
         // マルチコンポーネント用：特定インデックスの要素を消す
         void RemoveInstance(Entity e, size_t index) requires IsMultiComponent<T>::value
@@ -880,6 +1186,28 @@ public:
             }
         }
 
+        // 更新中のステージング用コピーをオーバーライド
+        void CopyComponentStaging(Entity src, Entity dst) override
+        {
+            if constexpr (IsMultiComponent<T>::value)
+            {
+                // マルチコンポーネントなら全インスタンスをステージングに追加
+                auto it = m_Multi.find(src);
+                if (it == m_Multi.end()) return;
+                for (auto const& inst : it->second)
+                {
+                    m_StagingMulti[dst].push_back(inst);
+                }
+            }
+            else
+            {
+                // シングルコンポーネントなら最新の値をステージングバッファに上書き
+                T* srcComp = GetComponent(src);
+                if (!srcComp) return;
+                m_StagingSingle[dst] = *srcComp;
+            }
+        }
+
         void CloneRawComponentTo(Entity dst, void* raw) override
         {
             if constexpr (IsMultiComponent<T>::value)
@@ -918,6 +1246,44 @@ public:
             }
         }
 
+        void AddPrefabComponentStaging(Entity e, const T& comp)
+        {
+            if constexpr (IsMultiComponent<T>::value)
+            {
+                m_StagingMulti[e].push_back(comp);
+            }
+            else
+            {
+                m_StagingSingle[e] = comp;
+            }
+        }
+
+        void AddPrefabComponent(Entity e, const T& comp)
+        {
+            if constexpr (IsMultiComponent<T>::value)
+            {
+                m_Multi[e].push_back(comp);
+            }
+            else
+            {
+                if (m_EntityToIndex.size() <= e)
+                    m_EntityToIndex.resize(e + 1, kInvalid);
+                uint32_t& idx = m_EntityToIndex[e];
+                if (idx == kInvalid)
+                {
+                    idx = static_cast<uint32_t>(m_Storage.size());
+                    m_Storage.push_back(comp);
+                    if (m_IndexToEntity.size() <= idx)
+                        m_IndexToEntity.resize(idx + 1, kInvalid);
+                    m_IndexToEntity[idx] = e;
+                }
+                else
+                {
+                    m_Storage[idx] = comp;
+                }
+            }
+        }
+
         // ─── 削除前のクリーンアップ
         void Cleanup(Entity e) override
         {
@@ -940,7 +1306,7 @@ public:
 
         /*-------------------- static ID --------------*/
         static CompID GetID()
-        { 
+        {
             //static CompID id = ++ECSManager::m_NextCompTypeID; return id;
             return ComponentID<T>();
         }
@@ -954,14 +1320,22 @@ public:
         {
             if constexpr (IsMultiComponent<T>::value)
             {
-                auto it = m_Multi.find(e);
-                return (it != m_Multi.end() && !it->second.empty()) ? (void*)&it->second : nullptr;
+                auto itS = m_StagingMulti.find(e);
+                if (itS != m_StagingMulti.end() && !itS->second.empty())
+                    return (void*)&itS->second;
+                auto itM = m_Multi.find(e);
+                return (itM != m_Multi.end() && !itM->second.empty())
+                    ? (void*)&itM->second
+                    : nullptr;
             }
             else
             {
+                auto itS = m_StagingSingle.find(e);
+                if (itS != m_StagingSingle.end())
+                    return (void*)&itS->second;
                 if (e >= m_EntityToIndex.size()) return nullptr;
                 uint32_t idx = m_EntityToIndex[e];
-                return (idx != kInvalid) ? (void*)&m_Storage[idx] : nullptr;
+                return idx != kInvalid ? (void*)&m_Storage[idx] : nullptr;
             }
         }
 
@@ -992,11 +1366,51 @@ public:
                 return (m_EntityToIndex[e] != kInvalid) ? 1u : 0u;
             }
         }
+        void FlushStaging() override
+        {
+            if constexpr (IsMultiComponent<T>::value)
+            {
+                for (auto& [e, stagingVec] : m_StagingMulti)
+                {
+                    auto& vec = m_Multi[e];
+                    vec.insert(vec.end(), stagingVec.begin(), stagingVec.end());
+                }
+                m_StagingMulti.clear();
+            }
+            else
+            {
+                for (auto& [e, comp] : m_StagingSingle)
+                {
+                    if (m_EntityToIndex.size() <= e) m_EntityToIndex.resize(e + 1, kInvalid);
+                    uint32_t idx = m_EntityToIndex[e];
+
+                    if (idx == kInvalid)
+                    {
+                        idx = static_cast<uint32_t>(m_Storage.size());
+                        m_Storage.push_back(comp);
+                        if (m_IndexToEntity.size() <= idx) m_IndexToEntity.resize(idx + 1, kInvalid);
+                        m_EntityToIndex[e] = idx;
+                        m_IndexToEntity[idx] = e;
+                    }
+                    else
+                    {
+                        m_Storage[idx] = comp; // 上書き
+                    }
+                }
+                m_StagingSingle.clear();
+            }
+        }
+        const std::unordered_map<Entity, std::vector<T>>& GetStagingMulti() const
+        {
+            return m_StagingMulti;
+        }
     private:
         Storage                         m_Storage;          // dense
         std::vector<uint32_t>           m_EntityToIndex;    // entity -> index
         std::vector<Entity>             m_IndexToEntity;    // index  -> entity
         std::unordered_map<Entity, std::vector<T>> m_Multi; // multi‑instance
+        std::unordered_map<Entity, T> m_StagingSingle; // フレーム中に追加された T
+        std::unordered_map<Entity, std::vector<T>> m_StagingMulti;
     };
 
     template<ComponentType T>
@@ -1038,7 +1452,8 @@ public:
         }
         /// フレーム中に遅延で追加されたエンティティ／コンポーネントを受け取って、
         /// そのエンティティだけ初期化フェーズの処理を走らせたいときに使う
-        virtual void InitializeEntity(Entity /*e*/) {}
+        virtual void InitializeEntity(Entity) {}
+        virtual void FinalizeEntity(Entity) {}
         virtual int GetPriority() const { return priority; }
         virtual void SetPriority(int p) { priority = p; }
         virtual bool IsEnabled() const { return enabled; }
@@ -1126,14 +1541,23 @@ public:
         void InitializeEntity(Entity e) override
         {
             if (!m_Init) return;
-            // ① アーキタイプが揃っているか
-            auto arch = m_pEcs->GetArchetype(e);
-            if ((arch & m_Required) != m_Required) return;
-            // ② 必要なコンポーネントが存在＆アクティブか
+            // ステージングも含めて、必要なコンポーネントが存在＆アクティブかチェック
             if (!((m_pEcs->GetComponent<T>(e) && m_pEcs->GetComponent<T>(e)->IsActive()) && ...))
                 return;
-            // ③ 初期化コールバック
+            // 初期化コールバックを実行
             m_Init(e, *m_pEcs->GetComponent<T>(e)...);
+        }
+        void FinalizeEntity(Entity e) override
+        {
+            if (!m_Fin) return;
+            // 「必要なコンポーネントが揃っているか」
+            auto arch = m_pEcs->GetArchetype(e);
+            if ((arch & m_Required) != m_Required) return;
+            // 存在＆アクティブチェック
+            if (!((m_pEcs->GetComponent<T>(e) && m_pEcs->GetComponent<T>(e)->IsActive()) && ...))
+                return;
+            // 終了コールバック
+            m_Fin(e, *m_pEcs->GetComponent<T>(e)...);
         }
         const Archetype& GetRequired() const { return m_Required; }
     private:
@@ -1181,17 +1605,42 @@ public:
             if (!m_Init) return;
             auto* pool = m_pEcs->GetComponentPool<T>();
             if (!pool) return;
-            auto it = pool->Map().find(e);
-            if (it == pool->Map().end() || it->second.empty()) return;
 
-            // 有効なインスタンスだけ抽出
             std::vector<T> filtered;
-            for (auto& inst : it->second)
-                if (inst.IsActive())
-                    filtered.push_back(inst);
+
+            // ① ステージングバッファのチェック
+            const auto& stagingMap = pool->GetStagingMulti(); // m_StagingMulti への参照を返す
+            if (auto itS = stagingMap.find(e); itS != stagingMap.end())
+            {
+                for (auto& inst : itS->second)
+                    if (inst.IsActive())
+                        filtered.push_back(inst);
+            }
+
+            // ② 本番データのチェック
+            const auto& mainMap = pool->Map(); // 既存の m_Multi
+            if (auto itM = mainMap.find(e); itM != mainMap.end())
+            {
+                for (auto& inst : itM->second)
+                    if (inst.IsActive())
+                        filtered.push_back(inst);
+            }
 
             if (!filtered.empty())
                 m_Init(e, filtered);
+        }
+        void FinalizeEntity(Entity e) override
+        {
+            if (!m_Fin) return;
+            auto* pool = m_pEcs->GetComponentPool<T>();
+            if (!pool) return;
+            // 本番バッファのみ（ステージング反映後にここが呼ばれる想定）
+            auto it = pool->Map().find(e);
+            if (it == pool->Map().end() || it->second.empty()) return;
+            // 有効なものだけを抜き出して呼ぶ
+            std::vector<T> tmp;
+            for (auto& c : it->second) if (c.IsActive()) tmp.push_back(c);
+            if (!tmp.empty()) m_Fin(e, tmp);
         }
     private:
         // 実際にプールを走査してコールバックを呼び出す共通処理
@@ -1294,8 +1743,9 @@ private:
     Entity                  m_NextEntityID = 0;
     std::vector<bool>       m_EntityToActive;
     std::vector<Entity>     m_RecycleEntities;
-    std::vector<Entity>  m_PendingInitEntities;
-    //static inline CompID    m_NextCompTypeID = 0;
+    std::vector<Entity> m_StagingEntities;            // フレーム中に生成された Entity の一覧
+    std::vector<bool> m_StagingEntityActive;          // 各 Entity の一時アクティブ状態
+    std::vector<Archetype> m_StagingEntityArchetypes; // 各 Entity の一時 Archetype
     std::vector<Archetype>  m_EntityToArchetype;
     std::unordered_map<CompID, int> m_DeletePriority;   // デフォルトは 0 (CompID 昇順になる)
     std::vector<std::function<void()>>          m_DeferredCommands;

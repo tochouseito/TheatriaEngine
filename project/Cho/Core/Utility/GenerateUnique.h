@@ -18,28 +18,31 @@ namespace cho
         const std::wstring& baseName,
         const Container& nameList)
     {
-        std::wstring newName = baseName;
+        std::wstring base;
         int counter = 1;
 
-        std::wregex numberRegex(LR"(^(.+?) \((\d+)\)$)");
+        // 修正: 空白なし "Name(1)" にも対応
+        std::wregex numberRegex(LR"(^(.+?)\((\d+)\)$)");
         std::wsmatch match;
 
         if (std::regex_match(baseName, match, numberRegex))
         {
-            newName = match[1];
+            base = match[1];
             counter = std::stoi(match[2]) + 1;
         }
         else
         {
+            base = baseName;
             if (!ContainsKey(nameList, baseName))
                 return baseName;
         }
 
-        while (ContainsKey(nameList, newName + L"(" + std::to_wstring(counter) + L")"))
+        std::wstring newName;
+        do
         {
-            counter++;
-        }
+            newName = base + L"(" + std::to_wstring(counter++) + L")";
+        } while (ContainsKey(nameList, newName));
 
-        return newName + L"(" + std::to_wstring(counter) + L")";
+        return newName;
     }
 }

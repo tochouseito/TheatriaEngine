@@ -37,6 +37,14 @@ void GameCore::Start()
 {
 	// スクリプト読み込み（場所変更予定）
 	cho::FileSystem::ScriptProject::LoadScriptDLL();
+	// クオータニオンに変更
+	TransformSystem* transformSystem = m_pECSManager->GetSystem<TransformSystem>();
+	transformSystem->m_isQuaternion = true;
+	// 物理演算システムの有効化
+	Rigidbody2DSystem* rigidbody2DSystem = m_pECSManager->GetSystem<Rigidbody2DSystem>();
+	rigidbody2DSystem->SetEnabled(true);
+	Rigidbody3DSystem* rigidbody3DSystem = m_pECSManager->GetSystem<Rigidbody3DSystem>();
+	rigidbody3DSystem->SetPaused(false);
 	// StartSystemの実行
 	m_pECSManager->InitializeAllSystems();
 }
@@ -57,11 +65,14 @@ void GameCore::GameRun()
 	}
 	// スクリプト読み込み（場所変更予定）
 	cho::FileSystem::ScriptProject::LoadScriptDLL();
+	// クオータニオンに変更
+	TransformSystem* transformSystem = m_pECSManager->GetSystem<TransformSystem>();
+	transformSystem->m_isQuaternion = true;
 	// 物理演算システムの有効化
 	Rigidbody2DSystem* rigidbody2DSystem = m_pECSManager->GetSystem<Rigidbody2DSystem>();
 	rigidbody2DSystem->SetEnabled(true);
 	Rigidbody3DSystem* rigidbody3DSystem = m_pECSManager->GetSystem<Rigidbody3DSystem>();
-	rigidbody3DSystem->SetEnabled(true);
+	rigidbody3DSystem->SetPaused(false);
 	// StartSystemの実行
 	m_pECSManager->InitializeAllSystems();
 	// 実行中フラグを立てる
@@ -80,7 +91,10 @@ void GameCore::GameStop()
 	Rigidbody2DSystem* rigidbody2DSystem = m_pECSManager->GetSystem<Rigidbody2DSystem>();
 	rigidbody2DSystem->SetEnabled(false);
 	Rigidbody3DSystem* rigidbody3DSystem = m_pECSManager->GetSystem<Rigidbody3DSystem>();
-	rigidbody3DSystem->SetEnabled(false);
+	rigidbody3DSystem->SetPaused(true);
+	// オイラーに変更
+	TransformSystem* transformSystem = m_pECSManager->GetSystem<TransformSystem>();
+	transformSystem->m_isQuaternion = false;
 	// スクリプトのアンロード（場所変更予定）
 	cho::FileSystem::ScriptProject::UnloadScriptDLL();
 	// 実行中フラグを下ろす
@@ -172,6 +186,8 @@ void GameCore::RegisterECSEvents()
 		[&]([[maybe_unused]] Entity src, [[maybe_unused]] Entity dst, [[maybe_unused]] MeshFilterComponent* c) {
 			MeshFilterComponent& srcMeshFilter = *m_pECSManager->GetComponent<MeshFilterComponent>(src);
 			*c = srcMeshFilter;
+			// モデルのIDを取得
+			c->modelID = m_EngineCommand->GetResourceManager()->GetModelManager()->GetModelDataIndex(c->modelName);
 			// モデルのUseListに登録
 			TransformComponent* transform = m_pECSManager->GetComponent<TransformComponent>(dst);
 			m_EngineCommand->GetResourceManager()->GetModelManager()->RegisterModelUseList(c->modelID.value(), transform->mapID.value());
@@ -227,7 +243,11 @@ void GameCore::RegisterECSEvents()
 	m_pComponentEventDispatcher->RegisterOnRemove<ScriptComponent>(
 		[&]([[maybe_unused]] Entity e, [[maybe_unused]] ScriptComponent* c) {
 			// スクリプトのインスタンスを削除
-			//m_pObjectContainer->DeleteScriptInstance(c->objectID);
+			if (c->instance)
+			{
+				c->cleanupFunc();
+				c->instance = nullptr;
+			}
 		});
 	m_pComponentEventDispatcher->RegisterOnRestore<ScriptComponent>(
 		[&]([[maybe_unused]] Entity e, [[maybe_unused]] ScriptComponent* c) {

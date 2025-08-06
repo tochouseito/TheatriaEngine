@@ -66,6 +66,15 @@ CHO_API GameObject* ChoSystem::CloneGameObject(const GameObject* srcObj, Vector3
 	return newObject;
 }
 
+// ゲームオブジェクト削除
+CHO_API void ChoSystem::DestroyGameObject(GameObject* obj)
+{
+	EngineCommand* engineCommand = g_Engine->GetEngineCommand();
+	if (!obj) { return; }
+	std::unique_ptr<DeleteObjectCommand> command = std::make_unique<DeleteObjectCommand>(obj->GetHandle());
+	command->Execute(engineCommand);
+}
+
 CHO_API float ChoSystem::DeltaTime()
 {
 	return Timer::GetDeltaTime();

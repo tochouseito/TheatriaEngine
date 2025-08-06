@@ -46,6 +46,8 @@ namespace ChoSystem
 	CHO_API GameObject* FindGameObjectByName(const std::wstring& name);
 	// ゲームオブジェクト複製
 	CHO_API GameObject* CloneGameObject(const GameObject* srcObj, Vector3 generatePosition);
+	// ゲームオブジェクト削除
+	CHO_API void DestroyGameObject(GameObject* obj);
 	// デルタタイム取得
 	CHO_API float DeltaTime();
 	// Marionnette取得

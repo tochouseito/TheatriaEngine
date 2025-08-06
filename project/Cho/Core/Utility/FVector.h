@@ -1,7 +1,10 @@
 #pragma once
 #include <vector>
+#include <unordered_set>
 #include <cstdint>
+#include <stdexcept>
 #include <memory>
+#include <optional>
 
 // フリーリスト付き可変長配列
 template <typename T>
@@ -89,97 +92,91 @@ public:
     // 新しい要素を追加し、インデックスを返す
     size_t push_back(T&& value)
     {
-        if (!freeList.empty())
+        if (!freeStack.empty())
         {
-            size_t index = freeList.back();
-            freeList.pop_back();
+            size_t index = freeStack.back();
+            freeStack.pop_back();
+
             data[index] = std::move(value);
+            validFlags[index] = true;
             return index;
         }
+
         if (nextIndex >= data.size())
         {
             data.push_back(std::move(value));
+            validFlags.push_back(true); // 新しい要素は有効
         }
         else
         {
             data[nextIndex] = std::move(value);
+            validFlags[nextIndex] = true;
         }
+        ++validCount; // 有効な要素数を更新
         return nextIndex++;
     }
 
     template <typename... Args>
     size_t emplace_back(Args&&... args)
     {
-        if (!freeList.empty())
+        if (!freeStack.empty())
         {
-            size_t index = freeList.back();
-            freeList.pop_back();
+            size_t index = freeStack.back();
+            freeStack.pop_back();
 
-            data[index] = std::move(T(std::forward<Args>(args)...));
+            data[index].emplace(std::forward<Args>(args)...);
+            validFlags[index] = true;
             return index;
         }
 
         if (nextIndex >= data.size())
         {
-            data.emplace_back(std::forward<Args>(args)...);
+            data.emplace_back(std::in_place, std::forward<Args>(args)...);
+            validFlags.push_back(true);
         }
         else
         {
-            new (&data[nextIndex]) T(std::forward<Args>(args)...);
+            data[nextIndex].emplace(std::forward<Args>(args)...);
+            validFlags[nextIndex] = true;
         }
-
+        ++validCount; // 有効な要素数を更新
         return nextIndex++;
     }
 
     // 指定インデックスの要素を削除（フリーリストに追加）
     void erase(size_t index)
     {
-        if (index >= nextIndex)
-        {
-            throw std::out_of_range("Index out of range in FVector::erase");
-            return;
-        }
+        if (index >= nextIndex || !isValid(index)) return;
 
-        if (!isValid(index)) return;
-
-        // 明示的にデストラクタ呼び出し
-        data[index].~T();
-
-        freeList.push_back(index);
+        data[index].reset();
+        validFlags[index] = false;
+        freeStack.push_back(index);
+        --validCount; // 有効な要素数を更新
     }
 
     // インデックスアクセス
     T& operator[](size_t index)
     {
-        if (index >= nextIndex)
+        if (index >= nextIndex || !isValid(index))
         {
-            throw std::out_of_range("Index out of range in FVector::erase");
+            throw std::out_of_range("Index out of range or invalid in FVector::operator[]");
         }
-        return data[index];
+        return data[index].value();
     }
 
     const T& operator[](size_t index) const
     {
-        if (index >= nextIndex)
+        if (index >= nextIndex || !isValid(index))
         {
-            throw std::out_of_range("Index out of range in FVector::erase");
+            throw std::out_of_range("Index out of range or invalid in FVector::operator[]");
         }
-        return data[index];
+        return data[index].value();
     }
 
     // 要素が有効かどうか
-    bool isValid(size_t index) const
+    [[nodiscard]] inline bool isValid(size_t index) const noexcept
     {
-        // フリーリストにあったら無効な要素
-        for (const auto& freeIndex : freeList)
-        {
-            if (index == freeIndex)
-            {
-                return false;
-            }
-        }
-        // 有効な要素
-        return index < nextIndex;
+        return index < validFlags.size() && validFlags[index] != 0;
     }
 
     // 予約容量
@@ -192,18 +189,18 @@ public:
     void clear()
     {
         data.clear();
-        freeList.clear();
+        validFlags.clear();
+        freeStack.clear();
         nextIndex = 0;
+        validCount = 0;
     }
 
     // 予約
     void reserve(size_t newCapacity)
     {
         data.reserve(newCapacity);
+        validFlags.reserve(newCapacity);
     }
-
-    // vectorの取得
-    std::vector<T>& GetVector() { return data; }
 
     T& back()
     {
@@ -211,7 +208,7 @@ public:
         {
             if (isValid(i))
             {
-                return data[i];
+                return data[i].value();
             }
         }
         throw std::out_of_range("FVector::back() called on empty or invalid container");
@@ -223,10 +220,16 @@ public:
         {
             if (isValid(i))
             {
-                return data[i];
+                return data[i].value();
             }
         }
         throw std::out_of_range("FVector::back() called on empty or invalid container");
+    }
+
+    // 有効な要素数を返す
+    size_t size() const
+    {
+        return validCount;
     }
 
     // 非const iterator
@@ -252,7 +255,9 @@ public:
 
 
 private:
-    std::vector<T> data;          // 実際のデータ
-    std::vector<size_t> freeList; // 再利用可能なインデックス
-    size_t nextIndex = 0;         // 次に追加する要素の位置
+    std::vector<std::optional<T>> data;     // データ本体
+    std::vector<size_t> freeStack;          // 再利用候補（順序管理用）
+    std::vector<uint8_t> validFlags;           // 有効/無効フラグ
+    size_t nextIndex = 0;
+    size_t validCount = 0; // 有効な要素の数（size()で使用）
 };

@@ -63,6 +63,7 @@ namespace cho
         float fixedDeltaTime = 1.0f / 60.0f;
         bool debugMode = false;
         std::wstring skyTexName;
+		Vector3 gravity = { 0.0f, 0.0f, 0.0f }; // 重力
     };
     struct FolderNode
     {

@@ -50,7 +50,7 @@ public:
 		}
 		return std::string(); // 無効な名前の場合は空のデータを返す
 	}
-	size_t GetScriptCount() { return m_ScriptNameContainer.GetVector().size(); }
+	size_t GetScriptCount() { return m_ScriptNameContainer.size(); }
 	FVector<std::string>& GetScriptNameContainer() { return m_ScriptNameContainer; } // スクリプト名コンテナを取得
 
 	void RegisterScript(const std::string& scriptName, ScriptFactoryFunc func);

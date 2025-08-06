@@ -14,6 +14,7 @@ class CHO_API GameObject
 public:
 	std::optional<Entity> GetSrcEntity() const noexcept;
 	ObjectHandle GetHandle() const noexcept { return m_Handle; }
+	void SetHandle(const ObjectHandle& handle) noexcept { m_Handle = handle; }
 	std::wstring GetName() const noexcept;
 	ObjectType GetType() const noexcept { return m_Type; }
 	std::string GetTag() const noexcept;
@@ -30,7 +31,7 @@ public:
 	void SetInactive() noexcept { m_Active = false; }
 	// スクリプトのインスタンスを取得
 	template<typename T>
-	T* GetScriptInstance() const noexcept
+	T* GetMarionnette() const noexcept
 	{
 		// TがMarionnetteを継承しているか確認
 		static_assert(std::is_base_of<Marionnette, T>::value, "T must be derived from Marionnette");
@@ -55,11 +56,15 @@ private:
 	class ImplGameObject;
 	ImplGameObject* implGameObject = nullptr;
 
+	// ECSManagerへのポインタ
+	ECSManager* m_ECS = nullptr;
+
 	// スクリプトインスタンス取得関数補助
 	ScriptComponent* GetScriptComponent() const noexcept;
 public:
 	// コンストラクタ
 	GameObject(
+		ECSManager* ecsManager,
 		const ObjectHandle& handle,
 		const std::wstring& name,
 		const ObjectType& type,

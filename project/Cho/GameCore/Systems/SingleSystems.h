@@ -283,6 +283,10 @@ public:
 		// いつもの処理
 		ECSManager::System<TransformComponent, Rigidbody3DComponent>::Update();
 	}
+	void SetPaused(bool paused)
+	{
+		m_Paused = paused;
+	}
 private:
 	void InitializeComponent([[maybe_unused]] Entity e, TransformComponent& transform, Rigidbody3DComponent& rb);
 	void UpdateComponent([[maybe_unused]] Entity e, TransformComponent& transform, Rigidbody3DComponent& rb);
@@ -294,6 +298,7 @@ private:
 		m_World = world;
 	}
 	physics::d3::Id3World* m_World = nullptr;
+	bool m_Paused = true; // 一時停止フラグ
 };
 
 class MaterialSystem : public ECSManager::System<MaterialComponent>
