@@ -8,7 +8,13 @@ class GameObject::ImplGameObject
 {
 public:
 	ImplGameObject() = default;
-	~ImplGameObject() = default;
+	~ImplGameObject()
+	{
+		m_SrcEntity = std::nullopt; // クローン時のオリジナルのIDをクリア
+		m_SceneName = L""; // 管理しているSceneNameをクリア
+		// parameters.clear(); // スクリプト用パラメータをクリア
+		m_Name = L""; // ゲームオブジェクト名をクリア
+	}
 	std::function<std::optional<Entity>()> GetEntityFunc;	// スクリプト用ゲームオブジェクトID取得関数
 	std::function<void(const std::optional<Entity>& id)> SetEntityFunc;	// スクリプト用ゲームオブジェクトID設定関数
 	std::function<std::wstring()> GetNameFunc;	// スクリプト用ゲームオブジェクト名取得関数
@@ -146,5 +152,6 @@ GameObject::~GameObject()
 	if (implGameObject)
 	{
 		delete implGameObject;
+		implGameObject = nullptr;
 	}
 }

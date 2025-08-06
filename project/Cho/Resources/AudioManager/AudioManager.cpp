@@ -285,7 +285,7 @@ void AudioManager::SoundStop(SoundData& soundData)
 void AudioManager::Finalize()
 {
 	/*全ての音声データを解放*/
-	for (uint32_t i = 0; i < m_SoundData.GetVector().size(); ++i)
+	for (uint32_t i = 0; i < m_SoundData.size(); ++i)
 	{
 		SoundUnLord(i);
 	}

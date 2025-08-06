@@ -221,6 +221,8 @@ ObjectHandle GameWorld::AddGameObjectClone(const ObjectHandle& src)
 	std::wstring newName = GenerateUniqueName<std::unordered_map<std::wstring, ObjectHandle>>(srcGameObject->GetName(), m_ObjectHandleMap);
 	// srcのクローンリストに追加
 	handle.cloneID = static_cast<uint32_t>(m_pGameObjects[src.sceneID][src.objectID].push_back(std::make_unique<GameObject>(m_pECSManager,handle, newName, srcGameObject->GetType(),transform)));
+	GameObject* dstGameObject = m_pGameObjects[src.sceneID][src.objectID][handle.cloneID].get();
+	dstGameObject->SetHandle(handle); // クローンIDを設定
 	// Entityにコンポーネントを追加
 	// AddDefaultComponentsToGameObject(handle, srcGameObject->GetType());
 	// 辞書に登録

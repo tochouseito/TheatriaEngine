@@ -14,6 +14,7 @@ class CHO_API GameObject
 public:
 	std::optional<Entity> GetSrcEntity() const noexcept;
 	ObjectHandle GetHandle() const noexcept { return m_Handle; }
+	void SetHandle(const ObjectHandle& handle) noexcept { m_Handle = handle; }
 	std::wstring GetName() const noexcept;
 	ObjectType GetType() const noexcept { return m_Type; }
 	std::string GetTag() const noexcept;
