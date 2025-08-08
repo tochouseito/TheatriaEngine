@@ -90,6 +90,12 @@ void TransformSystem::priorityUpdate()
 
 void TransformSystem::UpdateComponent(Entity e, TransformComponent& transform)
 {
+	// TransformIDがないならエラー
+	if (!transform.mapID.has_value())
+	{
+		Log::Write(LogLevel::Assert, "TransformComponent does not have a mapID. Please initialize the TransformComponent before updating.");
+	}
+
 	// 度数からラジアンに変換
 	Vector3 radians = chomath::DegreesToRadians(transform.degrees);
 	Rigidbody3DComponent* rb3d = m_pEcs->GetComponent<Rigidbody3DComponent>(e);

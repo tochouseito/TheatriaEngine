@@ -114,28 +114,28 @@ struct MaterialEditor::Impl
 MaterialEditor::MaterialEditor(EditorManager* editorManager) :
 	BaseEditor(editorManager), impl(std::make_unique<Impl>())
 {
-	// node editorの初期化
-	ed::Config config;
-	config.SettingsFile = "MaterialEditor.json"; // 設定ファイルのパス
-	impl->m_NodeEditorContext = ed::CreateEditor(&config);
-	// ed::SetCurrentEditor(m_NodeEditorContext);
-	ResourceManager* resM = m_EditorManager->GetEngineCommand()->GetResourceManager();
-	TextureManager* texM = resM->GetTextureManager();
-    std::string dataPaht = "External/imgui_Extensions/imgui-node-editor/examples/blueprints-example/data/";
-    texM->LoadTextureFile(
-        dataPaht + "BlueprintBackground.png");
-    texM->LoadTextureFile(
-        dataPaht + "ic_save_white_24dp.png");
-    texM->LoadTextureFile(
-        dataPaht + "ic_restore_white_24dp.png");
+	//// node editorの初期化
+	//ed::Config config;
+	//config.SettingsFile = "MaterialEditor.json"; // 設定ファイルのパス
+	//impl->m_NodeEditorContext = ed::CreateEditor(&config);
+	//// ed::SetCurrentEditor(m_NodeEditorContext);
+	//ResourceManager* resM = m_EditorManager->GetEngineCommand()->GetResourceManager();
+	//TextureManager* texM = resM->GetTextureManager();
+ //   std::string dataPaht = "External/imgui_Extensions/imgui-node-editor/examples/blueprints-example/data/";
+ //   texM->LoadTextureFile(
+ //       dataPaht + "BlueprintBackground.png");
+ //   texM->LoadTextureFile(
+ //       dataPaht + "ic_save_white_24dp.png");
+ //   texM->LoadTextureFile(
+ //       dataPaht + "ic_restore_white_24dp.png");
 
-    // handle
-	PixelBuffer* headerBackground = resM->GetBuffer<PixelBuffer>(texM->GetTextureID(L"header_background.png"));
-    PixelBuffer* saveIcon = resM->GetBuffer<PixelBuffer>(texM->GetTextureID(L"ic_save_white_24dp.png"));
-    PixelBuffer* restoreIcon = resM->GetBuffer<PixelBuffer>(texM->GetTextureID(L"ic_restore_white_24dp.png"));
-    impl->m_HeaderBackground = (ImTextureID)headerBackground->GetSRVGpuHandle().ptr;
-	impl->m_SaveIcon = (ImTextureID)saveIcon->GetSRVGpuHandle().ptr;
-	impl->m_restoreIcon = (ImTextureID)restoreIcon->GetSRVGpuHandle().ptr;
+ //   // handle
+	//PixelBuffer* headerBackground = resM->GetBuffer<PixelBuffer>(texM->GetTextureID(L"header_background.png"));
+ //   PixelBuffer* saveIcon = resM->GetBuffer<PixelBuffer>(texM->GetTextureID(L"ic_save_white_24dp.png"));
+ //   PixelBuffer* restoreIcon = resM->GetBuffer<PixelBuffer>(texM->GetTextureID(L"ic_restore_white_24dp.png"));
+ //   impl->m_HeaderBackground = (ImTextureID)headerBackground->GetSRVGpuHandle().ptr;
+	//impl->m_SaveIcon = (ImTextureID)saveIcon->GetSRVGpuHandle().ptr;
+	//impl->m_restoreIcon = (ImTextureID)restoreIcon->GetSRVGpuHandle().ptr;
 }
 
 MaterialEditor::~MaterialEditor()
@@ -155,7 +155,7 @@ void MaterialEditor::Initialize()
 
 void MaterialEditor::Update()
 {
-	Window();
+	//Window();
 }
 
 void MaterialEditor::Window()

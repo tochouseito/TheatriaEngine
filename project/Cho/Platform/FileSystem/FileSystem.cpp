@@ -1363,6 +1363,7 @@ void cho::FileSystem::ScriptProject::UpdateVcxproj()
     fs::path scriptPath = includeBase / "Cho/GameCore/Marionnette";
 	fs::path contextPath = includeBase / "Cho/GameCore/ScriptAPI";
     fs::path projectDirPath = "$(ProjectDir)";
+    fs::path projectDirPath2 = "$(ProjectDir)Assets/Scripts";
 
     // ライブラリディレクトリ
     //fs::path libraryPath = currentPath / "../generated/outputs/$(Configuration)/";
@@ -1438,7 +1439,7 @@ void cho::FileSystem::ScriptProject::UpdateVcxproj()
     vcxFile << "      <Optimization>Disabled</Optimization>\n";
     vcxFile << "      <MultiProcessorCompilation>true</MultiProcessorCompilation>\n";
     vcxFile << "      <PreprocessorDefinitions>_DEBUG;EXPORT_SCRIPT_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>\n";
-    vcxFile << "      <AdditionalIncludeDirectories>" << projectDirPath.string() << ";" << physicsPath.string() << ";" << contextPath.string() << ";" << scriptPath.string() << ";" << mathLibPath.string() << ";" << mathPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
+    vcxFile << "      <AdditionalIncludeDirectories>" << projectDirPath.string() << ";" << projectDirPath2.string() << ";" << physicsPath.string() << ";" << contextPath.string() << ";" << scriptPath.string() << ";" << mathLibPath.string() << ";" << mathPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
     vcxFile << "      <LanguageStandard>stdcpp20</LanguageStandard>\n";
     vcxFile << "      <LanguageStandard_C>stdc17</LanguageStandard_C>\n";
     vcxFile << "      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>\n";
@@ -1460,7 +1461,7 @@ void cho::FileSystem::ScriptProject::UpdateVcxproj()
     vcxFile << "      <Optimization>Disabled</Optimization>\n";
     vcxFile << "      <MultiProcessorCompilation>true</MultiProcessorCompilation>\n";
     vcxFile << "      <PreprocessorDefinitions>NDEBUG;EXPORT_SCRIPT_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>\n";
-    vcxFile << "      <AdditionalIncludeDirectories>" << projectDirPath.string() << ";" << physicsPath.string() << ";" << contextPath.string() << ";" << scriptPath.string() << ";" << mathLibPath.string() << ";" << mathPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
+    vcxFile << "      <AdditionalIncludeDirectories>" << projectDirPath.string() << ";" << projectDirPath2.string() << ";" << physicsPath.string() << ";" << contextPath.string() << ";" << scriptPath.string() << ";" << mathLibPath.string() << ";" << mathPath.string() << ";" << systemPath.string() << ";" << ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
     vcxFile << "      <LanguageStandard>stdcpp20</LanguageStandard>\n";
     vcxFile << "      <LanguageStandard_C>stdc17</LanguageStandard_C>\n";
     vcxFile << "      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>\n";
@@ -2268,7 +2269,6 @@ void cho::FileSystem::GameBuilder::CopyFilesToBuildFolder([[maybe_unused]]Engine
             fs::path(L"GameProjects") / m_sProjectName / fs::path(L"ProjectSettings"),
             L"Cho/Engine",
             L"Cho/Resources/EngineAssets",
-            L"Cho/Externals/ChoMath",
             L"Cho/pch",
             L"Cho/APIExportsMacro.h",
             L"Cho/ChoEngineAPI.h",

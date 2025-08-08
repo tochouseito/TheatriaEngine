@@ -26,7 +26,15 @@ bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 		filePathString.c_str(),
 		aiProcess_FlipWindingOrder |
 		aiProcess_FlipUVs |
-		aiProcess_Triangulate);// 三角形化
+		aiProcess_Triangulate|				// 三角形化
+		aiProcess_ValidateDataStructure|	// 読み込んだシーンの構造が内部的に正しいかチェックし、異常があればログに出す
+		aiProcess_JoinIdenticalVertices|		// 「位置・法線・UV」などすべての属性が同一の頂点をマージして1つにまとめる
+		aiProcess_SortByPType|					// プリミティブタイプ（点・線・三角形など）を分類します
+		aiProcess_ImproveCacheLocality|		// インデックスバッファをGPUキャッシュに優しい順番に並び替える
+		aiProcess_RemoveRedundantMaterials|	// 他と同じ内容のマテリアルを1つに統合します
+		//aiProcess_FindDegenerates				// 退化ポリゴン（面積ゼロの三角形、重なった点）を検出・削除します ←indexが壊れるのでOFF
+		aiProcess_FindInvalidData				// NaNやInfなどの無効な頂点データや法線を検出・修正します
+		);
 	if (!scene)
 	{
 		Log::Write(LogLevel::Assert, "Assimp ReadFile Error");
@@ -89,6 +97,10 @@ bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 			// aiProcess_Triangulate を使っているので常に face.mNumIndices == 3
 			for (uint32_t e = 0;e < 3;++e)
 			{
+				if (face.mIndices[e] >= vertexCount)
+				{
+					Log::Write(LogLevel::Assert, "MeshData Index out of range: " + std::to_string(face.mIndices[e]));
+				}
 				meshData.indices[idx++] = face.mIndices[e];
 			}
 		}

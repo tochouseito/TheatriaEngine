@@ -33,7 +33,7 @@ void TextureManager::LoadTextureFile(const fs::path& filePath)
             // 他のフォーマット (.png, .jpg など) を読み込む
             hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
         }
-        Log::Write(LogLevel::Assert, "Texture loaded.", hr);
+        Log::Write(LogLevel::Assert, "Texture loaded." + filePath.string(), hr);
 
         // ミップマップの生成
         DirectX::ScratchImage mipImages{};

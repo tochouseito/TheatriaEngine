@@ -249,27 +249,47 @@ public:
         // ② 生成（ステージングなら GenerateEntity もステージングに入るよう修正済み）
         Entity dst = GenerateEntity();
 
-        // ③ 各コンポーネントをコピー or ステージングコピー
+        // ── コピーする CompID を集めて優先度順にソート ──
+        std::vector<CompID> toCopy;
         for (CompID id = 0; id < arch.size(); ++id)
-        {
-            if (!arch.test(id)) continue;
+            if (arch.test(id))
+                toCopy.push_back(id);
 
+        std::sort(toCopy.begin(), toCopy.end(),
+            [&](CompID a, CompID b) {
+                int pa = m_CopyPriority.count(a) ? m_CopyPriority[a] : 0;
+                int pb = m_CopyPriority.count(b) ? m_CopyPriority[b] : 0;
+                if (pa != pb) return pa < pb;
+                return a < b;
+            });
+
+        // ③ 優先度順にしてからコピー＆通知
+        for (CompID id : toCopy)
+        {
             auto* pool = m_TypeToComponents[id].get();
             if (m_IsUpdating)
             {
-                // フレーム中はステージングバッファに積む
                 pool->CopyComponentStaging(src, dst);
-                // ステージングリストに積む
                 size_t idx = StagingIndexForEntity(dst);
-                m_StagingEntityArchetypes[idx] = arch;
-                NotifyComponentCopied(src, dst, id);
+                m_StagingEntityArchetypes[idx].set(id);
             }
             else
             {
-                // フレーム外は即時コピー
+                // 通常フレーム：即時コピー
                 pool->CopyComponent(src, dst);
-                NotifyComponentCopied(src, dst, id);
+
+                // → ここで本番バッファにもビットを立てる
+                if (m_EntityToArchetype.size() <= dst)
+                    m_EntityToArchetype.resize(dst + 1);
+                Archetype& archDst = m_EntityToArchetype[dst];
+                if (!archDst.test(id))
+                {
+                    m_ArchToEntities[archDst].Remove(dst);
+                    archDst.set(id);
+                    m_ArchToEntities[archDst].Add(dst);
+                }
             }
+            NotifyComponentCopied(src, dst, id);
         }
 
         // ④ アーキタイプの反映
@@ -296,43 +316,58 @@ public:
         // ① ソースのアーキタイプを取得
         const Archetype arch = GetArchetype(src);
 
-        // ② 各コンポーネントをコピー or ステージングコピー
+        // ── コピーする CompID を集めて優先度順にソート ──
+        std::vector<CompID> toCopy;
         for (CompID id = 0; id < arch.size(); ++id)
-        {
-            if (!arch.test(id)) continue;
-            auto* pool = m_TypeToComponents[id].get();
+            if (arch.test(id))
+                toCopy.push_back(id);
 
+        std::sort(toCopy.begin(), toCopy.end(),
+            [&](CompID a, CompID b) {
+                int pa = m_CopyPriority.count(a) ? m_CopyPriority[a] : 0;
+                int pb = m_CopyPriority.count(b) ? m_CopyPriority[b] : 0;
+                if (pa != pb) return pa < pb;
+                return a < b;
+            });
+
+        // ③ 優先度順にしてからコピー＆通知
+        for (CompID id : toCopy)
+        {
+            auto* pool = m_TypeToComponents[id].get();
             if (m_IsUpdating)
             {
-                // ── ステージング中はステージングバッファに積む
                 pool->CopyComponentStaging(src, dst);
-
-                // ステージングエンティティリストにビットを反映
                 size_t idx = StagingIndexForEntity(dst);
                 m_StagingEntityArchetypes[idx].set(id);
-
-                // イベント通知
-                NotifyComponentCopied(src, dst, id);
             }
             else
             {
-                // ── 通常フレームは即時コピー
+                // 通常フレーム：即時コピー
                 pool->CopyComponent(src, dst);
-                NotifyComponentCopied(src, dst, id);
+
+                // → ここで本番バッファにもビットを立てる
+                if (m_EntityToArchetype.size() <= dst)
+                    m_EntityToArchetype.resize(dst + 1);
+                Archetype& archDst = m_EntityToArchetype[dst];
+                if (!archDst.test(id))
+                {
+                    m_ArchToEntities[archDst].Remove(dst);
+                    archDst.set(id);
+                    m_ArchToEntities[archDst].Add(dst);
+                }
             }
+            NotifyComponentCopied(src, dst, id);
         }
 
-        // ③ アーキタイプ＆Initialize呼び出し
+        // ④ アーキタイプの反映
         if (m_IsUpdating)
         {
-            // ステージング状態でも、コピーされたコンポーネントごとに
-            // InitializeEntity を呼んで初期化処理を走らせる
             for (auto& sys : m_Systems)
                 sys->InitializeEntity(dst);
         }
         else
         {
-            // 本番バッファにアーキタイプを反映
+            // 即時反映
             if (m_EntityToArchetype.size() <= dst)
                 m_EntityToArchetype.resize(dst + 1);
             m_EntityToArchetype[dst] = arch;
@@ -712,6 +747,13 @@ public:
         m_DeletePriority[ComponentPool<T>::GetID()] = priority;
     }
 
+    // コピー時の優先度を設定するテンプレート関数
+    template<ComponentType T>
+    void SetCopyPriority(int priority)
+    {
+        m_CopyPriority[ComponentPool<T>::GetID()] = priority;
+    }
+
     /*-------------------- Accessors ----------------------------------*/
     inline const Archetype& GetArchetype(Entity e) const
     {
@@ -826,9 +868,9 @@ public:
         }
 
         m_IsUpdating = false;
-        FlushDeferred();
         FlushStagingEntities();
         FlushStagingComponents();
+        FlushDeferred();
 
         // 総合計測終了
         auto t1_total = Clock::now();
@@ -1748,6 +1790,7 @@ private:
     std::vector<Archetype> m_StagingEntityArchetypes; // 各 Entity の一時 Archetype
     std::vector<Archetype>  m_EntityToArchetype;
     std::unordered_map<CompID, int> m_DeletePriority;   // デフォルトは 0 (CompID 昇順になる)
+    std::unordered_map<CompID, int> m_CopyPriority;   // コピー時の優先度マップ
     std::vector<std::function<void()>>          m_DeferredCommands;
     std::vector<std::weak_ptr<IEntityEventListener>>          m_EntityListeners;
     std::vector<std::unique_ptr<ISystem>>       m_Systems;

@@ -190,6 +190,7 @@ void GameCore::RegisterECSEvents()
 			c->modelID = m_EngineCommand->GetResourceManager()->GetModelManager()->GetModelDataIndex(c->modelName);
 			// モデルのUseListに登録
 			TransformComponent* transform = m_pECSManager->GetComponent<TransformComponent>(dst);
+			
 			m_EngineCommand->GetResourceManager()->GetModelManager()->RegisterModelUseList(c->modelID.value(), transform->mapID.value());
 		});
 	m_pComponentEventDispatcher->RegisterOnRemove<MeshFilterComponent>(
@@ -204,6 +205,7 @@ void GameCore::RegisterECSEvents()
 			c->modelID = m_EngineCommand->GetResourceManager()->GetModelManager()->GetModelDataIndex(c->modelName);
 			// モデルのUseListに登録
 			TransformComponent* transform = m_pECSManager->GetComponent<TransformComponent>(e);
+			
 			m_EngineCommand->GetResourceManager()->GetModelManager()->RegisterModelUseList(c->modelID.value(), transform->mapID.value());
 		});
 	// MeshRendererComponent
