@@ -12,7 +12,7 @@ void GameCore::Initialize(ResourceManager* resourceManager, GraphicsEngine* grap
 	// ECSマネージャの生成
 	m_pECSManager = std::make_unique<ECSManager>();
 	// ゲームワールドの生成
-	m_pGameWorld = std::make_unique<GameWorld>(m_pECSManager.get());
+	m_pGameWorld = std::make_unique<GameWorld>(this, m_pECSManager.get());
 	// シーンマネージャーの生成
 	m_pSceneManager = std::make_unique<SceneManager>(m_pGameWorld.get());
 	// 2dPhysicsワールドの生成
@@ -55,6 +55,12 @@ void GameCore::Update()
 	UpdateEnvironmentSetting();
 	// ゲームが実行中でなければreturn
 	m_pECSManager->UpdateAllSystems();
+	if (isRunning)
+	{
+		// GameWorld遅延キューの実行
+		m_pGameWorld->FlushDeferred();
+	}
+	
 }
 
 void GameCore::GameRun()
@@ -73,6 +79,8 @@ void GameCore::GameRun()
 	rigidbody2DSystem->SetEnabled(true);
 	Rigidbody3DSystem* rigidbody3DSystem = m_pECSManager->GetSystem<Rigidbody3DSystem>();
 	rigidbody3DSystem->SetPaused(false);
+	// AwakeSystem
+	m_pECSManager->AwakeAllSystems();
 	// StartSystemの実行
 	m_pECSManager->InitializeAllSystems();
 	// 実行中フラグを立てる
@@ -619,12 +627,10 @@ void GameCore::RegisterECSSystems(ResourceManager* resourceManager, GraphicsEngi
 {
 	// シングルシステム
 	// 初期化システムの登録
-	// ScriptInstanceGenerateSystem
-	m_pECSManager->AddSystem<ScriptInstanceGenerateSystem>();
-	ScriptInstanceGenerateSystem* scriptInstanceGenerateSystem = m_pECSManager->GetSystem<ScriptInstanceGenerateSystem>();
-	scriptInstanceGenerateSystem->SetGameWorld(m_pGameWorld.get());
 	// ScriptComponentSystem
 	m_pECSManager->AddSystem<ScriptSystem>();
+	ScriptSystem* scriptSystem = m_pECSManager->GetSystem<ScriptSystem>();
+	scriptSystem->SetGameWorld(m_pGameWorld.get());
 	// TransformComponentSystem
 	m_pECSManager->AddSystem<TransformSystem>();
 	TransformSystem* transformSystem = m_pECSManager->GetSystem<TransformSystem>();

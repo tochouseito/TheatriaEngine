@@ -188,6 +188,15 @@ namespace ChoSystem
             return data;
 		}
 
+        void SetTransform(const Vector3& pos);
+        /*void SetTransform(const Vector3& pos, const Quaternion& rot)
+        {
+
+        }
+        void SetTransform(const Vector3& pos, const Vector3& rot)
+        {
+
+        }*/
 
     private:
         void UpdatePtr()

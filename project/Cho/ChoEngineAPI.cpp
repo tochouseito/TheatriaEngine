@@ -63,6 +63,12 @@ CHO_API GameObject* ChoSystem::CloneGameObject(const GameObject* srcObj, Vector3
 	{
 		transform->position = generatePosition;
 	}
+	// Rigidbodyがあれば初期位置を指定
+	Rigidbody3DComponent* rb3d = engineCommand->GetGameCore()->GetECSManager()->GetComponent<Rigidbody3DComponent>(newObject->GetHandle().entity);
+	if(transform && rb3d && rb3d->runtimeBody)
+	{
+		rb3d->runtimeBody->SetTransform(transform->position);
+	}
 	return newObject;
 }
 

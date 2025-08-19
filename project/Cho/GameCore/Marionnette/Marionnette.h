@@ -23,18 +23,6 @@ public:
         T comp(gameObject.GetHandle().entity, ecsManager);
         return comp;
     }
-	/*template<cho::ComponentInterface::MarionnetteInterface T>
-    T* GetMarionnette() const
-    {
-        if(ScriptComponent* script = ecsManager->GetComponent<ScriptComponent>(gameObject.GetHandle().entity))
-        {
-            return static_cast<T*>(script->instance);
-        }
-        else
-        {
-			return nullptr;
-        }
-    }*/
 public:
 	GameObject& gameObject;
 	ChoSystem::Transform transform;

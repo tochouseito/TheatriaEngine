@@ -62,9 +62,17 @@ Quaternion physics::d3::bulletBody::GetRotation() const
 
 void physics::d3::bulletBody::SetTransform(const Vector3& position, const Quaternion& rotation)
 {
-	btTransform transform;
+	btTransform transform = impl->rigidBody->getWorldTransform();
 	transform.setOrigin(btVector3(position.x, position.y, position.z));
 	transform.setRotation(btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w));
+	impl->rigidBody->getMotionState()->setWorldTransform(transform);
+	impl->rigidBody->setWorldTransform(transform); // 剛体のワールド変換を更新
+}
+
+void physics::d3::bulletBody::SetTransform(const Vector3& position)
+{
+	btTransform transform = impl->rigidBody->getWorldTransform();
+	transform.setOrigin(btVector3(position.x, position.y, position.z));
 	impl->rigidBody->getMotionState()->setWorldTransform(transform);
 	impl->rigidBody->setWorldTransform(transform); // 剛体のワールド変換を更新
 }

@@ -861,3 +861,8 @@
 //	auto* animation = m_ECS->GetComponent<AnimationComponent>(m_Entity);
 //	data = animation;
 //}
+
+void ChoSystem::Rigidbody3D::SetTransform(const Vector3& pos)
+{
+	data->runtimeBody->SetTransform(pos);
+}

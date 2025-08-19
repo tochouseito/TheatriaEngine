@@ -284,60 +284,6 @@ void CameraSystem::FinalizeComponent(Entity e, TransformComponent& transform, Ca
 	e; transform; camera;
 }
 
-void ScriptInstanceGenerateSystem::GenerateInstance(Entity e, ScriptComponent& script)
-{
-	if (script.scriptName.empty())
-	{
-		script.isActive = false;
-		return;
-	}
-	std::string funcName = "Create" + script.scriptName + "Script";
-	funcName.erase(std::remove_if(funcName.begin(), funcName.end(), ::isspace), funcName.end());
-	// CreateScript関数を取得
-	typedef Marionnette* (*CreateScriptFunc)(GameObject&);
-	CreateScriptFunc createScript = (CreateScriptFunc)GetProcAddress(cho::FileSystem::ScriptProject::m_DllHandle, funcName.c_str());
-	if (!createScript)
-	{
-		script.isActive = false;
-		return;
-	}
-	// スクリプトを生成
-	GameObject* object = m_pGameWorld->GetGameObject(e);
-	Marionnette* scriptInstance = createScript(*object);
-	if (!scriptInstance)
-	{
-		script.isActive = false;
-		return;
-	}
-	// Handleを取得
-	script.objectHandle = object->GetHandle();
-	// ECSをセット
-	scriptInstance->SetECSPtr(m_pEcs);
-	// スクリプトのStart関数とUpdate関数をラップ
-	script.startFunc = [scriptInstance]() {
-		scriptInstance->Start();
-		};
-	script.updateFunc = [scriptInstance]() {
-		scriptInstance->Update();
-		};
-	// インスタンスの解放用のクロージャを設定
-	script.cleanupFunc = [scriptInstance, this]() {
-		delete scriptInstance;
-		};
-	// 衝突関数をラップ
-	script.onCollisionEnterFunc = [scriptInstance](GameObject& other) {
-		scriptInstance->OnCollisionEnter(other);
-		};
-	script.onCollisionStayFunc = [scriptInstance](GameObject& other) {
-		scriptInstance->OnCollisionStay(other);
-		};
-	script.onCollisionExitFunc = [scriptInstance](GameObject& other) {
-		scriptInstance->OnCollisionExit(other);
-		};
-	script.instance = scriptInstance;
-	script.isActive = true;
-}
-
 void ScriptSystem::InitializeComponent(Entity, ScriptComponent& script)
 {
 	if (!script.isActive || !script.instance) return;
@@ -403,6 +349,60 @@ void ScriptSystem::FinalizeComponent(Entity e, ScriptComponent& script)
 		Log::Write(LogLevel::Debug, "Unknown script error");
 	}
 	script.isActive = false;
+}
+
+void ScriptSystem::AwakeComponent(Entity e, ScriptComponent& script)
+{
+	if (script.scriptName.empty())
+	{
+		script.isActive = false;
+		return;
+	}
+	std::string funcName = "Create" + script.scriptName + "Script";
+	funcName.erase(std::remove_if(funcName.begin(), funcName.end(), ::isspace), funcName.end());
+	// CreateScript関数を取得
+	typedef Marionnette* (*CreateScriptFunc)(GameObject&);
+	CreateScriptFunc createScript = (CreateScriptFunc)GetProcAddress(cho::FileSystem::ScriptProject::m_DllHandle, funcName.c_str());
+	if (!createScript)
+	{
+		script.isActive = false;
+		return;
+	}
+	// スクリプトを生成
+	GameObject* object = m_pGameWorld->GetGameObject(e);
+	Marionnette* scriptInstance = createScript(*object);
+	if (!scriptInstance)
+	{
+		script.isActive = false;
+		return;
+	}
+	// Handleを取得
+	script.objectHandle = object->GetHandle();
+	// ECSをセット
+	scriptInstance->SetECSPtr(m_pEcs);
+	// スクリプトのStart関数とUpdate関数をラップ
+	script.startFunc = [scriptInstance]() {
+		scriptInstance->Start();
+		};
+	script.updateFunc = [scriptInstance]() {
+		scriptInstance->Update();
+		};
+	// インスタンスの解放用のクロージャを設定
+	script.cleanupFunc = [scriptInstance, this]() {
+		delete scriptInstance;
+		};
+	// 衝突関数をラップ
+	script.onCollisionEnterFunc = [scriptInstance](GameObject& other) {
+		scriptInstance->OnCollisionEnter(other);
+		};
+	script.onCollisionStayFunc = [scriptInstance](GameObject& other) {
+		scriptInstance->OnCollisionStay(other);
+		};
+	script.onCollisionExitFunc = [scriptInstance](GameObject& other) {
+		scriptInstance->OnCollisionExit(other);
+		};
+	script.instance = scriptInstance;
+	script.isActive = true;
 }
 
 void Rigidbody2DSystem::InitializeComponent(Entity e, TransformComponent& transform, Rigidbody2DComponent& rb)
@@ -1309,35 +1309,7 @@ void EffectEditorSystem::UpdateShader()
 
 void Rigidbody3DSystem::InitializeComponent(Entity e, TransformComponent& transform, Rigidbody3DComponent& rb)
 {
-	e;
-	physics::d3::Id3BodyDef bodyDef;
-	// Rigidbody3DComponentの初期化
-	bodyDef.position = Vector3(transform.position.x, transform.position.y, transform.position.z);
-	bodyDef.userData = static_cast<void*>(&rb.selfEntity.value());
-	bodyDef.friction = rb.friction;
-	bodyDef.restitution = rb.restitution;
-	bodyDef.halfsize = rb.halfsize;
-	/*physics::d2::Id2BodyDef bodyDef;
-	bodyDef.userData = static_cast<void*>(&rb.selfEntity.value());
-	bodyDef.type = rb.bodyType;
-	bodyDef.gravityScale = rb.gravityScale;
-	bodyDef.fixedRotation = rb.fixedRotation;
-	bodyDef.position = Vector2(transform.position.x, transform.position.y);
-	float angleZ = chomath::DegreesToRadians(transform.degrees).z;
-	bodyDef.angle = angleZ;
-	rb.runtimeBody = m_World->CreateBody(bodyDef);
-	rb.runtimeBody->SetAwake(true);*/
-	rb.velocity.Initialize();
-
-	rb.runtimeBody = m_World->CreateBody(bodyDef);
-
-	rb.runtimeBody->SetKinematic(rb.isKinematic);
-
-	// Transformと同期（optional）
-	transform.position.x = rb.runtimeBody->GetPosition().x;
-	transform.position.y = rb.runtimeBody->GetPosition().y;
-
-	rb.runtimeBody->SetLinearVelocity(rb.velocity);
+	e; transform; rb;
 }
 
 void Rigidbody3DSystem::UpdateComponent(Entity e, TransformComponent& transform, Rigidbody3DComponent& rb)
@@ -1415,4 +1387,37 @@ void Rigidbody3DSystem::StepSimulation()
 	float deltaTime = DeltaTime();
 	if (deltaTime <= 0.0f) return; // 0以下は無視
 	m_World->Step(deltaTime);
+}
+
+void Rigidbody3DSystem::AwakeComponent(Entity e, TransformComponent& transform, Rigidbody3DComponent& rb)
+{
+	e;
+	physics::d3::Id3BodyDef bodyDef;
+	// Rigidbody3DComponentの初期化
+	bodyDef.position = Vector3(transform.position.x, transform.position.y, transform.position.z);
+	bodyDef.userData = static_cast<void*>(&rb.selfEntity.value());
+	bodyDef.friction = rb.friction;
+	bodyDef.restitution = rb.restitution;
+	bodyDef.halfsize = rb.halfsize;
+	/*physics::d2::Id2BodyDef bodyDef;
+	bodyDef.userData = static_cast<void*>(&rb.selfEntity.value());
+	bodyDef.type = rb.bodyType;
+	bodyDef.gravityScale = rb.gravityScale;
+	bodyDef.fixedRotation = rb.fixedRotation;
+	bodyDef.position = Vector2(transform.position.x, transform.position.y);
+	float angleZ = chomath::DegreesToRadians(transform.degrees).z;
+	bodyDef.angle = angleZ;
+	rb.runtimeBody = m_World->CreateBody(bodyDef);
+	rb.runtimeBody->SetAwake(true);*/
+	rb.velocity.Initialize();
+
+	rb.runtimeBody = m_World->CreateBody(bodyDef);
+
+	rb.runtimeBody->SetKinematic(rb.isKinematic);
+
+	// Transformと同期（optional）
+	/*transform.position.x = rb.runtimeBody->GetPosition().x;
+	transform.position.y = rb.runtimeBody->GetPosition().y;*/
+
+	rb.runtimeBody->SetLinearVelocity(rb.velocity);
 }

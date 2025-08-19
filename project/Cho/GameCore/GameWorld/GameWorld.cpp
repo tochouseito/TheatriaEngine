@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "GameWorld.h"
+#include "GameCore/GameCore.h"
 #include "GameCore/GameScene/GameScene.h"
 #include "Core/Utility/GenerateUnique.h"
 #include "Core/ChoLog/ChoLog.h"
@@ -158,23 +159,17 @@ GameScene GameWorld::CreateGameSceneFromWorld(SceneManager& sceneManager, const 
 // オブジェクトを削除
 void GameWorld::RemoveGameObject(const ObjectHandle& handle)
 {
-	// GemeObjectを取得
-	GameObject* gameObject = GetGameObject(handle);
 	// ECSから削除
 	m_pECSManager->RemoveEntity(handle.entity);
-	// 辞書から削除
-	m_ObjectHandleMap.erase(gameObject->GetName());
-	m_ObjectHandleMapFromEntity.erase(handle.entity);
-	// コンテナから削除
-	// クローンならクローンリストから削除
-	if (handle.isClone)
+	// ゲーム更新中なら遅延キュー
+	if (m_pGameCore->IsRunning())
 	{
-		// クローンリストから削除
-		m_pGameObjects[handle.sceneID][handle.objectID].erase(handle.cloneID);
+		Defer([this, handle]() { RemoveGameObjectImpl(handle); } );
 	}
-	else // クローンでないならオブジェクトリストから削除
+	else
 	{
-		m_pGameObjects[handle.sceneID].erase(handle.objectID);
+		// ゲーム更新中でなければ即時削除
+		RemoveGameObjectImpl(handle);
 	}
 }
 
@@ -315,5 +310,27 @@ void GameWorld::AddDefaultComponentsToGameObject(ObjectHandle handle, ObjectType
 		break;
 	default:
 		break;
+	}
+}
+
+// 削除実行関数
+void GameWorld::RemoveGameObjectImpl(const ObjectHandle& handle)
+{
+	// GameObjectを取得
+	GameObject* gameObject = GetGameObject(handle);
+	if (!gameObject) return; // 存在しない場合は何もしない
+	// 辞書から削除
+	m_ObjectHandleMap.erase(gameObject->GetName());
+	m_ObjectHandleMapFromEntity.erase(handle.entity);
+	// コンテナから削除
+	// クローンならクローンリストから削除
+	if (handle.isClone)
+	{
+		// クローンリストから削除
+		m_pGameObjects[handle.sceneID][handle.objectID].erase(handle.cloneID);
+	}
+	else // クローンでないならオブジェクトリストから削除
+	{
+		m_pGameObjects[handle.sceneID].erase(handle.objectID);
 	}
 }
