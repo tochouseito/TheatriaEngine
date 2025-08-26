@@ -154,6 +154,7 @@ void TransformSystem::UpdateComponent(Entity e, TransformComponent& transform)
 	if(rb3d && rb3d->runtimeBody)
 	{
 		rb3d->runtimeBody->SetLinearVelocity(Vector3(rb3d->velocity.x, rb3d->velocity.y, rb3d->velocity.z));
+		rb3d->runtimeBody->SetAngularVelocity(Vector3(rb3d->angularVelocity.x, rb3d->angularVelocity.y, rb3d->angularVelocity.z));
 	}
 
 	// アニメーションコンポーネントがあればスキニングの確認
@@ -1326,7 +1327,8 @@ void Rigidbody3DSystem::UpdateComponent(Entity e, TransformComponent& transform,
 		// 新しいボディを作成
 		physics::d3::Id3BodyDef bodyDef;
 		bodyDef.position = Vector3(transform.position.x, transform.position.y, transform.position.z);
-		bodyDef.userData = static_cast<void*>(&rb.selfEntity.value());
+		// bodyDef.userData = static_cast<void*>(&rb.selfEntity.value());
+		bodyDef.userIndex = static_cast<int>(rb.selfEntity.value());
 		bodyDef.friction = rb.friction;
 		bodyDef.restitution = rb.restitution;
 		bodyDef.mass = rb.mass;

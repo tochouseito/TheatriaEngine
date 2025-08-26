@@ -444,6 +444,7 @@ void Inspector::Rigidbody3DComponentView(GameObject* object)
 		ImGui::Checkbox("Is Sensor", &rigidbody->isSensor);
 		ImGui::DragFloat3("Half Size", &rigidbody->halfsize.x, 0.1f, 0.0f, 100.0f);
 		ImGui::DragFloat3("Velocity", &rigidbody->velocity.x, 0.1f, -100.0f, 100.0f);
+		ImGui::DragFloat3("Angular Velocity", &rigidbody->angularVelocity.x, 0.1f, -100.0f, 100.0f);
 		ImGui::DragFloat("摩擦係数", &rigidbody->friction, 0.05f, 0.0f, 1.0f);
 		ImGui::DragFloat("反発係数", &rigidbody->restitution, 0.05f, 0.0f, 1.0f);
 		if (ImGui::Button("Remove Rigidbody3D Component"))
