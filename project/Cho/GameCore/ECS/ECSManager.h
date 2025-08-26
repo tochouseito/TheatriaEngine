@@ -158,7 +158,7 @@ public:
                 m_EntityToArchetype.resize(entity + 1);
             m_EntityToArchetype[entity] = Archetype{};
 
-            m_ArchToEntities[Archetype{}].Add(entity);
+            // m_ArchToEntities[Archetype{}].Add(entity);
         }
 
         return entity;
@@ -281,13 +281,14 @@ public:
                 // → ここで本番バッファにもビットを立てる
                 if (m_EntityToArchetype.size() <= dst)
                     m_EntityToArchetype.resize(dst + 1);
-                Archetype& archDst = m_EntityToArchetype[dst];
+               /* Archetype& archDst = m_EntityToArchetype[dst];
                 if (!archDst.test(id))
                 {
                     m_ArchToEntities[archDst].Remove(dst);
                     archDst.set(id);
                     m_ArchToEntities[archDst].Add(dst);
-                }
+                }*/
+                m_EntityToArchetype[dst].set(id);
             }
             NotifyComponentCopied(src, dst, id);
         }
@@ -301,10 +302,17 @@ public:
         else
         {
             // 即時反映
-            if (m_EntityToArchetype.size() <= dst)
+            /*if (m_EntityToArchetype.size() <= dst)
                 m_EntityToArchetype.resize(dst + 1);
             m_EntityToArchetype[dst] = arch;
-            m_ArchToEntities[arch].Add(dst);
+            m_ArchToEntities[arch].Add(dst);*/
+			Archetype oldArch = Archetype{};
+            Archetype& newArch = m_EntityToArchetype[dst];
+            if (oldArch != newArch)
+            {
+				m_ArchToEntities[oldArch].Remove(dst);
+				m_ArchToEntities[newArch].Add(dst);
+            }
         }
 
         return dst;
@@ -315,6 +323,8 @@ public:
     {
         // ① ソースのアーキタイプを取得
         const Archetype arch = GetArchetype(src);
+
+        Archetype oldArch = m_IsUpdating ? Archetype{} : GetArchetype(dst);
 
         // ── コピーする CompID を集めて優先度順にソート ──
         std::vector<CompID> toCopy;
@@ -348,13 +358,7 @@ public:
                 // → ここで本番バッファにもビットを立てる
                 if (m_EntityToArchetype.size() <= dst)
                     m_EntityToArchetype.resize(dst + 1);
-                Archetype& archDst = m_EntityToArchetype[dst];
-                if (!archDst.test(id))
-                {
-                    m_ArchToEntities[archDst].Remove(dst);
-                    archDst.set(id);
-                    m_ArchToEntities[archDst].Add(dst);
-                }
+                m_EntityToArchetype[dst].set(id);
             }
             NotifyComponentCopied(src, dst, id);
         }
@@ -368,10 +372,16 @@ public:
         else
         {
             // 即時反映
-            if (m_EntityToArchetype.size() <= dst)
+            /*if (m_EntityToArchetype.size() <= dst)
                 m_EntityToArchetype.resize(dst + 1);
             m_EntityToArchetype[dst] = arch;
-            m_ArchToEntities[arch].Add(dst);
+            m_ArchToEntities[arch].Add(dst);*/
+            Archetype& newArch = m_EntityToArchetype[dst];
+            if (oldArch != newArch)
+            {
+                m_ArchToEntities[oldArch].Remove(dst);
+                m_ArchToEntities[newArch].Add(dst);
+			}
         }
     }
 
