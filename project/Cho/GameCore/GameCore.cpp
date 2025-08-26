@@ -779,13 +779,13 @@ void GameCore::RegisterContactEvents()
 			}
 		});
 
-	m_pPy3dWorld->SetBeginContactCallback([this](void* a, void* b)
+	m_pPy3dWorld->SetBeginContactCallback([this](int a, int b)
 		{
 			// 接触開始処理
 			if (a && b)
 			{
-				Entity entityA = *static_cast<Entity*>(a);
-				Entity entityB = *static_cast<Entity*>(b);
+				Entity entityA = static_cast<Entity>(a);
+				Entity entityB = static_cast<Entity>(b);
 
 				// CollisionEnter
 				ScriptComponent* scriptA = m_pECSManager->GetComponent<ScriptComponent>(entityA);
@@ -807,13 +807,13 @@ void GameCore::RegisterContactEvents()
 				}
 			}
 		});
-	m_pPy3dWorld->SetEndContactCallback([this](void* a, void* b)
+	m_pPy3dWorld->SetEndContactCallback([this](int a, int b)
 		{
 			// 接触終了処理
 			if (a && b)
 			{
-				Entity entityA = *static_cast<Entity*>(a);
-				Entity entityB = *static_cast<Entity*>(b);
+				Entity entityA = static_cast<Entity>(a);
+				Entity entityB = static_cast<Entity>(b);
 
 				// CollisionEnter
 				ScriptComponent* scriptA = m_pECSManager->GetComponent<ScriptComponent>(entityA);
@@ -835,13 +835,13 @@ void GameCore::RegisterContactEvents()
 				}
 			}
 		});
-	m_pPy3dWorld->SetStayContactCallback([this](void* a, void* b)
+	m_pPy3dWorld->SetStayContactCallback([this](int a, int b)
 		{
 			// 接触中処理
 			if (a && b)
 			{
-				Entity entityA = *static_cast<Entity*>(a);
-				Entity entityB = *static_cast<Entity*>(b);
+				Entity entityA = static_cast<Entity>(a);
+				Entity entityB = static_cast<Entity>(b);	
 
 				// CollisionEnter
 				ScriptComponent* scriptA = m_pECSManager->GetComponent<ScriptComponent>(entityA);

@@ -18,7 +18,7 @@ namespace physics::d3
 
 	class Id3Shape;
 
-	using OnContactFunc = std::function<void(void*, void*)>;
+	using OnContactFunc = std::function<void(int, int)>;
 
 	class Id3World
 	{

@@ -1395,7 +1395,8 @@ void Rigidbody3DSystem::AwakeComponent(Entity e, TransformComponent& transform, 
 	physics::d3::Id3BodyDef bodyDef;
 	// Rigidbody3DComponentの初期化
 	bodyDef.position = Vector3(transform.position.x, transform.position.y, transform.position.z);
-	bodyDef.userData = static_cast<void*>(&rb.selfEntity.value());
+	// bodyDef.userData = static_cast<void*>(&rb.selfEntity.value());
+	bodyDef.userIndex = static_cast<int>(rb.selfEntity.value());
 	bodyDef.friction = rb.friction;
 	bodyDef.restitution = rb.restitution;
 	bodyDef.halfsize = rb.halfsize;

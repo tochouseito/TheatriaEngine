@@ -153,7 +153,7 @@ void physics::d3::bulletWorld::ProcessEvents()
 
 			if (!impl->previousContacts.contains(pair) && beginContactCallback)
 			{
-				beginContactCallback(a->getUserPointer(), b->getUserPointer());
+				beginContactCallback(a->getUserIndex(), b->getUserIndex());
 			}
 		}
 	}
@@ -163,11 +163,11 @@ void physics::d3::bulletWorld::ProcessEvents()
 		if (!impl->currentContacts.contains(pair))
 		{
 			if (endContactCallback)
-				endContactCallback(pair.first->getUserPointer(), pair.second->getUserPointer());
+				endContactCallback(pair.first->getUserIndex(), pair.second->getUserIndex());
 		}
 		else if (stayContactCallback)
 		{
-			stayContactCallback(pair.first->getUserPointer(), pair.second->getUserPointer());
+			stayContactCallback(pair.first->getUserIndex(), pair.second->getUserIndex());
 		}
 	}
 

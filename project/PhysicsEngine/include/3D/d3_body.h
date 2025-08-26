@@ -15,6 +15,7 @@ namespace physics::d3
 		float restitution = 0.2f; // 反発係数
 		float mass = 1.0f; // 質量
 		void* userData = nullptr; // ユーザーデータ
+		int userIndex = -1; // ユーザーインデックス
 	};
 
 	class Id3Body

@@ -37,6 +37,7 @@ void physics::d3::bulletBody::Create(const Id3BodyDef& bodyDef)
 	impl->rigidBody->setFriction(bodyDef.friction);
 	impl->rigidBody->setRestitution(bodyDef.restitution);
 	impl->rigidBody->setUserPointer(bodyDef.userData); // ユーザーデータを設定
+	impl->rigidBody->setUserIndex(bodyDef.userIndex); // ユーザーインデックスを設定
 }
 
 void physics::d3::bulletBody::Destroy()
