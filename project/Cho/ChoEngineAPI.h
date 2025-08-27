@@ -50,6 +50,9 @@ namespace ChoSystem
 	CHO_API void DestroyGameObject(GameObject* obj);
 	// デルタタイム取得
 	CHO_API float DeltaTime();
+	// 解像度取得
+	CHO_API uint32_t ScreenWidth();
+	CHO_API uint32_t ScreenHeight();
 	// Marionnette取得
 	CHO_API Marionnette* GetMarionnettePtr(const std::wstring& name);
 	template<ChoSystem::MarionnetteInterface T>

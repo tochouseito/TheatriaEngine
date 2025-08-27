@@ -103,6 +103,9 @@ public:
 	void PostRender(ImGuiManager* imgui, RenderMode mode);
 	// レンダーターゲットテクスチャ、ImGui、スワップチェーンのリサイズ
 	void ScreenResize();
+	// 解像度の取得
+	UINT64 GetResolutionWidth() { return m_ResolutionWidth; }
+	UINT GetResolutionHeight() { return m_ResolutionHeight; }
 
 	PipelineManager* GetPipelineManager() { return m_PipelineManager.get(); }
 

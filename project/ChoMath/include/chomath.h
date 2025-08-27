@@ -2,6 +2,11 @@
 // ChoMath.cpp : スタティック ライブラリ用の関数を定義します。
 //
 
+/*
+行ベクトル　row-vector
+行優先 row-major
+*/
+
 #include "chomath_pch.h"
 #include "Vector2.h"
 #include "Vector3.h"
@@ -49,11 +54,15 @@ namespace chomath {
 	Vector3 TransformNormal(const Vector3& v, const Matrix4& m);
 
 	Vector3 Transform(const Vector3& vector, const Matrix4& matrix);
+	bool Transform(const Vector3& in, const Matrix4& matrix, Vector3& out);
 
 	Matrix4 MakeIdentity4x4();
 
 
 	Matrix4 Multiply(const Matrix4& m1, const Matrix4& m2);
+
+	// 行列とベクトルの掛け算
+	Vector4 Mul(const Matrix4& mat, const Vector3& v, float w = 1.0f);
 
 	Matrix4 MakeTranslateMatrix(const Vector3& translate);
 
@@ -128,4 +137,7 @@ namespace chomath {
 
 	// ALLBillboard
 	Matrix4 BillboardMatrix(const Matrix4 cameraMatrix);
+
+	// 3D空間から2D空間への変換
+	Vector2 WorldToScreen(const Vector3& worldPos, const Matrix4& viewMatrix, const Matrix4& projMatrix, const uint32_t& screenWidth, const uint32_t& screenHeight);
 };

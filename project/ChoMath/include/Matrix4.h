@@ -1,6 +1,7 @@
 #pragma once
 #include <cmath>
 #include <cstring>
+#include "Vector3.h"
 
 /// <summary>
 /// 4x4行列構造体
@@ -155,6 +156,10 @@ struct Matrix4 final {
             }
         }
     }
+
+    Vector3 GetWorldPosition() const {
+        return Vector3(m[3][0], m[3][1], m[3][2]);
+	}
 
     void ToArray16(float out[16]) const
     {

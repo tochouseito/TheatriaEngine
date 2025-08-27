@@ -145,6 +145,11 @@ struct Vector3 final {
         return other * (dot / otherLengthSq);
     }
 
+    // ゼロチェック
+    bool IsZero() const {
+        return x == 0.0f && y == 0.0f && z == 0.0f;
+	}
+
 public:// 静的メンバ
 	// ゼロベクトルの取得
     static Vector3 Zero() {

@@ -86,6 +86,18 @@ CHO_API float ChoSystem::DeltaTime()
 	return Timer::GetDeltaTime();
 }
 
+CHO_API uint32_t ChoSystem::ScreenWidth()
+{
+	EngineCommand* engineCommand = g_Engine->GetEngineCommand();
+	return static_cast<uint32_t>(engineCommand->GetGraphicsEngine()->GetResolutionWidth());
+}
+
+CHO_API uint32_t ChoSystem::ScreenHeight()
+{
+	EngineCommand* engineCommand = g_Engine->GetEngineCommand();
+	return static_cast<uint32_t>(engineCommand->GetGraphicsEngine()->GetResolutionHeight());
+}
+
 CHO_API Marionnette* ChoSystem::GetMarionnettePtr(const std::wstring& name)
 {
 	GameObject* obj = FindGameObjectByName(name);
