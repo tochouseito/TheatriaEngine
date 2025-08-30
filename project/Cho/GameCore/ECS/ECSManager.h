@@ -41,12 +41,29 @@ using Archetype = std::bitset<256>;
 // コンポーネントだと判別するためのタグ
 struct IComponentTag
 {
-    virtual void Initialize() {} // 初期化関数を定義
-    bool  IsActive() const noexcept { return m_Active; } // アクティブ状態を取得する関数
-    void SetActive(bool active) noexcept { m_Active = active; } // アクティブ状態を設定する関数
+    virtual ~IComponentTag() = default; // 仮想デストラクタを定義
+
+    // 所有エンティティ設定
+    //virtual void SetOwner(Entity e) noexcept { m_Owner = e; }
+    //Entity GetOwner() const noexcept { return m_Owner; }
+
+    // 所属 ECSManager 設定
+    //virtual void SetECSManager(ECSManager* ecs) noexcept { m_pECS = ecs; }
+    //ECSManager* GetECSManager() const noexcept { return m_pECS; }
+
+    // 初期化関数
+    virtual void Initialize() {}
+
+    // アクティブ状態
+    bool IsActive() const noexcept { return m_Active; }
+    void SetActive(bool active) noexcept { m_Active = active; }
+
 private:
-    bool m_Active = true; // アクティブ状態を保持するメンバ変数
+    bool m_Active = true;        // アクティブ状態
+    //Entity m_Owner = 0;          // 所属エンティティID
+    //ECSManager* m_pECS = nullptr; // 自分を管理するECSへのポインタ
 };
+
 // コンポーネントが複数持てるか(デフォルトは持てない)
 template<typename T>
 struct IsMultiComponent : std::false_type {};
@@ -499,6 +516,8 @@ public:
             }
 
             if constexpr (HasInitialize<T>) comp->Initialize();
+			//comp->SetOwner(entity);
+			//comp->SetECSManager(this);
             NotifyComponentAdded(entity, type);
 
             return comp; // 即時取得可能
@@ -506,6 +525,8 @@ public:
 
         // 通常フロー（即時反映）
         T* comp = pool->AddComponent(entity);
+		//comp->SetOwner(entity);
+		//comp->SetECSManager(this);
 
         if (m_EntityToArchetype.size() <= entity)
             m_EntityToArchetype.resize(entity + 1, Archetype{});
@@ -540,6 +561,9 @@ public:
         {
             // ▼ ステージングに即時追加
             pool->AddPrefabComponentStaging(e, comp);
+			//T* pComp = pool->GetComponent(e);
+			//pComp->SetOwner(e);
+			//pComp->SetECSManager(this);
 
             // ▼ Archetype も staging に反映
             auto itE = std::find(m_StagingEntities.begin(), m_StagingEntities.end(), e);
@@ -562,6 +586,9 @@ public:
 
         // ▼ 通常の即時追加（更新中でない場合）
         pool->AddPrefabComponent(e, comp);
+		//T* pComp = pool->GetComponent(e);
+		//pComp->SetOwner(e);
+		//pComp->SetECSManager(this);
 
         if (m_EntityToArchetype.size() <= e)
             m_EntityToArchetype.resize(e + 1, Archetype{});
@@ -1119,12 +1146,20 @@ public:
         {
             if constexpr (IsMultiComponent<T>::value)
             {
-                return &m_StagingMulti[e].emplace_back();
+                auto& vec = m_StagingMulti[e];
+                vec.emplace_back();
+                T& inst = vec.back();
+                //inst.SetOwner(e);
+                //inst.SetECSManager(m_pEcs);
+                return &inst;
             }
             else
             {
                 // 上書きも可能
-                return &m_StagingSingle[e];
+                T& inst = m_StagingSingle[e];
+                //inst.SetOwner(e);
+                //inst.SetECSManager(m_pEcs);
+                return &inst;
             }
         }
 
@@ -1225,6 +1260,10 @@ public:
                 auto& vecSrc = it->second;
                 auto& vecDst = m_Multi[dst] = vecSrc; // copy vector
                 vecDst;
+     //           for (auto& inst : vecDst)
+     //           {
+					////inst.SetOwner(dst);
+     //           }
             }
             else
             {
@@ -1235,25 +1274,31 @@ public:
                 {
                     auto& c = m_Storage[m_EntityToIndex[dst]];
                     c = m_Storage[idxSrc];
-                    return;
                 }
-
-                // 新規にコピーする場合
-                m_Storage.emplace_back(m_Storage[idxSrc]);
-                auto& newComp = m_Storage.back();
-                newComp;
-
-                uint32_t idxDst = static_cast<uint32_t>(m_Storage.size() - 1);
-                if (m_EntityToIndex.size() <= dst)
+                else
                 {
-                    m_EntityToIndex.resize(dst + 1, kInvalid);
+                    // 新規にコピーする場合
+                    m_Storage.emplace_back(m_Storage[idxSrc]);
+                    auto& newComp = m_Storage.back();
+                    newComp;
+
+                    uint32_t idxDst = static_cast<uint32_t>(m_Storage.size() - 1);
+                    if (m_EntityToIndex.size() <= dst)
+                    {
+                        m_EntityToIndex.resize(dst + 1, kInvalid);
+                    }
+                    if (m_IndexToEntity.size() <= idxDst)
+                    {
+                        m_IndexToEntity.resize(idxDst + 1, kInvalid);
+                    }
+                    m_EntityToIndex[dst] = idxDst;
+                    m_IndexToEntity[idxDst] = dst;
                 }
-                if (m_IndexToEntity.size() <= idxDst)
+				/*T* comp = GetComponent(dst);
+                if (comp)
                 {
-                    m_IndexToEntity.resize(idxDst + 1, kInvalid);
-                }
-                m_EntityToIndex[dst] = idxDst;
-                m_IndexToEntity[idxDst] = dst;
+					comp->SetOwner(dst);
+                }*/
             }
         }
 
@@ -1268,6 +1313,8 @@ public:
                 for (auto const& inst : it->second)
                 {
                     m_StagingMulti[dst].push_back(inst);
+                    //m_StagingMulti[dst].back().SetOwner(dst);
+                    //m_StagingMulti[dst].back().SetECSManager(m_pEcs);
                 }
             }
             else
@@ -1276,6 +1323,8 @@ public:
                 T* srcComp = GetComponent(src);
                 if (!srcComp) return;
                 m_StagingSingle[dst] = *srcComp;
+                //m_StagingSingle[dst].SetOwner(dst);
+                //m_StagingSingle[dst].SetECSManager(m_pEcs);
             }
         }
 
@@ -1322,10 +1371,14 @@ public:
             if constexpr (IsMultiComponent<T>::value)
             {
                 m_StagingMulti[e].push_back(comp);
+                //m_StagingMulti[e].back().SetOwner(e);
+                //m_StagingMulti[e].back().SetECSManager(m_pEcs);
             }
             else
             {
                 m_StagingSingle[e] = comp;
+                //m_StagingSingle[e].SetOwner(e);
+                //m_StagingSingle[e].SetECSManager(m_pEcs);
             }
         }
 
