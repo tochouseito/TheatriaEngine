@@ -117,7 +117,7 @@ CHO_API Marionnette* ChoSystem::GetMarionnettePtr(const std::wstring& name)
 
 void ChoSystem::SceneManagerAPI::LoadScene(const std::wstring& sceneName)
 {
-	g_Engine->GetEngineCommand()->GetGameCore()->GetSceneManager()->LoadScene(sceneName);
+	g_Engine->GetEngineCommand()->GetGameCore()->GetSceneManager()->SetLoadingSceneName(sceneName);
 }
 
 void ChoSystem::SceneManagerAPI::UnloadScene(const std::wstring& sceneName)

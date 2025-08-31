@@ -256,25 +256,40 @@ ObjectHandle GameWorld::CreateGameObjectCopy(const ObjectHandle& src)
 // 全シーン破棄
 void GameWorld::ClearAllScenes()
 {
+	//for (auto& scene : m_pGameObjects)
+	//{
+	//	for (auto& object : scene)
+	//	{
+	//		for (auto& clone : object)
+	//		{
+	//			//std::wstring name = clone->GetName();
+	//			//Entity entity = clone->GetHandle().entity;
+	//			//// ECSから削除
+	//			//m_pECSManager->RemoveEntity(entity);
+	//			//RemoveGameObjectImpl(clone->GetHandle());
+	//		}
+	//	}
+	//}
+	//// コンテナと辞書をクリア
+	//m_pGameObjects.clear();
+	//m_ObjectHandleMap.clear();
+	//m_ObjectHandleMapFromEntity.clear();
+	//// メインカメラをクリア
+	//m_pMainCamera = nullptr;
 	for (auto& scene : m_pGameObjects)
 	{
 		for (auto& object : scene)
 		{
 			for (auto& clone : object)
 			{
-				std::wstring name = clone->GetName();
-				Entity entity = clone->GetHandle().entity;
 				// ECSから削除
-				m_pECSManager->RemoveEntity(entity);
+				m_pECSManager->RemoveEntity(clone->GetHandle().entity);
+				// RemoveGameObject(clone->GetHandle());
 			}
 		}
 	}
-	// コンテナと辞書をクリア
-	m_pGameObjects.clear();
-	m_ObjectHandleMap.clear();
-	m_ObjectHandleMapFromEntity.clear();
-	// メインカメラをクリア
-	m_pMainCamera = nullptr;
+	AllClearSceneImpl();
+	m_pECSManager->CancelUpdateLoop();
 }
 
 // タイプごとの初期コンポーネントを追加
@@ -333,4 +348,14 @@ void GameWorld::RemoveGameObjectImpl(const ObjectHandle& handle)
 	{
 		m_pGameObjects[handle.sceneID].erase(handle.objectID);
 	}
+}
+
+void GameWorld::AllClearSceneImpl()
+{
+	// コンテナと辞書をクリア
+	m_pGameObjects.clear();
+	m_ObjectHandleMap.clear();
+	m_ObjectHandleMapFromEntity.clear();
+	// メインカメラをクリア
+	m_pMainCamera = nullptr;
 }

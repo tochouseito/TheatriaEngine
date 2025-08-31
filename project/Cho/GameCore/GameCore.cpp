@@ -51,6 +51,14 @@ void GameCore::Start()
 
 void GameCore::Update()
 {
+	if (!m_pSceneManager->GetLoadingSceneName().empty())
+	{
+		// AwakeSystem
+		m_pECSManager->AwakeAllSystems();
+		// StartSystemの実行
+		m_pECSManager->InitializeAllSystems();
+		m_pSceneManager->SetLoadingSceneName(L"");
+	}
 	// 環境設定の更新
 	UpdateEnvironmentSetting();
 	// ゲームが実行中でなければreturn
@@ -59,6 +67,11 @@ void GameCore::Update()
 	{
 		// GameWorld遅延キューの実行
 		m_pGameWorld->FlushDeferred();
+		// シーン切り替え
+		if(!m_pSceneManager->GetLoadingSceneName().empty())
+		{
+			m_pSceneManager->LoadScene(m_pSceneManager->GetLoadingSceneName(), true);
+		}
 	}
 	
 }

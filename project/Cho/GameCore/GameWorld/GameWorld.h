@@ -60,10 +60,12 @@ private:
 
 	// 削除実行関数
 	void RemoveGameObjectImpl(const ObjectHandle& handle);
+	void AllClearSceneImpl();
 	void Defer(std::function<void()> cmd)
 	{
 		m_DeferredCommands.push_back(std::move(cmd));
 	}
+	
 	// フレーム末にまとめてコマンドを実行
 	void FlushDeferred()
 	{

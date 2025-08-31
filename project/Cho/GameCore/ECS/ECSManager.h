@@ -823,6 +823,12 @@ public:
         return nullptr;
     }
 
+    // 更新ループを中止するAPI
+    void CancelUpdateLoop()
+    {
+        m_CancelUpdate = true;
+    }
+
     // ① ゲーム開始前に一度だけ
     void InitializeAllSystems()
     {
@@ -860,6 +866,7 @@ public:
     {
         using Clock = std::chrono::steady_clock;
         m_IsUpdating = true;
+        m_CancelUpdate = false; // ← 毎フレーム最初にリセット
 
         // 総合計測開始
         auto t0_total = Clock::now();
@@ -868,7 +875,9 @@ public:
         for (Entity e : m_NewEntitiesLastFrame)
         {
             for (auto& sys : m_Systems)
+            {
                 sys->InitializeEntity(e);
+            }
         }
         m_NewEntitiesLastFrame.clear();
 
@@ -879,6 +888,7 @@ public:
         {
             if (sys->IsEnabled())
             {
+                if (m_CancelUpdate) break; // 中止判定
                 // 各システム計測開始
                 auto t0 = Clock::now();
                 sys->Update();
@@ -891,6 +901,7 @@ public:
         }
 
         m_IsUpdating = false;
+		m_CancelUpdate = false;
         FlushStagingEntities();
         FlushStagingComponents();
         FlushDeferred();
@@ -1931,6 +1942,7 @@ private:
     /*-------------------- data members --------------------------------*/
 
     bool                                                        m_IsUpdating = false;
+    bool                                                        m_CancelUpdate = false;
     Entity                                                      m_NextEntityID = 0;
     std::vector<bool>                                           m_EntityToActive;
     std::vector<Entity>                                         m_RecycleEntities;

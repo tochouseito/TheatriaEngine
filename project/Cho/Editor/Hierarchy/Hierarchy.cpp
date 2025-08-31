@@ -83,6 +83,12 @@ void Hierarchy::Window()
 	static wchar_t inputBuffer[128] = L""; // 入力用バッファ
 	static std::wstring editingName;   // 現在編集中のオブジェクト名
 	// オブジェクトをリストで表示
+	if(gameWorld->GetWorldContainer().empty() || gameWorld->GetWorldContainer()[0].empty())
+	{
+		ImGui::Text("No GameObject");
+		ImGui::End();
+		return;
+	}
 	for (const auto& objects : gameWorld->GetWorldContainer()[0])
 	{
 		for (const auto& object : objects)
