@@ -78,6 +78,14 @@ void physics::d3::bulletBody::SetTransform(const Vector3& position)
 	impl->rigidBody->setWorldTransform(transform); // 剛体のワールド変換を更新
 }
 
+void physics::d3::bulletBody::SetTransform(const Quaternion& rotation)
+{
+	btTransform transform = impl->rigidBody->getWorldTransform();
+	transform.setRotation(btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w));
+	impl->rigidBody->getMotionState()->setWorldTransform(transform);
+	impl->rigidBody->setWorldTransform(transform); // 剛体のワールド変換を更新
+}
+
 Vector3 physics::d3::bulletBody::GetLinearVelocity() const
 {
 	btVector3 linVel = impl->rigidBody->getLinearVelocity();

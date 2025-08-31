@@ -1354,6 +1354,10 @@ void Rigidbody3DSystem::UpdateComponent(Entity e, TransformComponent& transform,
 	rb.velocity.x = velocity.x;
 	rb.velocity.y = velocity.y;
 	rb.velocity.z = velocity.z;
+	Vector3 angularVelocity = rb.runtimeBody->GetAngularVelocity();
+	rb.angularVelocity.x = angularVelocity.x;
+	rb.angularVelocity.y = angularVelocity.y;
+	rb.angularVelocity.z = angularVelocity.z;
 
 	rb.quaternion = rb.runtimeBody->GetRotation();
 

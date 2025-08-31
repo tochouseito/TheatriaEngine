@@ -33,6 +33,7 @@ namespace physics::d3
 		// ボディの位置と角度を設定
 		virtual void SetTransform(const Vector3& position, const Quaternion& rotation) = 0;
 		virtual void SetTransform(const Vector3& position) = 0;
+		virtual void SetTransform(const Quaternion& rotation) = 0;
 		// ボディの速度を取得
 		virtual Vector3 GetLinearVelocity() const = 0;
 		// ボディの速度を設定
@@ -61,6 +62,7 @@ namespace physics::d3
 		Quaternion GetRotation() const override;
 		void SetTransform(const Vector3& position, const Quaternion& rotation) override;
 		void SetTransform(const Vector3& position) override;
+		void SetTransform(const Quaternion& rotation) override;
 		Vector3 GetLinearVelocity() const override;
 		void SetLinearVelocity(const Vector3& velocity) override;
 		Vector3 GetAngularVelocity() const override;
@@ -84,6 +86,7 @@ namespace physics::d3
 		Quaternion GetRotation() const override;
 		void SetTransform(const Vector3&, const Quaternion&) override {}
 		void SetTransform(const Vector3&) override {}
+		void SetTransform(const Quaternion&) override {}
 		Vector3 GetLinearVelocity() const override;
 		void SetLinearVelocity(const Vector3& velocity) override;
 		bool IsActive() const override;

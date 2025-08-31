@@ -156,6 +156,14 @@ public:// 静的メンバ
         return Vector3(0.0f, 0.0f, 0.0f);
 	}
 
+    static Vector3 One() {
+        return Vector3(1.0f, 1.0f, 1.0f);
+	}
+
+    static Vector3 Up() {
+		return Vector3(0.0f, 1.0f, 0.0f);
+	}
+
     static Vector3 Normalize(const Vector3& v) {
         Vector3 result=v;
         float len = result.Length();

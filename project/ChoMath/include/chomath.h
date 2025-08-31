@@ -60,6 +60,7 @@ namespace chomath {
 
 
 	Matrix4 Multiply(const Matrix4& m1, const Matrix4& m2);
+	Vector3 Multiply(const Vector3& vec, const Matrix4& mat);
 
 	// 行列とベクトルの掛け算
 	Vector4 Mul(const Matrix4& mat, const Vector3& v, float w = 1.0f);
@@ -140,4 +141,25 @@ namespace chomath {
 
 	// 3D空間から2D空間への変換
 	Vector2 WorldToScreen(const Vector3& worldPos, const Matrix4& viewMatrix, const Matrix4& projMatrix, const uint32_t& screenWidth, const uint32_t& screenHeight);
+
+	// 球面線形補間 (Slerp) 関数
+	Vector3 Slerp(const Vector3& v1, const Vector3& v2, float t);
+
+	// イージング
+	namespace easing {
+		// t: 0.0f ～ 1.0f の入力 (経過割合)
+		// 戻り値: 0.0f ～ 1.0f の出力 (補間値)
+
+		// 線形（普通のLerpと同じ）
+		float Linear(const float& t);
+
+		// 二乗で加速（最初ゆっくり → 後半速い）
+		float EaseInQuad(const float& t);
+
+		// 二乗で減速（最初速い → 後半ゆっくり）
+		float EaseOutQuad(const float& t);
+
+		// 二乗で加減速（最初ゆっくり → 中盤速い → 最後ゆっくり）
+		float EaseInOutQuad(const float& t);
+	}
 };

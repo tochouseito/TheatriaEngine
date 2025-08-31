@@ -34,6 +34,20 @@ struct Matrix4 final {
         return !(*this == other);
     }
 
+    // 負号演算子
+    Matrix4 operator-() const
+    {
+        Matrix4 result;
+        for (int i = 0; i < 4; ++i)
+        {
+            for (int j = 0; j < 4; ++j)
+            {
+                result.m[i][j] = -m[i][j];
+            }
+        }
+        return result;
+    }
+
     // 行列加算
     Matrix4 operator+(const Matrix4& other) const {
         Matrix4 result;
