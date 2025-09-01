@@ -86,6 +86,7 @@ bool cho::FileSystem::CreateNewProjectFolder(const std::wstring& projectName)
     {
         return false; // Assets フォルダの作成に失敗
 	}
+
 	// ProjectSettings フォルダを作成
 	std::filesystem::path projectSettingsPath = newProjectPath / "ProjectSettings";
     if (!std::filesystem::create_directory(projectSettingsPath))

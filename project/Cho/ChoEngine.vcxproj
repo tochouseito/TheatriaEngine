@@ -495,6 +495,7 @@ xcopy "$(SolutionDir)Cho\Resources\EngineAssets" "$(TargetDir)Cho\Resources\Engi
 copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"
 xcopy "$(SolutionDir)Cho\GameCore\Marionnette" "$(TargetDir)Cho\GameCore\Marionnette" /E /I /Y
 xcopy "$(SolutionDir)ChoMath\include" "$(TargetDir)ChoMath\include" /E /I /Y
+xcopy "$(SolutionDir)ChoMath\chomath_pch.h" "$(TargetDir)ChoMath\" /E /I /Y
 xcopy "$(SolutionDir)PhysicsEngine\include" "$(TargetDir)PhysicsEngine\include" /E /I /Y
 xcopy "$(SolutionDir)Cho\GameCore\ScriptAPI" "$(TargetDir)Cho\GameCore\ScriptAPI" /E /I /Y
 xcopy "$(SolutionDir)Cho\Platform\InputManager" "$(TargetDir)Cho\Platform\InputManager" /E /I /Y
@@ -556,6 +557,7 @@ xcopy "$(SolutionDir)Cho\Resources\EngineAssets" "$(TargetDir)Cho\Resources\Engi
 copy "$(SolutionDir)imgui.ini" "$(TargetDir)imgui.ini"
 xcopy "$(SolutionDir)Cho\GameCore\Marionnette" "$(TargetDir)Cho\GameCore\Marionnette" /E /I /Y
 xcopy "$(SolutionDir)ChoMath\include" "$(TargetDir)ChoMath\include" /E /I /Y
+xcopy "$(SolutionDir)ChoMath\chomath_pch.h" "$(TargetDir)ChoMath\" /E /I /Y
 xcopy "$(SolutionDir)PhysicsEngine\include" "$(TargetDir)PhysicsEngine\include" /E /I /Y
 xcopy "$(SolutionDir)Cho\GameCore\ScriptAPI" "$(TargetDir)Cho\GameCore\ScriptAPI" /E /I /Y
 xcopy "$(SolutionDir)Cho\Platform\InputManager" "$(TargetDir)Cho\Platform\InputManager" /E /I /Y
