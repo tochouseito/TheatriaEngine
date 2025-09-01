@@ -47,6 +47,9 @@ public:
 	SceneID GetSceneID(const std::wstring& sceneName) const noexcept;
 	// シーン名からシーンを取得
 	GameScene* GetSceneToName(const std::wstring& sceneName) noexcept;
+
+	void SetLoadingSceneName(const std::wstring& sceneName) { m_LoadingSceneName = sceneName; }
+	const std::wstring& GetLoadingSceneName() const { return m_LoadingSceneName; }
 private:
 	GameWorld* m_pGameWorld = nullptr; // ゲームワールドへのポインタ
 
@@ -56,5 +59,8 @@ private:
 	std::unordered_map<std::wstring, SceneID> m_SceneNameToID;
 	// シーンインスタンスコンテナ
 	FVector<std::unique_ptr<GameSceneInstance>> m_pSceneInstances;
+
+	// 読み込むシーンの名前
+	std::wstring m_LoadingSceneName = L"";
 };
 

@@ -4,7 +4,7 @@
 #include <shellapi.h>
 #include <imgui.h>
 #include <imgui_impl_win32.h>
-//#include <resource.h>
+#include "../ChoEditor/resource.h"
 #include "Core/ChoLog/ChoLog.h"
 using namespace cho;
 extern IMGUI_IMPL_API LRESULT
@@ -98,9 +98,9 @@ void WinApp::CreateGameWindow() {
 	m_WC.hInstance = GetModuleHandle(nullptr);
 	// カーソル
 	m_WC.hCursor = LoadCursor(nullptr, IDC_ARROW);
-
 	// アイコン
-	//m_WC.hIcon = LoadIcon(nullptr, MAKEINTRESOURCE(IDI_APP_ICON));
+	m_WC.hIcon = LoadIcon(m_WC.hInstance, MAKEINTRESOURCE(IDI_MAIN_ICON));
+
 
 	// ウィンドウクラスを登録する
 	RegisterClass(&m_WC);

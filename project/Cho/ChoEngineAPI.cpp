@@ -63,6 +63,12 @@ CHO_API GameObject* ChoSystem::CloneGameObject(const GameObject* srcObj, Vector3
 	{
 		transform->position = generatePosition;
 	}
+	// Rigidbodyがあれば初期位置を指定
+	Rigidbody3DComponent* rb3d = engineCommand->GetGameCore()->GetECSManager()->GetComponent<Rigidbody3DComponent>(newObject->GetHandle().entity);
+	if(transform && rb3d && rb3d->runtimeBody)
+	{
+		rb3d->runtimeBody->SetTransform(transform->position);
+	}
 	return newObject;
 }
 
@@ -78,6 +84,18 @@ CHO_API void ChoSystem::DestroyGameObject(GameObject* obj)
 CHO_API float ChoSystem::DeltaTime()
 {
 	return Timer::GetDeltaTime();
+}
+
+CHO_API uint32_t ChoSystem::ScreenWidth()
+{
+	EngineCommand* engineCommand = g_Engine->GetEngineCommand();
+	return static_cast<uint32_t>(engineCommand->GetGraphicsEngine()->GetResolutionWidth());
+}
+
+CHO_API uint32_t ChoSystem::ScreenHeight()
+{
+	EngineCommand* engineCommand = g_Engine->GetEngineCommand();
+	return static_cast<uint32_t>(engineCommand->GetGraphicsEngine()->GetResolutionHeight());
 }
 
 CHO_API Marionnette* ChoSystem::GetMarionnettePtr(const std::wstring& name)
@@ -99,7 +117,7 @@ CHO_API Marionnette* ChoSystem::GetMarionnettePtr(const std::wstring& name)
 
 void ChoSystem::SceneManagerAPI::LoadScene(const std::wstring& sceneName)
 {
-	g_Engine->GetEngineCommand()->GetGameCore()->GetSceneManager()->LoadScene(sceneName);
+	g_Engine->GetEngineCommand()->GetGameCore()->GetSceneManager()->SetLoadingSceneName(sceneName);
 }
 
 void ChoSystem::SceneManagerAPI::UnloadScene(const std::wstring& sceneName)

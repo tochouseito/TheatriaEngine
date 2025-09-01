@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "GameWorld.h"
+#include "GameCore/GameCore.h"
 #include "GameCore/GameScene/GameScene.h"
 #include "Core/Utility/GenerateUnique.h"
 #include "Core/ChoLog/ChoLog.h"
@@ -158,23 +159,17 @@ GameScene GameWorld::CreateGameSceneFromWorld(SceneManager& sceneManager, const 
 // オブジェクトを削除
 void GameWorld::RemoveGameObject(const ObjectHandle& handle)
 {
-	// GemeObjectを取得
-	GameObject* gameObject = GetGameObject(handle);
 	// ECSから削除
 	m_pECSManager->RemoveEntity(handle.entity);
-	// 辞書から削除
-	m_ObjectHandleMap.erase(gameObject->GetName());
-	m_ObjectHandleMapFromEntity.erase(handle.entity);
-	// コンテナから削除
-	// クローンならクローンリストから削除
-	if (handle.isClone)
+	// ゲーム更新中なら遅延キュー
+	if (m_pGameCore->IsRunning())
 	{
-		// クローンリストから削除
-		m_pGameObjects[handle.sceneID][handle.objectID].erase(handle.cloneID);
+		Defer([this, handle]() { RemoveGameObjectImpl(handle); } );
 	}
-	else // クローンでないならオブジェクトリストから削除
+	else
 	{
-		m_pGameObjects[handle.sceneID].erase(handle.objectID);
+		// ゲーム更新中でなければ即時削除
+		RemoveGameObjectImpl(handle);
 	}
 }
 
@@ -243,7 +238,7 @@ ObjectHandle GameWorld::CreateGameObjectCopy(const ObjectHandle& src)
 	// Entityを取得
 	Entity entity = m_pECSManager->CopyEntity(src.entity);
 	handle.entity = entity;
-
+	
 	ChoSystem::Transform transform(entity, m_pECSManager);
 	// オブジェクトIDを取得
 	uint32_t objectID = static_cast<uint32_t>(m_pGameObjects[0].push_back(FVector<std::unique_ptr<GameObject>>()));
@@ -261,25 +256,40 @@ ObjectHandle GameWorld::CreateGameObjectCopy(const ObjectHandle& src)
 // 全シーン破棄
 void GameWorld::ClearAllScenes()
 {
+	//for (auto& scene : m_pGameObjects)
+	//{
+	//	for (auto& object : scene)
+	//	{
+	//		for (auto& clone : object)
+	//		{
+	//			//std::wstring name = clone->GetName();
+	//			//Entity entity = clone->GetHandle().entity;
+	//			//// ECSから削除
+	//			//m_pECSManager->RemoveEntity(entity);
+	//			//RemoveGameObjectImpl(clone->GetHandle());
+	//		}
+	//	}
+	//}
+	//// コンテナと辞書をクリア
+	//m_pGameObjects.clear();
+	//m_ObjectHandleMap.clear();
+	//m_ObjectHandleMapFromEntity.clear();
+	//// メインカメラをクリア
+	//m_pMainCamera = nullptr;
 	for (auto& scene : m_pGameObjects)
 	{
 		for (auto& object : scene)
 		{
 			for (auto& clone : object)
 			{
-				std::wstring name = clone->GetName();
-				Entity entity = clone->GetHandle().entity;
 				// ECSから削除
-				m_pECSManager->RemoveEntity(entity);
+				m_pECSManager->RemoveEntity(clone->GetHandle().entity);
+				// RemoveGameObject(clone->GetHandle());
 			}
 		}
 	}
-	// コンテナと辞書をクリア
-	m_pGameObjects.clear();
-	m_ObjectHandleMap.clear();
-	m_ObjectHandleMapFromEntity.clear();
-	// メインカメラをクリア
-	m_pMainCamera = nullptr;
+	AllClearSceneImpl();
+	m_pECSManager->CancelUpdateLoop();
 }
 
 // タイプごとの初期コンポーネントを追加
@@ -316,4 +326,36 @@ void GameWorld::AddDefaultComponentsToGameObject(ObjectHandle handle, ObjectType
 	default:
 		break;
 	}
+}
+
+// 削除実行関数
+void GameWorld::RemoveGameObjectImpl(const ObjectHandle& handle)
+{
+	// GameObjectを取得
+	GameObject* gameObject = GetGameObject(handle);
+	if (!gameObject) return; // 存在しない場合は何もしない
+	// 辞書から削除
+	m_ObjectHandleMap.erase(gameObject->GetName());
+	m_ObjectHandleMapFromEntity.erase(handle.entity);
+	// コンテナから削除
+	// クローンならクローンリストから削除
+	if (handle.isClone)
+	{
+		// クローンリストから削除
+		m_pGameObjects[handle.sceneID][handle.objectID].erase(handle.cloneID);
+	}
+	else // クローンでないならオブジェクトリストから削除
+	{
+		m_pGameObjects[handle.sceneID].erase(handle.objectID);
+	}
+}
+
+void GameWorld::AllClearSceneImpl()
+{
+	// コンテナと辞書をクリア
+	m_pGameObjects.clear();
+	m_ObjectHandleMap.clear();
+	m_ObjectHandleMapFromEntity.clear();
+	// メインカメラをクリア
+	m_pMainCamera = nullptr;
 }

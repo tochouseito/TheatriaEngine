@@ -485,6 +485,7 @@ struct Rigidbody3DComponent : public IComponentTag
 	Vector3 halfsize = { 0.5f, 0.5f, 0.5f }; // 半径（ボックス形状の場合）
 	Vector3 preHalfsize = { 0.5f,0.5f,0.5f };
 	Vector3 velocity = { 0.0f, 0.0f, 0.0f }; // 速度
+	Vector3 angularVelocity = { 0.0f, 0.0f, 0.0f }; // 角速度
 	Quaternion quaternion = { 0.0f, 0.0f, 0.0f, 1.0f }; // 回転
 	std::optional<Vector3> requestedPosition = std::nullopt; // 位置リクエスト
 	physics::d3::Id3Body* runtimeBody = nullptr; // 物理エンジンのボディ

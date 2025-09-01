@@ -103,7 +103,7 @@ namespace ChoSystem
     class CHO_API Transform : public IComponentInterface
     {
 		friend class Marionnette;
-        public:
+    public:
         Transform(Entity e, ECSManager* ecs) : IComponentInterface(e, ecs) {}
         ~Transform() = default;
         TransformComponent* operator->()
@@ -111,12 +111,13 @@ namespace ChoSystem
             UpdatePtr();
             return data;
 		}
-        private:
+    private:
         void UpdatePtr()
         {
             data = m_ECS->GetComponent<TransformComponent>(m_Entity);
         }
         TransformComponent* data = nullptr;
+    public:
 	};
 	template<>
     struct InterfaceTraits<ChoSystem::Transform>
@@ -188,6 +189,8 @@ namespace ChoSystem
             return data;
 		}
 
+        void SetTransform(const Vector3& pos);
+        void SetTransform(const Quaternion& rot);
 
     private:
         void UpdatePtr()

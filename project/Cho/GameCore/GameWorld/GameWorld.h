@@ -6,15 +6,17 @@
 class ECSManager;
 class SceneManager;
 class GameScene;
+class GameCore;
 // コンテナのエイリアス
 using WorldContainer = FVector<FVector<FVector<std::unique_ptr<GameObject>>>>;
 
 class GameWorld
 {
+	friend class GameCore;
 	friend class SceneManager;
 public:
 	// Constructor
-	GameWorld(ECSManager* ecs):m_pECSManager(ecs)
+	GameWorld(GameCore* gamecore, ECSManager* ecs) : m_pGameCore(gamecore), m_pECSManager(ecs)
 	{
 	}
 	// Destructor
@@ -56,6 +58,22 @@ private:
 	// タイプごとの初期コンポーネントを追加
 	void AddDefaultComponentsToGameObject(ObjectHandle handle, ObjectType type);
 
+	// 削除実行関数
+	void RemoveGameObjectImpl(const ObjectHandle& handle);
+	void AllClearSceneImpl();
+	void Defer(std::function<void()> cmd)
+	{
+		m_DeferredCommands.push_back(std::move(cmd));
+	}
+	
+	// フレーム末にまとめてコマンドを実行
+	void FlushDeferred()
+	{
+		for (auto& cmd : m_DeferredCommands) cmd();
+		m_DeferredCommands.clear();
+	}
+
+	GameCore* m_pGameCore = nullptr; // GameCoreへのポインタ
 	ECSManager* m_pECSManager = nullptr;	
 	// GameObjectコンテナ
 	// [SceneID][ObjectID][CloneID] = GameObject
@@ -66,5 +84,6 @@ private:
 	std::unordered_map<Entity, ObjectHandle> m_ObjectHandleMapFromEntity;
 	// メインカメラ
 	GameObject* m_pMainCamera = nullptr;
+	std::vector<std::function<void()>>                          m_DeferredCommands;
 };
 

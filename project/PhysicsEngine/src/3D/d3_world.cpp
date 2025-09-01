@@ -30,6 +30,26 @@ struct bulletWorld::Impl
 
 	std::unordered_set<std::pair<const btCollisionObject*, const btCollisionObject*>> currentContacts;
 	std::unordered_set<std::pair<const btCollisionObject*, const btCollisionObject*>> previousContacts;
+
+	void RemoveContactsOf(const btCollisionObject* obj)
+	{
+		// 現在の接触から指定されたオブジェクトとの接触を削除
+		auto erase_from = [obj](auto& s) {
+			for (auto it = s.begin(); it != s.end();)
+			{
+				if(it->first == obj || it->second == obj)
+				{
+					it = s.erase(it);
+				}
+				else
+				{
+					++it;
+				}
+			}
+			};
+		erase_from(currentContacts);
+		erase_from(previousContacts);
+	}
 };
 
 physics::d3::bulletWorld::bulletWorld():
@@ -104,7 +124,10 @@ void physics::d3::bulletWorld::DestroyBody(Id3Body* body)
 {
 	if (!body) return;
 	bulletBody* bulletBodyPtr = static_cast<bulletBody*>(body);
-	impl->world->removeRigidBody(bulletBodyPtr->GetRigidBody());
+	btRigidBody* rb = bulletBodyPtr->GetRigidBody();
+	// 削除する前に衝突履歴から削除
+	impl->RemoveContactsOf(rb);
+	impl->world->removeRigidBody(rb);
 	bulletBodyPtr->Destroy();
 	std::erase_if(bodies, [body](const std::unique_ptr<Id3Body>& ptr) {
 		return ptr.get() == body;
@@ -130,7 +153,7 @@ void physics::d3::bulletWorld::ProcessEvents()
 
 			if (!impl->previousContacts.contains(pair) && beginContactCallback)
 			{
-				beginContactCallback(a->getUserPointer(), b->getUserPointer());
+				beginContactCallback(a->getUserIndex(), b->getUserIndex());
 			}
 		}
 	}
@@ -140,11 +163,11 @@ void physics::d3::bulletWorld::ProcessEvents()
 		if (!impl->currentContacts.contains(pair))
 		{
 			if (endContactCallback)
-				endContactCallback(pair.first->getUserPointer(), pair.second->getUserPointer());
+				endContactCallback(pair.first->getUserIndex(), pair.second->getUserIndex());
 		}
 		else if (stayContactCallback)
 		{
-			stayContactCallback(pair.first->getUserPointer(), pair.second->getUserPointer());
+			stayContactCallback(pair.first->getUserIndex(), pair.second->getUserIndex());
 		}
 	}
 

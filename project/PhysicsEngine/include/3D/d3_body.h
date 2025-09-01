@@ -15,6 +15,7 @@ namespace physics::d3
 		float restitution = 0.2f; // 反発係数
 		float mass = 1.0f; // 質量
 		void* userData = nullptr; // ユーザーデータ
+		int userIndex = -1; // ユーザーインデックス
 	};
 
 	class Id3Body
@@ -31,6 +32,8 @@ namespace physics::d3
 		virtual Quaternion GetRotation() const = 0;
 		// ボディの位置と角度を設定
 		virtual void SetTransform(const Vector3& position, const Quaternion& rotation) = 0;
+		virtual void SetTransform(const Vector3& position) = 0;
+		virtual void SetTransform(const Quaternion& rotation) = 0;
 		// ボディの速度を取得
 		virtual Vector3 GetLinearVelocity() const = 0;
 		// ボディの速度を設定
@@ -58,6 +61,8 @@ namespace physics::d3
 		Vector3 GetPosition() const override;
 		Quaternion GetRotation() const override;
 		void SetTransform(const Vector3& position, const Quaternion& rotation) override;
+		void SetTransform(const Vector3& position) override;
+		void SetTransform(const Quaternion& rotation) override;
 		Vector3 GetLinearVelocity() const override;
 		void SetLinearVelocity(const Vector3& velocity) override;
 		Vector3 GetAngularVelocity() const override;
@@ -80,6 +85,8 @@ namespace physics::d3
 		Vector3 GetPosition() const override;
 		Quaternion GetRotation() const override;
 		void SetTransform(const Vector3&, const Quaternion&) override {}
+		void SetTransform(const Vector3&) override {}
+		void SetTransform(const Quaternion&) override {}
 		Vector3 GetLinearVelocity() const override;
 		void SetLinearVelocity(const Vector3& velocity) override;
 		bool IsActive() const override;

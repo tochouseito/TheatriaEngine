@@ -73,6 +73,21 @@ Vector3 chomath::Transform(const Vector3& vector, const Matrix4& matrix) {
 	return result;
 }
 
+bool chomath::Transform(const Vector3& in, const Matrix4& matrix, Vector3& out)
+{
+	out.x = in.x * matrix.m[0][0] + in.y * matrix.m[1][0] + in.z * matrix.m[2][0] + matrix.m[3][0];
+	out.y = in.x * matrix.m[0][1] + in.y * matrix.m[1][1] + in.z * matrix.m[2][1] + matrix.m[3][1];
+	out.z = in.x * matrix.m[0][2] + in.y * matrix.m[1][2] + in.z * matrix.m[2][2] + matrix.m[3][2];
+	float w = in.x * matrix.m[0][3] + in.y * matrix.m[1][3] + in.z * matrix.m[2][3] + matrix.m[3][3];
+	if (w == 0.0f) {
+		return false;
+	}
+	out.x /= w;
+	out.y /= w;
+	out.z /= w;
+	return true;
+}
+
 Matrix4 chomath::MakeIdentity4x4()
 {
 	Matrix4 result = { 0 };
@@ -92,6 +107,29 @@ Matrix4 chomath::Multiply(const Matrix4& m1, const Matrix4& m2)
 			}
 		}
 	}
+	return result;
+}
+
+Vector3 chomath::Multiply(const Vector3& vec, const Matrix4& mat)
+{
+	Vector3 result;
+
+	result.x = vec.x * mat.m[0][0] + vec.y * mat.m[1][0] + vec.z * mat.m[2][0] + mat.m[3][0];
+	result.y = vec.x * mat.m[0][1] + vec.y * mat.m[1][1] + vec.z * mat.m[2][1] + mat.m[3][1];
+	result.z = vec.x * mat.m[0][2] + vec.y * mat.m[1][2] + vec.z * mat.m[2][2] + mat.m[3][2];
+
+	return result;
+}
+
+
+// 行列とベクトルの掛け算
+Vector4 chomath::Mul(const Matrix4& mat, const Vector3& v, float w)
+{
+	Vector4 result{};
+	result.x = v.x * mat.m[0][0] + v.y * mat.m[1][0] + v.z * mat.m[2][0] + w * mat.m[3][0];
+	result.y = v.x * mat.m[0][1] + v.y * mat.m[1][1] + v.z * mat.m[2][1] + w * mat.m[3][1];
+	result.z = v.x * mat.m[0][2] + v.y * mat.m[1][2] + v.z * mat.m[2][2] + w * mat.m[3][2];
+	result.w = v.x * mat.m[0][3] + v.y * mat.m[1][3] + v.z * mat.m[2][3] + w * mat.m[3][3];
 	return result;
 }
 
@@ -796,9 +834,98 @@ Matrix4 chomath::BillboardMatrix(const Matrix4 cameraMatrix)
 	return result;
 }
 
+// 3D空間から2D空間への変換
+Vector2 chomath::WorldToScreen(const Vector3& worldPos, const Matrix4& viewMatrix, const Matrix4& projMatrix, const uint32_t& screenWidth, const uint32_t& screenHeight)
+{
+	//// Viewport行列
+	//Matrix4 viewportMatrix = MakeViewportMatrix(0.0f, 0.0f, static_cast<float>(screenWidth), static_cast<float>(screenHeight), 0.0f, 1.0f);
+	//// View * Projection * Viewport
+	//Matrix4 vpMatrix = Multiply(viewportMatrix, Multiply(viewMatrix, projMatrix));
+	//// 変換
+	//Vector3 screenPos = Transform(worldPos, vpMatrix);
+	//return Vector2(screenPos.x, screenPos.y);
+	// ワールド → ビュー変換
+	Vector4 viewPos = Mul(viewMatrix, worldPos);
+
+	// ビュー → クリップ変換
+	Vector4 clipPos = Mul(projMatrix, { viewPos.x, viewPos.y, viewPos.z }, viewPos.w);
+
+	// NDC (正規化デバイス座標) に変換
+	if (clipPos.w == 0.0f) clipPos.w = 1e-6f; // divide by zero 回避
+	float ndcX = clipPos.x / clipPos.w;
+	float ndcY = clipPos.y / clipPos.w;
+
+	// スクリーン座標に変換
+	Vector2 screenPos;
+	screenPos.x = (ndcX * 0.5f + 0.5f) * static_cast<float>(screenWidth);
+	screenPos.y = (1.0f - (ndcY * 0.5f + 0.5f)) * static_cast<float>(screenHeight); // Yは上下反転
+
+	return screenPos;
+}
+
+// 球面線形補間 (Slerp) 関数
+Vector3 chomath::Slerp(const Vector3& v1, const Vector3& v2, float t)
+{
+	// 正規化
+	Vector3 start = v1;
+	Vector3 end = v2;
+	float dot = start.x * end.x + start.y * end.y + start.z * end.z;
+	if (dot < 0.0f)
+	{
+		end.x = -end.x;
+		end.y = -end.y;
+		end.z = -end.z;
+		dot = -dot;
+	}
+
+	const float threshold = 0.9995f;
+	if (dot > threshold)
+	{
+		// 線形補間
+		return Vector3{
+			v1.x + t * (v2.x - v1.x), v1.y + t * (v2.y - v1.y), v1.z + t * (v2.z - v1.z) };
+	}
+
+	// 角度を計算
+	float theta = std::acos(dot);
+	float invSinTheta = 1.0f / std::sin(theta);
+
+	// 球面線形補間
+	float scale1 = std::sin((1.0f - t) * theta) * invSinTheta;
+	float scale2 = std::sin(t * theta) * invSinTheta;
+
+	return Vector3{
+		scale1 * v1.x + scale2 * v2.x,
+		scale1 * v1.y + scale2 * v2.y,
+		scale1 * v1.z + scale2 * v2.z
+	};
+}
+
 float chomath::Lerp(const float& start, const float& end, const float& t)
 {
 	return start + (end - start) * t;
 }
 
+// 線形（普通のLerpと同じ）
+float chomath::easing::Linear(const float& t)
+{
+	return t;
+}
 
+// 二乗で加速（最初ゆっくり → 後半速い）
+float chomath::easing::EaseInQuad(const float& t)
+{
+	return t * t;
+}
+
+// 二乗で減速（最初速い → 後半ゆっくり）
+float chomath::easing::EaseOutQuad(const float& t)
+{
+	return 1.0f - (1.0f - t) * (1.0f - t);
+}
+
+// 二乗で加減速（最初ゆっくり → 中盤速い → 最後ゆっくり）
+float chomath::easing::EaseInOutQuad(const float& t)
+{
+	return t < 0.5f ? 2.0f * t * t : 1.0f - powf(-2.0f * t + 2.0f, 2) / 2.0f;
+}

@@ -1,6 +1,7 @@
 #pragma once
 #include <cmath>
 #include <cstring>
+#include "Vector3.h"
 
 /// <summary>
 /// 4x4行列構造体
@@ -31,6 +32,20 @@ struct Matrix4 final {
     // 否定の等号演算子
     bool operator!=(const Matrix4& other) const {
         return !(*this == other);
+    }
+
+    // 負号演算子
+    Matrix4 operator-() const
+    {
+        Matrix4 result;
+        for (int i = 0; i < 4; ++i)
+        {
+            for (int j = 0; j < 4; ++j)
+            {
+                result.m[i][j] = -m[i][j];
+            }
+        }
+        return result;
     }
 
     // 行列加算
@@ -155,6 +170,10 @@ struct Matrix4 final {
             }
         }
     }
+
+    Vector3 GetWorldPosition() const {
+        return Vector3(m[3][0], m[3][1], m[3][2]);
+	}
 
     void ToArray16(float out[16]) const
     {

@@ -195,6 +195,12 @@ public:
         validCount = 0;
     }
 
+	// 空かどうか
+    bool empty() const
+    {
+        return validCount == 0;
+	}
+
     // 予約
     void reserve(size_t newCapacity)
     {

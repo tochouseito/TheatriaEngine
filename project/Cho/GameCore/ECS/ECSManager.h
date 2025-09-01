@@ -41,12 +41,29 @@ using Archetype = std::bitset<256>;
 // コンポーネントだと判別するためのタグ
 struct IComponentTag
 {
-    virtual void Initialize() {} // 初期化関数を定義
-    bool  IsActive() const noexcept { return m_Active; } // アクティブ状態を取得する関数
-    void SetActive(bool active) noexcept { m_Active = active; } // アクティブ状態を設定する関数
+    virtual ~IComponentTag() = default; // 仮想デストラクタを定義
+
+    // 所有エンティティ設定
+    //virtual void SetOwner(Entity e) noexcept { m_Owner = e; }
+    //Entity GetOwner() const noexcept { return m_Owner; }
+
+    // 所属 ECSManager 設定
+    //virtual void SetECSManager(ECSManager* ecs) noexcept { m_pECS = ecs; }
+    //ECSManager* GetECSManager() const noexcept { return m_pECS; }
+
+    // 初期化関数
+    virtual void Initialize() {}
+
+    // アクティブ状態
+    bool IsActive() const noexcept { return m_Active; }
+    void SetActive(bool active) noexcept { m_Active = active; }
+
 private:
-    bool m_Active = true; // アクティブ状態を保持するメンバ変数
+    bool m_Active = true;        // アクティブ状態
+    //Entity m_Owner = 0;          // 所属エンティティID
+    //ECSManager* m_pECS = nullptr; // 自分を管理するECSへのポインタ
 };
+
 // コンポーネントが複数持てるか(デフォルトは持てない)
 template<typename T>
 struct IsMultiComponent : std::false_type {};
@@ -158,7 +175,7 @@ public:
                 m_EntityToArchetype.resize(entity + 1);
             m_EntityToArchetype[entity] = Archetype{};
 
-            m_ArchToEntities[Archetype{}].Add(entity);
+            // m_ArchToEntities[Archetype{}].Add(entity);
         }
 
         return entity;
@@ -249,42 +266,70 @@ public:
         // ② 生成（ステージングなら GenerateEntity もステージングに入るよう修正済み）
         Entity dst = GenerateEntity();
 
-        // ③ 各コンポーネントをコピー or ステージングコピー
+        // ── コピーする CompID を集めて優先度順にソート ──
+        std::vector<CompID> toCopy;
         for (CompID id = 0; id < arch.size(); ++id)
-        {
-            if (!arch.test(id)) continue;
+            if (arch.test(id))
+                toCopy.push_back(id);
 
+        std::sort(toCopy.begin(), toCopy.end(),
+            [&](CompID a, CompID b) {
+                int pa = m_CopyPriority.count(a) ? m_CopyPriority[a] : 0;
+                int pb = m_CopyPriority.count(b) ? m_CopyPriority[b] : 0;
+                if (pa != pb) return pa < pb;
+                return a < b;
+            });
+
+        // ③ 優先度順にしてからコピー＆通知
+        for (CompID id : toCopy)
+        {
             auto* pool = m_TypeToComponents[id].get();
             if (m_IsUpdating)
             {
-                // フレーム中はステージングバッファに積む
                 pool->CopyComponentStaging(src, dst);
-                // ステージングリストに積む
                 size_t idx = StagingIndexForEntity(dst);
-                m_StagingEntityArchetypes[idx] = arch;
-                NotifyComponentCopied(src, dst, id);
+                m_StagingEntityArchetypes[idx].set(id);
             }
             else
             {
-                // フレーム外は即時コピー
+                // 通常フレーム：即時コピー
                 pool->CopyComponent(src, dst);
-                NotifyComponentCopied(src, dst, id);
+
+                // → ここで本番バッファにもビットを立てる
+                if (m_EntityToArchetype.size() <= dst)
+                    m_EntityToArchetype.resize(dst + 1);
+               /* Archetype& archDst = m_EntityToArchetype[dst];
+                if (!archDst.test(id))
+                {
+                    m_ArchToEntities[archDst].Remove(dst);
+                    archDst.set(id);
+                    m_ArchToEntities[archDst].Add(dst);
+                }*/
+                m_EntityToArchetype[dst].set(id);
             }
+            NotifyComponentCopied(src, dst, id);
         }
 
         // ④ アーキタイプの反映
         if (m_IsUpdating)
         {
             for (auto& sys : m_Systems)
-                sys->InitializeEntity(dst);
+                sys->AwakeEntity(dst);
         }
         else
         {
             // 即時反映
-            if (m_EntityToArchetype.size() <= dst)
+            /*if (m_EntityToArchetype.size() <= dst)
                 m_EntityToArchetype.resize(dst + 1);
             m_EntityToArchetype[dst] = arch;
-            m_ArchToEntities[arch].Add(dst);
+            m_ArchToEntities[arch].Add(dst);*/
+			Archetype oldArch = Archetype{};
+            Archetype& newArch = m_EntityToArchetype[dst];
+            if (oldArch != newArch)
+            {
+				m_ArchToEntities[oldArch].Remove(dst);
+				m_ArchToEntities[newArch].Add(dst);
+            }
         }
 
         return dst;
@@ -296,47 +341,64 @@ public:
         // ① ソースのアーキタイプを取得
         const Archetype arch = GetArchetype(src);
 
-        // ② 各コンポーネントをコピー or ステージングコピー
-        for (CompID id = 0; id < arch.size(); ++id)
-        {
-            if (!arch.test(id)) continue;
-            auto* pool = m_TypeToComponents[id].get();
+        Archetype oldArch = m_IsUpdating ? Archetype{} : GetArchetype(dst);
 
+        // ── コピーする CompID を集めて優先度順にソート ──
+        std::vector<CompID> toCopy;
+        for (CompID id = 0; id < arch.size(); ++id)
+            if (arch.test(id))
+                toCopy.push_back(id);
+
+        std::sort(toCopy.begin(), toCopy.end(),
+            [&](CompID a, CompID b) {
+                int pa = m_CopyPriority.count(a) ? m_CopyPriority[a] : 0;
+                int pb = m_CopyPriority.count(b) ? m_CopyPriority[b] : 0;
+                if (pa != pb) return pa < pb;
+                return a < b;
+            });
+
+        // ③ 優先度順にしてからコピー＆通知
+        for (CompID id : toCopy)
+        {
+            auto* pool = m_TypeToComponents[id].get();
             if (m_IsUpdating)
             {
-                // ── ステージング中はステージングバッファに積む
                 pool->CopyComponentStaging(src, dst);
-
-                // ステージングエンティティリストにビットを反映
                 size_t idx = StagingIndexForEntity(dst);
                 m_StagingEntityArchetypes[idx].set(id);
-
-                // イベント通知
-                NotifyComponentCopied(src, dst, id);
             }
             else
             {
-                // ── 通常フレームは即時コピー
+                // 通常フレーム：即時コピー
                 pool->CopyComponent(src, dst);
-                NotifyComponentCopied(src, dst, id);
+
+                // → ここで本番バッファにもビットを立てる
+                if (m_EntityToArchetype.size() <= dst)
+                    m_EntityToArchetype.resize(dst + 1);
+                m_EntityToArchetype[dst].set(id);
             }
+            NotifyComponentCopied(src, dst, id);
         }
 
-        // ③ アーキタイプ＆Initialize呼び出し
+        // ④ アーキタイプの反映
         if (m_IsUpdating)
         {
-            // ステージング状態でも、コピーされたコンポーネントごとに
-            // InitializeEntity を呼んで初期化処理を走らせる
             for (auto& sys : m_Systems)
-                sys->InitializeEntity(dst);
+                sys->AwakeEntity(dst);
         }
         else
         {
-            // 本番バッファにアーキタイプを反映
-            if (m_EntityToArchetype.size() <= dst)
+            // 即時反映
+            /*if (m_EntityToArchetype.size() <= dst)
                 m_EntityToArchetype.resize(dst + 1);
             m_EntityToArchetype[dst] = arch;
-            m_ArchToEntities[arch].Add(dst);
+            m_ArchToEntities[arch].Add(dst);*/
+            Archetype& newArch = m_EntityToArchetype[dst];
+            if (oldArch != newArch)
+            {
+                m_ArchToEntities[oldArch].Remove(dst);
+                m_ArchToEntities[newArch].Add(dst);
+			}
         }
     }
 
@@ -454,35 +516,17 @@ public:
             }
 
             if constexpr (HasInitialize<T>) comp->Initialize();
+			//comp->SetOwner(entity);
+			//comp->SetECSManager(this);
             NotifyComponentAdded(entity, type);
-
-            // 対応するシステムだけを初期化
-            if constexpr (!IsMultiComponent<T>::value)
-            {
-                for (auto& up : m_Systems)
-                {
-                    if (auto sys = dynamic_cast<System<T>*>(up.get()))
-                    {
-                        sys->InitializeEntity(entity);
-                    }
-                }
-            }
-            else
-            {
-                for (auto& up : m_Systems)
-                {
-                    if (auto msys = dynamic_cast<MultiComponentSystem<T>*>(up.get()))
-                    {
-                        msys->InitializeEntity(entity);
-                    }
-                }
-            }
 
             return comp; // 即時取得可能
         }
 
         // 通常フロー（即時反映）
         T* comp = pool->AddComponent(entity);
+		//comp->SetOwner(entity);
+		//comp->SetECSManager(this);
 
         if (m_EntityToArchetype.size() <= entity)
             m_EntityToArchetype.resize(entity + 1, Archetype{});
@@ -517,6 +561,9 @@ public:
         {
             // ▼ ステージングに即時追加
             pool->AddPrefabComponentStaging(e, comp);
+			//T* pComp = pool->GetComponent(e);
+			//pComp->SetOwner(e);
+			//pComp->SetECSManager(this);
 
             // ▼ Archetype も staging に反映
             auto itE = std::find(m_StagingEntities.begin(), m_StagingEntities.end(), e);
@@ -539,6 +586,9 @@ public:
 
         // ▼ 通常の即時追加（更新中でない場合）
         pool->AddPrefabComponent(e, comp);
+		//T* pComp = pool->GetComponent(e);
+		//pComp->SetOwner(e);
+		//pComp->SetECSManager(this);
 
         if (m_EntityToArchetype.size() <= e)
             m_EntityToArchetype.resize(e + 1, Archetype{});
@@ -712,6 +762,13 @@ public:
         m_DeletePriority[ComponentPool<T>::GetID()] = priority;
     }
 
+    // コピー時の優先度を設定するテンプレート関数
+    template<ComponentType T>
+    void SetCopyPriority(int priority)
+    {
+        m_CopyPriority[ComponentPool<T>::GetID()] = priority;
+    }
+
     /*-------------------- Accessors ----------------------------------*/
     inline const Archetype& GetArchetype(Entity e) const
     {
@@ -766,6 +823,12 @@ public:
         return nullptr;
     }
 
+    // 更新ループを中止するAPI
+    void CancelUpdateLoop()
+    {
+        m_CancelUpdate = true;
+    }
+
     // ① ゲーム開始前に一度だけ
     void InitializeAllSystems()
     {
@@ -803,9 +866,20 @@ public:
     {
         using Clock = std::chrono::steady_clock;
         m_IsUpdating = true;
+        m_CancelUpdate = false; // ← 毎フレーム最初にリセット
 
         // 総合計測開始
         auto t0_total = Clock::now();
+
+        // 追加直後の Entity を初期化システムに通す
+        for (Entity e : m_NewEntitiesLastFrame)
+        {
+            for (auto& sys : m_Systems)
+            {
+                sys->InitializeEntity(e);
+            }
+        }
+        m_NewEntitiesLastFrame.clear();
 
         // システム更新
         std::sort(m_Systems.begin(), m_Systems.end(),
@@ -814,6 +888,7 @@ public:
         {
             if (sys->IsEnabled())
             {
+                if (m_CancelUpdate) break; // 中止判定
                 // 各システム計測開始
                 auto t0 = Clock::now();
                 sys->Update();
@@ -826,9 +901,10 @@ public:
         }
 
         m_IsUpdating = false;
-        FlushDeferred();
+		m_CancelUpdate = false;
         FlushStagingEntities();
         FlushStagingComponents();
+        FlushDeferred();
 
         // 総合計測終了
         auto t1_total = Clock::now();
@@ -863,6 +939,36 @@ public:
         // 全体計測終了
         auto t1_total = Clock::now();
         m_LastTotalFinalizeTimeMs =
+            std::chrono::duration<double, std::milli>(t1_total - t0_total).count();
+    }
+
+    // ① ゲーム開始前に一度だけ
+    void AwakeAllSystems()
+    {
+        using Clock = std::chrono::steady_clock;
+        // 全体計測開始
+        auto t0_total = Clock::now();
+
+        std::sort(m_Systems.begin(), m_Systems.end(),
+            [](auto& a, auto& b) { return a->GetPriority() < b->GetPriority(); });
+        for (auto& sys : m_Systems)
+        {
+            if (sys->IsEnabled())
+            {
+                // 各システム計測開始
+                auto t0 = Clock::now();
+                sys->Awake();
+                auto t1 = Clock::now();
+                // 型情報をキーに時間を保存
+                std::type_index ti(typeid(*sys));
+                m_LastSystemAwakeTimeMs[ti] =
+                    std::chrono::duration<double, std::milli>(t1 - t0).count();
+            }
+        }
+
+        // 全体計測終了
+        auto t1_total = Clock::now();
+        m_LastTotalAwakeTimeMs =
             std::chrono::duration<double, std::milli>(t1_total - t0_total).count();
     }
 
@@ -926,6 +1032,9 @@ public:
 
             // Archetype バケットに登録
             m_ArchToEntities[m_StagingEntityArchetypes[i]].Add(e);
+
+            // 新規Entityリストに追加
+            m_NewEntitiesLastFrame.push_back(e);
         }
 
         // 一時バッファをクリア
@@ -1048,12 +1157,20 @@ public:
         {
             if constexpr (IsMultiComponent<T>::value)
             {
-                return &m_StagingMulti[e].emplace_back();
+                auto& vec = m_StagingMulti[e];
+                vec.emplace_back();
+                T& inst = vec.back();
+                //inst.SetOwner(e);
+                //inst.SetECSManager(m_pEcs);
+                return &inst;
             }
             else
             {
                 // 上書きも可能
-                return &m_StagingSingle[e];
+                T& inst = m_StagingSingle[e];
+                //inst.SetOwner(e);
+                //inst.SetECSManager(m_pEcs);
+                return &inst;
             }
         }
 
@@ -1154,6 +1271,10 @@ public:
                 auto& vecSrc = it->second;
                 auto& vecDst = m_Multi[dst] = vecSrc; // copy vector
                 vecDst;
+     //           for (auto& inst : vecDst)
+     //           {
+					////inst.SetOwner(dst);
+     //           }
             }
             else
             {
@@ -1164,25 +1285,31 @@ public:
                 {
                     auto& c = m_Storage[m_EntityToIndex[dst]];
                     c = m_Storage[idxSrc];
-                    return;
                 }
-
-                // 新規にコピーする場合
-                m_Storage.emplace_back(m_Storage[idxSrc]);
-                auto& newComp = m_Storage.back();
-                newComp;
-
-                uint32_t idxDst = static_cast<uint32_t>(m_Storage.size() - 1);
-                if (m_EntityToIndex.size() <= dst)
+                else
                 {
-                    m_EntityToIndex.resize(dst + 1, kInvalid);
+                    // 新規にコピーする場合
+                    m_Storage.emplace_back(m_Storage[idxSrc]);
+                    auto& newComp = m_Storage.back();
+                    newComp;
+
+                    uint32_t idxDst = static_cast<uint32_t>(m_Storage.size() - 1);
+                    if (m_EntityToIndex.size() <= dst)
+                    {
+                        m_EntityToIndex.resize(dst + 1, kInvalid);
+                    }
+                    if (m_IndexToEntity.size() <= idxDst)
+                    {
+                        m_IndexToEntity.resize(idxDst + 1, kInvalid);
+                    }
+                    m_EntityToIndex[dst] = idxDst;
+                    m_IndexToEntity[idxDst] = dst;
                 }
-                if (m_IndexToEntity.size() <= idxDst)
+				/*T* comp = GetComponent(dst);
+                if (comp)
                 {
-                    m_IndexToEntity.resize(idxDst + 1, kInvalid);
-                }
-                m_EntityToIndex[dst] = idxDst;
-                m_IndexToEntity[idxDst] = dst;
+					comp->SetOwner(dst);
+                }*/
             }
         }
 
@@ -1197,6 +1324,8 @@ public:
                 for (auto const& inst : it->second)
                 {
                     m_StagingMulti[dst].push_back(inst);
+                    //m_StagingMulti[dst].back().SetOwner(dst);
+                    //m_StagingMulti[dst].back().SetECSManager(m_pEcs);
                 }
             }
             else
@@ -1205,6 +1334,8 @@ public:
                 T* srcComp = GetComponent(src);
                 if (!srcComp) return;
                 m_StagingSingle[dst] = *srcComp;
+                //m_StagingSingle[dst].SetOwner(dst);
+                //m_StagingSingle[dst].SetECSManager(m_pEcs);
             }
         }
 
@@ -1251,10 +1382,14 @@ public:
             if constexpr (IsMultiComponent<T>::value)
             {
                 m_StagingMulti[e].push_back(comp);
+                //m_StagingMulti[e].back().SetOwner(e);
+                //m_StagingMulti[e].back().SetECSManager(m_pEcs);
             }
             else
             {
                 m_StagingSingle[e] = comp;
+                //m_StagingSingle[e].SetOwner(e);
+                //m_StagingSingle[e].SetECSManager(m_pEcs);
             }
         }
 
@@ -1438,12 +1573,12 @@ public:
         ISystem() : m_pEcs(nullptr) {}
         /// 開始時に一度だけ呼ばれる
         virtual void Initialize() {}
-
         /// 毎フレーム呼ばれる
         virtual void Update() = 0;
-
         /// 終了時に一度だけ呼ばれる
         virtual void Finalize() {}
+        /// 一度だけ呼ばれる
+        virtual void Awake() {}
         virtual ~ISystem() = default;
         /// ECSManager に登録されたタイミングで呼び出される
         virtual void OnRegister(ECSManager* ecs)
@@ -1451,9 +1586,10 @@ public:
             m_pEcs = ecs;
         }
         /// フレーム中に遅延で追加されたエンティティ／コンポーネントを受け取って、
-        /// そのエンティティだけ初期化フェーズの処理を走らせたいときに使う
+        /// そのエンティティだけフェーズの処理を走らせたいときに使う
         virtual void InitializeEntity(Entity) {}
         virtual void FinalizeEntity(Entity) {}
+        virtual void AwakeEntity(Entity) {}
         virtual int GetPriority() const { return priority; }
         virtual void SetPriority(int p) { priority = p; }
         virtual bool IsEnabled() const { return enabled; }
@@ -1475,11 +1611,14 @@ public:
         using UpdateFunc = std::function<void(Entity, T&...)>;
         using InitFunc = std::function<void(Entity, T&...)>;
         using FinFunc = std::function<void(Entity, T&...)>;
+        using AwakeFunc = std::function<void(Entity, T&...)>;
     public:
-        explicit System(UpdateFunc u,
+        explicit System(
+            UpdateFunc u,
             InitFunc   i = {},
-            FinFunc    f = {})
-            : m_Update(u), m_Init(i), m_Fin(f)
+            FinFunc    f = {},
+            AwakeFunc  w = {})
+            : m_Update(u), m_Init(i), m_Fin(f), m_Awake(w)
         {
             (m_Required.set(ComponentPool<T>::GetID()), ...);
         }
@@ -1538,6 +1677,22 @@ public:
                 }
             }
         }
+        // Awake フェーズでエンティティごとの処理
+        void Awake() override
+        {
+            if (!m_Awake) return;
+            for (auto& [arch, bucket] : m_pEcs->GetArchToEntities())
+            {
+                if ((arch & m_Required) != m_Required) continue;
+                for (Entity e : bucket.GetEntities())
+                {
+                    if (!m_pEcs->IsEntityActive(e))                continue;
+                    if (!((m_pEcs->GetComponent<T>(e) != nullptr) && ...)) continue;
+                    if (!((m_pEcs->GetComponent<T>(e)->IsActive()) && ...)) continue;
+                    m_Awake(e, *m_pEcs->GetComponent<T>(e)...);
+                }
+            }
+        }
         void InitializeEntity(Entity e) override
         {
             if (!m_Init) return;
@@ -1550,14 +1705,20 @@ public:
         void FinalizeEntity(Entity e) override
         {
             if (!m_Fin) return;
-            // 「必要なコンポーネントが揃っているか」
-            auto arch = m_pEcs->GetArchetype(e);
-            if ((arch & m_Required) != m_Required) return;
-            // 存在＆アクティブチェック
+            // ステージングも含めて、必要なコンポーネントが存在＆アクティブかチェック
             if (!((m_pEcs->GetComponent<T>(e) && m_pEcs->GetComponent<T>(e)->IsActive()) && ...))
                 return;
             // 終了コールバック
             m_Fin(e, *m_pEcs->GetComponent<T>(e)...);
+        }
+        void AwakeEntity(Entity e) override
+        {
+            if (!m_Awake) return;
+            // ステージングも含めて、必要なコンポーネントが存在＆アクティブかチェック
+            if (!((m_pEcs->GetComponent<T>(e) && m_pEcs->GetComponent<T>(e)->IsActive()) && ...))
+                return;
+            // Awakeコールバック
+            m_Awake(e, *m_pEcs->GetComponent<T>(e)...);
         }
         const Archetype& GetRequired() const { return m_Required; }
     private:
@@ -1565,6 +1726,7 @@ public:
         UpdateFunc         m_Update;
         InitFunc           m_Init;
         FinFunc            m_Fin;
+        AwakeFunc          m_Awake; // 追加：Awake用のコールバック
     };
 
     template<ComponentType T>
@@ -1574,11 +1736,14 @@ public:
         using InitFunc = std::function<void(Entity, std::vector<T>&)>;
         using UpdateFunc = std::function<void(Entity, std::vector<T>&)>;
         using FinFunc = std::function<void(Entity, std::vector<T>&)>;
+        using AwakeFunc = std::function<void(Entity, std::vector<T>&)>;
     public:
-        explicit MultiComponentSystem(UpdateFunc u,
+        explicit MultiComponentSystem(
+            UpdateFunc u,
             InitFunc   i = {},
-            FinFunc    f = {})
-            : m_Update(u), m_Init(i), m_Fin(f)
+            FinFunc    f = {},
+            AwakeFunc  w = {})
+            : m_Update(u), m_Init(i), m_Fin(f), m_Awake(w)
         {
         }
         // 起動時に一度だけ呼ばれる
@@ -1599,6 +1764,13 @@ public:
         {
             if (!m_Fin) return;
             processAll(m_Fin);
+        }
+
+        // Awake フェーズでエンティティごとの処理
+        void Awake() override
+        {
+            if (!m_Awake) return;
+            processAll(m_Awake);
         }
         void InitializeEntity(Entity e) override
         {
@@ -1642,6 +1814,35 @@ public:
             for (auto& c : it->second) if (c.IsActive()) tmp.push_back(c);
             if (!tmp.empty()) m_Fin(e, tmp);
         }
+        void AwakeEntity(Entity e) override
+        {
+            if (!m_Awake) return;
+            auto* pool = m_pEcs->GetComponentPool<T>();
+            if (!pool) return;
+
+            std::vector<T> filtered;
+
+            // ① ステージングバッファのチェック
+            const auto& stagingMap = pool->GetStagingMulti(); // m_StagingMulti への参照を返す
+            if (auto itS = stagingMap.find(e); itS != stagingMap.end())
+            {
+                for (auto& inst : itS->second)
+                    if (inst.IsActive())
+                        filtered.push_back(inst);
+            }
+
+            // ② 本番データのチェック
+            const auto& mainMap = pool->Map(); // 既存の m_Multi
+            if (auto itM = mainMap.find(e); itM != mainMap.end())
+            {
+                for (auto& inst : itM->second)
+                    if (inst.IsActive())
+                        filtered.push_back(inst);
+            }
+
+            if (!filtered.empty())
+                m_Awake(e, filtered);
+        }
     private:
         // 実際にプールを走査してコールバックを呼び出す共通処理
         template<typename Func>
@@ -1672,6 +1873,7 @@ public:
         UpdateFunc         m_Update;
         InitFunc           m_Init;
         FinFunc            m_Fin;
+        AwakeFunc          m_Awake; // 追加：Awake用のコールバック
     };
 
     std::unordered_map<Archetype, EntityContainer>& GetArchToEntities() { return m_ArchToEntities; }
@@ -1739,34 +1941,39 @@ private:
 
     /*-------------------- data members --------------------------------*/
 
-    bool                    m_IsUpdating = false;
-    Entity                  m_NextEntityID = 0;
-    std::vector<bool>       m_EntityToActive;
-    std::vector<Entity>     m_RecycleEntities;
-    std::vector<Entity> m_StagingEntities;            // フレーム中に生成された Entity の一覧
-    std::vector<bool> m_StagingEntityActive;          // 各 Entity の一時アクティブ状態
-    std::vector<Archetype> m_StagingEntityArchetypes; // 各 Entity の一時 Archetype
-    std::vector<Archetype>  m_EntityToArchetype;
-    std::unordered_map<CompID, int> m_DeletePriority;   // デフォルトは 0 (CompID 昇順になる)
-    std::vector<std::function<void()>>          m_DeferredCommands;
-    std::vector<std::weak_ptr<IEntityEventListener>>          m_EntityListeners;
-    std::vector<std::unique_ptr<ISystem>>       m_Systems;
-    std::vector<std::weak_ptr<IIComponentEventListener>>      m_ComponentListeners;
+    bool                                                        m_IsUpdating = false;
+    bool                                                        m_CancelUpdate = false;
+    Entity                                                      m_NextEntityID = 0;
+    std::vector<bool>                                           m_EntityToActive;
+    std::vector<Entity>                                         m_RecycleEntities;
+    std::vector<Entity>                                         m_StagingEntities;            // フレーム中に生成された Entity の一覧
+    std::vector<bool>                                           m_StagingEntityActive;          // 各 Entity の一時アクティブ状態
+    std::vector<Archetype>                                      m_StagingEntityArchetypes; // 各 Entity の一時 Archetype
+    std::vector<Archetype>                                      m_EntityToArchetype;
+    std::unordered_map<CompID, int>                             m_DeletePriority;   // デフォルトは 0 (CompID 昇順になる)
+    std::unordered_map<CompID, int>                             m_CopyPriority;   // コピー時の優先度マップ
+    std::vector<std::function<void()>>                          m_DeferredCommands;
+    std::vector<std::weak_ptr<IEntityEventListener>>            m_EntityListeners;
+    std::vector<std::unique_ptr<ISystem>>                       m_Systems;
+    std::vector<std::weak_ptr<IIComponentEventListener>>        m_ComponentListeners;
     std::unordered_map<Archetype, EntityContainer>              m_ArchToEntities;
     std::unordered_map<CompID, std::shared_ptr<IComponentPool>> m_TypeToComponents;
-
-    // 最後に計測した全システム更新の所要時間（ms）
-    double m_LastTotalUpdateTimeMs = 0.0;
-
-    // 各システム型ごとに最後に計測した更新時間（ms）
-    std::unordered_map<std::type_index, double> m_LastSystemUpdateTimeMs;
+    double                                                      m_LastTotalUpdateTimeMs = 0.0; // 最後に計測した全システム更新の所要時間（ms）
+    std::unordered_map<std::type_index, double>                 m_LastSystemUpdateTimeMs; // 各システム型ごとに最後に計測した更新時間（ms）
 
     // Initialize／Finalize の計測用
     double m_LastTotalInitializeTimeMs = 0.0;
     double m_LastTotalFinalizeTimeMs = 0.0;
+    double m_LastTotalAwakeTimeMs = 0.0;
 
-    std::unordered_map<std::type_index, double> m_LastSystemInitializeTimeMs;
-    std::unordered_map<std::type_index, double> m_LastSystemFinalizeTimeMs;
+    std::unordered_map<std::type_index, double>                 m_LastSystemInitializeTimeMs;
+    std::unordered_map<std::type_index, double>                 m_LastSystemFinalizeTimeMs;
+    std::unordered_map<std::type_index, double>                 m_LastSystemAwakeTimeMs;
+
+    // SystemごとのUpdate直前に処理する初期化対象格納用
+    std::unordered_map<std::type_index, std::vector<Entity>>    m_PendingInitBeforeUpdate;
+    // 新規に追加された Entity を記録するバッファ
+    std::vector<Entity>                                         m_NewEntitiesLastFrame;
 };
 
 struct IComponentEventListener : public IIComponentEventListener

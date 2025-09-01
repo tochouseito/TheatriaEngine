@@ -98,36 +98,9 @@ private:
 	StructuredBuffer<BUFFER_DATA_TF>* m_pIntegrationBuffer = nullptr;
 };
 
-class ScriptInstanceGenerateSystem : public ECSManager::System<ScriptComponent>
-{
-	friend class GameCore;
-public:
-	ScriptInstanceGenerateSystem() :
-		ECSManager::System<ScriptComponent>(
-			[&]([[maybe_unused]] Entity e, [[maybe_unused]] ScriptComponent& script)
-			{
-				// 何もしない
-			},
-			[&]([[maybe_unused]] Entity e, ScriptComponent& script)
-			{
-				GenerateInstance(e,script);
-			})
-	{
-	}
-	~ScriptInstanceGenerateSystem() = default;
-private:
-	void GenerateInstance(Entity e,ScriptComponent& script);
-
-	void SetGameWorld(GameWorld* gameWorld)
-	{
-		m_pGameWorld = gameWorld;
-	}
-
-	GameWorld* m_pGameWorld = nullptr;
-};
-
 class ScriptSystem : public ECSManager::System<ScriptComponent>
 {
+	friend class GameCore;
 public:
 	ScriptSystem():
 		ECSManager::System<ScriptComponent>(
@@ -142,7 +115,12 @@ public:
 			[&](Entity e, ScriptComponent& script)
 			{
 				FinalizeComponent(e, script);
-			})
+			},
+			[&](Entity e, ScriptComponent& script)
+			{
+				AwakeComponent(e, script);
+			}
+		)
 	{
 	}
 	~ScriptSystem() = default;
@@ -150,6 +128,14 @@ private:
 	void InitializeComponent([[maybe_unused]] Entity e, [[maybe_unused]] ScriptComponent& script);
 	void UpdateComponent([[maybe_unused]] Entity e, ScriptComponent& script);
 	void FinalizeComponent([[maybe_unused]] Entity e, ScriptComponent& script);
+	void AwakeComponent([[maybe_unused]] Entity e, ScriptComponent& script);
+
+	void SetGameWorld(GameWorld* gameWorld)
+	{
+		m_pGameWorld = gameWorld;
+	}
+
+	GameWorld* m_pGameWorld = nullptr;
 };
 
 class Rigidbody2DSystem : public ECSManager::System<TransformComponent, Rigidbody2DComponent>
@@ -271,7 +257,12 @@ public:
 			[this](Entity e, TransformComponent& transform, Rigidbody3DComponent& rb)
 			{
 				FinalizeComponent(e, transform, rb);
-			})
+			},
+			[this](Entity e, TransformComponent& transform, Rigidbody3DComponent& rb)
+			{
+				AwakeComponent(e, transform, rb);
+			}
+		)
 	{
 	}
 	~Rigidbody3DSystem() = default;
@@ -293,6 +284,7 @@ private:
 	void Reset(Rigidbody3DComponent& rb);
 	void FinalizeComponent([[maybe_unused]] Entity e, TransformComponent& transform, Rigidbody3DComponent& rb);
 	void StepSimulation();
+	void AwakeComponent([[maybe_unused]] Entity e, TransformComponent& transform, Rigidbody3DComponent& rb);
 	void SetPhysicsWorld(physics::d3::Id3World* world)
 	{
 		m_World = world;
