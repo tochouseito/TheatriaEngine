@@ -10,6 +10,7 @@ namespace physics::d3
 	struct Id3BodyDef
 	{
 		Vector3 position; // 位置
+		Vector3 degrees; // オイラー角
 		Vector3 halfsize; // 半径（ボックス形状の場合）
 		float friction = 0.5f; // 摩擦係数
 		float restitution = 0.2f; // 反発係数
@@ -29,7 +30,8 @@ namespace physics::d3
 		// ボディの位置を取得
 		virtual Vector3 GetPosition() const = 0;
 		// ボディの角度を取得
-		virtual Quaternion GetRotation() const = 0;
+		virtual Quaternion GetQuaternion() const = 0;
+		virtual Vector3 GetRotation() const = 0; // オイラー角を取得
 		// ボディの位置と角度を設定
 		virtual void SetTransform(const Vector3& position, const Quaternion& rotation) = 0;
 		virtual void SetTransform(const Vector3& position) = 0;
@@ -59,7 +61,8 @@ namespace physics::d3
 		void Create(const Id3BodyDef& bodyDef) override;
 		void Destroy() override;
 		Vector3 GetPosition() const override;
-		Quaternion GetRotation() const override;
+		Quaternion GetQuaternion() const override;
+		Vector3 GetRotation() const override;
 		void SetTransform(const Vector3& position, const Quaternion& rotation) override;
 		void SetTransform(const Vector3& position) override;
 		void SetTransform(const Quaternion& rotation) override;
@@ -83,7 +86,8 @@ namespace physics::d3
 		void Create(const Id3BodyDef& bodyDef) override;
 		void Destroy() override;
 		Vector3 GetPosition() const override;
-		Quaternion GetRotation() const override;
+		Quaternion GetQuaternion() const override;
+		Vector3 GetRotation() const override { return Vector3::Zero(); } // オイラー角を取得
 		void SetTransform(const Vector3&, const Quaternion&) override {}
 		void SetTransform(const Vector3&) override {}
 		void SetTransform(const Quaternion&) override {}

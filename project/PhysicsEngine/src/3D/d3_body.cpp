@@ -25,6 +25,15 @@ void physics::d3::bulletBody::Create(const Id3BodyDef& bodyDef)
 	btTransform transform;
 	transform.setIdentity();
 	transform.setOrigin(btVector3(bodyDef.position.x, bodyDef.position.y, bodyDef.position.z));
+
+	// degreesからクォータニオンを作成
+	btScalar roll = btRadians(bodyDef.degrees.x);
+	btScalar pitch = btRadians(bodyDef.degrees.y);
+	btScalar yaw = btRadians(bodyDef.degrees.z);
+	btQuaternion quat;
+	quat.setEulerZYX(yaw, pitch, roll); // ZYX順で設定
+	transform.setRotation(quat);
+
 	impl->motionState = std::make_unique<btDefaultMotionState>(transform);
 	btScalar mass = bodyDef.mass; // 質量を設定
 	btVector3 inertia(0, 0, 0);
@@ -54,11 +63,25 @@ Vector3 physics::d3::bulletBody::GetPosition() const
 	return Vector3(transform.getOrigin().x(), transform.getOrigin().y(), transform.getOrigin().z());
 }
 
-Quaternion physics::d3::bulletBody::GetRotation() const
+Quaternion physics::d3::bulletBody::GetQuaternion() const
 {
 	btTransform transform;
 	impl->rigidBody->getMotionState()->getWorldTransform(transform);
 	return Quaternion(transform.getRotation().x(), transform.getRotation().y(), transform.getRotation().z(), transform.getRotation().w());
+}
+
+Vector3 physics::d3::bulletBody::GetRotation() const
+{
+	btTransform transform = impl->rigidBody->getWorldTransform();
+	btQuaternion quat = transform.getRotation();
+	btMatrix3x3 mat(quat);  // クォータニオンを回転行列に変換
+	btScalar roll, pitch, yaw;
+	mat.getEulerYPR(yaw, pitch, roll); // 引数は (yaw, pitch, roll) の順
+	btScalar degreesX, degreesY, degreesZ;
+	degreesX = btDegrees(roll);
+	degreesY = btDegrees(pitch);
+	degreesZ = btDegrees(yaw);
+	return Vector3(degreesX, degreesY, degreesZ);
 }
 
 void physics::d3::bulletBody::SetTransform(const Vector3& position, const Quaternion& rotation)
@@ -156,7 +179,7 @@ Vector3 physics::d3::chophysicsBody::GetPosition() const
 	return Vector3();
 }
 
-Quaternion physics::d3::chophysicsBody::GetRotation() const
+Quaternion physics::d3::chophysicsBody::GetQuaternion() const
 {
 	return Quaternion();
 }
