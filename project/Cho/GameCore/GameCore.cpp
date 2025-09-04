@@ -722,12 +722,12 @@ void GameCore::RegisterContactEvents()
 				Rigidbody2DComponent* rigidbodyB = m_pECSManager->GetComponent<Rigidbody2DComponent>(entityB);
 				if (rigidbodyA && rigidbodyA->isActive && rigidbodyB && rigidbodyB->isActive)
 				{
-					if (scriptA)
+					if (scriptA && scriptA->instance)
 					{
 						GameObject* gameObjectB = m_pGameWorld->GetGameObject(entityB);
 						scriptA->onCollisionEnterFunc(*gameObjectB);
 					}
-					if(scriptB)
+					if(scriptB && scriptB->instance)
 					{
 						GameObject* gameObjectA = m_pGameWorld->GetGameObject(entityA);
 						scriptB->onCollisionEnterFunc(*gameObjectA);
@@ -750,12 +750,12 @@ void GameCore::RegisterContactEvents()
 				Rigidbody2DComponent* rigidbodyB = m_pECSManager->GetComponent<Rigidbody2DComponent>(entityB);
 				if (rigidbodyA && rigidbodyA->isActive && rigidbodyB && rigidbodyB->isActive)
 				{
-					if (scriptA)
+					if (scriptA && scriptA->instance)
 					{
 						GameObject* gameObjectB = m_pGameWorld->GetGameObject(entityB);
 						scriptA->onCollisionExitFunc(*gameObjectB);
 					}
-					if (scriptB)
+					if (scriptB && scriptB->instance)
 					{
 						GameObject* gameObjectA = m_pGameWorld->GetGameObject(entityA);
 						scriptB->onCollisionExitFunc(*gameObjectA);
@@ -778,12 +778,12 @@ void GameCore::RegisterContactEvents()
 				Rigidbody2DComponent* rigidbodyB = m_pECSManager->GetComponent<Rigidbody2DComponent>(entityB);
 				if (rigidbodyA && rigidbodyA->isActive && rigidbodyB && rigidbodyB->isActive)
 				{
-					if (scriptA)
+					if (scriptA && scriptA->instance)
 					{
 						GameObject* gameObjectB = m_pGameWorld->GetGameObject(entityB);
 						scriptA->onCollisionStayFunc(*gameObjectB);
 					}
-					if (scriptB)
+					if (scriptB && scriptB->instance)
 					{
 						GameObject* gameObjectA = m_pGameWorld->GetGameObject(entityA);
 						scriptB->onCollisionStayFunc(*gameObjectA);
@@ -807,12 +807,12 @@ void GameCore::RegisterContactEvents()
 				Rigidbody3DComponent* rigidbodyB = m_pECSManager->GetComponent<Rigidbody3DComponent>(entityB);
 				if (rigidbodyA && rigidbodyA->IsActive() && rigidbodyB && rigidbodyB->IsActive())
 				{
-					if (scriptA)
+					if (scriptA && scriptA->instance)
 					{
 						GameObject* gameObjectB = m_pGameWorld->GetGameObject(entityB);
 						scriptA->onCollisionEnterFunc(*gameObjectB);
 					}
-					if (scriptB)
+					if (scriptB && scriptB->instance)
 					{
 						GameObject* gameObjectA = m_pGameWorld->GetGameObject(entityA);
 						scriptB->onCollisionEnterFunc(*gameObjectA);
@@ -835,12 +835,12 @@ void GameCore::RegisterContactEvents()
 				Rigidbody3DComponent* rigidbodyB = m_pECSManager->GetComponent<Rigidbody3DComponent>(entityB);
 				if (rigidbodyA && rigidbodyA->IsActive() && rigidbodyB && rigidbodyB->IsActive())
 				{
-					if (scriptA)
+					if (scriptA && scriptA->instance)
 					{
 						GameObject* gameObjectB = m_pGameWorld->GetGameObject(entityB);
 						scriptA->onCollisionExitFunc(*gameObjectB);
 					}
-					if (scriptB)
+					if (scriptB && scriptB->instance)
 					{
 						GameObject* gameObjectA = m_pGameWorld->GetGameObject(entityA);
 						scriptB->onCollisionExitFunc(*gameObjectA);
@@ -863,12 +863,12 @@ void GameCore::RegisterContactEvents()
 				Rigidbody3DComponent* rigidbodyB = m_pECSManager->GetComponent<Rigidbody3DComponent>(entityB);
 				if (rigidbodyA && rigidbodyA->IsActive() && rigidbodyB && rigidbodyB->IsActive())
 				{
-					if (scriptA)
+					if (scriptA && scriptA->instance)
 					{
 						GameObject* gameObjectB = m_pGameWorld->GetGameObject(entityB);
 						scriptA->onCollisionStayFunc(*gameObjectB);
 					}
-					if (scriptB)
+					if (scriptB && scriptB->instance)
 					{
 						GameObject* gameObjectA = m_pGameWorld->GetGameObject(entityA);
 						scriptB->onCollisionStayFunc(*gameObjectA);

@@ -174,6 +174,8 @@ void physics::d3::bulletWorld::ProcessEvents()
 	impl->previousContacts = impl->currentContacts;
 }
 
+btDynamicsWorld* physics::d3::bulletWorld::GetDynamicsWorld() const { return impl->world.get(); }
+
 Id3World* physics::d3::CreateWorld(d3Backend backend)
 {
 	switch (backend)

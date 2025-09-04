@@ -439,8 +439,15 @@ void Inspector::Rigidbody3DComponentView(GameObject* object)
 		// BodyParameters
 		// 質量
 		ImGui::DragFloat("質量", &rigidbody->mass, 0.1f, 0.0f, 100.0f);
-		//ImGui::DragFloat("Gravity Scale", &rigidbody->gravityScale, 0.1f, 0.0f, 100.0f);
-		ImGui::Checkbox("Is Kinematic", &rigidbody->isKinematic);
+		ImGui::DragFloat("Gravity Scale", &rigidbody->gravityScale, 0.1f, 0.0f, 100.0f);
+		// Body Type Combo
+		const char* bodyTypeItems[] = { "Static", "Dynamic", "Kinematic" };
+		int currentType = static_cast<int>(rigidbody->bodyType);
+		if (ImGui::Combo("Body Type", &currentType, bodyTypeItems, IM_ARRAYSIZE(bodyTypeItems)))
+		{
+			rigidbody->bodyType = static_cast<physics::d3::Id3BodyType>(currentType);
+		}
+		// Sensor
 		ImGui::Checkbox("Is Sensor", &rigidbody->isSensor);
 		ImGui::DragFloat3("Half Size", &rigidbody->halfsize.x, 0.1f, 0.0f, 100.0f);
 		ImGui::DragFloat3("Velocity", &rigidbody->velocity.x, 0.1f, -100.0f, 100.0f);

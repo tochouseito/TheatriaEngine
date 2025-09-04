@@ -1336,31 +1336,37 @@ void Rigidbody3DSystem::UpdateComponent(Entity e, TransformComponent& transform,
 		rb.runtimeBody = m_World->CreateBody(bodyDef);
 	}
 
-	rb.runtimeBody->SetKinematic(rb.isKinematic);
+	rb.runtimeBody->SetBodyType(m_World, rb.bodyType);
 	rb.runtimeBody->SetSensor(rb.isSensor);
+	rb.runtimeBody->SetGravityScale(m_World,rb.gravityScale);
 
 	if (rb.requestedPosition)
 	{
-		rb.runtimeBody->SetTransform(rb.requestedPosition.value(), rb.runtimeBody->GetRotation());
+		rb.runtimeBody->SetTransform(rb.requestedPosition.value(), rb.runtimeBody->GetQuaternion());
 		rb.requestedPosition.reset();
 	}
-	
-	const Vector3& pos = rb.runtimeBody->GetPosition();
-	transform.position.x = pos.x;
-	transform.position.y = pos.y;
-	transform.position.z = pos.z;
 
+	// 剛体のTransformをTransformComponentに反映
+	// position
+	transform.position = rb.runtimeBody->GetPosition();
+	// rotation
+	transform.degrees = rb.runtimeBody->GetRotation();
+	transform.quaternion = rb.runtimeBody->GetQuaternion();
+	
+	// Rigidbody3DComponentに反映
+	// velocity
 	Vector3 velocity = rb.runtimeBody->GetLinearVelocity();
 	rb.velocity.x = velocity.x;
 	rb.velocity.y = velocity.y;
 	rb.velocity.z = velocity.z;
+	// angularVelocity
 	Vector3 angularVelocity = rb.runtimeBody->GetAngularVelocity();
 	rb.angularVelocity.x = angularVelocity.x;
 	rb.angularVelocity.y = angularVelocity.y;
 	rb.angularVelocity.z = angularVelocity.z;
-
-	rb.quaternion = rb.runtimeBody->GetRotation();
-
+	// quaternion
+	rb.quaternion = rb.runtimeBody->GetQuaternion();
+	// halfsize
 	rb.preHalfsize = rb.halfsize;
 }
 
@@ -1400,8 +1406,8 @@ void Rigidbody3DSystem::AwakeComponent(Entity e, TransformComponent& transform, 
 	e;
 	physics::d3::Id3BodyDef bodyDef;
 	// Rigidbody3DComponentの初期化
-	bodyDef.position = Vector3(transform.position.x, transform.position.y, transform.position.z);
-	// bodyDef.userData = static_cast<void*>(&rb.selfEntity.value());
+	bodyDef.position = transform.position;
+	bodyDef.degrees = transform.degrees;
 	bodyDef.userIndex = static_cast<int>(rb.selfEntity.value());
 	bodyDef.friction = rb.friction;
 	bodyDef.restitution = rb.restitution;
@@ -1419,8 +1425,8 @@ void Rigidbody3DSystem::AwakeComponent(Entity e, TransformComponent& transform, 
 	rb.velocity.Initialize();
 
 	rb.runtimeBody = m_World->CreateBody(bodyDef);
-
-	rb.runtimeBody->SetKinematic(rb.isKinematic);
+	
+	rb.runtimeBody->SetBodyType(m_World, rb.bodyType);
 
 	// Transformと同期（optional）
 	/*transform.position.x = rb.runtimeBody->GetPosition().x;

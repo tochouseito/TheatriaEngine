@@ -8,6 +8,8 @@
 #include <unordered_set>
 #include <xhash>
 
+class btDynamicsWorld;
+
 namespace physics::d3
 {
 	enum class d3Backend
@@ -48,6 +50,7 @@ namespace physics::d3
 
 	class bulletWorld : public Id3World
 	{
+		friend class bulletBody;
 	public:
 		bulletWorld();
 		~bulletWorld() override;
@@ -71,6 +74,7 @@ namespace physics::d3
 		{
 			stayContactCallback = std::move(callback);
 		}
+		btDynamicsWorld* GetDynamicsWorld() const; // Bulletの物理ワールドを取得
 	private:
 		struct Impl;
 		std::unique_ptr<Impl> impl;
