@@ -7,6 +7,7 @@ class GraphicsEngine;
 class GameObject;
 class InputManager;
 class EngineCommand;
+class PlatformLayer;
 // インタフェース
 class IEngineCommand
 {
@@ -56,7 +57,7 @@ class EngineCommand
 	friend class GraphicsEngine;
 public:
 	// Constructor
-	EngineCommand(GameCore* gameCore, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine,InputManager* input);
+	EngineCommand(GameCore* gameCore, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine,InputManager* input, PlatformLayer* platformLayer);
 	// Destructor
 	~EngineCommand()
 	{
@@ -101,6 +102,8 @@ public:
 	EditorManager* GetEditorManager() { return m_EditorManager; }
 	// 入力マネージャを取得
 	InputManager* GetInputManager() { return m_InputManager; }
+	// プラットフォームレイヤーを取得
+	PlatformLayer* GetPlatformLayer() { return m_PlatformLayer; }
 	// レンダリングテクスチャのハンドルを取得
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGameTextureHandle();
 	D3D12_GPU_DESCRIPTOR_HANDLE GetSceneTextureHandle();
@@ -129,6 +132,7 @@ private:
 	ResourceManager* m_ResourceManager = nullptr;
 	GraphicsEngine* m_GraphicsEngine = nullptr;
 	InputManager* m_InputManager = nullptr;
+	PlatformLayer* m_PlatformLayer = nullptr;
 	std::vector<std::unique_ptr<IEngineCommand>> m_Commands;
 };
 

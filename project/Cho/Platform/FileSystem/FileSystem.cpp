@@ -1245,6 +1245,79 @@ bool cho::FileSystem::LoadProjectFolder(const std::wstring& projectName, EngineC
     return true;
 }
 
+/// CSVを2次元vectorに読み込む関数
+std::vector<std::vector<std::string>> cho::FileSystem::LoadCSV(const std::string& filePath)
+{
+    std::vector<std::vector<std::string>> data;
+    std::ifstream file(filePath);
+    if (!file.is_open())
+    {
+        std::cerr << "CSVファイルを開けませんでした: " << filePath << std::endl;
+        return data;
+    }
+
+    std::string line;
+    while (std::getline(file, line))
+    {
+        std::vector<std::string> row;
+        std::stringstream ss(line);
+        std::string cell;
+
+        while (std::getline(ss, cell, ',')) // カンマ区切りで取得
+        {
+            row.push_back(cell);
+        }
+
+        data.push_back(row);
+    }
+
+    return data;
+}
+
+/// CSVを2次元vector<int>に読み込む関数
+std::vector<std::vector<int>> cho::FileSystem::LoadCSV_Int(const std::string& filePath)
+{
+    std::vector<std::vector<int>> data;
+    std::ifstream file(filePath);
+    if (!file.is_open())
+    {
+        std::cerr << "CSVファイルを開けませんでした: " << filePath << std::endl;
+        return data;
+    }
+
+    std::string line;
+    while (std::getline(file, line))
+    {
+        std::vector<int> row;
+        std::stringstream ss(line);
+        std::string cell;
+
+        while (std::getline(ss, cell, ',')) // カンマ区切りで取得
+        {
+            if (!cell.empty())
+            {
+                try
+                {
+                    row.push_back(std::stoi(cell)); // string → int
+                }
+                catch (const std::invalid_argument&)
+                {
+                    std::cerr << "数値変換エラー: " << cell << std::endl;
+                    row.push_back(0); // エラー時は0にしておく
+                }
+            }
+            else
+            {
+                row.push_back(0); // 空セルは0扱い
+            }
+        }
+
+        data.push_back(row);
+    }
+
+    return data;
+}
+
 std::string cho::FileSystem::GenerateGUID()
 {
     GUID guid;

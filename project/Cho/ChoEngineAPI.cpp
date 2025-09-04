@@ -115,6 +115,16 @@ CHO_API Marionnette* ChoSystem::GetMarionnettePtr(const std::wstring& name)
 	}
 }
 
+std::vector<std::vector<std::string>> ChoSystem::LoadCSV(const std::string& filePath)
+{
+	return cho::FileSystem::LoadCSV(filePath);
+}
+
+std::vector<std::vector<int>> ChoSystem::LoadCSV_Int(const std::string& filePath)
+{
+	return cho::FileSystem::LoadCSV_Int(filePath);
+}
+
 void ChoSystem::SceneManagerAPI::LoadScene(const std::wstring& sceneName)
 {
 	g_Engine->GetEngineCommand()->GetGameCore()->GetSceneManager()->SetLoadingSceneName(sceneName);

@@ -61,6 +61,10 @@ namespace ChoSystem
 		return static_cast<T*>(GetMarionnettePtr(name));
 	}
 
+	// csv読み込み
+	CHO_API std::vector<std::vector<std::string>> LoadCSV(const std::string& filePath);
+	CHO_API std::vector<std::vector<int>> LoadCSV_Int(const std::string& filePath);
+
 	// SceneManager
 	struct SceneManagerAPI
 	{

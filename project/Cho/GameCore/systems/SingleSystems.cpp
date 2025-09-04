@@ -1412,25 +1412,12 @@ void Rigidbody3DSystem::AwakeComponent(Entity e, TransformComponent& transform, 
 	bodyDef.friction = rb.friction;
 	bodyDef.restitution = rb.restitution;
 	bodyDef.halfsize = rb.halfsize;
-	/*physics::d2::Id2BodyDef bodyDef;
-	bodyDef.userData = static_cast<void*>(&rb.selfEntity.value());
-	bodyDef.type = rb.bodyType;
-	bodyDef.gravityScale = rb.gravityScale;
-	bodyDef.fixedRotation = rb.fixedRotation;
-	bodyDef.position = Vector2(transform.position.x, transform.position.y);
-	float angleZ = chomath::DegreesToRadians(transform.degrees).z;
-	bodyDef.angle = angleZ;
-	rb.runtimeBody = m_World->CreateBody(bodyDef);
-	rb.runtimeBody->SetAwake(true);*/
+
 	rb.velocity.Initialize();
 
 	rb.runtimeBody = m_World->CreateBody(bodyDef);
 	
 	rb.runtimeBody->SetBodyType(m_World, rb.bodyType);
-
-	// Transformと同期（optional）
-	/*transform.position.x = rb.runtimeBody->GetPosition().x;
-	transform.position.y = rb.runtimeBody->GetPosition().y;*/
 
 	rb.runtimeBody->SetLinearVelocity(rb.velocity);
 }

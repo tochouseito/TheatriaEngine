@@ -833,6 +833,8 @@ public:
     void InitializeAllSystems()
     {
         using Clock = std::chrono::steady_clock;
+        m_IsUpdating = true;
+        m_CancelUpdate = false; // ← 毎フレーム最初にリセット
         // 全体計測開始
         auto t0_total = Clock::now();
 
@@ -852,6 +854,9 @@ public:
                     std::chrono::duration<double, std::milli>(t1 - t0).count();
             }
         }
+
+        m_IsUpdating = false;
+        m_CancelUpdate = false;
 
         // 全体計測終了
         auto t1_total = Clock::now();
@@ -916,6 +921,8 @@ public:
     void FinalizeAllSystems()
     {
         using Clock = std::chrono::steady_clock;
+        m_IsUpdating = true;
+        m_CancelUpdate = false; // ← 毎フレーム最初にリセット
         // 全体計測開始
         auto t0_total = Clock::now();
 
@@ -936,6 +943,9 @@ public:
             }
         }
 
+        m_IsUpdating = false;
+        m_CancelUpdate = false;
+
         // 全体計測終了
         auto t1_total = Clock::now();
         m_LastTotalFinalizeTimeMs =
@@ -946,6 +956,8 @@ public:
     void AwakeAllSystems()
     {
         using Clock = std::chrono::steady_clock;
+        m_IsUpdating = true;
+        m_CancelUpdate = false; // ← 毎フレーム最初にリセット
         // 全体計測開始
         auto t0_total = Clock::now();
 
@@ -965,6 +977,9 @@ public:
                     std::chrono::duration<double, std::milli>(t1 - t0).count();
             }
         }
+
+        m_IsUpdating = false;
+        m_CancelUpdate = false;
 
         // 全体計測終了
         auto t1_total = Clock::now();

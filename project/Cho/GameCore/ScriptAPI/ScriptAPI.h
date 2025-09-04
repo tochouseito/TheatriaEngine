@@ -111,6 +111,11 @@ namespace ChoSystem
             UpdatePtr();
             return data;
 		}
+        operator bool() noexcept
+        {
+            UpdatePtr();
+			return data != nullptr;
+        }
     private:
         void UpdatePtr()
         {
@@ -136,6 +141,11 @@ namespace ChoSystem
         {
             UpdatePtr();
             return data;
+        }
+        operator bool() noexcept
+        {
+            UpdatePtr();
+            return data != nullptr;
         }
     private:
         void UpdatePtr()
@@ -163,6 +173,11 @@ namespace ChoSystem
             UpdatePtr();
             return data;
         }
+        operator bool() noexcept
+        {
+            UpdatePtr();
+            return data != nullptr;
+        }
     private:
         void UpdatePtr()
         {
@@ -188,6 +203,11 @@ namespace ChoSystem
             UpdatePtr();
             return data;
 		}
+        operator bool() noexcept
+        {
+            UpdatePtr();
+            return data != nullptr;
+        }
 
         void SetTransform(const Vector3& pos);
         void SetTransform(const Quaternion& rot);
@@ -211,6 +231,11 @@ namespace ChoSystem
         {
             UpdatePtr();
             return data;
+        }
+        operator bool() noexcept
+        {
+            UpdatePtr();
+            return data != nullptr;
         }
     private:
         void UpdatePtr()

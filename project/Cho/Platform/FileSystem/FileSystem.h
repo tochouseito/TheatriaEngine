@@ -172,7 +172,11 @@ namespace cho
 		static void SaveProject(EditorManager* editorManager, SceneManager* sceneManager, GameWorld* gameWorld, ECSManager* ecs);
         // プロジェクトフォルダを読み込む
         static bool LoadProjectFolder(const std::wstring& projectName, EngineCommand* engineCommand);
-        // 
+        /// CSVを2次元vectorに読み込む関数
+        // csv読み込み
+        static std::vector<std::vector<std::string>> LoadCSV(const std::string& filePath);
+        /// CSVを2次元vector<int>に読み込む関数
+        static std::vector<std::vector<int>> LoadCSV_Int(const std::string& filePath);
 
         static FileType DetectFileType(const nlohmann::json& j)
         {
