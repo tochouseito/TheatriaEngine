@@ -1336,8 +1336,9 @@ void Rigidbody3DSystem::UpdateComponent(Entity e, TransformComponent& transform,
 		rb.runtimeBody = m_World->CreateBody(bodyDef);
 	}
 
-	rb.runtimeBody->SetKinematic(rb.isKinematic);
+	rb.runtimeBody->SetBodyType(m_World, rb.bodyType);
 	rb.runtimeBody->SetSensor(rb.isSensor);
+	rb.runtimeBody->SetGravityScale(m_World,rb.gravityScale);
 
 	if (rb.requestedPosition)
 	{
@@ -1424,8 +1425,8 @@ void Rigidbody3DSystem::AwakeComponent(Entity e, TransformComponent& transform, 
 	rb.velocity.Initialize();
 
 	rb.runtimeBody = m_World->CreateBody(bodyDef);
-
-	rb.runtimeBody->SetKinematic(rb.isKinematic);
+	
+	rb.runtimeBody->SetBodyType(m_World, rb.bodyType);
 
 	// Transformと同期（optional）
 	/*transform.position.x = rb.runtimeBody->GetPosition().x;

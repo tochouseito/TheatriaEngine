@@ -1029,7 +1029,8 @@ json cho::Serialization::ToJson(const Rigidbody3DComponent& rb)
 	j["friction"] = rb.friction;
 	j["restitution"] = rb.restitution;
 	j["velocity"] = { rb.velocity.x, rb.velocity.y, rb.velocity.z };
-	j["isKinematic"] = rb.isKinematic;
+	j["gravityScale"] = rb.gravityScale;
+	j["bodyType"] = static_cast<int>(rb.bodyType);
 	j["mass"] = rb.mass;
 	j["isSensor"] = rb.isSensor;
 	j["quaternion"] = { rb.quaternion.x, rb.quaternion.y, rb.quaternion.z, rb.quaternion.w };
@@ -1888,7 +1889,8 @@ void cho::Deserialization::FromJson(const json& j, Rigidbody3DComponent& rb)
 	rb.friction = j.value("friction", 0.5f);
 	rb.restitution = j.value("restitution", 0.0f);
 	rb.halfsize = { j["halfsize"][0], j["halfsize"][1], j["halfsize"][2] };
-	rb.isKinematic = j.value("isKinematic", false);
+	rb.bodyType = static_cast<physics::d3::Id3BodyType>(j.value("bodyType", 0));
+	rb.gravityScale = j.value("gravityScale", 1.0f);
 	rb.mass = j.value("mass", 1.0f);
 	rb.isSensor = j.value("isSensor", false);
     if (j.contains("velocity") && j["velocity"].is_array() && j["velocity"].size() == 3)

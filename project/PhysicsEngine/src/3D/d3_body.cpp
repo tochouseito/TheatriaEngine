@@ -1,5 +1,6 @@
 #include "physicsengine_pch.h"
 #include "3D/d3_body.h"
+#include "3D/d3_world.h"
 
 // BulletPhysics
 #include <btBulletDynamicsCommon.h>
@@ -12,6 +13,8 @@ struct bulletBody::Impl
 	std::unique_ptr<btCollisionShape> shape; // Bulletの衝突形状データ
 	std::unique_ptr<btDefaultMotionState> motionState; // 物理オブジェクトの状態
 	std::unique_ptr<btRigidBody> rigidBody; // 剛体データ
+	Id3BodyType currentType = Id3BodyType::DYNAMIC; // 現在のボディタイプ
+	float lastDynamicMass = 1.0f; // 最後に設定した質量
 };
 
 physics::d3::bulletBody::bulletBody():
@@ -47,6 +50,7 @@ void physics::d3::bulletBody::Create(const Id3BodyDef& bodyDef)
 	impl->rigidBody->setRestitution(bodyDef.restitution);
 	impl->rigidBody->setUserPointer(bodyDef.userData); // ユーザーデータを設定
 	impl->rigidBody->setUserIndex(bodyDef.userIndex); // ユーザーインデックスを設定
+	impl->currentType = bodyDef.bodyType;
 }
 
 void physics::d3::bulletBody::Destroy()
@@ -131,6 +135,18 @@ void physics::d3::bulletBody::SetAngularVelocity(const Vector3& angularVelocity)
 	impl->rigidBody->setAngularVelocity(btVector3(angularVelocity.x, angularVelocity.y, angularVelocity.z));
 }
 
+void physics::d3::bulletBody::SetGravityScale(Id3World* world, const float& scale)
+{
+	if (!impl || !impl->rigidBody || !world) return;
+	bulletWorld* bulletWorldPtr = static_cast<bulletWorld*>(world);
+	// ワールド重力に上書きされないようにフラグ設定
+	impl->rigidBody->setFlags(impl->rigidBody->getFlags() | BT_DISABLE_WORLD_GRAVITY);
+	// スケール適用した重力を設定
+	impl->rigidBody->setGravity(bulletWorldPtr->GetDynamicsWorld()->getGravity() * scale);
+	// 再アクティブ化
+	impl->rigidBody->activate(true);
+}
+
 btRigidBody* physics::d3::bulletBody::GetRigidBody() const { return impl->rigidBody.get(); }
 
 // Bulletの剛体データを取得
@@ -139,18 +155,104 @@ bool physics::d3::bulletBody::IsActive() const { return impl->rigidBody->isActiv
 // 有効かどうかを取得
 void physics::d3::bulletBody::SetActive(bool active) { impl->rigidBody->activate(active); }
 
-void physics::d3::bulletBody::SetKinematic(bool isKinematic)
+void physics::d3::bulletBody::SetBodyType(Id3World* world, Id3BodyType bodyType)
 {
-	if(isKinematic)
+	if (!impl || !impl->rigidBody || !world) return;
+
+	btRigidBody* body = impl->rigidBody.get();
+	btCollisionShape* shape = impl->shape.get();
+	bulletWorld* bulletWorldPtr = static_cast<bulletWorld*>(world);
+	btDynamicsWorld* worldPtr = bulletWorldPtr->GetDynamicsWorld();
+	if (impl->currentType == bodyType) return;
+
+	auto flags = body->getCollisionFlags();
+
+	// DYNAMIC のときの質量を覚えておく（切替元がDYNAMICなら）
+	if (impl->currentType == Id3BodyType::DYNAMIC)
 	{
-		impl->rigidBody->setCollisionFlags(impl->rigidBody->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
-		impl->rigidBody->setActivationState(DISABLE_DEACTIVATION); // 非アクティブ化を無効にする
+		btScalar invMass = body->getInvMass();
+		if (invMass > 0)
+		{
+			impl->lastDynamicMass = btScalar(1.0f) / invMass; // 現在の質量を保存
+		}
 	}
-	else
+
+	switch (bodyType)
 	{
-		impl->rigidBody->setCollisionFlags(impl->rigidBody->getCollisionFlags() & ~btCollisionObject::CF_KINEMATIC_OBJECT);
-		impl->rigidBody->setActivationState(ACTIVE_TAG); // アクティブ化状態に戻す
+	case Id3BodyType::STATIC:
+	{
+		// Kinematic フラグを外す
+		flags &= ~btCollisionObject::CF_KINEMATIC_OBJECT;
+		body->setCollisionFlags(flags);
+
+		// 質量0 / 慣性0 → Static 扱い
+		btVector3 inertia(0, 0, 0);
+		body->setMassProps(btScalar(0.0f), inertia);
+		body->updateInertiaTensor();
+
+		// 速度をゼロに
+		body->setLinearVelocity(btVector3(0, 0, 0));
+		body->setAngularVelocity(btVector3(0, 0, 0));
+
+		// スリープ許可
+		body->setActivationState(WANTS_DEACTIVATION);
+
+		// AABB 更新（位置を動かすStaticなら特に重要）
+		if (worldPtr) worldPtr->updateSingleAabb(body);
+		break;
 	}
+
+	case Id3BodyType::DYNAMIC:
+	{
+		// Kinematic フラグを外す
+		flags &= ~btCollisionObject::CF_KINEMATIC_OBJECT;
+		body->setCollisionFlags(flags);
+
+		// 質量を復元（最低1.0fなど下限を決めると安定）
+		btScalar remakeMass = btMax(impl->lastDynamicMass, btScalar(1.0f));
+
+		btVector3 inertia(0, 0, 0);
+		if (shape && remakeMass > 0)
+		{
+			shape->calculateLocalInertia(remakeMass, inertia);
+		}
+		body->setMassProps(remakeMass, inertia);
+		body->updateInertiaTensor();
+
+		// 再アクティブ化
+		body->setActivationState(ACTIVE_TAG);
+		body->activate(true);
+
+		if (worldPtr) worldPtr->updateSingleAabb(body);
+		break;
+	}
+
+	case Id3BodyType::KINEMATIC:
+	{
+		// Kinematic フラグON（質量は0にする）
+		flags |= btCollisionObject::CF_KINEMATIC_OBJECT;
+		body->setCollisionFlags(flags);
+
+		btVector3 inertia(0, 0, 0);
+		body->setMassProps(btScalar(0.0f), inertia);
+		body->updateInertiaTensor();
+
+		// 速度は基本ゼロに（毎フレーム手動更新で与える）
+		body->setLinearVelocity(btVector3(0, 0, 0));
+		body->setAngularVelocity(btVector3(0, 0, 0));
+
+		// スリープ無効化（手で動かす壁なので寝かせない）
+		body->setActivationState(DISABLE_DEACTIVATION);
+
+		if (worldPtr) worldPtr->updateSingleAabb(body);
+		break;
+	}
+
+	default:
+		break;
+	}
+
+	impl->currentType = bodyType;
 }
 
 void physics::d3::bulletBody::SetSensor(bool isSensor)

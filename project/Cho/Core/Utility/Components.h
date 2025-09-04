@@ -476,12 +476,12 @@ struct Rigidbody3DComponent : public IComponentTag
 	Rigidbody3DComponent(const Rigidbody3DComponent&) = default;
 	// ムーブコンストラクタ（移動）
 	Rigidbody3DComponent(Rigidbody3DComponent&&) noexcept = default;
-	//float gravityScale = 1.0f;
-	bool isKinematic = false;
+	float gravityScale = 1.0f;
 	bool isSensor = false; // センサーかどうか
 	float friction = 0.3f; // 摩擦係数
 	float restitution = 0.0f; // 反発係数
 	float mass = 1.0f; // 質量
+	physics::d3::Id3BodyType bodyType = physics::d3::Id3BodyType::DYNAMIC; // ボディタイプ
 	Vector3 halfsize = { 0.5f, 0.5f, 0.5f }; // 半径（ボックス形状の場合）
 	Vector3 preHalfsize = { 0.5f,0.5f,0.5f };
 	Vector3 velocity = { 0.0f, 0.0f, 0.0f }; // 速度
@@ -498,7 +498,7 @@ struct Rigidbody3DComponent : public IComponentTag
 		restitution = other.restitution;
 		halfsize = other.halfsize;
 		preHalfsize = other.preHalfsize;
-		isKinematic = other.isKinematic;
+		bodyType = other.bodyType;
 		mass = other.mass;
 		isSensor = other.isSensor;
 		velocity = other.velocity;
@@ -514,7 +514,7 @@ struct Rigidbody3DComponent : public IComponentTag
 		restitution = 0.0f;
 		halfsize = { 0.5f, 0.5f, 0.5f };
 		preHalfsize = { 0.5f, 0.5f, 0.5f };
-		isKinematic = false;
+		bodyType = physics::d3::Id3BodyType::DYNAMIC;
 		mass = 1.0f;
 		isSensor = false;
 		velocity = { 0.0f, 0.0f, 0.0f }; // 速度
