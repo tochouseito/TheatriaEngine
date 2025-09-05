@@ -1881,21 +1881,48 @@ void cho::FileSystem::ScriptProject::UnloadPDB()
 bool cho::FileSystem::ScriptProject::WaitForBuild(const std::wstring& dllPath, int timeoutMs)
 {
     using namespace std::chrono;
+
+    // DLLをアンロード
+    UnloadScriptDLL();
+
     auto start = steady_clock::now();
 
     FILETIME lastWrite = {};
+    bool updated = false;
+
     while (duration_cast<milliseconds>(steady_clock::now() - start).count() < timeoutMs)
     {
         WIN32_FILE_ATTRIBUTE_DATA fad;
         if (GetFileAttributesExW(dllPath.c_str(), GetFileExInfoStandard, &fad))
         {
-            // 書き込み時刻を取得
             if (CompareFileTime(&lastWrite, &fad.ftLastWriteTime) != 0)
             {
                 // 更新された
-                return true;
+                lastWrite = fad.ftLastWriteTime;
+                updated = true;
+            }
+
+            if (updated)
+            {
+                // 書き込み完了チェック: 読み取り専用で開けるかどうか
+                HANDLE hFile = CreateFileW(
+                    dllPath.c_str(),
+                    GENERIC_READ,
+                    FILE_SHARE_READ,  // 読み込みだけ共有
+                    nullptr,
+                    OPEN_EXISTING,
+                    FILE_ATTRIBUTE_NORMAL,
+                    nullptr
+                );
+
+                if (hFile != INVALID_HANDLE_VALUE)
+                {
+                    CloseHandle(hFile);
+                    return true; // 完全に開けたので完了
+                }
             }
         }
+
         Sleep(500); // 0.5秒おきに確認
     }
     return false; // タイムアウト
