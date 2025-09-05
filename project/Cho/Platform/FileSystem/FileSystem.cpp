@@ -14,7 +14,11 @@
 #include <shobjidl.h> 
 #include <ole2.h>
 #include <DbgHelp.h>
+#include <comdef.h>
+#include <atlbase.h>
 #pragma comment(lib, "Dbghelp.lib")
+#pragma comment(lib, "ole32.lib")
+#pragma comment(lib, "oleaut32.lib")
 using namespace cho;
 
 std::wstring cho::FileSystem::m_sProjectName = L"";
@@ -25,6 +29,20 @@ std::string cho::FileSystem::ScriptProject::m_SlnPath = "";
 std::string cho::FileSystem::ScriptProject::m_ProjPath = "";
 HMODULE cho::FileSystem::ScriptProject::m_DllHandle = nullptr;
 DWORD64 cho::FileSystem::ScriptProject::m_PDBBaseAddress = 0;
+
+// スクリプトプロジェクトの自動保存、ビルド
+static HRESULT InvokeByName(IDispatch* pDisp, LPCOLESTR name, VARIANT* args, UINT cArgs)
+{
+    DISPID dispid;
+    HRESULT hr = pDisp->GetIDsOfNames(IID_NULL, const_cast<LPOLESTR*>(&name), 1, LOCALE_USER_DEFAULT, &dispid);
+    if (FAILED(hr)) return hr;
+
+    // 引数は逆順で渡す（rgvarg[0] が最後の引数）
+    DISPPARAMS dp = {};
+    dp.cArgs = cArgs;
+    dp.rgvarg = args;
+    return pDisp->Invoke(dispid, IID_NULL, LOCALE_USER_DEFAULT, DISPATCH_METHOD, &dp, nullptr, nullptr, nullptr);
+}
 
 // プロジェクトフォルダを探す
 std::optional<std::filesystem::path> cho::FileSystem::FindOrCreateGameProjects()
@@ -1245,6 +1263,79 @@ bool cho::FileSystem::LoadProjectFolder(const std::wstring& projectName, EngineC
     return true;
 }
 
+/// CSVを2次元vectorに読み込む関数
+std::vector<std::vector<std::string>> cho::FileSystem::LoadCSV(const std::string& filePath)
+{
+    std::vector<std::vector<std::string>> data;
+    std::ifstream file(filePath);
+    if (!file.is_open())
+    {
+        std::cerr << "CSVファイルを開けませんでした: " << filePath << std::endl;
+        return data;
+    }
+
+    std::string line;
+    while (std::getline(file, line))
+    {
+        std::vector<std::string> row;
+        std::stringstream ss(line);
+        std::string cell;
+
+        while (std::getline(ss, cell, ',')) // カンマ区切りで取得
+        {
+            row.push_back(cell);
+        }
+
+        data.push_back(row);
+    }
+
+    return data;
+}
+
+/// CSVを2次元vector<int>に読み込む関数
+std::vector<std::vector<int>> cho::FileSystem::LoadCSV_Int(const std::string& filePath)
+{
+    std::vector<std::vector<int>> data;
+    std::ifstream file(filePath);
+    if (!file.is_open())
+    {
+        std::cerr << "CSVファイルを開けませんでした: " << filePath << std::endl;
+        return data;
+    }
+
+    std::string line;
+    while (std::getline(file, line))
+    {
+        std::vector<int> row;
+        std::stringstream ss(line);
+        std::string cell;
+
+        while (std::getline(ss, cell, ',')) // カンマ区切りで取得
+        {
+            if (!cell.empty())
+            {
+                try
+                {
+                    row.push_back(std::stoi(cell)); // string → int
+                }
+                catch (const std::invalid_argument&)
+                {
+                    std::cerr << "数値変換エラー: " << cell << std::endl;
+                    row.push_back(0); // エラー時は0にしておく
+                }
+            }
+            else
+            {
+                row.push_back(0); // 空セルは0扱い
+            }
+        }
+
+        data.push_back(row);
+    }
+
+    return data;
+}
+
 std::string cho::FileSystem::GenerateGUID()
 {
     GUID guid;
@@ -1780,6 +1871,117 @@ void cho::FileSystem::ScriptProject::UnloadPDB()
     SymUnloadModule64(GetCurrentProcess(), m_PDBBaseAddress);
 	SymCleanup(GetCurrentProcess());
 }
+
+bool cho::FileSystem::ScriptProject::SaveAndBuildSolution(const std::wstring& targetSln, const bool& isBuild)
+{
+    bool any = false;
+    // .slnがついていなければ足す
+    std::wstring slnPath = targetSln;
+    if (slnPath.size() < 4 || slnPath.substr(slnPath.size() - 4) != L".sln")
+    {
+        slnPath += L".sln";
+    }
+    /*HRESULT hr = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+    if (FAILED(hr) && hr != RPC_E_CHANGED_MODE)
+    {
+        Log::Write(LogLevel::Assert, "CoInitializeEx failed", hr);
+        return false;
+    }*/
+
+    CComPtr<IRunningObjectTable> rot;
+    if (FAILED(GetRunningObjectTable(0, &rot))) { CoUninitialize(); return false; }
+
+    CComPtr<IEnumMoniker> enumMoniker;
+    if (FAILED(rot->EnumRunning(&enumMoniker))) { CoUninitialize(); return false; }
+
+    CComPtr<IMoniker> moniker;
+    while (enumMoniker->Next(1, &moniker, nullptr) == S_OK)
+    {
+        CComPtr<IBindCtx> bindCtx;
+        HRESULT hr = CreateBindCtx(0, &bindCtx);
+        hr;
+
+        LPOLESTR displayName = nullptr;
+        if (SUCCEEDED(moniker->GetDisplayName(bindCtx, nullptr, &displayName)))
+        {
+            std::wstring name(displayName);
+            CoTaskMemFree(displayName);
+
+            if (name.find(L"VisualStudio.DTE.") != std::wstring::npos)
+            {
+                CComPtr<IUnknown> unk;
+                if (SUCCEEDED(rot->GetObject(moniker, &unk)))
+                {
+                    CComPtr<IDispatch> dte;
+                    if (SUCCEEDED(unk->QueryInterface(IID_IDispatch, (void**)&dte)))
+                    {
+                        // Solution.FullName を取得
+                        DISPID dispidSolution;
+                        LPOLESTR solutionNamePtr = const_cast<LPOLESTR>(L"Solution");// const → 非constに変更
+                        if (SUCCEEDED(dte->GetIDsOfNames(IID_NULL, &solutionNamePtr, 1, LOCALE_USER_DEFAULT, &dispidSolution)))
+                        {
+                            CComVariant result;
+                            DISPPARAMS noArgs = { nullptr, nullptr, 0, 0 };
+                            if (SUCCEEDED(dte->Invoke(dispidSolution, IID_NULL, LOCALE_USER_DEFAULT,
+                                DISPATCH_PROPERTYGET, &noArgs, &result, nullptr, nullptr)))
+                            {
+                                if (result.vt == VT_DISPATCH && result.pdispVal)
+                                {
+                                    CComPtr<IDispatch> solution = result.pdispVal;
+                                    DISPID dispidFullName;
+									LPOLESTR fullNamePtr = const_cast<LPOLESTR>(L"FullName"); // const → 非constに変更
+                                    if (SUCCEEDED(solution->GetIDsOfNames(IID_NULL, &fullNamePtr, 1, LOCALE_USER_DEFAULT, &dispidFullName)))
+                                    {
+                                        CComVariant solPath;
+                                        if (SUCCEEDED(solution->Invoke(dispidFullName, IID_NULL, LOCALE_USER_DEFAULT,
+                                            DISPATCH_PROPERTYGET, &noArgs, &solPath, nullptr, nullptr)))
+                                        {
+                                            if (solPath.vt == VT_BSTR)
+                                            {
+                                                std::wstring fullPath(solPath.bstrVal);
+
+                                                // ★ slnPath に一致するかチェック（部分一致 or 完全一致）
+                                                if (fullPath.find(slnPath) != std::wstring::npos)
+                                                {
+                                                    Log::Write(LogLevel::Info, L"Target Solution Found: " + fullPath);
+
+                                                    // SaveAll
+                                                    VARIANT args[2];
+                                                    VariantInit(&args[0]); VariantInit(&args[1]);
+                                                    args[0].vt = VT_BSTR; args[0].bstrVal = SysAllocString(L"");
+                                                    args[1].vt = VT_BSTR; args[1].bstrVal = SysAllocString(L"File.SaveAll");
+                                                    InvokeByName(dte, L"ExecuteCommand", args, 2);
+                                                    VariantClear(&args[0]); VariantClear(&args[1]);
+
+                                                    if (isBuild)
+                                                    {
+                                                        // Build Solution
+                                                        VariantInit(&args[0]); VariantInit(&args[1]);
+                                                        args[0].vt = VT_BSTR; args[0].bstrVal = SysAllocString(L"");
+                                                        args[1].vt = VT_BSTR; args[1].bstrVal = SysAllocString(L"Build.BuildSolution");
+                                                        if (SUCCEEDED(InvokeByName(dte, L"ExecuteCommand", args, 2)))
+                                                            any = true;
+                                                        VariantClear(&args[0]); VariantClear(&args[1]);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        moniker.Release();
+    }
+
+    // CoUninitialize();
+    return any;
+}
+
+
 
 void cho::Deserialization::FromJson(const json& j, TransformComponent& t)
 {

@@ -7,11 +7,12 @@
 #include "Core/Utility/EffectStruct.h"
 #include "EngineCommand/EngineCommands.h"
 
-EngineCommand::EngineCommand(GameCore* gameCore, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine,InputManager* input):
+EngineCommand::EngineCommand(GameCore* gameCore, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine,InputManager* input, PlatformLayer* platformLayer):
 	m_GameCore(gameCore),
 	m_ResourceManager(resourceManager),
 	m_GraphicsEngine(graphicsEngine),
-	m_InputManager(input)
+	m_InputManager(input),
+	m_PlatformLayer(platformLayer)
 {
 	
 }
@@ -52,6 +53,9 @@ void EngineCommand::SaveProjectFile()
 
 void EngineCommand::GenerateScript(const std::string& scriptName)
 {
+	// プロジェクトの保存処理
+	cho::FileSystem::ScriptProject::SaveAndBuildSolution(cho::FileSystem::m_sProjectName, false);
+	// スクリプトファイルの生成
 	cho::FileSystem::ScriptProject::GenerateScriptFiles(scriptName);
 	// プロジェクトファイルを更新
 	cho::FileSystem::ScriptProject::UpdateVcxproj();

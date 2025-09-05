@@ -1,5 +1,6 @@
 #pragma once
 #define NOMINMAX // Windowのminmaxマクロを除外
+#define _WIN32_DCOM
 #include <Windows.h>
 #include <sstream>
 #include <regex>
@@ -172,7 +173,11 @@ namespace cho
 		static void SaveProject(EditorManager* editorManager, SceneManager* sceneManager, GameWorld* gameWorld, ECSManager* ecs);
         // プロジェクトフォルダを読み込む
         static bool LoadProjectFolder(const std::wstring& projectName, EngineCommand* engineCommand);
-        // 
+        /// CSVを2次元vectorに読み込む関数
+        // csv読み込み
+        static std::vector<std::vector<std::string>> LoadCSV(const std::string& filePath);
+        /// CSVを2次元vector<int>に読み込む関数
+        static std::vector<std::vector<int>> LoadCSV_Int(const std::string& filePath);
 
         static FileType DetectFileType(const nlohmann::json& j)
         {
@@ -210,7 +215,9 @@ namespace cho
 			static std::vector<std::string> GetScriptFiles();
 			static HMODULE GetScriptDLLHandle() { return m_DllHandle; }
 			static bool LoadPDB(const std::string& dllPath);
-			static void UnloadPDB();
+            static void UnloadPDB();
+
+            static bool SaveAndBuildSolution(const std::wstring& targetSln, const bool& isBuild = true);
 
             static std::string m_SlnGUID;
 			static std::string m_ProjGUID;
