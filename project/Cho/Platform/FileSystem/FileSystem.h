@@ -1,5 +1,6 @@
 #pragma once
 #define NOMINMAX // Windowのminmaxマクロを除外
+#define _WIN32_DCOM
 #include <Windows.h>
 #include <sstream>
 #include <regex>
@@ -214,7 +215,9 @@ namespace cho
 			static std::vector<std::string> GetScriptFiles();
 			static HMODULE GetScriptDLLHandle() { return m_DllHandle; }
 			static bool LoadPDB(const std::string& dllPath);
-			static void UnloadPDB();
+            static void UnloadPDB();
+
+            static bool SaveAndBuildSolution(const std::wstring& targetSln);
 
             static std::string m_SlnGUID;
 			static std::string m_ProjGUID;

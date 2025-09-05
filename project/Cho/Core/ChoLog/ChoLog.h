@@ -43,7 +43,7 @@ namespace cho
 
         static void Write(
             LogLevel level,
-            const std::string& message,
+            const std::variant<std::string, std::wstring>& message,
             std::optional<std::variant<bool, HRESULT>> flag = std::nullopt,
             const std::source_location location = std::source_location::current());
     private:

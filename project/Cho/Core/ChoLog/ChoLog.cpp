@@ -1,5 +1,6 @@
 #include "ChoLog.h"
 #include <cassert>
+#include <string>
 
 std::string cho::Log::LogFileName = "ChoEngineLog.txt";
 std::mutex cho::Log::logMutex;
@@ -38,11 +39,25 @@ std::string ConvertString(const std::wstring& str)
     return result;
 }
 
-void cho::Log::Write(LogLevel level,
-    const std::string& message,
+void cho::Log::Write(
+    LogLevel level,
+    const std::variant<std::string, std::wstring>& message,
     std::optional<std::variant<bool, HRESULT>> flag,
     const std::source_location location)
 {
+    // --- メッセージを std::string に正規化 ---
+    std::string msg;
+    if (std::holds_alternative<std::string>(message))
+    {
+        msg = std::get<std::string>(message);
+    }
+    else
+    {
+        const std::wstring& wmsg = std::get<std::wstring>(message);
+        // UTF-8 に変換
+		msg = ConvertString(wmsg);
+    }
+
     std::string suffix;
 
     if (flag.has_value())
@@ -56,62 +71,69 @@ void cho::Log::Write(LogLevel level,
             {
                 if (!b)
                 {
-                    std::string logMessage = std::format("[ASSERT] {}:{} -\n {}{}", location.file_name(), location.line(), message, suffix);
+                    std::string logMessage = std::format(
+                        "[ASSERT] {}:{} -\n {}{}",
+                        location.file_name(), location.line(), msg, suffix);
 #ifdef _DEBUG
                     OutputDebugStringA((logMessage + "\n").c_str());
 #endif
 #ifdef NDEBUG
-                    //WriteToFile(logMessage);
+                    //WriteToFile(fullMessage);
 #endif
-                    CHO_ASSERT(false,logMessage.c_str()); // assert 発動
+                    CHO_ASSERT(false, logMessage.c_str());
                     return;
                 }
-                // 成功時は単に出力（レベルはInfoにする）
-                level = LogLevel::Info;
+                level = LogLevel::Info; // 成功ならInfo扱い
             }
-
-        } else if (std::holds_alternative<HRESULT>(*flag))
+        }
+        else if (std::holds_alternative<HRESULT>(*flag))
         {
             HRESULT hr = std::get<HRESULT>(*flag);
             bool success = SUCCEEDED(hr);
-            suffix = success ? " : Succeeded" : std::format(" : Failed (HRESULT: 0x{:08X})", static_cast<unsigned int>(hr));
+            suffix = success ? " : Succeeded"
+                : std::format(" : Failed (HRESULT: 0x{:08X})", static_cast<unsigned int>(hr));
 
             if (level == LogLevel::Assert)
             {
                 if (FAILED(hr))
                 {
-                    std::string logMessage = std::format("[ASSERT] {}:{} -\n {}{}", location.file_name(), location.line(), message, suffix);
+                    std::string logMessage = std::format(
+                        "[ASSERT] {}:{} -\n {}{}",
+                        location.file_name(), location.line(), msg, suffix);
 #ifdef _DEBUG
                     OutputDebugStringA((logMessage + "\n").c_str());
 #endif
 #ifdef NDEBUG
-                    //WriteToFile(logMessage);
+                    //WriteToFile(fullMessage);
 #endif
-                    CHO_ASSERT(false,logMessage.c_str()); // assert 発動
+                    CHO_ASSERT(false, logMessage.c_str());
                     return;
                 }
-                // 成功時はInfoとして出力
                 level = LogLevel::Info;
             }
         }
-    } else
+    }
+    else
     {
         if (level == LogLevel::Assert)
         {
-            std::string logMessage = std::format("[ASSERT] {}:{} -\n {}", location.file_name(), location.line(), message);
+            std::string logMessage = std::format(
+                "[ASSERT] {}:{} -\n {}",
+                location.file_name(), location.line(), msg);
 #ifdef _DEBUG
             OutputDebugStringA((logMessage + "\n").c_str());
 #endif
 #ifdef NDEBUG
-            //WriteToFile(logMessage);
+            //WriteToFile(fullMessage);
 #endif
-			CHO_ASSERT(false,logMessage.c_str()); // assert 発動
+            CHO_ASSERT(false, logMessage.c_str());
             return;
         }
     }
 
-    std::string prefix = std::format("[{}] {}:{} -\n ", ToString(level), location.file_name(), location.line());
-    std::string fullMessage = prefix + message + suffix;
+    std::string prefix = std::format("[{}] {}:{} -\n ",
+        ToString(level), location.file_name(), location.line());
+    std::string fullMessage = prefix + msg + suffix;
 
 #ifdef _DEBUG
     OutputDebugStringA((fullMessage + "\n").c_str());
