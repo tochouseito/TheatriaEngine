@@ -53,6 +53,9 @@ void EngineCommand::SaveProjectFile()
 
 void EngineCommand::GenerateScript(const std::string& scriptName)
 {
+	// プロジェクトの保存処理
+	cho::FileSystem::ScriptProject::SaveAndBuildSolution(cho::FileSystem::m_sProjectName, false);
+	// スクリプトファイルの生成
 	cho::FileSystem::ScriptProject::GenerateScriptFiles(scriptName);
 	// プロジェクトファイルを更新
 	cho::FileSystem::ScriptProject::UpdateVcxproj();

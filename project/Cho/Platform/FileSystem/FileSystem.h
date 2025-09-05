@@ -217,7 +217,7 @@ namespace cho
 			static bool LoadPDB(const std::string& dllPath);
             static void UnloadPDB();
 
-            static bool SaveAndBuildSolution(const std::wstring& targetSln);
+            static bool SaveAndBuildSolution(const std::wstring& targetSln, const bool& isBuild = true);
 
             static std::string m_SlnGUID;
 			static std::string m_ProjGUID;

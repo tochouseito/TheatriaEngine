@@ -1872,7 +1872,7 @@ void cho::FileSystem::ScriptProject::UnloadPDB()
 	SymCleanup(GetCurrentProcess());
 }
 
-bool cho::FileSystem::ScriptProject::SaveAndBuildSolution(const std::wstring& targetSln)
+bool cho::FileSystem::ScriptProject::SaveAndBuildSolution(const std::wstring& targetSln, const bool& isBuild)
 {
     bool any = false;
     // .slnがついていなければ足す
@@ -1953,13 +1953,16 @@ bool cho::FileSystem::ScriptProject::SaveAndBuildSolution(const std::wstring& ta
                                                     InvokeByName(dte, L"ExecuteCommand", args, 2);
                                                     VariantClear(&args[0]); VariantClear(&args[1]);
 
-                                                    // Build Solution
-                                                    VariantInit(&args[0]); VariantInit(&args[1]);
-                                                    args[0].vt = VT_BSTR; args[0].bstrVal = SysAllocString(L"");
-                                                    args[1].vt = VT_BSTR; args[1].bstrVal = SysAllocString(L"Build.BuildSolution");
-                                                    if (SUCCEEDED(InvokeByName(dte, L"ExecuteCommand", args, 2)))
-                                                        any = true;
-                                                    VariantClear(&args[0]); VariantClear(&args[1]);
+                                                    if (isBuild)
+                                                    {
+                                                        // Build Solution
+                                                        VariantInit(&args[0]); VariantInit(&args[1]);
+                                                        args[0].vt = VT_BSTR; args[0].bstrVal = SysAllocString(L"");
+                                                        args[1].vt = VT_BSTR; args[1].bstrVal = SysAllocString(L"Build.BuildSolution");
+                                                        if (SUCCEEDED(InvokeByName(dte, L"ExecuteCommand", args, 2)))
+                                                            any = true;
+                                                        VariantClear(&args[0]); VariantClear(&args[1]);
+                                                    }
                                                 }
                                             }
                                         }
