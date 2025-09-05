@@ -147,6 +147,18 @@ void physics::d3::bulletBody::SetGravityScale(Id3World* world, const float& scal
 	impl->rigidBody->activate(true);
 }
 
+void physics::d3::bulletBody::SetLinearFactor(const Vector3& factor)
+{
+	if (!impl || !impl->rigidBody) return;
+	impl->rigidBody->setLinearFactor(btVector3(factor.x, factor.y, factor.z));
+}
+
+void physics::d3::bulletBody::SetAngularFactor(const Vector3& factor)
+{
+	if (!impl || !impl->rigidBody) return;
+	impl->rigidBody->setAngularFactor(btVector3(factor.x, factor.y, factor.z));
+}
+
 btRigidBody* physics::d3::bulletBody::GetRigidBody() const { return impl->rigidBody.get(); }
 
 // Bulletの剛体データを取得

@@ -54,6 +54,10 @@ namespace physics::d3
 		virtual void SetAngularVelocity(const Vector3&) {} // 角速度を設定（デフォルトは何もしない）
 		// gravityScaleの設定
 		virtual void SetGravityScale(Id3World* world, const float&) = 0;
+		// LinearFactorの設定
+		virtual void SetLinearFactor(const Vector3&) = 0;
+		// AngularFactorの設定
+		virtual void SetAngularFactor(const Vector3&) = 0;
 		// 有効化
 		virtual bool IsActive() const = 0;
 		// 有効化・無効化
@@ -83,6 +87,9 @@ namespace physics::d3
 		Vector3 GetAngularVelocity() const override;
 		void SetAngularVelocity(const Vector3& angularVelocity) override;
 		void SetGravityScale(Id3World* world, const float& scale) override; // gravityScaleの設定
+		void SetLinearFactor(const Vector3& factor) override; // LinearFactorの設定
+		void SetAngularFactor(const Vector3& factor) override; // AngularFactorの設定
+		
 		btRigidBody* GetRigidBody() const; // Bulletの剛体データを取得
 		bool IsActive() const override; // 有効かどうかを取得
 		void SetActive(bool active) override; // 有効化・無効化
@@ -107,6 +114,8 @@ namespace physics::d3
 		Vector3 GetLinearVelocity() const override;
 		void SetLinearVelocity(const Vector3& velocity) override;
 		void SetGravityScale(Id3World*, const float& scale) override { scale; } // gravityScaleの設定
+		void SetLinearFactor(const Vector3& factor) override { factor; } // LinearFactorの設定
+		void SetAngularFactor(const Vector3& factor) override { factor; } // AngularFactorの設定
 		bool IsActive() const override;
 		void SetActive(bool active) override { active; }
 		void SetBodyType(Id3World*, Id3BodyType bodyType) override { bodyType; }

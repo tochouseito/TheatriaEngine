@@ -1046,6 +1046,12 @@ json cho::Serialization::ToJson(const Rigidbody3DComponent& rb)
 	j["halfsize"] = { rb.halfsize.x, rb.halfsize.y, rb.halfsize.z };
 	j["friction"] = rb.friction;
 	j["restitution"] = rb.restitution;
+	j["fixedPositionX"] = rb.fixedPositionX;
+	j["fixedPositionY"] = rb.fixedPositionY;
+    j["fixedPositionZ"] = rb.fixedPositionZ;
+	j["fixedRotationX"] = rb.fixedRotationX;
+	j["fixedRotationY"] = rb.fixedRotationY;
+	j["fixedRotationZ"] = rb.fixedRotationZ;
 	j["velocity"] = { rb.velocity.x, rb.velocity.y, rb.velocity.z };
 	j["gravityScale"] = rb.gravityScale;
 	j["bodyType"] = static_cast<int>(rb.bodyType);
@@ -1872,6 +1878,29 @@ void cho::FileSystem::ScriptProject::UnloadPDB()
 	SymCleanup(GetCurrentProcess());
 }
 
+bool cho::FileSystem::ScriptProject::WaitForBuild(const std::wstring& dllPath, int timeoutMs)
+{
+    using namespace std::chrono;
+    auto start = steady_clock::now();
+
+    FILETIME lastWrite = {};
+    while (duration_cast<milliseconds>(steady_clock::now() - start).count() < timeoutMs)
+    {
+        WIN32_FILE_ATTRIBUTE_DATA fad;
+        if (GetFileAttributesExW(dllPath.c_str(), GetFileExInfoStandard, &fad))
+        {
+            // 書き込み時刻を取得
+            if (CompareFileTime(&lastWrite, &fad.ftLastWriteTime) != 0)
+            {
+                // 更新された
+                return true;
+            }
+        }
+        Sleep(500); // 0.5秒おきに確認
+    }
+    return false; // タイムアウト
+}
+
 bool cho::FileSystem::ScriptProject::SaveAndBuildSolution(const std::wstring& targetSln, const bool& isBuild)
 {
     bool any = false;
@@ -1962,6 +1991,9 @@ bool cho::FileSystem::ScriptProject::SaveAndBuildSolution(const std::wstring& ta
                                                         if (SUCCEEDED(InvokeByName(dte, L"ExecuteCommand", args, 2)))
                                                             any = true;
                                                         VariantClear(&args[0]); VariantClear(&args[1]);
+                                                        // DLLのパス
+                                                        std::wstring dllPath = L"GameProjects/" + m_sProjectName + L"/bin/" + m_sProjectName + L".dll";
+														WaitForBuild(dllPath, 10000); // 10秒待つ
                                                     }
                                                 }
                                             }
@@ -2090,6 +2122,12 @@ void cho::Deserialization::FromJson(const json& j, Rigidbody3DComponent& rb)
 {
 	rb.friction = j.value("friction", 0.5f);
 	rb.restitution = j.value("restitution", 0.0f);
+	rb.fixedPositionX = j.value("fixedPositionX", false);
+	rb.fixedPositionY = j.value("fixedPositionY", false);
+	rb.fixedPositionZ = j.value("fixedPositionZ", false);
+	rb.fixedRotationX = j.value("fixedRotationX", false);
+	rb.fixedRotationY = j.value("fixedRotationY", false);
+	rb.fixedRotationZ = j.value("fixedRotationZ", false);
 	rb.halfsize = { j["halfsize"][0], j["halfsize"][1], j["halfsize"][2] };
 	rb.bodyType = static_cast<physics::d3::Id3BodyType>(j.value("bodyType", 0));
 	rb.gravityScale = j.value("gravityScale", 1.0f);

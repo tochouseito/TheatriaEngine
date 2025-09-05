@@ -440,6 +440,13 @@ void Inspector::Rigidbody3DComponentView(GameObject* object)
 		// 質量
 		ImGui::DragFloat("質量", &rigidbody->mass, 0.1f, 0.0f, 100.0f);
 		ImGui::DragFloat("Gravity Scale", &rigidbody->gravityScale, 0.1f, 0.0f, 100.0f);
+		// 軸固定
+		ImGui::Checkbox("X軸座標固定", &rigidbody->fixedPositionX);
+		ImGui::Checkbox("Y軸座標固定", &rigidbody->fixedPositionY);
+		ImGui::Checkbox("Z軸座標固定", &rigidbody->fixedPositionZ);
+		ImGui::Checkbox("X軸回転固定", &rigidbody->fixedRotationX);
+		ImGui::Checkbox("Y軸回転固定", &rigidbody->fixedRotationY);
+		ImGui::Checkbox("Z軸回転固定", &rigidbody->fixedRotationZ);
 		// Body Type Combo
 		const char* bodyTypeItems[] = { "Static", "Dynamic", "Kinematic" };
 		int currentType = static_cast<int>(rigidbody->bodyType);

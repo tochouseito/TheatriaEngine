@@ -216,7 +216,7 @@ namespace cho
 			static HMODULE GetScriptDLLHandle() { return m_DllHandle; }
 			static bool LoadPDB(const std::string& dllPath);
             static void UnloadPDB();
-
+            static bool WaitForBuild(const std::wstring& dllPath, int timeoutMs = 60000);
             static bool SaveAndBuildSolution(const std::wstring& targetSln, const bool& isBuild = true);
 
             static std::string m_SlnGUID;
