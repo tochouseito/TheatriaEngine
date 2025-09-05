@@ -153,8 +153,46 @@ void TransformSystem::UpdateComponent(Entity e, TransformComponent& transform)
 	}
 	if(rb3d && rb3d->runtimeBody)
 	{
-		rb3d->runtimeBody->SetLinearVelocity(Vector3(rb3d->velocity.x, rb3d->velocity.y, rb3d->velocity.z));
-		rb3d->runtimeBody->SetAngularVelocity(Vector3(rb3d->angularVelocity.x, rb3d->angularVelocity.y, rb3d->angularVelocity.z));
+		Vector3 linearF = Vector3(1.0f, 1.0f, 1.0f);
+		Vector3 velocity = rb3d->velocity;
+		Vector3 angularF = Vector3(1.0f, 1.0f, 1.0f);
+		Vector3 angularVelocity = rb3d->angularVelocity;
+		// 位置
+		if(rb3d->fixedPositionX)
+		{
+			linearF.x = 0.0f;
+			velocity.x = 0.0f;
+		}
+		if(rb3d->fixedPositionY)
+		{
+			linearF.y = 0.0f;
+			velocity.y = 0.0f;
+		}
+		if(rb3d->fixedPositionZ)
+		{
+			linearF.z = 0.0f;
+			velocity.z = 0.0f;
+		}
+		rb3d->runtimeBody->SetLinearFactor(linearF);
+		rb3d->runtimeBody->SetLinearVelocity(velocity);
+		// 回転
+		if(rb3d->fixedRotationX)
+		{
+			angularF.x = 0.0f;
+			angularVelocity.x = 0.0f;
+		}
+		if(rb3d->fixedRotationY)
+		{
+			angularF.y = 0.0f;
+			angularVelocity.y = 0.0f;
+		}
+		if(rb3d->fixedRotationZ)
+		{
+			angularF.z = 0.0f;
+			angularVelocity.z = 0.0f;
+		}
+		rb3d->runtimeBody->SetAngularFactor(angularF);
+		rb3d->runtimeBody->SetAngularVelocity(angularVelocity);
 	}
 
 	// アニメーションコンポーネントがあればスキニングの確認

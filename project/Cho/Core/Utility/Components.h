@@ -481,6 +481,12 @@ struct Rigidbody3DComponent : public IComponentTag
 	float friction = 0.3f; // 摩擦係数
 	float restitution = 0.0f; // 反発係数
 	float mass = 1.0f; // 質量
+	bool fixedPositionX = false; // X軸座標固定
+	bool fixedPositionY = false; // Y軸座標固定
+	bool fixedPositionZ = false; // Z軸座標固定
+	bool fixedRotationX = false; // X軸回転固定
+	bool fixedRotationY = false; // Y軸回転固定
+	bool fixedRotationZ = false; // Z軸回転固定
 	physics::d3::Id3BodyType bodyType = physics::d3::Id3BodyType::DYNAMIC; // ボディタイプ
 	Vector3 halfsize = { 0.5f, 0.5f, 0.5f }; // 半径（ボックス形状の場合）
 	Vector3 preHalfsize = { 0.5f,0.5f,0.5f };
@@ -496,6 +502,13 @@ struct Rigidbody3DComponent : public IComponentTag
 		if (this == &other) return *this;
 		friction = other.friction;
 		restitution = other.restitution;
+		fixedPositionX = other.fixedPositionX;
+		fixedPositionY = other.fixedPositionY;
+		fixedPositionZ = other.fixedPositionZ;
+		fixedRotationX = other.fixedRotationX;
+		fixedRotationY = other.fixedRotationY;
+		fixedRotationZ = other.fixedRotationZ;
+		gravityScale = other.gravityScale;
 		halfsize = other.halfsize;
 		preHalfsize = other.preHalfsize;
 		bodyType = other.bodyType;
@@ -512,6 +525,13 @@ struct Rigidbody3DComponent : public IComponentTag
 	{
 		friction = 0.3f;
 		restitution = 0.0f;
+		fixedPositionX = false;
+		fixedPositionY = false;
+		fixedPositionZ = false;
+		fixedRotationX = false;
+		fixedRotationY = false;
+		fixedRotationZ = false;
+		gravityScale = 1.0f;
 		halfsize = { 0.5f, 0.5f, 0.5f };
 		preHalfsize = { 0.5f, 0.5f, 0.5f };
 		bodyType = physics::d3::Id3BodyType::DYNAMIC;
