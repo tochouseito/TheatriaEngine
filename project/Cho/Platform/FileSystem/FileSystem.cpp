@@ -1928,6 +1928,82 @@ bool cho::FileSystem::ScriptProject::WaitForBuild(const std::wstring& dllPath, i
     return false; // タイムアウト
 }
 
+bool cho::FileSystem::ScriptProject::WaitForBuildNotification(int timeoutMs)
+{
+    HANDLE hPipe = CreateNamedPipeW(
+        L"\\\\.\\pipe\\BuildWatcherPipe",
+        PIPE_ACCESS_INBOUND,
+        PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT,
+        1,
+        0,
+        0,
+        timeoutMs,
+        nullptr);
+
+    if (hPipe == INVALID_HANDLE_VALUE)
+    {
+        std::wcerr << L"[WaitForBuildNotification] パイプ作成失敗: " << GetLastError() << std::endl;
+        return false;
+    }
+
+    HANDLE hEvent = CreateEventW(NULL, TRUE, FALSE, L"ChoEngineReadyEvent");
+    if (hEvent)
+    {
+        SetEvent(hEvent); // BuildWatcher に「準備できたよ」と通知
+    }
+
+    // BuildWatcher からの接続を待つ
+    BOOL connected = ConnectNamedPipe(hPipe, nullptr) ? TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
+    if (!connected)
+    {
+        DWORD err = GetLastError();
+		Log::Write(LogLevel::Error, "[WaitForBuildNotification] ConnectNamedPipe failed. err=" + std::to_string(err));
+        CloseHandle(hPipe);
+        return false;
+    }
+
+    wchar_t buffer[256];
+    DWORD bytesRead = 0;
+    bool buildSucceeded = false;
+
+    // タイムアウト監視用
+    DWORD startTick = GetTickCount();
+
+    while (GetTickCount() - startTick < (DWORD)timeoutMs)
+    {
+        if (ReadFile(hPipe, buffer, sizeof(buffer) - sizeof(wchar_t), &bytesRead, nullptr) && bytesRead > 0)
+        {
+            buffer[bytesRead / sizeof(wchar_t)] = L'\0';
+            std::wstring msg(buffer);
+
+            if (msg == L"BUILD_START")
+            {
+                std::wcout << L"[通知] ビルド開始" << std::endl;
+            }
+            else if (msg.rfind(L"BUILD_FAIL:", 0) == 0)
+            {
+                std::wcout << L"[通知] 失敗: " << msg.substr(11) << std::endl;
+                buildSucceeded = false;
+            }
+            else if (msg.rfind(L"BUILD_SUCCESS:", 0) == 0)
+            {
+                std::wcout << L"[通知] 成功: " << msg.substr(13) << std::endl;
+                buildSucceeded = true;
+            }
+            else if (msg == L"BUILD_DONE")
+            {
+                std::wcout << L"[通知] ビルド完了" << std::endl;
+                CloseHandle(hPipe);
+                return buildSucceeded;
+            }
+        }
+        Sleep(100);
+    }
+	if (hEvent) { CloseHandle(hEvent); }
+    CloseHandle(hPipe);
+    return false; // タイムアウト
+}
+
 bool cho::FileSystem::ScriptProject::SaveAndBuildSolution(const std::wstring& targetSln, const bool& isBuild)
 {
     bool any = false;
@@ -2016,11 +2092,10 @@ bool cho::FileSystem::ScriptProject::SaveAndBuildSolution(const std::wstring& ta
                                                         args[0].vt = VT_BSTR; args[0].bstrVal = SysAllocString(L"");
                                                         args[1].vt = VT_BSTR; args[1].bstrVal = SysAllocString(L"Build.BuildSolution");
                                                         if (SUCCEEDED(InvokeByName(dte, L"ExecuteCommand", args, 2)))
-                                                            any = true;
+                                                        {
+															any = WaitForBuildNotification(60000); // 60秒待つ
+                                                        }
                                                         VariantClear(&args[0]); VariantClear(&args[1]);
-                                                        // DLLのパス
-                                                        std::wstring dllPath = L"GameProjects/" + m_sProjectName + L"/bin/" + m_sProjectName + L".dll";
-														WaitForBuild(dllPath, 10000); // 10秒待つ
                                                     }
                                                 }
                                             }
