@@ -23,7 +23,7 @@ void HubManager::Update()
     }
     if (m_IsGameRuntime)
     {
-        std::wstring selectedProjectName = L"PortfolioPiece";
+        std::wstring selectedProjectName = L"2025LE3B10Days";
         // プロジェクトの読み込み
         FileSystem::LoadProjectFolder(selectedProjectName, m_pEngineCommand);
         // プロジェクトのパスを保存

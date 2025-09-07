@@ -1,0 +1,17 @@
+C:\Users\sinse\source\repos\school\ChoEngine\generated\outputs\$(Configuration)\BuildWatcher.exe.config
+C:\Users\sinse\source\repos\school\ChoEngine\generated\outputs\$(Configuration)\BuildWatcher.exe
+C:\Users\sinse\source\repos\school\ChoEngine\generated\outputs\$(Configuration)\BuildWatcher.pdb
+C:\Users\sinse\source\repos\ChoEngine\generated\outputs\$(Configuration)\BuildWatcher.exe.config
+C:\Users\sinse\source\repos\ChoEngine\generated\outputs\$(Configuration)\BuildWatcher.exe
+C:\Users\sinse\source\repos\ChoEngine\generated\outputs\$(Configuration)\BuildWatcher.pdb
+C:\Users\sinse\source\repos\ChoEngine\generated\outputs\Debug\BuildWatcher.exe.config
+C:\Users\sinse\source\repos\ChoEngine\generated\outputs\Debug\BuildWatcher.exe
+C:\Users\sinse\source\repos\ChoEngine\generated\outputs\Debug\BuildWatcher.pdb
+C:\Users\sinse\source\repos\ChoEngine\project\BuildWatcher\obj\Debug\BuildWatcher.csproj.AssemblyReference.cache
+C:\Users\sinse\source\repos\ChoEngine\project\BuildWatcher\obj\Debug\BuildWatcher.Properties.Resources.resources
+C:\Users\sinse\source\repos\ChoEngine\project\BuildWatcher\obj\Debug\BuildWatcher.csproj.GenerateResource.cache
+C:\Users\sinse\source\repos\ChoEngine\project\BuildWatcher\obj\Debug\BuildWatcher.csproj.CoreCompileInputs.cache
+C:\Users\sinse\source\repos\ChoEngine\project\BuildWatcher\obj\Debug\BuildWat.8E05B97E.Up2Date
+C:\Users\sinse\source\repos\ChoEngine\project\BuildWatcher\obj\Debug\BuildWatcher.exe
+C:\Users\sinse\source\repos\ChoEngine\project\BuildWatcher\obj\Debug\BuildWatcher.pdb
+C:\Users\sinse\source\repos\ChoEngine\project\BuildWatcher\obj\Debug\BuildWatcher.exe.config
