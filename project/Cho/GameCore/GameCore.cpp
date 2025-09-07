@@ -83,7 +83,7 @@ void GameCore::GameRun()
 		return;
 	}
 	// スクリプトプロジェクトの保存処理、ビルド処理
-	cho::FileSystem::ScriptProject::SaveAndBuildSolution(cho::FileSystem::m_sProjectName);
+	//cho::FileSystem::ScriptProject::SaveAndBuildSolution(cho::FileSystem::m_sProjectName);
 	// スクリプト読み込み（場所変更予定）
 	cho::FileSystem::ScriptProject::LoadScriptDLL();
 	// クオータニオンに変更
