@@ -223,7 +223,7 @@ namespace cho
             static void SendMessageToBuildWatcher(const std::wstring& msg);
 
             // メッセージ受信
-            static std::wstring ReceiveMessageFromBuildWatcher();
+            static std::wstring WaitForAckFromBuildWatcher(DWORD timeoutMs);
             static bool TestPipeMessage();
 
             static bool SaveAndBuildSolution(const std::wstring& targetSln, const bool& isBuild = true);

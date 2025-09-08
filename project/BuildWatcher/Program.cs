@@ -102,6 +102,7 @@ class Program
 
                     switch (line)
                     {
+                        // 必ず ACK: で始まる応答を返すこと
                         case "TEST_MESSAGE":
                             writer.WriteLine("ACK:TEST_MESSAGE");
                             break;
