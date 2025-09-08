@@ -46,6 +46,7 @@ class Program
         })
         { IsBackground = true }.Start();
 
+        // パイプ接続
         // エンジンがイベントを作るまで待つ
         EventWaitHandle waitHandle = null;
         while (true)
@@ -66,48 +67,59 @@ class Program
         Console.WriteLine("合図を受け取りました。パイプ接続します。");
 
         // パイプ接続
-        using (var pipe = new NamedPipeClientStream(".", "BuildWatcherPipe", PipeDirection.Out))
+        using (var pipeIn = new NamedPipeClientStream(".", "EngineToWatcher", PipeDirection.In))
+        using (var pipeOut = new NamedPipeClientStream(".", "WatcherToEngine", PipeDirection.Out))
         {
             try
             {
-                pipe.Connect(5000); // 5秒タイムアウト
+                // 両方に接続
+                pipeIn.Connect(5000);
+                pipeOut.Connect(5000);
+                // 5秒タイムアウト
                 Console.WriteLine("パイプ接続成功！");
             }
             catch (TimeoutException)
             {
                 Console.WriteLine("パイプ接続タイムアウト");
+                return;
             }
-            //File.AppendAllText("BuildWatcher.log", "Connected to Engine.\n");
+
             Console.WriteLine("Connected to Engine.");
 
-            using (var writer = new StreamWriter(pipe, Encoding.Unicode) { AutoFlush = true })
+            using (var reader = new StreamReader(pipeIn, Encoding.Unicode))
+            using (var writer = new StreamWriter(pipeOut, Encoding.Unicode) { AutoFlush = true })
             {
-                // DTE を取得（VS2022の場合）
-                EnvDTE80.DTE2 dte = (DTE2)Marshal.GetActiveObject("VisualStudio.DTE.17.0");
-
-                // イベントフック
-                dte.Events.BuildEvents.OnBuildBegin += (scope, action) =>
+                while (true)
                 {
-                    writer.WriteLine("BUILD_START");
-                };
+                    string line = reader.ReadLine();
+                    if (line == null)
+                    {
+                        Console.WriteLine("Engine が終了しました。");
+                        break;
+                    }
 
-                dte.Events.BuildEvents.OnBuildProjConfigDone += (proj, config, platform, solConfig, success) =>
-                {
-                    if (success)
-                        writer.WriteLine($"BUILD_SUCCESS:{proj}");
-                    else
-                        writer.WriteLine($"BUILD_FAIL:{proj}");
-                };
+                    Console.WriteLine("[Engineから受信] " + line);
 
-                dte.Events.BuildEvents.OnBuildDone += (scope, action) =>
-                {
-                    writer.WriteLine("BUILD_DONE");
-                };
-
-                // イベントループを保持
-                while (true) System.Threading.Thread.Sleep(1000);
+                    switch (line)
+                    {
+                        case "TEST_MESSAGE":
+                            writer.WriteLine("ACK:TEST_MESSAGE");
+                            break;
+                        case "BUILD_START":
+                            writer.WriteLine("ACK:BUILD_START");
+                            break;
+                        case "BUILD_DONE":
+                            writer.WriteLine("ACK:BUILD_DONE");
+                            break;
+                        default:
+                            writer.WriteLine("ACK:UNKNOWN");
+                            break;
+                    }
+                }
             }
         }
+
+        
     }
 
     [DllImport("kernel32.dll")]

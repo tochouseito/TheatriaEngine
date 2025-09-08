@@ -64,7 +64,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	cho::SetEngine(engine.get());// エンジンのポインタをセット
 
 	// BuildWatcherコントローラー
-	//BuildWatcherController buildWatcher;
+	BuildWatcherController buildWatcher;
 
 	// エンジンの稼働
 	engine->CrashHandlerEntry();// クラッシュ時の処理のハンドラー
