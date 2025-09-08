@@ -1,10 +1,12 @@
 ﻿using EnvDTE;
 using EnvDTE80;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Threading;
 
@@ -112,6 +114,82 @@ class Program
                         case "BUILD_DONE":
                             writer.WriteLine("ACK:BUILD_DONE");
                             break;
+                        case string s when s.StartsWith("BUILD_SLN|"):// "BUILD_SLN|Game|Debug|x64"
+                            {
+                                var parts = s.Split('|');
+                                if (parts.Length >= 4)
+                                {
+                                    string slnName = parts[1];
+                                    string config = parts[2];
+                                    string platform = parts[3];
+
+                                    // writer.WriteLine("ACK:BUILD_SLN");
+
+                                    bool found = false;
+                                    foreach (var dte in GetRunningVisualStudios())
+                                    {
+                                        try
+                                        {
+                                            string opened = System.IO.Path.GetFileNameWithoutExtension(dte.Solution.FullName);
+                                            if (string.Equals(opened, slnName, StringComparison.OrdinalIgnoreCase))
+                                            {
+                                                Console.WriteLine($"ビルド対象ソリューション発見: {dte.Solution.FullName}");
+                                                found = true;
+                                                var configs = dte.Solution.SolutionBuild.SolutionConfigurations;
+                                                EnvDTE.SolutionConfiguration targetConfig = null;
+
+                                                foreach (EnvDTE.SolutionConfiguration cfg in configs)
+                                                {
+                                                    if (string.Equals(cfg.Name, config, StringComparison.OrdinalIgnoreCase))
+                                                    {
+                                                        // この構成が対象のプラットフォームを持つかチェック
+                                                        foreach (EnvDTE.SolutionContext ctx in cfg.SolutionContexts)
+                                                        {
+                                                            if (string.Equals(ctx.PlatformName, platform, StringComparison.OrdinalIgnoreCase))
+                                                            {
+                                                                targetConfig = cfg;
+                                                                break;
+                                                            }
+                                                        }
+                                                    }
+                                                    if (targetConfig != null)
+                                                    {
+                                                        break;
+                                                    }
+                                                }
+                                                if (targetConfig != null)
+                                                {
+                                                    targetConfig.Activate();
+                                                    dte.Solution.SolutionBuild.Build(true);
+
+                                                    // ビルド完了待ち
+                                                    while (dte.Solution.SolutionBuild.BuildState == vsBuildState.vsBuildStateInProgress)
+                                                        System.Threading.Thread.Sleep(500);
+
+                                                    Console.WriteLine("Build 完了");
+                                                    writer.WriteLine("ACK:BUILD_SLN");
+                                                }
+                                                else
+                                                {
+                                                    Console.WriteLine($"構成 {config}|{platform} が見つかりませんでした。");
+                                                }
+                                                
+                                                break;
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            Console.WriteLine("DTE 操作中エラー: " + ex.Message);
+                                        }
+                                    }
+
+                                    if (!found)
+                                    {
+                                        Console.WriteLine($"指定されたソリューション {slnName} が見つかりません。");
+                                    }
+                                }
+                                break;
+                            }
                         default:
                             writer.WriteLine("ACK:UNKNOWN");
                             break;
@@ -122,6 +200,39 @@ class Program
 
         
     }
+
+    // ROT から DTE を列挙
+    static IEnumerable<EnvDTE80.DTE2> GetRunningVisualStudios()
+    {
+        IRunningObjectTable rot;
+        GetRunningObjectTable(0, out rot);
+        IEnumMoniker enumMoniker;
+        rot.EnumRunning(out enumMoniker);
+
+        IMoniker[] moniker = new IMoniker[1];
+        IntPtr fetched = IntPtr.Zero;
+
+        while (enumMoniker.Next(1, moniker, fetched) == 0)
+        {
+            IBindCtx bindCtx;
+            CreateBindCtx(0, out bindCtx);
+            string displayName;
+            moniker[0].GetDisplayName(bindCtx, null, out displayName);
+
+            if (displayName.StartsWith("!VisualStudio.DTE"))
+            {
+                object comObject;
+                rot.GetObject(moniker[0], out comObject);
+                yield return (EnvDTE80.DTE2)comObject;
+            }
+        }
+    }
+
+    [DllImport("ole32.dll")]
+    private static extern int CreateBindCtx(uint reserved, out IBindCtx ppbc);
+
+    [DllImport("ole32.dll")]
+    private static extern int GetRunningObjectTable(uint reserved, out IRunningObjectTable prot);
 
     [DllImport("kernel32.dll")]
     static extern IntPtr GetCurrentProcess();

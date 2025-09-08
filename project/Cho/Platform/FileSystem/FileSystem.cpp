@@ -2108,7 +2108,8 @@ std::wstring cho::FileSystem::ScriptProject::WaitForAckFromBuildWatcher(DWORD ti
     while (PeekNamedPipe(m_ReadPipe, nullptr, 0, nullptr, &bytesAvailable, nullptr) && bytesAvailable > 0)
     {
         // 余っている分を全部読み捨て
-        ReadFile(m_ReadPipe, buffer, sizeof(buffer) - sizeof(wchar_t), &bytesRead, nullptr);
+        BOOL b = ReadFile(m_ReadPipe, buffer, sizeof(buffer) - sizeof(wchar_t), &bytesRead, nullptr);
+        b;
     }
 
     // --- Step 2: タイムアウト付きで新しいメッセージを待つ ---
@@ -2245,6 +2246,7 @@ bool cho::FileSystem::ScriptProject::SaveAndBuildSolution(const std::wstring& ta
                                                     if (isBuild)
                                                     {
                                                         // Build Solution
+                                                        /*
                                                         VariantInit(&args[0]); VariantInit(&args[1]);
                                                         args[0].vt = VT_BSTR; args[0].bstrVal = SysAllocString(L"");
                                                         args[1].vt = VT_BSTR; args[1].bstrVal = SysAllocString(L"Build.BuildSolution");
@@ -2253,6 +2255,21 @@ bool cho::FileSystem::ScriptProject::SaveAndBuildSolution(const std::wstring& ta
 															any = WaitForBuildNotification(60000); // 60秒待つ
                                                         }
                                                         VariantClear(&args[0]); VariantClear(&args[1]);
+                                                        */
+														// Buildwatchr にビルド開始を通知
+                                                        std::wstring config;
+#ifdef _DEBUG
+														config = L"Debug";
+#elif NDEBUG
+														config = L"Release";
+#endif
+                                                        SendMessageToBuildWatcher(L"BUILD_SLN|" + m_sProjectName + L"|" + config + L"|x64");
+                                                        // ここで必ず返事が来るまでブロック
+                                                        std::wstring reply = WaitForAckFromBuildWatcher(5000); // 5秒待機
+                                                        if (!reply.empty())
+                                                        {
+                                                            Log::Write(LogLevel::Info, L"Received from BuildWatcher: " + reply);
+                                                        }
                                                     }
                                                 }
                                             }
