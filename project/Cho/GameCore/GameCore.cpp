@@ -76,14 +76,14 @@ void GameCore::Update()
 	
 }
 
-void GameCore::GameRun()
+void GameCore::GameRun(const bool& isDebugger)
 {
 	if (isRunning)
 	{
 		return;
 	}
 	// スクリプトプロジェクトの保存処理、ビルド処理
-	cho::FileSystem::ScriptProject::SaveAndBuildSolution(cho::FileSystem::m_sProjectName);
+	cho::FileSystem::ScriptProject::SaveAndBuildSolution(cho::FileSystem::m_sProjectName,true,isDebugger);
 	// スクリプト読み込み（場所変更予定）
 	cho::FileSystem::ScriptProject::LoadScriptDLL();
 	// クオータニオンに変更
@@ -120,6 +120,17 @@ void GameCore::GameStop()
 	transformSystem->m_isQuaternion = false;
 	// スクリプトのアンロード（場所変更予定）
 	cho::FileSystem::ScriptProject::UnloadScriptDLL();
+	// デタッチ
+	if (cho::FileSystem::ScriptProject::m_IsAttached)
+	{
+		cho::FileSystem::ScriptProject::SendMessageToBuildWatcher(L"STOP_DEBUGGER|" + cho::FileSystem::m_sProjectName);
+		// ここで必ず返事が来るまでブロック
+		std::wstring reply = cho::FileSystem::ScriptProject::WaitForAckFromBuildWatcher(5000); // 5秒待機
+		if (!reply.empty())
+		{
+			Log::Write(LogLevel::Info, L"Received from BuildWatcher: " + reply);
+		}
+	}
 	// 実行中フラグを下ろす
 	isRunning = false;
 }

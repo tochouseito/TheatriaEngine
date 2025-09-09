@@ -115,7 +115,7 @@ public:
 	// Test:スクリプト作成	
 	void GenerateScript(const std::string& scriptName);
 	// ゲーム再生
-	void GameRun();
+	void GameRun(const bool& isDebugger);
 	// ゲーム停止
 	void GameStop();
 	// ゲーム実行中か

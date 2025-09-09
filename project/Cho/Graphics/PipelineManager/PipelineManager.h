@@ -6,16 +6,6 @@
 // test
 struct IndirectArgs
 {
-	D3D12_GPU_VIRTUAL_ADDRESS cbv_ViewProjection;
-	D3D12_GPU_VIRTUAL_ADDRESS srv_IntegrationTF;
-	D3D12_GPU_VIRTUAL_ADDRESS srv_UseTransformList;
-	D3D12_GPU_VIRTUAL_ADDRESS srv_BoneMatrix;
-	D3D12_GPU_VIRTUAL_ADDRESS srv_SkinningInfluence;
-	D3D12_GPU_VIRTUAL_ADDRESS cbv_SkinningInfo;
-	D3D12_GPU_VIRTUAL_ADDRESS cbv_Lights;
-	D3D12_GPU_VIRTUAL_ADDRESS cbv_Environment;
-	D3D12_GPU_VIRTUAL_ADDRESS srv_IntegrationTF2;
-	D3D12_GPU_VIRTUAL_ADDRESS srv_IntegrationMTL;
 	D3D12_DRAW_INDEXED_ARGUMENTS drawIndexedArgs;// DrawIndexedIndirect用引数
 };
 
