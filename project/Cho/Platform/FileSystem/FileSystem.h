@@ -221,12 +221,11 @@ namespace cho
             static bool ConnectPipeToBuildWatcher(const int& timeoutMs);
             // メッセージ送信
             static void SendMessageToBuildWatcher(const std::wstring& msg);
-
             // メッセージ受信
             static std::wstring WaitForAckFromBuildWatcher(DWORD timeoutMs);
             static bool TestPipeMessage();
 
-            static bool SaveAndBuildSolution(const std::wstring& targetSln, const bool& isBuild = true);
+            static bool SaveAndBuildSolution(const std::wstring& targetSln, const bool& isBuild = true, const bool& isDebugger = false);
 
             static std::string m_SlnGUID;
 			static std::string m_ProjGUID;
@@ -239,6 +238,7 @@ namespace cho
             static void ClosePipe();
 			static HANDLE m_ReadPipe;// 読み取り用パイプ
 			static HANDLE m_WritePipe;// 書き込み用パイプ
+            static bool m_IsAttached;
         };
 
         class GameBuilder

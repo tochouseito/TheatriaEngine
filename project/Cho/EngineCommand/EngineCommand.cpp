@@ -63,9 +63,9 @@ void EngineCommand::GenerateScript(const std::string& scriptName)
 	m_ResourceManager->GetScriptContainer()->AddScriptData(scriptName);
 }
 
-void EngineCommand::GameRun()
+void EngineCommand::GameRun(const bool& isDebugger)
 {
-	m_GameCore->GameRun();
+	m_GameCore->GameRun(isDebugger);
 }
 
 void EngineCommand::GameStop()

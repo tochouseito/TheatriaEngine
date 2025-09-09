@@ -653,8 +653,6 @@ void GraphicsEngine::DrawForward(ResourceManager& resourceManager, GameCore& gam
 			// インデックスバッファビューをセット
 			D3D12_INDEX_BUFFER_VIEW* ibv = resourceManager.GetBuffer<IIndexBuffer>(modelData.meshes[i].indexBufferIndex)->GetIndexBufferView();
 			context->SetIndexBuffer(ibv);
-			// 引数バッファを更新
-			//IndirectArgs indirectArgs = {};
 			// カメラバッファをセット
 			context->SetGraphicsRootConstantBufferView(0, cameraBuffer->GetResource()->GetGPUVirtualAddress());
 			// トランスフォーム統合バッファをセット
@@ -683,6 +681,8 @@ void GraphicsEngine::DrawForward(ResourceManager& resourceManager, GameCore& gam
 			// マテリアル統合バッファをセット
 			IStructuredBuffer* materialBuffer = resourceManager.GetIntegrationBuffer(IntegrationDataType::Material);
 			context->SetGraphicsRootShaderResourceView(9, materialBuffer->GetResource()->GetGPUVirtualAddress());
+			// 引数バッファを更新
+			//IndirectArgs indirectArgs = {};
 			/*indirectArgs.cbv_ViewProjection = cameraBuffer->GetResource()->GetGPUVirtualAddress();
 			indirectArgs.srv_IntegrationTF = transformBuffer->GetResource()->GetGPUVirtualAddress();
 			indirectArgs.srv_UseTransformList = useTransformBuffer->GetResource()->GetGPUVirtualAddress();
@@ -692,11 +692,12 @@ void GraphicsEngine::DrawForward(ResourceManager& resourceManager, GameCore& gam
 			indirectArgs.cbv_Lights = lightBuffer->GetResource()->GetGPUVirtualAddress();
 			indirectArgs.cbv_Environment = envBuffer->GetResource()->GetGPUVirtualAddress();
 			indirectArgs.srv_IntegrationMTL = materialBuffer->GetResource()->GetGPUVirtualAddress();
-			indirectArgs.drawIndexedArgs.IndexCountPerInstance = static_cast<UINT>(modelData.meshes[0].indices.size());
-			indirectArgs.drawIndexedArgs.InstanceCount = static_cast<UINT>(modelData.useTransformList.size());
+			indirectArgs.drawIndexedArgs.IndexCountPerInstance = static_cast<UINT>(modelData.meshes[0].indices.size());*/
+			/*indirectArgs.drawIndexedArgs.InstanceCount = static_cast<UINT>(modelData.useTransformList.size());
 			indirectArgs.drawIndexedArgs.StartIndexLocation = 0;
 			indirectArgs.drawIndexedArgs.BaseVertexLocation = 0;
 			indirectArgs.drawIndexedArgs.StartInstanceLocation = 0;
+			indirectArgs.drawIndexedArgs.IndexCountPerInstance = static_cast<UINT>(modelData.meshes[i].indices.size());
 			m_PipelineManager->GetIntegratePSO().indirectArgsBuffer->UpdateData(indirectArgs);*/
 			// 配列テクスチャのためヒープをセット
 			context->SetGraphicsRootDescriptorTable(10, resourceManager.GetSUVDHeap()->GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());

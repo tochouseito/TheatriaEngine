@@ -190,6 +190,147 @@ class Program
                                 }
                                 break;
                             }
+                        case string s when s.StartsWith("BUILD_SLN_DEBUGGER|"):// "BUILD_SLN_DEBUGGER|Game|Debug|x64"
+                            {
+                                var parts = s.Split('|');
+                                if (parts.Length >= 4)
+                                {
+                                    string slnName = parts[1];
+                                    string config = parts[2];
+                                    string platform = parts[3];
+
+                                    // writer.WriteLine("ACK:BUILD_SLN");
+
+                                    bool found = false;
+                                    foreach (var dte in GetRunningVisualStudios())
+                                    {
+                                        try
+                                        {
+                                            string opened = System.IO.Path.GetFileNameWithoutExtension(dte.Solution.FullName);
+                                            if (string.Equals(opened, slnName, StringComparison.OrdinalIgnoreCase))
+                                            {
+                                                Console.WriteLine($"ビルド対象ソリューション発見: {dte.Solution.FullName}");
+                                                found = true;
+                                                var configs = dte.Solution.SolutionBuild.SolutionConfigurations;
+                                                EnvDTE.SolutionConfiguration targetConfig = null;
+
+                                                foreach (EnvDTE.SolutionConfiguration cfg in configs)
+                                                {
+                                                    if (string.Equals(cfg.Name, config, StringComparison.OrdinalIgnoreCase))
+                                                    {
+                                                        // この構成が対象のプラットフォームを持つかチェック
+                                                        foreach (EnvDTE.SolutionContext ctx in cfg.SolutionContexts)
+                                                        {
+                                                            if (string.Equals(ctx.PlatformName, platform, StringComparison.OrdinalIgnoreCase))
+                                                            {
+                                                                targetConfig = cfg;
+                                                                break;
+                                                            }
+                                                        }
+                                                    }
+                                                    if (targetConfig != null)
+                                                    {
+                                                        break;
+                                                    }
+                                                }
+                                                if (targetConfig != null)
+                                                {
+                                                    targetConfig.Activate();
+                                                    dte.Solution.SolutionBuild.Build(true);
+
+                                                    // ビルド完了待ち
+                                                    while (dte.Solution.SolutionBuild.BuildState == vsBuildState.vsBuildStateInProgress)
+                                                        System.Threading.Thread.Sleep(500);
+
+                                                    Console.WriteLine("Build 完了");
+
+                                                    // 親プロセスIDを取得（すでに持っているなら使う）
+                                                    int id = parent.Id;
+                                                    Console.WriteLine($"親プロセスID: {id}");
+
+                                                    try
+                                                    {
+                                                        // VS のデバッガが見ているローカルプロセスを列挙
+                                                        foreach (EnvDTE.Process proc in dte.Debugger.LocalProcesses)
+                                                        {
+                                                            if (proc.ProcessID == id)
+                                                            {
+                                                                proc.Attach();
+                                                                Console.WriteLine("親プロセスにデバッガをアタッチしました。");
+                                                                break;
+                                                            }
+                                                        }
+                                                    }
+                                                    catch (Exception ex)
+                                                    {
+                                                        Console.WriteLine("デバッガアタッチ失敗: " + ex.Message);
+                                                    }
+
+                                                    writer.WriteLine("ACK:BUILD_SLN");
+                                                }
+                                                else
+                                                {
+                                                    Console.WriteLine($"構成 {config}|{platform} が見つかりませんでした。");
+                                                }
+
+                                                break;
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            Console.WriteLine("DTE 操作中エラー: " + ex.Message);
+                                        }
+                                    }
+
+                                    if (!found)
+                                    {
+                                        Console.WriteLine($"指定されたソリューション {slnName} が見つかりません。");
+                                    }
+                                }
+                                break;
+                            }
+                        case string s when s.StartsWith("STOP_DEBUGGER|"):
+                            {
+                                var parts = s.Split('|');
+                                if (parts.Length >= 2)
+                                {
+                                    string slnName = parts[1];
+
+                                    foreach (var dte in GetRunningVisualStudios())
+                                    {
+                                        try
+                                        {
+                                            string opened = Path.GetFileNameWithoutExtension(dte.Solution.FullName);
+                                            if (string.Equals(opened, slnName, StringComparison.OrdinalIgnoreCase))
+                                            {
+                                                if (dte.Debugger.DebuggedProcesses.Count > 0)
+                                                {
+                                                    try
+                                                    {
+                                                        dte.Debugger.Stop(true); // ← Shift+F5 相当
+                                                        Console.WriteLine("デバッグを停止しました。");
+                                                        writer.WriteLine("ACK:STOP_DEBUGGER");
+                                                    }
+                                                    catch (Exception ex)
+                                                    {
+                                                        Console.WriteLine("デバッグ停止失敗: " + ex.Message);
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    Console.WriteLine("現在デバッグ中のプロセスはありません。");
+                                                    writer.WriteLine("ACK:STOP_DEBUGGER");
+                                                }
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            Console.WriteLine("デバッガ操作中エラー: " + ex.Message);
+                                        }
+                                    }
+                                }
+                                break;
+                            }
                         default:
                             writer.WriteLine("ACK:UNKNOWN");
                             break;

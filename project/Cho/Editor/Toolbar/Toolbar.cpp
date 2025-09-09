@@ -102,7 +102,16 @@ void Toolbar::Window()
             // Play
 			// 現在のSceneを保存
             m_EditorManager->SaveEditingScene();
-            m_EngineCommand->GameRun();
+            m_EngineCommand->GameRun(false);
+        }
+        // 横並び
+		ImGui::SameLine();
+        if (ImGui::Button("デバッガー実行"))
+        {
+            // Play
+            // 現在のSceneを保存
+            m_EditorManager->SaveEditingScene();
+            m_EngineCommand->GameRun(true);
         }
     }
     ImGui::SameLine(0, buttonSpacing);

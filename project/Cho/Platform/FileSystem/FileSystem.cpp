@@ -31,6 +31,7 @@ HMODULE cho::FileSystem::ScriptProject::m_DllHandle = nullptr;
 DWORD64 cho::FileSystem::ScriptProject::m_PDBBaseAddress = 0;
 HANDLE cho::FileSystem::ScriptProject::m_ReadPipe = nullptr; // 読み取り用パイプ
 HANDLE cho::FileSystem::ScriptProject::m_WritePipe = nullptr; // 書き込み用パイプ
+bool cho::FileSystem::ScriptProject::m_IsAttached = false;
 
 // スクリプトプロジェクトの自動保存、ビルド
 static HRESULT InvokeByName(IDispatch* pDisp, LPCOLESTR name, VARIANT* args, UINT cArgs)
@@ -2093,6 +2094,7 @@ void cho::FileSystem::ScriptProject::SendMessageToBuildWatcher(const std::wstrin
         DWORD err = GetLastError();
 		Log::Write(LogLevel::Info, "[Engine] WriteFile failed. err=" + std::to_string(err));
     }
+	m_IsAttached = false;
 }
 
 // メッセージ受信
@@ -2162,7 +2164,7 @@ bool cho::FileSystem::ScriptProject::TestPipeMessage()
     return false;
 }
 
-bool cho::FileSystem::ScriptProject::SaveAndBuildSolution(const std::wstring& targetSln, const bool& isBuild)
+bool cho::FileSystem::ScriptProject::SaveAndBuildSolution(const std::wstring& targetSln, const bool& isBuild, const bool& isDebugger)
 {
     bool any = false;
     // .slnがついていなければ足す
@@ -2263,13 +2265,21 @@ bool cho::FileSystem::ScriptProject::SaveAndBuildSolution(const std::wstring& ta
 #elif NDEBUG
 														config = L"Release";
 #endif
-                                                        SendMessageToBuildWatcher(L"BUILD_SLN|" + m_sProjectName + L"|" + config + L"|x64");
+                                                        if (isDebugger)
+                                                        {
+                                                            SendMessageToBuildWatcher(L"BUILD_SLN_DEBUGGER|" + m_sProjectName + L"|" + config + L"|x64");
+                                                        }
+                                                        else
+                                                        {
+                                                            SendMessageToBuildWatcher(L"BUILD_SLN|" + m_sProjectName + L"|" + config + L"|x64");
+                                                        }
                                                         // ここで必ず返事が来るまでブロック
                                                         std::wstring reply = WaitForAckFromBuildWatcher(5000); // 5秒待機
                                                         if (!reply.empty())
                                                         {
                                                             Log::Write(LogLevel::Info, L"Received from BuildWatcher: " + reply);
                                                         }
+                                                        m_IsAttached = isDebugger;
                                                     }
                                                 }
                                             }
