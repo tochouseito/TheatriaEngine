@@ -56,7 +56,6 @@ void EditorManager::Initialize()
 
 	// BuildWatcherと接続
 	cho::FileSystem::ScriptProject::ConnectPipeToBuildWatcher(60000);// 60秒
-	//cho::FileSystem::ScriptProject::SendMessageToBuildWatcher(L"EditorStarted");
 }
 
 void EditorManager::Update()
