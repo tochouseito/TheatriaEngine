@@ -218,6 +218,13 @@ namespace cho
             static void UnloadPDB();
             static bool WaitForBuild(const std::wstring& dllPath, int timeoutMs = 60000);
             static bool WaitForBuildNotification(int timeoutMs);
+            static bool ConnectPipeToBuildWatcher(const int& timeoutMs);
+            // メッセージ送信
+            static void SendMessageToBuildWatcher(const std::wstring& msg);
+
+            // メッセージ受信
+            static std::wstring WaitForAckFromBuildWatcher(DWORD timeoutMs);
+            static bool TestPipeMessage();
 
             static bool SaveAndBuildSolution(const std::wstring& targetSln, const bool& isBuild = true);
 
@@ -227,6 +234,11 @@ namespace cho
 			static std::string m_ProjPath;
             static HMODULE m_DllHandle;
 			static DWORD64 m_PDBBaseAddress;
+
+            // Pipe
+            static void ClosePipe();
+			static HANDLE m_ReadPipe;// 読み取り用パイプ
+			static HANDLE m_WritePipe;// 書き込み用パイプ
         };
 
         class GameBuilder

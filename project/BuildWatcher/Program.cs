@@ -1,10 +1,12 @@
 ﻿using EnvDTE;
 using EnvDTE80;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Threading;
 
@@ -46,6 +48,7 @@ class Program
         })
         { IsBackground = true }.Start();
 
+        // パイプ接続
         // エンジンがイベントを作るまで待つ
         EventWaitHandle waitHandle = null;
         while (true)
@@ -66,49 +69,170 @@ class Program
         Console.WriteLine("合図を受け取りました。パイプ接続します。");
 
         // パイプ接続
-        using (var pipe = new NamedPipeClientStream(".", "BuildWatcherPipe", PipeDirection.Out))
+        using (var pipeIn = new NamedPipeClientStream(".", "EngineToWatcher", PipeDirection.In))
+        using (var pipeOut = new NamedPipeClientStream(".", "WatcherToEngine", PipeDirection.Out))
         {
             try
             {
-                pipe.Connect(5000); // 5秒タイムアウト
+                // 両方に接続
+                pipeIn.Connect(5000);
+                pipeOut.Connect(5000);
+                // 5秒タイムアウト
                 Console.WriteLine("パイプ接続成功！");
             }
             catch (TimeoutException)
             {
                 Console.WriteLine("パイプ接続タイムアウト");
+                return;
             }
-            //File.AppendAllText("BuildWatcher.log", "Connected to Engine.\n");
+
             Console.WriteLine("Connected to Engine.");
 
-            using (var writer = new StreamWriter(pipe, Encoding.Unicode) { AutoFlush = true })
+            using (var reader = new StreamReader(pipeIn, Encoding.Unicode))
+            using (var writer = new StreamWriter(pipeOut, Encoding.Unicode) { AutoFlush = true })
             {
-                // DTE を取得（VS2022の場合）
-                EnvDTE80.DTE2 dte = (DTE2)Marshal.GetActiveObject("VisualStudio.DTE.17.0");
-
-                // イベントフック
-                dte.Events.BuildEvents.OnBuildBegin += (scope, action) =>
+                while (true)
                 {
-                    writer.WriteLine("BUILD_START");
-                };
+                    string line = reader.ReadLine();
+                    if (line == null)
+                    {
+                        Console.WriteLine("Engine が終了しました。");
+                        break;
+                    }
 
-                dte.Events.BuildEvents.OnBuildProjConfigDone += (proj, config, platform, solConfig, success) =>
-                {
-                    if (success)
-                        writer.WriteLine($"BUILD_SUCCESS:{proj}");
-                    else
-                        writer.WriteLine($"BUILD_FAIL:{proj}");
-                };
+                    Console.WriteLine("[Engineから受信] " + line);
 
-                dte.Events.BuildEvents.OnBuildDone += (scope, action) =>
-                {
-                    writer.WriteLine("BUILD_DONE");
-                };
+                    switch (line)
+                    {
+                        // 必ず ACK: で始まる応答を返すこと
+                        case "TEST_MESSAGE":
+                            writer.WriteLine("ACK:TEST_MESSAGE");
+                            break;
+                        case "BUILD_START":
+                            writer.WriteLine("ACK:BUILD_START");
+                            break;
+                        case "BUILD_DONE":
+                            writer.WriteLine("ACK:BUILD_DONE");
+                            break;
+                        case string s when s.StartsWith("BUILD_SLN|"):// "BUILD_SLN|Game|Debug|x64"
+                            {
+                                var parts = s.Split('|');
+                                if (parts.Length >= 4)
+                                {
+                                    string slnName = parts[1];
+                                    string config = parts[2];
+                                    string platform = parts[3];
 
-                // イベントループを保持
-                while (true) System.Threading.Thread.Sleep(1000);
+                                    // writer.WriteLine("ACK:BUILD_SLN");
+
+                                    bool found = false;
+                                    foreach (var dte in GetRunningVisualStudios())
+                                    {
+                                        try
+                                        {
+                                            string opened = System.IO.Path.GetFileNameWithoutExtension(dte.Solution.FullName);
+                                            if (string.Equals(opened, slnName, StringComparison.OrdinalIgnoreCase))
+                                            {
+                                                Console.WriteLine($"ビルド対象ソリューション発見: {dte.Solution.FullName}");
+                                                found = true;
+                                                var configs = dte.Solution.SolutionBuild.SolutionConfigurations;
+                                                EnvDTE.SolutionConfiguration targetConfig = null;
+
+                                                foreach (EnvDTE.SolutionConfiguration cfg in configs)
+                                                {
+                                                    if (string.Equals(cfg.Name, config, StringComparison.OrdinalIgnoreCase))
+                                                    {
+                                                        // この構成が対象のプラットフォームを持つかチェック
+                                                        foreach (EnvDTE.SolutionContext ctx in cfg.SolutionContexts)
+                                                        {
+                                                            if (string.Equals(ctx.PlatformName, platform, StringComparison.OrdinalIgnoreCase))
+                                                            {
+                                                                targetConfig = cfg;
+                                                                break;
+                                                            }
+                                                        }
+                                                    }
+                                                    if (targetConfig != null)
+                                                    {
+                                                        break;
+                                                    }
+                                                }
+                                                if (targetConfig != null)
+                                                {
+                                                    targetConfig.Activate();
+                                                    dte.Solution.SolutionBuild.Build(true);
+
+                                                    // ビルド完了待ち
+                                                    while (dte.Solution.SolutionBuild.BuildState == vsBuildState.vsBuildStateInProgress)
+                                                        System.Threading.Thread.Sleep(500);
+
+                                                    Console.WriteLine("Build 完了");
+                                                    writer.WriteLine("ACK:BUILD_SLN");
+                                                }
+                                                else
+                                                {
+                                                    Console.WriteLine($"構成 {config}|{platform} が見つかりませんでした。");
+                                                }
+                                                
+                                                break;
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            Console.WriteLine("DTE 操作中エラー: " + ex.Message);
+                                        }
+                                    }
+
+                                    if (!found)
+                                    {
+                                        Console.WriteLine($"指定されたソリューション {slnName} が見つかりません。");
+                                    }
+                                }
+                                break;
+                            }
+                        default:
+                            writer.WriteLine("ACK:UNKNOWN");
+                            break;
+                    }
+                }
+            }
+        }
+
+        
+    }
+
+    // ROT から DTE を列挙
+    static IEnumerable<EnvDTE80.DTE2> GetRunningVisualStudios()
+    {
+        IRunningObjectTable rot;
+        GetRunningObjectTable(0, out rot);
+        IEnumMoniker enumMoniker;
+        rot.EnumRunning(out enumMoniker);
+
+        IMoniker[] moniker = new IMoniker[1];
+        IntPtr fetched = IntPtr.Zero;
+
+        while (enumMoniker.Next(1, moniker, fetched) == 0)
+        {
+            IBindCtx bindCtx;
+            CreateBindCtx(0, out bindCtx);
+            string displayName;
+            moniker[0].GetDisplayName(bindCtx, null, out displayName);
+
+            if (displayName.StartsWith("!VisualStudio.DTE"))
+            {
+                object comObject;
+                rot.GetObject(moniker[0], out comObject);
+                yield return (EnvDTE80.DTE2)comObject;
             }
         }
     }
+
+    [DllImport("ole32.dll")]
+    private static extern int CreateBindCtx(uint reserved, out IBindCtx ppbc);
+
+    [DllImport("ole32.dll")]
+    private static extern int GetRunningObjectTable(uint reserved, out IRunningObjectTable prot);
 
     [DllImport("kernel32.dll")]
     static extern IntPtr GetCurrentProcess();

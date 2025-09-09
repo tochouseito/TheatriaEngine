@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable">
+  <Extern href="stdidcmd.h"/>
+  <Extern href="vsshlids.h"/>
+
+  <Commands>
+    <Groups>
+      <!-- Debug ツールバーの中に独自グループを作成 -->
+      <Group guid="guidChoAttachCmdSet" id="MyGroup" priority="0x3000">
+        <Parent guid="guidSHLMainMenu" id="IDM_DEBUG_MENU"/>
+      </Group>
+    </Groups>
+
+	<Buttons>
+		<Button guid="guidChoAttachCmdSet" id="cmdidAttachCho" priority="0x0100" type="Button">
+			<Parent guid="guidChoAttachCmdSet" id="MyGroup" />
+			<Strings>
+				<ButtonText>Attach to ChoEngine</ButtonText>
+			</Strings>
+		</Button>
+	</Buttons>
+  </Commands>
+
+  <Symbols>
+    <!-- C# と一致させる -->
+    <GuidSymbol name="guidChoAttachCmdSet" value="{b8d3e7c5-8d2d-4f5a-9d3d-9a9f1e7b2a11}">
+      <IDSymbol name="MyGroup" value="0x0200" />
+      <IDSymbol name="cmdidAttachCho" value="0x0100" />
+    </GuidSymbol>
+  </Symbols>
+</CommandTable>

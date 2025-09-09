@@ -280,6 +280,14 @@ void MainMenu::HelpMenu()
         
         ImGui::EndMenu();
     }
+    if (ImGui::BeginMenu("TEST"))
+    {
+        if (ImGui::Button("TEST"))
+        {
+			cho::FileSystem::ScriptProject::TestPipeMessage();
+        }
+		ImGui::EndMenu();
+    }
 }
 
 void MainMenu::SettingMenu()

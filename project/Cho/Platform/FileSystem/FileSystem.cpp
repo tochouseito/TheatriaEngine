@@ -29,6 +29,8 @@ std::string cho::FileSystem::ScriptProject::m_SlnPath = "";
 std::string cho::FileSystem::ScriptProject::m_ProjPath = "";
 HMODULE cho::FileSystem::ScriptProject::m_DllHandle = nullptr;
 DWORD64 cho::FileSystem::ScriptProject::m_PDBBaseAddress = 0;
+HANDLE cho::FileSystem::ScriptProject::m_ReadPipe = nullptr; // 読み取り用パイプ
+HANDLE cho::FileSystem::ScriptProject::m_WritePipe = nullptr; // 書き込み用パイプ
 
 // スクリプトプロジェクトの自動保存、ビルド
 static HRESULT InvokeByName(IDispatch* pDisp, LPCOLESTR name, VARIANT* args, UINT cArgs)
@@ -2004,6 +2006,162 @@ bool cho::FileSystem::ScriptProject::WaitForBuildNotification(int timeoutMs)
     return false; // タイムアウト
 }
 
+bool cho::FileSystem::ScriptProject::ConnectPipeToBuildWatcher(const int& timeoutMs)
+{
+	// パイプの作成
+	// Read/Write それぞれ作成
+    m_ReadPipe = CreateNamedPipeW(
+		L"\\\\.\\pipe\\WatcherToEngine",
+        PIPE_ACCESS_INBOUND,// 読み込み専用
+        PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT,
+        1,
+        1024 * sizeof(wchar_t), // 出力バッファ
+        1024 * sizeof(wchar_t), // 入力バッファ
+        timeoutMs,
+		nullptr);
+
+    if (m_ReadPipe == INVALID_HANDLE_VALUE)
+    {
+        std::wcerr << L"[WatcherToEngine] パイプ作成失敗: " << GetLastError() << std::endl;
+        return false;
+	}
+
+    m_WritePipe = CreateNamedPipeW(
+		L"\\\\.\\pipe\\EngineToWatcher",
+        PIPE_ACCESS_OUTBOUND,// 書き込み専用
+        PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT,
+        1,
+        1024 * sizeof(wchar_t), // 出力バッファ
+        1024 * sizeof(wchar_t), // 入力バッファ
+		timeoutMs,
+		nullptr);
+
+    if (m_WritePipe == INVALID_HANDLE_VALUE)
+    {
+        std::wcerr << L"[EngineToWatcher] パイプ作成失敗: " << GetLastError() << std::endl;
+        return false;
+	}
+
+    HANDLE hEvent = CreateEventW(NULL, TRUE, FALSE, L"ChoEngineReadyEvent");
+    if (hEvent)
+    {
+        SetEvent(hEvent); // BuildWatcher に「準備できたよ」と通知
+    }
+
+    // BuildWatcher からの接続を待つ
+    BOOL connected = ConnectNamedPipe(m_ReadPipe, nullptr) ? TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
+    if (!connected)
+    {
+        DWORD err = GetLastError();
+        Log::Write(LogLevel::Error, "[WaitForBuildNotification] ConnectNamedPipe failed. err=" + std::to_string(err));
+        CloseHandle(m_ReadPipe);
+        return false;
+    }
+	BOOL connected2 = ConnectNamedPipe(m_WritePipe, nullptr) ? TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
+    if (!connected2)
+    {
+        DWORD err = GetLastError();
+        Log::Write(LogLevel::Error, "[WaitForBuildNotification] ConnectNamedPipe failed. err=" + std::to_string(err));
+        CloseHandle(m_WritePipe);
+        return false;
+    }
+
+	// イベントハンドルはもう不要
+    if (hEvent) { CloseHandle(hEvent); }
+
+	return connected && connected2;
+}
+
+// メッセージ送信
+void cho::FileSystem::ScriptProject::SendMessageToBuildWatcher(const std::wstring& msg)
+{
+    if (m_WritePipe == INVALID_HANDLE_VALUE) return;
+
+    std::wstring sendMsg = msg + L"\n"; // 改行を付ける（C#側 ReadLine 用）
+    DWORD written = 0;
+    BOOL ok = WriteFile(
+        m_WritePipe,
+        sendMsg.c_str(),
+        (DWORD)(sendMsg.size() * sizeof(wchar_t)),
+        &written,
+        nullptr);
+
+    FlushFileBuffers(m_WritePipe);
+
+    if (!ok)
+    {
+        DWORD err = GetLastError();
+		Log::Write(LogLevel::Info, "[Engine] WriteFile failed. err=" + std::to_string(err));
+    }
+}
+
+// メッセージ受信
+std::wstring cho::FileSystem::ScriptProject::WaitForAckFromBuildWatcher(DWORD timeoutMs)
+{
+    if (m_ReadPipe == INVALID_HANDLE_VALUE) return L"";
+
+    wchar_t buffer[256];
+    DWORD bytesRead = 0;
+
+    // --- Step 1: パイプ内の古いメッセージを破棄する ---
+    DWORD bytesAvailable = 0;
+    while (PeekNamedPipe(m_ReadPipe, nullptr, 0, nullptr, &bytesAvailable, nullptr) && bytesAvailable > 0)
+    {
+        // 余っている分を全部読み捨て
+        BOOL b = ReadFile(m_ReadPipe, buffer, sizeof(buffer) - sizeof(wchar_t), &bytesRead, nullptr);
+        b;
+    }
+
+    // --- Step 2: タイムアウト付きで新しいメッセージを待つ ---
+    DWORD start = GetTickCount();
+    while (GetTickCount() - start < timeoutMs)
+    {
+        bytesAvailable = 0;
+        if (PeekNamedPipe(m_ReadPipe, nullptr, 0, nullptr, &bytesAvailable, nullptr) && bytesAvailable > 0)
+        {
+            if (ReadFile(m_ReadPipe, buffer, sizeof(buffer) - sizeof(wchar_t), &bytesRead, nullptr) && bytesRead > 0)
+            {
+                size_t charCount = bytesRead / sizeof(wchar_t);
+                buffer[charCount] = L'\0';
+                std::wstring msg(buffer, charCount);
+
+                // 改行を除去
+                while (!msg.empty() && (msg.back() == L'\r' || msg.back() == L'\n'))
+                    msg.pop_back();
+
+                // --- Step 3: ACK判定 ---
+                if (msg.rfind(L"ACK:", 0) == 0)
+                {
+                    return msg; // 期待通りのACKを受け取った
+                }
+                else
+                {
+                    // ACKじゃない場合はログを出して再ループ
+                    Log::Write(LogLevel::Warn, L"Unexpected message: " + msg);
+                }
+            }
+        }
+        Sleep(10); // CPU負荷を抑える
+    }
+
+    // --- Step 4: タイムアウト ---
+    Log::Write(LogLevel::Error, "Timeout waiting for ACK");
+    return L"";
+}
+
+bool cho::FileSystem::ScriptProject::TestPipeMessage()
+{
+    SendMessageToBuildWatcher(L"TEST_MESSAGE");
+    // ここで必ず返事が来るまでブロック
+    std::wstring reply = WaitForAckFromBuildWatcher(5000); // 5秒待機
+    if (!reply.empty())
+    {
+        Log::Write(LogLevel::Info, L"Received from BuildWatcher: " + reply);
+        return true;
+    }
+    return false;
+}
+
 bool cho::FileSystem::ScriptProject::SaveAndBuildSolution(const std::wstring& targetSln, const bool& isBuild)
 {
     bool any = false;
@@ -2088,6 +2246,7 @@ bool cho::FileSystem::ScriptProject::SaveAndBuildSolution(const std::wstring& ta
                                                     if (isBuild)
                                                     {
                                                         // Build Solution
+                                                        /*
                                                         VariantInit(&args[0]); VariantInit(&args[1]);
                                                         args[0].vt = VT_BSTR; args[0].bstrVal = SysAllocString(L"");
                                                         args[1].vt = VT_BSTR; args[1].bstrVal = SysAllocString(L"Build.BuildSolution");
@@ -2096,6 +2255,21 @@ bool cho::FileSystem::ScriptProject::SaveAndBuildSolution(const std::wstring& ta
 															any = WaitForBuildNotification(60000); // 60秒待つ
                                                         }
                                                         VariantClear(&args[0]); VariantClear(&args[1]);
+                                                        */
+														// Buildwatchr にビルド開始を通知
+                                                        std::wstring config;
+#ifdef _DEBUG
+														config = L"Debug";
+#elif NDEBUG
+														config = L"Release";
+#endif
+                                                        SendMessageToBuildWatcher(L"BUILD_SLN|" + m_sProjectName + L"|" + config + L"|x64");
+                                                        // ここで必ず返事が来るまでブロック
+                                                        std::wstring reply = WaitForAckFromBuildWatcher(5000); // 5秒待機
+                                                        if (!reply.empty())
+                                                        {
+                                                            Log::Write(LogLevel::Info, L"Received from BuildWatcher: " + reply);
+                                                        }
                                                     }
                                                 }
                                             }
@@ -2113,6 +2287,13 @@ bool cho::FileSystem::ScriptProject::SaveAndBuildSolution(const std::wstring& ta
 
     // CoUninitialize();
     return any;
+}
+
+// Pipe
+void cho::FileSystem::ScriptProject::ClosePipe()
+{
+	CloseHandle(m_ReadPipe);
+	CloseHandle(m_WritePipe);
 }
 
 

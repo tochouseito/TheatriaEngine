@@ -53,6 +53,10 @@ void EditorManager::Initialize()
 	m_EffectHierarchy->Initialize();
 	// MaterialEditor
 	m_MaterialEditor->Initialize();
+
+	// BuildWatcherと接続
+	cho::FileSystem::ScriptProject::ConnectPipeToBuildWatcher(60000);// 60秒
+	//cho::FileSystem::ScriptProject::SendMessageToBuildWatcher(L"EditorStarted");
 }
 
 void EditorManager::Update()
