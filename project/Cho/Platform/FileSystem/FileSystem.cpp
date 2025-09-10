@@ -1046,6 +1046,7 @@ json cho::Serialization::ToJson(const BoxCollider2DComponent& bc)
 json cho::Serialization::ToJson(const Rigidbody3DComponent& rb)
 {
     json j;
+	j["active"] = rb.IsActive();
 	j["halfsize"] = { rb.halfsize.x, rb.halfsize.y, rb.halfsize.z };
 	j["friction"] = rb.friction;
 	j["restitution"] = rb.restitution;
@@ -2413,6 +2414,7 @@ void cho::Deserialization::FromJson(const json& j, BoxCollider2DComponent& bc)
 
 void cho::Deserialization::FromJson(const json& j, Rigidbody3DComponent& rb)
 {
+	rb.SetActive(j.value("active", true));
 	rb.friction = j.value("friction", 0.5f);
 	rb.restitution = j.value("restitution", 0.0f);
 	rb.fixedPositionX = j.value("fixedPositionX", false);
@@ -2849,13 +2851,17 @@ void cho::FileSystem::GameBuilder::CopyFilesToBuildFolder([[maybe_unused]]Engine
         cho::Log::Write(LogLevel::Assert, "CopyFilesToBuildFolder failed: " + std::string(e.what()));
     }
 
+    // exeの名前
+	// std::wstring finalExeName = m_sProjectName+L".exe"; // 任意の最終ファイル名
+    std::wstring finalExeName = L"3024_ビタエリア.exe"; // 任意の最終ファイル名
+
     std::vector<std::pair<fs::path, fs::path>> renameList = {
     { buildRoot / L"ChoEngine_GameRuntime.dll",    buildRoot / L"ChoEngine.dll" },
     { buildRoot / L"ChoEngine_GameRuntime.exp",    buildRoot / L"ChoEngine.exp" },
     { buildRoot / L"ChoEngine_GameRuntime.lib",    buildRoot / L"ChoEngine.lib" },
     { buildRoot / L"dxcompiler_GameRuntime.dll",   buildRoot / L"dxcompiler.dll" },
     { buildRoot / L"dxil_GameRuntime.dll",         buildRoot / L"dxil.dll" },
-    { buildRoot / L"GameTemplate.exe",             buildRoot / L"Game.exe" }, // 任意の最終ファイル名
+    { buildRoot / L"GameTemplate.exe",             buildRoot / finalExeName }, // 任意の最終ファイル名
     };
 
     for (const auto& [from, to] : renameList)
