@@ -116,7 +116,7 @@ void WinApp::CreateGameWindow() {
 	// ウィンドウの生成
 	m_HWND = CreateWindow(
 		m_WC.lpszClassName,		// 利用するクラス名
-		L"Cho",//L"Cho",					// タイトルバーの文字
+		L"3024_ビタエリア",//L"Cho",					// タイトルバーの文字
 		WS_OVERLAPPEDWINDOW,	// よく見るウィンドウスタイル
 		CW_USEDEFAULT,			// 表示X座標
 		CW_USEDEFAULT,			// 表示Y座標
