@@ -23,7 +23,7 @@ EditorManager::EditorManager(EngineCommand* engineCommand, InputManager* inputMa
 	engineCommand->SetEditorManager(this);
 }
 
-void EditorManager::Initialize()
+void EditorManager::Initialize(const bool& isRuntime)
 {
 	// Toolbar
 	m_Toolbar->Initialize();
@@ -53,9 +53,10 @@ void EditorManager::Initialize()
 	m_EffectHierarchy->Initialize();
 	// MaterialEditor
 	m_MaterialEditor->Initialize();
-
-	// BuildWatcherと接続
-	cho::FileSystem::ScriptProject::ConnectPipeToBuildWatcher(60000);// 60秒
+	if(!isRuntime){
+		// BuildWatcherと接続
+		cho::FileSystem::ScriptProject::ConnectPipeToBuildWatcher(60000);// 60秒
+	}
 }
 
 void EditorManager::Update()

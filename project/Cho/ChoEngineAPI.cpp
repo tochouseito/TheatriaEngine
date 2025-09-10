@@ -9,6 +9,76 @@
 namespace ChoSystem
 {
 	SceneManagerAPI sceneManager;
+	struct AudioAPI::ImplAudioAPI
+	{
+		ImplAudioAPI() = default;
+		~ImplAudioAPI() = default;
+		std::vector<SoundData> soundDatas;
+	};
+	AudioAPI::AudioAPI()
+	{
+		implAudioAPI = std::make_unique<ImplAudioAPI>();
+	}
+	AudioAPI testAudio;
+	CHO_API void AudioAPI::AddSource(const std::string& name)
+	{
+		for(const auto& src : implAudioAPI->soundDatas)
+		{
+			// 既に追加されているものは追加しない
+			if(src.name == name) return;
+		}
+		ResourceManager* resourceManager = g_Engine->GetEngineCommand()->GetResourceManager();
+		if (!resourceManager) { return; }
+		std::unordered_map<std::string, uint32_t> audioNameMap = resourceManager->GetAudioManager()->GetSoundDataToName();
+		for(const auto& pair : audioNameMap)
+		{
+			if (pair.first == name)
+			{
+				SoundData soundData = resourceManager->GetAudioManager()->CreateSoundData(name);
+				if (implAudioAPI)
+				{
+					implAudioAPI->soundDatas.push_back(soundData);
+				}
+				break;
+			}
+		}
+	}
+	CHO_API void AudioAPI::Play(const std::string& name, const bool& isLoop)
+	{
+		for(auto& src : implAudioAPI->soundDatas)
+		{
+			if(src.name == name)
+			{
+				ResourceManager* resourceManager = g_Engine->GetEngineCommand()->GetResourceManager();
+				if (!resourceManager) { return; }
+				resourceManager->GetAudioManager()->SoundPlayWave(src, isLoop);
+				break;
+			}
+		}
+	}
+	CHO_API void AudioAPI::Stop(const std::string& name)
+	{
+		name;
+	}
+	CHO_API bool AudioAPI::IsPlaying(const std::string& name)
+	{
+		name;
+		return false;
+	}
+	CHO_API void AudioAPI::SetVolume(const std::string& name, const float& volume)
+	{
+		for (auto& src : implAudioAPI->soundDatas)
+		{
+			if (src.name == name)
+			{
+				ResourceManager* resourceManager = g_Engine->GetEngineCommand()->GetResourceManager();
+				if (!resourceManager) { return; }
+				src.currentVolume = volume;
+				resourceManager->GetAudioManager()->SetVolume(src, volume);
+				break;
+			}
+		}
+	}
 }
 
 CHO_API Engine* cho::CreateEngine(RuntimeMode mode)

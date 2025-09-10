@@ -220,6 +220,40 @@ namespace ChoSystem
 		Rigidbody3DComponent* data = nullptr;
 	};
 
+    // Audio
+    class CHO_API Audio : public IComponentInterface
+    {
+		friend class Marionnette;
+        public:
+        Audio(Entity e, ECSManager* ecs) : IComponentInterface(e, ecs) {}
+        ~Audio() = default;
+        AudioComponent* operator->()
+        {
+            UpdatePtr();
+			return data;
+            }
+        operator bool() noexcept
+        {
+			UpdatePtr();
+            return data != nullptr;
+		}
+
+        /*void AddSource(const std::string& name)
+        {
+
+        }
+		void Play(const std::string& name, const bool& isLoop);
+		void Stop(const std::string& name);
+		bool IsPlaying(const std::string& name);
+		void SetVolume(const std::string& name, const float& volume);*/
+        private:
+        void UpdatePtr()
+        {
+            data = m_ECS->GetComponent<AudioComponent>(m_Entity);
+		}
+        AudioComponent* data = nullptr;
+	};
+
     // Animation
     class CHO_API Animation : public IComponentInterface
     {

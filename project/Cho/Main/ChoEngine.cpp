@@ -58,7 +58,7 @@ void ChoEngine::Initialize()
 
 	// EditorManager初期化
 	editorManager = std::make_unique<EditorManager>(engineCommand.get(), platformLayer->GetInputManager());
-	editorManager->Initialize();
+	editorManager->Initialize(runtimeMode == RuntimeMode::Game);
 
 	// HubManager初期化
 	hubManager = std::make_unique<HubManager>(platformLayer.get(), coreSystem.get(), engineCommand.get(), runtimeMode == RuntimeMode::Game ? true : false);
@@ -142,7 +142,7 @@ void ChoEngine::Update()
 	static bool isGameRun = true;
 	if (runtimeMode == RuntimeMode::Game && isGameRun)
 	{
-		gameCore->GameRun();
+		gameCore->GameRun(false,true);
 		isGameRun = false;
 	}
 	// GameCore更新

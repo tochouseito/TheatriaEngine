@@ -74,6 +74,21 @@ namespace ChoSystem
 	};
 	CHO_API extern SceneManagerAPI sceneManager;
 
+	// TestAPI
+	struct AudioAPI
+	{
+		CHO_API AudioAPI();
+		CHO_API void AddSource(const std::string& name);
+		CHO_API void Play(const std::string& name, const bool& isLoop);
+		CHO_API void Stop(const std::string& name);
+		CHO_API bool IsPlaying(const std::string& name);
+		CHO_API void SetVolume(const std::string& name, const float& volume);
+	private:
+		struct ImplAudioAPI;
+		std::unique_ptr<ImplAudioAPI> implAudioAPI = nullptr;
+	};
+	CHO_API extern AudioAPI testAudio;
+
 	// InputManager
 	namespace Input
 	{

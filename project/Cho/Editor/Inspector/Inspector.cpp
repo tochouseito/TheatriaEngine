@@ -574,6 +574,35 @@ void Inspector::AudioComponentView(GameObject* object)
 	//	}
 	//	ImGui::EndCombo();
 	//}
+	//// オーディオソースの追加
+	//// オーディオを選択するためのドロップダウンメニュー
+	//if (ImGui::BeginCombo("AddSource","TEST"))
+	//{
+	//	for (const auto& pair : audioNameMap)
+	//	{
+	//		for(const auto& src : audio->soundData)
+	//		{
+	//			// 既に追加されているものは選択不可にする
+	//			if(src.name == pair.first) continue;
+	//		}
+	//		if (ImGui::Selectable(pair.first.c_str()))
+	//		{
+	//			// 追加
+	//			SoundData soundData = m_EngineCommand->GetResourceManager()->GetAudioManager()->CreateSoundData(pair.first);
+	//			audio->soundData.push_back(soundData);
+	//		}
+	//	}
+	//	ImGui::EndCombo();
+	//}
+	//// 各オーディオソースの設定
+	//for(auto& src : audio->soundData)
+	//{
+	//	ImGui::TreeNode(src.name.c_str());
+
+	//	ImGui::DragFloat("Volume", &src.currentVolume, 0.01f, 0.0f, 1.0f);
+
+	//	ImGui::TreePop();
+	//}
 }
 
 void Inspector::AnimationComponentView(GameObject* object)
