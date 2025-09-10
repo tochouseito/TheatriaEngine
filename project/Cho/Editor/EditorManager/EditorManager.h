@@ -35,7 +35,7 @@ public:
 	~EditorManager()
 	{
 	}
-	void Initialize();
+	void Initialize(const bool& isRuntime = false);
 	void Update();
 	EngineCommand* GetEngineCommand() { return m_EngineCommand; }
 	InputManager* GetInputManager() { return m_InputManager; }

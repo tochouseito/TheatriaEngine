@@ -76,14 +76,17 @@ void GameCore::Update()
 	
 }
 
-void GameCore::GameRun(const bool& isDebugger)
+void GameCore::GameRun(const bool& isDebugger, const bool& isRuntime)
 {
 	if (isRunning)
 	{
 		return;
 	}
-	// スクリプトプロジェクトの保存処理、ビルド処理
-	cho::FileSystem::ScriptProject::SaveAndBuildSolution(cho::FileSystem::m_sProjectName,true,isDebugger);
+	if (!isRuntime)
+	{
+		// スクリプトプロジェクトの保存処理、ビルド処理
+		cho::FileSystem::ScriptProject::SaveAndBuildSolution(cho::FileSystem::m_sProjectName, true, isDebugger);
+	}
 	// スクリプト読み込み（場所変更予定）
 	cho::FileSystem::ScriptProject::LoadScriptDLL();
 	// クオータニオンに変更

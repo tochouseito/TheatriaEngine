@@ -37,7 +37,7 @@ public:
 	void Start();
 	void Update();
 	bool IsRunning() const { return isRunning; }
-	void GameRun(const bool& isDebugger = false);
+	void GameRun(const bool& isDebugger = false,const bool&isRuntime = false);
 	void GameStop();
 	physics::d2::Id2World* GetPhysicsWorld2D() { return m_pPy2dWorld.get(); }
 	physics::d3::Id3World* GetPhysicsWorld3D() { return m_pPy3dWorld.get(); }

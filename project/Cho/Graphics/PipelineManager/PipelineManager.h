@@ -9,13 +9,21 @@ struct IndirectArgs
 	D3D12_DRAW_INDEXED_ARGUMENTS drawIndexedArgs;// DrawIndexedIndirect用引数
 };
 
+struct ArgsBuffer
+{
+	std::unique_ptr<GpuBuffer> h_Upload = nullptr;// アップロード用バッファ
+	std::unique_ptr<GpuBuffer> h_Default = nullptr;// デフォルトバッファ
+	std::span<IndirectArgs> mappedData = {};// マッピングデータ
+};
+
 struct PSO
 {
 	ComPtr<ID3D12PipelineState> pso;
 	ComPtr<ID3D12RootSignature> rootSignature;
 	std::vector<std::pair<uint32_t, std::string>> rootParameters;
 	ComPtr<ID3D12CommandSignature> commandSignature;// コマンドシグネチャ
-	std::unique_ptr<ConstantBuffer<IndirectArgs>> indirectArgsBuffer;// IndirectArgs用バッファ
+	// std::unique_ptr<ConstantBuffer<IndirectArgs>> indirectArgsBuffer;// IndirectArgs用バッファ
+	ArgsBuffer argsBuffer;// ArgsBuffer
 };
 
 struct PipelineStateObject
