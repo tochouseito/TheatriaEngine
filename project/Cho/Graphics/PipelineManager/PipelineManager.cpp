@@ -656,16 +656,43 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 	Log::Write(LogLevel::Assert, "Pipeline state created.", hr);
 
 	// コマンド引数バッファを作成
-	m_IntegratePSO.indirectArgsBuffer = std::make_unique<ConstantBuffer<IndirectArgs>>();
-	m_IntegratePSO.indirectArgsBuffer->CreateConstantBufferResource(device);
-	// リソースの状態遷移
+	m_IntegratePSO.argsBuffer.h_Upload = std::make_unique<GpuBuffer>();
+	UINT structureByteStride = static_cast<UINT>(sizeof(IndirectArgs));// Bufferのサイズ
+	D3D12_HEAP_PROPERTIES heapProps = {};// ヒープの設定
+	heapProps.Type = D3D12_HEAP_TYPE_UPLOAD;// CPUから書き込み可能
+	// Bufferの作成
+	m_IntegratePSO.argsBuffer.h_Upload->CreateBuffer(
+		device,// デバイス
+		heapProps,// ヒープの設定
+		D3D12_HEAP_FLAG_NONE,// ヒープのフラグ
+		D3D12_RESOURCE_STATE_GENERIC_READ,// リソースの状態
+		D3D12_RESOURCE_FLAG_NONE,// リソースのフラグ
+		1, structureByteStride);
+	// マッピング
+	IndirectArgs* mappedData = nullptr;// 一時マップ用
+	size_t mappedDataSize = 1;
+	m_IntegratePSO.argsBuffer.h_Upload->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&mappedData));
+	// spanでラップ
+	m_IntegratePSO.argsBuffer.mappedData = std::span<IndirectArgs>(mappedData, mappedDataSize);
+
+	// Default
+	m_IntegratePSO.argsBuffer.h_Default = std::make_unique<GpuBuffer>();
+	heapProps.Type = D3D12_HEAP_TYPE_DEFAULT;// GPU専用
+	// Bufferの作成
+	m_IntegratePSO.argsBuffer.h_Default->CreateBuffer(
+		device,// デバイス
+		heapProps,// ヒープの設定
+		D3D12_HEAP_FLAG_NONE,// ヒープのフラグ
+		D3D12_RESOURCE_STATE_COMMON,// リソースの状態
+		D3D12_RESOURCE_FLAG_NONE,// リソースのフラグ
+		1, structureByteStride);
+	// COPY_DESTに遷移
 	CommandContext* context = m_pGraphicsEngine->GetCommandContext();
 	m_pGraphicsEngine->BeginCommandContext(context);
 	context->BarrierTransition(
-		m_IntegratePSO.indirectArgsBuffer->GetResource(),
-		D3D12_RESOURCE_STATE_GENERIC_READ,
-		D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT
-	);
+		m_IntegratePSO.argsBuffer.h_Default->GetResource(),
+		D3D12_RESOURCE_STATE_COMMON,
+		D3D12_RESOURCE_STATE_COPY_DEST);
 	m_pGraphicsEngine->EndCommandContext(context, Compute);
 	m_pGraphicsEngine->WaitForGPU(Compute);
 }
