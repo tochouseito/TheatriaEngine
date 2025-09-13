@@ -707,9 +707,9 @@ void GraphicsEngine::DrawForward(ResourceManager& resourceManager, GameCore& gam
 			PixelBuffer* skyboxTexture = resourceManager.GetBuffer<PixelBuffer>(resourceManager.GetTextureManager()->GetTextureID(resourceManager.GetSkyboxTextureName()));
 			context->SetGraphicsRootDescriptorTable(11, skyboxTexture->GetSRVGpuHandle());
 			// インスタンス数を取得
-			UINT numInstance = static_cast<UINT>(modelData.useTransformList.size());
+			//UINT numInstance = static_cast<UINT>(modelData.useTransformList.size());
 			// DrawCall
-			context->DrawIndexedInstanced(static_cast<UINT>(modelData.meshes[i].indices.size()), numInstance, 0, 0, 0);
+			//context->DrawIndexedInstanced(static_cast<UINT>(modelData.meshes[i].indices.size()), numInstance, 0, 0, 0);
 			// IndirectDrawCall
 			context->ExecuteIndirect(
 				m_PipelineManager->GetIntegratePSO().commandSignature.Get(),
