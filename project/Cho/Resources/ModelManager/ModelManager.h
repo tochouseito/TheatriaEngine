@@ -4,6 +4,7 @@
 #include "SDK/DirectX/DirectX12/stdafx/stdafx.h"
 #include "Core/Utility/Color.h"
 #include "Core/Utility/AnimationStruct.h"
+#include "Graphics/PipelineManager/PipelineManager.h"
 #include <unordered_map>
 #include <filesystem>
 #include <memory>
@@ -77,6 +78,9 @@ struct ModelData
 	std::optional<uint32_t> boneMatrixBufferIndex = std::nullopt;
 	uint32_t nextBoneOffsetIndex = 0; // 次のボーンオフセットインデックス
 	std::vector<uint32_t> removedBoneOffsetIndices; // 削除されたボーンオフセットインデックスのリスト
+
+	ComPtr<ID3D12CommandSignature> commandSignature;// コマンドシグネチャ
+	ArgsBuffer argsBuffer;// ArgsBuffer
 
 	uint32_t AllocateBoneOffsetIdx()
 	{

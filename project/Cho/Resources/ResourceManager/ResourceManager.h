@@ -81,6 +81,7 @@ private:
 class ResourceManager
 {
 	friend class GraphicsEngine;
+	friend class ModelManager;
 public:
 	// コンストラクタ
 	ResourceManager(ID3D12Device8* device);
@@ -457,6 +458,8 @@ private:
 	void CreateDummyMaterial();
 	// 遅延キューに登録
 	void RegisterDeferredDestroy(const std::shared_ptr<GpuResource>& resource);
+	
+	ID3D12Device* GetDevice() const { return m_Device; }
 
 	// Device
 	ID3D12Device8* m_Device = nullptr;
