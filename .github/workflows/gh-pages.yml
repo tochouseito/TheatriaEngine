@@ -13,7 +13,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install sphinx sphinx-rtd-theme
-      - run: sphinx-build -b html docs docs/_build/html
+      - run: sphinx-build -b html docs/source docs/build/html
       - uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
