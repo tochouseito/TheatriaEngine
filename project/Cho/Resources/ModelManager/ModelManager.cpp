@@ -1114,38 +1114,48 @@ void ModelManager::AddModelData(ModelData& modelData)
 	// 名前が重複していたら、エラー
 	// ここに処理を追加する
 
-	// test
-	// コマンド引数バッファを作成
-	modelData.argsBuffer.h_Upload = std::make_unique<GpuBuffer>();
-	UINT structureByteStride = static_cast<UINT>(sizeof(IndirectArgs));// Bufferのサイズ
-	D3D12_HEAP_PROPERTIES heapProps = {};// ヒープの設定
-	heapProps.Type = D3D12_HEAP_TYPE_UPLOAD;// CPUから書き込み可能
-	// Bufferの作成
-	modelData.argsBuffer.h_Upload->CreateBuffer(
-		m_pResourceManager->GetDevice(),// デバイス
-		heapProps,// ヒープの設定
-		D3D12_HEAP_FLAG_NONE,// ヒープのフラグ
-		D3D12_RESOURCE_STATE_GENERIC_READ,// リソースの状態
-		D3D12_RESOURCE_FLAG_NONE,// リソースのフラグ
-		1, structureByteStride);
-	// マッピング
-	IndirectArgs* mappedData = nullptr;// 一時マップ用
-	size_t mappedDataSize = 1;
-	modelData.argsBuffer.h_Upload->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&mappedData));
-	// spanでラップ
-	modelData.argsBuffer.mappedData = std::span<IndirectArgs>(mappedData, mappedDataSize);
+	//// test
+	//// コマンド引数バッファを作成
+	//UINT64 byteStride =
+	//	8 /*cbv*/ + 8 /*srv*/ + 8 /*srv*/ + 8 /*srv*/ + 
+	//	8 /*srv*/ + 8 /*cbv*/ + 8 /*cbv*/ + 8 /*cbv*/ + 
+	//	8 /*srv*/ + 8 /*srv*/ +
+	//	sizeof(D3D12_VERTEX_BUFFER_VIEW) + // 16
+	//	sizeof(D3D12_INDEX_BUFFER_VIEW) + // 16
+	//	sizeof(D3D12_DRAW_INDEXED_ARGUMENTS); // 20
+	//const UINT maxCmdCount = 1;
+	//const UINT64 bufferSize = byteStride * maxCmdCount;
+	//modelData.argsBuffer.byteStride = byteStride;
+	//modelData.argsBuffer.totalBytes = bufferSize;
+	//modelData.argsBuffer.h_Upload = std::make_unique<GpuBuffer>();
+	//D3D12_HEAP_PROPERTIES heapProps = {};// ヒープの設定
+	//heapProps.Type = D3D12_HEAP_TYPE_UPLOAD;// CPUから書き込み可能
+	//// Bufferの作成
+	//modelData.argsBuffer.h_Upload->CreateBuffer(
+	//	m_pResourceManager->GetDevice(),// デバイス
+	//	heapProps,// ヒープの設定
+	//	D3D12_HEAP_FLAG_NONE,// ヒープのフラグ
+	//	D3D12_RESOURCE_STATE_GENERIC_READ,// リソースの状態
+	//	D3D12_RESOURCE_FLAG_NONE,// リソースのフラグ
+	//	1, static_cast<UINT>(bufferSize));
+	//// マッピング
+	//IndirectArgsRecord* mappedData = nullptr;// 一時マップ用
+	//size_t mappedDataSize = maxCmdCount;
+	//modelData.argsBuffer.h_Upload->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&mappedData));
+	//// spanでラップ
+	//modelData.argsBuffer.mappedData = std::span<IndirectArgsRecord>(mappedData, mappedDataSize);
 
-	// Default
-	modelData.argsBuffer.h_Default = std::make_unique<GpuBuffer>();
-	heapProps.Type = D3D12_HEAP_TYPE_DEFAULT;// GPU専用
-	// Bufferの作成
-	modelData.argsBuffer.h_Default->CreateBuffer(
-		m_pResourceManager->GetDevice(),// デバイス
-		heapProps,// ヒープの設定
-		D3D12_HEAP_FLAG_NONE,// ヒープのフラグ
-		D3D12_RESOURCE_STATE_COMMON,// リソースの状態
-		D3D12_RESOURCE_FLAG_NONE,// リソースのフラグ
-		1, structureByteStride);
+	//// Default
+	//modelData.argsBuffer.h_Default = std::make_unique<GpuBuffer>();
+	//heapProps.Type = D3D12_HEAP_TYPE_DEFAULT;// GPU専用
+	//// Bufferの作成
+	//modelData.argsBuffer.h_Default->CreateBuffer(
+	//	m_pResourceManager->GetDevice(),// デバイス
+	//	heapProps,// ヒープの設定
+	//	D3D12_HEAP_FLAG_NONE,// ヒープのフラグ
+	//	D3D12_RESOURCE_STATE_COMMON,// リソースの状態
+	//	D3D12_RESOURCE_FLAG_NONE,// リソースのフラグ
+	//	1, static_cast<UINT>(bufferSize));
 
 
 	// モデルをコンテナに追加

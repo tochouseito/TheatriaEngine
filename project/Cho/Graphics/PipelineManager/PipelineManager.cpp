@@ -514,7 +514,6 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 	rootParameters[10].DescriptorTable.pDescriptorRanges = &textureRange;
 	rootParameters[10].DescriptorTable.NumDescriptorRanges = 1;
 	// CubeTexture
-
 	D3D12_DESCRIPTOR_RANGE cubeTextureRenge = {};
 	cubeTextureRenge.BaseShaderRegister = 3;
 	cubeTextureRenge.RegisterSpace = 2;
@@ -563,20 +562,108 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 	Log::Write(LogLevel::Assert, "Root signature created.", hr);
 
 	// Command Signature
-	D3D12_INDIRECT_ARGUMENT_DESC argDesc = {};
+	const uint32_t argCount = 13;
+	D3D12_INDIRECT_ARGUMENT_DESC argDesc[argCount] = {};
+	uint32_t k = 0;
+	// cbv
+	argDesc[k].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT_BUFFER_VIEW;
+	argDesc[k].ConstantBufferView.RootParameterIndex = 0;
+	k++;
+	// srv
+	argDesc[k].Type = D3D12_INDIRECT_ARGUMENT_TYPE_SHADER_RESOURCE_VIEW;
+	argDesc[k].ShaderResourceView.RootParameterIndex = 1;
+	k++;
+	// srv
+	argDesc[k].Type = D3D12_INDIRECT_ARGUMENT_TYPE_SHADER_RESOURCE_VIEW;
+	argDesc[k].ShaderResourceView.RootParameterIndex = 2;
+	k++;
+	// srv
+	argDesc[k].Type = D3D12_INDIRECT_ARGUMENT_TYPE_SHADER_RESOURCE_VIEW;
+	argDesc[k].ShaderResourceView.RootParameterIndex = 3;
+	k++;
+	// srv
+	argDesc[k].Type = D3D12_INDIRECT_ARGUMENT_TYPE_SHADER_RESOURCE_VIEW;
+	argDesc[k].ShaderResourceView.RootParameterIndex = 4;
+	k++;
+	// cbv
+	argDesc[k].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT_BUFFER_VIEW;
+	argDesc[k].ConstantBufferView.RootParameterIndex = 5;
+	k++;
+	// cbv
+	argDesc[k].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT_BUFFER_VIEW;
+	argDesc[k].ConstantBufferView.RootParameterIndex = 6;
+	k++;
+	// cbv
+	argDesc[k].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT_BUFFER_VIEW;
+	argDesc[k].ConstantBufferView.RootParameterIndex = 7;
+	k++;
+	// srv
+	argDesc[k].Type = D3D12_INDIRECT_ARGUMENT_TYPE_SHADER_RESOURCE_VIEW;
+	argDesc[k].ShaderResourceView.RootParameterIndex = 8;
+	k++;
+	// srv
+	argDesc[k].Type = D3D12_INDIRECT_ARGUMENT_TYPE_SHADER_RESOURCE_VIEW;
+	argDesc[k].ShaderResourceView.RootParameterIndex = 9;
+	k++;
+	// vbv
+	argDesc[k].Type = D3D12_INDIRECT_ARGUMENT_TYPE_VERTEX_BUFFER_VIEW;
+	argDesc[k].VertexBuffer.Slot = 0;
+	k++;
+	// ibv
+	argDesc[k].Type = D3D12_INDIRECT_ARGUMENT_TYPE_INDEX_BUFFER_VIEW;
+	k++;
 	// DrawIndexed
-	argDesc.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED;
+	argDesc[k].Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED;
+	k++;
 
 	D3D12_COMMAND_SIGNATURE_DESC cmdSigDesc = {};
-	cmdSigDesc.ByteStride = sizeof(D3D12_DRAW_INDEXED_ARGUMENTS);
-	cmdSigDesc.NumArgumentDescs = 1;
-	cmdSigDesc.pArgumentDescs = &argDesc;
+	UINT64 byteStride = static_cast<UINT64>(sizeof(IndirectArgsRecord));
+	cmdSigDesc.ByteStride = static_cast<UINT>(byteStride);
+	cmdSigDesc.NumArgumentDescs = argCount;
+	cmdSigDesc.pArgumentDescs = argDesc;
 
 	hr = device->CreateCommandSignature(
 		&cmdSigDesc,
-		nullptr,
-		IID_PPV_ARGS(&m_IntegratePSO.commandSignature)
-	);
+		m_IntegratePSO.rootSignature.Get(),
+		IID_PPV_ARGS(&m_IntegratePSO.commandSignature));
+
+	// コマンド引数バッファを作成
+	const UINT maxCmdCount = 256;
+	const UINT64 bufferSize = byteStride * maxCmdCount;
+	m_IntegratePSO.argsBuffer.byteStride = byteStride;
+	m_IntegratePSO.argsBuffer.totalBytes = bufferSize;
+
+	m_IntegratePSO.argsBuffer.h_Upload = std::make_unique<GpuBuffer>();
+	D3D12_HEAP_PROPERTIES heapProps = {};// ヒープの設定
+	heapProps.Type = D3D12_HEAP_TYPE_UPLOAD;// CPUから書き込み可能
+	// Bufferの作成
+	m_IntegratePSO.argsBuffer.h_Upload->CreateBuffer(
+		device,// デバイス
+		heapProps,// ヒープの設定
+		D3D12_HEAP_FLAG_NONE,// ヒープのフラグ
+		D3D12_RESOURCE_STATE_GENERIC_READ,// リソースの状態
+		D3D12_RESOURCE_FLAG_NONE,// リソースのフラグ
+		1, static_cast<UINT>(bufferSize));
+	// マッピング
+	IndirectArgsRecord* mappedData = nullptr;// 一時マップ用
+	size_t mappedDataSize = maxCmdCount;
+	m_IntegratePSO.argsBuffer.h_Upload->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&mappedData));
+	// spanでラップ
+	m_IntegratePSO.argsBuffer.mappedData = std::span<IndirectArgsRecord>(mappedData, mappedDataSize);
+	// 0クリア
+	memset(mappedData, 0, bufferSize);
+
+	// Default
+	m_IntegratePSO.argsBuffer.h_Default = std::make_unique<GpuBuffer>();
+	heapProps.Type = D3D12_HEAP_TYPE_DEFAULT;// GPU専用
+	// Bufferの作成
+	m_IntegratePSO.argsBuffer.h_Default->CreateBuffer(
+		device,// デバイス
+		heapProps,// ヒープの設定
+		D3D12_HEAP_FLAG_NONE,// ヒープのフラグ
+		D3D12_RESOURCE_STATE_COMMON,// リソースの状態
+		D3D12_RESOURCE_FLAG_NONE,// リソースのフラグ
+		1, static_cast<UINT>(bufferSize));
 
 	// InputLayout
 	D3D12_INPUT_ELEMENT_DESC inputElementDesc[5] = {};
@@ -654,47 +741,6 @@ void PipelineManager::CreatePipelineIntegrate(ID3D12Device8* device)
 		IID_PPV_ARGS(&m_IntegratePSO.pso)
 	);
 	Log::Write(LogLevel::Assert, "Pipeline state created.", hr);
-
-	// コマンド引数バッファを作成
-	m_IntegratePSO.argsBuffer.h_Upload = std::make_unique<GpuBuffer>();
-	UINT structureByteStride = static_cast<UINT>(sizeof(IndirectArgs));// Bufferのサイズ
-	D3D12_HEAP_PROPERTIES heapProps = {};// ヒープの設定
-	heapProps.Type = D3D12_HEAP_TYPE_UPLOAD;// CPUから書き込み可能
-	// Bufferの作成
-	m_IntegratePSO.argsBuffer.h_Upload->CreateBuffer(
-		device,// デバイス
-		heapProps,// ヒープの設定
-		D3D12_HEAP_FLAG_NONE,// ヒープのフラグ
-		D3D12_RESOURCE_STATE_GENERIC_READ,// リソースの状態
-		D3D12_RESOURCE_FLAG_NONE,// リソースのフラグ
-		1, structureByteStride);
-	// マッピング
-	IndirectArgs* mappedData = nullptr;// 一時マップ用
-	size_t mappedDataSize = 1;
-	m_IntegratePSO.argsBuffer.h_Upload->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&mappedData));
-	// spanでラップ
-	m_IntegratePSO.argsBuffer.mappedData = std::span<IndirectArgs>(mappedData, mappedDataSize);
-
-	// Default
-	m_IntegratePSO.argsBuffer.h_Default = std::make_unique<GpuBuffer>();
-	heapProps.Type = D3D12_HEAP_TYPE_DEFAULT;// GPU専用
-	// Bufferの作成
-	m_IntegratePSO.argsBuffer.h_Default->CreateBuffer(
-		device,// デバイス
-		heapProps,// ヒープの設定
-		D3D12_HEAP_FLAG_NONE,// ヒープのフラグ
-		D3D12_RESOURCE_STATE_COMMON,// リソースの状態
-		D3D12_RESOURCE_FLAG_NONE,// リソースのフラグ
-		1, structureByteStride);
-	// COPY_DESTに遷移
-	CommandContext* context = m_pGraphicsEngine->GetCommandContext();
-	m_pGraphicsEngine->BeginCommandContext(context);
-	context->BarrierTransition(
-		m_IntegratePSO.argsBuffer.h_Default->GetResource(),
-		D3D12_RESOURCE_STATE_COMMON,
-		D3D12_RESOURCE_STATE_COPY_DEST);
-	m_pGraphicsEngine->EndCommandContext(context, Compute);
-	m_pGraphicsEngine->WaitForGPU(Compute);
 }
 
 void PipelineManager::CreatePipelineLine(ID3D12Device8* device)

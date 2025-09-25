@@ -91,7 +91,7 @@ void CommandManager::CreateQueueContexts(ID3D12Device8* device)
 	}
 }
 
-QueueContext::QueueContext(ID3D12Device* device, D3D12_COMMAND_LIST_TYPE type)
+QueueContext::QueueContext(ID3D12Device* device, D3D12_COMMAND_LIST_TYPE type) : m_Device(device)
 {
 	HRESULT hr = {};
 	/*FenceCreate*/
@@ -149,7 +149,20 @@ void QueueContext::WaitForFence()
 		m_Fence->SetEventOnCompletion(m_FenceValue, m_FenceEvent);
 		// イベント待つ
 		WaitForSingleObject(m_FenceEvent, INFINITE);
+		//if (WaitForSingleObject(m_FenceEvent, 5000) != WAIT_OBJECT_0)
+		//{ // 1秒など
+		//	HRESULT dr = m_Device->GetDeviceRemovedReason();            // ← ここで呼ぶ
+		//	DumpDred(m_Device, dr);
+		//	return;
+		//}
 	}
+	//HRESULT dr = m_Device->GetDeviceRemovedReason();
+	//if (FAILED(dr))
+	//{
+	//	DumpDred(m_Device, dr);  // ← ここで DRED 取得
+	//	//HandleDeviceLost(dr);
+	//	return;
+	//}
 }
 
 CommandPool::CommandPool(ID3D12Device* device, D3D12_COMMAND_LIST_TYPE type, size_t poolSize)

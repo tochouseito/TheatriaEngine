@@ -79,8 +79,7 @@ struct ModelData
 	uint32_t nextBoneOffsetIndex = 0; // 次のボーンオフセットインデックス
 	std::vector<uint32_t> removedBoneOffsetIndices; // 削除されたボーンオフセットインデックスのリスト
 
-	ComPtr<ID3D12CommandSignature> commandSignature;// コマンドシグネチャ
-	ArgsBuffer argsBuffer;// ArgsBuffer
+	//ArgsBuffer argsBuffer;// ArgsBuffer
 
 	uint32_t AllocateBoneOffsetIdx()
 	{

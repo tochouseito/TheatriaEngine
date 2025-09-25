@@ -24,6 +24,7 @@ public:
 	ID3D12Fence* GetFence() { return m_Fence.Get(); };
 	uint64_t GetFenceValue() { return m_FenceValue; };
 private:
+	ID3D12Device* m_Device = nullptr;
     ComPtr<ID3D12CommandQueue> m_CommandQueue = nullptr;
     ComPtr<ID3D12Fence> m_Fence = nullptr;
     HANDLE m_FenceEvent = {};

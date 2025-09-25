@@ -43,3 +43,5 @@ using namespace cho;
 // FreeListContainer
 #include "Core/Utility/FArray.h"
 #include "Core/Utility/FVector.h"
+
+void DumpDred(ID3D12Device* device, HRESULT reason);
