@@ -4,16 +4,40 @@
 #include <memory>
 
 // test
-struct IndirectArgs
+//struct IndirectArgs
+//{
+//	D3D12_DRAW_INDEXED_ARGUMENTS drawIndexedArgs;// DrawIndexedIndirect用引数
+//};
+struct IndirectArgsRecord
 {
-	D3D12_DRAW_INDEXED_ARGUMENTS drawIndexedArgs;// DrawIndexedIndirect用引数
+	// 8Bずつ（CBV/SRVは GPU VA）
+	D3D12_GPU_VIRTUAL_ADDRESS root0;	// root 0
+	D3D12_GPU_VIRTUAL_ADDRESS root1;	// root 1
+	D3D12_GPU_VIRTUAL_ADDRESS root2;	// root 2
+	D3D12_GPU_VIRTUAL_ADDRESS root3;	// root 3
+	D3D12_GPU_VIRTUAL_ADDRESS root4;	// root 4
+	D3D12_GPU_VIRTUAL_ADDRESS root5;	// root 5
+	D3D12_GPU_VIRTUAL_ADDRESS root6;	// root 6
+	D3D12_GPU_VIRTUAL_ADDRESS root7;	// root 7
+	D3D12_GPU_VIRTUAL_ADDRESS root8;	// root 8
+	D3D12_GPU_VIRTUAL_ADDRESS root9;	// root 9
+
+	// VBV / IBV
+	D3D12_VERTEX_BUFFER_VIEW vbv;
+	D3D12_INDEX_BUFFER_VIEW  ibv;
+
+	// DrawIndexed
+	D3D12_DRAW_INDEXED_ARGUMENTS draw;
 };
+static_assert(sizeof(D3D12_GPU_VIRTUAL_ADDRESS) == 8, "Size of D3D12_GPU_VIRTUAL_ADDRESS is not 8 bytes.");
 
 struct ArgsBuffer
 {
 	std::unique_ptr<GpuBuffer> h_Upload = nullptr;// アップロード用バッファ
 	std::unique_ptr<GpuBuffer> h_Default = nullptr;// デフォルトバッファ
-	std::span<IndirectArgs> mappedData = {};// マッピングデータ
+	std::span<IndirectArgsRecord> mappedData = {};// マッピングデータ
+	UINT64 byteStride = 0;// バイトストライド
+	UINT64 totalBytes = 0;// バッファの総バイト数	
 };
 
 struct PSO
@@ -22,7 +46,6 @@ struct PSO
 	ComPtr<ID3D12RootSignature> rootSignature;
 	std::vector<std::pair<uint32_t, std::string>> rootParameters;
 	ComPtr<ID3D12CommandSignature> commandSignature;// コマンドシグネチャ
-	// std::unique_ptr<ConstantBuffer<IndirectArgs>> indirectArgsBuffer;// IndirectArgs用バッファ
 	ArgsBuffer argsBuffer;// ArgsBuffer
 };
 

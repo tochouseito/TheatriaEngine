@@ -57,7 +57,7 @@ public:
 		heapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;// UploadHeapを使う
 		GpuBuffer::CreateBuffer(
 			device, heapProperties, D3D12_HEAP_FLAG_NONE,
-			D3D12_RESOURCE_STATE_GENERIC_READ,
+			D3D12_RESOURCE_STATE_INDEX_BUFFER,
 			D3D12_RESOURCE_FLAG_NONE,
 			numElements, structureByteStride);
 		// マッピング

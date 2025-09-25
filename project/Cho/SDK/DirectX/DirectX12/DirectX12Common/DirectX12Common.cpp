@@ -42,7 +42,7 @@ void DirectX12Common::CreateDXGIFactory([[maybe_unused]] const bool& enableDebug
 	[ INITIALIZATION MESSAGE #1016: CREATEDEVICE_DEBUG_LAYER_STARTUP_OPTIONS]
 	上記の警告メッセージが出てくるがデバッグ時のみのものなので無視していい
 	*/
-	Microsoft::WRL::ComPtr<ID3D12Debug1> debugController;
+	ComPtr<ID3D12Debug6> debugController;
 	if (enableDebugLayer) {
 		if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
 			// Log出力
@@ -54,6 +54,12 @@ void DirectX12Common::CreateDXGIFactory([[maybe_unused]] const bool& enableDebug
 			// さらにGPU側でもチェックを行うようにする
 			debugController->SetEnableGPUBasedValidation(TRUE);
 		}
+	}
+	ComPtr<ID3D12DeviceRemovedExtendedDataSettings> deviceRemoved;
+	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&deviceRemoved))))
+	{
+		deviceRemoved->SetAutoBreadcrumbsEnablement(D3D12_DRED_ENABLEMENT_FORCED_ON);
+		deviceRemoved->SetPageFaultEnablement(D3D12_DRED_ENABLEMENT_FORCED_ON);
 	}
 #endif
 	// DXGIファクトリーの生成
@@ -133,7 +139,7 @@ void DirectX12Common::CreateDevice()
 	CheckD3D12Features();
 
 #ifdef _DEBUG
-	Microsoft::WRL::ComPtr< ID3D12InfoQueue> infoQueue;
+	ComPtr<ID3D12InfoQueue> infoQueue;
 	// フィルタリングを一時的に無効化してみる
 
 	if (SUCCEEDED(m_Device->QueryInterface(IID_PPV_ARGS(&infoQueue)))) {
@@ -151,7 +157,8 @@ void DirectX12Common::CreateDevice()
 
 			// Windows11でのDXGIデバッグレイヤーとDX12デバッグレイヤーの相互作用バグによるエラーメッセージ
 			// https://stackoverflow.com/questions/69805245/directx-12-application-is-crashing-in-windows-11
-			D3D12_MESSAGE_ID_RESOURCE_BARRIER_MISMATCHING_COMMAND_LIST_TYPE
+			D3D12_MESSAGE_ID_RESOURCE_BARRIER_MISMATCHING_COMMAND_LIST_TYPE,
+			D3D12_MESSAGE_ID_GPU_BASED_VALIDATION_RESOURCE_STATE_IMPRECISE // = 1044 相当
 		};
 
 		// 抑制するレベル
