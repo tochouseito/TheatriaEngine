@@ -22,14 +22,14 @@ void AssetBrowser::Window()
     if (ImGui::BeginTable("TreeTable", 1, ImGuiTableFlags_BordersInnerV))
     {
         // 左：フォルダー階層
-        FolderTree(cho::FileSystem::g_ProjectFiles);
+        FolderTree(theatria::FileSystem::g_ProjectFiles);
 		ImGui::EndTable();
     }
 	ImGui::End();
 	// ファイルの表示
 	ImGui::Begin("FileGrid");
     // 右：ファイル表示
-    FileGrid(cho::FileSystem::g_ProjectFiles);
+    FileGrid(theatria::FileSystem::g_ProjectFiles);
     ImGui::End();
 }
 
@@ -57,7 +57,7 @@ void AssetBrowser::FolderTree(FolderNode& node)
 
 void AssetBrowser::FileGrid(FolderNode& root)
 {
-    FolderNode* target = cho::FileSystem::FindFolderNodeByPath(root, m_SelectedFolder);
+    FolderNode* target = theatria::FileSystem::FindFolderNodeByPath(root, m_SelectedFolder);
     if (!target) return;
 
 	// ウィンドウからファイル名のドロップがあった場合
@@ -67,7 +67,7 @@ void AssetBrowser::FileGrid(FolderNode& root)
 		{
 			// ドロップされたファイルを処理する
 			std::filesystem::path dropPath = filePath;
-			cho::FileSystem::AddFile(dropPath, *target, m_EditorManager->GetEngineCommand());
+			theatria::FileSystem::AddFile(dropPath, *target, m_EditorManager->GetEngineCommand());
 		}
     }
     

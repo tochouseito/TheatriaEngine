@@ -55,7 +55,7 @@ void EditorManager::Initialize(const bool& isRuntime)
 	m_MaterialEditor->Initialize();
 	if(!isRuntime){
 		// BuildWatcherと接続
-		cho::FileSystem::ScriptProject::ConnectPipeToBuildWatcher(60000);// 60秒
+		theatria::FileSystem::ScriptProject::ConnectPipeToBuildWatcher(60000);// 60秒
 	}
 }
 

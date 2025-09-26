@@ -55,7 +55,7 @@ class Program
         {
             try
             {
-                waitHandle = EventWaitHandle.OpenExisting("ChoEngineReadyEvent");
+                waitHandle = EventWaitHandle.OpenExisting("TheatriaEngineReadyEvent");
                 break;
             }
             catch

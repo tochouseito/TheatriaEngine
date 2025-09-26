@@ -60,7 +60,7 @@ ObjectHandle GameWorld::CreateGameObject(const std::wstring& name, ObjectType ty
 	handle.entity = entity;
 	// 基本コンポーネントを追加
 	m_pECSManager->AddComponent<TransformComponent>(handle.entity);
-	ChoSystem::Transform transform(entity, m_pECSManager);
+	theatriaSystem::Transform transform(entity, m_pECSManager);
 	// オブジェクトIDを取得
 	uint32_t objectID = static_cast<uint32_t>(m_pGameObjects[0].push_back(FVector<std::unique_ptr<GameObject>>()));
 	handle.objectID = objectID;
@@ -95,19 +95,19 @@ SceneID GameWorld::AddGameObjectFromScene(const GameScene& scene, const bool& up
 		meshFilter;
 		// 基本コンポーネントを追加
 		// m_pECSManager->AddComponent<TransformComponent>(handle.entity);
-		ChoSystem::Transform transform(entity, m_pECSManager);
+		theatriaSystem::Transform transform(entity, m_pECSManager);
 		// オブジェクトIDを取得
 		uint32_t objectID = static_cast<uint32_t>(m_pGameObjects[sceneID].push_back(FVector<std::unique_ptr<GameObject>>()));
 		handle.objectID = objectID;
 		// GameObjectを作成
 		if (prefab.GetName().empty())
 		{
-			cho::Log::Write(cho::LogLevel::Assert, "Prefab name is empty. Please set a valid name for the prefab.");
+			theatria::Log::Write(theatria::LogLevel::Assert, "Prefab name is empty. Please set a valid name for the prefab.");
 			return sceneID;
 		}
 		if(prefab.GetType() == ObjectType::None)
 		{
-			cho::Log::Write(cho::LogLevel::Assert, "Prefab type is None. Please set a valid type for the prefab.");
+			theatria::Log::Write(theatria::LogLevel::Assert, "Prefab type is None. Please set a valid type for the prefab.");
 			return sceneID;
 		}
 		m_pGameObjects[sceneID][objectID].push_back(std::make_unique<GameObject>(m_pECSManager,handle, prefab.GetName(), prefab.GetType(),transform));
@@ -209,7 +209,7 @@ ObjectHandle GameWorld::AddGameObjectClone(const ObjectHandle& src)
 	handle.entity = entity;
 	// 基本コンポーネントを追加
 	// m_pECSManager->AddComponent<TransformComponent>(handle.entity);
-	ChoSystem::Transform transform(entity, m_pECSManager);
+	theatriaSystem::Transform transform(entity, m_pECSManager);
 	// objectIDを取得
 	handle.objectID = src.objectID; // srcのobjectIDを使用
 	// 名前被り防止
@@ -239,7 +239,7 @@ ObjectHandle GameWorld::CreateGameObjectCopy(const ObjectHandle& src)
 	Entity entity = m_pECSManager->CopyEntity(src.entity);
 	handle.entity = entity;
 	
-	ChoSystem::Transform transform(entity, m_pECSManager);
+	theatriaSystem::Transform transform(entity, m_pECSManager);
 	// オブジェクトIDを取得
 	uint32_t objectID = static_cast<uint32_t>(m_pGameObjects[0].push_back(FVector<std::unique_ptr<GameObject>>()));
 	handle.objectID = objectID;

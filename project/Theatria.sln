@@ -8,11 +8,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ソリューション項目
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ChoEngine", "Cho\ChoEngine.vcxproj", "{FB856F70-9F85-4BBD-91A4-9E378674FF92}"
-	ProjectSection(ProjectDependencies) = postProject
-		{65D0069A-9075-49D7-9CC7-DECF7CE300C2} = {65D0069A-9075-49D7-9CC7-DECF7CE300C2}
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ChoPhysics", "ChoPhysics\ChoPhysics.vcxproj", "{65D0069A-9075-49D7-9CC7-DECF7CE300C2}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PhysicsEngine", "PhysicsEngine\PhysicsEngine.vcxproj", "{9900BF4D-D7FC-4FEB-868E-65FBAD0D6A2D}"
@@ -36,6 +31,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "imgui_Extensions", "Externa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildWatcher", "BuildWatcher\BuildWatcher.csproj", "{D4A352E4-05F6-4323-A80A-64AE01DCABA7}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TheatriaEngine", "Cho\TheatriaEngine.vcxproj", "{FB856F70-9F85-4BBD-91A4-9E378674FF92}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -46,18 +43,6 @@ Global
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{FB856F70-9F85-4BBD-91A4-9E378674FF92}.Debug|Any CPU.ActiveCfg = Debug|x64
-		{FB856F70-9F85-4BBD-91A4-9E378674FF92}.Debug|Any CPU.Build.0 = Debug|x64
-		{FB856F70-9F85-4BBD-91A4-9E378674FF92}.Debug|x64.ActiveCfg = Debug|x64
-		{FB856F70-9F85-4BBD-91A4-9E378674FF92}.Debug|x64.Build.0 = Debug|x64
-		{FB856F70-9F85-4BBD-91A4-9E378674FF92}.Profile|Any CPU.ActiveCfg = Release|x64
-		{FB856F70-9F85-4BBD-91A4-9E378674FF92}.Profile|Any CPU.Build.0 = Release|x64
-		{FB856F70-9F85-4BBD-91A4-9E378674FF92}.Profile|x64.ActiveCfg = Release|x64
-		{FB856F70-9F85-4BBD-91A4-9E378674FF92}.Profile|x64.Build.0 = Release|x64
-		{FB856F70-9F85-4BBD-91A4-9E378674FF92}.Release|Any CPU.ActiveCfg = Release|x64
-		{FB856F70-9F85-4BBD-91A4-9E378674FF92}.Release|Any CPU.Build.0 = Release|x64
-		{FB856F70-9F85-4BBD-91A4-9E378674FF92}.Release|x64.ActiveCfg = Release|x64
-		{FB856F70-9F85-4BBD-91A4-9E378674FF92}.Release|x64.Build.0 = Release|x64
 		{65D0069A-9075-49D7-9CC7-DECF7CE300C2}.Debug|Any CPU.ActiveCfg = Debug|x64
 		{65D0069A-9075-49D7-9CC7-DECF7CE300C2}.Debug|Any CPU.Build.0 = Debug|x64
 		{65D0069A-9075-49D7-9CC7-DECF7CE300C2}.Debug|x64.ActiveCfg = Debug|x64
@@ -178,6 +163,18 @@ Global
 		{D4A352E4-05F6-4323-A80A-64AE01DCABA7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D4A352E4-05F6-4323-A80A-64AE01DCABA7}.Release|x64.ActiveCfg = Release|Any CPU
 		{D4A352E4-05F6-4323-A80A-64AE01DCABA7}.Release|x64.Build.0 = Release|Any CPU
+		{FB856F70-9F85-4BBD-91A4-9E378674FF92}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{FB856F70-9F85-4BBD-91A4-9E378674FF92}.Debug|Any CPU.Build.0 = Debug|x64
+		{FB856F70-9F85-4BBD-91A4-9E378674FF92}.Debug|x64.ActiveCfg = Debug|x64
+		{FB856F70-9F85-4BBD-91A4-9E378674FF92}.Debug|x64.Build.0 = Debug|x64
+		{FB856F70-9F85-4BBD-91A4-9E378674FF92}.Profile|Any CPU.ActiveCfg = Release|x64
+		{FB856F70-9F85-4BBD-91A4-9E378674FF92}.Profile|Any CPU.Build.0 = Release|x64
+		{FB856F70-9F85-4BBD-91A4-9E378674FF92}.Profile|x64.ActiveCfg = Release|x64
+		{FB856F70-9F85-4BBD-91A4-9E378674FF92}.Profile|x64.Build.0 = Release|x64
+		{FB856F70-9F85-4BBD-91A4-9E378674FF92}.Release|Any CPU.ActiveCfg = Release|x64
+		{FB856F70-9F85-4BBD-91A4-9E378674FF92}.Release|Any CPU.Build.0 = Release|x64
+		{FB856F70-9F85-4BBD-91A4-9E378674FF92}.Release|x64.ActiveCfg = Release|x64
+		{FB856F70-9F85-4BBD-91A4-9E378674FF92}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

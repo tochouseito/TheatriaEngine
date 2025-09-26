@@ -862,12 +862,12 @@
 //	data = animation;
 //}
 
-void ChoSystem::Rigidbody3D::SetTransform(const Vector3& pos)
+void theatriaSystem::Rigidbody3D::SetTransform(const Vector3& pos)
 {
 	data->runtimeBody->SetTransform(pos);
 }
 
-void ChoSystem::Rigidbody3D::SetTransform(const Quaternion& rot)
+void theatriaSystem::Rigidbody3D::SetTransform(const Quaternion& rot)
 {
 	data->runtimeBody->SetTransform(rot);
 }

@@ -251,10 +251,10 @@ void MainMenu::EngineInfoMenu()
 {
 	if (ImGui::BeginMenu("Engine Info"))
 	{
-		//// ChoEngineのバージョンを表示
-		//ImGui::Text("ChoEngine Version: %s", Cho::GetVersion().c_str());
+		//// TheatriaEngineのバージョンを表示
+		//ImGui::Text("TheatriaEngine Version: %s", Cho::GetVersion().c_str());
 		//ImGui::Separator();
-		//// ChoEngineのビルド日を表示
+		//// TheatriaEngineのビルド日を表示
 		//ImGui::Text("Build Date: %s", __DATE__);
 		//ImGui::EndMenu();
         // フレームレートを表示
@@ -273,9 +273,9 @@ void MainMenu::HelpMenu()
 {
     if (ImGui::BeginMenu("Help"))
     {
-        if(ImGui::Button("https://tochouseito.github.io/ChoEngine_Docs/"))
+        if(ImGui::Button("https://tochouseito.github.io/TheatriaEngine_Docs/"))
         {
-			WinApp::OpenWebURL(L"https://tochouseito.github.io/ChoEngine_Docs/");
+			WinApp::OpenWebURL(L"https://tochouseito.github.io/TheatriaEngine_Docs/");
         }
         
         ImGui::EndMenu();
@@ -429,7 +429,7 @@ void MainMenu::SettingWindow()
 	m_EngineCommand->GetInputManager()->SetJoystickDeadZone(0,leftDeadZone, rightDeadZone);
 
 	ImGui::Text("最初のシーン");
-    static std::wstring selectFirstScene = cho::FileSystem::g_GameSettings.startScene;
+    static std::wstring selectFirstScene = theatria::FileSystem::g_GameSettings.startScene;
 	std::wstring startScene = L"シーンがありません";
     if (!selectFirstScene.empty())
     {
@@ -443,7 +443,7 @@ void MainMenu::SettingWindow()
             {
 				selectFirstScene = scene.GetName(); // 選択されたシーン名を保存
                 // ゲーム設定に保存
-                cho::FileSystem::g_GameSettings.startScene = selectFirstScene;
+                theatria::FileSystem::g_GameSettings.startScene = selectFirstScene;
             }
         }
         ImGui::EndCombo();
@@ -504,7 +504,7 @@ void MainMenu::BuildSettingWindow()
     if (ImGui::Button("フォルダを選択してビルド"))
     {
         std::wstring folderPath;
-        folderPath = cho::FileSystem::GameBuilder::SelectFolderDialog();
+        folderPath = theatria::FileSystem::GameBuilder::SelectFolderDialog();
 		if (!folderPath.empty())
 		{
 			// フォルダが選択された場合、ビルドを実行

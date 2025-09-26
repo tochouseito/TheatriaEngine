@@ -100,7 +100,7 @@
     <ProjectReference Include="..\BuildWatcher\BuildWatcher.csproj">
       <Project>{d4a352e4-05f6-4323-a80a-64ae01dcaba7}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\Cho\ChoEngine.vcxproj">
+    <ProjectReference Include="..\Cho\TheatriaEngine.vcxproj">
       <Project>{fb856f70-9f85-4bbd-91a4-9e378674ff92}</Project>
     </ProjectReference>
   </ItemGroup>

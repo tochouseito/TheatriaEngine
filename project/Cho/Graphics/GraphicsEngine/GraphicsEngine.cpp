@@ -7,7 +7,7 @@
 #include "GameCore/GameCore.h"
 #include "Core/ChoLog/ChoLog.h"
 #include "SDK/ImGui/ImGuiUtlity/ImGuiUtlity.h"
-using namespace cho;
+using namespace theatria;
 
 void GraphicsEngine::Init()
 {
@@ -252,7 +252,7 @@ void GraphicsEngine::SetRenderTargets(CommandContext* context, DrawPass pass, Re
 		}
 		else
 		{
-			cho::Log::Write(LogLevel::Assert, "Unknown RenderMode for GBuffers pass");
+			theatria::Log::Write(LogLevel::Assert, "Unknown RenderMode for GBuffers pass");
 		}
 		break;
 	case Lighting:
@@ -905,7 +905,7 @@ void GraphicsEngine::DrawPostProcess([[maybe_unused]] ResourceManager& resourceM
 	}
 	else
 	{
-		cho::Log::Write(LogLevel::Assert, "Unknown RenderMode for PostProcess pass");
+		theatria::Log::Write(LogLevel::Assert, "Unknown RenderMode for PostProcess pass");
 		return;
 	}
 	// オフスクリーンレンダリングテクスチャをセット
@@ -947,7 +947,7 @@ void GraphicsEngine::DrawEditorView([[maybe_unused]] ResourceManager& resourceMa
 	}
 	else
 	{
-		cho::Log::Write(LogLevel::Assert, "Unknown RenderMode for PostProcess pass");
+		theatria::Log::Write(LogLevel::Assert, "Unknown RenderMode for PostProcess pass");
 		return;
 	}
 	// オフスクリーンレンダリングテクスチャをセット

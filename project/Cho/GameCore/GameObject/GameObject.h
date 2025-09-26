@@ -9,7 +9,7 @@ class ECSManager;
 class ResourceManager;
 
 // GameObjectクラス
-class CHO_API GameObject
+class THEATRIA_API GameObject
 {
 public:
 	std::optional<Entity> GetSrcEntity() const noexcept;
@@ -46,7 +46,7 @@ public:
 	// パラメータを設定
 	void SetParameter(const std::string& name, const ObjectParameter& value);
 public:
-	ChoSystem::Transform transform;
+	theatriaSystem::Transform transform;
 private:
 	ObjectHandle m_Handle;			// オブジェクトハンドル
 	ObjectType m_Type;								// ゲームオブジェクトのタイプ
@@ -68,7 +68,7 @@ public:
 		const ObjectHandle& handle,
 		const std::wstring& name,
 		const ObjectType& type,
-		const ChoSystem::Transform& tf);
+		const theatriaSystem::Transform& tf);
 	// デストラクタ
 	~GameObject();
 	// コピー、代入禁止

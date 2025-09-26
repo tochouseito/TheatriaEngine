@@ -1,9 +1,9 @@
 #pragma once
 #include "GameCore/GameObject/GameObject.h"
 #include "Core/Utility/Components.h"
-#define USE_CHOENGINE_SCRIPT
-#include "ChoEngineAPI.h"
-class CHO_API Marionnette
+#define USE_TheatriaEngine_SCRIPT
+#include "TheatriaEngineAPI.h"
+class THEATRIA_API Marionnette
 {
     friend class ScriptInstanceGenerateSystem;
     friend class ScriptSystem;
@@ -17,7 +17,7 @@ public:
     virtual void OnCollisionEnter(GameObject&) {}
     virtual void OnCollisionStay(GameObject&) {}
     virtual void OnCollisionExit(GameObject&) {}
-    template<ChoSystem::Type T>
+    template<theatriaSystem::Type T>
     T GetComponent() const
     {
         T comp(gameObject.GetHandle().entity, ecsManager);
@@ -25,7 +25,7 @@ public:
     }
 public:
 	GameObject& gameObject;
-	ChoSystem::Transform transform;
+	theatriaSystem::Transform transform;
 private:
 	void SetECSPtr(ECSManager* ecs) 
     { 

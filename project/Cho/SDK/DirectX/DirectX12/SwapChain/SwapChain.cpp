@@ -2,7 +2,7 @@
 #include "SwapChain.h"
 #include "Resources/ResourceManager/ResourceManager.h"
 #include "Core/ChoLog/ChoLog.h"
-using namespace cho;
+using namespace theatria;
 
 SwapChain::SwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue, const HWND& hwnd, const UINT64& width, const UINT& height)
 {

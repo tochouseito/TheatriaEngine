@@ -8,7 +8,7 @@
 #include "GameCore/GameCore.h"
 #include "Editor/EditorManager/EditorManager.h"
 #include "EngineCommand/EngineCommand.h"
-using namespace cho;
+using namespace theatria;
 
 void HubManager::Initialize()
 {

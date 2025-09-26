@@ -6,7 +6,7 @@
 #include "Editor/EditorManager/EditorManager.h"
 #include "Core/Utility/GenerateUnique.h"
 #include "Core/ChoLog/ChoLog.h"
-using namespace cho;
+using namespace theatria;
 #include <random>
 
 bool Add3DObjectCommand::Execute(EngineCommand* edit)

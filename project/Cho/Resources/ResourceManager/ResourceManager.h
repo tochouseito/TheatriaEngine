@@ -484,21 +484,21 @@ private:
 	// 遅延破棄キュー
 	DeferredDestroyQueue m_DeferredDestroyQueue;
 	// 定数バッファ
-	FVector<cho::atomic_shared_ptr<IConstantBuffer>> m_ConstantBuffers;
+	FVector<theatria::atomic_shared_ptr<IConstantBuffer>> m_ConstantBuffers;
 	// 構造化バッファ
-	FVector<cho::atomic_shared_ptr<IStructuredBuffer>> m_StructuredBuffers;
+	FVector<theatria::atomic_shared_ptr<IStructuredBuffer>> m_StructuredBuffers;
 	// 頂点バッファ
-	FVector<cho::atomic_shared_ptr<IVertexBuffer>> m_VertexBuffers;
+	FVector<theatria::atomic_shared_ptr<IVertexBuffer>> m_VertexBuffers;
 	// インデックスバッファ
-	FVector<cho::atomic_shared_ptr<IIndexBuffer>> m_IndexBuffers;
+	FVector<theatria::atomic_shared_ptr<IIndexBuffer>> m_IndexBuffers;
 	// カラーバッファ
-	FVector<cho::atomic_shared_ptr<ColorBuffer>> m_ColorBuffers;
+	FVector<theatria::atomic_shared_ptr<ColorBuffer>> m_ColorBuffers;
 	// 深度バッファ
-	FVector<cho::atomic_shared_ptr<DepthBuffer>> m_DepthBuffers;
+	FVector<theatria::atomic_shared_ptr<DepthBuffer>> m_DepthBuffers;
 	// テクスチャバッファ
-	FVector<cho::atomic_shared_ptr<PixelBuffer>> m_TextureBuffers;
+	FVector<theatria::atomic_shared_ptr<PixelBuffer>> m_TextureBuffers;
 	// UAVバッファ
-	FVector<cho::atomic_shared_ptr<IRWStructuredBuffer>> m_UAVBuffers;
+	FVector<theatria::atomic_shared_ptr<IRWStructuredBuffer>> m_UAVBuffers;
 	// 統合バッファ
 	std::array<std::unique_ptr<IIntegrationData>, IntegrationDataType::kCount> m_IntegrationData;
 	// デバッグカメラバッファ

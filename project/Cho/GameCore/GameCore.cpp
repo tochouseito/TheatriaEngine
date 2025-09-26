@@ -36,7 +36,7 @@ void GameCore::Initialize(ResourceManager* resourceManager, GraphicsEngine* grap
 void GameCore::Start()
 {
 	// スクリプト読み込み（場所変更予定）
-	cho::FileSystem::ScriptProject::LoadScriptDLL();
+	theatria::FileSystem::ScriptProject::LoadScriptDLL();
 	// クオータニオンに変更
 	TransformSystem* transformSystem = m_pECSManager->GetSystem<TransformSystem>();
 	transformSystem->m_isQuaternion = true;
@@ -85,10 +85,10 @@ void GameCore::GameRun(const bool& isDebugger, const bool& isRuntime)
 	if (!isRuntime)
 	{
 		// スクリプトプロジェクトの保存処理、ビルド処理
-		cho::FileSystem::ScriptProject::SaveAndBuildSolution(cho::FileSystem::m_sProjectName, true, isDebugger);
+		theatria::FileSystem::ScriptProject::SaveAndBuildSolution(theatria::FileSystem::m_sProjectName, true, isDebugger);
 	}
 	// スクリプト読み込み（場所変更予定）
-	cho::FileSystem::ScriptProject::LoadScriptDLL();
+	theatria::FileSystem::ScriptProject::LoadScriptDLL();
 	// クオータニオンに変更
 	TransformSystem* transformSystem = m_pECSManager->GetSystem<TransformSystem>();
 	transformSystem->m_isQuaternion = true;
@@ -122,13 +122,13 @@ void GameCore::GameStop()
 	TransformSystem* transformSystem = m_pECSManager->GetSystem<TransformSystem>();
 	transformSystem->m_isQuaternion = false;
 	// スクリプトのアンロード（場所変更予定）
-	cho::FileSystem::ScriptProject::UnloadScriptDLL();
+	theatria::FileSystem::ScriptProject::UnloadScriptDLL();
 	// デタッチ
-	if (cho::FileSystem::ScriptProject::m_IsAttached)
+	if (theatria::FileSystem::ScriptProject::m_IsAttached)
 	{
-		cho::FileSystem::ScriptProject::SendMessageToBuildWatcher(L"STOP_DEBUGGER|" + cho::FileSystem::m_sProjectName);
+		theatria::FileSystem::ScriptProject::SendMessageToBuildWatcher(L"STOP_DEBUGGER|" + theatria::FileSystem::m_sProjectName);
 		// ここで必ず返事が来るまでブロック
-		std::wstring reply = cho::FileSystem::ScriptProject::WaitForAckFromBuildWatcher(5000); // 5秒待機
+		std::wstring reply = theatria::FileSystem::ScriptProject::WaitForAckFromBuildWatcher(5000); // 5秒待機
 		if (!reply.empty())
 		{
 			Log::Write(LogLevel::Info, L"Received from BuildWatcher: " + reply);

@@ -1,7 +1,7 @@
 #pragma once
 #include <imgui.h>
 
-namespace cho
+namespace theatria
 {
 	class ImGuiUtility
 	{

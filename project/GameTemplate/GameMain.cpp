@@ -4,7 +4,7 @@
 #define ENGINECREATE_FUNCTION
 #define RUNTIMEMODE_GAME
 // Engine
-#include "Cho/ChoEngineAPI.h"
+#include "Cho/TheatriaEngineAPI.h"
 // Windows
 #include <Windows.h>
 #include <memory>
@@ -13,9 +13,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
 #pragma warning(pop)
 	// エンジンのインスタンス
-	std::unique_ptr<Engine, decltype(&cho::DestroyEngine)> engine(
-		cho::CreateEngine(RuntimeMode::Game), cho::DestroyEngine);// エンジンの生成
-	cho::SetEngine(engine.get());// エンジンのポインタをセット
+	std::unique_ptr<Engine, decltype(&theatria::DestroyEngine)> engine(
+		theatria::CreateEngine(RuntimeMode::Game), theatria::DestroyEngine);// エンジンの生成
+	theatria::SetEngine(engine.get());// エンジンのポインタをセット
 	// エンジンの稼働
 	engine->CrashHandlerEntry();// クラッシュ時の処理のハンドラー
 	engine->Operation();// エンジンの稼働

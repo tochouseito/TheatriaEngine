@@ -73,11 +73,11 @@
 class ECSManager;
 class ResourceManager;
 
-namespace ChoSystem
+namespace theatriaSystem
 {
     // スクリプトから取得可能なコンポーネントのインターフェース
     // 基底クラス
-    class CHO_API IComponentInterface
+    class THEATRIA_API IComponentInterface
     {
     public:
         IComponentInterface(Entity e, ECSManager* ecs) :m_Entity(e), m_ECS(ecs) {}
@@ -100,7 +100,7 @@ namespace ChoSystem
     struct InterfaceTraits;
 
 	// Transform
-    class CHO_API Transform : public IComponentInterface
+    class THEATRIA_API Transform : public IComponentInterface
     {
 		friend class Marionnette;
     public:
@@ -125,13 +125,13 @@ namespace ChoSystem
     public:
 	};
 	template<>
-    struct InterfaceTraits<ChoSystem::Transform>
+    struct InterfaceTraits<theatriaSystem::Transform>
     {
         using Component = TransformComponent;
 	};
 
     // Camera
-    class CHO_API Camera : public IComponentInterface
+    class THEATRIA_API Camera : public IComponentInterface
     {
         friend class Marionnette;
     public:
@@ -155,14 +155,14 @@ namespace ChoSystem
         CameraComponent* data = nullptr;
     };
     template<>
-    struct InterfaceTraits<ChoSystem::Camera>
+    struct InterfaceTraits<theatriaSystem::Camera>
     {
         using Component = CameraComponent;
     };
 
 
     // Material
-    class CHO_API Material : public IComponentInterface
+    class THEATRIA_API Material : public IComponentInterface
     {
         friend class Marionnette;
     public:
@@ -186,13 +186,13 @@ namespace ChoSystem
         MaterialComponent* data = nullptr;
     };
     template<>
-    struct InterfaceTraits<ChoSystem::Material>
+    struct InterfaceTraits<theatriaSystem::Material>
     {
         using Component = MaterialComponent;
     };
 
     // Rigidbody3D
-    class CHO_API Rigidbody3D : public IComponentInterface
+    class THEATRIA_API Rigidbody3D : public IComponentInterface
     {
 		friend class Marionnette;
     public:
@@ -221,7 +221,7 @@ namespace ChoSystem
 	};
 
     // Audio
-    class CHO_API Audio : public IComponentInterface
+    class THEATRIA_API Audio : public IComponentInterface
     {
 		friend class Marionnette;
         public:
@@ -255,7 +255,7 @@ namespace ChoSystem
 	};
 
     // Animation
-    class CHO_API Animation : public IComponentInterface
+    class THEATRIA_API Animation : public IComponentInterface
     {
         friend class Marionnette;
     public:
@@ -279,7 +279,7 @@ namespace ChoSystem
         AnimationComponent* data = nullptr;
     };
     template<>
-    struct InterfaceTraits<ChoSystem::Animation>
+    struct InterfaceTraits<theatriaSystem::Animation>
     {
         using Component = AnimationComponent;
     };

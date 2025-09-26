@@ -21,7 +21,7 @@
     <ClCompile Include="GameCore\GameScene\GameScene.cpp" />
     <ClCompile Include="Editor\Manipulate\Manipulate.cpp" />
     <ClCompile Include="Resources\AudioManager\AudioManager.cpp" />
-    <ClCompile Include="ChoEngineAPI.cpp" />
+    <ClCompile Include="TheatriaEngineAPI.cpp" />
     <ClCompile Include="Core\ChoLog\ChoLog.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
@@ -73,7 +73,7 @@
     <ClCompile Include="Graphics\PipelineManager\PipelineManager.cpp" />
     <ClCompile Include="Graphics\VisualEffect\VFXManager.cpp" />
     <ClCompile Include="Hub\HubManager.cpp" />
-    <ClCompile Include="Main\ChoEngine.cpp" />
+    <ClCompile Include="Main\TheatriaEngine.cpp" />
     <ClCompile Include="OS\Windows\WinApp\WinApp.cpp" />
     <ClCompile Include="pch\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -119,7 +119,7 @@
     <ClInclude Include="GameCore\GameScene\GameScene.h" />
     <ClInclude Include="Editor\Manipulate\Manipulate.h" />
     <ClInclude Include="Resources\AudioManager\AudioManager.h" />
-    <ClInclude Include="ChoEngineAPI.h" />
+    <ClInclude Include="TheatriaEngineAPI.h" />
     <ClInclude Include="Core\ChoLog\ChoLog.h" />
     <ClInclude Include="Core\CoreSystem\CoreSystem.h" />
     <ClInclude Include="Core\MathLibrary\MathLibrary.h" />
@@ -176,7 +176,7 @@
     <ClInclude Include="Graphics\PipelineManager\PipelineManager.h" />
     <ClInclude Include="Graphics\VisualEffect\VFXManager.h" />
     <ClInclude Include="Hub\HubManager.h" />
-    <ClInclude Include="Main\ChoEngine.h" />
+    <ClInclude Include="Main\TheatriaEngine.h" />
     <ClInclude Include="OS\Windows\WinApp\WinApp.h" />
     <ClInclude Include="pch\pch.h" />
     <ClInclude Include="Platform\FileSystem\FileSystem.h" />
@@ -423,6 +423,7 @@
     <ProjectGuid>{fb856f70-9f85-4bbd-91a4-9e378674ff92}</ProjectGuid>
     <RootNamespace>ChoEngine</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>TheatriaEngine</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -464,7 +465,7 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;CHOENGINE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;THEATRIAENGINE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -506,7 +507,7 @@ xcopy "$(SolutionDir)Cho\Core\Utility\Color.h" "$(TargetDir)Cho\Core\Utility\" /
 xcopy "$(SolutionDir)Cho\Core\Utility\InputStruct.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Core\Utility\IDType.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Core\Utility\EffectStruct.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
-xcopy "$(SolutionDir)Cho\ChoEngineAPI.h" "$(TargetDir)Cho\" /E /I /Y
+xcopy "$(SolutionDir)Cho\$(ProjectName)API.h" "$(TargetDir)Cho\" /E /I /Y
 xcopy "$(SolutionDir)Cho\APIExportsMacro.h" "$(TargetDir)Cho\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Engine\Engine.h" "$(TargetDir)Cho\Engine\" /E /I /Y
 xcopy "$(SolutionDir)Cho\GameCore\GameObject\GameObject.h" "$(TargetDir)Cho\GameCore\GameObject" /E /I /Y
@@ -525,7 +526,7 @@ xcopy "$(SolutionDir)Cho\GameCore\ECS" "$(TargetDir)Cho\GameCore\ECS" /E /I /Y</
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;CHOENGINE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;THEATRIAENGINE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -568,7 +569,7 @@ xcopy "$(SolutionDir)Cho\Core\Utility\Color.h" "$(TargetDir)Cho\Core\Utility\" /
 xcopy "$(SolutionDir)Cho\Core\Utility\InputStruct.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Core\Utility\IDType.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Core\Utility\EffectStruct.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
-xcopy "$(SolutionDir)Cho\ChoEngineAPI.h" "$(TargetDir)Cho\" /E /I /Y
+xcopy "$(SolutionDir)Cho\$(ProjectName)API.h" "$(TargetDir)Cho\" /E /I /Y
 xcopy "$(SolutionDir)Cho\APIExportsMacro.h" "$(TargetDir)Cho\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Engine\Engine.h" "$(TargetDir)Cho\Engine\" /E /I /Y
 xcopy "$(SolutionDir)Cho\GameCore\GameObject\GameObject.h" "$(TargetDir)Cho\GameCore\GameObject" /E /I /Y

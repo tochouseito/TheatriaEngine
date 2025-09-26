@@ -1,5 +1,5 @@
 #pragma once
-namespace cho
+namespace theatria
 {
 	// カスタムImGui
 	namespace ImGuiEx

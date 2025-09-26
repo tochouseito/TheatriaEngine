@@ -25,7 +25,7 @@
 std::wstring ConvertString(const std::string& str);
 std::string ConvertString(const std::wstring& str);
 
-namespace cho
+namespace theatria
 {
 
     enum class LogLevel

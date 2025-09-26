@@ -1,20 +1,20 @@
 #include "pch.h"
-#include "ChoEngine.h"
+#include "TheatriaEngine.h"
 #include <exception>
 
 // Windowアプリケーション
 #include "OS/Windows/WinApp/WinApp.h"
 
-ChoEngine::ChoEngine(RuntimeMode mode):
+TheatriaEngine::TheatriaEngine(RuntimeMode mode):
 	Engine(mode)
 {
 }
 
-ChoEngine::~ChoEngine()
+TheatriaEngine::~TheatriaEngine()
 {
 }
 
-void ChoEngine::Initialize()
+void TheatriaEngine::Initialize()
 {
 	// ResourceLeakChecker
 	resourceLeakChecker = std::make_unique<ResourceLeakChecker>();
@@ -65,7 +65,7 @@ void ChoEngine::Initialize()
 	hubManager->Initialize();
 }
 
-void ChoEngine::Finalize()
+void TheatriaEngine::Finalize()
 {
 	// GPUの完了待ち
 	graphicsEngine->Finalize();
@@ -96,7 +96,7 @@ void ChoEngine::Finalize()
 	WinApp::TerminateWindow();
 }
 
-void ChoEngine::Operation()
+void TheatriaEngine::Operation()
 {
 	/*初期化*/
 	Initialize();
@@ -120,7 +120,7 @@ void ChoEngine::Operation()
 	Finalize();
 }
 
-void ChoEngine::Update()
+void TheatriaEngine::Update()
 {
 	// PlatformLayer更新
 	platformLayer->Update();
@@ -151,7 +151,7 @@ void ChoEngine::Update()
 	imGuiManager->End();
 }
 
-void ChoEngine::Draw()
+void TheatriaEngine::Draw()
 {
 	//　描画準備
 	graphicsEngine->PreRender();
@@ -173,7 +173,7 @@ void ChoEngine::Draw()
 	}
 }
 
-void ChoEngine::Start()
+void TheatriaEngine::Start()
 {
 	// PlatformLayer記録開始
 	platformLayer->StartFrame();
@@ -239,18 +239,18 @@ void ChoEngine::Start()
 	//gameCore->Start(*resourceManager);
 }
 
-void ChoEngine::End()
+void TheatriaEngine::End()
 {
 	// PlatformLayer記録終了
 	platformLayer->EndFrame();
 }
 
-void ChoEngine::OnCrashHandler()
+void TheatriaEngine::OnCrashHandler()
 {
 	// クラッシュ時の処理
 }
 
-void ChoEngine::CrashHandlerEntry()
+void TheatriaEngine::CrashHandlerEntry()
 {
 	std::set_terminate(OnCrashHandler);
 }

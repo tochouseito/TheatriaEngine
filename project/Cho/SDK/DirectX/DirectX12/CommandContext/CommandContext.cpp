@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "CommandContext.h"
 #include "Core/ChoLog/ChoLog.h"
-using namespace cho;
+using namespace theatria;
 
 void CommandContext::Create(ID3D12Device* device, D3D12_COMMAND_LIST_TYPE type)
 {

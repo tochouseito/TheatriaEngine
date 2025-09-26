@@ -19,19 +19,19 @@
 #pragma comment(lib, "Dbghelp.lib")
 #pragma comment(lib, "ole32.lib")
 #pragma comment(lib, "oleaut32.lib")
-using namespace cho;
+using namespace theatria;
 
-std::wstring cho::FileSystem::m_sProjectName = L"";
+std::wstring theatria::FileSystem::m_sProjectName = L"";
 // GUID 生成
-std::string cho::FileSystem::ScriptProject::m_SlnGUID = GenerateGUID();
-std::string cho::FileSystem::ScriptProject::m_ProjGUID = GenerateGUID();
-std::string cho::FileSystem::ScriptProject::m_SlnPath = "";
-std::string cho::FileSystem::ScriptProject::m_ProjPath = "";
-HMODULE cho::FileSystem::ScriptProject::m_DllHandle = nullptr;
-DWORD64 cho::FileSystem::ScriptProject::m_PDBBaseAddress = 0;
-HANDLE cho::FileSystem::ScriptProject::m_ReadPipe = nullptr; // 読み取り用パイプ
-HANDLE cho::FileSystem::ScriptProject::m_WritePipe = nullptr; // 書き込み用パイプ
-bool cho::FileSystem::ScriptProject::m_IsAttached = false;
+std::string theatria::FileSystem::ScriptProject::m_SlnGUID = GenerateGUID();
+std::string theatria::FileSystem::ScriptProject::m_ProjGUID = GenerateGUID();
+std::string theatria::FileSystem::ScriptProject::m_SlnPath = "";
+std::string theatria::FileSystem::ScriptProject::m_ProjPath = "";
+HMODULE theatria::FileSystem::ScriptProject::m_DllHandle = nullptr;
+DWORD64 theatria::FileSystem::ScriptProject::m_PDBBaseAddress = 0;
+HANDLE theatria::FileSystem::ScriptProject::m_ReadPipe = nullptr; // 読み取り用パイプ
+HANDLE theatria::FileSystem::ScriptProject::m_WritePipe = nullptr; // 書き込み用パイプ
+bool theatria::FileSystem::ScriptProject::m_IsAttached = false;
 
 // スクリプトプロジェクトの自動保存、ビルド
 static HRESULT InvokeByName(IDispatch* pDisp, LPCOLESTR name, VARIANT* args, UINT cArgs)
@@ -48,7 +48,7 @@ static HRESULT InvokeByName(IDispatch* pDisp, LPCOLESTR name, VARIANT* args, UIN
 }
 
 // プロジェクトフォルダを探す
-std::optional<std::filesystem::path> cho::FileSystem::FindOrCreateGameProjects()
+std::optional<std::filesystem::path> theatria::FileSystem::FindOrCreateGameProjects()
 {
     namespace fs = std::filesystem;
     fs::path execPath = fs::current_path();
@@ -66,7 +66,7 @@ std::optional<std::filesystem::path> cho::FileSystem::FindOrCreateGameProjects()
 }
 
 // プロジェクトフォルダを取得
-std::vector<std::wstring> cho::FileSystem::GetProjectFolders()
+std::vector<std::wstring> theatria::FileSystem::GetProjectFolders()
 {
     std::vector<std::wstring> result;
 
@@ -85,7 +85,7 @@ std::vector<std::wstring> cho::FileSystem::GetProjectFolders()
 }
 
 // 新しいプロジェクトを作成
-bool cho::FileSystem::CreateNewProjectFolder(const std::wstring& projectName)
+bool theatria::FileSystem::CreateNewProjectFolder(const std::wstring& projectName)
 {
     auto rootOpt = FindOrCreateGameProjects();
     if (!rootOpt) return false;
@@ -119,7 +119,7 @@ bool cho::FileSystem::CreateNewProjectFolder(const std::wstring& projectName)
 }
 
 // プロジェクトファイルを保存
-bool cho::FileSystem::SaveProjectFile(const std::wstring& projectName, const std::vector<std::wstring>& sceneFiles)
+bool theatria::FileSystem::SaveProjectFile(const std::wstring& projectName, const std::vector<std::wstring>& sceneFiles)
 {
     std::filesystem::path path = std::filesystem::path(projectName) / "ChoProject.json";
 
@@ -155,7 +155,7 @@ bool cho::FileSystem::SaveProjectFile(const std::wstring& projectName, const std
 }
 
 // プロジェクトファイルを読み込む
-std::optional<cho::ProjectInfo> cho::FileSystem::LoadProjectFile(const std::wstring& projectName)
+std::optional<theatria::ProjectInfo> theatria::FileSystem::LoadProjectFile(const std::wstring& projectName)
 {
     std::filesystem::path path = std::filesystem::path(projectName) / "ChoProject.json";
 
@@ -175,7 +175,7 @@ std::optional<cho::ProjectInfo> cho::FileSystem::LoadProjectFile(const std::wstr
             return std::nullopt; // ファイル種別違い
         }
 
-        cho::ProjectInfo info;
+        theatria::ProjectInfo info;
         info.name = j.value("name", "");
         info.version = j.value("version", "");
 
@@ -194,7 +194,7 @@ std::optional<cho::ProjectInfo> cho::FileSystem::LoadProjectFile(const std::wstr
 }
 
 // エンジン設定ファイルを保存
-bool cho::FileSystem::SaveEngineConfig(const std::wstring& projectName, const EngineConfigInfo& config)
+bool theatria::FileSystem::SaveEngineConfig(const std::wstring& projectName, const EngineConfigInfo& config)
 {
     std::filesystem::path path = std::filesystem::path(projectName) / "EngineConfig.json";
 
@@ -224,7 +224,7 @@ bool cho::FileSystem::SaveEngineConfig(const std::wstring& projectName, const En
 }
 
 // エンジン設定ファイルを読み込む
-std::optional<cho::EngineConfigInfo> cho::FileSystem::LoadEngineConfig(const std::wstring& projectName)
+std::optional<theatria::EngineConfigInfo> theatria::FileSystem::LoadEngineConfig(const std::wstring& projectName)
 {
     std::filesystem::path path = std::filesystem::path(projectName) / "EngineConfig.json";
 
@@ -262,7 +262,7 @@ std::optional<cho::EngineConfigInfo> cho::FileSystem::LoadEngineConfig(const std
 }
 
 // ゲーム設定ファイルを保存
-bool cho::FileSystem::SaveGameSettings(const std::wstring& projectName, const cho::GameSettingsInfo& settings)
+bool theatria::FileSystem::SaveGameSettings(const std::wstring& projectName, const theatria::GameSettingsInfo& settings)
 {
     std::filesystem::path path = std::filesystem::path(projectName) / "ProjectSettings";
 	std::filesystem::path fileName = "GameSettings.json";
@@ -302,7 +302,7 @@ bool cho::FileSystem::SaveGameSettings(const std::wstring& projectName, const ch
 }
 
 // ゲーム設定ファイルを読み込む
-bool cho::FileSystem::LoadGameSettings(const std::wstring& filePath)
+bool theatria::FileSystem::LoadGameSettings(const std::wstring& filePath)
 {
     try
     {
@@ -317,7 +317,7 @@ bool cho::FileSystem::LoadGameSettings(const std::wstring& filePath)
             return false;
         }
 
-        cho::GameSettingsInfo settings;
+        theatria::GameSettingsInfo settings;
         settings.startScene = std::filesystem::path(j.value("startScene", "MainScene")).wstring();
         settings.frameRate = j.value("frameRate", 60);
         settings.fixedDeltaTime = j.value("fixedDeltaTime", 1.0f / 60.0f);
@@ -337,7 +337,7 @@ bool cho::FileSystem::LoadGameSettings(const std::wstring& filePath)
             settings.gravity = Vector3(0.0f, -9.81f, 0.0f);
         }
 		// ゲーム設定をグローバルに保存
-		cho::FileSystem::g_GameSettings = settings;
+		theatria::FileSystem::g_GameSettings = settings;
 
         return true;
     }
@@ -347,7 +347,7 @@ bool cho::FileSystem::LoadGameSettings(const std::wstring& filePath)
     }
 }
 
-bool cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::wstring& srcFileName, GameScene* scene, ECSManager* ecs)
+bool theatria::FileSystem::SaveSceneFile(const std::wstring& directory, const std::wstring& srcFileName, GameScene* scene, ECSManager* ecs)
 {
     ecs;
 	// アセットフォルダが存在しない場合は作成
@@ -388,7 +388,7 @@ bool cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
         {
             if (const auto* t = prefab.GetComponentPtr<TransformComponent>())
             {
-                comps["Transform"] = cho::Serialization::ToJson(*t);
+                comps["Transform"] = theatria::Serialization::ToJson(*t);
             }
         }
 		// MeshFilterComponentの保存
@@ -396,7 +396,7 @@ bool cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
         {
             if (const auto* m = prefab.GetComponentPtr<MeshFilterComponent>())
             {
-                comps["MeshFilter"] = cho::Serialization::ToJson(*m);
+                comps["MeshFilter"] = theatria::Serialization::ToJson(*m);
             }
 		}
         // MeshRendererComponentの保存
@@ -404,7 +404,7 @@ bool cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
         {
             if (const auto* r = prefab.GetComponentPtr<MeshRendererComponent>())
             {
-                comps["MeshRenderer"] = cho::Serialization::ToJson(*r);
+                comps["MeshRenderer"] = theatria::Serialization::ToJson(*r);
             }
 		}
         // MaterialComponentの保存
@@ -412,7 +412,7 @@ bool cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
         {
             if (const auto* m = prefab.GetComponentPtr<MaterialComponent>())
             {
-                comps["Material"] = cho::Serialization::ToJson(*m);
+                comps["Material"] = theatria::Serialization::ToJson(*m);
 			}
             }
         // ScriptComponentの保存
@@ -420,7 +420,7 @@ bool cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
         {
             if (const auto* s = prefab.GetComponentPtr<ScriptComponent>())
             {
-                comps["Script"] = cho::Serialization::ToJson(*s);
+                comps["Script"] = theatria::Serialization::ToJson(*s);
             }
         }
         // LineRendererComponentの保存
@@ -429,7 +429,7 @@ bool cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
             const auto* lineRenderers = prefab.GetAllComponentsPtr<LineRendererComponent>();
             if (lineRenderers)
             {
-                comps["LineRenderer"] = cho::Serialization::ToJson(*lineRenderers);
+                comps["LineRenderer"] = theatria::Serialization::ToJson(*lineRenderers);
 			}
             }
         // Rigidbody2DComponentの保存
@@ -437,7 +437,7 @@ bool cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
         {
             if (const auto* rb = prefab.GetComponentPtr<Rigidbody2DComponent>())
             {
-                comps["Rigidbody2D"] = cho::Serialization::ToJson(*rb);
+                comps["Rigidbody2D"] = theatria::Serialization::ToJson(*rb);
             }
         }
         // BoxCollider2DComponentの保存
@@ -445,7 +445,7 @@ bool cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
         {
             if (const auto* bc = prefab.GetComponentPtr<BoxCollider2DComponent>())
             {
-                comps["BoxCollider2D"] = cho::Serialization::ToJson(*bc);
+                comps["BoxCollider2D"] = theatria::Serialization::ToJson(*bc);
             }
         }
 		// Rigidbody3DComponentの保存
@@ -453,7 +453,7 @@ bool cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
         {
             if (const auto* rb3d = prefab.GetComponentPtr<Rigidbody3DComponent>())
             {
-                comps["Rigidbody3D"] = cho::Serialization::ToJson(*rb3d);
+                comps["Rigidbody3D"] = theatria::Serialization::ToJson(*rb3d);
             }
 		}
         // CameraComponentの保存
@@ -461,7 +461,7 @@ bool cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
         {
             if (const auto* c = prefab.GetComponentPtr<CameraComponent>())
             {
-                comps["Camera"] = cho::Serialization::ToJson(*c);
+                comps["Camera"] = theatria::Serialization::ToJson(*c);
 			}
             }
         // ParticleComponentの保存
@@ -469,7 +469,7 @@ bool cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
         {
             if (const auto* p = prefab.GetComponentPtr<ParticleComponent>())
             {
-                comps["Particle"] = cho::Serialization::ToJson(*p);
+                comps["Particle"] = theatria::Serialization::ToJson(*p);
             }
         }
         // EmitterComponentの保存
@@ -477,7 +477,7 @@ bool cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
         {
             if (const auto* e = prefab.GetComponentPtr<EmitterComponent>())
             {
-                comps["Emitter"] = cho::Serialization::ToJson(*e);
+                comps["Emitter"] = theatria::Serialization::ToJson(*e);
 			}
         }
         // UISpriteComponentの保存
@@ -485,7 +485,7 @@ bool cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
         {
             if (const auto* ui = prefab.GetComponentPtr<UISpriteComponent>())
             {
-                comps["UISprite"] = cho::Serialization::ToJson(*ui);
+                comps["UISprite"] = theatria::Serialization::ToJson(*ui);
 			}
         }
 		// LightComponentの保存
@@ -493,7 +493,7 @@ bool cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
         {
             if (const auto* l = prefab.GetComponentPtr<LightComponent>())
             {
-                comps["Light"] = cho::Serialization::ToJson(*l);
+                comps["Light"] = theatria::Serialization::ToJson(*l);
             }
         }
 		// AudioComponentの保存
@@ -501,7 +501,7 @@ bool cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
         {
             if (const auto* a = prefab.GetComponentPtr<AudioComponent>())
             {
-                comps["Audio"] = cho::Serialization::ToJson(*a);
+                comps["Audio"] = theatria::Serialization::ToJson(*a);
             }
 		}
         // AnimationComponentの保存
@@ -509,7 +509,7 @@ bool cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
         {
             if (const auto* anim = prefab.GetComponentPtr<AnimationComponent>())
             {
-                comps["Animation"] = cho::Serialization::ToJson(*anim);
+                comps["Animation"] = theatria::Serialization::ToJson(*anim);
             }
 		}
         prefabJson["components"] = comps;
@@ -537,7 +537,7 @@ bool cho::FileSystem::SaveSceneFile(const std::wstring& directory, const std::ws
     }
 }
 
-bool cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand* engineCommand)
+bool theatria::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand* engineCommand)
 {
     if (!engineCommand) { Log::Write(LogLevel::Assert, "EngineCommand is nullptr"); }
     try
@@ -860,7 +860,7 @@ bool cho::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCommand*
 //    }
 //}
 
-bool cho::FileSystem::SaveGameParameter(const std::wstring& filePath, const std::string& group, const std::string& item, const std::string& dataName, const GameParameterVariant& value)
+bool theatria::FileSystem::SaveGameParameter(const std::wstring& filePath, const std::string& group, const std::string& item, const std::string& dataName, const GameParameterVariant& value)
 {
     json root;
 
@@ -904,7 +904,7 @@ bool cho::FileSystem::SaveGameParameter(const std::wstring& filePath, const std:
     return true;
 }
 
-bool cho::FileSystem::LoadGameParameter(const std::wstring& filePath, const std::string& group, const std::string& item, const std::string& dataName, GameParameterVariant& outValue)
+bool theatria::FileSystem::LoadGameParameter(const std::wstring& filePath, const std::string& group, const std::string& item, const std::string& dataName, GameParameterVariant& outValue)
 {
     json root;
 	// ファイルを開く
@@ -944,7 +944,7 @@ bool cho::FileSystem::LoadGameParameter(const std::wstring& filePath, const std:
 }
 
 // コンポーネントを保存
-json cho::Serialization::ToJson(const TransformComponent& t)
+json theatria::Serialization::ToJson(const TransformComponent& t)
 {
     json j;
     j["translation"] = { t.position.x, t.position.y, t.position.z };
@@ -955,7 +955,7 @@ json cho::Serialization::ToJson(const TransformComponent& t)
     return j;
 }
 
-json cho::Serialization::ToJson(const CameraComponent& c)
+json theatria::Serialization::ToJson(const CameraComponent& c)
 {
     json j;
     j["fovAngleY"] = c.fovAngleY;
@@ -965,7 +965,7 @@ json cho::Serialization::ToJson(const CameraComponent& c)
     return j;
 }
 
-json cho::Serialization::ToJson(const MeshFilterComponent& m)
+json theatria::Serialization::ToJson(const MeshFilterComponent& m)
 {
     json j;
     if (m.modelID.has_value())
@@ -976,14 +976,14 @@ json cho::Serialization::ToJson(const MeshFilterComponent& m)
     return j;
 }
 
-json cho::Serialization::ToJson(const MeshRendererComponent& r)
+json theatria::Serialization::ToJson(const MeshRendererComponent& r)
 {
     json j;
     j["visible"] = r.visible;
     return j;
 }
 
-json cho::Serialization::ToJson(const MaterialComponent& m)
+json theatria::Serialization::ToJson(const MaterialComponent& m)
 {
     json j;
 	j["Color"] = { m.color.r, m.color.g, m.color.b, m.color.a };
@@ -996,14 +996,14 @@ json cho::Serialization::ToJson(const MaterialComponent& m)
 	return j;
 }
 
-json cho::Serialization::ToJson(const ScriptComponent& s)
+json theatria::Serialization::ToJson(const ScriptComponent& s)
 {
 	json j;
 	j["scriptName"] = s.scriptName;
 	return j;
 }
 
-json cho::Serialization::ToJson(const std::vector<LineRendererComponent>& ls)
+json theatria::Serialization::ToJson(const std::vector<LineRendererComponent>& ls)
 {
     json jArray = json::array();
     for (const auto& l : ls)
@@ -1017,7 +1017,7 @@ json cho::Serialization::ToJson(const std::vector<LineRendererComponent>& ls)
     return jArray;
 }
 
-json cho::Serialization::ToJson(const Rigidbody2DComponent& rb)
+json theatria::Serialization::ToJson(const Rigidbody2DComponent& rb)
 {
 	json j;
 	j["isActive"] = rb.isActive;
@@ -1029,7 +1029,7 @@ json cho::Serialization::ToJson(const Rigidbody2DComponent& rb)
 	return j;
 }
 
-json cho::Serialization::ToJson(const BoxCollider2DComponent& bc)
+json theatria::Serialization::ToJson(const BoxCollider2DComponent& bc)
 {
 	json j;
 	j["offsetX"] = bc.offsetX;
@@ -1043,7 +1043,7 @@ json cho::Serialization::ToJson(const BoxCollider2DComponent& bc)
 	return j;
 }
 
-json cho::Serialization::ToJson(const Rigidbody3DComponent& rb)
+json theatria::Serialization::ToJson(const Rigidbody3DComponent& rb)
 {
     json j;
 	j["active"] = rb.IsActive();
@@ -1065,7 +1065,7 @@ json cho::Serialization::ToJson(const Rigidbody3DComponent& rb)
 	return j;
 }
 
-json cho::Serialization::ToJson(const EmitterComponent& e)
+json theatria::Serialization::ToJson(const EmitterComponent& e)
 {
     json j;
     j["lifeTime"] = { e.lifeTime.median,e.lifeTime.amplitude };
@@ -1145,14 +1145,14 @@ json cho::Serialization::ToJson(const EmitterComponent& e)
 	return j;
 }
 
-json cho::Serialization::ToJson(const ParticleComponent& p)
+json theatria::Serialization::ToJson(const ParticleComponent& p)
 {
     json j;
 	j["count"] = p.count;
 	return j;
 }
 
-json cho::Serialization::ToJson(const UISpriteComponent& ui)
+json theatria::Serialization::ToJson(const UISpriteComponent& ui)
 {
     json j;
 	j["position"] = { ui.position.x, ui.position.y };
@@ -1165,7 +1165,7 @@ json cho::Serialization::ToJson(const UISpriteComponent& ui)
 	return j;
 }
 
-json cho::Serialization::ToJson(const LightComponent& l)
+json theatria::Serialization::ToJson(const LightComponent& l)
 {
 	json j;
 	j["color"] = { l.color.r, l.color.g, l.color.b, l.color.a };
@@ -1179,7 +1179,7 @@ json cho::Serialization::ToJson(const LightComponent& l)
 	return j;
 }
 
-json cho::Serialization::ToJson(const AudioComponent& a)
+json theatria::Serialization::ToJson(const AudioComponent& a)
 {
     json j;
 	//j["audioName"] = a.audioName;
@@ -1187,7 +1187,7 @@ json cho::Serialization::ToJson(const AudioComponent& a)
 	return j;
 }
 
-json cho::Serialization::ToJson(const AnimationComponent& a)
+json theatria::Serialization::ToJson(const AnimationComponent& a)
 {
 	json j;
     j["transitionDuration"] = a.transitionDuration;
@@ -1198,7 +1198,7 @@ json cho::Serialization::ToJson(const AnimationComponent& a)
 	return j;
 }
 
-FileType cho::FileSystem::GetJsonFileType(const std::filesystem::path& path)
+FileType theatria::FileSystem::GetJsonFileType(const std::filesystem::path& path)
 {
     try
     {
@@ -1227,7 +1227,7 @@ FileType cho::FileSystem::GetJsonFileType(const std::filesystem::path& path)
     }
 }
 
-void cho::FileSystem::SaveProject(EditorManager* editorManager, SceneManager* sceneManager, GameWorld* gameWorld, ECSManager* ecs)
+void theatria::FileSystem::SaveProject(EditorManager* editorManager, SceneManager* sceneManager, GameWorld* gameWorld, ECSManager* ecs)
 {
     gameWorld; sceneManager;
     if (m_sProjectName.empty()) { return; }
@@ -1239,14 +1239,14 @@ void cho::FileSystem::SaveProject(EditorManager* editorManager, SceneManager* sc
     g_GameSettings.skyTexName = skyTexName;
 	// 重力の保存
 	g_GameSettings.gravity = editorManager->GetEngineCommand()->GetGameCore()->GetPhysicsWorld3D()->GetGravity();
-    cho::FileSystem::SaveGameSettings(projectPath, g_GameSettings);
+    theatria::FileSystem::SaveGameSettings(projectPath, g_GameSettings);
     // SceneFile
 	// 編集されたシーンを保存
     editorManager->SaveEditingScene();
     for (auto& scene : editorManager->GetSceneMap())
     {
 		// シーンファイルを保存
-        cho::FileSystem::SaveSceneFile(
+        theatria::FileSystem::SaveSceneFile(
             projectPath,
             scene.first,
             editorManager->GetEditScene(scene.first),
@@ -1256,7 +1256,7 @@ void cho::FileSystem::SaveProject(EditorManager* editorManager, SceneManager* sc
 }
 
 // プロジェクトフォルダを読み込む
-bool cho::FileSystem::LoadProjectFolder(const std::wstring& projectName, EngineCommand* engineCommand)
+bool theatria::FileSystem::LoadProjectFolder(const std::wstring& projectName, EngineCommand* engineCommand)
 {
 	m_sProjectName = projectName;
     std::filesystem::path projectPath = std::filesystem::path(L"GameProjects") / projectName;
@@ -1274,7 +1274,7 @@ bool cho::FileSystem::LoadProjectFolder(const std::wstring& projectName, EngineC
 }
 
 /// CSVを2次元vectorに読み込む関数
-std::vector<std::vector<std::string>> cho::FileSystem::LoadCSV(const std::string& filePath)
+std::vector<std::vector<std::string>> theatria::FileSystem::LoadCSV(const std::string& filePath)
 {
     std::vector<std::vector<std::string>> data;
     std::ifstream file(filePath);
@@ -1303,7 +1303,7 @@ std::vector<std::vector<std::string>> cho::FileSystem::LoadCSV(const std::string
 }
 
 /// CSVを2次元vector<int>に読み込む関数
-std::vector<std::vector<int>> cho::FileSystem::LoadCSV_Int(const std::string& filePath)
+std::vector<std::vector<int>> theatria::FileSystem::LoadCSV_Int(const std::string& filePath)
 {
     std::vector<std::vector<int>> data;
     std::ifstream file(filePath);
@@ -1346,7 +1346,7 @@ std::vector<std::vector<int>> cho::FileSystem::LoadCSV_Int(const std::string& fi
     return data;
 }
 
-std::string cho::FileSystem::GenerateGUID()
+std::string theatria::FileSystem::GenerateGUID()
 {
     GUID guid;
     HRESULT hr;
@@ -1378,7 +1378,7 @@ std::string cho::FileSystem::GenerateGUID()
     return oss.str();
 }
 
-void cho::FileSystem::ScriptProject::GenerateSolutionAndProject()
+void theatria::FileSystem::ScriptProject::GenerateSolutionAndProject()
 {
     std::string projectNameStr = ConvertString(m_sProjectName);
     // 出力先
@@ -1430,7 +1430,7 @@ void cho::FileSystem::ScriptProject::GenerateSolutionAndProject()
     }
 }
 
-void cho::FileSystem::ScriptProject::UpdateVcxproj()
+void theatria::FileSystem::ScriptProject::UpdateVcxproj()
 {
     std::vector<std::string> scriptFiles;
 
@@ -1551,7 +1551,7 @@ void cho::FileSystem::ScriptProject::UpdateVcxproj()
     vcxFile << "    <Link>\n";
     vcxFile << "      <SubSystem>Windows</SubSystem>\n";
     vcxFile << "      <GenerateDebugInformation>true</GenerateDebugInformation>\n";
-    vcxFile << "      <AdditionalDependencies>"<<"ChoMath.lib"<<";"<< "ChoEngine.lib" << ";" << "%(AdditionalDependencies)</AdditionalDependencies>\n";
+    vcxFile << "      <AdditionalDependencies>"<<"ChoMath.lib"<<";"<< "TheatriaEngine.lib" << ";" << "%(AdditionalDependencies)</AdditionalDependencies>\n";
     vcxFile << "      <AdditionalLibraryDirectories>" << libraryPath.string() << ";" << libraryPath2.string() << ";%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>\n";
     vcxFile << "    </Link>\n";
     vcxFile << "  </ItemDefinitionGroup>\n";
@@ -1575,7 +1575,7 @@ void cho::FileSystem::ScriptProject::UpdateVcxproj()
     vcxFile << "      <EnableCOMDATFolding>true</EnableCOMDATFolding>\n";
     vcxFile << "      <OptimizeReferences>true</OptimizeReferences>\n";
     vcxFile << "      <GenerateDebugInformation>true</GenerateDebugInformation>\n";
-    vcxFile << "      <AdditionalDependencies>" << "ChoMath.lib" << ";" << "ChoEngine.lib" << ";" << "%(AdditionalDependencies)</AdditionalDependencies>\n";
+    vcxFile << "      <AdditionalDependencies>" << "ChoMath.lib" << ";" << "TheatriaEngine.lib" << ";" << "%(AdditionalDependencies)</AdditionalDependencies>\n";
     vcxFile << "      <AdditionalLibraryDirectories>" << libraryPath.string() << ";" << libraryPath2.string() << ";%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>\n";
     vcxFile << "    </Link>\n";
     vcxFile << "  </ItemDefinitionGroup>\n";
@@ -1607,7 +1607,7 @@ void cho::FileSystem::ScriptProject::UpdateVcxproj()
     vcxFile.close();
 }
 
-void cho::FileSystem::ScriptProject::UpdateFilters(const std::string& filterPath)
+void theatria::FileSystem::ScriptProject::UpdateFilters(const std::string& filterPath)
 {
     std::vector<std::string> scriptFiles;
 
@@ -1665,7 +1665,7 @@ void cho::FileSystem::ScriptProject::UpdateFilters(const std::string& filterPath
     filtersFile.close();
 }
 
-void cho::FileSystem::ScriptProject::GenerateScriptFiles(const std::string& scriptName)
+void theatria::FileSystem::ScriptProject::GenerateScriptFiles(const std::string& scriptName)
 {
     std::filesystem::path outputDir = "GameProjects/" + ConvertString(m_sProjectName);
 
@@ -1715,7 +1715,7 @@ void cho::FileSystem::ScriptProject::GenerateScriptFiles(const std::string& scri
     }
 }
 
-void cho::FileSystem::ScriptProject::LoadProjectPath(const std::wstring& projectName)
+void theatria::FileSystem::ScriptProject::LoadProjectPath(const std::wstring& projectName)
 {
     std::string projectNameStr = ConvertString(projectName);
     // 出力先
@@ -1726,7 +1726,7 @@ void cho::FileSystem::ScriptProject::LoadProjectPath(const std::wstring& project
     m_ProjPath = outputPath + "/" + projectNameStr + ".vcxproj";
 }
 
-void cho::FileSystem::ScriptProject::LoadScriptDLL()
+void theatria::FileSystem::ScriptProject::LoadScriptDLL()
 {
 	// DLLのパス
 	std::string dllPath = "GameProjects/" + ConvertString(m_sProjectName) + "/bin/" + ConvertString(m_sProjectName) + ".dll";
@@ -1741,7 +1741,7 @@ void cho::FileSystem::ScriptProject::LoadScriptDLL()
     }
 }
 
-void cho::FileSystem::ScriptProject::UnloadScriptDLL()
+void theatria::FileSystem::ScriptProject::UnloadScriptDLL()
 {
 	// PDBのアンロード
     UnloadPDB();
@@ -1767,7 +1767,7 @@ void cho::FileSystem::ScriptProject::UnloadScriptDLL()
 //    }
 //}
 
-bool cho::FileSystem::ScriptProject::BuildScriptDLL()
+bool theatria::FileSystem::ScriptProject::BuildScriptDLL()
 {
     std::string projectPath = "GameProjects/" + ConvertString(m_sProjectName) + "/" + ConvertString(m_sProjectName) + ".vcxproj";
     std::string command = "msbuild \"" + projectPath + "\" /p:Configuration=Debug /p:Platform=x64";
@@ -1803,7 +1803,7 @@ bool cho::FileSystem::ScriptProject::BuildScriptDLL()
     }
 }
 
-std::vector<std::string> cho::FileSystem::ScriptProject::GetScriptFiles()
+std::vector<std::string> theatria::FileSystem::ScriptProject::GetScriptFiles()
 {
     std::vector<std::string> scriptNames;
     fs::path exePath = fs::current_path(); // 実行ファイルがある場所
@@ -1832,7 +1832,7 @@ std::vector<std::string> cho::FileSystem::ScriptProject::GetScriptFiles()
 	return scriptNames;
 }
 
-bool cho::FileSystem::ScriptProject::LoadPDB(const std::string& dllPath)
+bool theatria::FileSystem::ScriptProject::LoadPDB(const std::string& dllPath)
 {
     HANDLE process = GetCurrentProcess();
 
@@ -1876,13 +1876,13 @@ bool cho::FileSystem::ScriptProject::LoadPDB(const std::string& dllPath)
     return true;
 }
 
-void cho::FileSystem::ScriptProject::UnloadPDB()
+void theatria::FileSystem::ScriptProject::UnloadPDB()
 {
     SymUnloadModule64(GetCurrentProcess(), m_PDBBaseAddress);
 	SymCleanup(GetCurrentProcess());
 }
 
-bool cho::FileSystem::ScriptProject::WaitForBuild(const std::wstring& dllPath, int timeoutMs)
+bool theatria::FileSystem::ScriptProject::WaitForBuild(const std::wstring& dllPath, int timeoutMs)
 {
     using namespace std::chrono;
 
@@ -1932,7 +1932,7 @@ bool cho::FileSystem::ScriptProject::WaitForBuild(const std::wstring& dllPath, i
     return false; // タイムアウト
 }
 
-bool cho::FileSystem::ScriptProject::WaitForBuildNotification(int timeoutMs)
+bool theatria::FileSystem::ScriptProject::WaitForBuildNotification(int timeoutMs)
 {
     HANDLE hPipe = CreateNamedPipeW(
         L"\\\\.\\pipe\\BuildWatcherPipe",
@@ -1950,7 +1950,7 @@ bool cho::FileSystem::ScriptProject::WaitForBuildNotification(int timeoutMs)
         return false;
     }
 
-    HANDLE hEvent = CreateEventW(NULL, TRUE, FALSE, L"ChoEngineReadyEvent");
+    HANDLE hEvent = CreateEventW(NULL, TRUE, FALSE, L"TheatriaEngineReadyEvent");
     if (hEvent)
     {
         SetEvent(hEvent); // BuildWatcher に「準備できたよ」と通知
@@ -2008,7 +2008,7 @@ bool cho::FileSystem::ScriptProject::WaitForBuildNotification(int timeoutMs)
     return false; // タイムアウト
 }
 
-bool cho::FileSystem::ScriptProject::ConnectPipeToBuildWatcher(const int& timeoutMs)
+bool theatria::FileSystem::ScriptProject::ConnectPipeToBuildWatcher(const int& timeoutMs)
 {
 	// パイプの作成
 	// Read/Write それぞれ作成
@@ -2044,7 +2044,7 @@ bool cho::FileSystem::ScriptProject::ConnectPipeToBuildWatcher(const int& timeou
         return false;
 	}
 
-    HANDLE hEvent = CreateEventW(NULL, TRUE, FALSE, L"ChoEngineReadyEvent");
+    HANDLE hEvent = CreateEventW(NULL, TRUE, FALSE, L"TheatriaEngineReadyEvent");
     if (hEvent)
     {
         SetEvent(hEvent); // BuildWatcher に「準備できたよ」と通知
@@ -2075,7 +2075,7 @@ bool cho::FileSystem::ScriptProject::ConnectPipeToBuildWatcher(const int& timeou
 }
 
 // メッセージ送信
-void cho::FileSystem::ScriptProject::SendMessageToBuildWatcher(const std::wstring& msg)
+void theatria::FileSystem::ScriptProject::SendMessageToBuildWatcher(const std::wstring& msg)
 {
     if (m_WritePipe == INVALID_HANDLE_VALUE) return;
 
@@ -2099,7 +2099,7 @@ void cho::FileSystem::ScriptProject::SendMessageToBuildWatcher(const std::wstrin
 }
 
 // メッセージ受信
-std::wstring cho::FileSystem::ScriptProject::WaitForAckFromBuildWatcher(DWORD timeoutMs)
+std::wstring theatria::FileSystem::ScriptProject::WaitForAckFromBuildWatcher(DWORD timeoutMs)
 {
     if (m_ReadPipe == INVALID_HANDLE_VALUE) return L"";
 
@@ -2152,7 +2152,7 @@ std::wstring cho::FileSystem::ScriptProject::WaitForAckFromBuildWatcher(DWORD ti
     return L"";
 }
 
-bool cho::FileSystem::ScriptProject::TestPipeMessage()
+bool theatria::FileSystem::ScriptProject::TestPipeMessage()
 {
     SendMessageToBuildWatcher(L"TEST_MESSAGE");
     // ここで必ず返事が来るまでブロック
@@ -2165,7 +2165,7 @@ bool cho::FileSystem::ScriptProject::TestPipeMessage()
     return false;
 }
 
-bool cho::FileSystem::ScriptProject::SaveAndBuildSolution(const std::wstring& targetSln, const bool& isBuild, const bool& isDebugger)
+bool theatria::FileSystem::ScriptProject::SaveAndBuildSolution(const std::wstring& targetSln, const bool& isBuild, const bool& isDebugger)
 {
     bool any = false;
     // .slnがついていなければ足す
@@ -2301,7 +2301,7 @@ bool cho::FileSystem::ScriptProject::SaveAndBuildSolution(const std::wstring& ta
 }
 
 // Pipe
-void cho::FileSystem::ScriptProject::ClosePipe()
+void theatria::FileSystem::ScriptProject::ClosePipe()
 {
 	CloseHandle(m_ReadPipe);
 	CloseHandle(m_WritePipe);
@@ -2309,7 +2309,7 @@ void cho::FileSystem::ScriptProject::ClosePipe()
 
 
 
-void cho::Deserialization::FromJson(const json& j, TransformComponent& t)
+void theatria::Deserialization::FromJson(const json& j, TransformComponent& t)
 {
 	t.position = { j["translation"][0], j["translation"][1], j["translation"][2] };
 	t.quaternion = { j["rotation"][0], j["rotation"][1], j["rotation"][2], j["rotation"][3] };
@@ -2318,7 +2318,7 @@ void cho::Deserialization::FromJson(const json& j, TransformComponent& t)
 	t.isBillboard = j.value("isBillboard", false);
 }
 
-void cho::Deserialization::FromJson(const json& j, CameraComponent& c)
+void theatria::Deserialization::FromJson(const json& j, CameraComponent& c)
 {
 	c.fovAngleY = j.value("fovAngleY", 45.0f);
 	c.aspectRatio = j.value("aspectRatio", 1.777f);
@@ -2326,7 +2326,7 @@ void cho::Deserialization::FromJson(const json& j, CameraComponent& c)
 	c.farZ = j.value("farZ", 1000.0f);
 }
 
-void cho::Deserialization::FromJson(const json& j, MeshFilterComponent& m)
+void theatria::Deserialization::FromJson(const json& j, MeshFilterComponent& m)
 {
     j;m;
 	/*if (j.contains("modelName"))
@@ -2340,12 +2340,12 @@ void cho::Deserialization::FromJson(const json& j, MeshFilterComponent& m)
 	}*/
 }
 
-void cho::Deserialization::FromJson(const json& j, MeshRendererComponent& r)
+void theatria::Deserialization::FromJson(const json& j, MeshRendererComponent& r)
 {
 	r.visible = j.value("visible", true);
 }
 
-void cho::Deserialization::FromJson(const json& j, MaterialComponent& m)
+void theatria::Deserialization::FromJson(const json& j, MaterialComponent& m)
 {
 	m.color = { j["Color"][0], j["Color"][1], j["Color"][2], j["Color"][3] };
 	m.textureName = ConvertString(j.value("textureName",""));
@@ -2355,7 +2355,7 @@ void cho::Deserialization::FromJson(const json& j, MaterialComponent& m)
 	m.uvFlipY = j.value("uvFlipY", false);
 }
 
-void cho::Deserialization::FromJson(const json& j, ScriptComponent& s)
+void theatria::Deserialization::FromJson(const json& j, ScriptComponent& s)
 {
     j;s;
 	/*s.scriptName = j.value("scriptName", "");
@@ -2375,7 +2375,7 @@ void cho::Deserialization::FromJson(const json& j, ScriptComponent& s)
 	}*/
 }
 
-void cho::Deserialization::FromJson(const json& j, std::vector<LineRendererComponent>& ls)
+void theatria::Deserialization::FromJson(const json& j, std::vector<LineRendererComponent>& ls)
 {
     j;ls;
 	/*if (j.is_array())
@@ -2391,7 +2391,7 @@ void cho::Deserialization::FromJson(const json& j, std::vector<LineRendererCompo
 	}*/
 }
 
-void cho::Deserialization::FromJson(const json& j, Rigidbody2DComponent& rb)
+void theatria::Deserialization::FromJson(const json& j, Rigidbody2DComponent& rb)
 {
     j;rb;
 	/*rb.isKinematic = j.value("isKinematic", false);
@@ -2401,7 +2401,7 @@ void cho::Deserialization::FromJson(const json& j, Rigidbody2DComponent& rb)
 	rb.fixedRotation = j.value("fixedRotation", false);*/
 }
 
-void cho::Deserialization::FromJson(const json& j, BoxCollider2DComponent& bc)
+void theatria::Deserialization::FromJson(const json& j, BoxCollider2DComponent& bc)
 {
 	bc.offsetX = j.value("offsetX", 0.0f);
 	bc.offsetY = j.value("offsetY", 0.0f);
@@ -2412,7 +2412,7 @@ void cho::Deserialization::FromJson(const json& j, BoxCollider2DComponent& bc)
 	bc.restitution = j.value("restitution", 0.0f);
 }
 
-void cho::Deserialization::FromJson(const json& j, Rigidbody3DComponent& rb)
+void theatria::Deserialization::FromJson(const json& j, Rigidbody3DComponent& rb)
 {
 	rb.SetActive(j.value("active", true));
 	rb.friction = j.value("friction", 0.5f);
@@ -2446,7 +2446,7 @@ void cho::Deserialization::FromJson(const json& j, Rigidbody3DComponent& rb)
 	}
 }
 
-void cho::Deserialization::FromJson(const json& j, EmitterComponent& e)
+void theatria::Deserialization::FromJson(const json& j, EmitterComponent& e)
 {
     // lifeTime
     if (j.contains("lifeTime") && j["lifeTime"].is_array() && j["lifeTime"].size() == 2)
@@ -2498,12 +2498,12 @@ void cho::Deserialization::FromJson(const json& j, EmitterComponent& e)
     e.isBillboard = j.value("isBillboard", true);
 }
 
-void cho::Deserialization::FromJson(const json& j, ParticleComponent& p)
+void theatria::Deserialization::FromJson(const json& j, ParticleComponent& p)
 {
 	p.count = j.value("count", 1024);
 }
 
-void cho::Deserialization::FromJson(const json& j, UISpriteComponent& ui)
+void theatria::Deserialization::FromJson(const json& j, UISpriteComponent& ui)
 {
 	ui.position = { j["position"][0], j["position"][1] };
 	ui.rotation = j.value("rotation", 0.0f);
@@ -2514,7 +2514,7 @@ void cho::Deserialization::FromJson(const json& j, UISpriteComponent& ui)
 	ui.textureSize = { j["textureSize"][0], j["textureSize"][1] };
 }
 
-void cho::Deserialization::FromJson(const json& j, LightComponent& l)
+void theatria::Deserialization::FromJson(const json& j, LightComponent& l)
 {
 	l.color = { j["color"][0], j["color"][1], j["color"][2], j["color"][3] };
 	l.intensity = j.value("intensity", 1.0f);
@@ -2526,13 +2526,13 @@ void cho::Deserialization::FromJson(const json& j, LightComponent& l)
 	l.active = j.value("active", true);
 }
 
-void cho::Deserialization::FromJson(const json& j, AudioComponent& a)
+void theatria::Deserialization::FromJson(const json& j, AudioComponent& a)
 {
 	//a.audioName = j.value("audioName", "");
 	a.isLoop = j.value("isLoop", false);
 }
 
-void cho::Deserialization::FromJson(const json& j, AnimationComponent& a)
+void theatria::Deserialization::FromJson(const json& j, AnimationComponent& a)
 {
 	a.transitionDuration = j.value("transitionDuration", 0.2f);
 	a.animationIndex = j.value("animationIndex", 0);
@@ -2540,12 +2540,12 @@ void cho::Deserialization::FromJson(const json& j, AnimationComponent& a)
 	a.modelName = ConvertString(modelName);
 }
 
-void cho::FileSystem::ScanFolder(const path& rootPath, EngineCommand* engineCommand)
+void theatria::FileSystem::ScanFolder(const path& rootPath, EngineCommand* engineCommand)
 {
     g_ProjectFiles = ScanRecursive(rootPath,engineCommand);
 }
 
-FolderNode cho::FileSystem::ScanRecursive(const path& path, EngineCommand* engineCommand)
+FolderNode theatria::FileSystem::ScanRecursive(const path& path, EngineCommand* engineCommand)
 {
     FolderNode node;        // 一番上のノード
 	node.folderPath = path; // フォルダパス
@@ -2579,7 +2579,7 @@ FolderNode cho::FileSystem::ScanRecursive(const path& path, EngineCommand* engin
 }
 
 // フォルダノードをパスで検索
-FolderNode* cho::FileSystem::FindFolderNodeByPath(FolderNode& node, const std::filesystem::path& target)
+FolderNode* theatria::FileSystem::FindFolderNodeByPath(FolderNode& node, const std::filesystem::path& target)
 {
     if (node.folderPath == target)
         return &node;
@@ -2592,7 +2592,7 @@ FolderNode* cho::FileSystem::FindFolderNodeByPath(FolderNode& node, const std::f
     return nullptr;
 }
 
-bool cho::FileSystem::ProcessFile(const path& filePath, EngineCommand* engineCommand)
+bool theatria::FileSystem::ProcessFile(const path& filePath, EngineCommand* engineCommand)
 {
 	std::wstring wFileName = filePath.filename().wstring();
 	std::wstring scriptName = wFileName.substr(0, wFileName.find_last_of('.')); // 拡張子を除いたファイル名
@@ -2631,38 +2631,38 @@ bool cho::FileSystem::ProcessFile(const path& filePath, EngineCommand* engineCom
 
         switch (type)
         {
-        case cho::ChoProject:
+        case theatria::ChoProject:
             break;
-        case cho::EngineConfig:
+        case theatria::EngineConfig:
             break;
-        case cho::GameSettings:
+        case theatria::GameSettings:
         {
             return LoadGameSettings(filePath);
         }
             break;
-        case cho::SceneFile:// シーンファイル
+        case theatria::SceneFile:// シーンファイル
         {
 			return LoadSceneFile(filePath,engineCommand);
         }
             break;
-        case cho::ModelFile:
+        case theatria::ModelFile:
             break;
-        case cho::ImageFile:
+        case theatria::ImageFile:
             break;
-        case cho::SoundFile:
+        case theatria::SoundFile:
             break;
-        case cho::EffectFile:
+        case theatria::EffectFile:
             break;
-		case cho::ScriptFile:// スクリプトファイル
+		case theatria::ScriptFile:// スクリプトファイル
         {
 			//return LoadScriptFile(filePath, engineCommand);
         }
             break;
-        case cho::GameParameter:
+        case theatria::GameParameter:
             break;
-        case cho::PrefabFile:
+        case theatria::PrefabFile:
             break;
-        case cho::Unknown:
+        case theatria::Unknown:
             break;
         default:
             break;
@@ -2672,7 +2672,7 @@ bool cho::FileSystem::ProcessFile(const path& filePath, EngineCommand* engineCom
 	return false;
 }
 
-bool cho::FileSystem::AddFile(const path& filePath, FolderNode& folderNode, EngineCommand* engineCommand)
+bool theatria::FileSystem::AddFile(const path& filePath, FolderNode& folderNode, EngineCommand* engineCommand)
 {
     namespace fs = std::filesystem;
     if (filePath.empty() || !fs::exists(filePath)) return false;
@@ -2732,13 +2732,13 @@ bool cho::FileSystem::AddFile(const path& filePath, FolderNode& folderNode, Engi
     catch (const fs::filesystem_error& e)
     {
         // ログ出力などがあれば追加
-        cho::Log::Write(LogLevel::Assert,"AddFile failed: " + filePath.string() + " (" + e.what() + ")");
+        theatria::Log::Write(LogLevel::Assert,"AddFile failed: " + filePath.string() + " (" + e.what() + ")");
     }
 
     return false;
 }
 
-std::wstring cho::FileSystem::GameBuilder::SelectFolderDialog()
+std::wstring theatria::FileSystem::GameBuilder::SelectFolderDialog()
 {
     std::wstring selectedPath;
     HRESULT hr;
@@ -2781,7 +2781,7 @@ std::wstring cho::FileSystem::GameBuilder::SelectFolderDialog()
     return selectedPath;
 }
 
-void cho::FileSystem::GameBuilder::CopyFilesToBuildFolder([[maybe_unused]]EngineCommand* engineCommand, const std::wstring& folderPath)
+void theatria::FileSystem::GameBuilder::CopyFilesToBuildFolder([[maybe_unused]]EngineCommand* engineCommand, const std::wstring& folderPath)
 {
     namespace fs = std::filesystem;
     fs::path buildRoot = fs::path(folderPath) / m_sProjectName;
@@ -2794,9 +2794,9 @@ void cho::FileSystem::GameBuilder::CopyFilesToBuildFolder([[maybe_unused]]Engine
 
         // コピーするパス一覧（構造維持したいパス）
         std::vector<fs::path> sources = {
-            L"ChoEngine_GameRuntime.dll",
-            L"ChoEngine_GameRuntime.exp",
-            L"ChoEngine_GameRuntime.lib",
+            L"TheatriaEngine_GameRuntime.dll",
+            L"TheatriaEngine_GameRuntime.exp",
+            L"TheatriaEngine_GameRuntime.lib",
             //L"ChoMath.lib",
             L"dxcompiler_GameRuntime.dll",
             L"dxil_GameRuntime.dll",
@@ -2809,7 +2809,7 @@ void cho::FileSystem::GameBuilder::CopyFilesToBuildFolder([[maybe_unused]]Engine
             L"Cho/Resources/EngineAssets",
             L"Cho/pch",
             L"Cho/APIExportsMacro.h",
-            L"Cho/ChoEngineAPI.h",
+            L"Cho/TheatriaEngineAPI.h",
         };
 
         /*for (const auto& scene : engineCommand->GetGameCore()->GetSceneManager()->GetScenes())
@@ -2823,7 +2823,7 @@ void cho::FileSystem::GameBuilder::CopyFilesToBuildFolder([[maybe_unused]]Engine
 
             if (!fs::exists(sourcePath))
             {
-                cho::Log::Write(LogLevel::Assert, "Source file or directory does not exist: " + sourcePath.string());
+                theatria::Log::Write(LogLevel::Assert, "Source file or directory does not exist: " + sourcePath.string());
                 continue;
             }
 
@@ -2844,11 +2844,11 @@ void cho::FileSystem::GameBuilder::CopyFilesToBuildFolder([[maybe_unused]]Engine
             }
         }
 
-        cho::Log::Write(LogLevel::Info, "CopyFilesToBuildFolder completed successfully.");
+        theatria::Log::Write(LogLevel::Info, "CopyFilesToBuildFolder completed successfully.");
     }
     catch (const std::exception& e)
     {
-        cho::Log::Write(LogLevel::Assert, "CopyFilesToBuildFolder failed: " + std::string(e.what()));
+        theatria::Log::Write(LogLevel::Assert, "CopyFilesToBuildFolder failed: " + std::string(e.what()));
     }
 
     // exeの名前
@@ -2856,9 +2856,9 @@ void cho::FileSystem::GameBuilder::CopyFilesToBuildFolder([[maybe_unused]]Engine
     std::wstring finalExeName = L"3024_ビタエリア.exe"; // 任意の最終ファイル名
 
     std::vector<std::pair<fs::path, fs::path>> renameList = {
-    { buildRoot / L"ChoEngine_GameRuntime.dll",    buildRoot / L"ChoEngine.dll" },
-    { buildRoot / L"ChoEngine_GameRuntime.exp",    buildRoot / L"ChoEngine.exp" },
-    { buildRoot / L"ChoEngine_GameRuntime.lib",    buildRoot / L"ChoEngine.lib" },
+    { buildRoot / L"TheatriaEngine_GameRuntime.dll",    buildRoot / L"TheatriaEngine.dll" },
+    { buildRoot / L"TheatriaEngine_GameRuntime.exp",    buildRoot / L"TheatriaEngine.exp" },
+    { buildRoot / L"TheatriaEngine_GameRuntime.lib",    buildRoot / L"TheatriaEngine.lib" },
     { buildRoot / L"dxcompiler_GameRuntime.dll",   buildRoot / L"dxcompiler.dll" },
     { buildRoot / L"dxil_GameRuntime.dll",         buildRoot / L"dxil.dll" },
     { buildRoot / L"GameTemplate.exe",             buildRoot / finalExeName }, // 任意の最終ファイル名
@@ -2873,18 +2873,18 @@ void cho::FileSystem::GameBuilder::CopyFilesToBuildFolder([[maybe_unused]]Engine
                 fs::rename(from, to);
             } else
             {
-                cho::Log::Write(LogLevel::Assert, "File not found to rename: " + from.string());
+                theatria::Log::Write(LogLevel::Assert, "File not found to rename: " + from.string());
             }
         }
         catch (const std::exception& e)
         {
-            cho::Log::Write(LogLevel::Assert, "Rename failed: " + from.string() + " → " + to.string() + " : " + e.what());
+            theatria::Log::Write(LogLevel::Assert, "Rename failed: " + from.string() + " → " + to.string() + " : " + e.what());
         }
     }
 
 }
 
-std::wstring cho::FileSystem::GameBuilder::GetEnvVar(const wchar_t* name)
+std::wstring theatria::FileSystem::GameBuilder::GetEnvVar(const wchar_t* name)
 {
     wchar_t buffer[512];
     size_t len = 0;

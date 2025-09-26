@@ -20,7 +20,7 @@ class ECSManager;
 class ResourceManager;
 class EditorManager;
 class EngineCommand;
-namespace cho
+namespace theatria
 {
     enum FileType
     {
@@ -137,13 +137,13 @@ namespace cho
 		// プロジェクトファイルを保存
         static bool SaveProjectFile(const std::wstring& projectName, const std::vector<std::wstring>& sceneFiles);
 		// プロジェクトファイルを読み込む
-        static std::optional<cho::ProjectInfo> LoadProjectFile(const std::wstring& projectName);
+        static std::optional<theatria::ProjectInfo> LoadProjectFile(const std::wstring& projectName);
 		// エンジン設定ファイルを保存
         static bool SaveEngineConfig(const std::wstring& projectName, const EngineConfigInfo& config);
 		// エンジン設定ファイルを読み込む
         static std::optional<EngineConfigInfo> LoadEngineConfig(const std::wstring& projectName);
 		// ゲーム設定ファイルを保存
-        static bool SaveGameSettings(const std::wstring& projectName, const cho::GameSettingsInfo& settings);
+        static bool SaveGameSettings(const std::wstring& projectName, const theatria::GameSettingsInfo& settings);
 		// ゲーム設定ファイルを読み込む
         static bool LoadGameSettings(const std::wstring& filePath);
 		// シーンファイルを保存
