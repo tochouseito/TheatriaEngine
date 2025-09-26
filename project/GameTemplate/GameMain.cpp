@@ -2,6 +2,7 @@
 #pragma warning(disable:28251)
 // エンジン起動関数を使う
 #define ENGINECREATE_FUNCTION
+#define RUNTIMEMODE_GAME
 // Engine
 #include "Cho/ChoEngineAPI.h"
 // Windows

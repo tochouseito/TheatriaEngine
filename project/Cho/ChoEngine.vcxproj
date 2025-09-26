@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Config\Config.cpp" />
     <ClCompile Include="GameCore\CPrefab\CPrefab.cpp" />
     <ClCompile Include="GameCore\ECS\EngineComponentID.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
@@ -107,6 +108,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="APIExportsMacro.h" />
+    <ClInclude Include="Config\Config.h" />
     <ClInclude Include="Core\Utility\AnimationStruct.h" />
     <ClInclude Include="Core\Utility\atomic_shared_ptr.h" />
     <ClInclude Include="GameCore\CPrefab\CPrefab.h" />
@@ -450,12 +452,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)..\generated\outputs\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)..\generated\intermediate\ChoEngine\</IntDir>
+    <IntDir>$(SolutionDir)..\generated\intermediate\$(ProjectName)\</IntDir>
     <MultiProcFXC>true</MultiProcFXC>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)..\generated\outputs\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)..\generated\intermediate\ChoEngine\</IntDir>
+    <IntDir>$(SolutionDir)..\generated\intermediate\$(ProjectName)\</IntDir>
     <MultiProcFXC>true</MultiProcFXC>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
