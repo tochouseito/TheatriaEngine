@@ -1,6 +1,14 @@
 #pragma once
 
 #include "SDK/DirectX/DirectX12/stdafx/stdafx.h"
+#include "SDK/DirectX/DirectX12/GpuResource/GpuResource.h"
+#include "SDK/DirectX/DirectX12/GpuBuffer/GpuBuffer.h"
+#include "SDK/DirectX/DirectX12/ColorBuffer/ColorBuffer.h"
+#include "SDK/DirectX/DirectX12/DepthBuffer/DepthBuffer.h"
+#include "SDK/DirectX/DirectX12/PixelBuffer/PixelBuffer.h"
+#include "SDK/DirectX/DirectX12/VertexBuffer/VertexBuffer.h"
+#include "SDK/DirectX/DirectX12/IndexBuffer/IndexBuffer.h"
+#include "SDK/DirectX/DirectX12/SwapChain/SwapChain.h"
 #include <vector>
 #include <array>
 #include <queue>
@@ -16,14 +24,14 @@ public:
 	virtual void Flush();
 	virtual ID3D12GraphicsCommandList6* GetCommandList() { return m_CommandList.Get(); };
 	virtual D3D12_COMMAND_LIST_TYPE GetType() { return m_Type; };
-
 	virtual void SetDescriptorHeap(ID3D12DescriptorHeap* heap);
-	virtual void BarrierTransition(ID3D12Resource* pResource, D3D12_RESOURCE_STATES Before, D3D12_RESOURCE_STATES After);
 	virtual void BarrierUAV(D3D12_RESOURCE_BARRIER_TYPE Type, D3D12_RESOURCE_BARRIER_FLAGS Flags, ID3D12Resource* pResource);
 	virtual void ResourceBarrier(UINT NumBarriers, const D3D12_RESOURCE_BARRIER* pBarriers);
-	virtual void SetRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE* rtvHandle, D3D12_CPU_DESCRIPTOR_HANDLE* dsvHandle = nullptr);
-	virtual void ClearRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE handle);
-	virtual void ClearDepthStencil(D3D12_CPU_DESCRIPTOR_HANDLE handle);
+	virtual void SetRenderTarget(ColorBuffer* rtv, DepthBuffer* depth = nullptr);
+	virtual void SetRenderTarget(SwapChainBuffer* swapChainBuffer);
+	virtual void ClearRenderTarget(ColorBuffer* rt);
+	virtual void ClearRenderTarget(SwapChainBuffer* swapChainBuffer);
+	virtual void ClearDepthStencil(DepthBuffer* depth);
 	virtual void ClearUnorderedAccessViewUint(D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle, D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle, ID3D12Resource* pResource, const UINT* value, UINT numRects, const D3D12_RECT* pRects);
 	virtual void SetViewport(const D3D12_VIEWPORT& viewport);
 	virtual void SetScissorRect(const D3D12_RECT& rect);
@@ -51,6 +59,10 @@ protected:
 	ComPtr<ID3D12CommandAllocator> m_CommandAllocator;
 	ComPtr<ID3D12GraphicsCommandList6> m_CommandList;
 	D3D12_COMMAND_LIST_TYPE m_Type = {};
+private:
+	virtual void BarrierTransition(ID3D12Resource* pResource, D3D12_RESOURCE_STATES Before, D3D12_RESOURCE_STATES After);
+	virtual void CheckResourceStateTransition(GpuResource* pResource, D3D12_RESOURCE_STATES checkState);
+	virtual void CheckResourceStateTransition(SwapChainBuffer* swapChainBuffer, D3D12_RESOURCE_STATES checkState);
 };
 
 class GraphicsContext : public CommandContext {

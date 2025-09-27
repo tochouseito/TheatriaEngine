@@ -11,6 +11,7 @@ struct SwapChainBuffer
 	std::optional<uint32_t> backBufferIndex = std::nullopt;
 	D3D12_CPU_DESCRIPTOR_HANDLE m_RTVCpuHandle = {};
 	std::optional<uint32_t> m_RTVHandleIndex = std::nullopt;
+	D3D12_RESOURCE_STATES m_ResourceState = D3D12_RESOURCE_STATE_PRESENT;
 };
 class SwapChain
 {

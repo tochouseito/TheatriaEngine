@@ -188,6 +188,7 @@ void GraphicsEngine::SetRenderTargets(CommandContext* context, DrawPass pass, Re
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle;
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle;
 	ColorBuffer* renderTex = nullptr;
+	DepthBuffer* depthTex = nullptr;
 	switch (pass)
 	{
 	case GBuffers:
@@ -198,27 +199,29 @@ void GraphicsEngine::SetRenderTargets(CommandContext* context, DrawPass pass, Re
 			{
 				// StateをRenderTargetに変更	
 				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_GameRenderTextures[GameRenderTextureType::GameGBufferTexture].m_BufferIndex);
-				context->BarrierTransition(
+				/*context->BarrierTransition(
 					renderTex->GetResource(),
 					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
 					D3D12_RESOURCE_STATE_RENDER_TARGET
-				);
+				);*/
 				// RTV,DSVの設定
-				dsvHandle = m_ResourceManager->GetBuffer<DepthBuffer>(m_DepthManager->GetDepthBufferIndex())->GetDSVCpuHandle();
-				rtvHandle = renderTex->GetRTVCpuHandle();
-				context->SetRenderTarget(&rtvHandle, &dsvHandle);
+				depthTex = m_ResourceManager->GetBuffer<DepthBuffer>(m_DepthManager->GetDepthBufferIndex());
+				/*context->SetRenderTarget(&rtvHandle, &dsvHandle);
 				context->ClearRenderTarget(rtvHandle);
-				context->ClearDepthStencil(dsvHandle);
+				context->ClearDepthStencil(dsvHandle);*/
+				context->SetRenderTarget(renderTex, depthTex);
+				context->ClearRenderTarget(renderTex);
+				context->ClearDepthStencil(depthTex);
 			}
 			else
 			{
 				// StateをPixelShaderResourceに変更
-				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_GameRenderTextures[GameRenderTextureType::GameGBufferTexture].m_BufferIndex);
+				/*renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_GameRenderTextures[GameRenderTextureType::GameGBufferTexture].m_BufferIndex);
 				context->BarrierTransition(
 					renderTex->GetResource(),
 					D3D12_RESOURCE_STATE_RENDER_TARGET,
 					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
-				);
+				);*/
 			}
 		}
 		else if(mode == RenderMode::Scene)
@@ -227,27 +230,31 @@ void GraphicsEngine::SetRenderTargets(CommandContext* context, DrawPass pass, Re
 			{
 				// StateをRenderTargetに変更	
 				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_SceneRenderTextures[SceneRenderTextureType::SceneGBufferTexture].m_BufferIndex);
-				context->BarrierTransition(
+				/*context->BarrierTransition(
 					renderTex->GetResource(),
 					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
 					D3D12_RESOURCE_STATE_RENDER_TARGET
-				);
+				);*/
 				// RTV,DSVの設定
-				dsvHandle = m_ResourceManager->GetBuffer<DepthBuffer>(m_DepthManager->GetDepthBufferIndex())->GetDSVCpuHandle();
-				rtvHandle = renderTex->GetRTVCpuHandle();
-				context->SetRenderTarget(&rtvHandle, &dsvHandle);
+				depthTex = m_ResourceManager->GetBuffer<DepthBuffer>(m_DepthManager->GetDepthBufferIndex());
+				//dsvHandle = m_ResourceManager->GetBuffer<DepthBuffer>(m_DepthManager->GetDepthBufferIndex())->GetDSVCpuHandle();
+				//rtvHandle = renderTex->GetRTVCpuHandle();
+				/*context->SetRenderTarget(&rtvHandle, &dsvHandle);
 				context->ClearRenderTarget(rtvHandle);
-				context->ClearDepthStencil(dsvHandle);
+				context->ClearDepthStencil(dsvHandle);*/
+				context->SetRenderTarget(renderTex, depthTex);
+				context->ClearRenderTarget(renderTex);
+				context->ClearDepthStencil(depthTex);
 			}
 			else
 			{
 				// StateをPixelShaderResourceに変更
-				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_SceneRenderTextures[SceneRenderTextureType::SceneGBufferTexture].m_BufferIndex);
-				context->BarrierTransition(
+				//renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_SceneRenderTextures[SceneRenderTextureType::SceneGBufferTexture].m_BufferIndex);
+				/*context->BarrierTransition(
 					renderTex->GetResource(),
 					D3D12_RESOURCE_STATE_RENDER_TARGET,
 					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
-				);
+				);*/
 			}
 		}
 		else
@@ -263,25 +270,27 @@ void GraphicsEngine::SetRenderTargets(CommandContext* context, DrawPass pass, Re
 			{
 				// StateをRenderTargetに変更	
 				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_GameRenderTextures[GameRenderTextureType::GameLightingTexture].m_BufferIndex);
-				context->BarrierTransition(
+				/*context->BarrierTransition(
 					renderTex->GetResource(),
 					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
 					D3D12_RESOURCE_STATE_RENDER_TARGET
-				);
+				);*/
 				// RTVの設定
-				rtvHandle = renderTex->GetRTVCpuHandle();
+				/*rtvHandle = renderTex->GetRTVCpuHandle();
 				context->SetRenderTarget(&rtvHandle);
-				context->ClearRenderTarget(rtvHandle);
+				context->ClearRenderTarget(rtvHandle);*/
+				context->SetRenderTarget(renderTex);
+				context->ClearRenderTarget(renderTex);
 			}
 			else
 			{
 				// StateをPixelShaderResourceに変更
-				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_GameRenderTextures[GameRenderTextureType::GameLightingTexture].m_BufferIndex);
+				/*renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_GameRenderTextures[GameRenderTextureType::GameLightingTexture].m_BufferIndex);
 				context->BarrierTransition(
 					renderTex->GetResource(),
 					D3D12_RESOURCE_STATE_RENDER_TARGET,
 					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
-				);
+				);*/
 			}
 		}
 		else if (mode == RenderMode::Scene)
@@ -290,25 +299,27 @@ void GraphicsEngine::SetRenderTargets(CommandContext* context, DrawPass pass, Re
 			{
 				// StateをRenderTargetに変更	
 				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_SceneRenderTextures[SceneRenderTextureType::SceneLightingTexture].m_BufferIndex);
-				context->BarrierTransition(
+				/*context->BarrierTransition(
 					renderTex->GetResource(),
 					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
 					D3D12_RESOURCE_STATE_RENDER_TARGET
-				);
+				);*/
 				// RTVの設定
-				rtvHandle = renderTex->GetRTVCpuHandle();
-				context->SetRenderTarget(&rtvHandle);
-				context->ClearRenderTarget(rtvHandle);
+				//rtvHandle = renderTex->GetRTVCpuHandle();
+				/*context->SetRenderTarget(&rtvHandle);
+				context->ClearRenderTarget(rtvHandle);*/
+				context->SetRenderTarget(renderTex);
+				context->ClearRenderTarget(renderTex);
 			}
 			else
 			{
 				// StateをPixelShaderResourceに変更
-				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_SceneRenderTextures[SceneRenderTextureType::SceneLightingTexture].m_BufferIndex);
+				/*renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_SceneRenderTextures[SceneRenderTextureType::SceneLightingTexture].m_BufferIndex);
 				context->BarrierTransition(
 					renderTex->GetResource(),
 					D3D12_RESOURCE_STATE_RENDER_TARGET,
 					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
-				);
+				);*/
 			}
 		}
 		break;
@@ -320,26 +331,29 @@ void GraphicsEngine::SetRenderTargets(CommandContext* context, DrawPass pass, Re
 			{
 				// StateをRenderTargetに変更	
 				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_GameRenderTextures[GameRenderTextureType::GameForwardTexture].m_BufferIndex);
-				context->BarrierTransition(
+				/*context->BarrierTransition(
 					renderTex->GetResource(),
 					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
 					D3D12_RESOURCE_STATE_RENDER_TARGET
-				);
+				);*/
 				// RTV,DSVの設定
-				dsvHandle = m_ResourceManager->GetBuffer<DepthBuffer>(m_DepthManager->GetDepthBufferIndex())->GetDSVCpuHandle();
+				depthTex = m_ResourceManager->GetBuffer<DepthBuffer>(m_DepthManager->GetDepthBufferIndex());
+				/*dsvHandle = m_ResourceManager->GetBuffer<DepthBuffer>(m_DepthManager->GetDepthBufferIndex())->GetDSVCpuHandle();
 				rtvHandle = renderTex->GetRTVCpuHandle();
 				context->SetRenderTarget(&rtvHandle, &dsvHandle);
-				context->ClearRenderTarget(rtvHandle);
+				context->ClearRenderTarget(rtvHandle);*/
+				context->SetRenderTarget(renderTex, depthTex);
+				context->ClearRenderTarget(renderTex);
 			}
 			else
 			{
 				// StateをPixelShaderResourceに変更
-				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_GameRenderTextures[GameRenderTextureType::GameForwardTexture].m_BufferIndex);
+				/*renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_GameRenderTextures[GameRenderTextureType::GameForwardTexture].m_BufferIndex);
 				context->BarrierTransition(
 					renderTex->GetResource(),
 					D3D12_RESOURCE_STATE_RENDER_TARGET,
 					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
-				);
+				);*/
 			}
 		}
 		else if (mode == RenderMode::Scene)
@@ -348,26 +362,29 @@ void GraphicsEngine::SetRenderTargets(CommandContext* context, DrawPass pass, Re
 			{
 				// StateをRenderTargetに変更	
 				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_SceneRenderTextures[SceneRenderTextureType::SceneForwardTexture].m_BufferIndex);
-				context->BarrierTransition(
+				/*context->BarrierTransition(
 					renderTex->GetResource(),
 					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
 					D3D12_RESOURCE_STATE_RENDER_TARGET
-				);
+				);*/
 				// RTV,DSVの設定
-				dsvHandle = m_ResourceManager->GetBuffer<DepthBuffer>(m_DepthManager->GetDepthBufferIndex())->GetDSVCpuHandle();
+				depthTex = m_ResourceManager->GetBuffer<DepthBuffer>(m_DepthManager->GetDepthBufferIndex());
+				/*dsvHandle = m_ResourceManager->GetBuffer<DepthBuffer>(m_DepthManager->GetDepthBufferIndex())->GetDSVCpuHandle();
 				rtvHandle = renderTex->GetRTVCpuHandle();
 				context->SetRenderTarget(&rtvHandle, &dsvHandle);
-				context->ClearRenderTarget(rtvHandle);
+				context->ClearRenderTarget(rtvHandle);*/
+				context->SetRenderTarget(renderTex, depthTex);
+				context->ClearRenderTarget(renderTex);
 			}
 			else
 			{
 				// StateをPixelShaderResourceに変更
-				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_SceneRenderTextures[SceneRenderTextureType::SceneForwardTexture].m_BufferIndex);
+				/*renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_SceneRenderTextures[SceneRenderTextureType::SceneForwardTexture].m_BufferIndex);
 				context->BarrierTransition(
 					renderTex->GetResource(),
 					D3D12_RESOURCE_STATE_RENDER_TARGET,
 					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
-				);
+				);*/
 			}
 		}
 		break;
@@ -379,25 +396,27 @@ void GraphicsEngine::SetRenderTargets(CommandContext* context, DrawPass pass, Re
 			{
 				// StateをRenderTargetに変更	
 				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_GameRenderTextures[GameRenderTextureType::GamePostProcessTexture].m_BufferIndex);
-				context->BarrierTransition(
+				/*context->BarrierTransition(
 					renderTex->GetResource(),
 					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
 					D3D12_RESOURCE_STATE_RENDER_TARGET
-				);
+				);*/
 				// RTVの設定
-				rtvHandle = renderTex->GetRTVCpuHandle();
+				/*rtvHandle = renderTex->GetRTVCpuHandle();
 				context->SetRenderTarget(&rtvHandle);
-				context->ClearRenderTarget(rtvHandle);
+				context->ClearRenderTarget(rtvHandle);*/
+				context->SetRenderTarget(renderTex);
+				context->ClearRenderTarget(renderTex);
 			}
 			else
 			{
 				// StateをPixelShaderResourceに変更
-				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_GameRenderTextures[GameRenderTextureType::GamePostProcessTexture].m_BufferIndex);
+				/*renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_GameRenderTextures[GameRenderTextureType::GamePostProcessTexture].m_BufferIndex);
 				context->BarrierTransition(
 					renderTex->GetResource(),
 					D3D12_RESOURCE_STATE_RENDER_TARGET,
 					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
-				);
+				);*/
 			}
 		}
 		else if (mode == RenderMode::Scene)
@@ -406,25 +425,27 @@ void GraphicsEngine::SetRenderTargets(CommandContext* context, DrawPass pass, Re
 			{
 				// StateをRenderTargetに変更	
 				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_SceneRenderTextures[SceneRenderTextureType::ScenePostProcessTexture].m_BufferIndex);
-				context->BarrierTransition(
+				/*context->BarrierTransition(
 					renderTex->GetResource(),
 					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
 					D3D12_RESOURCE_STATE_RENDER_TARGET
-				);
+				);*/
 				// RTVの設定
-				rtvHandle = renderTex->GetRTVCpuHandle();
+				/*rtvHandle = renderTex->GetRTVCpuHandle();
 				context->SetRenderTarget(&rtvHandle);
-				context->ClearRenderTarget(rtvHandle);
+				context->ClearRenderTarget(rtvHandle);*/
+				context->SetRenderTarget(renderTex);
+				context->ClearRenderTarget(renderTex);
 			}
 			else
 			{
 				// StateをPixelShaderResourceに変更
-				renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_SceneRenderTextures[SceneRenderTextureType::ScenePostProcessTexture].m_BufferIndex);
+				/*renderTex = m_ResourceManager->GetBuffer<ColorBuffer>(m_SceneRenderTextures[SceneRenderTextureType::ScenePostProcessTexture].m_BufferIndex);
 				context->BarrierTransition(
 					renderTex->GetResource(),
 					D3D12_RESOURCE_STATE_RENDER_TARGET,
 					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
-				);
+				);*/
 			}
 		}
 		break;
@@ -435,22 +456,24 @@ void GraphicsEngine::SetRenderTargets(CommandContext* context, DrawPass pass, Re
 		if (isSetTarget)
 		{
 			// StateをRenderTargetに変更	
-			context->BarrierTransition(
+			/*context->BarrierTransition(
 				m_SwapChain->GetBuffer(backBufferIndex)->pResource.Get(),
 				D3D12_RESOURCE_STATE_PRESENT,
-				D3D12_RESOURCE_STATE_RENDER_TARGET);
+				D3D12_RESOURCE_STATE_RENDER_TARGET);*/
 			// RTVの設定
-			rtvHandle = m_SwapChain->GetBuffer(backBufferIndex)->m_RTVCpuHandle;
+			/*rtvHandle = m_SwapChain->GetBuffer(backBufferIndex)->m_RTVCpuHandle;
 			context->SetRenderTarget(&rtvHandle);
-			context->ClearRenderTarget(rtvHandle);
+			context->ClearRenderTarget(rtvHandle);*/
+			context->SetRenderTarget(m_SwapChain->GetBuffer(backBufferIndex));
+			context->ClearRenderTarget(m_SwapChain->GetBuffer(backBufferIndex));
 		}
 		else
 		{
 			// StateをPresentに変更
-			context->BarrierTransition(
+			/*context->BarrierTransition(
 				m_SwapChain->GetBuffer(backBufferIndex)->pResource.Get(),
 				D3D12_RESOURCE_STATE_RENDER_TARGET,
-				D3D12_RESOURCE_STATE_PRESENT);
+				D3D12_RESOURCE_STATE_PRESENT);*/
 		}
 	}
 			break;

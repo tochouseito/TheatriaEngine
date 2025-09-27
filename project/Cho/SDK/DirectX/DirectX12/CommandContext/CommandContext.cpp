@@ -102,22 +102,48 @@ void CommandContext::ResourceBarrier(UINT NumBarriers, const D3D12_RESOURCE_BARR
 	m_CommandList->ResourceBarrier(NumBarriers, pBarriers);
 }
 
-void CommandContext::SetRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE* rtvHandle, D3D12_CPU_DESCRIPTOR_HANDLE* dsvHandle)
+void CommandContext::SetRenderTarget(ColorBuffer* rtv, DepthBuffer* depth)
 {
+	// リソースステートのチェック
+	CheckResourceStateTransition(rtv, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	if (depth)
+	{
+		CheckResourceStateTransition(depth, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+	}
 	// レンダーターゲットビューの設定
-	m_CommandList->OMSetRenderTargets(1, rtvHandle, false, dsvHandle);
+	m_CommandList->OMSetRenderTargets(1, &rtv->GetRTVCpuHandle(), false, depth ? &depth->GetDSVCpuHandle() : nullptr);
 }
 
-void CommandContext::ClearRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE handle)
+void CommandContext::SetRenderTarget(SwapChainBuffer* swapChainBuffer)
 {
+	// リソースステートのチェック
+	CheckResourceStateTransition(swapChainBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	// レンダーターゲットビューの設定
+	m_CommandList->OMSetRenderTargets(1, &swapChainBuffer->m_RTVCpuHandle, false, nullptr);
+}
+
+void CommandContext::ClearRenderTarget(ColorBuffer* rt)
+{
+	// リソースステートのチェック
+	CheckResourceStateTransition(rt, D3D12_RESOURCE_STATE_RENDER_TARGET);
 	// 指定した色で画面全体をクリアする
-	m_CommandList->ClearRenderTargetView(handle, kClearColor, 0, nullptr);
+	m_CommandList->ClearRenderTargetView(rt->GetRTVCpuHandle(), kClearColor, 0, nullptr);
 }
 
-void CommandContext::ClearDepthStencil(D3D12_CPU_DESCRIPTOR_HANDLE handle)
+void CommandContext::ClearRenderTarget(SwapChainBuffer* swapChainBuffer)
 {
+	// リソースステートのチェック
+	CheckResourceStateTransition(swapChainBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	// 指定した色で画面全体をクリアする
+	m_CommandList->ClearRenderTargetView(swapChainBuffer->m_RTVCpuHandle, kClearColor, 0, nullptr);
+}
+
+void CommandContext::ClearDepthStencil(DepthBuffer* depth)
+{
+	// リソースステートのチェック
+	CheckResourceStateTransition(depth, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 	// 深度ステンシルビューのクリア
-	m_CommandList->ClearDepthStencilView(handle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+	m_CommandList->ClearDepthStencilView(depth->GetDSVCpuHandle(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 }
 
 void CommandContext::ClearUnorderedAccessViewUint(D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle, D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle, ID3D12Resource* pResource,const UINT* value,UINT numRects, const D3D12_RECT* pRects)
@@ -256,6 +282,34 @@ void CommandContext::ExecuteIndirect(ID3D12CommandSignature* pCommandSignature, 
 {
 	// 間接コマンドの実行
 	m_CommandList->ExecuteIndirect(pCommandSignature, MaxCommandCount, pArgumentBuffer, ArgumentBufferOffset, pCountBuffer, CountBufferOffset);
+}
+
+void CommandContext::CheckResourceStateTransition(GpuResource* pResource, D3D12_RESOURCE_STATES checkState)
+{
+	// リソースステートのチェック
+	if(pResource->GetResourceState() == checkState)
+	{
+		// 問題なし
+		return;
+	}
+	// リソースステートの遷移
+	BarrierTransition(pResource->GetResource(), pResource->GetResourceState(), checkState);
+	// リソースステートの更新
+	pResource->SetResourceState(checkState);
+}
+
+void CommandContext::CheckResourceStateTransition(SwapChainBuffer* swapChainBuffer, D3D12_RESOURCE_STATES checkState)
+{
+	// リソースステートのチェック
+	if (swapChainBuffer->m_ResourceState == checkState)
+	{
+		// 問題なし
+		return;
+	}
+	// リソースステートの遷移
+	BarrierTransition(swapChainBuffer->pResource.Get(), swapChainBuffer->m_ResourceState, checkState);
+	// リソースステートの更新
+	swapChainBuffer->m_ResourceState = checkState;
 }
 
 GraphicsContext::GraphicsContext(ID3D12Device* device)
