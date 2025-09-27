@@ -37,6 +37,10 @@ public:
     ID3D12Resource** GetAddressOf() { return m_pResource.GetAddressOf(); }
 	// リソースのバージョンIDを取得
     uint32_t GetVersionID() const { return m_VersionID; }
+	// ResourceState を取得
+	D3D12_RESOURCE_STATES GetResourceState() const { return m_UseState; }
+	// ResourceState を設定
+	void SetResourceState(D3D12_RESOURCE_STATES state) { m_UseState = state; }
 
     // 遅延破棄用に自分を shared_ptr 化する
     std::shared_ptr<GpuResource> GetShared()
