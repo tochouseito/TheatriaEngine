@@ -13,9 +13,6 @@ public:
 		m_ArraySize(0),
 		m_Format(DXGI_FORMAT_UNKNOWN),
 		m_Dimension(D3D12_RESOURCE_DIMENSION_UNKNOWN),
-		m_SRVCpuHandle({}),
-		m_SRVGpuHandle({}),
-		m_SRVHandleIndex(std::nullopt),
 		GpuResource()
 	{
 	}
@@ -27,9 +24,6 @@ public:
 		m_ArraySize(0),
 		m_Format(DXGI_FORMAT_UNKNOWN),
 		m_Dimension(D3D12_RESOURCE_DIMENSION_UNKNOWN),
-		m_SRVCpuHandle({}),
-		m_SRVGpuHandle({}),
-		m_SRVHandleIndex(std::nullopt),
 		GpuResource(pResource,CurrentState)
 	{
 	}
@@ -42,9 +36,6 @@ public:
 		m_ArraySize = 0;
 		m_Format = DXGI_FORMAT_UNKNOWN;
 		m_Dimension = D3D12_RESOURCE_DIMENSION_UNKNOWN;
-		m_SRVCpuHandle = {};
-		m_SRVGpuHandle = {};
-		m_SRVHandleIndex = std::nullopt;
 	}
 	// リソースの生成
 	void CreatePixelBufferResource(ID3D12Device8* device, D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES& state);
@@ -60,11 +51,6 @@ public:
 	const DXGI_FORMAT& GetFormat() const { return m_Format; }
 	// ピクセルバッファの次元を取得
 	D3D12_RESOURCE_DIMENSION GetDimension() const { return m_Dimension; }
-	// ディスクリプタハンドルを取得
-	D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCpuHandle() const { return m_SRVCpuHandle; }
-	D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGpuHandle() const { return m_SRVGpuHandle; }
-	// ディスクリプタハンドルインデックスを取得
-	std::optional<uint32_t> GetSRVHandleIndex() const { return m_SRVHandleIndex; }
 protected:
 	// ピクセルバッファの幅
 	UINT64 m_Width;
@@ -78,10 +64,5 @@ protected:
 	DXGI_FORMAT m_Format;
 	// ピクセルバッファの次元
 	D3D12_RESOURCE_DIMENSION m_Dimension;
-	// ディスクリプタハンドル
-	D3D12_CPU_DESCRIPTOR_HANDLE m_SRVCpuHandle = {};
-	D3D12_GPU_DESCRIPTOR_HANDLE m_SRVGpuHandle = {};
-	// ディスクリプタハンドルインデックス
-	std::optional<uint32_t> m_SRVHandleIndex = std::nullopt;
 };
 

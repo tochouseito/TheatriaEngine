@@ -58,14 +58,14 @@ bool PixelBuffer::CreateSRV(ID3D12Device8* device, D3D12_SHADER_RESOURCE_VIEW_DE
 		return false;
 	}
 	// CPUハンドルを取得
-	m_SRVCpuHandle = pDescriptorHeap->GetCPUDescriptorHandle(m_SRVHandleIndex.value());
+	m_SRVCPUHandle = pDescriptorHeap->GetCPUDescriptorHandle(m_SRVHandleIndex.value());
 	// GPUハンドルを取得
-	m_SRVGpuHandle = pDescriptorHeap->GetGPUDescriptorHandle(m_SRVHandleIndex.value());
+	m_SRVGPUHandle = pDescriptorHeap->GetGPUDescriptorHandle(m_SRVHandleIndex.value());
 	// Viewの生成
 	device->CreateShaderResourceView(
 		GetResource(),
 		&srvDesc,
-		m_SRVCpuHandle
+		m_SRVCPUHandle
 	);
 	return true;
 }

@@ -160,11 +160,6 @@ public:
 	virtual void CreateStructuredBufferResource(ID3D12Device* device, const UINT& numElements) = 0;
 	// SRV作成
 	virtual bool CreateSRV(ID3D12Device8* device, D3D12_SHADER_RESOURCE_VIEW_DESC& srvDesc, DescriptorHeap* pDescriptorHeap) = 0;
-	// ディスクリプタハンドルを取得
-	virtual D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCpuHandle() const = 0;
-	virtual D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGpuHandle() const = 0;
-	// ディスクリプタハンドルインデックスを取得
-	virtual std::optional<uint32_t> GetSRVHandleIndex() const = 0;
 };
 
 template<typename T>
@@ -184,9 +179,6 @@ public:
 	~StructuredBuffer()
 	{
 		m_MappedData = std::span<T>{};
-		m_SRVCpuHandle = {};
-		m_SRVGpuHandle = {};
-		m_SRVHandleIndex = std::nullopt;
 	}
 	void CreateStructuredBufferResource(ID3D12Device* device, const UINT& numElements) override
 	{
@@ -233,14 +225,14 @@ public:
 			return false;
 		}
 		// CPUハンドルを取得
-		m_SRVCpuHandle = pDescriptorHeap->GetCPUDescriptorHandle(m_SRVHandleIndex.value());
+		m_SRVCPUHandle = pDescriptorHeap->GetCPUDescriptorHandle(m_SRVHandleIndex.value());
 		// GPUハンドルを取得
-		m_SRVGpuHandle = pDescriptorHeap->GetGPUDescriptorHandle(m_SRVHandleIndex.value());
+		m_SRVGPUHandle = pDescriptorHeap->GetGPUDescriptorHandle(m_SRVHandleIndex.value());
 		// Viewの生成
 		device->CreateShaderResourceView(
 			GetResource(),
 			&srvDesc,
-			m_SRVCpuHandle
+			m_SRVCPUHandle
 		);
 		return true;
 	}
@@ -276,19 +268,9 @@ public:
 	{
 		return m_MappedData;
 	}
-	// ディスクリプタハンドルを取得
-	D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCpuHandle() const override { return m_SRVCpuHandle; }
-	D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGpuHandle() const override { return m_SRVGpuHandle; }
-	// ディスクリプタハンドルインデックスを取得
-	std::optional<uint32_t> GetSRVHandleIndex() const override { return m_SRVHandleIndex; }
 private:
 	// マッピングデータ
 	std::span<T> m_MappedData;
-	// ディスクリプタハンドル
-	D3D12_CPU_DESCRIPTOR_HANDLE m_SRVCpuHandle = {};
-	D3D12_GPU_DESCRIPTOR_HANDLE m_SRVGpuHandle = {};
-	// ディスクリプタハンドルインデックス
-	std::optional<uint32_t> m_SRVHandleIndex = std::nullopt;
 };
 
 // UAVのインターフェース
@@ -310,11 +292,6 @@ public:
 	virtual void CreateRWStructuredBufferResource(ID3D12Device8* device, const UINT& numElements) = 0;
 	// SRV作成
 	virtual bool CreateUAV(ID3D12Device8* device, D3D12_UNORDERED_ACCESS_VIEW_DESC& uavDesc, DescriptorHeap* pDescriptorHeap, bool useCounter = false) = 0;
-	// ディスクリプタハンドルを取得
-	virtual D3D12_CPU_DESCRIPTOR_HANDLE GetUAVCpuHandle() const = 0;
-	virtual D3D12_GPU_DESCRIPTOR_HANDLE GetUAVGpuHandle() const = 0;
-	// ディスクリプタハンドルインデックスを取得
-	virtual std::optional<uint32_t> GetUAVHandleIndex() const = 0;
 	// カウンターリソースを取得
 	virtual ID3D12Resource* GetCounterResource() { return m_CounterResource.GetResource(); }
 	// カウンターリソースの値用
@@ -341,9 +318,6 @@ public:
 	// Destructor
 	~RWStructuredBuffer()
 	{
-		m_UAVCpuHandle = {};
-		m_UAVGpuHandle = {};
-		m_UAVHandleIndex = std::nullopt;
 	}
 	void CreateRWStructuredBufferResource(ID3D12Device8* device, const UINT& numElements) override
 	{
@@ -380,8 +354,8 @@ public:
 			Log::Write(LogLevel::Warn, "DescriptorHeap is full");
 			return false;
 		}
-		m_UAVCpuHandle = pDescriptorHeap->GetCPUDescriptorHandle(m_UAVHandleIndex.value());
-		m_UAVGpuHandle = pDescriptorHeap->GetGPUDescriptorHandle(m_UAVHandleIndex.value());
+		m_UAVCPUHandle = pDescriptorHeap->GetCPUDescriptorHandle(m_UAVHandleIndex.value());
+		m_UAVGPUHandle = pDescriptorHeap->GetGPUDescriptorHandle(m_UAVHandleIndex.value());
 
 		if (useCounter)
 		{
@@ -436,14 +410,14 @@ public:
 				GetResource(),
 				m_CounterResource.GetResource(),
 				&uavDesc,
-				m_UAVCpuHandle);
+				m_UAVCPUHandle);
 		} else
 		{
 			device->CreateUnorderedAccessView(
 				GetResource(),
 				nullptr,
 				&uavDesc,
-				m_UAVCpuHandle
+				m_UAVCPUHandle
 			);
 		}
 		return true;
@@ -455,15 +429,4 @@ public:
 			GetResource()->Unmap(0, nullptr);
 		}
 	}
-	// ディスクリプタハンドルを取得
-	D3D12_CPU_DESCRIPTOR_HANDLE GetUAVCpuHandle() const override { return m_UAVCpuHandle; }
-	D3D12_GPU_DESCRIPTOR_HANDLE GetUAVGpuHandle() const override { return m_UAVGpuHandle; }
-	// ディスクリプタハンドルインデックスを取得
-	std::optional<uint32_t> GetUAVHandleIndex() const override { return m_UAVHandleIndex; }
-private:
-	// ディスクリプタハンドル
-	D3D12_CPU_DESCRIPTOR_HANDLE m_UAVCpuHandle = {};
-	D3D12_GPU_DESCRIPTOR_HANDLE m_UAVGpuHandle = {};
-	// ディスクリプタハンドルインデックス
-	std::optional<uint32_t> m_UAVHandleIndex = std::nullopt;
 };

@@ -26,27 +26,6 @@ public:
 	virtual bool CreateUAV(ID3D12Device8* device, D3D12_UNORDERED_ACCESS_VIEW_DESC& uavDesc, DescriptorHeap* pDescriptorHeap, bool useCounter = false) = 0;
 	// 頂点バッファビューを取得
 	virtual D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() = 0;
-	// ディスクリプタハンドルを取得
-	D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCpuHandle() const { return m_SRVCpuHandle; }
-	D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGpuHandle() const { return m_SRVGpuHandle; }
-	// ディスクリプタハンドルインデックスを取得
-	std::optional<uint32_t> GetSRVHandleIndex() const { return m_SRVHandleIndex; }
-	// UAVディスクリプタハンドルを取得
-	D3D12_CPU_DESCRIPTOR_HANDLE GetUAVCpuHandle() const { return m_UAVCpuHandle; }
-	D3D12_GPU_DESCRIPTOR_HANDLE GetUAVGpuHandle() const { return m_UAVGpuHandle; }
-	// UAVディスクリプタハンドルインデックスを取得
-	std::optional<uint32_t> GetUAVHandleIndex() const { return m_UAVHandleIndex; }
-protected:
-	// ディスクリプタハンドル
-	D3D12_CPU_DESCRIPTOR_HANDLE m_SRVCpuHandle = {};
-	D3D12_GPU_DESCRIPTOR_HANDLE m_SRVGpuHandle = {};
-	// ディスクリプタハンドルインデックス
-	std::optional<uint32_t> m_SRVHandleIndex = std::nullopt;
-	// UAVディスクリプタハンドル
-	D3D12_CPU_DESCRIPTOR_HANDLE m_UAVCpuHandle = {};
-	D3D12_GPU_DESCRIPTOR_HANDLE m_UAVGpuHandle = {};
-	// UAVディスクリプタハンドルインデックス
-	std::optional<uint32_t> m_UAVHandleIndex = std::nullopt;
 };
 
 template<typename T>
@@ -138,14 +117,14 @@ public:
 			return false;
 		}
 		// CPUハンドルを取得
-		m_SRVCpuHandle = pDescriptorHeap->GetCPUDescriptorHandle(m_SRVHandleIndex.value());
+		m_SRVCPUHandle = pDescriptorHeap->GetCPUDescriptorHandle(m_SRVHandleIndex.value());
 		// GPUハンドルを取得
-		m_SRVGpuHandle = pDescriptorHeap->GetGPUDescriptorHandle(m_SRVHandleIndex.value());
+		m_SRVGPUHandle = pDescriptorHeap->GetGPUDescriptorHandle(m_SRVHandleIndex.value());
 		// Viewの生成
 		device->CreateShaderResourceView(
 			GetResource(),
 			&srvDesc,
-			m_SRVCpuHandle
+			m_SRVCPUHandle
 		);
 		return true;
 	}
@@ -174,8 +153,8 @@ public:
 			Log::Write(LogLevel::Warn, "DescriptorHeap is full");
 			return false;
 		}
-		m_UAVCpuHandle = pDescriptorHeap->GetCPUDescriptorHandle(m_UAVHandleIndex.value());
-		m_UAVGpuHandle = pDescriptorHeap->GetGPUDescriptorHandle(m_UAVHandleIndex.value());
+		m_UAVCPUHandle = pDescriptorHeap->GetCPUDescriptorHandle(m_UAVHandleIndex.value());
+		m_UAVGPUHandle = pDescriptorHeap->GetGPUDescriptorHandle(m_UAVHandleIndex.value());
 
 		if (useCounter)
 		{
@@ -186,7 +165,7 @@ public:
 				GetResource(),
 				nullptr,
 				&uavDesc,
-				m_UAVCpuHandle
+				m_UAVCPUHandle
 			);
 		}
 		return true;

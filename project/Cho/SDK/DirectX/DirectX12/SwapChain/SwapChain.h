@@ -2,6 +2,8 @@
 
 #include "SDK/DirectX/DirectX12/stdafx/stdafx.h"
 
+class CommandManager;
+class GraphicsEngine;
 class ResourceManager;
 
 static const uint32_t bufferCount = 2;
@@ -17,7 +19,7 @@ class SwapChain
 {
 public:
 	// Constructor
-	SwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue, const HWND& hwnd, const UINT64& width, const UINT& height);
+	SwapChain(IDXGIFactory7* dxgiFactory, GraphicsEngine* graphicsEngine, ID3D12CommandQueue* queue, CommandManager* commandManagerPtr, const HWND& hwnd, const UINT64& width, const UINT& height);
 	// Destructor
 	~SwapChain()
 	{
@@ -40,5 +42,8 @@ private:
 	int32_t m_RefreshRate = {};
 	// BufferIndex
 	std::array<std::unique_ptr<SwapChainBuffer>, bufferCount> m_BufferData = {};
+
+	GraphicsEngine* m_GraphicsEngine = nullptr;
+	CommandManager* m_CommandManager = nullptr;
 };
 
