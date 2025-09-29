@@ -3,7 +3,7 @@
 #include <atomic>
 #include <type_traits>
 
-namespace cho
+namespace theatria
 {
     template <typename T>
     class atomic_shared_ptr

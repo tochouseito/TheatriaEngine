@@ -3,7 +3,7 @@
 エンジン基底クラス
 --------------------------------------------*/
 
-// if delete
+#include "Config/Config.h"
 
 // C++
 #include <memory>
@@ -35,5 +35,6 @@ public:// method
 	}
 protected:
 	RuntimeMode runtimeMode;
+	Theatria::Config config;
 };
 

@@ -24,7 +24,7 @@ private:
 
 class GameCore
 {
-	friend class ChoEngine;
+	friend class TheatriaEngine;
 public:
 	GameCore()
 	{

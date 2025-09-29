@@ -2,8 +2,8 @@
 #include <cassert>
 #include <string>
 
-std::string cho::Log::LogFileName = "ChoEngineLog.txt";
-std::mutex cho::Log::logMutex;
+std::string theatria::Log::LogFileName = "TheatriaEngineLog.txt";
+std::mutex theatria::Log::logMutex;
 
 std::wstring ConvertString(const std::string& str)
 {
@@ -39,7 +39,7 @@ std::string ConvertString(const std::wstring& str)
     return result;
 }
 
-void cho::Log::Write(
+void theatria::Log::Write(
     LogLevel level,
     const std::variant<std::string, std::wstring>& message,
     std::optional<std::variant<bool, HRESULT>> flag,
@@ -143,10 +143,10 @@ void cho::Log::Write(
 #endif
 }
 
-void cho::Log::WriteToFile(const std::string& message)
+void theatria::Log::WriteToFile(const std::string& message)
 {
     std::lock_guard<std::mutex> lock(logMutex);
-    std::ofstream logFile("ChoEngineLog.txt", std::ios::app);
+    std::ofstream logFile("TheatriaEngineLog.txt", std::ios::app);
     if (logFile.is_open())
     {
         auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
@@ -158,7 +158,7 @@ void cho::Log::WriteToFile(const std::string& message)
     }
 }
 
-std::string cho::Log::ToString(LogLevel level)
+std::string theatria::Log::ToString(LogLevel level)
 {
     switch (level)
     {

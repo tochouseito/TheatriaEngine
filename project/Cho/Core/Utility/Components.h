@@ -1,5 +1,5 @@
 #pragma once
-#include "ChoMath.h"// ChoEngine数学ライブラリ
+#include "ChoMath.h"// TheatriaEngine数学ライブラリ
 #include "Core/Utility/Color.h"
 #include "Core/Utility/IDType.h"
 #include "Core/Utility/EffectStruct.h"

@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "GpuResource.h"
 #include "Core/ChoLog/ChoLog.h"
-using namespace cho;
+using namespace theatria;
 
 void GpuResource::CreateResource(ID3D12Device* device, D3D12_HEAP_PROPERTIES& heapProperties, D3D12_HEAP_FLAGS heapFlags, D3D12_RESOURCE_DESC& desc, D3D12_RESOURCE_STATES InitialState, D3D12_CLEAR_VALUE* pClearValue)
 {
@@ -14,6 +14,7 @@ void GpuResource::CreateResource(ID3D12Device* device, D3D12_HEAP_PROPERTIES& he
 		IID_PPV_ARGS(&m_pResource)
 	);
 	m_UseState = InitialState;
+	m_HeapType = heapProperties.Type;
 	Log::Write(LogLevel::Assert, "CreateCommittedResource", hr);
 }
 
@@ -21,9 +22,6 @@ void GpuResource::RemakeResource(ID3D12Device* device, D3D12_HEAP_PROPERTIES& he
 {
 	// リソースの破棄
 	Destroy();
-	// 新しい状態を設定
-	m_UseState = InitialState;
-
 	HRESULT hr = device->CreateCommittedResource(
 		&heapProperties,
 		heapFlags,
@@ -33,6 +31,7 @@ void GpuResource::RemakeResource(ID3D12Device* device, D3D12_HEAP_PROPERTIES& he
 		IID_PPV_ARGS(&m_pResource)
 	);
 	m_UseState = InitialState;
+	m_HeapType = heapProperties.Type;
 	Log::Write(LogLevel::Assert, "CreateCommittedResource", hr);
 }
 

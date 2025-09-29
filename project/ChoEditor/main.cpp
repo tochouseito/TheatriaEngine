@@ -2,8 +2,9 @@
 #pragma warning(disable:28251)
 // エンジン起動関数を使う
 #define ENGINECREATE_FUNCTION
+#define RUNTIMEMODE_EDITOR
 // Engine
-#include "Cho/ChoEngineAPI.h"
+#include "Cho/TheatriaEngineAPI.h"
 // Windows
 #include <Windows.h>
 #include <memory>
@@ -59,9 +60,9 @@ private:
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma warning(pop)
 	// エンジンのインスタンス
-	std::unique_ptr<Engine, decltype(&cho::DestroyEngine)> engine(
-		cho::CreateEngine(RuntimeMode::Editor), cho::DestroyEngine);// エンジンの生成
-	cho::SetEngine(engine.get());// エンジンのポインタをセット
+	std::unique_ptr<Engine, decltype(&theatria::DestroyEngine)> engine(
+		theatria::CreateEngine(RuntimeMode::Editor), theatria::DestroyEngine);// エンジンの生成
+	theatria::SetEngine(engine.get());// エンジンのポインタをセット
 
 	// BuildWatcherコントローラー
 	BuildWatcherController buildWatcher;

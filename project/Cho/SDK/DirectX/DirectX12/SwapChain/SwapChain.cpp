@@ -1,10 +1,12 @@
 #include "pch.h"
 #include "SwapChain.h"
+#include "Graphics/GraphicsEngine/GraphicsEngine.h"
 #include "Resources/ResourceManager/ResourceManager.h"
 #include "Core/ChoLog/ChoLog.h"
-using namespace cho;
+using namespace theatria;
 
-SwapChain::SwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* queue, const HWND& hwnd, const UINT64& width, const UINT& height)
+SwapChain::SwapChain(IDXGIFactory7* dxgiFactory, GraphicsEngine* graphicsEngine, ID3D12CommandQueue* queue, CommandManager* commandManagerPtr, const HWND& hwnd, const UINT64& width, const UINT& height)
+	:m_GraphicsEngine(graphicsEngine), m_CommandManager(commandManagerPtr)
 {
 	CreateSwapChain(dxgiFactory, queue,  hwnd, width, height);
 }
@@ -80,9 +82,23 @@ void SwapChain::CreateResource(ID3D12Device8* device, ResourceManager* resourceM
 
 void SwapChain::Present()
 {
-	HRESULT hr = m_SwapChain->Present(1, 0);
-	hr;
-	//Log::Write(LogLevel::Assert, "SwapChain presented.", hr);
+	// リソースステートのチェック
+	UINT backBufferIndex = m_SwapChain->GetCurrentBackBufferIndex();
+	SwapChainBuffer* buffer = m_BufferData[backBufferIndex].get();
+	if(buffer->m_ResourceState != D3D12_RESOURCE_STATE_PRESENT)
+	{
+		// コマンドリスト取得
+		CommandContext* context = m_CommandManager->GetCommandContext();
+		// コマンドリスト開始
+		m_GraphicsEngine->BeginCommandContext(context);
+		// リソースバリア設定
+		context->CheckResourceStateTransition(buffer, D3D12_RESOURCE_STATE_PRESENT);
+		// コマンドリスト終了
+		m_GraphicsEngine->EndCommandContext(context, Graphics);
+		// GPUの完了待ち
+		m_GraphicsEngine->WaitForGPU(Graphics);
+	}
+	m_SwapChain->Present(1, 0);
 }
 
 void SwapChain::Resize(ID3D12Device8* device, const UINT64& width, const UINT& height)

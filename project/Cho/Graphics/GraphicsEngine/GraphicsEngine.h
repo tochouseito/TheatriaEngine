@@ -70,6 +70,7 @@ class GameCore;
 class EngineCommand;
 class GraphicsEngine : public Engine
 {
+	friend class SwapChain;
 	friend class TextureManager;
 	friend class PipelineManager;
 	friend class ResourceManager;

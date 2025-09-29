@@ -1,12 +1,12 @@
 #include "pch.h"
 #define ENGINECREATE_FUNCTION
-#define USE_CHOENGINE_SCRIPT
-#include "ChoEngineAPI.h"
-#include "Main/ChoEngine.h"
+#define USE_TheatriaEngine_SCRIPT
+#include "TheatriaEngineAPI.h"
+#include "Main/TheatriaEngine.h"
 #include "EngineCommand/EngineCommands.h"
 
 // メンバ定義
-namespace ChoSystem
+namespace theatriaSystem
 {
 	SceneManagerAPI sceneManager;
 	struct AudioAPI::ImplAudioAPI
@@ -20,7 +20,7 @@ namespace ChoSystem
 		implAudioAPI = std::make_unique<ImplAudioAPI>();
 	}
 	AudioAPI testAudio;
-	CHO_API void AudioAPI::AddSource(const std::string& name)
+	THEATRIA_API void AudioAPI::AddSource(const std::string& name)
 	{
 		for(const auto& src : implAudioAPI->soundDatas)
 		{
@@ -43,7 +43,7 @@ namespace ChoSystem
 			}
 		}
 	}
-	CHO_API void AudioAPI::Play(const std::string& name, const bool& isLoop)
+	THEATRIA_API void AudioAPI::Play(const std::string& name, const bool& isLoop)
 	{
 		for(auto& src : implAudioAPI->soundDatas)
 		{
@@ -56,16 +56,16 @@ namespace ChoSystem
 			}
 		}
 	}
-	CHO_API void AudioAPI::Stop(const std::string& name)
+	THEATRIA_API void AudioAPI::Stop(const std::string& name)
 	{
 		name;
 	}
-	CHO_API bool AudioAPI::IsPlaying(const std::string& name)
+	THEATRIA_API bool AudioAPI::IsPlaying(const std::string& name)
 	{
 		name;
 		return false;
 	}
-	CHO_API void AudioAPI::SetVolume(const std::string& name, const float& volume)
+	THEATRIA_API void AudioAPI::SetVolume(const std::string& name, const float& volume)
 	{
 		for (auto& src : implAudioAPI->soundDatas)
 		{
@@ -81,40 +81,40 @@ namespace ChoSystem
 	}
 }
 
-CHO_API Engine* cho::CreateEngine(RuntimeMode mode)
+THEATRIA_API Engine* theatria::CreateEngine(RuntimeMode mode)
 {
-    return new ChoEngine(mode);
+    return new TheatriaEngine(mode);
 }
 
-CHO_API void cho::DestroyEngine(Engine* engine)
+THEATRIA_API void theatria::DestroyEngine(Engine* engine)
 {
 	delete engine;
 }
 
-CHO_API void cho::SetEngine(Engine* engine)
+THEATRIA_API void theatria::SetEngine(Engine* engine)
 {
-	g_Engine = static_cast<ChoEngine*>(engine);
+	g_Engine = static_cast<TheatriaEngine*>(engine);
 }
 
-CHO_API bool ChoSystem::SaveGameParameter(const std::wstring& filePath, const std::string& group, const std::string& item, const std::string& dataName, const GameParameterVariant& value)
+THEATRIA_API bool theatriaSystem::SaveGameParameter(const std::wstring& filePath, const std::string& group, const std::string& item, const std::string& dataName, const GameParameterVariant& value)
 {
-	return cho::FileSystem::SaveGameParameter(filePath, group, item, dataName, value);
+	return theatria::FileSystem::SaveGameParameter(filePath, group, item, dataName, value);
 }
 
-CHO_API bool ChoSystem::LoadGameParameter(const std::wstring& filePath, const std::string& group, const std::string& item, const std::string& dataName, GameParameterVariant& outValue)
+THEATRIA_API bool theatriaSystem::LoadGameParameter(const std::wstring& filePath, const std::string& group, const std::string& item, const std::string& dataName, GameParameterVariant& outValue)
 {
-	return cho::FileSystem::LoadGameParameter(filePath, group, item, dataName, outValue);
+	return theatria::FileSystem::LoadGameParameter(filePath, group, item, dataName, outValue);
 }
 
 // ゲームオブジェクト取得
-CHO_API GameObject* ChoSystem::FindGameObjectByName(const std::wstring& name)
+THEATRIA_API GameObject* theatriaSystem::FindGameObjectByName(const std::wstring& name)
 {
 	GameCore* gameCore = g_Engine->GetEngineCommand()->GetGameCore();
 	GameObject* result = gameCore->GetGameWorld()->GetGameObject(name);
 	return result;
 }
 
-CHO_API GameObject* ChoSystem::CloneGameObject(const GameObject* srcObj, Vector3 generatePosition)
+THEATRIA_API GameObject* theatriaSystem::CloneGameObject(const GameObject* srcObj, Vector3 generatePosition)
 {
 	EngineCommand* engineCommand = g_Engine->GetEngineCommand();
 	std::unique_ptr<CloneObjectCommand> command = std::make_unique<CloneObjectCommand>(srcObj->GetHandle());
@@ -143,7 +143,7 @@ CHO_API GameObject* ChoSystem::CloneGameObject(const GameObject* srcObj, Vector3
 }
 
 // ゲームオブジェクト削除
-CHO_API void ChoSystem::DestroyGameObject(GameObject* obj)
+THEATRIA_API void theatriaSystem::DestroyGameObject(GameObject* obj)
 {
 	EngineCommand* engineCommand = g_Engine->GetEngineCommand();
 	if (!obj) { return; }
@@ -151,24 +151,24 @@ CHO_API void ChoSystem::DestroyGameObject(GameObject* obj)
 	command->Execute(engineCommand);
 }
 
-CHO_API float ChoSystem::DeltaTime()
+THEATRIA_API float theatriaSystem::DeltaTime()
 {
 	return Timer::GetDeltaTime();
 }
 
-CHO_API uint32_t ChoSystem::ScreenWidth()
+THEATRIA_API uint32_t theatriaSystem::ScreenWidth()
 {
 	EngineCommand* engineCommand = g_Engine->GetEngineCommand();
 	return static_cast<uint32_t>(engineCommand->GetGraphicsEngine()->GetResolutionWidth());
 }
 
-CHO_API uint32_t ChoSystem::ScreenHeight()
+THEATRIA_API uint32_t theatriaSystem::ScreenHeight()
 {
 	EngineCommand* engineCommand = g_Engine->GetEngineCommand();
 	return static_cast<uint32_t>(engineCommand->GetGraphicsEngine()->GetResolutionHeight());
 }
 
-CHO_API Marionnette* ChoSystem::GetMarionnettePtr(const std::wstring& name)
+THEATRIA_API Marionnette* theatriaSystem::GetMarionnettePtr(const std::wstring& name)
 {
 	GameObject* obj = FindGameObjectByName(name);
 	if (!obj) { return nullptr; }
@@ -185,72 +185,72 @@ CHO_API Marionnette* ChoSystem::GetMarionnettePtr(const std::wstring& name)
 	}
 }
 
-std::vector<std::vector<std::string>> ChoSystem::LoadCSV(const std::string& filePath)
+std::vector<std::vector<std::string>> theatriaSystem::LoadCSV(const std::string& filePath)
 {
-	return cho::FileSystem::LoadCSV(filePath);
+	return theatria::FileSystem::LoadCSV(filePath);
 }
 
-std::vector<std::vector<int>> ChoSystem::LoadCSV_Int(const std::string& filePath)
+std::vector<std::vector<int>> theatriaSystem::LoadCSV_Int(const std::string& filePath)
 {
-	return cho::FileSystem::LoadCSV_Int(filePath);
+	return theatria::FileSystem::LoadCSV_Int(filePath);
 }
 
-void ChoSystem::SceneManagerAPI::LoadScene(const std::wstring& sceneName)
+void theatriaSystem::SceneManagerAPI::LoadScene(const std::wstring& sceneName)
 {
 	g_Engine->GetEngineCommand()->GetGameCore()->GetSceneManager()->SetLoadingSceneName(sceneName);
 }
 
-void ChoSystem::SceneManagerAPI::UnloadScene(const std::wstring& sceneName)
+void theatriaSystem::SceneManagerAPI::UnloadScene(const std::wstring& sceneName)
 {
 	sceneName;
 }
 
-void ChoSystem::SceneManagerAPI::ChangeMainScene(const std::wstring& sceneName)
+void theatriaSystem::SceneManagerAPI::ChangeMainScene(const std::wstring& sceneName)
 {
 	sceneName;
 }
 
-bool ChoSystem::Input::PushKey(const uint8_t& keyNumber)
+bool theatriaSystem::Input::PushKey(const uint8_t& keyNumber)
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->PushKey(keyNumber);
 }
 
-bool ChoSystem::Input::TriggerKey(const uint8_t& keyNumber)
+bool theatriaSystem::Input::TriggerKey(const uint8_t& keyNumber)
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->TriggerKey(keyNumber);
 }
 
-const DIMOUSESTATE2& ChoSystem::Input::GetAllMouse()
+const DIMOUSESTATE2& theatriaSystem::Input::GetAllMouse()
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->GetAllMouse();
 }
 
-MouseMove ChoSystem::Input::GetMouseMove()
+MouseMove theatriaSystem::Input::GetMouseMove()
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->GetMouseMove();
 }
 
-bool ChoSystem::Input::IsPressMouse(const int32_t& mouseNumber)
+bool theatriaSystem::Input::IsPressMouse(const int32_t& mouseNumber)
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->IsPressMouse(mouseNumber);
 }
 
-bool ChoSystem::Input::IsTriggerMouse(const int32_t& mouseNumber)
+bool theatriaSystem::Input::IsTriggerMouse(const int32_t& mouseNumber)
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->IsTriggerMouse(mouseNumber);
 }
 
-const Vector2& ChoSystem::Input::GetMouseWindowPosition()
+const Vector2& theatriaSystem::Input::GetMouseWindowPosition()
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->GetMouseWindowPosition();
 }
 
-Vector2 ChoSystem::Input::GetMouseScreenPosition()
+Vector2 theatriaSystem::Input::GetMouseScreenPosition()
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->GetMouseScreenPosition();
 }
 
-bool ChoSystem::Input::GetJoystickState(const int32_t& stickNo, XINPUT_STATE& out)
+bool theatriaSystem::Input::GetJoystickState(const int32_t& stickNo, XINPUT_STATE& out)
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->GetJoystickState(stickNo, out);
 }

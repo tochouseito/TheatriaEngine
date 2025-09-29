@@ -48,17 +48,17 @@ D3D12_GPU_DESCRIPTOR_HANDLE EngineCommand::GetTextureHandle(const std::wstring& 
 
 void EngineCommand::SaveProjectFile()
 {
-	cho::FileSystem::SaveProject(m_EditorManager,m_GameCore->GetSceneManager(), m_GameCore->GetGameWorld(), m_GameCore->GetECSManager());
+	theatria::FileSystem::SaveProject(m_EditorManager,m_GameCore->GetSceneManager(), m_GameCore->GetGameWorld(), m_GameCore->GetECSManager());
 }
 
 void EngineCommand::GenerateScript(const std::string& scriptName)
 {
 	// プロジェクトの保存処理
-	cho::FileSystem::ScriptProject::SaveAndBuildSolution(cho::FileSystem::m_sProjectName, false);
+	theatria::FileSystem::ScriptProject::SaveAndBuildSolution(theatria::FileSystem::m_sProjectName, false);
 	// スクリプトファイルの生成
-	cho::FileSystem::ScriptProject::GenerateScriptFiles(scriptName);
+	theatria::FileSystem::ScriptProject::GenerateScriptFiles(scriptName);
 	// プロジェクトファイルを更新
-	cho::FileSystem::ScriptProject::UpdateVcxproj();
+	theatria::FileSystem::ScriptProject::UpdateVcxproj();
 	// スクリプトコンテナに追加
 	m_ResourceManager->GetScriptContainer()->AddScriptData(scriptName);
 }

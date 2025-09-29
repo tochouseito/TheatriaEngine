@@ -12,4 +12,4 @@
 #include <chomath.h>
 using namespace chomath;
 #include "Core/ChoLog/ChoLog.h"
-using namespace cho;
+using namespace theatria;

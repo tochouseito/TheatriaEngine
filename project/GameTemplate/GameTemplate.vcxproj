@@ -20,6 +20,9 @@
     <ProjectReference Include="..\Cho\ChoEngine.vcxproj">
       <Project>{fb856f70-9f85-4bbd-91a4-9e378674ff92}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\Cho\TheatriaEngine.vcxproj">
+      <Project>{fb856f70-9f85-4bbd-91a4-9e378674ff92}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

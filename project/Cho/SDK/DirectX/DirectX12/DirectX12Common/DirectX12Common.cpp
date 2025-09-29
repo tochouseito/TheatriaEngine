@@ -179,6 +179,98 @@ void DirectX12Common::CreateDevice()
 // 各サポートチェック
 void DirectX12Common::CheckD3D12Features()
 {
+	// D3D12Options
+	if (SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &m_Options, sizeof(m_Options))))
+	{
+
+	}
+
+	// D3D12Options1
+	if (SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS1, &m_Options1, sizeof(m_Options1))))
+	{
+	}
+	// D3D12Options2
+	if (SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS2, &m_Options2, sizeof(m_Options2))))
+	{
+	}
+	// D3D12Options3
+	if (SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS3, &m_Options3, sizeof(m_Options3))))
+	{
+	}
+	// D3D12Options4
+	if (SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS4, &m_Options4, sizeof(m_Options4))))
+	{
+	}
+	// D3D12Options5
+	if (SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &m_Options5, sizeof(m_Options5))))
+	{
+	}
+	// D3D12Options6
+	if (SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS6, &m_Options6, sizeof(m_Options6))))
+	{
+	}
+	// D3D12Options7
+	if (SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS7, &m_Options7, sizeof(m_Options7))))
+	{
+	}
+	// D3D12Options8
+	if (SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS8, &m_Options8, sizeof(m_Options8))))
+	{
+	}
+	// D3D12Options9
+	if (SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS9, &m_Options9, sizeof(m_Options9))))
+	{
+	}
+	// D3D12Options10
+	if (SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS10, &m_Options10, sizeof(m_Options10))))
+	{
+	}
+	// D3D12Options11
+	if (SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS11, &m_Options11, sizeof(m_Options11))))
+	{
+	}
+	// D3D12Options12
+	if (SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS12, &m_Options12, sizeof(m_Options12))))
+	{
+	}
+	// D3D12Options13
+	if (SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS13, &m_Options13, sizeof(m_Options13))))
+	{
+	}
+	// D3D12Options14
+	if (SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS14, &m_Options14, sizeof(m_Options14))))
+	{
+	}
+	// D3D12Options15
+	if (SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS15, &m_Options15, sizeof(m_Options15))))
+	{
+	}
+	// D3D12Options16
+	if (SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS16, &m_Options16, sizeof(m_Options16))))
+	{
+	}
+	// D3D12Options17
+	if(SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS17, &m_Options17, sizeof(m_Options17))))
+	{
+	}
+	// D3D12Options18
+	if(SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS18, &m_Options18, sizeof(m_Options18))))
+	{
+	}
+	// D3D12Options19
+	if(SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS19, &m_Options19, sizeof(m_Options19))))
+	{
+	}
+	// D3D12Options20
+	if(SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS20, &m_Options20, sizeof(m_Options20))))
+	{
+	}
+	// D3D12Options21
+	if(SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS21, &m_Options21, sizeof(m_Options21))))
+	{
+	}
+
+
 	//// シェーダモデルをチェック.
 	//{
 	//	D3D12_FEATURE_DATA_SHADER_MODEL shaderModel = { D3D_SHADER_MODEL_6_5 };
@@ -208,6 +300,22 @@ void DirectX12Common::CheckD3D12Features()
 	//		}
 	//	}
 	//}
+
+	// ExecuteIndirect (Resource Binding Tierを間接的に利用可否チェック)
+	{
+		D3D12_FEATURE_DATA_D3D12_OPTIONS options = {};
+		if (SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &options, sizeof(options))))
+		{
+			if (options.ResourceBindingTier != D3D12_RESOURCE_BINDING_TIER_1)
+			{
+				Log::Write(LogLevel::Info, std::format("Resource Binding Tier: {}", (int)options.ResourceBindingTier));
+			}
+			else
+			{
+				Log::Write(LogLevel::Assert, "Resource Binding Tier: Not Supported");
+			}
+		}
+	}
 
 	// Raytracing
 	{
@@ -255,17 +363,27 @@ void DirectX12Common::CheckD3D12Features()
 		}
 	}
 
-	// ExecuteIndirect (Resource Binding Tierを間接的に利用可否チェック)
+	// 16拡張機能
 	{
-		D3D12_FEATURE_DATA_D3D12_OPTIONS options = {};
-		if (SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &options, sizeof(options))))
+		D3D12_FEATURE_DATA_D3D12_OPTIONS16 options16 = {};
+		if (SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS16, &options16, sizeof(options16))))
 		{
-			if (options.ResourceBindingTier != D3D12_RESOURCE_BINDING_TIER_1)
+			// GPU_UPLOAD_HEAPサポートチェック
+			if (options16.GPUUploadHeapSupported != 0)
 			{
-				Log::Write(LogLevel::Info, std::format("Resource Binding Tier: {}", (int)options.ResourceBindingTier));
+				Log::Write(LogLevel::Info, std::format("GPU Virtual Address Support: {}", (int)options16.GPUUploadHeapSupported));
 			} else
 			{
-				Log::Write(LogLevel::Assert, "Resource Binding Tier: Not Supported");
+				Log::Write(LogLevel::Info, "GPU Virtual Address Support: Not Supported");
+			}
+
+			// Dynamic Depth Biasサポートチェック
+			if(options16.DynamicDepthBiasSupported != 0)
+			{
+				Log::Write(LogLevel::Info, std::format("Dynamic Depth Bias Support: {}", (int)options16.DynamicDepthBiasSupported));
+			} else
+			{
+				Log::Write(LogLevel::Info, "Dynamic Depth Bias Support: Not Supported");
 			}
 		}
 	}

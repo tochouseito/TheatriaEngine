@@ -15,7 +15,7 @@
   *     cv.erase_swap_and_pop(id);                 // O(1) delete w/o holes
   *     for (auto& v : cv) { ... }
   *
-  * Author: ChoEngine project (2025)
+  * Author: TheatriaEngine project (2025)
 --------------------------------------------------------------------*/
 #include <vector>
 #include <memory>
@@ -26,7 +26,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace cho
+namespace theatria
 {
 
     // ---------------------------------------------------------------

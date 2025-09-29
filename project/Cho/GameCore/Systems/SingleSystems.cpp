@@ -401,7 +401,7 @@ void ScriptSystem::AwakeComponent(Entity e, ScriptComponent& script)
 	funcName.erase(std::remove_if(funcName.begin(), funcName.end(), ::isspace), funcName.end());
 	// CreateScript関数を取得
 	typedef Marionnette* (*CreateScriptFunc)(GameObject&);
-	CreateScriptFunc createScript = (CreateScriptFunc)GetProcAddress(cho::FileSystem::ScriptProject::m_DllHandle, funcName.c_str());
+	CreateScriptFunc createScript = (CreateScriptFunc)GetProcAddress(theatria::FileSystem::ScriptProject::m_DllHandle, funcName.c_str());
 	if (!createScript)
 	{
 		script.isActive = false;
@@ -674,12 +674,12 @@ void ParticleEmitterSystem::InitializeComponent(Entity e, ParticleComponent& par
 	context->SetComputeRootSignature(m_pGraphicsEngine->GetPipelineManager()->GetParticleInitPSO().rootSignature.Get());
 	// パーティクルバッファをセット
 	IRWStructuredBuffer* particleBuffer = m_pResourceManager->GetBuffer<IRWStructuredBuffer>(particle.bufferIndex);
-	context->SetComputeRootDescriptorTable(0, particleBuffer->GetUAVGpuHandle());
+	context->SetComputeRootDescriptorTable(0, particleBuffer,ViewType::UnorderedAccessView);
 	// フリーリストバッファをセット
 	IRWStructuredBuffer* freeListBuffer = m_pResourceManager->GetBuffer<IRWStructuredBuffer>(particle.freeListBufferIndex);
-	context->SetComputeRootDescriptorTable(1, freeListBuffer->GetUAVGpuHandle());
+	context->SetComputeRootDescriptorTable(1, freeListBuffer, ViewType::UnorderedAccessView);
 	// カウンターバッファをセット
-	context->SetComputeRootUnorderedAccessView(2, freeListBuffer->GetCounterResource()->GetGPUVirtualAddress());
+	context->SetComputeRootUnorderedAccessView(2, freeListBuffer);
 	// Dispatch
 	context->Dispatch(1, 1, 1);
 	// コマンドリストをクローズ
@@ -750,19 +750,19 @@ void ParticleEmitterSystem::UpdateComponent(Entity e, ParticleComponent& particl
 	context->SetComputeRootSignature(m_pGraphicsEngine->GetPipelineManager()->GetParticleEmitPSO().rootSignature.Get());
 	// パーティクルバッファをセット
 	IRWStructuredBuffer* particleBuffer = m_pResourceManager->GetBuffer<IRWStructuredBuffer>(particle.bufferIndex);
-	context->SetComputeRootDescriptorTable(0, particleBuffer->GetUAVGpuHandle());
+	context->SetComputeRootDescriptorTable(0, particleBuffer, ViewType::UnorderedAccessView);
 	// エミッターバッファをセット
 	IStructuredBuffer* emitterBuffer = m_pResourceManager->GetBuffer<IStructuredBuffer>(emitter.bufferIndex);
-	context->SetComputeRootDescriptorTable(1, emitterBuffer->GetSRVGpuHandle());
+	context->SetComputeRootDescriptorTable(1, emitterBuffer, ViewType::ShaderResourceView);
 	// PerFrameバッファをセット
 	IConstantBuffer* perFrameBuffer = m_pResourceManager->GetBuffer<IConstantBuffer>(particle.perFrameBufferIndex);
-	context->SetComputeRootConstantBufferView(2, perFrameBuffer->GetResource()->GetGPUVirtualAddress());
+	context->SetComputeRootConstantBufferView(2, perFrameBuffer);
 	// フリーリストインデックスバッファをセット
 	//IRWStructuredBuffer* freeListIndexBuffer = m_pResourceManager->GetBuffer<IRWStructuredBuffer>(particle.freeListIndexBufferIndex);
 	//context->SetComputeRootDescriptorTable(3, freeListIndexBuffer->GetUAVGpuHandle());
 	// フリーリストバッファをセット
 	IRWStructuredBuffer* freeListBuffer = m_pResourceManager->GetBuffer<IRWStructuredBuffer>(particle.freeListBufferIndex);
-	context->SetComputeRootDescriptorTable(3, freeListBuffer->GetUAVGpuHandle());
+	context->SetComputeRootDescriptorTable(3, freeListBuffer, ViewType::UnorderedAccessView);
 	// Dispatch
 	context->Dispatch(1, 1, 1);
 
@@ -777,13 +777,13 @@ void ParticleEmitterSystem::UpdateComponent(Entity e, ParticleComponent& particl
 	// ルートシグネチャセット
 	context->SetComputeRootSignature(m_pGraphicsEngine->GetPipelineManager()->GetParticleUpdatePSO().rootSignature.Get());
 	// パーティクルバッファをセット
-	context->SetComputeRootDescriptorTable(0, particleBuffer->GetUAVGpuHandle());
+	context->SetComputeRootDescriptorTable(0, particleBuffer, ViewType::UnorderedAccessView);
 	// PerFrameバッファをセット
-	context->SetComputeRootConstantBufferView(1, perFrameBuffer->GetResource()->GetGPUVirtualAddress());
+	context->SetComputeRootConstantBufferView(1, perFrameBuffer);
 	// フリーリストインデックスバッファをセット
 	//context->SetComputeRootDescriptorTable(2, freeListIndexBuffer->GetUAVGpuHandle());
 	// フリーリストバッファをセット
-	context->SetComputeRootDescriptorTable(2, freeListBuffer->GetUAVGpuHandle());
+	context->SetComputeRootDescriptorTable(2, freeListBuffer, ViewType::UnorderedAccessView);
 	// Dispatch
 	context->Dispatch(1, 1, 1);
 
@@ -1268,11 +1268,11 @@ void EffectEditorSystem::InitEffectParticle()
 	// ルートシグネチャセット
 	context->SetComputeRootSignature(m_pGraphicsEngine->GetPipelineManager()->GetEffectInitPSO().rootSignature.Get());
 	// Particleバッファをセット
-	context->SetComputeRootDescriptorTable(0, particleBuffer->GetUAVGpuHandle());
+	context->SetComputeRootDescriptorTable(0, particleBuffer, ViewType::UnorderedAccessView);
 	// ParticleListバッファをセット
-	context->SetComputeRootDescriptorTable(1, particleListBuffer->GetUAVGpuHandle());
+	context->SetComputeRootDescriptorTable(1, particleListBuffer, ViewType::UnorderedAccessView);
 	// ListCounterバッファをセット
-	context->SetComputeRootUnorderedAccessView(2, particleListBuffer->GetCounterResource()->GetGPUVirtualAddress());
+	context->SetComputeRootUnorderedAccessView(2, particleListBuffer);
 	// Dispatch
 	context->Dispatch(128, 1, 1);
 	// 並列阻止
@@ -1305,19 +1305,19 @@ void EffectEditorSystem::UpdateShader()
 	// ルートシグネチャセット
 	context->SetComputeRootSignature(m_pGraphicsEngine->GetPipelineManager()->GetEffectTimeBaseEmitPSO().rootSignature.Get());
 	// UseListをセット
-	context->SetComputeRootDescriptorTable(0, useRootListBuffer->GetSRVGpuHandle());
+	context->SetComputeRootDescriptorTable(0, useRootListBuffer, ViewType::ShaderResourceView);
 	// Rootをセット
-	context->SetComputeRootDescriptorTable(1, rootBuffer->GetSRVGpuHandle());
+	context->SetComputeRootDescriptorTable(1, rootBuffer, ViewType::ShaderResourceView);
 	// ノードバッファをセット
-	context->SetComputeRootDescriptorTable(2, nodeBuffer->GetSRVGpuHandle());
+	context->SetComputeRootDescriptorTable(2, nodeBuffer, ViewType::ShaderResourceView);
 	// スプライトバッファをセット
-	context->SetComputeRootDescriptorTable(3, spriteBuffer->GetSRVGpuHandle());
+	context->SetComputeRootDescriptorTable(3, spriteBuffer, ViewType::ShaderResourceView);
 	// Particleバッファをセット
-	context->SetComputeRootDescriptorTable(4, particleBuffer->GetUAVGpuHandle());
+	context->SetComputeRootDescriptorTable(4, particleBuffer, ViewType::UnorderedAccessView);
 	// ParticleListバッファをセット
-	context->SetComputeRootDescriptorTable(5, particleListBuffer->GetUAVGpuHandle());
+	context->SetComputeRootDescriptorTable(5, particleListBuffer, ViewType::UnorderedAccessView);
 	// ListCounterバッファをセット
-	context->SetComputeRootUnorderedAccessView(6, particleListBuffer->GetCounterResource()->GetGPUVirtualAddress());
+	context->SetComputeRootUnorderedAccessView(6, particleListBuffer);
 	// Dispatch
 	context->Dispatch(static_cast<UINT>(m_pResourceManager->GetEffectRootUseListCount()), 1, 1);
 
@@ -1331,15 +1331,15 @@ void EffectEditorSystem::UpdateShader()
 	// ルートシグネチャセット
 	context->SetComputeRootSignature(m_pGraphicsEngine->GetPipelineManager()->GetEffectTimeBaseUpdatePSO().rootSignature.Get());
 	// Rootをセット
-	context->SetComputeRootDescriptorTable(0, rootBuffer->GetSRVGpuHandle());
+	context->SetComputeRootDescriptorTable(0, rootBuffer, ViewType::ShaderResourceView);
 	// ノードバッファをセット
-	context->SetComputeRootDescriptorTable(1, nodeBuffer->GetSRVGpuHandle());
+	context->SetComputeRootDescriptorTable(1, nodeBuffer, ViewType::ShaderResourceView);
 	// スプライトバッファをセット
-	context->SetComputeRootDescriptorTable(2, spriteBuffer->GetSRVGpuHandle());
+	context->SetComputeRootDescriptorTable(2, spriteBuffer, ViewType::ShaderResourceView);
 	// Particleバッファをセット
-	context->SetComputeRootDescriptorTable(3, particleBuffer->GetUAVGpuHandle());
+	context->SetComputeRootDescriptorTable(3, particleBuffer, ViewType::UnorderedAccessView);
 	// ParticleListバッファをセット
-	context->SetComputeRootDescriptorTable(4, particleListBuffer->GetUAVGpuHandle());
+	context->SetComputeRootDescriptorTable(4, particleListBuffer, ViewType::UnorderedAccessView);
 	// Dispatch
 	context->Dispatch(128, 1, 1);
 	// クローズ

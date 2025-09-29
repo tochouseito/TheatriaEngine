@@ -38,7 +38,7 @@ static const float kClearColor[] = { 0.1f,0.25f,0.5f,1.0f };
 #include <wrl.h>
 using Microsoft::WRL::ComPtr;
 #include "Core/ChoLog/ChoLog.h"
-using namespace cho;
+using namespace theatria;
 
 // FreeListContainer
 #include "Core/Utility/FArray.h"

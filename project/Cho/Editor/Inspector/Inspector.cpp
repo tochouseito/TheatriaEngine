@@ -4,7 +4,7 @@
 #include "EngineCommand/EngineCommands.h"
 #include "GameCore/GameCore.h"
 #include "Core/ChoLog/ChoLog.h"
-using namespace cho;
+using namespace theatria;
 #include "Resources/ResourceManager/ResourceManager.h"
 
 void Inspector::Initialize()

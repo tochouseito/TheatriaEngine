@@ -37,7 +37,7 @@ public:
 	// Engineのリソースをロード
 	void LoadEngineTexture();
 	// Resourceのアップロード
-	void UploadTextureDataEx(ID3D12Resource* resource, const DirectX::ScratchImage& mipImages);
+	void UploadTextureDataEx(PixelBuffer* pBuffer, const DirectX::ScratchImage& mipImages);
 	// ダミーテクスチャバッファを取得
 	PixelBuffer* GetDummyTextureBuffer();
 	// テクスチャが存在するか

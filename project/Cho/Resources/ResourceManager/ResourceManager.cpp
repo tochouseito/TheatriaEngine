@@ -140,6 +140,19 @@ uint32_t ResourceManager::CreateTextureBuffer(D3D12_RESOURCE_DESC& desc, D3D12_C
 bool ResourceManager::RemakeColorBuffer(std::optional<uint32_t>& index, D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES state)
 {
 	ColorBuffer* buffer = GetBuffer<ColorBuffer>(index);
+	// ディスクリプタヒープにインデックスを返却
+	if (buffer->GetSRVHandleIndex().has_value())
+	{
+		m_SUVDescriptorHeap->RemoveHandle(buffer->GetSRVHandleIndex().value());
+	}
+	if(buffer->GetUAVHandleIndex().has_value())
+	{
+		m_SUVDescriptorHeap->RemoveHandle(buffer->GetUAVHandleIndex().value());
+	}
+	if (buffer->GetRTVHandleIndex().has_value())
+	{
+		m_RTVDescriptorHeap->RemoveHandle(buffer->GetRTVHandleIndex().value());
+	}
 	buffer->RemakePixelBufferResource(m_Device, desc, clearValue, state);
 	// SRVの設定
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};

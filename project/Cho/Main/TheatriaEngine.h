@@ -2,7 +2,7 @@
 
 /*--------------------------------------------* 
 
-ChoEngineクラス
+TheatriaEngineクラス
 
 --------------------------------------------*/
 
@@ -30,13 +30,13 @@ ChoEngineクラス
 // HubManager
 #include "Hub/HubManager.h"
 
-class ChoEngine : public Engine
+class TheatriaEngine : public Engine
 {
 public:// method
 	// コンストラクタ
-	ChoEngine(RuntimeMode mode);
+	TheatriaEngine(RuntimeMode mode);
 	// デストラクタ
-	~ChoEngine();
+	~TheatriaEngine();
 	// 初期化
 	void Initialize() override;
 	// 終了処理

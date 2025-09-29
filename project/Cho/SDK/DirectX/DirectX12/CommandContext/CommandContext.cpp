@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "CommandContext.h"
 #include "Core/ChoLog/ChoLog.h"
-using namespace cho;
+using namespace theatria;
 
 void CommandContext::Create(ID3D12Device* device, D3D12_COMMAND_LIST_TYPE type)
 {
@@ -102,22 +102,52 @@ void CommandContext::ResourceBarrier(UINT NumBarriers, const D3D12_RESOURCE_BARR
 	m_CommandList->ResourceBarrier(NumBarriers, pBarriers);
 }
 
-void CommandContext::SetRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE* rtvHandle, D3D12_CPU_DESCRIPTOR_HANDLE* dsvHandle)
+void CommandContext::SetRenderTarget(ColorBuffer* rtv, DepthBuffer* depth)
 {
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = {};
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = {};
+	// リソースステートのチェック
+	CheckResourceStateTransition(rtv, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	if (depth)
+	{
+		dsvHandle = depth->GetDSVCpuHandle();
+		CheckResourceStateTransition(depth, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+	}
 	// レンダーターゲットビューの設定
-	m_CommandList->OMSetRenderTargets(1, rtvHandle, false, dsvHandle);
+	rtvHandle = rtv->GetRTVCpuHandle();
+	m_CommandList->OMSetRenderTargets(1, &rtvHandle, false, depth ? &dsvHandle : nullptr);
 }
 
-void CommandContext::ClearRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE handle)
+void CommandContext::SetRenderTarget(SwapChainBuffer* swapChainBuffer)
 {
+	// リソースステートのチェック
+	CheckResourceStateTransition(swapChainBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	// レンダーターゲットビューの設定
+	m_CommandList->OMSetRenderTargets(1, &swapChainBuffer->m_RTVCpuHandle, false, nullptr);
+}
+
+void CommandContext::ClearRenderTarget(ColorBuffer* rt)
+{
+	// リソースステートのチェック
+	CheckResourceStateTransition(rt, D3D12_RESOURCE_STATE_RENDER_TARGET);
 	// 指定した色で画面全体をクリアする
-	m_CommandList->ClearRenderTargetView(handle, kClearColor, 0, nullptr);
+	m_CommandList->ClearRenderTargetView(rt->GetRTVCpuHandle(), kClearColor, 0, nullptr);
 }
 
-void CommandContext::ClearDepthStencil(D3D12_CPU_DESCRIPTOR_HANDLE handle)
+void CommandContext::ClearRenderTarget(SwapChainBuffer* swapChainBuffer)
 {
+	// リソースステートのチェック
+	CheckResourceStateTransition(swapChainBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	// 指定した色で画面全体をクリアする
+	m_CommandList->ClearRenderTargetView(swapChainBuffer->m_RTVCpuHandle, kClearColor, 0, nullptr);
+}
+
+void CommandContext::ClearDepthStencil(DepthBuffer* depth)
+{
+	// リソースステートのチェック
+	CheckResourceStateTransition(depth, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 	// 深度ステンシルビューのクリア
-	m_CommandList->ClearDepthStencilView(handle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+	m_CommandList->ClearDepthStencilView(depth->GetDSVCpuHandle(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 }
 
 void CommandContext::ClearUnorderedAccessViewUint(D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle, D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle, ID3D12Resource* pResource,const UINT* value,UINT numRects, const D3D12_RECT* pRects)
@@ -180,58 +210,122 @@ void CommandContext::SetIndexBuffer(const D3D12_INDEX_BUFFER_VIEW* pView)
 	m_CommandList->IASetIndexBuffer(pView);
 }
 
-void CommandContext::SetGraphicsRootConstantBufferView(UINT RootParameterIndex, D3D12_GPU_VIRTUAL_ADDRESS BufferLocation)
+void CommandContext::SetGraphicsRootConstantBufferView(UINT RootParameterIndex, GpuResource* pResource)
 {
+	// リソースステートのチェック
+	CheckResourceStateTransition(pResource, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 	// ルート定数バッファビューの設定
-	m_CommandList->SetGraphicsRootConstantBufferView(RootParameterIndex, BufferLocation);
+	m_CommandList->SetGraphicsRootConstantBufferView(RootParameterIndex, pResource->GetResource()->GetGPUVirtualAddress());
 }
 
-void CommandContext::SetComputeRootConstantBufferView(UINT RootParameterIndex, D3D12_GPU_VIRTUAL_ADDRESS BufferLocation)
+void CommandContext::SetComputeRootConstantBufferView(UINT RootParameterIndex, GpuResource* pResource)
 {
+	// リソースステートのチェック
+	CheckResourceStateTransition(pResource, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 	// コンピュートルート定数バッファビューの設定
-	m_CommandList->SetComputeRootConstantBufferView(RootParameterIndex, BufferLocation);
+	m_CommandList->SetComputeRootConstantBufferView(RootParameterIndex, pResource->GetResource()->GetGPUVirtualAddress());
 }
 
-void CommandContext::SetGraphicsRootShaderResourceView(UINT RootParameterIndex, D3D12_GPU_VIRTUAL_ADDRESS BufferLocation)
+void CommandContext::SetGraphicsRootShaderResourceView(UINT RootParameterIndex, GpuResource* pResource)
 {
+	// リソースステートのチェック
+	CheckResourceStateTransition(pResource, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 	// ルートシェーダリソースビューの設定
-	m_CommandList->SetGraphicsRootShaderResourceView(RootParameterIndex, BufferLocation);
+	m_CommandList->SetGraphicsRootShaderResourceView(RootParameterIndex, pResource->GetResource()->GetGPUVirtualAddress());
 }
 
-void CommandContext::SetComputeRootShaderResourceView(UINT RootParameterIndex, D3D12_GPU_VIRTUAL_ADDRESS BufferLocation)
+void CommandContext::SetComputeRootShaderResourceView(UINT RootParameterIndex, GpuResource* pResource)
 {
+	// リソースステートのチェック
+	CheckResourceStateTransition(pResource, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 	// コンピュートルートシェーダリソースビューの設定
-	m_CommandList->SetComputeRootShaderResourceView(RootParameterIndex, BufferLocation);
+	m_CommandList->SetComputeRootShaderResourceView(RootParameterIndex, pResource->GetResource()->GetGPUVirtualAddress());
 }
 
-void CommandContext::SetGraphicsRootUnorderedAccessView(UINT RootParameterIndex, D3D12_GPU_VIRTUAL_ADDRESS BufferLocation)
+void CommandContext::SetGraphicsRootUnorderedAccessView(UINT RootParameterIndex, GpuResource* pResource)
 {
+	// リソースステートのチェック
+	CheckResourceStateTransition(pResource, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 	// ルートシェーダリソースビューの設定
-	m_CommandList->SetGraphicsRootUnorderedAccessView(RootParameterIndex, BufferLocation);
+	m_CommandList->SetGraphicsRootUnorderedAccessView(RootParameterIndex, pResource->GetResource()->GetGPUVirtualAddress());
 }
 
-void CommandContext::SetComputeRootUnorderedAccessView(UINT RootParameterIndex, D3D12_GPU_VIRTUAL_ADDRESS BufferLocation)
+void CommandContext::SetComputeRootUnorderedAccessView(UINT RootParameterIndex, GpuResource* pResource)
 {
+	// リソースステートのチェック
+	CheckResourceStateTransition(pResource, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 	// コンピュートルートシェーダリソースビューの設定
-	m_CommandList->SetComputeRootUnorderedAccessView(RootParameterIndex, BufferLocation);
+	m_CommandList->SetComputeRootUnorderedAccessView(RootParameterIndex, pResource->GetResource()->GetGPUVirtualAddress());
 }
 
-void CommandContext::SetGraphicsRootDescriptorTable(UINT RootParameterIndex, D3D12_GPU_DESCRIPTOR_HANDLE BaseDescriptor)
+void CommandContext::SetGraphicsRootDescriptorTable(UINT RootParameterIndex, GpuResource* pResource, ViewType viewType)
+{
+	// リソースステートのチェック
+	CheckResourceStateTransition(pResource, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+	// ルートディスクリプタテーブルの設定
+	switch (viewType)
+	{
+	case ViewType::ConstantBufferView:
+		break;
+	case ViewType::ShaderResourceView:
+		m_CommandList->SetGraphicsRootDescriptorTable(RootParameterIndex, pResource->GetSRVGpuHandle());
+		break;
+	case ViewType::UnorderedAccessView:
+		m_CommandList->SetGraphicsRootDescriptorTable(RootParameterIndex, pResource->GetUAVGpuHandle());
+		break;
+	case ViewType::RenderTargetView:
+		break;
+	case ViewType::DepthStencilView:
+		break;
+	default:
+		break;
+	}
+}
+
+void CommandContext::SetGraphicsRootDescriptorTable(UINT RootParameterIndex, ID3D12DescriptorHeap* pDescHeap)
 {
 	// ルートディスクリプタテーブルの設定
-	m_CommandList->SetGraphicsRootDescriptorTable(RootParameterIndex, BaseDescriptor);
+	m_CommandList->SetGraphicsRootDescriptorTable(RootParameterIndex, pDescHeap->GetGPUDescriptorHandleForHeapStart());
 }
 
-void CommandContext::SetComputeRootDescriptorTable(UINT RootParameterIndex, D3D12_GPU_DESCRIPTOR_HANDLE BaseDescriptor)
+void CommandContext::SetComputeRootDescriptorTable(UINT RootParameterIndex, GpuResource* pResource, ViewType viewType)
+{
+	// リソースステートのチェック
+	CheckResourceStateTransition(pResource, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+	// コンピュートルートディスクリプタテーブルの設定
+	switch (viewType)
+	{
+	case ViewType::ConstantBufferView:
+		break;
+	case ViewType::ShaderResourceView:
+		m_CommandList->SetComputeRootDescriptorTable(RootParameterIndex, pResource->GetSRVGpuHandle());
+		break;
+	case ViewType::UnorderedAccessView:
+		m_CommandList->SetComputeRootDescriptorTable(RootParameterIndex, pResource->GetUAVGpuHandle());
+		break;
+	case ViewType::RenderTargetView:
+		break;
+	case ViewType::DepthStencilView:
+		break;
+	default:
+		break;
+	}
+}
+
+void CommandContext::SetComputeRootDescriptorTable(UINT RootParameterIndex, ID3D12DescriptorHeap* pDescHeap)
 {
 	// コンピュートルートディスクリプタテーブルの設定
-	m_CommandList->SetComputeRootDescriptorTable(RootParameterIndex, BaseDescriptor);
+	m_CommandList->SetComputeRootDescriptorTable(RootParameterIndex, pDescHeap->GetGPUDescriptorHandleForHeapStart());
 }
 
-void CommandContext::CopyBufferRegion(ID3D12Resource* pDstResource, UINT DstOffset, ID3D12Resource* pSrcResource, UINT SrcOffset, UINT NumBytes)
+void CommandContext::CopyBufferRegion(GpuBuffer* pDstBuffer, UINT DstOffset, GpuBuffer* pSrcBuffer, UINT SrcOffset, UINT NumBytes)
 {
+	// コピー元リソースステートのチェック
+	CheckResourceStateTransition(pSrcBuffer, D3D12_RESOURCE_STATE_COPY_SOURCE);
+	// コピー先リソースステートのチェック
+	CheckResourceStateTransition(pDstBuffer, D3D12_RESOURCE_STATE_COPY_DEST);
 	// バッファのコピー
-	m_CommandList->CopyBufferRegion(pDstResource, DstOffset, pSrcResource, SrcOffset, NumBytes);
+	m_CommandList->CopyBufferRegion(pDstBuffer->GetResource(), DstOffset, pSrcBuffer->GetResource(), SrcOffset, NumBytes);
 }
 
 void CommandContext::DrawInstanced(UINT VertexCountPerInstance, UINT InstanceCount, UINT StartVertexLocation, UINT StartInstanceLocation)
@@ -252,10 +346,42 @@ void CommandContext::Dispatch(UINT ThreadGroupCountX, UINT ThreadGroupCountY, UI
 	m_CommandList->Dispatch(ThreadGroupCountX, ThreadGroupCountY, ThreadGroupCountZ);
 }
 
-void CommandContext::ExecuteIndirect(ID3D12CommandSignature* pCommandSignature, UINT MaxCommandCount, ID3D12Resource* pArgumentBuffer, UINT ArgumentBufferOffset, ID3D12Resource* pCountBuffer, UINT CountBufferOffset)
+void CommandContext::ExecuteIndirect(ID3D12CommandSignature* pCommandSignature, UINT MaxCommandCount, GpuResource* pArgumentResource, UINT ArgumentBufferOffset, ID3D12Resource* pCountBuffer, UINT CountBufferOffset)
 {
+	// 引数バッファのリソースステートのチェック
+	CheckResourceStateTransition(pArgumentResource, D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT);
 	// 間接コマンドの実行
-	m_CommandList->ExecuteIndirect(pCommandSignature, MaxCommandCount, pArgumentBuffer, ArgumentBufferOffset, pCountBuffer, CountBufferOffset);
+	m_CommandList->ExecuteIndirect(pCommandSignature, MaxCommandCount, pArgumentResource->GetResource(), ArgumentBufferOffset, pCountBuffer, CountBufferOffset);
+}
+
+void CommandContext::CheckResourceStateTransition(GpuResource* pResource, D3D12_RESOURCE_STATES checkState)
+{
+	// UploadHeapはState遷移しない
+	if (pResource->GetHeapType() == D3D12_HEAP_TYPE_UPLOAD) { return; }
+	// リソースステートのチェック
+	if(pResource->GetResourceState() == checkState)
+	{
+		// 問題なし
+		return;
+	}
+	// リソースステートの遷移
+	BarrierTransition(pResource->GetResource(), pResource->GetResourceState(), checkState);
+	// リソースステートの更新
+	pResource->SetResourceState(checkState);
+}
+
+void CommandContext::CheckResourceStateTransition(SwapChainBuffer* swapChainBuffer, D3D12_RESOURCE_STATES checkState)
+{
+	// リソースステートのチェック
+	if (swapChainBuffer->m_ResourceState == checkState)
+	{
+		// 問題なし
+		return;
+	}
+	// リソースステートの遷移
+	BarrierTransition(swapChainBuffer->pResource.Get(), swapChainBuffer->m_ResourceState, checkState);
+	// リソースステートの更新
+	swapChainBuffer->m_ResourceState = checkState;
 }
 
 GraphicsContext::GraphicsContext(ID3D12Device* device)

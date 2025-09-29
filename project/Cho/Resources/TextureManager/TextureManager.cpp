@@ -3,7 +3,7 @@
 #include "Resources/ResourceManager/ResourceManager.h"
 #include "Graphics/GraphicsEngine/GraphicsEngine.h"
 #include "Core/ChoLog/ChoLog.h"
-using namespace cho;
+using namespace theatria;
 
 void TextureManager::LoadTextureFile(const fs::path& filePath)
 {
@@ -82,7 +82,7 @@ void TextureManager::LoadTextureFile(const fs::path& filePath)
         texData.bufferIndex = m_ResourceManager->CreateTextureBuffer(resourceDesc, nullptr, D3D12_RESOURCE_STATE_COPY_DEST,texData.metadata.IsCubemap());
         // テクスチャデータをコピー
         UploadTextureDataEx(
-            m_ResourceManager->GetBuffer<PixelBuffer>(texData.bufferIndex)->GetResource(),
+            m_ResourceManager->GetBuffer<PixelBuffer>(texData.bufferIndex),
             mipImages
         );
         // テクスチャデータを追加
@@ -105,12 +105,12 @@ void TextureManager::LoadEngineTexture()
     }
 }
 
-void TextureManager::UploadTextureDataEx(ID3D12Resource* resource, const DirectX::ScratchImage& mipImages)
+void TextureManager::UploadTextureDataEx(PixelBuffer* pBuffer, const DirectX::ScratchImage& mipImages)
 {
     CommandContext* context = m_GraphicsEngine->GetCommandContext();
     std::vector<D3D12_SUBRESOURCE_DATA> subresources;
     DirectX::PrepareUpload(m_Device, mipImages.GetImages(), mipImages.GetImageCount(), mipImages.GetMetadata(), subresources);
-    UINT64 intermediateSize = GetRequiredIntermediateSize(resource, 0, static_cast<UINT>(subresources.size()));
+    UINT64 intermediateSize = GetRequiredIntermediateSize(pBuffer->GetResource(), 0, static_cast<UINT>(subresources.size()));
     // Resourceの各種設定
     D3D12_HEAP_PROPERTIES heapProperties{};
     heapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;// UploadHeapを使う
@@ -128,7 +128,7 @@ void TextureManager::UploadTextureDataEx(ID3D12Resource* resource, const DirectX
     m_GraphicsEngine->BeginCommandContext(context);
     UpdateSubresources(
         context->GetCommandList(),
-        resource,
+        pBuffer->GetResource(),
         intermediateResource->GetResource(),
         0, 0,
         static_cast<UINT>(subresources.size()),
@@ -138,14 +138,7 @@ void TextureManager::UploadTextureDataEx(ID3D12Resource* resource, const DirectX
     // D3D12_RESOURCE_STATE_COPY_DESTから
     // D3D12_RESOURCE_STATE_GENERIC_READへ
     // ResourceStateを変更する
-    D3D12_RESOURCE_BARRIER barrier{};
-    barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-    barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-    barrier.Transition.pResource = resource;
-    barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
-    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_GENERIC_READ;
-    context->ResourceBarrier(1, &barrier);
+	context->CheckResourceStateTransition(pBuffer, D3D12_RESOURCE_STATE_GENERIC_READ);
     m_GraphicsEngine->EndCommandContext(context, QueueType::Copy);
     m_GraphicsEngine->WaitForGPU(QueueType::Copy);
 }

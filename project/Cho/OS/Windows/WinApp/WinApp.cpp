@@ -6,7 +6,7 @@
 #include <imgui_impl_win32.h>
 #include "../ChoEditor/resource.h"
 #include "Core/ChoLog/ChoLog.h"
-using namespace cho;
+using namespace theatria;
 extern IMGUI_IMPL_API LRESULT
 ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 

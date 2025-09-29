@@ -45,11 +45,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)..\generated\outputs\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)..\generated\intermediate\ChoEditor\</IntDir>
+    <IntDir>$(SolutionDir)..\generated\intermediate\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)..\generated\outputs\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)..\generated\intermediate\ChoEditor\</IntDir>
+    <IntDir>$(SolutionDir)..\generated\intermediate\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -100,7 +100,7 @@
     <ProjectReference Include="..\BuildWatcher\BuildWatcher.csproj">
       <Project>{d4a352e4-05f6-4323-a80a-64ae01dcaba7}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\Cho\ChoEngine.vcxproj">
+    <ProjectReference Include="..\Cho\TheatriaEngine.vcxproj">
       <Project>{fb856f70-9f85-4bbd-91a4-9e378674ff92}</Project>
     </ProjectReference>
   </ItemGroup>
