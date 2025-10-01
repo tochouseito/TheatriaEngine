@@ -10,6 +10,10 @@
 #include <memory>
 #include <string>
 
+# ifdef _DEBUG
+#include <crtdbg.h>
+# endif
+
 class BuildWatcherController
 {
 public:
@@ -59,6 +63,13 @@ private:
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma warning(pop)
+#ifdef _DEBUG
+    // メモリリーク検出
+    _CrtMemState s1, s2, diff;
+    // 開始時の状態を保存
+    _CrtMemCheckpoint(&s1);
+#endif
+
 	// エンジンのインスタンス
 	std::unique_ptr<Engine, decltype(&theatria::DestroyEngine)> engine(
 		theatria::CreateEngine(RuntimeMode::Editor), theatria::DestroyEngine);// エンジンの生成
@@ -71,5 +82,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	engine->CrashHandlerEntry();// クラッシュ時の処理のハンドラー
 	buildWatcher.LaunchBuildWatcher();// BuildWatcher起動
 	engine->Operation();// エンジンの稼働
+
+#ifdef _DEBUG
+    // 終了時の状態を保存
+    _CrtMemCheckpoint(&s2);
+
+    // 差分を計算してリークを確認
+    if (_CrtMemDifference(&diff, &s1, &s2))
+    {
+        OutputDebugStringA("[Memory Leak Detected in Scope!]\n");
+        _CrtMemDumpStatistics(&diff);
+    }
+    else
+    {
+        OutputDebugStringA("[No Leak in Scope]\n");
+    }
+#endif
+
 	return 0;
 }
