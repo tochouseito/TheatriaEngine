@@ -76,6 +76,18 @@ namespace theatria
 		std::vector<FolderNode> children;
     };
 
+    // 起動Configファイル
+    struct LaunchConfig
+    {
+        std::wstring projectName = L"";
+    };
+
+    // キャッシュファイル構成
+    struct CacheFile
+    {
+        std::vector<std::wstring> projects;
+    };
+
     // ComponentsSerializer
     namespace Serialization
     {
@@ -153,11 +165,7 @@ namespace theatria
         static bool SaveSceneFile(const std::wstring& directory,const std::wstring& srcFileName, GameScene* scene, ECSManager* ecs);
 		// シーンファイルを読み込む
         static bool LoadSceneFile(const std::wstring& filePath,EngineCommand* engineCommand);
-        // スクリプトのファイルを保存
-		//static bool SaveScriptFile(const std::wstring& directory,ResourceManager* resourceManager);
-		// スクリプトのファイルを読み込む
-		//static bool LoadScriptFile(const std::wstring& filePath, EngineCommand* engineCommand);
-		// ゲームパラメーターファイルを保存
+        // ゲームパラメーターファイルを保存
         static bool SaveGameParameter(const std::wstring& filePath,
             const std::string& group,
             const std::string& item,
@@ -169,6 +177,10 @@ namespace theatria
             const std::string& item,
             const std::string& dataName,
             GameParameterVariant& outValue);
+        // 起動Configファイルを保存
+        static bool SaveLaunchConfig(const LaunchConfig& config);
+        // 起動Configファイルを読み込む
+        static LaunchConfig LoadLaunchConfig(const std::wstring& filePath);
 
         static FileType GetJsonFileType(const std::filesystem::path& path);
 

@@ -782,88 +782,6 @@ bool theatria::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCom
     }
 }
 
-//bool Cho::FileSystem::SaveScriptFile(const std::wstring& directory, ResourceManager* resourceManager)
-//{
-//    ScriptContainer* scriptContainer = resourceManager->GetScriptContainer();
-//    if (!scriptContainer) return false;
-//
-//    nlohmann::ordered_json j;
-//    j["fileType"] = "ScriptFile";
-//
-//    std::vector<std::string> scriptList;
-//    for (size_t i = 0; i < scriptContainer->GetScriptCount(); ++i)
-//    {
-//        std::optional<std::string> data = scriptContainer->GetScriptDataByID(static_cast<uint32_t>(i));
-//        if (data)
-//        {
-//            scriptList.push_back(data.value());
-//        }
-//    }
-//    j["scripts"] = scriptList;
-//
-//    std::filesystem::path path = std::filesystem::path(directory) / "ScriptData.json";
-//    try
-//    {
-//        std::ofstream file(path);
-//        if (!file.is_open()) return false;
-//        file << j.dump(4);
-//        file.close();
-//        return true;
-//    }
-//    catch (...)
-//    {
-//        return false;
-//    }
-//}
-//
-//bool Cho::FileSystem::LoadScriptFile(const std::wstring& filePath, EngineCommand* engineCommand)
-//{
-//    if (!engineCommand) { Log::Write(LogLevel::Assert, "EngineCommand is nullptr"); }
-//	ScriptContainer* scriptContainer = engineCommand->GetResourceManager()->GetScriptContainer();
-//    if (!scriptContainer) { return false; }
-//
-//    try
-//    {
-//        std::ifstream file(filePath);
-//        if (!file.is_open()) { return false; }
-//
-//        nlohmann::json j;
-//        file >> j;
-//
-//        if (j.contains("fileType") && j["fileType"] != "ScriptFile")
-//        {
-//            return false;
-//        }
-//
-//        std::vector<std::string> availableScriptFiles = ScriptProject::GetScriptFiles();
-//
-//        if (j.contains("scripts"))
-//        {
-//            for (const auto& scriptNameJson : j["scripts"])
-//            {
-//                std::string scriptName = scriptNameJson.get<std::string>();
-//
-//                // スクリプトファイル群の中に存在しているかをチェック
-//                auto found = std::find_if(availableScriptFiles.begin(), availableScriptFiles.end(),
-//                    [&](const std::string& file) {
-//                        return std::filesystem::path(file).stem().string() == scriptName;
-//                    });
-//
-//                if (found != availableScriptFiles.end())
-//                {
-//                    scriptContainer->AddScriptData(scriptName);
-//                }
-//            }
-//        }
-//
-//        return true;
-//    }
-//    catch (...)
-//    {
-//        return false;
-//    }
-//}
-
 bool theatria::FileSystem::SaveGameParameter(const std::wstring& filePath, const std::string& group, const std::string& item, const std::string& dataName, const GameParameterVariant& value)
 {
     json root;
@@ -945,6 +863,16 @@ bool theatria::FileSystem::LoadGameParameter(const std::wstring& filePath, const
         return false;
     }
     return true;
+}
+
+bool theatria::FileSystem::SaveLaunchConfig(const LaunchConfig& config)
+{
+    return false;
+}
+
+LaunchConfig theatria::FileSystem::LoadLaunchConfig(const std::wstring& filePath)
+{
+    return LaunchConfig();
 }
 
 // コンポーネントを保存
