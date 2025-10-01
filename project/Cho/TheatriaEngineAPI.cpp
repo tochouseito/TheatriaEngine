@@ -1,6 +1,6 @@
 #include "pch.h"
 #define ENGINECREATE_FUNCTION
-#define USE_TheatriaEngine_SCRIPT
+#define USE_THEATRIAENGINE_SCRIPT
 #include "TheatriaEngineAPI.h"
 #include "Main/TheatriaEngine.h"
 #include "EngineCommand/EngineCommands.h"
@@ -43,7 +43,7 @@ namespace theatriaSystem
 			}
 		}
 	}
-	THEATRIA_API void AudioAPI::Play(const std::string& name, const bool& isLoop)
+	THEATRIA_API void AudioAPI::Play(const std::string& name, bool isLoop)
 	{
 		for(auto& src : implAudioAPI->soundDatas)
 		{
@@ -65,7 +65,7 @@ namespace theatriaSystem
 		name;
 		return false;
 	}
-	THEATRIA_API void AudioAPI::SetVolume(const std::string& name, const float& volume)
+	THEATRIA_API void AudioAPI::SetVolume(const std::string& name, float volume)
 	{
 		for (auto& src : implAudioAPI->soundDatas)
 		{
@@ -210,12 +210,12 @@ void theatriaSystem::SceneManagerAPI::ChangeMainScene(const std::wstring& sceneN
 	sceneName;
 }
 
-bool theatriaSystem::Input::PushKey(const uint8_t& keyNumber)
+bool theatriaSystem::Input::PushKey(uint8_t keyNumber)
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->PushKey(keyNumber);
 }
 
-bool theatriaSystem::Input::TriggerKey(const uint8_t& keyNumber)
+bool theatriaSystem::Input::TriggerKey(uint8_t keyNumber)
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->TriggerKey(keyNumber);
 }
@@ -230,12 +230,12 @@ MouseMove theatriaSystem::Input::GetMouseMove()
 	return g_Engine->GetEngineCommand()->GetInputManager()->GetMouseMove();
 }
 
-bool theatriaSystem::Input::IsPressMouse(const int32_t& mouseNumber)
+bool theatriaSystem::Input::IsPressMouse(int32_t mouseNumber)
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->IsPressMouse(mouseNumber);
 }
 
-bool theatriaSystem::Input::IsTriggerMouse(const int32_t& mouseNumber)
+bool theatriaSystem::Input::IsTriggerMouse(int32_t mouseNumber)
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->IsTriggerMouse(mouseNumber);
 }
@@ -250,17 +250,17 @@ Vector2 theatriaSystem::Input::GetMouseScreenPosition()
 	return g_Engine->GetEngineCommand()->GetInputManager()->GetMouseScreenPosition();
 }
 
-bool theatriaSystem::Input::GetJoystickState(const int32_t& stickNo, XINPUT_STATE& out)
+bool theatriaSystem::Input::GetJoystickState(int32_t stickNo, XINPUT_STATE& out)
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->GetJoystickState(stickNo, out);
 }
 
-bool GetJoystickStatePrevious(const int32_t& stickNo, XINPUT_STATE& out)
+bool GetJoystickStatePrevious(int32_t stickNo, XINPUT_STATE& out)
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->GetJoystickStatePrevious(stickNo, out);
 }
 
-void SetJoystickDeadZone(const int32_t& stickNo, const int32_t& deadZoneL, const int32_t& deadZoneR)
+void SetJoystickDeadZone(int32_t stickNo, int32_t deadZoneL, int32_t deadZoneR)
 {
 	g_Engine->GetEngineCommand()->GetInputManager()->SetJoystickDeadZone(stickNo, deadZoneL, deadZoneR);
 }
@@ -270,22 +270,22 @@ size_t GetNumberOfJoysticks()
 	return g_Engine->GetEngineCommand()->GetInputManager()->GetNumberOfJoysticks();
 }
 
-bool IsTriggerPadButton(const PadButton& button, int32_t stickNo)
+bool IsTriggerPadButton(PadButton button, int32_t stickNo)
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->IsTriggerPadButton(button, stickNo);
 }
 
-bool IsPressPadButton(const PadButton& button, int32_t stickNo)
+bool IsPressPadButton(PadButton button, int32_t stickNo)
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->IsPressPadButton(button, stickNo);
 }
 
-Vector2 GetStickValue(const LR& padStick, int32_t stickNo)
+Vector2 GetStickValue(LR padStick, int32_t stickNo)
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->GetStickValue(padStick, stickNo);
 }
 
-float GetLRTrigger(const LR& LorR, int32_t stickNo)
+float GetLRTrigger(LR LorR, int32_t stickNo)
 {
 	return g_Engine->GetEngineCommand()->GetInputManager()->GetLRTrigger(LorR, stickNo);
 }
