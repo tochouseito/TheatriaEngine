@@ -30,7 +30,7 @@ msvc:
   multiprocessor: true
   common_defines: [UNICODE, _UNICODE, NOMINMAX, _CRT_SECURE_NO_WARNINGS]
   compile_options: [/W4, /permissive-, /Zc:preprocessor, /EHsc, /MP]
-  extra_compile_options: [/source-charset:utf-8]
+  extra_compile_options: [/source-charset:utf-8, /utf-8]
 
 build:
   target_dir: ${SolutionDir}..\generated\outputs\${Configuration}\
@@ -91,6 +91,7 @@ targets:
     sources: []
     include_dirs: [${SolutionDir}, ${SolutionDir}ChoMath, ${SolutionDir}ChoMath\include]
     treat_warnings_as_errors: false
+    working_directory: ${target_dir}
     configs:
       - name: Debug
         inline_expansion: None
@@ -100,6 +101,104 @@ targets:
         inline_expansion: O2
         intrinsics: false
         ltcg: false
+
+  - name: ChoMath #プロジェクト名
+    type: StaticLib #構成の種類
+    sources: [] #ソースファイル
+    include_dirs: [${ProjectDir}, ${ProjectDir}include/] #追加のインクルードディレクトリ
+    links: [] #追加の依存ファイル
+    pch: # プリコンパイラヘッダ
+      enable: true
+      header:
+      source:
+    configs: #構成ごとの設定
+      - name: Debug
+        build:
+          target_dir: ${SolutionDir}..\generated\outputs\${Configuration}\ #出力ディレクトリ
+          obj_dir:${SolutionDir}..\generated\intermediate\${ProjectName}\ #中間ディレクトリ
+          target_name: ${ProjectName} #ターゲット名
+
+      - name: Release
+        build:
+          target_dir: ${SolutionDir}..\generated\outputs\${Configuration}\ #出力ディレクトリ
+          obj_dir:${SolutionDir}..\generated\intermediate\${ProjectName}\ #中間ディレクトリ
+          target_name: ${ProjectName} #ターゲット名
+
+  - name: ChoPhysics
+    type: StaticLib #構成の種類
+    sources: [] #ソースファイル
+    include_dirs: [${ProjectDir}, ${ProjectDir}include/, ${ProjectDir}../ChoMath/, ${ProjectDir}../ChoMath/include] #追加のインクルードディレクトリ
+    links: [] #追加の依存ファイル
+    pch: # プリコンパイラヘッダ
+      enable: true
+      header:
+      source:
+    configs: #構成ごとの設定
+      - name: Debug
+        build:
+          target_dir: ${ProjectDir}lib\${Configuration}\ #出力ディレクトリ
+
+      - name: Release
+        build:
+          target_dir: ${ProjectDir}lib\${Configuration}\ #出力ディレクトリ
+
+  - name: DirectXTex
+    type: StaticLib #構成の種類
+    sources: [] #ソースファイル
+    include_dirs: [${ProjectDir}, ${ProjectDir}Shader/Compiled] #追加のインクルードディレクトリ
+    links: [] #追加の依存ファイル
+    pch: # プリコンパイラヘッダ
+      enable: true
+      header:
+      source:
+    msvc:
+    extra_compile_options: [/Zc:twoPhase- /Zc:__cplusplus]
+    configs: #構成ごとの設定
+      - name: Debug
+        build:
+          target_dir: ${ProjectDir}lib\${Configuration}\ #出力ディレクトリ
+
+      - name: Release
+        build:
+          target_dir: ${ProjectDir}lib\${Configuration}\ #出力ディレクトリ
+
+  - name: GameTemplate
+    type: WindowedApp #構成の種類
+    sources: [] #ソースファイル
+    include_dirs: [${SolutionDir}, ${SolutionDir}ChoMath, ${SolutionDir}ChoMath/include] #追加のインクルードディレクトリ
+    links: [] #追加の依存ファイル
+    pch: # プリコンパイラヘッダ
+      enable: true
+      header:
+      source:
+    msvc:
+    extra_compile_options: [/Zc:twoPhase- /Zc:__cplusplus]
+    configs: #構成ごとの設定
+      - name: Debug
+
+      - name: Release
+
+  - name: imgui
+    type: StaticLib #構成の種類
+    sources: [] #ソースファイル
+    include_dirs: [${ProjectDir}, ${ProjectDir}include\] #追加のインクルードディレクトリ
+    links: [] #追加の依存ファイル
+    msvc:
+      warning_level: 3
+    configs: #構成ごとの設定
+      - name: Debug
+        build:
+          target_dir: ${ProjectDir}lib\${Configuration}\ #出力ディレクトリ
+
+      - name: Release
+        build:
+          target_dir: ${ProjectDir}lib\${Configuration}\ #出力ディレクトリ
+
+  - name: imgui_Extensions
+
+  - name: PhysicsEngine
+
+  - name: TheatriaEngine
 
 
 
