@@ -285,6 +285,8 @@ bool theatria::FileSystem::SaveGameSettings(const std::wstring& projectName, con
     j["debugMode"] = settings.debugMode;
 	j["skyTexName"] = std::filesystem::path(settings.skyTexName).string();
 	j["gravity"] = { settings.gravity.x, settings.gravity.y, settings.gravity.z };
+    j["titleBar"] = std::filesystem::path(settings.titleBar).string();
+    j["exeNae"] = std::filesystem::path(settings.exeName).string();
 
     try
     {
@@ -336,6 +338,8 @@ bool theatria::FileSystem::LoadGameSettings(const std::wstring& filePath)
         {
             settings.gravity = Vector3(0.0f, -9.81f, 0.0f);
         }
+        settings.titleBar = std::filesystem::path(j.value("titleBar", "Theatria Engine")).wstring();
+        settings.exeName = std::filesystem::path(j.value("exeName", "TheatriaGame")).wstring();
 		// ゲーム設定をグローバルに保存
 		theatria::FileSystem::g_GameSettings = settings;
 
@@ -2852,8 +2856,7 @@ void theatria::FileSystem::GameBuilder::CopyFilesToBuildFolder([[maybe_unused]]E
     }
 
     // exeの名前
-	// std::wstring finalExeName = m_sProjectName+L".exe"; // 任意の最終ファイル名
-    std::wstring finalExeName = L"3024_ビタエリア.exe"; // 任意の最終ファイル名
+    std::wstring finalExeName = g_GameSettings.exeName + L".exe"; // 任意の最終ファイル名
 
     std::vector<std::pair<fs::path, fs::path>> renameList = {
     { buildRoot / L"TheatriaEngine_GameRuntime.dll",    buildRoot / L"TheatriaEngine.dll" },

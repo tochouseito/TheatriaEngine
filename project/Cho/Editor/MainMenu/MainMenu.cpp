@@ -500,6 +500,65 @@ void MainMenu::BuildSettingWindow()
 	if (!m_OpenBuildSettingWindow) { return; }
 	ImGui::Begin("BuildSetting##MainMenuBuildSetting", &m_OpenBuildSettingWindow);
 	ImGui::Text("ビルド設定");
+    static char titleBarBuffer[256];
+    if (ImGui::Button("タイトルバーを入力"))
+    {
+        ImGui::OpenPopup("TitleBarInputPopup");
+        // 初期値を UTF-8 にして C バッファへ
+        std::memset(titleBarBuffer, 0, sizeof(titleBarBuffer));
+        const std::string u8 = ConvertString(theatria::FileSystem::g_GameSettings.titleBar);
+        std::memcpy(titleBarBuffer, u8.c_str(), std::min(u8.size(), sizeof(titleBarBuffer) - 1));
+    }
+    if (ImGui::BeginPopupModal("TitleBarInputPopup", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::Text("タイトルバーを入力してください:");
+        ImGui::InputText("##TitleBar", titleBarBuffer, IM_ARRAYSIZE(titleBarBuffer));
+        if (ImGui::Button("OK"))
+        {
+            // UTF-8 → UTF-16 に戻して保存
+            std::wstring newTitleBar = ConvertString(std::string(titleBarBuffer));
+            theatria::FileSystem::g_GameSettings.titleBar = newTitleBar;
+
+            // もし Win32 ウィンドウタイトルも即時反映したいなら:
+            // ::SetWindowTextW(hwnd, newTitleBar.c_str());
+
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("キャンセル"))
+        {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
+
+    static char exeNameBuffer[256];
+    if (ImGui::Button("実行ファイル名を入力"))
+    {
+        ImGui::OpenPopup("ExeNameInputPopup");
+        // 初期値を UTF-8 にして C バッファへ
+        std::memset(exeNameBuffer, 0, sizeof(exeNameBuffer));
+        const std::string u8 = ConvertString(theatria::FileSystem::g_GameSettings.exeName);
+        std::memcpy(exeNameBuffer, u8.c_str(), std::min(u8.size(), sizeof(exeNameBuffer) - 1));
+    }
+    if (ImGui::BeginPopupModal("ExeNameInputPopup", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::Text("実行ファイル名を入力してください:");
+        ImGui::InputText("##ExeName", exeNameBuffer, IM_ARRAYSIZE(exeNameBuffer));
+        if (ImGui::Button("OK"))
+        {
+            // UTF-8 → UTF-16 に戻して保存
+            std::wstring newExeName = ConvertString(std::string(exeNameBuffer));
+            theatria::FileSystem::g_GameSettings.exeName = newExeName;
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("キャンセル"))
+        {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
 
     if (ImGui::Button("フォルダを選択してビルド"))
     {

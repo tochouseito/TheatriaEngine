@@ -8,6 +8,7 @@
 #include "GameCore/GameCore.h"
 #include "Editor/EditorManager/EditorManager.h"
 #include "EngineCommand/EngineCommand.h"
+#include "OS/Windows/WinApp/WinApp.h"
 using namespace theatria;
 
 void HubManager::Initialize()
@@ -23,13 +24,15 @@ void HubManager::Update()
     }
     if (m_IsGameRuntime)
     {
-        std::wstring selectedProjectName = L"2025LE3B10Days";
+        std::wstring selectedProjectName = L"PortfolioPiece";
         // プロジェクトの読み込み
         FileSystem::LoadProjectFolder(selectedProjectName, m_pEngineCommand);
         // プロジェクトのパスを保存
         FileSystem::ScriptProject::LoadProjectPath(selectedProjectName);
         // ブランチを取得
         GetCurrentBranch();
+        // ウィンドウのタイトルバーを変更
+        SetWindowTextW(WinApp::GetHWND(), FileSystem::g_GameSettings.titleBar.c_str());
         // プロジェクト選択後、Hubを終了
         m_IsRun = false; // プロジェクト選択後、Hubを終了
     }

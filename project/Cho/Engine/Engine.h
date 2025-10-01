@@ -35,6 +35,6 @@ public:// method
 	}
 protected:
 	RuntimeMode runtimeMode;
-	Theatria::Config config;
+	theatria::Config config;
 };
 

@@ -50,6 +50,7 @@ namespace theatria
         int width = 1280;
         int height = 720;
         bool fullscreen = false;
+        std::wstring titleBar = L"Theatria Engine";
     };
     struct EngineConfigInfo
     {
@@ -65,6 +66,8 @@ namespace theatria
         bool debugMode = false;
         std::wstring skyTexName;
 		Vector3 gravity = { 0.0f, 0.0f, 0.0f }; // 重力
+        std::wstring titleBar = L"Theatria Engine";
+        std::wstring exeName = L"TheatriaGame";
     };
     struct FolderNode
     {

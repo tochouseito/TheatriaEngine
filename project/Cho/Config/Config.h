@@ -2,7 +2,7 @@
 #include <string>
 #include <Vector3.h>
 
-namespace Theatria
+namespace theatria
 {
 	/*
 	* エンジン、プロジェクトの設定や構成を保持するクラス
@@ -32,7 +32,7 @@ namespace Theatria
 			bool fullscreen = false;					// フルスクリーンモード
 			bool vSync = true;							// 垂直同期
 		};
-		Config(const ConfigData& data = {}) : configData(data) {}
+        Config() {}
 		~Config() = default;
 		// 設定データの取得
 		std::string GetProjectName() const { return configData.projectName; }

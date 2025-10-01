@@ -7,12 +7,13 @@
 #include "Core/Utility/EffectStruct.h"
 #include "EngineCommand/EngineCommands.h"
 
-EngineCommand::EngineCommand(GameCore* gameCore, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine,InputManager* input, PlatformLayer* platformLayer):
+EngineCommand::EngineCommand(GameCore* gameCore, ResourceManager* resourceManager, GraphicsEngine* graphicsEngine,InputManager* input, PlatformLayer* platformLayer, theatria::Config* config):
 	m_GameCore(gameCore),
 	m_ResourceManager(resourceManager),
 	m_GraphicsEngine(graphicsEngine),
 	m_InputManager(input),
-	m_PlatformLayer(platformLayer)
+	m_PlatformLayer(platformLayer),
+    m_Config(config)
 {
 	
 }
