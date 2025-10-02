@@ -2,9 +2,10 @@
 #include "CommandManager.h"
 #include "Core/ThreadManager/ThreadManager.h"
 
-CommandManager::CommandManager(ID3D12Device8* device)
+CommandManager::CommandManager(ID3D12Device8* device, ThreadManager* threadManager):
+    m_Device(device),
+    m_ThreadManager(threadManager)
 {
-	m_Device = device;
 	CreateQueueContexts(device);// デバイスを受け取り、キューコンテキストを作成する
 	Initialize();// 初期化
 }
@@ -15,7 +16,7 @@ CommandManager::~CommandManager()
 
 void CommandManager::Initialize()
 {
-	m_CommandPool = std::make_unique<CommandPool>(m_Device, D3D12_COMMAND_LIST_TYPE_DIRECT, ThreadManager::GetInstance().GetThreadCount());
+	m_CommandPool = std::make_unique<CommandPool>(m_Device, D3D12_COMMAND_LIST_TYPE_DIRECT, m_ThreadManager->GetThreadCount());
 }
 
 void CommandManager::Shutdown()
@@ -168,12 +169,13 @@ void QueueContext::WaitForFence()
 CommandPool::CommandPool(ID3D12Device* device, D3D12_COMMAND_LIST_TYPE type, size_t poolSize)
 	: m_Device(device), m_Type(type)
 {
-	for (size_t i = 0; i < poolSize; ++i)
+    poolSize;
+	/*for (size_t i = 0; i < poolSize; ++i)
 	{
 		auto context = std::make_unique<CommandContext>();
 		context->Create(device, type);
 		m_CommandPool.push(std::move(context));
-	}
+	}*/
 }
 
 CommandPool::~CommandPool()

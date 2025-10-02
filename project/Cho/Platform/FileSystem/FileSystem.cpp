@@ -867,11 +867,13 @@ bool theatria::FileSystem::LoadGameParameter(const std::wstring& filePath, const
 
 bool theatria::FileSystem::SaveLaunchConfig(const LaunchConfig& config)
 {
+    config;
     return false;
 }
 
 LaunchConfig theatria::FileSystem::LoadLaunchConfig(const std::wstring& filePath)
 {
+    filePath;
     return LaunchConfig();
 }
 

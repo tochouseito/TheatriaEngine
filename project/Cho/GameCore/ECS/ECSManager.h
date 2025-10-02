@@ -1995,6 +1995,12 @@ struct IComponentEventListener : public IIComponentEventListener
 {
     friend class ECSManager;
 public:
+    IComponentEventListener() = default;
+    virtual ~IComponentEventListener()
+    {
+        onAddSingle.clear();
+    }
+
     // 依存する ECSManager のポインタをセット
     void SetECSManager(ECSManager* ecs) { m_pEcs = ecs; }
 

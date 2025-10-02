@@ -38,7 +38,7 @@ void TheatriaEngine::Initialize()
 	resourceManager = std::make_unique<ResourceManager>(dx12->GetDevice());
 
 	// GraphicsEngine初期化
-	graphicsEngine = std::make_unique<GraphicsEngine>(dx12->GetDevice(),resourceManager.get(),GetRuntimeMode());
+	graphicsEngine = std::make_unique<GraphicsEngine>(dx12->GetDevice(),resourceManager.get(),GetRuntimeMode(), coreSystem->GetThreadManager());
 	graphicsEngine->CreateSwapChain(dx12->GetDXGIFactory());
 	graphicsEngine->Init();
 
@@ -211,7 +211,7 @@ void TheatriaEngine::Start()
 		// ResourceManager初期化
 		resourceManager = std::make_unique<ResourceManager>(dx12->GetDevice());
 		// GraphicsEngine初期化
-		graphicsEngine = std::make_unique<GraphicsEngine>(dx12->GetDevice(), resourceManager.get(), GetRuntimeMode());
+		graphicsEngine = std::make_unique<GraphicsEngine>(dx12->GetDevice(), resourceManager.get(), GetRuntimeMode(), coreSystem->GetThreadManager());
 		graphicsEngine->CreateSwapChain(dx12->GetDXGIFactory());
 		graphicsEngine->Init();
 		// Model,TextureManager初期化

@@ -8,7 +8,6 @@ size_t ECS_RegisterComponentID(const char* uniqueName)   // C で export する�
     static std::unordered_map<std::string, size_t> map;
     static size_t nextID = 0;
     static std::mutex m;
-
     std::lock_guard lk(m);
     auto [it, inserted] = map.try_emplace(uniqueName, nextID);
     if (inserted) ++nextID;          // 新規登録なら採番
