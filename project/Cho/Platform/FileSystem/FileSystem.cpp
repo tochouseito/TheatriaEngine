@@ -22,6 +22,7 @@
 using namespace theatria;
 
 std::wstring theatria::FileSystem::m_sProjectName = L"";
+std::wstring theatria::FileSystem::m_sProjectFolderPath = L"";
 // GUID 生成
 std::string theatria::FileSystem::ScriptProject::m_SlnGUID = GenerateGUID();
 std::string theatria::FileSystem::ScriptProject::m_ProjGUID = GenerateGUID();
@@ -85,12 +86,9 @@ std::vector<std::wstring> theatria::FileSystem::GetProjectFolders()
 }
 
 // 新しいプロジェクトを作成
-bool theatria::FileSystem::CreateNewProjectFolder(const std::wstring& projectName)
+bool theatria::FileSystem::CreateNewProjectFolder(const std::wstring& projectName, const std::wstring& projectPath)
 {
-    auto rootOpt = FindOrCreateGameProjects();
-    if (!rootOpt) return false;
-
-    std::filesystem::path newProjectPath = *rootOpt / projectName;
+    std::filesystem::path newProjectPath = projectPath + L"/" + projectName;
 
     if (std::filesystem::exists(newProjectPath))
     {
@@ -787,7 +785,7 @@ bool theatria::FileSystem::SaveGameParameter(const std::wstring& filePath, const
     json root;
 
     // 既存のファイルを開く（存在しなければ新規）
-    std::wstring path = L"GameProjects/" + m_sProjectName + L"/" + filePath + L".json";
+    std::wstring path = m_sProjectFolderPath + L"/" + filePath + L".json";
     std::ifstream ifs(path);
     if (ifs.is_open())
     {
@@ -830,7 +828,7 @@ bool theatria::FileSystem::LoadGameParameter(const std::wstring& filePath, const
 {
     json root;
 	// ファイルを開く
-    std::wstring path = L"GameProjects/" + m_sProjectName + L"/" + filePath + L".json";
+    std::wstring path = m_sProjectFolderPath + L"/" + filePath + L".json";
     std::ifstream ifs(path);
     if (!ifs.is_open()) { return false; }
     try
@@ -865,16 +863,137 @@ bool theatria::FileSystem::LoadGameParameter(const std::wstring& filePath, const
     return true;
 }
 
-bool theatria::FileSystem::SaveLaunchConfig(const LaunchConfig& config)
+bool theatria::FileSystem::SaveLaunchConfig(const LaunchConfig& config, const std::wstring& filePath)
 {
-    config;
-    return false;
+    std::filesystem::path path = filePath;
+    std::filesystem::path fileName = "/LaunchConfig.json";
+    
+    // ファイルパスを設定
+    path /= fileName;
+
+    nlohmann::ordered_json j;
+    j["fileType"] = "LaunchConfig";
+    j["projectName"] = config.projectName.c_str();
+
+    try
+    {
+        std::ofstream file(path.string());
+        if (!file.is_open()) return false;
+
+        file << j.dump(4);
+        file.close();
+        return true;
+    }
+    catch (...)
+    {
+        return false;
+    }
 }
 
 LaunchConfig theatria::FileSystem::LoadLaunchConfig(const std::wstring& filePath)
 {
-    filePath;
-    return LaunchConfig();
+    LaunchConfig result = {};
+    try
+    {
+        std::ifstream file(filePath);
+        if (!file.is_open()) { return result; }
+
+        nlohmann::json j;
+        file >> j;
+
+        if (j.contains("fileType") && j["fileType"] != "LaunchConfig")
+        {
+            return result;
+        }
+
+        result.projectName = std::filesystem::path(j.value("projectName", "")).wstring();
+
+        return result;
+    }
+    catch (...)
+    {
+        return result;
+    }
+}
+
+bool theatria::FileSystem::SaveCacheFile(const CacheFile& cache, const std::wstring& filePath)
+{
+    std::filesystem::path path = filePath + L"/cache/";
+    std::filesystem::path fileName = "projectNameList.json";
+    // プロジェクト設定フォルダが存在しない場合は作成
+    if (!std::filesystem::exists(path))
+    {
+        if (!std::filesystem::create_directory(path))
+        {
+            return false; // フォルダの作成に失敗
+        }
+    }
+    // ファイルパスを設定
+    path /= fileName;
+
+    nlohmann::ordered_json j;
+    j["fileType"] = "cache";
+    // wstring → string 変換（UTF-8）
+    std::vector<std::string> projectNames;
+    for (const auto& ws : cache.projectNames)
+    {
+        projectNames.emplace_back(std::filesystem::path(ws).string()); // or std::wstring_convert
+    }
+
+    j["projectNames"] = projectNames;
+
+    try
+    {
+        std::ofstream file(path.string());
+        if (!file.is_open()) return false;
+
+        file << j.dump(4);
+        file.close();
+        return true;
+    }
+    catch (...)
+    {
+        return false;
+    }
+}
+
+bool theatria::FileSystem::LoadCacheFile(const std::wstring& filePath)
+{
+    std::filesystem::path path = filePath + L"/cache/";
+    std::filesystem::path fileName = "projectNameList.json";
+    // ファイルパスを設定
+    path /= fileName;
+    try
+    {
+        std::ifstream file(path.string());
+        if (!file.is_open())
+        {
+            return false;
+        }
+
+        nlohmann::json j;
+        file >> j;
+
+        if (j.contains("fileType") && j["fileType"] != "cache")
+        {
+            return false; // ファイル種別違い
+        }
+
+        theatria::CacheFile info;
+
+        for (const auto& projectName : j["projectNames"])
+        {
+            std::string s = projectName.get<std::string>();
+            info.projectNames.push_back(std::filesystem::path(s).wstring());
+        }
+        // 保存
+        g_CacheFile = info;
+        return true;
+    }
+    catch (...)
+    {
+        return true;
+    }
 }
 
 // コンポーネントを保存
@@ -1166,14 +1285,13 @@ void theatria::FileSystem::SaveProject(EditorManager* editorManager, SceneManage
     gameWorld; sceneManager;
     if (m_sProjectName.empty()) { return; }
     // セーブ
-	std::filesystem::path projectPath = std::filesystem::path(L"GameProjects") / m_sProjectName;
 	// GameSettingsFile
     // Skyboxtexの保存
     std::wstring skyTexName = editorManager->GetEngineCommand()->GetResourceManager()->GetSkyboxTextureName();
     g_GameSettings.skyTexName = skyTexName;
 	// 重力の保存
 	g_GameSettings.gravity = editorManager->GetEngineCommand()->GetGameCore()->GetPhysicsWorld3D()->GetGravity();
-    theatria::FileSystem::SaveGameSettings(projectPath, g_GameSettings);
+    theatria::FileSystem::SaveGameSettings(m_sProjectFolderPath, g_GameSettings);
     // SceneFile
 	// 編集されたシーンを保存
     editorManager->SaveEditingScene();
@@ -1181,23 +1299,26 @@ void theatria::FileSystem::SaveProject(EditorManager* editorManager, SceneManage
     {
 		// シーンファイルを保存
         theatria::FileSystem::SaveSceneFile(
-            projectPath,
+            m_sProjectFolderPath,
             scene.first,
             editorManager->GetEditScene(scene.first),
             ecs
 		);
     }
+    // キャッシュファイルの保存
+    SaveCacheFile(g_CacheFile, std::filesystem::current_path().wstring());
 }
 
 // プロジェクトフォルダを読み込む
-bool theatria::FileSystem::LoadProjectFolder(const std::wstring& projectName, EngineCommand* engineCommand)
+bool theatria::FileSystem::LoadProjectFolder(const std::wstring& projectFolderPath, EngineCommand* engineCommand)
 {
-	m_sProjectName = projectName;
-    std::filesystem::path projectPath = std::filesystem::path(L"GameProjects") / projectName;
+    std::filesystem::path path = projectFolderPath;
+    m_sProjectName = path.filename().wstring();
+    m_sProjectFolderPath = projectFolderPath;
 
     // プロジェクトファイル類を読み込み
     // 全ファイル走査（サブディレクトリ含む）
-    ScanFolder(projectPath,engineCommand);
+    ScanFolder(path,engineCommand);
     engineCommand->GetResourceManager()->SetSkyboxTextureName(g_GameSettings.skyTexName);
 	Vector3 gravityVector3 = g_GameSettings.gravity;
     std::unique_ptr<SetGravityCommand> setGravity = std::make_unique<SetGravityCommand>(gravityVector3);
@@ -1316,7 +1437,7 @@ void theatria::FileSystem::ScriptProject::GenerateSolutionAndProject()
 {
     std::string projectNameStr = ConvertString(m_sProjectName);
     // 出力先
-    std::string outputPath = "GameProjects/" + projectNameStr;
+    std::string outputPath = ConvertString(m_sProjectFolderPath);
 	// ソリューションファイルパス
     m_SlnPath = outputPath + "/" + projectNameStr + ".sln";
 	// vcxprojファイルパス
@@ -1370,7 +1491,7 @@ void theatria::FileSystem::ScriptProject::UpdateVcxproj()
 
     fs::path exePath = fs::current_path(); // 実行ファイルがある場所
     // プロジェクトディレクトリ全体を再帰的に探索
-    fs::path projectDir = exePath / "GameProjects" / m_sProjectName;
+    fs::path projectDir = exePath / m_sProjectFolderPath;
 
     for (const auto& entry : fs::recursive_directory_iterator(projectDir))
     {
@@ -1547,7 +1668,7 @@ void theatria::FileSystem::ScriptProject::UpdateFilters(const std::string& filte
 
     fs::path exePath = fs::current_path(); // 実行ファイルがある場所
     // プロジェクトディレクトリ全体を再帰的に探索
-    fs::path projectDir = exePath / "GameProjects" / m_sProjectName;
+    fs::path projectDir = exePath / m_sProjectFolderPath;
 
     // scriptFiles には相対パスを格納するように修正
     for (const auto& entry : fs::recursive_directory_iterator(projectDir))
@@ -1601,7 +1722,7 @@ void theatria::FileSystem::ScriptProject::UpdateFilters(const std::string& filte
 
 void theatria::FileSystem::ScriptProject::GenerateScriptFiles(const std::string& scriptName)
 {
-    std::filesystem::path outputDir = "GameProjects/" + ConvertString(m_sProjectName);
+    std::filesystem::path outputDir = m_sProjectFolderPath;
 
     // テンプレートファイルのパス
     std::filesystem::path templateHeader = "Cho/Resources/EngineAssets/TemplateScript/TemplateScript.h";
@@ -1653,7 +1774,7 @@ void theatria::FileSystem::ScriptProject::LoadProjectPath(const std::wstring& pr
 {
     std::string projectNameStr = ConvertString(projectName);
     // 出力先
-    std::string outputPath = "GameProjects/" + projectNameStr;
+    std::string outputPath = ConvertString(m_sProjectFolderPath);
     // ソリューションファイルパス
     m_SlnPath = outputPath + "/" + projectNameStr + ".sln";
     // vcxprojファイルパス
@@ -1663,7 +1784,7 @@ void theatria::FileSystem::ScriptProject::LoadProjectPath(const std::wstring& pr
 void theatria::FileSystem::ScriptProject::LoadScriptDLL()
 {
 	// DLLのパス
-	std::string dllPath = "GameProjects/" + ConvertString(m_sProjectName) + "/bin/" + ConvertString(m_sProjectName) + ".dll";
+	std::string dllPath = ConvertString(m_sProjectFolderPath) + "/bin/" + ConvertString(m_sProjectName) + ".dll";
 	// PDBのロード
 	LoadPDB(dllPath);
     // ロード
@@ -1703,7 +1824,7 @@ void theatria::FileSystem::ScriptProject::UnloadScriptDLL()
 
 bool theatria::FileSystem::ScriptProject::BuildScriptDLL()
 {
-    std::string projectPath = "GameProjects/" + ConvertString(m_sProjectName) + "/" + ConvertString(m_sProjectName) + ".vcxproj";
+    std::string projectPath = ConvertString(m_sProjectFolderPath) + "/" + ConvertString(m_sProjectName) + ".vcxproj";
     std::string command = "msbuild \"" + projectPath + "\" /p:Configuration=Debug /p:Platform=x64";
 
     std::ostringstream logStream;
@@ -1742,7 +1863,7 @@ std::vector<std::string> theatria::FileSystem::ScriptProject::GetScriptFiles()
     std::vector<std::string> scriptNames;
     fs::path exePath = fs::current_path(); // 実行ファイルがある場所
     // プロジェクトディレクトリ全体を再帰的に探索
-    fs::path projectDir = exePath / "GameProjects" / m_sProjectName;
+    fs::path projectDir = exePath / m_sProjectFolderPath;
     for (const auto& entry : fs::recursive_directory_iterator(projectDir))
     {
         if (!entry.is_regular_file()) continue;
@@ -2736,9 +2857,9 @@ void theatria::FileSystem::GameBuilder::CopyFilesToBuildFolder([[maybe_unused]]E
             L"dxil_GameRuntime.dll",
             L"GameTemplate.exe",
             L"imgui.ini", // 後で消す
-            fs::path(L"GameProjects") / m_sProjectName / fs::path(L"Assets"),
-            fs::path(L"GameProjects") / m_sProjectName / fs::path(L"bin"),
-            fs::path(L"GameProjects") / m_sProjectName / fs::path(L"ProjectSettings"),
+            fs::path(m_sProjectFolderPath) / fs::path(L"Assets"),
+            fs::path(m_sProjectFolderPath) / fs::path(L"bin"),
+            fs::path(m_sProjectFolderPath) / fs::path(L"ProjectSettings"),
             L"Cho/Engine",
             L"Cho/Resources/EngineAssets",
             L"Cho/pch",

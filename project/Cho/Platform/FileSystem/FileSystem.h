@@ -85,7 +85,7 @@ namespace theatria
     // キャッシュファイル構成
     struct CacheFile
     {
-        std::vector<std::wstring> projects;
+        std::vector<std::wstring> projectNames;
     };
 
     // ComponentsSerializer
@@ -148,7 +148,7 @@ namespace theatria
 		// プロジェクトフォルダを取得
         static std::vector<std::wstring> GetProjectFolders();
         // 新しいプロジェクトを作成
-        static bool CreateNewProjectFolder(const std::wstring& projectName);
+        static bool CreateNewProjectFolder(const std::wstring& projectName, const std::wstring& projectPath);
 		// プロジェクトファイルを保存
         static bool SaveProjectFile(const std::wstring& projectName, const std::vector<std::wstring>& sceneFiles);
 		// プロジェクトファイルを読み込む
@@ -178,16 +178,20 @@ namespace theatria
             const std::string& dataName,
             GameParameterVariant& outValue);
         // 起動Configファイルを保存
-        static bool SaveLaunchConfig(const LaunchConfig& config);
+        static bool SaveLaunchConfig(const LaunchConfig& config, const std::wstring& filePath);
         // 起動Configファイルを読み込む
         static LaunchConfig LoadLaunchConfig(const std::wstring& filePath);
+        // キャッシュファイルを保存
+        static bool SaveCacheFile(const CacheFile& cache, const std::wstring& filePath);
+        // キャッシュファイルを読み込む
+        static bool LoadCacheFile(const std::wstring& filePath);
 
         static FileType GetJsonFileType(const std::filesystem::path& path);
 
         // プロジェクトを保存
 		static void SaveProject(EditorManager* editorManager, SceneManager* sceneManager, GameWorld* gameWorld, ECSManager* ecs);
         // プロジェクトフォルダを読み込む
-        static bool LoadProjectFolder(const std::wstring& projectName, EngineCommand* engineCommand);
+        static bool LoadProjectFolder(const std::wstring& projectFolderPath, EngineCommand* engineCommand);
         /// CSVを2次元vectorに読み込む関数
         // csv読み込み
         static std::vector<std::vector<std::string>> LoadCSV(const std::string& filePath);
@@ -213,8 +217,10 @@ namespace theatria
         // GUID 生成
         static std::string GenerateGUID();
         static std::wstring m_sProjectName;
+        static std::wstring m_sProjectFolderPath;
         static inline FolderNode g_ProjectFiles;
 		static inline GameSettingsInfo g_GameSettings;
+        static inline CacheFile g_CacheFile;
 
         class ScriptProject
         {
