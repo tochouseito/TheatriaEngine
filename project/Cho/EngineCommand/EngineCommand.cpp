@@ -55,13 +55,15 @@ void EngineCommand::SaveProjectFile()
 void EngineCommand::GenerateScript(const std::string& scriptName)
 {
 	// プロジェクトの保存処理
-	theatria::FileSystem::ScriptProject::SaveAndBuildSolution(theatria::FileSystem::m_sProjectName, false);
+	theatria::FileSystem::ScriptProject::SaveAndBuildSolution(false);
 	// スクリプトファイルの生成
 	theatria::FileSystem::ScriptProject::GenerateScriptFiles(scriptName);
 	// プロジェクトファイルを更新
 	theatria::FileSystem::ScriptProject::UpdateVcxproj();
 	// スクリプトコンテナに追加
 	m_ResourceManager->GetScriptContainer()->AddScriptData(scriptName);
+    // プロジェクトの保存処理
+    theatria::FileSystem::ScriptProject::SaveAndBuildSolution(false);
 }
 
 void EngineCommand::GameRun(const bool& isDebugger)

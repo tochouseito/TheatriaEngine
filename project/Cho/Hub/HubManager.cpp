@@ -116,31 +116,34 @@ void HubManager::ShowSidebar()
         {
             // ダイアログを開いて保存先フォルダを選択
             std::wstring projectPath = FileSystem::GameBuilder::SelectFolderDialog();
-            
-            bool created = FileSystem::CreateNewProjectFolder(name,projectPath);
-            if (created)
+            if (!projectPath.empty())
             {
-				// デフォルトのシーンを作成
-                GameScene scene = m_pEngineCommand->GetGameCore()->GetSceneManager()->CreateDefaultScene();
-                // エディタにセット、ロード
-                m_pEngineCommand->GetEditorManager()->ChangeEditingScene(scene.GetName());
-                // プロジェクト名を保存
-                FileSystem::m_sProjectName = name;
-                FileSystem::m_sProjectFolderPath = projectPath + L"/" + name;
-				// プロジェクトフォルダを作成
-                FileSystem::ScriptProject::GenerateSolutionAndProject();
-                // キャッシュに追加
-                FileSystem::g_CacheFile.projectNames.push_back(FileSystem::m_sProjectFolderPath);
-                // ブランチを取得
-                GetCurrentBranch();
-                // プロジェクトを保存
-                FileSystem::SaveProject(m_pEngineCommand->GetEditorManager(), m_pEngineCommand->GetGameCore()->GetSceneManager(), m_pEngineCommand->GetGameCore()->GetGameWorld(), m_pEngineCommand->GetGameCore()->GetECSManager());
-				m_IsRun = false; // プロジェクト作成後、Hubを終了
-            } else
-            {
-                // エラー発生（すでに存在・作成失敗など）
-                errorMessage = "プロジェクト作成に失敗しました。同名のプロジェクトが存在するか、権限がありません。";
-                ImGui::OpenPopup("ErrorPopup");
+                bool created = FileSystem::CreateNewProjectFolder(name, projectPath);
+                if (created)
+                {
+                    // デフォルトのシーンを作成
+                    GameScene scene = m_pEngineCommand->GetGameCore()->GetSceneManager()->CreateDefaultScene();
+                    // エディタにセット、ロード
+                    m_pEngineCommand->GetEditorManager()->ChangeEditingScene(scene.GetName());
+                    // プロジェクト名を保存
+                    FileSystem::m_sProjectName = name;
+                    FileSystem::m_sProjectFolderPath = projectPath + L"\\" + name;
+                    // プロジェクトフォルダを作成
+                    FileSystem::ScriptProject::GenerateSolutionAndProject();
+                    // キャッシュに追加
+                    FileSystem::g_CacheFile.projectNames.push_back(FileSystem::m_sProjectFolderPath);
+                    // ブランチを取得
+                    GetCurrentBranch();
+                    // プロジェクトを保存
+                    FileSystem::SaveProject(m_pEngineCommand->GetEditorManager(), m_pEngineCommand->GetGameCore()->GetSceneManager(), m_pEngineCommand->GetGameCore()->GetGameWorld(), m_pEngineCommand->GetGameCore()->GetECSManager());
+                    m_IsRun = false; // プロジェクト作成後、Hubを終了
+                }
+                else
+                {
+                    // エラー発生（すでに存在・作成失敗など）
+                    errorMessage = "プロジェクト作成に失敗しました。同名のプロジェクトが存在するか、権限がありません。";
+                    ImGui::OpenPopup("ErrorPopup");
+                }
             }
         }
     }
@@ -191,6 +194,7 @@ void HubManager::ShowSidebar()
         if (!std::filesystem::exists(proj))
         {
             projects.erase(std::remove(projects.begin(), projects.end(), proj), projects.end());
+            continue;
         }
         std::filesystem::path path(proj);
         std::string utf8Name = ConvertString(path.filename().wstring());

@@ -85,7 +85,7 @@ void GameCore::GameRun(const bool& isDebugger, const bool& isRuntime)
 	if (!isRuntime)
 	{
 		// スクリプトプロジェクトの保存処理、ビルド処理
-		theatria::FileSystem::ScriptProject::SaveAndBuildSolution(theatria::FileSystem::m_sProjectName, true, isDebugger);
+		theatria::FileSystem::ScriptProject::SaveAndBuildSolution(true, isDebugger);
 	}
 	// スクリプト読み込み（場所変更予定）
 	theatria::FileSystem::ScriptProject::LoadScriptDLL();

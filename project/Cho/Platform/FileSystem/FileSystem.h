@@ -246,7 +246,7 @@ namespace theatria
             static std::wstring WaitForAckFromBuildWatcher(DWORD timeoutMs);
             static bool TestPipeMessage();
 
-            static bool SaveAndBuildSolution(const std::wstring& targetSln, const bool& isBuild = true, const bool& isDebugger = false);
+            static bool SaveAndBuildSolution(const bool& isBuild = true, const bool& isDebugger = false);
 
             static std::string m_SlnGUID;
 			static std::string m_ProjGUID;

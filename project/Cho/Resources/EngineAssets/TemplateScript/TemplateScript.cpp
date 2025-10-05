@@ -1,5 +1,5 @@
 #include "{ SCRIPT_NAME }.h"
-using namespace ChoSystem;
+using namespace theatriaSystem;
 
 void { SCRIPT_NAME }::Start()
 {

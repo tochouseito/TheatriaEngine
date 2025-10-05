@@ -113,6 +113,64 @@ bool theatria::FileSystem::CreateNewProjectFolder(const std::wstring& projectNam
         return false; // ProjectSettings フォルダの作成に失敗
     }
 
+    // Packages フォルダを作成
+    std::filesystem::path packagesPath = newProjectPath / "Packages";
+    if (!std::filesystem::create_directory(packagesPath))
+    {
+        return false; // Packages フォルダの作成に失敗
+    }
+
+    // Packagesの中にlib,includeフォルダを作成
+    std::filesystem::path libPath = packagesPath / "lib";
+    if (!std::filesystem::create_directory(libPath))
+    {
+        return false; // libフォルダの作成に失敗
+    }
+    std::filesystem::path includePath = packagesPath / "include";
+    if (!std::filesystem::create_directory(includePath))
+    {
+        return false; // includeフォルダの作成に失敗
+    }
+
+    // libフォルダにTheatriaEngine_GameRuntime.lib,.exp,.dllを"_GameRuntime"を外してコピー
+    std::filesystem::path engineLibPath = std::filesystem::current_path() / "TheatriaEngine_GameRuntime.lib";
+    std::filesystem::path engineExpPath = std::filesystem::current_path() / "TheatriaEngine_GameRuntime.exp";
+    std::filesystem::path engineDllPath = std::filesystem::current_path() / "TheatriaEngine_GameRuntime.dll";
+    if (std::filesystem::exists(engineLibPath))
+    {
+        std::filesystem::copy_file(engineLibPath, libPath / "TheatriaEngine.lib");
+    }
+    if (std::filesystem::exists(engineExpPath))
+    {
+        std::filesystem::copy_file(engineExpPath, libPath / "TheatriaEngine.exp");
+    }
+    if (std::filesystem::exists(engineDllPath))
+    {
+        std::filesystem::copy_file(engineDllPath, libPath / "TheatriaEngine.dll");
+    }
+    // ChoMath.libをコピー
+    std::filesystem::path mathLibPath = std::filesystem::current_path() / "ChoMath.lib";
+    if (std::filesystem::exists(mathLibPath))
+    {
+        std::filesystem::copy_file(mathLibPath, libPath / "ChoMath.lib");
+    }
+    // includeフォルダにCho,ChoMath,PhysicsEngineフォルダを中身ごとコピー
+    std::filesystem::path choIncludePath = std::filesystem::current_path() / "Cho";
+    if (std::filesystem::exists(choIncludePath))
+    {
+        std::filesystem::copy(choIncludePath, includePath / "Cho", std::filesystem::copy_options::recursive);
+    }
+    std::filesystem::path choMathIncludePath = std::filesystem::current_path() / "ChoMath";
+    if (std::filesystem::exists(choMathIncludePath))
+    {
+        std::filesystem::copy(choMathIncludePath, includePath / "ChoMath", std::filesystem::copy_options::recursive);
+    }
+    std::filesystem::path physicsIncludePath = std::filesystem::current_path() / "PhysicsEngine";
+    if (std::filesystem::exists(physicsIncludePath))
+    {
+        std::filesystem::copy(physicsIncludePath, includePath / "PhysicsEngine", std::filesystem::copy_options::recursive);
+    }
+
 	return true; // プロジェクトフォルダの作成に成功
 }
 
@@ -1509,11 +1567,13 @@ void theatria::FileSystem::ScriptProject::UpdateVcxproj()
     }
 
     // パス設定
-    fs::path currentPath = fs::current_path();
+    //fs::path currentPath = fs::current_path();
 
     // インクルードディレクトリ
 	// スクリプトファイルのパス
-    fs::path includeBase = fs::relative(currentPath, projectDir);
+    //fs::path includeBase = fs::relative(currentPath, projectDir);
+    //includeBase /= "Packages";
+    fs::path includeBase = "$(ProjectDir)Packages/include";
     fs::path systemPath = includeBase / "Cho";
     fs::path mathLibPath = includeBase / "ChoMath/include";
     fs::path mathPath = includeBase / "ChoMath";
@@ -1526,8 +1586,8 @@ void theatria::FileSystem::ScriptProject::UpdateVcxproj()
     // ライブラリディレクトリ
     //fs::path libraryPath = currentPath / "../generated/outputs/$(Configuration)/";
     //fs::path libraryPath2 = includeBase / "../../";
-    fs::path libraryPath = "$(ProjectDir)../../../generated/outputs/$(Configuration)/";
-    fs::path libraryPath2 = "$(ProjectDir)../../";
+    fs::path libraryPath = "$(ProjectDir)Packages/lib";
+    fs::path libraryPath2 = "$(ProjectDir)";
 
     // パスの正規化
     systemPath.make_preferred();
@@ -2220,11 +2280,11 @@ bool theatria::FileSystem::ScriptProject::TestPipeMessage()
     return false;
 }
 
-bool theatria::FileSystem::ScriptProject::SaveAndBuildSolution(const std::wstring& targetSln, const bool& isBuild, const bool& isDebugger)
+bool theatria::FileSystem::ScriptProject::SaveAndBuildSolution(const bool& isBuild, const bool& isDebugger)
 {
     bool any = false;
     // .slnがついていなければ足す
-    std::wstring slnPath = targetSln;
+    std::wstring slnPath = m_sProjectFolderPath + L"\\" + m_sProjectName;
     if (slnPath.size() < 4 || slnPath.substr(slnPath.size() - 4) != L".sln")
     {
         slnPath += L".sln";
