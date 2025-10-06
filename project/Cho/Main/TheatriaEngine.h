@@ -29,6 +29,8 @@ TheatriaEngineクラス
 #include "Editor/EditorManager/EditorManager.h"
 // HubManager
 #include "Hub/HubManager.h"
+// Config
+#include "Config/Config.h"
 
 class TheatriaEngine : public Engine
 {
@@ -78,5 +80,7 @@ private:// member
 	std::unique_ptr<EditorManager> editorManager = nullptr;// EditorManager
 	// HubManager
 	std::unique_ptr<HubManager> hubManager = nullptr;// HubManager
+    // Config
+    std::unique_ptr<theatria::Config> config = nullptr;
 };
 

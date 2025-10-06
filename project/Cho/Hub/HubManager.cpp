@@ -8,10 +8,19 @@
 #include "GameCore/GameCore.h"
 #include "Editor/EditorManager/EditorManager.h"
 #include "EngineCommand/EngineCommand.h"
+#include "OS/Windows/WinApp/WinApp.h"
 using namespace theatria;
 
 void HubManager::Initialize()
 {
+    // キャッシュの読み込み
+    FileSystem::LoadCacheFile(std::filesystem::current_path().wstring());
+    if (m_IsGameRuntime)
+    {
+        // 起動Configの読み込み
+        LaunchConfig config = FileSystem::LoadLaunchConfig(std::filesystem::current_path().wstring());
+        FileSystem::m_sProjectName = config.projectName;
+    }
 }
 
 void HubManager::Update()
@@ -23,13 +32,15 @@ void HubManager::Update()
     }
     if (m_IsGameRuntime)
     {
-        std::wstring selectedProjectName = L"2025LE3B10Days";
+        std::wstring selectedProjectName = FileSystem::m_sProjectName;
         // プロジェクトの読み込み
         FileSystem::LoadProjectFolder(selectedProjectName, m_pEngineCommand);
         // プロジェクトのパスを保存
         FileSystem::ScriptProject::LoadProjectPath(selectedProjectName);
         // ブランチを取得
         GetCurrentBranch();
+        // ウィンドウのタイトルバーを変更
+        SetWindowTextW(WinApp::GetHWND(), FileSystem::g_GameSettings.titleBar.c_str());
         // プロジェクト選択後、Hubを終了
         m_IsRun = false; // プロジェクト選択後、Hubを終了
     }
@@ -100,28 +111,39 @@ void HubManager::ShowSidebar()
 
     if (ImGui::Button("Create New Project"))
     {
-		std::wstring name = ConvertString(newProjectName);
+        std::wstring name = ConvertString(newProjectName);
         if (!name.empty())
         {
-            bool created = FileSystem::CreateNewProjectFolder(name);
-            if (created)
+            // ダイアログを開いて保存先フォルダを選択
+            std::wstring projectPath = FileSystem::GameBuilder::SelectFolderDialog();
+            if (!projectPath.empty())
             {
-				// デフォルトのシーンを作成
-                GameScene scene = m_pEngineCommand->GetGameCore()->GetSceneManager()->CreateDefaultScene();
-                // エディタにセット、ロード
-                m_pEngineCommand->GetEditorManager()->ChangeEditingScene(scene.GetName());
-                // プロジェクト名を保存
-                FileSystem::m_sProjectName = name;
-				// プロジェクトフォルダを作成
-                FileSystem::ScriptProject::GenerateSolutionAndProject();
-                // プロジェクトを保存
-                FileSystem::SaveProject(m_pEngineCommand->GetEditorManager(), m_pEngineCommand->GetGameCore()->GetSceneManager(), m_pEngineCommand->GetGameCore()->GetGameWorld(), m_pEngineCommand->GetGameCore()->GetECSManager());
-				m_IsRun = false; // プロジェクト作成後、Hubを終了
-            } else
-            {
-                // エラー発生（すでに存在・作成失敗など）
-                errorMessage = "プロジェクト作成に失敗しました。同名のプロジェクトが存在するか、権限がありません。";
-                ImGui::OpenPopup("ErrorPopup");
+                bool created = FileSystem::CreateNewProjectFolder(name, projectPath);
+                if (created)
+                {
+                    // デフォルトのシーンを作成
+                    GameScene scene = m_pEngineCommand->GetGameCore()->GetSceneManager()->CreateDefaultScene();
+                    // エディタにセット、ロード
+                    m_pEngineCommand->GetEditorManager()->ChangeEditingScene(scene.GetName());
+                    // プロジェクト名を保存
+                    FileSystem::m_sProjectName = name;
+                    FileSystem::m_sProjectFolderPath = projectPath + L"\\" + name;
+                    // プロジェクトフォルダを作成
+                    FileSystem::ScriptProject::GenerateSolutionAndProject();
+                    // キャッシュに追加
+                    FileSystem::g_CacheFile.projectNames.push_back(FileSystem::m_sProjectFolderPath);
+                    // ブランチを取得
+                    GetCurrentBranch();
+                    // プロジェクトを保存
+                    FileSystem::SaveProject(m_pEngineCommand->GetEditorManager(), m_pEngineCommand->GetGameCore()->GetSceneManager(), m_pEngineCommand->GetGameCore()->GetGameWorld(), m_pEngineCommand->GetGameCore()->GetECSManager());
+                    m_IsRun = false; // プロジェクト作成後、Hubを終了
+                }
+                else
+                {
+                    // エラー発生（すでに存在・作成失敗など）
+                    errorMessage = "プロジェクト作成に失敗しました。同名のプロジェクトが存在するか、権限がありません。";
+                    ImGui::OpenPopup("ErrorPopup");
+                }
             }
         }
     }
@@ -139,26 +161,78 @@ void HubManager::ShowSidebar()
 
     ImGui::Separator();
 
-    static std::vector<std::wstring> projects = FileSystem::GetProjectFolders();
-    static int selectedIndex = -1;
-
-    for (int i = 0; i < projects.size(); ++i)
+    // ディスクからプロジェクトを探す
+    if(ImGui::Button(ConvertString(L"ディスクからプロジェクトを探す").c_str()))
     {
-		std::string utf8Name = ConvertString(projects[i]);
-        if (ImGui::Selectable(utf8Name.c_str(), selectedIndex == i))
+        // ダイアログを開いてプロジェクトフォルダを選択
+        std::wstring folder = FileSystem::GameBuilder::SelectFolderDialog();
+        if (!folder.empty())
         {
-            selectedIndex = i;
-            std::wstring selectedProjectName = projects[i];
-            // プロジェクトの読み込み
-			FileSystem::LoadProjectFolder(selectedProjectName, m_pEngineCommand);
-			// プロジェクトのパスを保存
-			FileSystem::ScriptProject::LoadProjectPath(selectedProjectName);
-			// ブランチを取得
+            // プロジェクトフォルダを読み込む
+            FileSystem::LoadProjectFolder(folder, m_pEngineCommand);
+            // プロジェクト名を保存
+            std::filesystem::path projectName = std::filesystem::path(folder).filename();
+            FileSystem::m_sProjectName = projectName;
+            // ブランチを取得
             GetCurrentBranch();
-			// プロジェクト選択後、Hubを終了
-			m_IsRun = false; // プロジェクト選択後、Hubを終了
+            // ウィンドウのタイトルバーを変更
+            SetWindowTextW(WinApp::GetHWND(), FileSystem::g_GameSettings.titleBar.c_str());
+            // プロジェクト選択後、Hubを終了
+            m_IsRun = false; // プロジェクト選択後、Hubを終了
+            // プロジェクトパスを保存
+            FileSystem::g_CacheFile.projectNames.push_back(folder);
         }
     }
+
+    ImGui::Text("Select Project:");
+
+    // プロジェクト一覧を取得
+    std::vector<std::wstring> projects = FileSystem::g_CacheFile.projectNames;
+    for(const auto& proj : projects)
+    {
+        // 存在しないプロジェクトはリストから削除
+        if (!std::filesystem::exists(proj))
+        {
+            projects.erase(std::remove(projects.begin(), projects.end(), proj), projects.end());
+            continue;
+        }
+        std::filesystem::path path(proj);
+        std::string utf8Name = ConvertString(path.filename().wstring());
+        if (ImGui::Selectable(utf8Name.c_str(), FileSystem::m_sProjectName == path.filename().wstring()))
+        {
+            // プロジェクトの読み込み
+            FileSystem::LoadProjectFolder(path.wstring(), m_pEngineCommand);
+            // プロジェクト名を保存
+            FileSystem::m_sProjectName = path.filename().wstring();
+            // ブランチを取得
+            GetCurrentBranch();
+            // ウィンドウのタイトルバーを変更
+            SetWindowTextW(WinApp::GetHWND(), FileSystem::g_GameSettings.titleBar.c_str());
+            // プロジェクト選択後、Hubを終了
+            m_IsRun = false; // プロジェクト選択後、Hubを終了
+        }
+    }
+
+  //  static std::vector<std::wstring> projects = FileSystem::GetProjectFolders();
+  //  static int selectedIndex = -1;
+
+  //  for (int i = 0; i < projects.size(); ++i)
+  //  {
+		//std::string utf8Name = ConvertString(projects[i]);
+  //      if (ImGui::Selectable(utf8Name.c_str(), selectedIndex == i))
+  //      {
+  //          selectedIndex = i;
+  //          std::wstring selectedProjectName = projects[i];
+  //          // プロジェクトの読み込み
+		//	FileSystem::LoadProjectFolder(selectedProjectName, m_pEngineCommand);
+		//	// プロジェクトのパスを保存
+		//	FileSystem::ScriptProject::LoadProjectPath(selectedProjectName);
+		//	// ブランチを取得
+  //          GetCurrentBranch();
+		//	// プロジェクト選択後、Hubを終了
+		//	m_IsRun = false; // プロジェクト選択後、Hubを終了
+  //      }
+  //  }
 
     ImGui::End();
 }
@@ -174,7 +248,7 @@ void HubManager::ShowMainContent()
 
 void HubManager::GetCurrentBranch()
 {
-	std::string gitFolder = "GameProjects/" + ConvertString(FileSystem::m_sProjectName) + "/.git";
+	std::string gitFolder = ConvertString(FileSystem::m_sProjectFolderPath) + "/.git";
 	std::filesystem::path gitPath(gitFolder);
 	m_GitHeadPath = gitPath / "HEAD";
     m_LastBranch = ReadCurrentBranch();

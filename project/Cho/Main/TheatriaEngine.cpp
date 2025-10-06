@@ -19,6 +19,9 @@ void TheatriaEngine::Initialize()
 	// ResourceLeakChecker
 	resourceLeakChecker = std::make_unique<ResourceLeakChecker>();
 
+    // Config
+    config = std::make_unique<theatria::Config>();
+
 	// ウィンドウの作成
 	WinApp::CreateGameWindow();
 
@@ -35,7 +38,7 @@ void TheatriaEngine::Initialize()
 	resourceManager = std::make_unique<ResourceManager>(dx12->GetDevice());
 
 	// GraphicsEngine初期化
-	graphicsEngine = std::make_unique<GraphicsEngine>(dx12->GetDevice(),resourceManager.get(),GetRuntimeMode());
+	graphicsEngine = std::make_unique<GraphicsEngine>(dx12->GetDevice(),resourceManager.get(),GetRuntimeMode(), coreSystem->GetThreadManager());
 	graphicsEngine->CreateSwapChain(dx12->GetDXGIFactory());
 	graphicsEngine->Init();
 
@@ -51,7 +54,7 @@ void TheatriaEngine::Initialize()
 	gameCore->Initialize(resourceManager.get(),graphicsEngine.get());
 
 	// EngineCommand初期化
-	engineCommand = std::make_unique<EngineCommand>(gameCore.get(), resourceManager.get(), graphicsEngine.get(),platformLayer->GetInputManager(),platformLayer.get());
+	engineCommand = std::make_unique<EngineCommand>(gameCore.get(), resourceManager.get(), graphicsEngine.get(),platformLayer->GetInputManager(),platformLayer.get(),config.get());
 	// GameCoreにEngineCommandをセット
 	gameCore->SetEngineCommandPtr(engineCommand.get());
 	graphicsEngine->SetEngineCommand(engineCommand.get());
@@ -208,7 +211,7 @@ void TheatriaEngine::Start()
 		// ResourceManager初期化
 		resourceManager = std::make_unique<ResourceManager>(dx12->GetDevice());
 		// GraphicsEngine初期化
-		graphicsEngine = std::make_unique<GraphicsEngine>(dx12->GetDevice(), resourceManager.get(), GetRuntimeMode());
+		graphicsEngine = std::make_unique<GraphicsEngine>(dx12->GetDevice(), resourceManager.get(), GetRuntimeMode(), coreSystem->GetThreadManager());
 		graphicsEngine->CreateSwapChain(dx12->GetDXGIFactory());
 		graphicsEngine->Init();
 		// Model,TextureManager初期化
@@ -220,7 +223,7 @@ void TheatriaEngine::Start()
 		gameCore = std::make_unique<GameCore>();
 		gameCore->Initialize(resourceManager.get(),graphicsEngine.get());
 		// EngineCommand初期化
-		engineCommand = std::make_unique<EngineCommand>(gameCore.get(), resourceManager.get(), graphicsEngine.get(),platformLayer->GetInputManager(), platformLayer.get());
+		engineCommand = std::make_unique<EngineCommand>(gameCore.get(), resourceManager.get(), graphicsEngine.get(),platformLayer->GetInputManager(), platformLayer.get(), config.get());
 		// GameCoreにEngineCommandをセット
 		gameCore->SetEngineCommandPtr(engineCommand.get());
 		graphicsEngine->SetEngineCommand(engineCommand.get());

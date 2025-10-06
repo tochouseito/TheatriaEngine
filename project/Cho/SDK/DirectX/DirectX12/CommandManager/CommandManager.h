@@ -2,6 +2,8 @@
 
 #include "SDK/DirectX/DirectX12/CommandContext/CommandContext.h"
 
+class ThreadManager;
+
 enum QueueType {
 	Graphics,
 	Compute,
@@ -51,7 +53,7 @@ private:
 class CommandManager
 {
 public:
-    CommandManager(ID3D12Device8* device);
+    CommandManager(ID3D12Device8* device, ThreadManager* threadManager);
     ~CommandManager();
 
     void Initialize();
@@ -76,6 +78,7 @@ private:
 	void CreateQueueContexts(ID3D12Device8* device);
 private:
 	ID3D12Device8* m_Device = nullptr;
+    ThreadManager* m_ThreadManager = nullptr;
     // コマンドキューコンテキスト
 	std::array<std::unique_ptr<QueueContext>, kQueueTypeCount> m_QueueContexts;
 	// コマンドプール

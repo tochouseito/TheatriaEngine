@@ -1,7 +1,7 @@
 #pragma once
 #include "GameCore/GameObject/GameObject.h"
 #include "Core/Utility/Components.h"
-#define USE_TheatriaEngine_SCRIPT
+#define USE_THEATRIAENGINE_SCRIPT
 #include "TheatriaEngineAPI.h"
 class THEATRIA_API Marionnette
 {

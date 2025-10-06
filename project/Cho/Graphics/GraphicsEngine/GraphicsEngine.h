@@ -68,6 +68,7 @@ class ResourceManager;
 class ImGuiManager;
 class GameCore;
 class EngineCommand;
+class ThreadManager;
 class GraphicsEngine : public Engine
 {
 	friend class SwapChain;
@@ -79,13 +80,13 @@ class GraphicsEngine : public Engine
 	friend class EffectEditorSystem;
 public:
 	// Constructor
-	GraphicsEngine(ID3D12Device8* device,ResourceManager* resourceManager,RuntimeMode mode) : 
-		m_Device(device), m_ResourceManager(resourceManager), Engine(mode)
-	{
-		m_GraphicsCore = std::make_unique<GraphicsCore>(device);
-		m_DepthManager = std::make_unique<DepthManager>();
-		m_PipelineManager = std::make_unique<PipelineManager>(resourceManager,this);
-	}
+    GraphicsEngine(ID3D12Device8* device, ResourceManager* resourceManager, RuntimeMode mode, ThreadManager* threadManager) :
+        m_Device(device), m_ResourceManager(resourceManager), Engine(mode), m_ThreadManager(threadManager)
+    {
+        m_GraphicsCore = std::make_unique<GraphicsCore>(device, threadManager);
+        m_DepthManager = std::make_unique<DepthManager>();
+        m_PipelineManager = std::make_unique<PipelineManager>(resourceManager,this);
+    }
 	// Destructor
 	~GraphicsEngine() = default;
 	void Finalize() override
@@ -152,6 +153,7 @@ private:
 	ID3D12Device8* m_Device = nullptr;
 	ResourceManager* m_ResourceManager = nullptr;
 	EngineCommand* m_EngineCommand = nullptr;
+    ThreadManager* m_ThreadManager = nullptr;
 
 	std::unique_ptr<SwapChain> m_SwapChain = nullptr;
 	std::unique_ptr<GraphicsCore> m_GraphicsCore = nullptr;

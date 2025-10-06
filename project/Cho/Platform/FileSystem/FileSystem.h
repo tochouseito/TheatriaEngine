@@ -50,6 +50,7 @@ namespace theatria
         int width = 1280;
         int height = 720;
         bool fullscreen = false;
+        std::wstring titleBar = L"Theatria Engine";
     };
     struct EngineConfigInfo
     {
@@ -65,12 +66,26 @@ namespace theatria
         bool debugMode = false;
         std::wstring skyTexName;
 		Vector3 gravity = { 0.0f, 0.0f, 0.0f }; // 重力
+        std::wstring titleBar = L"Theatria Engine";
+        std::wstring exeName = L"TheatriaGame";
     };
     struct FolderNode
     {
 		std::filesystem::path folderPath;
 		std::vector<std::filesystem::path> files;
 		std::vector<FolderNode> children;
+    };
+
+    // 起動Configファイル
+    struct LaunchConfig
+    {
+        std::wstring projectName = L"";
+    };
+
+    // キャッシュファイル構成
+    struct CacheFile
+    {
+        std::vector<std::wstring> projectNames;
     };
 
     // ComponentsSerializer
@@ -133,7 +148,7 @@ namespace theatria
 		// プロジェクトフォルダを取得
         static std::vector<std::wstring> GetProjectFolders();
         // 新しいプロジェクトを作成
-        static bool CreateNewProjectFolder(const std::wstring& projectName);
+        static bool CreateNewProjectFolder(const std::wstring& projectName, const std::wstring& projectPath);
 		// プロジェクトファイルを保存
         static bool SaveProjectFile(const std::wstring& projectName, const std::vector<std::wstring>& sceneFiles);
 		// プロジェクトファイルを読み込む
@@ -150,11 +165,7 @@ namespace theatria
         static bool SaveSceneFile(const std::wstring& directory,const std::wstring& srcFileName, GameScene* scene, ECSManager* ecs);
 		// シーンファイルを読み込む
         static bool LoadSceneFile(const std::wstring& filePath,EngineCommand* engineCommand);
-        // スクリプトのファイルを保存
-		//static bool SaveScriptFile(const std::wstring& directory,ResourceManager* resourceManager);
-		// スクリプトのファイルを読み込む
-		//static bool LoadScriptFile(const std::wstring& filePath, EngineCommand* engineCommand);
-		// ゲームパラメーターファイルを保存
+        // ゲームパラメーターファイルを保存
         static bool SaveGameParameter(const std::wstring& filePath,
             const std::string& group,
             const std::string& item,
@@ -166,13 +177,21 @@ namespace theatria
             const std::string& item,
             const std::string& dataName,
             GameParameterVariant& outValue);
+        // 起動Configファイルを保存
+        static bool SaveLaunchConfig(const LaunchConfig& config, const std::wstring& filePath);
+        // 起動Configファイルを読み込む
+        static LaunchConfig LoadLaunchConfig(const std::wstring& filePath);
+        // キャッシュファイルを保存
+        static bool SaveCacheFile(const CacheFile& cache, const std::wstring& filePath);
+        // キャッシュファイルを読み込む
+        static bool LoadCacheFile(const std::wstring& filePath);
 
         static FileType GetJsonFileType(const std::filesystem::path& path);
 
         // プロジェクトを保存
 		static void SaveProject(EditorManager* editorManager, SceneManager* sceneManager, GameWorld* gameWorld, ECSManager* ecs);
         // プロジェクトフォルダを読み込む
-        static bool LoadProjectFolder(const std::wstring& projectName, EngineCommand* engineCommand);
+        static bool LoadProjectFolder(const std::wstring& projectFolderPath, EngineCommand* engineCommand);
         /// CSVを2次元vectorに読み込む関数
         // csv読み込み
         static std::vector<std::vector<std::string>> LoadCSV(const std::string& filePath);
@@ -198,8 +217,10 @@ namespace theatria
         // GUID 生成
         static std::string GenerateGUID();
         static std::wstring m_sProjectName;
+        static std::wstring m_sProjectFolderPath;
         static inline FolderNode g_ProjectFiles;
 		static inline GameSettingsInfo g_GameSettings;
+        static inline CacheFile g_CacheFile;
 
         class ScriptProject
         {
@@ -225,7 +246,10 @@ namespace theatria
             static std::wstring WaitForAckFromBuildWatcher(DWORD timeoutMs);
             static bool TestPipeMessage();
 
-            static bool SaveAndBuildSolution(const std::wstring& targetSln, const bool& isBuild = true, const bool& isDebugger = false);
+            static bool SaveAndBuildSolution(const bool& isBuild = true, const bool& isDebugger = false);
+            // ファイル追加
+            static bool AddScriptFileToProject(const std::wstring& scriptName);
+            static bool AddClassFileToProject(const std::wstring& className);
 
             static std::string m_SlnGUID;
 			static std::string m_ProjGUID;

@@ -23,6 +23,11 @@ public:// メンバ関数
 	// 終了処理
 	void Finalize();
 
+    // ThreadManagerの取得
+    ThreadManager* GetThreadManager() { return threadManager.get(); }
+
 private:
+    // ThreadManager
+    std::unique_ptr<ThreadManager> threadManager = nullptr;
 };
 

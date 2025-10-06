@@ -13,10 +13,10 @@ CoreSystem::~CoreSystem()
 void CoreSystem::Initialize()
 {
 	// スレッドマネージャー
-	ThreadManager::GetInstance().Initialize();
+    threadManager = std::make_unique<ThreadManager>();
 }
 
 void CoreSystem::Finalize()
 {
-	ThreadManager::GetInstance().StopAllThreads();
+	threadManager->StopAllThreads();
 }

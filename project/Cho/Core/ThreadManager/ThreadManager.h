@@ -29,17 +29,20 @@ struct Task {
 };
 
 class ThreadManager {
+//public:
+//    static ThreadManager& GetInstance()
+//    {
+//        static ThreadManager instance;
+//        return instance;
+//    }
+//private:
+//    ThreadManager() {}
+//	ThreadManager(const ThreadManager&) = delete;
+//	ThreadManager& operator=(const ThreadManager&) = delete;
 public:
-    static ThreadManager& GetInstance()
-    {
-        static ThreadManager instance;
-        return instance;
-    }
-private:
-    ThreadManager() {}
-	ThreadManager(const ThreadManager&) = delete;
-	ThreadManager& operator=(const ThreadManager&) = delete;
-public:
+    ThreadManager() = default;
+    ~ThreadManager() = default;
+
     // 初期化
 	void Initialize();
 
