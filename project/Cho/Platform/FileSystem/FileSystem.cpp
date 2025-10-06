@@ -113,63 +113,63 @@ bool theatria::FileSystem::CreateNewProjectFolder(const std::wstring& projectNam
         return false; // ProjectSettings フォルダの作成に失敗
     }
 
-    // Packages フォルダを作成
-    std::filesystem::path packagesPath = newProjectPath / "Packages";
-    if (!std::filesystem::create_directory(packagesPath))
-    {
-        return false; // Packages フォルダの作成に失敗
-    }
+    //// Packages フォルダを作成
+    //std::filesystem::path packagesPath = newProjectPath / "Packages";
+    //if (!std::filesystem::create_directory(packagesPath))
+    //{
+    //    return false; // Packages フォルダの作成に失敗
+    //}
 
-    // Packagesの中にlib,includeフォルダを作成
-    std::filesystem::path libPath = packagesPath / "lib";
-    if (!std::filesystem::create_directory(libPath))
-    {
-        return false; // libフォルダの作成に失敗
-    }
-    std::filesystem::path includePath = packagesPath / "include";
-    if (!std::filesystem::create_directory(includePath))
-    {
-        return false; // includeフォルダの作成に失敗
-    }
+    //// Packagesの中にlib,includeフォルダを作成
+    //std::filesystem::path libPath = packagesPath / "lib";
+    //if (!std::filesystem::create_directory(libPath))
+    //{
+    //    return false; // libフォルダの作成に失敗
+    //}
+    //std::filesystem::path includePath = packagesPath / "include";
+    //if (!std::filesystem::create_directory(includePath))
+    //{
+    //    return false; // includeフォルダの作成に失敗
+    //}
 
-    // libフォルダにTheatriaEngine_GameRuntime.lib,.exp,.dllを"_GameRuntime"を外してコピー
-    std::filesystem::path engineLibPath = std::filesystem::current_path() / "TheatriaEngine_GameRuntime.lib";
-    std::filesystem::path engineExpPath = std::filesystem::current_path() / "TheatriaEngine_GameRuntime.exp";
-    std::filesystem::path engineDllPath = std::filesystem::current_path() / "TheatriaEngine_GameRuntime.dll";
-    if (std::filesystem::exists(engineLibPath))
-    {
-        std::filesystem::copy_file(engineLibPath, libPath / "TheatriaEngine.lib");
-    }
-    if (std::filesystem::exists(engineExpPath))
-    {
-        std::filesystem::copy_file(engineExpPath, libPath / "TheatriaEngine.exp");
-    }
-    if (std::filesystem::exists(engineDllPath))
-    {
-        std::filesystem::copy_file(engineDllPath, libPath / "TheatriaEngine.dll");
-    }
-    // ChoMath.libをコピー
-    std::filesystem::path mathLibPath = std::filesystem::current_path() / "ChoMath.lib";
-    if (std::filesystem::exists(mathLibPath))
-    {
-        std::filesystem::copy_file(mathLibPath, libPath / "ChoMath.lib");
-    }
-    // includeフォルダにCho,ChoMath,PhysicsEngineフォルダを中身ごとコピー
-    std::filesystem::path choIncludePath = std::filesystem::current_path() / "Cho";
-    if (std::filesystem::exists(choIncludePath))
-    {
-        std::filesystem::copy(choIncludePath, includePath / "Cho", std::filesystem::copy_options::recursive);
-    }
-    std::filesystem::path choMathIncludePath = std::filesystem::current_path() / "ChoMath";
-    if (std::filesystem::exists(choMathIncludePath))
-    {
-        std::filesystem::copy(choMathIncludePath, includePath / "ChoMath", std::filesystem::copy_options::recursive);
-    }
-    std::filesystem::path physicsIncludePath = std::filesystem::current_path() / "PhysicsEngine";
-    if (std::filesystem::exists(physicsIncludePath))
-    {
-        std::filesystem::copy(physicsIncludePath, includePath / "PhysicsEngine", std::filesystem::copy_options::recursive);
-    }
+    //// libフォルダにTheatriaEngine_GameRuntime.lib,.exp,.dllを"_GameRuntime"を外してコピー
+    //std::filesystem::path engineLibPath = std::filesystem::current_path() / "TheatriaEngine_GameRuntime.lib";
+    //std::filesystem::path engineExpPath = std::filesystem::current_path() / "TheatriaEngine_GameRuntime.exp";
+    //std::filesystem::path engineDllPath = std::filesystem::current_path() / "TheatriaEngine_GameRuntime.dll";
+    //if (std::filesystem::exists(engineLibPath))
+    //{
+    //    std::filesystem::copy_file(engineLibPath, libPath / "TheatriaEngine.lib");
+    //}
+    //if (std::filesystem::exists(engineExpPath))
+    //{
+    //    std::filesystem::copy_file(engineExpPath, libPath / "TheatriaEngine.exp");
+    //}
+    //if (std::filesystem::exists(engineDllPath))
+    //{
+    //    std::filesystem::copy_file(engineDllPath, libPath / "TheatriaEngine.dll");
+    //}
+    //// ChoMath.libをコピー
+    //std::filesystem::path mathLibPath = std::filesystem::current_path() / "ChoMath.lib";
+    //if (std::filesystem::exists(mathLibPath))
+    //{
+    //    std::filesystem::copy_file(mathLibPath, libPath / "ChoMath.lib");
+    //}
+    //// includeフォルダにCho,ChoMath,PhysicsEngineフォルダを中身ごとコピー
+    //std::filesystem::path choIncludePath = std::filesystem::current_path() / "Cho";
+    //if (std::filesystem::exists(choIncludePath))
+    //{
+    //    std::filesystem::copy(choIncludePath, includePath / "Cho", std::filesystem::copy_options::recursive);
+    //}
+    //std::filesystem::path choMathIncludePath = std::filesystem::current_path() / "ChoMath";
+    //if (std::filesystem::exists(choMathIncludePath))
+    //{
+    //    std::filesystem::copy(choMathIncludePath, includePath / "ChoMath", std::filesystem::copy_options::recursive);
+    //}
+    //std::filesystem::path physicsIncludePath = std::filesystem::current_path() / "PhysicsEngine";
+    //if (std::filesystem::exists(physicsIncludePath))
+    //{
+    //    std::filesystem::copy(physicsIncludePath, includePath / "PhysicsEngine", std::filesystem::copy_options::recursive);
+    //}
 
 	return true; // プロジェクトフォルダの作成に成功
 }
@@ -1573,7 +1573,7 @@ void theatria::FileSystem::ScriptProject::UpdateVcxproj()
 	// スクリプトファイルのパス
     //fs::path includeBase = fs::relative(currentPath, projectDir);
     //includeBase /= "Packages";
-    fs::path includeBase = "$(ProjectDir)Packages/include";
+    fs::path includeBase = std::filesystem::current_path();
     fs::path systemPath = includeBase / "Cho";
     fs::path mathLibPath = includeBase / "ChoMath/include";
     fs::path mathPath = includeBase / "ChoMath";
@@ -1586,7 +1586,7 @@ void theatria::FileSystem::ScriptProject::UpdateVcxproj()
     // ライブラリディレクトリ
     //fs::path libraryPath = currentPath / "../generated/outputs/$(Configuration)/";
     //fs::path libraryPath2 = includeBase / "../../";
-    fs::path libraryPath = "$(ProjectDir)Packages/lib";
+    fs::path libraryPath = std::filesystem::current_path();
     fs::path libraryPath2 = "$(ProjectDir)";
 
     // パスの正規化
@@ -2433,7 +2433,7 @@ bool theatria::FileSystem::ScriptProject::AddScriptFileToProject(const std::wstr
 bool theatria::FileSystem::ScriptProject::AddClassFileToProject(const std::wstring& className)
 {
     // .h は Header Files, .cpp は Source Files に自動で入る
-    SendMessageToBuildWatcher(L"ADD_SCRIPT_PROJ|"+ m_sProjectName + L".sln" + L"|" + m_sProjectName + L"|Source Files|" + className);
+    SendMessageToBuildWatcher(L"ADD_SCRIPT_PROJ|"+ m_sProjectName + L"|" + m_sProjectName + L"|Source Files|" + className);
     auto reply = WaitForAckFromBuildWatcher(5000);
     return reply.rfind(L"ACK:ADD_SCRIPT|OK|", 0) == 0;
 }
