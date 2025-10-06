@@ -258,6 +258,7 @@ namespace theatria
             static HMODULE m_DllHandle;
 			static DWORD64 m_PDBBaseAddress;
 
+
             // Pipe
             static void ClosePipe();
 			static HANDLE m_ReadPipe;// 読み取り用パイプ
