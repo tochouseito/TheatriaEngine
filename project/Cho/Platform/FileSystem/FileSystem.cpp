@@ -2415,6 +2415,29 @@ bool theatria::FileSystem::ScriptProject::SaveAndBuildSolution(const bool& isBui
     return any;
 }
 
+bool theatria::FileSystem::ScriptProject::AddScriptFileToProject(const std::wstring& scriptName)
+{
+    // ADD_SCRIPT_PROJ|<sln>|<proj>|<filter>|<ClassName>
+    std::wstring cmd = L"ADD_FILES_PROJ|Theatria|GameScript|Source Files|"
+        + scriptName + L".cpp";
+    SendMessageToBuildWatcher(cmd);
+
+    // HLSL など相対パスも OK（プロジェクト直下からの相対）
+    std::wstring cmd2 = L"ADD_FILES_PROJ|Theatria|GameScript|Shaders|Shaders\\DefaultPS.hlsl";
+    SendMessageToBuildWatcher(cmd2);
+
+    auto reply = WaitForAckFromBuildWatcher(5000);
+    return reply.rfind(L"ACK:ADD_FILES|OK|", 0) == 0;
+}
+
+bool theatria::FileSystem::ScriptProject::AddClassFileToProject(const std::wstring& className)
+{
+    // .h は Header Files, .cpp は Source Files に自動で入る
+    SendMessageToBuildWatcher(L"ADD_SCRIPT_PROJ|"+ m_sProjectName + L".sln" + L"|" + m_sProjectName + L"|Source Files|" + className);
+    auto reply = WaitForAckFromBuildWatcher(5000);
+    return reply.rfind(L"ACK:ADD_SCRIPT|OK|", 0) == 0;
+}
+
 // Pipe
 void theatria::FileSystem::ScriptProject::ClosePipe()
 {

@@ -1,5 +1,6 @@
-﻿using EnvDTE;
+using EnvDTE;
 using EnvDTE80;
+using Microsoft.VisualStudio.VCProjectEngine;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -19,6 +20,181 @@ class Program
             return p; // ChoEditor.exe の最初の1つを返す
         }
         return null;
+    }
+
+    // ソリューション内からプロジェクトを名前で探す（ソリューションフォルダ対応）
+    static Project FindProjectByName(DTE2 dte, string projName)
+    {
+        foreach (Project p in dte.Solution.Projects)
+        {
+            var found = FindProjectRecursive(p, projName);
+            if (found != null) return found;
+        }
+        return null;
+    }
+    static Project FindProjectRecursive(Project p, string projName)
+    {
+        if (p == null) return null;
+        if (string.Equals(p.Name, projName, StringComparison.OrdinalIgnoreCase))
+            return p;
+
+        if (p.Kind == EnvDTE80.ProjectKinds.vsProjectKindSolutionFolder && p.ProjectItems != null)
+        {
+            foreach (ProjectItem item in p.ProjectItems)
+            {
+                var sub = item.SubProject;
+                var found = FindProjectRecursive(sub, projName);
+                if (found != null) return found;
+            }
+        }
+        return null;
+    }
+
+    // フィルタを確実に用意
+    static VCFilter EnsureFilter(VCProject vcproj, string filterName)
+    {
+        foreach (VCFilter f in vcproj.Filters)
+            if (string.Equals(f.Name, filterName, StringComparison.OrdinalIgnoreCase))
+                return f;
+        return vcproj.AddFilter(filterName);
+    }
+    static string GetTemplateDir()
+    {
+        // Watcher.exe と同じ場所の Templates フォルダ
+        var exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+        var dir = Path.GetDirectoryName(exePath);
+        if (string.IsNullOrEmpty(dir))
+            dir = AppDomain.CurrentDomain.BaseDirectory; // 予備
+        return Path.Combine(dir, "Cho/Resources/EngineAssets/TemplateScript");
+    }
+
+    static string GetTemplatePath(string fileName)
+        => Path.Combine(GetTemplateDir(), fileName);
+
+    // テンプレ読込（UTF-8/BOM/他 だいたいOK）
+    static string LoadTemplateText(string fileName)
+    {
+        var path = GetTemplatePath(fileName);
+        if (!File.Exists(path)) throw new FileNotFoundException("Template not found", path);
+        return File.ReadAllText(path, Encoding.UTF8);
+    }
+
+    // { SCRIPT_NAME } をクラス名に置換
+    static string ApplyScriptName(string text, string className)
+        => text.Replace("{ SCRIPT_NAME }", className);
+
+    // 新規/空のときだけテンプレを書き込む
+    static bool WriteFromTemplateIfEmpty(string absPath, string templName, string className)
+    {
+        var parent = Path.GetDirectoryName(absPath);
+        if (string.IsNullOrEmpty(parent))
+            throw new ArgumentException("Invalid path: " + absPath);
+
+        Directory.CreateDirectory(parent);
+
+        if (File.Exists(absPath) && new FileInfo(absPath).Length > 0)
+            return false;
+
+        var src = LoadTemplateText(templName);
+        var outText = ApplyScriptName(src, className);
+
+        using (var sw = new StreamWriter(absPath, false, new UTF8Encoding(true)))
+            sw.Write(outText);
+
+        return true;
+    }
+    static string GetProjectDirectory(Project p)
+    {
+        // p.FullName は .vcxproj のフルパス
+        if (!string.IsNullOrEmpty(p.FullName))
+        {
+            var dir = Path.GetDirectoryName(p.FullName);
+            if (!string.IsNullOrEmpty(dir)) return dir;
+        }
+
+        // VCProject 側からも試す
+        var vcproj = p.Object as Microsoft.VisualStudio.VCProjectEngine.VCProject;
+        if (vcproj != null)
+        {
+            var dir2 = vcproj.ProjectDirectory;
+            if (!string.IsNullOrEmpty(dir2))
+                return Path.GetFullPath(dir2);
+        }
+
+        // 最後の砦（まず来ないはず）
+        return AppDomain.CurrentDomain.BaseDirectory;
+    }
+
+    static int AddFilesToVcProjectAtDir(
+    DTE2 dte, string projectName, string filterName, IEnumerable<string> relativeFilePaths, out string error)
+    {
+        error = null;
+        var p = FindProjectByName(dte, projectName);
+        if (p == null) { error = $"Project '{projectName}' not found."; return 0; }
+
+        var vcproj = p.Object as Microsoft.VisualStudio.VCProjectEngine.VCProject;
+        if (vcproj == null) { error = $"Project '{projectName}' is not a VC++ project."; return 0; }
+
+        var projDir = GetProjectDirectory(p);
+
+        bool old = dte.SuppressUI;
+        dte.SuppressUI = true;
+
+        int added = 0;
+        try
+        {
+            var filter = !string.IsNullOrEmpty(filterName) ? EnsureFilter(vcproj, filterName) : null;
+
+            foreach (var rel in relativeFilePaths)
+            {
+                if (string.IsNullOrWhiteSpace(rel)) continue;
+                var relNorm = rel.Trim().Trim('"').Replace('/', '\\');
+                var abs = Path.GetFullPath(Path.Combine(projDir, relNorm));
+
+                try
+                {
+                    // テンプレ適用（.h/.cpp のみ。必要なら他拡張子も分岐追加）
+                    string stem = Path.GetFileNameWithoutExtension(abs);
+                    string ext = Path.GetExtension(abs).ToLowerInvariant();
+                    switch (ext)
+                    {
+                        case ".h":
+                        case ".hpp":
+                        case ".hh":
+                            WriteFromTemplateIfEmpty(abs, "TemplateScript.h", stem);
+                            break;
+                        case ".cpp":
+                        case ".cxx":
+                            WriteFromTemplateIfEmpty(abs, "TemplateScript.cpp", stem);
+                            break;
+                        default:
+                            var parent = Path.GetDirectoryName(abs);
+                            if (string.IsNullOrEmpty(parent))
+                                throw new ArgumentException("Invalid path: " + abs);
+                            Directory.CreateDirectory(parent);
+                            if (!File.Exists(abs))
+                                File.WriteAllText(abs, "", new UTF8Encoding(true));
+                            break;
+                    }
+
+                    if (filter != null) filter.AddFile(abs);
+                    else vcproj.AddFile(abs);
+
+                    added++;
+                }
+                catch (Exception ex)
+                {
+                    error = (error == null) ? ex.Message : (error + "; " + ex.Message);
+                }
+            }
+
+            dte.ExecuteCommand("File.SaveAll");
+        }
+        finally
+        {
+            dte.SuppressUI = old;
+        }
+        return added;
     }
 
     static void Main()
@@ -329,6 +505,91 @@ class Program
                                         }
                                     }
                                 }
+                                break;
+                            }
+                        case string s when s.StartsWith("ADD_FILES_PROJ|"):
+                            {
+                                var parts = s.Split('|');
+                                if (parts.Length >= 5)
+                                {
+                                    string slnName = parts[1];
+                                    string projName = parts[2];
+                                    string filter = parts[3];
+                                    var files = parts[4].Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+
+                                    bool slnFound = false;
+                                    foreach (var dte in GetRunningVisualStudios())
+                                    {
+                                        try
+                                        {
+                                            string opened = Path.GetFileNameWithoutExtension(dte.Solution.FullName);
+                                            if (!string.Equals(opened, slnName, StringComparison.OrdinalIgnoreCase))
+                                                continue;
+
+                                            slnFound = true;
+
+                                            string error;
+                                            int added = AddFilesToVcProjectAtDir(dte, projName, filter, files, out error);
+                                            if (string.IsNullOrEmpty(error))
+                                                writer.WriteLine($"ACK:ADD_FILES|OK|{added}");
+                                            else
+                                                writer.WriteLine($"ACK:ADD_FILES|ERROR|{error}");
+                                            break;
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            writer.WriteLine($"ACK:ADD_FILES|ERROR|{ex.Message}");
+                                            break;
+                                        }
+                                    }
+                                    if (!slnFound)
+                                        writer.WriteLine($"ACK:ADD_FILES|ERROR|Solution '{slnName}' not found.");
+                                }
+                                else writer.WriteLine("ACK:ADD_FILES|ERROR|Bad arguments.");
+                                break;
+                            }
+                        case string s when s.StartsWith("ADD_SCRIPT_PROJ|"):
+                            {
+                                var parts = s.Split('|');
+                                if (parts.Length >= 5)
+                                {
+                                    string slnName = parts[1];
+                                    string projName = parts[2];
+                                    string filter = parts[3];    // 例: "Source Files"
+                                    string cls = parts[4];    // 例: "Player"
+
+                                    bool slnFound = false;
+                                    foreach (var dte in GetRunningVisualStudios())
+                                    {
+                                        try
+                                        {
+                                            string opened = Path.GetFileNameWithoutExtension(dte.Solution.FullName);
+                                            if (!string.Equals(opened, slnName, StringComparison.OrdinalIgnoreCase))
+                                                continue;
+
+                                            slnFound = true;
+
+                                            // ヘッダは Header Files、ソースは指定フィルタへ
+                                            string err1, err2;
+                                            int n1 = AddFilesToVcProjectAtDir(dte, projName, "Header Files", new[] { cls + ".h" }, out err1);
+                                            int n2 = AddFilesToVcProjectAtDir(dte, projName, filter, new[] { cls + ".cpp" }, out err2);
+
+                                            if (string.IsNullOrEmpty(err1) && string.IsNullOrEmpty(err2))
+                                                writer.WriteLine($"ACK:ADD_SCRIPT|OK|{n1 + n2}");
+                                            else
+                                                writer.WriteLine($"ACK:ADD_SCRIPT|ERROR|{(err1 ?? "")} {(err2 ?? "")}");
+                                            break;
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            writer.WriteLine($"ACK:ADD_SCRIPT|ERROR|{ex.Message}");
+                                            break;
+                                        }
+                                    }
+                                    if (!slnFound)
+                                        writer.WriteLine($"ACK:ADD_SCRIPT|ERROR|Solution '{slnName}' not found.");
+                                }
+                                else writer.WriteLine("ACK:ADD_SCRIPT|ERROR|Bad arguments.");
                                 break;
                             }
                         default:

@@ -247,6 +247,9 @@ namespace theatria
             static bool TestPipeMessage();
 
             static bool SaveAndBuildSolution(const bool& isBuild = true, const bool& isDebugger = false);
+            // ファイル追加
+            static bool AddScriptFileToProject(const std::wstring& scriptName);
+            static bool AddClassFileToProject(const std::wstring& className);
 
             static std::string m_SlnGUID;
 			static std::string m_ProjGUID;
