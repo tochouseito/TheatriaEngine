@@ -81,6 +81,8 @@ void CommandContext::BarrierTransition(ID3D12Resource* pResource, D3D12_RESOURCE
 	barrier.Transition.StateBefore = Before;
 	// 遷移後のResourceState
 	barrier.Transition.StateAfter = After;
+    // 全てのミップマップに対してバリアを張る
+    barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 	// TransitionBarrierを張る
 	m_CommandList->ResourceBarrier(1, &barrier);
 }

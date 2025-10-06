@@ -38,6 +38,7 @@ public:
 	virtual void BarrierUAV(D3D12_RESOURCE_BARRIER_TYPE Type, D3D12_RESOURCE_BARRIER_FLAGS Flags, ID3D12Resource* pResource);
 	virtual void ResourceBarrier(UINT NumBarriers, const D3D12_RESOURCE_BARRIER* pBarriers);
 	virtual void BarrierTransition(ID3D12Resource* pResource, D3D12_RESOURCE_STATES Before, D3D12_RESOURCE_STATES After);
+    // virtual void TextureBarrierTransition(ID3D12Resource* pResource, D3D12_RESOURCE_STATES Before, D3D12_RESOURCE_STATES After);
 	virtual void CheckResourceStateTransition(GpuResource* pResource, D3D12_RESOURCE_STATES checkState);
 	virtual void CheckResourceStateTransition(SwapChainBuffer* swapChainBuffer, D3D12_RESOURCE_STATES checkState);
 	virtual void SetRenderTarget(ColorBuffer* rtv, DepthBuffer* depth = nullptr);
