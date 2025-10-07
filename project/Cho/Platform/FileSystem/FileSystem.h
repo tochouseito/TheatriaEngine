@@ -251,6 +251,9 @@ namespace theatria
             static bool AddScriptFileToProject(const std::wstring& scriptName);
             static bool AddClassFileToProject(const std::wstring& className);
 
+            static std::wstring norm_path(const std::wstring& p);
+            static bool iequals(const std::wstring& a, const std::wstring& b);
+
             static std::string m_SlnGUID;
 			static std::string m_ProjGUID;
 			static std::string m_SlnPath;

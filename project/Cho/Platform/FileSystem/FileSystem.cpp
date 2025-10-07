@@ -19,6 +19,8 @@
 #pragma comment(lib, "Dbghelp.lib")
 #pragma comment(lib, "ole32.lib")
 #pragma comment(lib, "oleaut32.lib")
+#include <Shlwapi.h>
+#pragma comment(lib, "Shlwapi.lib")
 using namespace theatria;
 
 std::wstring theatria::FileSystem::m_sProjectName = L"";
@@ -2346,10 +2348,25 @@ bool theatria::FileSystem::ScriptProject::SaveAndBuildSolution(const bool& isBui
                                         {
                                             if (solPath.vt == VT_BSTR)
                                             {
-                                                std::wstring fullPath(solPath.bstrVal);
+                                                bool hit = false;
+                                                std::wstring fullPath = solPath.bstrVal;
+                                                if (iequals(fullPath, slnPath))
+                                                {
+                                                    // 完全一致（推奨）
+                                                    hit = true;
+                                                }
+                                                else
+                                                {
+                                                    // ファイル名だけ一致でもOKにする場合
+                                                    auto fnA = std::filesystem::path(fullPath).filename().wstring();
+                                                    auto fnB = std::filesystem::path(slnPath).filename().wstring();
+                                                    std::transform(fnA.begin(), fnA.end(), fnA.begin(), ::towlower);
+                                                    std::transform(fnB.begin(), fnB.end(), fnB.begin(), ::towlower);
+                                                    if (fnA == fnB) hit = true;
+                                                }
 
                                                 // ★ slnPath に一致するかチェック（部分一致 or 完全一致）
-                                                if (fullPath.find(slnPath) != std::wstring::npos)
+                                                if (hit)
                                                 {
                                                     Log::Write(LogLevel::Info, L"Target Solution Found: " + fullPath);
 
@@ -2436,6 +2453,22 @@ bool theatria::FileSystem::ScriptProject::AddClassFileToProject(const std::wstri
     SendMessageToBuildWatcher(L"ADD_SCRIPT_PROJ|"+ m_sProjectName + L"|" + m_sProjectName + L"|Source Files|" + className);
     auto reply = WaitForAckFromBuildWatcher(5000);
     return reply.rfind(L"ACK:ADD_SCRIPT|OK|", 0) == 0;
+}
+
+std::wstring theatria::FileSystem::ScriptProject::norm_path(const std::wstring& p)
+{
+    wchar_t buf[MAX_PATH];
+    DWORD n = GetFullPathNameW(p.c_str(), MAX_PATH, buf, nullptr);
+    std::wstring s = (n && n < MAX_PATH) ? buf : p;
+    std::replace(s.begin(), s.end(), L'/', L'\\');
+    std::transform(s.begin(), s.end(), s.begin(),
+        [](wchar_t c) { return static_cast<wchar_t>(std::tolower(c)); });
+    return s;
+}
+
+bool theatria::FileSystem::ScriptProject::iequals(const std::wstring& a, const std::wstring& b)
+{
+    return norm_path(a) == norm_path(b);
 }
 
 // Pipe
