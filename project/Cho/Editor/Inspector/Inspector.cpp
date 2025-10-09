@@ -4,6 +4,7 @@
 #include "EngineCommand/EngineCommands.h"
 #include "GameCore/GameCore.h"
 #include "Core/ChoLog/ChoLog.h"
+#include "TheaReflectDeclare.h"
 using namespace theatria;
 #include "Resources/ResourceManager/ResourceManager.h"
 
@@ -297,6 +298,45 @@ void Inspector::ScriptComponentView(GameObject* object)
 		}
 		ImGui::EndCombo();
 	}
+
+    if (script->instance)
+    {
+        for (const auto& field : script->fields)
+        {
+            if (field.second.type == typeid(int))
+            {
+                ImGui::DragInt(field.first.c_str(), static_cast<int*>(field.second.ptr), 1.0f, field.second.minmax.first, field.second.minmax.second);
+            }
+            else if (field.second.type == typeid(float))
+            {
+                ImGui::DragFloat(field.first.c_str(), static_cast<float*>(field.second.ptr), 0.1f, static_cast<float>(field.second.minmax.first), static_cast<float>(field.second.minmax.second));
+            }
+            else if (field.second.type == typeid(std::string))
+            {
+                /*char buffer[256];
+                std::string* strPtr = static_cast<std::string*>(field.second.ptr);
+                strncpy(buffer, strPtr->c_str(), sizeof(buffer));
+                if (ImGui::InputText(field.first.c_str(), buffer, sizeof(buffer)))
+                {
+                    *strPtr = std::string(buffer);
+                }*/
+                ImGui::Text("%s", field.first.c_str());
+            }
+            else if (field.second.type == typeid(bool))
+            {
+                ImGui::Checkbox(field.first.c_str(), static_cast<bool*>(field.second.ptr));
+            }
+            else if (field.second.type == typeid(Vector3))
+            {
+                Vector3* vec = static_cast<Vector3*>(field.second.ptr);
+                ImGui::DragFloat3(field.first.c_str(), &vec->x, 0.1f);
+            }
+            else
+            {
+                ImGui::Text("Unknown Type");
+            }
+        }
+    }
 }
 
 void Inspector::LineRendererComponentView(GameObject* object)

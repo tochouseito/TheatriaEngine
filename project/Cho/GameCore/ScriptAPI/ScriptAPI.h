@@ -130,6 +130,31 @@ namespace theatriaSystem
         using Component = TransformComponent;
 	};
 
+    // Script
+    class THEATRIA_API Script : public IComponentInterface
+    {
+        friend class Marionnette;
+    public:
+        Script(Entity e, ECSManager* ecs) : IComponentInterface(e, ecs) {}
+        ~Script() = default;
+        ScriptComponent* operator->()
+        {
+            UpdatePtr();
+            return data;
+        }
+        operator bool() noexcept
+        {
+            UpdatePtr();
+            return data != nullptr;
+        }
+    private:
+        void UpdatePtr()
+        {
+            data = m_ECS->GetComponent<ScriptComponent>(m_Entity);
+        }
+        ScriptComponent* data = nullptr;
+    };
+
     // Camera
     class THEATRIA_API Camera : public IComponentInterface
     {

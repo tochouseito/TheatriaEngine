@@ -376,6 +376,7 @@ void ScriptSystem::FinalizeComponent(Entity e, ScriptComponent& script)
 		// スクリプトのCleanup関数を呼び出す
 		script.cleanupFunc();
 		script.instance = nullptr;
+        script.fields.clear();
 	}
 	catch (const std::exception& e)
 	{
