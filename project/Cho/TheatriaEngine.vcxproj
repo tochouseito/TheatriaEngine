@@ -111,6 +111,7 @@
     <ClInclude Include="Config\Config.h" />
     <ClInclude Include="Core\Utility\AnimationStruct.h" />
     <ClInclude Include="Core\Utility\atomic_shared_ptr.h" />
+    <ClInclude Include="Core\Utility\containerUtility.h" />
     <ClInclude Include="TheaReflectDeclare.h" />
     <ClInclude Include="GameCore\CPrefab\CPrefab.h" />
     <ClInclude Include="Core\Utility\chunk_vector.h" />

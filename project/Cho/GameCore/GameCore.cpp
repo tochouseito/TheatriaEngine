@@ -76,6 +76,11 @@ void GameCore::Update()
 	
 }
 
+void GameCore::Finalize()
+{
+    theatria::FileSystem::ScriptProject::UnloadScriptDLL();
+}
+
 void GameCore::GameRun(const bool& isDebugger, const bool& isRuntime)
 {
 	if (isRunning)
@@ -122,7 +127,7 @@ void GameCore::GameStop()
 	TransformSystem* transformSystem = m_pECSManager->GetSystem<TransformSystem>();
 	transformSystem->m_isQuaternion = false;
 	// スクリプトのアンロード（場所変更予定）
-	theatria::FileSystem::ScriptProject::UnloadScriptDLL();
+	// theatria::FileSystem::ScriptProject::UnloadScriptDLL();
 	// デタッチ
 	if (theatria::FileSystem::ScriptProject::m_IsAttached)
 	{
@@ -660,6 +665,7 @@ void GameCore::RegisterECSSystems(ResourceManager* resourceManager, GraphicsEngi
 	m_pECSManager->AddSystem<ScriptSystem>();
 	ScriptSystem* scriptSystem = m_pECSManager->GetSystem<ScriptSystem>();
 	scriptSystem->SetGameWorld(m_pGameWorld.get());
+    scriptSystem->SetScriptContainer(resourceManager->GetScriptContainer());
 	// TransformComponentSystem
 	m_pECSManager->AddSystem<TransformSystem>();
 	TransformSystem* transformSystem = m_pECSManager->GetSystem<TransformSystem>();

@@ -273,16 +273,20 @@ struct ScriptComponent : public IComponentTag
 		onCollisionExitFunc = nullptr;
 		isActive = false;
 	}
-
-    // metadeta
     struct FieldDesc
     {
         void* ptr = nullptr;
         std::type_index type = typeid(void);
         std::pair<uint32_t, uint32_t> minmax = { 0, 0 }; // for int, float
     };
+    struct FieldVal  // 保存用
+    {
+        using Value = std::variant<int, float, Vector3, bool>;
+        Value value;
+        std::type_index type = typeid(void);
+        std::pair<uint32_t, uint32_t> minmax = { 0, 0 };
+    };
     std::unordered_map<std::string, FieldDesc> fields;
-    std::unordered_map<std::string, FieldDesc> saveFields; // 保存用
 };
 
 // ライン描画コンポーネント

@@ -11,6 +11,7 @@ class ResourceManager;
 class GraphicsEngine;
 class GameWorld;
 class EngineCommand;
+class ScriptContainer;
 struct ModelData;
 
 // TransformComponentSystem
@@ -134,8 +135,13 @@ private:
 	{
 		m_pGameWorld = gameWorld;
 	}
+    void SetScriptContainer(ScriptContainer* container)
+    {
+        m_pScriptContainer = container;
+    }
 
 	GameWorld* m_pGameWorld = nullptr;
+    ScriptContainer* m_pScriptContainer = nullptr;
 };
 
 class Rigidbody2DSystem : public ECSManager::System<TransformComponent, Rigidbody2DComponent>

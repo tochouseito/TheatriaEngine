@@ -409,7 +409,7 @@ bool theatria::FileSystem::LoadGameSettings(const std::wstring& filePath)
     }
 }
 
-bool theatria::FileSystem::SaveSceneFile(const std::wstring& directory, const std::wstring& srcFileName, GameScene* scene, ECSManager* ecs)
+bool theatria::FileSystem::SaveSceneFile(const std::wstring& directory, const std::wstring& srcFileName, GameScene* scene, ECSManager* ecs, EngineCommand* engineCommand)
 {
     ecs;
 	// アセットフォルダが存在しない場合は作成
@@ -482,7 +482,7 @@ bool theatria::FileSystem::SaveSceneFile(const std::wstring& directory, const st
         {
             if (const auto* s = prefab.GetComponentPtr<ScriptComponent>())
             {
-                comps["Script"] = theatria::Serialization::ToJson(*s);
+                comps["Script"] = theatria::Serialization::ToJson(*s, engineCommand->GetResourceManager()->GetScriptContainer());
             }
         }
         // LineRendererComponentの保存
@@ -692,12 +692,11 @@ bool theatria::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCom
                 if (comps.contains("Script"))
                 {
                     ScriptComponent s{};
-                    if (comps["Script"].contains("scriptName"))
-                    {
-                        std::string scriptNameStr = comps["Script"]["scriptName"].get<std::string>();
-                        s.scriptName = scriptNameStr;
-						prefab.AddComponent<ScriptComponent>(s);
-                    }
+                    auto& js = comps["Script"];
+                    // ScriptComponentの読み込み
+                    Deserialization::FromJson(js, s, engineCommand->GetResourceManager()->GetScriptContainer());
+                    // ScriptComponentの保存
+                    prefab.AddComponent<ScriptComponent>(s);
                 }
 
                 // LineRenderer（マルチコンポーネント）
@@ -1109,10 +1108,41 @@ json theatria::Serialization::ToJson(const MaterialComponent& m)
 	return j;
 }
 
-json theatria::Serialization::ToJson(const ScriptComponent& s)
+json theatria::Serialization::ToJson(const ScriptComponent& s, ScriptContainer* container)
 {
 	json j;
 	j["scriptName"] = s.scriptName;
+    ScriptData* scriptData = container->GetScriptDataByName(s.scriptName);
+    for (const auto& field : scriptData->saveFields)
+    {
+        if(field.second.type == typeid(float))
+        {
+            j["fields"][field.first]["name"] = field.first;
+            j["fields"][field.first]["value"] = std::get<float>(field.second.value);
+            j["fields"][field.first]["type"] = "float";
+            j["fields"][field.first]["minmax"] = { field.second.minmax.first, field.second.minmax.second };
+        }
+        else if (field.second.type == typeid(int))
+        {
+            j["fields"][field.first]["name"] = field.first;
+            j["fields"][field.first]["value"] = std::get<int>(field.second.value);
+            j["fields"][field.first]["type"] = "int";
+            j["fields"][field.first]["minmax"] = { field.second.minmax.first, field.second.minmax.second };
+        }
+        else if (field.second.type == typeid(bool))
+        {
+            j["fields"][field.first]["name"] = field.first;
+            j["fields"][field.first]["value"] = std::get<bool>(field.second.value);
+            j["fields"][field.first]["type"] = "bool";
+        }
+        else if (field.second.type == typeid(Vector3))
+        {
+            Vector3 v = std::get<Vector3>(field.second.value);
+            j["fields"][field.first]["name"] = field.first;
+            j["fields"][field.first]["value"] = { v.x, v.y, v.z };
+            j["fields"][field.first]["type"] = "Vector3";
+        }
+    }
 	return j;
 }
 
@@ -1340,7 +1370,7 @@ FileType theatria::FileSystem::GetJsonFileType(const std::filesystem::path& path
     }
 }
 
-void theatria::FileSystem::SaveProject(EditorManager* editorManager, SceneManager* sceneManager, GameWorld* gameWorld, ECSManager* ecs)
+void theatria::FileSystem::SaveProject(EditorManager* editorManager, SceneManager* sceneManager, GameWorld* gameWorld, ECSManager* ecs, EngineCommand* engineCommand)
 {
     gameWorld; sceneManager;
     if (m_sProjectName.empty()) { return; }
@@ -1362,7 +1392,8 @@ void theatria::FileSystem::SaveProject(EditorManager* editorManager, SceneManage
             m_sProjectFolderPath,
             scene.first,
             editorManager->GetEditScene(scene.first),
-            ecs
+            ecs,
+            engineCommand
 		);
     }
     // キャッシュファイルの保存
@@ -1385,6 +1416,8 @@ bool theatria::FileSystem::LoadProjectFolder(const std::wstring& projectFolderPa
     engineCommand->ExecuteCommand(std::move(setGravity));
 	// 最初のシーンをロード
     engineCommand->GetEditorManager()->ChangeEditingScene(g_GameSettings.startScene);
+    // ステージングされたdllをロード
+    ScriptProject::LoadScriptDLL();
     return true;
 }
 
@@ -1845,6 +1878,8 @@ void theatria::FileSystem::ScriptProject::LoadProjectPath(const std::wstring& pr
 
 void theatria::FileSystem::ScriptProject::LoadScriptDLL()
 {
+    // アンロード
+    UnloadScriptDLL();
 	// DLLのパス
 	std::string dllPath = ConvertString(m_sProjectFolderPath) + "/bin/" + ConvertString(m_sProjectName) + ".dll";
     // DLLをステージング
@@ -2632,24 +2667,108 @@ void theatria::Deserialization::FromJson(const json& j, MaterialComponent& m)
 	m.uvFlipY = j.value("uvFlipY", false);
 }
 
-void theatria::Deserialization::FromJson(const json& j, ScriptComponent& s)
+void theatria::Deserialization::FromJson(const json& j, ScriptComponent& s, ScriptContainer* container)
 {
-    j;s;
-	/*s.scriptName = j.value("scriptName", "");
-	if (j.contains("scriptID"))
-	{
-		s.scriptID = j["scriptID"].get<std::string>();
-	} else
-	{
-		s.scriptID.reset();
-	}
-	if (j.contains("entity"))
-	{
-		s.entity = j["entity"].get<std::string>();
-	} else
-	{
-		s.entity.reset();
-	}*/
+    // scriptName
+    if (j.contains("scriptName"))
+    {
+        s.scriptName = j.at("scriptName").get<std::string>();
+    }
+    else if (j.contains("Script") && j["Script"].contains("scriptName"))
+    {
+        s.scriptName = j["Script"]["scriptName"].get<std::string>();
+    }
+    container->AddScriptData(s.scriptName);
+    ScriptData* sd = container->GetScriptDataByName(s.scriptName);
+    if (!j.contains("fields") || !j.at("fields").is_object()) return;
+
+    const json& jf = j.at("fields");
+
+    for (auto it = jf.begin(); it != jf.end(); ++it)
+    {
+        const std::string key = it.key();
+        const json& obj = it.value();
+        if (!obj.is_object()) continue;
+
+        // 必須: value / type
+        if (!obj.contains("value") || !obj.contains("type")) continue;
+
+        const json& jval = obj.at("value");
+        const std::string typeStr = obj.at("type").get<std::string>();
+
+        ScriptComponent::FieldVal saved;
+
+        // 任意: minmax（float/intのみ有効）
+        if (obj.contains("minmax"))
+        {
+            const json& mm = obj.at("minmax");
+            if (mm.is_array() && mm.size() == 2)
+            {
+                saved.minmax.first = mm[0].get<uint32_t>();
+                saved.minmax.second = mm[1].get<uint32_t>();
+            }
+        }
+
+        // 値の復元
+        if (typeStr == "float")
+        {
+            saved.type = typeid(float);
+            float v = jval.get<float>();
+            // クランプ（必要なければこの2行を外してOK）
+            if (saved.minmax.first != 0 || saved.minmax.second != 0)
+            {
+                v = std::clamp(v, static_cast<float>(saved.minmax.first),
+                    static_cast<float>(saved.minmax.second));
+            }
+            saved.value = v;
+        }
+        else if (typeStr == "int")
+        {
+            saved.type = typeid(int);
+            int v = jval.get<int>();
+            if (saved.minmax.first != 0 || saved.minmax.second != 0)
+            {
+                v = std::clamp(v, static_cast<int>(saved.minmax.first),
+                    static_cast<int>(saved.minmax.second));
+            }
+            saved.value = v;
+        }
+        else if (typeStr == "bool")
+        {
+            saved.type = typeid(bool);
+            saved.value = jval.get<bool>();
+        }
+        else if (typeStr == "Vector3")
+        {
+            Vector3 v{};
+            if (jval.is_array() && jval.size() >= 3)
+            {
+                v.x = jval[0].get<float>();
+                v.y = jval[1].get<float>();
+                v.z = jval[2].get<float>();
+            }
+            else if (jval.is_object() && jval.contains("x") && jval.contains("y") && jval.contains("z"))
+            {
+                // 念のため { "x":..., "y":..., "z":... } 形式にも対応
+                v.x = jval["x"].get<float>();
+                v.y = jval["y"].get<float>();
+                v.z = jval["z"].get<float>();
+            }
+            else
+            {
+                continue; // 不正
+            }
+            saved.type = typeid(Vector3);
+            saved.value = v;
+        }
+        else
+        {
+            // 未知の type はスキップ（必要ならここで例外やログ）
+            continue;
+        }
+
+        sd->saveFields[key] = std::move(saved);
+    }
 }
 
 void theatria::Deserialization::FromJson(const json& j, std::vector<LineRendererComponent>& ls)
