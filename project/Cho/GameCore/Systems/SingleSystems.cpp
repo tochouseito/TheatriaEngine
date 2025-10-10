@@ -419,8 +419,6 @@ void ScriptSystem::FinalizeComponent(Entity e, ScriptComponent& script)
         ScriptComponent::FieldVal& save = sd->saveFields[field.first];
         if (field.second.type == typeid(float))
         {
-            float* p = static_cast<float*>(field.second.ptr);
-            float f = *p; f;
             save.value = *static_cast<float*>(field.second.ptr);
             save.minmax = field.second.minmax;
             save.type = field.second.type;
