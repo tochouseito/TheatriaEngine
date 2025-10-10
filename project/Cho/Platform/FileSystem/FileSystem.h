@@ -225,6 +225,15 @@ namespace theatria
         class ScriptProject
         {
         public:
+            struct StagedFiles
+            {
+                path originalDll;
+                path originalPdb;   // 無い場合は空
+                path stageDir;      // 例: C:\path\to\bin\.stage\1234-20251010-120102-123456
+                path stagedDll;
+                path stagedPdb;     // 無い場合は空
+            };
+
             static void GenerateSolutionAndProject();
 			static void UpdateVcxproj();
             static void UpdateFilters(const std::string& filterPath);
@@ -253,6 +262,16 @@ namespace theatria
 
             static std::wstring norm_path(const std::wstring& p);
             static bool iequals(const std::wstring& a, const std::wstring& b);
+
+            static std::wstring NowStamp();
+
+            static bool CopyWithRetry(const path& src, const path& dst,
+                int retries = 10, DWORD waitMs = 30, bool overwrite = true);
+
+            static StagedFiles StageDllAndPdbInSiblingFolder(const path& originalDll,
+                const std::wstring& stageRootName = L".stage");
+
+            static void CleanupStage(const StagedFiles& staged);
 
             static std::string m_SlnGUID;
 			static std::string m_ProjGUID;

@@ -1847,10 +1847,22 @@ void theatria::FileSystem::ScriptProject::LoadScriptDLL()
 {
 	// DLLのパス
 	std::string dllPath = ConvertString(m_sProjectFolderPath) + "/bin/" + ConvertString(m_sProjectName) + ".dll";
+    // DLLをステージング
+    auto staged = StageDllAndPdbInSiblingFolder(dllPath);
+    if (staged.stagedDll.empty())
+    {
+        Log::Write(LogLevel::Info, "DLL not found: " + dllPath);
+        return;
+    }
+    if(staged.stagedPdb.empty())
+    {
+        Log::Write(LogLevel::Info, "PDB not found for DLL: " + dllPath);
+    }
+
 	// PDBのロード
-	LoadPDB(dllPath);
+	LoadPDB(staged.stagedDll.string());
     // ロード
-	m_DllHandle = LoadLibraryA(dllPath.c_str());
+	m_DllHandle = LoadLibraryA(staged.stagedDll.string().c_str());
     if (!m_DllHandle)
     {
 		Log::Write(LogLevel::Info, "Failed to load DLL: " + dllPath);
@@ -2469,6 +2481,100 @@ std::wstring theatria::FileSystem::ScriptProject::norm_path(const std::wstring& 
 bool theatria::FileSystem::ScriptProject::iequals(const std::wstring& a, const std::wstring& b)
 {
     return norm_path(a) == norm_path(b);
+}
+
+std::wstring theatria::FileSystem::ScriptProject::NowStamp()
+{
+    using namespace std::chrono;
+    auto tp = system_clock::now();
+    auto tt = system_clock::to_time_t(tp);
+    auto tm = *std::localtime(&tt);
+    auto usec = duration_cast<microseconds>(tp.time_since_epoch()).count() % 1000000;
+    wchar_t buf[64];
+    swprintf(buf, 64, L"%04d%02d%02d-%02d%02d%02d-%06lld",
+        tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
+        tm.tm_hour, tm.tm_min, tm.tm_sec,
+        static_cast<long long>(usec));
+    return buf;
+}
+
+bool theatria::FileSystem::ScriptProject::CopyWithRetry(const fs::path& src, const fs::path& dst, int retries, DWORD waitMs, bool overwrite)
+{
+    auto opts = overwrite ? fs::copy_options::overwrite_existing
+        : fs::copy_options::none;
+
+    std::error_code ec;
+    for (int i = 0; i < retries; ++i)
+    {
+        ec.clear();
+        fs::copy_file(src, dst, opts, ec);
+        if (!ec) return true;
+
+        // 共有違反・ロックっぽいエラーはリトライ
+        DWORD winerr = (DWORD)ec.value();
+        if (winerr == ERROR_SHARING_VIOLATION || winerr == ERROR_LOCK_VIOLATION)
+        {
+            ::Sleep(waitMs);
+            continue;
+        }
+        // それ以外は即失敗
+        break;
+    }
+    return false;
+}
+
+theatria::FileSystem::ScriptProject::StagedFiles theatria::FileSystem::ScriptProject::StageDllAndPdbInSiblingFolder(const fs::path& originalDll, const std::wstring& stageRootName)
+{
+    StagedFiles out{};
+    out.originalDll = originalDll;
+
+    // PDB は DLL と同名（拡張子 .pdb）を隣で探す
+    fs::path pdb = originalDll;
+    pdb.replace_extension(L".pdb");
+    if (fs::exists(pdb)) out.originalPdb = pdb;
+
+    // 親フォルダ/.stage/<pid>-<timestamp>
+    fs::path parent = originalDll.parent_path();
+    DWORD pid = ::GetCurrentProcessId();
+    fs::path stageRoot = parent / stageRootName;
+    fs::path stageDir = stageRoot / (std::to_wstring(pid) + L"-" + NowStamp());
+
+    std::error_code ec;
+    fs::create_directories(stageDir, ec);
+    if (ec)
+    {
+        // ディレクトリ作成失敗
+        return out; // stagedDll==空 で失敗を示す
+    }
+
+    // DLLコピー
+    fs::path stagedDll = stageDir / originalDll.filename();
+    if (!CopyWithRetry(originalDll, stagedDll))
+    {
+        // 失敗したらディレクトリ掃除だけ試みる
+        std::error_code ec2; fs::remove_all(stageDir, ec2);
+        return out;
+    }
+
+    // PDBコピー（存在していれば）
+    fs::path stagedPdb;
+    if (!out.originalPdb.empty())
+    {
+        stagedPdb = stageDir / out.originalPdb.filename();
+        // PDBコピーは失敗しても致命ではないが、戻り値に反映したいので試す
+        CopyWithRetry(out.originalPdb, stagedPdb);
+    }
+
+    out.stageDir = stageDir;
+    out.stagedDll = stagedDll;
+    if (!stagedPdb.empty() && fs::exists(stagedPdb)) out.stagedPdb = stagedPdb;
+    return out;
+}
+
+void theatria::FileSystem::ScriptProject::CleanupStage(const StagedFiles& staged)
+{
+    if (staged.stageDir.empty()) return;
+    std::error_code ec; fs::remove_all(staged.stageDir, ec);
 }
 
 // Pipe

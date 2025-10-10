@@ -11,6 +11,7 @@
 #include <variant>
 #include <optional>
 #include <source_location>
+#include <system_error>
 
 #define CHO_ASSERT(expr, msg) \
     do { \

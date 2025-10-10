@@ -282,6 +282,7 @@ struct ScriptComponent : public IComponentTag
         std::pair<uint32_t, uint32_t> minmax = { 0, 0 }; // for int, float
     };
     std::unordered_map<std::string, FieldDesc> fields;
+    std::unordered_map<std::string, FieldDesc> saveFields; // 保存用
 };
 
 // ライン描画コンポーネント
