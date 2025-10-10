@@ -85,7 +85,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// エンジンの稼働
 	engine->CrashHandlerEntry();// クラッシュ時の処理のハンドラー
-	buildWatcher.LaunchBuildWatcher();// BuildWatcher起動
+	//buildWatcher.LaunchBuildWatcher();// BuildWatcher起動
 	engine->Operation();// エンジンの稼働
 
     // 解放

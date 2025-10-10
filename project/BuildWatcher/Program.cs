@@ -746,8 +746,12 @@ class Program
                                                     // ビルド完了待ち
                                                     MessagePump.PumpUntil(() => dte.Solution.SolutionBuild.BuildState != vsBuildState.vsBuildStateInProgress, 50, 60000);
 
-                                                    Console.WriteLine("Build 完了");
-                                                    writer.WriteLine("ACK:BUILD_SLN");
+                                                    // 判定
+                                                    var failedCount = dte.Solution.SolutionBuild.LastBuildInfo;
+                                                    bool ok = failedCount == 0;
+
+                                                    Console.WriteLine(ok ? "Build 成功" : $"Build 失敗: {failedCount} 件");
+                                                    writer.WriteLine(ok ? "ACK:BUILD_SLN|OK" : $"ACK:BUILD_SLN|FAIL|{failedCount}");
                                                 }
                                                 else
                                                 {
@@ -821,7 +825,13 @@ class Program
                                                     // ビルド完了待ち
                                                     MessagePump.PumpUntil(() => dte.Solution.SolutionBuild.BuildState != vsBuildState.vsBuildStateInProgress, 50, 60000);
 
-                                                    Console.WriteLine("Build 完了");
+                                                    // 判定
+                                                    var failedCount = dte.Solution.SolutionBuild.LastBuildInfo;
+                                                    bool ok = failedCount == 0;
+
+                                                    Console.WriteLine(ok ? "Build 成功" : $"Build 失敗: {failedCount} 件");
+                                                    writer.WriteLine(ok ? "ACK:BUILD_SLN|OK" : $"ACK:BUILD_SLN|FAIL|{failedCount}");
+                                                    if(!ok) break;
 
                                                     // 親プロセスIDを取得（すでに持っているなら使う）
                                                     int id = parent.Id;
@@ -845,7 +855,7 @@ class Program
                                                         Console.WriteLine("デバッガアタッチ失敗: " + ex.Message);
                                                     }
 
-                                                    writer.WriteLine("ACK:BUILD_SLN");
+                                                    writer.WriteLine("ACK:BUILD_SLN|OK");
                                                 }
                                                 else
                                                 {

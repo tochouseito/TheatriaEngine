@@ -2280,8 +2280,8 @@ std::wstring theatria::FileSystem::ScriptProject::WaitForAckFromBuildWatcher(DWO
     }
 
     // --- Step 2: タイムアウト付きで新しいメッセージを待つ ---
-    DWORD start = GetTickCount();
-    while (GetTickCount() - start < timeoutMs)
+    ULONGLONG start = GetTickCount64();
+    while (GetTickCount64() - start < timeoutMs)
     {
         bytesAvailable = 0;
         if (PeekNamedPipe(m_ReadPipe, nullptr, 0, nullptr, &bytesAvailable, nullptr) && bytesAvailable > 0)
@@ -2331,7 +2331,7 @@ bool theatria::FileSystem::ScriptProject::TestPipeMessage()
 
 bool theatria::FileSystem::ScriptProject::SaveAndBuildSolution(const bool& isBuild, const bool& isDebugger)
 {
-    bool any = false;
+    bool buildSuccess = false;
     // .slnがついていなければ足す
     std::wstring slnPath = m_sProjectFolderPath + L"\\" + m_sProjectName;
     if (slnPath.size() < 4 || slnPath.substr(slnPath.size() - 4) != L".sln")
@@ -2459,6 +2459,13 @@ bool theatria::FileSystem::ScriptProject::SaveAndBuildSolution(const bool& isBui
                                                         {
                                                             Log::Write(LogLevel::Info, L"Received from BuildWatcher: " + reply);
                                                         }
+                                                        if (reply == L"ACK:BUILD_SLN|OK")
+                                                        {
+                                                            buildSuccess = true;
+                                                        }else if(reply == L"ACK:BUILD_SLN|FAIL")
+                                                        {
+                                                            buildSuccess = false;
+                                                        }
                                                         m_IsAttached = isDebugger;
                                                     }
                                                 }
@@ -2476,7 +2483,7 @@ bool theatria::FileSystem::ScriptProject::SaveAndBuildSolution(const bool& isBui
     }
 
     // CoUninitialize();
-    return any;
+    return buildSuccess;
 }
 
 bool theatria::FileSystem::ScriptProject::AddScriptFileToProject(const std::wstring& scriptName)
