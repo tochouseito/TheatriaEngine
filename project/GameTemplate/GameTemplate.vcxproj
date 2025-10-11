@@ -17,9 +17,6 @@
     <ProjectReference Include="..\ChoMath\ChoMath.vcxproj">
       <Project>{3cf8afa4-25ac-4b52-92f3-3af6824d3643}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\Cho\ChoEngine.vcxproj">
-      <Project>{fb856f70-9f85-4bbd-91a4-9e378674ff92}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\Cho\TheatriaEngine.vcxproj">
       <Project>{fb856f70-9f85-4bbd-91a4-9e378674ff92}</Project>
     </ProjectReference>
