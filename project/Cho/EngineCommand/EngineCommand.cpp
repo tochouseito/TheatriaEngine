@@ -49,7 +49,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE EngineCommand::GetTextureHandle(const std::wstring& 
 
 void EngineCommand::SaveProjectFile()
 {
-	theatria::FileSystem::SaveProject(m_EditorManager,m_GameCore->GetSceneManager(), m_GameCore->GetGameWorld(), m_GameCore->GetECSManager());
+	theatria::FileSystem::SaveProject(m_EditorManager,m_GameCore->GetSceneManager(), m_GameCore->GetGameWorld(), m_GameCore->GetECSManager(),this);
 }
 
 void EngineCommand::GenerateScript(const std::string& scriptName)

@@ -20,6 +20,7 @@ class ECSManager;
 class ResourceManager;
 class EditorManager;
 class EngineCommand;
+class ScriptContainer;
 namespace theatria
 {
     enum FileType
@@ -97,7 +98,7 @@ namespace theatria
         json ToJson(const MeshFilterComponent& m);
         json ToJson(const MeshRendererComponent& r);
 		json ToJson(const MaterialComponent& m);
-		json ToJson(const ScriptComponent& s);
+		json ToJson(const ScriptComponent& s, ScriptContainer* container);
 		json ToJson(const std::vector<LineRendererComponent>& ls);
 		json ToJson(const Rigidbody2DComponent& rb);
 		json ToJson(const BoxCollider2DComponent& bc);
@@ -118,7 +119,7 @@ namespace theatria
 		void FromJson(const json& j, MeshFilterComponent& m);
 		void FromJson(const json& j, MeshRendererComponent& r);
 		void FromJson(const json& j, MaterialComponent& m);
-		void FromJson(const json& j, ScriptComponent& s);
+		void FromJson(const json& j, ScriptComponent& s, ScriptContainer* container);
 		void FromJson(const json& j, std::vector<LineRendererComponent>& ls);
 		void FromJson(const json& j, Rigidbody2DComponent& rb);
 		void FromJson(const json& j, BoxCollider2DComponent& bc);
@@ -162,7 +163,7 @@ namespace theatria
 		// ゲーム設定ファイルを読み込む
         static bool LoadGameSettings(const std::wstring& filePath);
 		// シーンファイルを保存
-        static bool SaveSceneFile(const std::wstring& directory,const std::wstring& srcFileName, GameScene* scene, ECSManager* ecs);
+        static bool SaveSceneFile(const std::wstring& directory,const std::wstring& srcFileName, GameScene* scene, ECSManager* ecs,EngineCommand* engineCommand);
 		// シーンファイルを読み込む
         static bool LoadSceneFile(const std::wstring& filePath,EngineCommand* engineCommand);
         // ゲームパラメーターファイルを保存
@@ -189,7 +190,7 @@ namespace theatria
         static FileType GetJsonFileType(const std::filesystem::path& path);
 
         // プロジェクトを保存
-		static void SaveProject(EditorManager* editorManager, SceneManager* sceneManager, GameWorld* gameWorld, ECSManager* ecs);
+		static void SaveProject(EditorManager* editorManager, SceneManager* sceneManager, GameWorld* gameWorld, ECSManager* ecs, EngineCommand* engineCommand);
         // プロジェクトフォルダを読み込む
         static bool LoadProjectFolder(const std::wstring& projectFolderPath, EngineCommand* engineCommand);
         /// CSVを2次元vectorに読み込む関数
@@ -225,6 +226,15 @@ namespace theatria
         class ScriptProject
         {
         public:
+            struct StagedFiles
+            {
+                path originalDll;
+                path originalPdb;   // 無い場合は空
+                path stageDir;      // 例: C:\path\to\bin\.stage\1234-20251010-120102-123456
+                path stagedDll;
+                path stagedPdb;     // 無い場合は空
+            };
+
             static void GenerateSolutionAndProject();
 			static void UpdateVcxproj();
             static void UpdateFilters(const std::string& filterPath);
@@ -250,6 +260,19 @@ namespace theatria
             // ファイル追加
             static bool AddScriptFileToProject(const std::wstring& scriptName);
             static bool AddClassFileToProject(const std::wstring& className);
+
+            static std::wstring norm_path(const std::wstring& p);
+            static bool iequals(const std::wstring& a, const std::wstring& b);
+
+            static std::wstring NowStamp();
+
+            static bool CopyWithRetry(const path& src, const path& dst,
+                int retries = 10, DWORD waitMs = 30, bool overwrite = true);
+
+            static StagedFiles StageDllAndPdbInSiblingFolder(const path& originalDll,
+                const std::wstring& stageRootName = L".stage");
+
+            static void CleanupStage(const StagedFiles& staged);
 
             static std::string m_SlnGUID;
 			static std::string m_ProjGUID;

@@ -3,6 +3,7 @@
 #include "Core/Utility/Components.h"
 #define USE_THEATRIAENGINE_SCRIPT
 #include "TheatriaEngineAPI.h"
+#include "TheaReflectDeclare.h"
 class THEATRIA_API Marionnette
 {
     friend class ScriptInstanceGenerateSystem;

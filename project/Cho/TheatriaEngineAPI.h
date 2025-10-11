@@ -125,5 +125,10 @@ namespace theatriaSystem
 		// 接続されているジョイスティック数を取得する
 		THEATRIA_API float GetLRTrigger(LR LorR, int32_t stickNo);
 	};
+
+    namespace Log
+    {
+
+    }
 #endif
 }

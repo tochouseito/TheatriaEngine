@@ -19,6 +19,8 @@
 #pragma comment(lib, "Dbghelp.lib")
 #pragma comment(lib, "ole32.lib")
 #pragma comment(lib, "oleaut32.lib")
+#include <Shlwapi.h>
+#pragma comment(lib, "Shlwapi.lib")
 using namespace theatria;
 
 std::wstring theatria::FileSystem::m_sProjectName = L"";
@@ -407,7 +409,7 @@ bool theatria::FileSystem::LoadGameSettings(const std::wstring& filePath)
     }
 }
 
-bool theatria::FileSystem::SaveSceneFile(const std::wstring& directory, const std::wstring& srcFileName, GameScene* scene, ECSManager* ecs)
+bool theatria::FileSystem::SaveSceneFile(const std::wstring& directory, const std::wstring& srcFileName, GameScene* scene, ECSManager* ecs, EngineCommand* engineCommand)
 {
     ecs;
 	// アセットフォルダが存在しない場合は作成
@@ -480,7 +482,7 @@ bool theatria::FileSystem::SaveSceneFile(const std::wstring& directory, const st
         {
             if (const auto* s = prefab.GetComponentPtr<ScriptComponent>())
             {
-                comps["Script"] = theatria::Serialization::ToJson(*s);
+                comps["Script"] = theatria::Serialization::ToJson(*s, engineCommand->GetResourceManager()->GetScriptContainer());
             }
         }
         // LineRendererComponentの保存
@@ -690,12 +692,11 @@ bool theatria::FileSystem::LoadSceneFile(const std::wstring& filePath, EngineCom
                 if (comps.contains("Script"))
                 {
                     ScriptComponent s{};
-                    if (comps["Script"].contains("scriptName"))
-                    {
-                        std::string scriptNameStr = comps["Script"]["scriptName"].get<std::string>();
-                        s.scriptName = scriptNameStr;
-						prefab.AddComponent<ScriptComponent>(s);
-                    }
+                    auto& js = comps["Script"];
+                    // ScriptComponentの読み込み
+                    Deserialization::FromJson(js, s, engineCommand->GetResourceManager()->GetScriptContainer());
+                    // ScriptComponentの保存
+                    prefab.AddComponent<ScriptComponent>(s);
                 }
 
                 // LineRenderer（マルチコンポーネント）
@@ -1107,10 +1108,41 @@ json theatria::Serialization::ToJson(const MaterialComponent& m)
 	return j;
 }
 
-json theatria::Serialization::ToJson(const ScriptComponent& s)
+json theatria::Serialization::ToJson(const ScriptComponent& s, ScriptContainer* container)
 {
 	json j;
 	j["scriptName"] = s.scriptName;
+    ScriptData* scriptData = container->GetScriptDataByName(s.scriptName);
+    for (const auto& field : scriptData->saveFields)
+    {
+        if(field.second.type == typeid(float))
+        {
+            j["fields"][field.first]["name"] = field.first;
+            j["fields"][field.first]["value"] = std::get<float>(field.second.value);
+            j["fields"][field.first]["type"] = "float";
+            j["fields"][field.first]["minmax"] = { field.second.minmax.first, field.second.minmax.second };
+        }
+        else if (field.second.type == typeid(int))
+        {
+            j["fields"][field.first]["name"] = field.first;
+            j["fields"][field.first]["value"] = std::get<int>(field.second.value);
+            j["fields"][field.first]["type"] = "int";
+            j["fields"][field.first]["minmax"] = { field.second.minmax.first, field.second.minmax.second };
+        }
+        else if (field.second.type == typeid(bool))
+        {
+            j["fields"][field.first]["name"] = field.first;
+            j["fields"][field.first]["value"] = std::get<bool>(field.second.value);
+            j["fields"][field.first]["type"] = "bool";
+        }
+        else if (field.second.type == typeid(Vector3))
+        {
+            Vector3 v = std::get<Vector3>(field.second.value);
+            j["fields"][field.first]["name"] = field.first;
+            j["fields"][field.first]["value"] = { v.x, v.y, v.z };
+            j["fields"][field.first]["type"] = "Vector3";
+        }
+    }
 	return j;
 }
 
@@ -1338,7 +1370,7 @@ FileType theatria::FileSystem::GetJsonFileType(const std::filesystem::path& path
     }
 }
 
-void theatria::FileSystem::SaveProject(EditorManager* editorManager, SceneManager* sceneManager, GameWorld* gameWorld, ECSManager* ecs)
+void theatria::FileSystem::SaveProject(EditorManager* editorManager, SceneManager* sceneManager, GameWorld* gameWorld, ECSManager* ecs, EngineCommand* engineCommand)
 {
     gameWorld; sceneManager;
     if (m_sProjectName.empty()) { return; }
@@ -1360,7 +1392,8 @@ void theatria::FileSystem::SaveProject(EditorManager* editorManager, SceneManage
             m_sProjectFolderPath,
             scene.first,
             editorManager->GetEditScene(scene.first),
-            ecs
+            ecs,
+            engineCommand
 		);
     }
     // キャッシュファイルの保存
@@ -1383,6 +1416,8 @@ bool theatria::FileSystem::LoadProjectFolder(const std::wstring& projectFolderPa
     engineCommand->ExecuteCommand(std::move(setGravity));
 	// 最初のシーンをロード
     engineCommand->GetEditorManager()->ChangeEditingScene(g_GameSettings.startScene);
+    // ステージングされたdllをロード
+    ScriptProject::LoadScriptDLL();
     return true;
 }
 
@@ -1843,12 +1878,26 @@ void theatria::FileSystem::ScriptProject::LoadProjectPath(const std::wstring& pr
 
 void theatria::FileSystem::ScriptProject::LoadScriptDLL()
 {
+    // アンロード
+    UnloadScriptDLL();
 	// DLLのパス
 	std::string dllPath = ConvertString(m_sProjectFolderPath) + "/bin/" + ConvertString(m_sProjectName) + ".dll";
+    // DLLをステージング
+    auto staged = StageDllAndPdbInSiblingFolder(dllPath);
+    if (staged.stagedDll.empty())
+    {
+        Log::Write(LogLevel::Info, "DLL not found: " + dllPath);
+        return;
+    }
+    if(staged.stagedPdb.empty())
+    {
+        Log::Write(LogLevel::Info, "PDB not found for DLL: " + dllPath);
+    }
+
 	// PDBのロード
-	LoadPDB(dllPath);
+	LoadPDB(staged.stagedDll.string());
     // ロード
-	m_DllHandle = LoadLibraryA(dllPath.c_str());
+	m_DllHandle = LoadLibraryA(staged.stagedDll.string().c_str());
     if (!m_DllHandle)
     {
 		Log::Write(LogLevel::Info, "Failed to load DLL: " + dllPath);
@@ -2231,8 +2280,8 @@ std::wstring theatria::FileSystem::ScriptProject::WaitForAckFromBuildWatcher(DWO
     }
 
     // --- Step 2: タイムアウト付きで新しいメッセージを待つ ---
-    DWORD start = GetTickCount();
-    while (GetTickCount() - start < timeoutMs)
+    ULONGLONG start = GetTickCount64();
+    while (GetTickCount64() - start < timeoutMs)
     {
         bytesAvailable = 0;
         if (PeekNamedPipe(m_ReadPipe, nullptr, 0, nullptr, &bytesAvailable, nullptr) && bytesAvailable > 0)
@@ -2282,7 +2331,7 @@ bool theatria::FileSystem::ScriptProject::TestPipeMessage()
 
 bool theatria::FileSystem::ScriptProject::SaveAndBuildSolution(const bool& isBuild, const bool& isDebugger)
 {
-    bool any = false;
+    bool buildSuccess = false;
     // .slnがついていなければ足す
     std::wstring slnPath = m_sProjectFolderPath + L"\\" + m_sProjectName;
     if (slnPath.size() < 4 || slnPath.substr(slnPath.size() - 4) != L".sln")
@@ -2346,10 +2395,25 @@ bool theatria::FileSystem::ScriptProject::SaveAndBuildSolution(const bool& isBui
                                         {
                                             if (solPath.vt == VT_BSTR)
                                             {
-                                                std::wstring fullPath(solPath.bstrVal);
+                                                bool hit = false;
+                                                std::wstring fullPath = solPath.bstrVal;
+                                                if (iequals(fullPath, slnPath))
+                                                {
+                                                    // 完全一致（推奨）
+                                                    hit = true;
+                                                }
+                                                else
+                                                {
+                                                    // ファイル名だけ一致でもOKにする場合
+                                                    auto fnA = std::filesystem::path(fullPath).filename().wstring();
+                                                    auto fnB = std::filesystem::path(slnPath).filename().wstring();
+                                                    std::transform(fnA.begin(), fnA.end(), fnA.begin(), ::towlower);
+                                                    std::transform(fnB.begin(), fnB.end(), fnB.begin(), ::towlower);
+                                                    if (fnA == fnB) hit = true;
+                                                }
 
                                                 // ★ slnPath に一致するかチェック（部分一致 or 完全一致）
-                                                if (fullPath.find(slnPath) != std::wstring::npos)
+                                                if (hit)
                                                 {
                                                     Log::Write(LogLevel::Info, L"Target Solution Found: " + fullPath);
 
@@ -2395,6 +2459,13 @@ bool theatria::FileSystem::ScriptProject::SaveAndBuildSolution(const bool& isBui
                                                         {
                                                             Log::Write(LogLevel::Info, L"Received from BuildWatcher: " + reply);
                                                         }
+                                                        if (reply == L"ACK:BUILD_SLN|OK")
+                                                        {
+                                                            buildSuccess = true;
+                                                        }else if(reply == L"ACK:BUILD_SLN|FAIL")
+                                                        {
+                                                            buildSuccess = false;
+                                                        }
                                                         m_IsAttached = isDebugger;
                                                     }
                                                 }
@@ -2412,7 +2483,7 @@ bool theatria::FileSystem::ScriptProject::SaveAndBuildSolution(const bool& isBui
     }
 
     // CoUninitialize();
-    return any;
+    return buildSuccess;
 }
 
 bool theatria::FileSystem::ScriptProject::AddScriptFileToProject(const std::wstring& scriptName)
@@ -2436,6 +2507,116 @@ bool theatria::FileSystem::ScriptProject::AddClassFileToProject(const std::wstri
     SendMessageToBuildWatcher(L"ADD_SCRIPT_PROJ|"+ m_sProjectName + L"|" + m_sProjectName + L"|Source Files|" + className);
     auto reply = WaitForAckFromBuildWatcher(5000);
     return reply.rfind(L"ACK:ADD_SCRIPT|OK|", 0) == 0;
+}
+
+std::wstring theatria::FileSystem::ScriptProject::norm_path(const std::wstring& p)
+{
+    wchar_t buf[MAX_PATH];
+    DWORD n = GetFullPathNameW(p.c_str(), MAX_PATH, buf, nullptr);
+    std::wstring s = (n && n < MAX_PATH) ? buf : p;
+    std::replace(s.begin(), s.end(), L'/', L'\\');
+    std::transform(s.begin(), s.end(), s.begin(),
+        [](wchar_t c) { return static_cast<wchar_t>(std::tolower(c)); });
+    return s;
+}
+
+bool theatria::FileSystem::ScriptProject::iequals(const std::wstring& a, const std::wstring& b)
+{
+    return norm_path(a) == norm_path(b);
+}
+
+std::wstring theatria::FileSystem::ScriptProject::NowStamp()
+{
+    using namespace std::chrono;
+    auto tp = system_clock::now();
+    auto tt = system_clock::to_time_t(tp);
+    auto tm = *std::localtime(&tt);
+    auto usec = duration_cast<microseconds>(tp.time_since_epoch()).count() % 1000000;
+    wchar_t buf[64];
+    swprintf(buf, 64, L"%04d%02d%02d-%02d%02d%02d-%06lld",
+        tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
+        tm.tm_hour, tm.tm_min, tm.tm_sec,
+        static_cast<long long>(usec));
+    return buf;
+}
+
+bool theatria::FileSystem::ScriptProject::CopyWithRetry(const fs::path& src, const fs::path& dst, int retries, DWORD waitMs, bool overwrite)
+{
+    auto opts = overwrite ? fs::copy_options::overwrite_existing
+        : fs::copy_options::none;
+
+    std::error_code ec;
+    for (int i = 0; i < retries; ++i)
+    {
+        ec.clear();
+        fs::copy_file(src, dst, opts, ec);
+        if (!ec) return true;
+
+        // 共有違反・ロックっぽいエラーはリトライ
+        DWORD winerr = (DWORD)ec.value();
+        if (winerr == ERROR_SHARING_VIOLATION || winerr == ERROR_LOCK_VIOLATION)
+        {
+            ::Sleep(waitMs);
+            continue;
+        }
+        // それ以外は即失敗
+        break;
+    }
+    return false;
+}
+
+theatria::FileSystem::ScriptProject::StagedFiles theatria::FileSystem::ScriptProject::StageDllAndPdbInSiblingFolder(const fs::path& originalDll, const std::wstring& stageRootName)
+{
+    StagedFiles out{};
+    out.originalDll = originalDll;
+
+    // PDB は DLL と同名（拡張子 .pdb）を隣で探す
+    fs::path pdb = originalDll;
+    pdb.replace_extension(L".pdb");
+    if (fs::exists(pdb)) out.originalPdb = pdb;
+
+    // 親フォルダ/.stage/<pid>-<timestamp>
+    fs::path parent = originalDll.parent_path();
+    DWORD pid = ::GetCurrentProcessId();
+    fs::path stageRoot = parent / stageRootName;
+    fs::path stageDir = stageRoot / (std::to_wstring(pid) + L"-" + NowStamp());
+
+    std::error_code ec;
+    fs::create_directories(stageDir, ec);
+    if (ec)
+    {
+        // ディレクトリ作成失敗
+        return out; // stagedDll==空 で失敗を示す
+    }
+
+    // DLLコピー
+    fs::path stagedDll = stageDir / originalDll.filename();
+    if (!CopyWithRetry(originalDll, stagedDll))
+    {
+        // 失敗したらディレクトリ掃除だけ試みる
+        std::error_code ec2; fs::remove_all(stageDir, ec2);
+        return out;
+    }
+
+    // PDBコピー（存在していれば）
+    fs::path stagedPdb;
+    if (!out.originalPdb.empty())
+    {
+        stagedPdb = stageDir / out.originalPdb.filename();
+        // PDBコピーは失敗しても致命ではないが、戻り値に反映したいので試す
+        CopyWithRetry(out.originalPdb, stagedPdb);
+    }
+
+    out.stageDir = stageDir;
+    out.stagedDll = stagedDll;
+    if (!stagedPdb.empty() && fs::exists(stagedPdb)) out.stagedPdb = stagedPdb;
+    return out;
+}
+
+void theatria::FileSystem::ScriptProject::CleanupStage(const StagedFiles& staged)
+{
+    if (staged.stageDir.empty()) return;
+    std::error_code ec; fs::remove_all(staged.stageDir, ec);
 }
 
 // Pipe
@@ -2493,24 +2674,108 @@ void theatria::Deserialization::FromJson(const json& j, MaterialComponent& m)
 	m.uvFlipY = j.value("uvFlipY", false);
 }
 
-void theatria::Deserialization::FromJson(const json& j, ScriptComponent& s)
+void theatria::Deserialization::FromJson(const json& j, ScriptComponent& s, ScriptContainer* container)
 {
-    j;s;
-	/*s.scriptName = j.value("scriptName", "");
-	if (j.contains("scriptID"))
-	{
-		s.scriptID = j["scriptID"].get<std::string>();
-	} else
-	{
-		s.scriptID.reset();
-	}
-	if (j.contains("entity"))
-	{
-		s.entity = j["entity"].get<std::string>();
-	} else
-	{
-		s.entity.reset();
-	}*/
+    // scriptName
+    if (j.contains("scriptName"))
+    {
+        s.scriptName = j.at("scriptName").get<std::string>();
+    }
+    else if (j.contains("Script") && j["Script"].contains("scriptName"))
+    {
+        s.scriptName = j["Script"]["scriptName"].get<std::string>();
+    }
+    container->AddScriptData(s.scriptName);
+    ScriptData* sd = container->GetScriptDataByName(s.scriptName);
+    if (!j.contains("fields") || !j.at("fields").is_object()) return;
+
+    const json& jf = j.at("fields");
+
+    for (auto it = jf.begin(); it != jf.end(); ++it)
+    {
+        const std::string key = it.key();
+        const json& obj = it.value();
+        if (!obj.is_object()) continue;
+
+        // 必須: value / type
+        if (!obj.contains("value") || !obj.contains("type")) continue;
+
+        const json& jval = obj.at("value");
+        const std::string typeStr = obj.at("type").get<std::string>();
+
+        ScriptComponent::FieldVal saved;
+
+        // 任意: minmax（float/intのみ有効）
+        if (obj.contains("minmax"))
+        {
+            const json& mm = obj.at("minmax");
+            if (mm.is_array() && mm.size() == 2)
+            {
+                saved.minmax.first = mm[0].get<uint32_t>();
+                saved.minmax.second = mm[1].get<uint32_t>();
+            }
+        }
+
+        // 値の復元
+        if (typeStr == "float")
+        {
+            saved.type = typeid(float);
+            float v = jval.get<float>();
+            // クランプ（必要なければこの2行を外してOK）
+            if (saved.minmax.first != 0 || saved.minmax.second != 0)
+            {
+                v = std::clamp(v, static_cast<float>(saved.minmax.first),
+                    static_cast<float>(saved.minmax.second));
+            }
+            saved.value = v;
+        }
+        else if (typeStr == "int")
+        {
+            saved.type = typeid(int);
+            int v = jval.get<int>();
+            if (saved.minmax.first != 0 || saved.minmax.second != 0)
+            {
+                v = std::clamp(v, static_cast<int>(saved.minmax.first),
+                    static_cast<int>(saved.minmax.second));
+            }
+            saved.value = v;
+        }
+        else if (typeStr == "bool")
+        {
+            saved.type = typeid(bool);
+            saved.value = jval.get<bool>();
+        }
+        else if (typeStr == "Vector3")
+        {
+            Vector3 v{};
+            if (jval.is_array() && jval.size() >= 3)
+            {
+                v.x = jval[0].get<float>();
+                v.y = jval[1].get<float>();
+                v.z = jval[2].get<float>();
+            }
+            else if (jval.is_object() && jval.contains("x") && jval.contains("y") && jval.contains("z"))
+            {
+                // 念のため { "x":..., "y":..., "z":... } 形式にも対応
+                v.x = jval["x"].get<float>();
+                v.y = jval["y"].get<float>();
+                v.z = jval["z"].get<float>();
+            }
+            else
+            {
+                continue; // 不正
+            }
+            saved.type = typeid(Vector3);
+            saved.value = v;
+        }
+        else
+        {
+            // 未知の type はスキップ（必要ならここで例外やログ）
+            continue;
+        }
+
+        sd->saveFields[key] = std::move(saved);
+    }
 }
 
 void theatria::Deserialization::FromJson(const json& j, std::vector<LineRendererComponent>& ls)

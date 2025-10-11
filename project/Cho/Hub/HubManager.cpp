@@ -135,7 +135,7 @@ void HubManager::ShowSidebar()
                     // ブランチを取得
                     GetCurrentBranch();
                     // プロジェクトを保存
-                    FileSystem::SaveProject(m_pEngineCommand->GetEditorManager(), m_pEngineCommand->GetGameCore()->GetSceneManager(), m_pEngineCommand->GetGameCore()->GetGameWorld(), m_pEngineCommand->GetGameCore()->GetECSManager());
+                    FileSystem::SaveProject(m_pEngineCommand->GetEditorManager(), m_pEngineCommand->GetGameCore()->GetSceneManager(), m_pEngineCommand->GetGameCore()->GetGameWorld(), m_pEngineCommand->GetGameCore()->GetECSManager(),m_pEngineCommand);
                     m_IsRun = false; // プロジェクト作成後、Hubを終了
                 }
                 else

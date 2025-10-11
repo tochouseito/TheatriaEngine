@@ -138,7 +138,8 @@ void TextureManager::UploadTextureDataEx(PixelBuffer* pBuffer, const DirectX::Sc
     // D3D12_RESOURCE_STATE_COPY_DESTから
     // D3D12_RESOURCE_STATE_GENERIC_READへ
     // ResourceStateを変更する
-	context->CheckResourceStateTransition(pBuffer, D3D12_RESOURCE_STATE_GENERIC_READ);
+	context->CheckResourceStateTransition(pBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE |
+        D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
     m_GraphicsEngine->EndCommandContext(context, QueueType::Copy);
     m_GraphicsEngine->WaitForGPU(QueueType::Copy);
 }

@@ -9,6 +9,13 @@
 #include "GameCore/Marionnette/Marionnette.h"
 using ScriptFactoryFunc = std::function<std::unique_ptr<Marionnette>()>;
 
+struct ScriptData
+{
+    std::string scriptName; // スクリプト名
+    // metadeta
+    std::unordered_map<std::string, ScriptComponent::FieldVal> saveFields; // 保存用
+};
+
 // スクリプトを格納するコンテナクラス
 class ScriptContainer
 {
@@ -26,37 +33,40 @@ public:
 			return; // 既に存在する場合は何もしない
 		}
 		std::string name = scriptName;
-		uint32_t index = static_cast<uint32_t>(m_ScriptNameContainer.push_back(std::move(name))); // スクリプト名をコンテナに追加
+        ScriptData data;
+        data.scriptName = name;
+        uint32_t index = static_cast<uint32_t>(m_ScriptDataContainer.push_back(std::move(data))); // スクリプト名をコンテナに追加
 		m_ScriptNameToIndex[scriptName] = index; // スクリプト名とインデックスをマップに追加
 	}
 	// スクリプトデータをIDで取得する関数
-	std::optional<std::string> GetScriptDataByID(const uint32_t & index)
+	std::optional<ScriptData> GetScriptDataByID(const uint32_t & index)
 	{
-		if (m_ScriptNameContainer.isValid(index))
+		if (m_ScriptDataContainer.isValid(index))
 		{
-			return m_ScriptNameContainer[index];
+			return m_ScriptDataContainer[index];
 		} else
 		{
 			return std::nullopt; // 無効なIDの場合は空のデータを返す
 		}
 	}
 	// スクリプトデータを名前で取得する関数
-	std::string GetScriptDataByName(const std::string & scriptName)
+	ScriptData* GetScriptDataByName(const std::string & scriptName)
 	{
 		if (m_ScriptNameToIndex.contains(scriptName))
 		{
 			uint32_t id = m_ScriptNameToIndex[scriptName];
-			return GetScriptDataByID(id).value();
+            ScriptData* data = &m_ScriptDataContainer[id];
+			return data;
 		}
-		return std::string(); // 無効な名前の場合は空のデータを返す
+		return nullptr; // 無効な名前の場合は空のデータを返す
 	}
-	size_t GetScriptCount() { return m_ScriptNameContainer.size(); }
-	FVector<std::string>& GetScriptNameContainer() { return m_ScriptNameContainer; } // スクリプト名コンテナを取得
+	size_t GetScriptCount() { return m_ScriptDataContainer.size(); }
+	FVector<ScriptData>& GetScriptNameContainer() { return m_ScriptDataContainer; } // スクリプト名コンテナを取得
 
 	void RegisterScript(const std::string& scriptName, ScriptFactoryFunc func);
 	std::unique_ptr<Marionnette> CreateScript(const std::string& scriptName);
 private:
-	FVector<std::string> m_ScriptNameContainer; // スクリプトデータを格納するベクター
+	FVector<ScriptData> m_ScriptDataContainer; // スクリプトデータを格納するベクター
 	// 名前で検索する用のコンテナ
 	std::unordered_map<std::string, uint32_t> m_ScriptNameToIndex; // スクリプト名からスクリプトIDを取得するためのマップ
 

@@ -111,6 +111,8 @@
     <ClInclude Include="Config\Config.h" />
     <ClInclude Include="Core\Utility\AnimationStruct.h" />
     <ClInclude Include="Core\Utility\atomic_shared_ptr.h" />
+    <ClInclude Include="Core\Utility\containerUtility.h" />
+    <ClInclude Include="TheaReflectDeclare.h" />
     <ClInclude Include="GameCore\CPrefab\CPrefab.h" />
     <ClInclude Include="Core\Utility\chunk_vector.h" />
     <ClInclude Include="Core\Utility\SoundData.h" />
@@ -515,7 +517,8 @@ xcopy "$(SolutionDir)Cho\GameCore\GameWorld" "$(TargetDir)Cho\GameCore\GameWorld
 xcopy "$(SolutionDir)Cho\Core\Utility\AnimationStruct.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Core\Utility\SoundData.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
 xcopy "$(SolutionDir)Cho\GameCore\ECS" "$(TargetDir)Cho\GameCore\ECS" /E /I /Y
-xcopy "$(SolutionDir)Cho\Config" "$(TargetDir)Cho\Config" /E /I /Y</Command>
+xcopy "$(SolutionDir)Cho\Config" "$(TargetDir)Cho\Config" /E /I /Y
+xcopy "$(SolutionDir)Cho\TheaReflectDeclare.h" "$(TargetDir)Cho\" /E /I /Y</Command>
     </PostBuildEvent>
     <FxCompile>
       <ShaderModel>6.5</ShaderModel>
@@ -578,7 +581,8 @@ xcopy "$(SolutionDir)Cho\GameCore\GameWorld" "$(TargetDir)Cho\GameCore\GameWorld
 xcopy "$(SolutionDir)Cho\Core\Utility\AnimationStruct.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
 xcopy "$(SolutionDir)Cho\Core\Utility\SoundData.h" "$(TargetDir)Cho\Core\Utility\" /E /I /Y
 xcopy "$(SolutionDir)Cho\GameCore\ECS" "$(TargetDir)Cho\GameCore\ECS" /E /I /Y
-xcopy "$(SolutionDir)Cho\Config" "$(TargetDir)Cho\Config" /E /I /Y</Command>
+xcopy "$(SolutionDir)Cho\Config" "$(TargetDir)Cho\Config" /E /I /Y
+xcopy "$(SolutionDir)Cho\TheaReflectDeclare.h" "$(TargetDir)Cho\" /E /I /Y</Command>
     </PostBuildEvent>
     <FxCompile>
       <ShaderModel>6.5</ShaderModel>

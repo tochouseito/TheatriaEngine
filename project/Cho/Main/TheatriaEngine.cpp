@@ -72,8 +72,6 @@ void TheatriaEngine::Finalize()
 {
 	// GPUの完了待ち
 	graphicsEngine->Finalize();
-	// GameCore終了処理
-	
 	// ファイルの保存
 	if (runtimeMode == RuntimeMode::Editor)
 	{
@@ -83,8 +81,10 @@ void TheatriaEngine::Finalize()
 			gameCore->GameStop();
 			editorManager->ReloadEditingScene();
 		}
-		FileSystem::SaveProject(editorManager.get(), gameCore->GetSceneManager(), gameCore->GetGameWorld(), gameCore->GetECSManager());
+		FileSystem::SaveProject(editorManager.get(), gameCore->GetSceneManager(), gameCore->GetGameWorld(), gameCore->GetECSManager(),engineCommand.get());
 	}
+    // GameCore終了処理
+    gameCore->Finalize();
 	// ImGuiManager終了処理
 	imGuiManager->Finalize();
 	// ResourceManager終了処理
@@ -190,7 +190,7 @@ void TheatriaEngine::Start()
 	{
 		if (runtimeMode == RuntimeMode::Editor&&!gameCore->IsRunning())
 		{
-			FileSystem::SaveProject(editorManager.get(), gameCore->GetSceneManager(), gameCore->GetGameWorld(), gameCore->GetECSManager());
+			FileSystem::SaveProject(editorManager.get(), gameCore->GetSceneManager(), gameCore->GetGameWorld(), gameCore->GetECSManager(),engineCommand.get());
 		}
 	}
 	// ブランチが変更されたかどうか

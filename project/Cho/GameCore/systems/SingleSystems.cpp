@@ -343,6 +343,46 @@ void ScriptSystem::InitializeComponent(Entity, ScriptComponent& script)
 		Log::Write(LogLevel::Debug, "Unknown script error");
 		script.isActive = false;
 	}
+    // fieldの上書き
+    ScriptData* sd = m_pScriptContainer->GetScriptDataByName(script.scriptName);
+    if (script.fields.empty())
+    {
+        sd->saveFields.clear();
+        return;
+    }
+    for (const auto& saveField : sd->saveFields)
+    {
+        if (!script.fields.contains(saveField.first)) { continue; }
+        ScriptComponent::FieldDesc& field = script.fields[saveField.first];
+        if (saveField.second.type == typeid(float) && field.type == typeid(float))
+        {
+            *static_cast<float*>(field.ptr) = std::get<float>(saveField.second.value);
+            field.minmax = saveField.second.minmax;
+            field.type = saveField.second.type;
+        }else if(saveField.second.type == typeid(int) && field.type == typeid(int))
+        {
+            *static_cast<int*>(field.ptr) = std::get<int>(saveField.second.value);
+            field.minmax = saveField.second.minmax;
+            field.type = saveField.second.type;
+        }
+        else if (saveField.second.type == typeid(bool) && field.type == typeid(bool))
+        {
+            *static_cast<bool*>(field.ptr) = std::get<bool>(saveField.second.value);
+            field.minmax = saveField.second.minmax;
+            field.type = saveField.second.type;
+        }
+        else if (saveField.second.type == typeid(Vector3) && field.type == typeid(Vector3))
+        {
+            *static_cast<Vector3*>(field.ptr) = std::get<Vector3>(saveField.second.value);
+            field.minmax = saveField.second.minmax;
+            field.type = saveField.second.type;
+        }
+        else
+        {
+            continue;
+        }
+    }
+    sd->saveFields.clear();
 }
 
 void ScriptSystem::UpdateComponent(Entity, ScriptComponent& script)
@@ -371,6 +411,42 @@ void ScriptSystem::FinalizeComponent(Entity e, ScriptComponent& script)
 {
 	e;
 	if (!script.isActive || !script.instance) return;
+    // fieldの保存
+    ScriptData* sd = m_pScriptContainer->GetScriptDataByName(script.scriptName);
+    if (script.fields.empty()) { script.fields.clear(); return; }
+    for (const auto& field : script.fields)
+    {
+        ScriptComponent::FieldVal& save = sd->saveFields[field.first];
+        if (field.second.type == typeid(float))
+        {
+            save.value = *static_cast<float*>(field.second.ptr);
+            save.minmax = field.second.minmax;
+            save.type = field.second.type;
+        }
+        else if (field.second.type == typeid(int))
+        {
+            save.value = *static_cast<int*>(field.second.ptr);
+            save.minmax = field.second.minmax;
+            save.type = field.second.type;
+        }
+        else if (field.second.type == typeid(bool))
+        {
+            save.value = *static_cast<bool*>(field.second.ptr);
+            save.minmax = field.second.minmax;
+            save.type = field.second.type;
+        }
+        else if (field.second.type == typeid(Vector3))
+        {
+            save.value = *static_cast<Vector3*>(field.second.ptr);
+            save.minmax = field.second.minmax;
+            save.type = field.second.type;
+        }
+        else
+        {
+            continue;
+        }
+    }
+    script.fields.clear();
 	try
 	{
 		// スクリプトのCleanup関数を呼び出す

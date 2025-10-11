@@ -36,6 +36,7 @@ public:
 	void SetEngineCommandPtr(EngineCommand* engineCommand) { m_EngineCommand = engineCommand; }
 	void Start();
 	void Update();
+    void Finalize();
 	bool IsRunning() const { return isRunning; }
 	void GameRun(const bool& isDebugger = false,const bool&isRuntime = false);
 	void GameStop();
