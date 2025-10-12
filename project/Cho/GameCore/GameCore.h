@@ -45,6 +45,8 @@ public:
 	// 環境設定更新
 	void UpdateEnvironmentSetting();
 
+    void SetScriptSystemEngineCommand();
+
 	GameWorld* GetGameWorld() { return m_pGameWorld.get(); }
 	SceneManager* GetSceneManager() { return m_pSceneManager.get(); }
 	ECSManager* GetECSManager() { return m_pECSManager.get(); }

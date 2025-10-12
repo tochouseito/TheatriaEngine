@@ -62,6 +62,7 @@ void TheatriaEngine::Initialize()
 	// EditorManager初期化
 	editorManager = std::make_unique<EditorManager>(engineCommand.get(), platformLayer->GetInputManager());
 	editorManager->Initialize(runtimeMode == RuntimeMode::Game);
+    gameCore->SetScriptSystemEngineCommand();
 
 	// HubManager初期化
 	hubManager = std::make_unique<HubManager>(platformLayer.get(), coreSystem.get(), engineCommand.get(), runtimeMode == RuntimeMode::Game ? true : false);

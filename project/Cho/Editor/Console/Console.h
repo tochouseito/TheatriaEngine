@@ -6,11 +6,23 @@
 #include <mutex>
 #include <cstdarg>
 #include <cstdint>
+#include <array>
 #include "Core/Utility/Color.h"   // あなたの Color 型
 
 class Console : public BaseEditor
 {
 public:
+    enum class LogColor
+    {
+        White = 0,
+        Red,
+        Green,
+        Blue,
+        Yellow,
+
+        _Count
+    };
+
     Console(EditorManager* editorManager) : BaseEditor(editorManager) {}
     ~Console() {}
 
@@ -26,6 +38,8 @@ public:
 
     // 色を指定（Color）
     void AddColored(const Color& color, const char* fmt, ...);
+
+    void AddColored(LogColor cc, const char* fmt, ...);
 
     void Clear();
 
@@ -55,4 +69,5 @@ private:
     char input_buf_[512]{};   // 下部の入力欄
     std::string scratch_;     // クリップボード用
     std::mutex mtx_;
+    std::array<uint32_t, static_cast<size_t>(LogColor::_Count)> m_Palette;
 };
