@@ -925,10 +925,18 @@ bool theatria::FileSystem::LoadGameParameter(const std::wstring& filePath, const
 bool theatria::FileSystem::SaveLaunchConfig(const LaunchConfig& config, const std::wstring& filePath)
 {
     std::filesystem::path path = filePath;
-    std::filesystem::path fileName = "/LaunchConfig.json";
+    std::filesystem::path fileName = "LaunchConfig.json";
     
     // ファイルパスを設定
     path /= fileName;
+
+    // ファイルが存在しない場合は新規作成
+    if (!std::filesystem::exists(path))
+    {
+        std::ofstream file(path.string());
+        if (!file.is_open()) return false;
+        file.close();
+    }
 
     nlohmann::ordered_json j;
     j["fileType"] = "LaunchConfig";
@@ -1113,34 +1121,37 @@ json theatria::Serialization::ToJson(const ScriptComponent& s, ScriptContainer* 
 	json j;
 	j["scriptName"] = s.scriptName;
     ScriptData* scriptData = container->GetScriptDataByName(s.scriptName);
-    for (const auto& field : scriptData->saveFields)
+    if (scriptData)
     {
-        if(field.second.type == typeid(float))
+        for (const auto& field : scriptData->saveFields)
         {
-            j["fields"][field.first]["name"] = field.first;
-            j["fields"][field.first]["value"] = std::get<float>(field.second.value);
-            j["fields"][field.first]["type"] = "float";
-            j["fields"][field.first]["minmax"] = { field.second.minmax.first, field.second.minmax.second };
-        }
-        else if (field.second.type == typeid(int))
-        {
-            j["fields"][field.first]["name"] = field.first;
-            j["fields"][field.first]["value"] = std::get<int>(field.second.value);
-            j["fields"][field.first]["type"] = "int";
-            j["fields"][field.first]["minmax"] = { field.second.minmax.first, field.second.minmax.second };
-        }
-        else if (field.second.type == typeid(bool))
-        {
-            j["fields"][field.first]["name"] = field.first;
-            j["fields"][field.first]["value"] = std::get<bool>(field.second.value);
-            j["fields"][field.first]["type"] = "bool";
-        }
-        else if (field.second.type == typeid(Vector3))
-        {
-            Vector3 v = std::get<Vector3>(field.second.value);
-            j["fields"][field.first]["name"] = field.first;
-            j["fields"][field.first]["value"] = { v.x, v.y, v.z };
-            j["fields"][field.first]["type"] = "Vector3";
+            if (field.second.type == typeid(float))
+            {
+                j["fields"][field.first]["name"] = field.first;
+                j["fields"][field.first]["value"] = std::get<float>(field.second.value);
+                j["fields"][field.first]["type"] = "float";
+                j["fields"][field.first]["minmax"] = { field.second.minmax.first, field.second.minmax.second };
+            }
+            else if (field.second.type == typeid(int))
+            {
+                j["fields"][field.first]["name"] = field.first;
+                j["fields"][field.first]["value"] = std::get<int>(field.second.value);
+                j["fields"][field.first]["type"] = "int";
+                j["fields"][field.first]["minmax"] = { field.second.minmax.first, field.second.minmax.second };
+            }
+            else if (field.second.type == typeid(bool))
+            {
+                j["fields"][field.first]["name"] = field.first;
+                j["fields"][field.first]["value"] = std::get<bool>(field.second.value);
+                j["fields"][field.first]["type"] = "bool";
+            }
+            else if (field.second.type == typeid(Vector3))
+            {
+                Vector3 v = std::get<Vector3>(field.second.value);
+                j["fields"][field.first]["name"] = field.first;
+                j["fields"][field.first]["value"] = { v.x, v.y, v.z };
+                j["fields"][field.first]["type"] = "Vector3";
+            }
         }
     }
 	return j;
@@ -1881,17 +1892,18 @@ void theatria::FileSystem::ScriptProject::LoadScriptDLL()
     // アンロード
     UnloadScriptDLL();
 	// DLLのパス
-	std::string dllPath = ConvertString(m_sProjectFolderPath) + "/bin/" + ConvertString(m_sProjectName) + ".dll";
+	// std::string dllPath = ConvertString(m_sProjectFolderPath) + "/bin/" + ConvertString(m_sProjectName) + ".dll";
+    fs::path dllPath = fs::path(m_sProjectFolderPath) / L"bin" / (m_sProjectName + L".dll");
     // DLLをステージング
     auto staged = StageDllAndPdbInSiblingFolder(dllPath);
     if (staged.stagedDll.empty())
     {
-        Log::Write(LogLevel::Info, "DLL not found: " + dllPath);
+        Log::Write(LogLevel::Info, L"DLL not found: " + dllPath.wstring());
         return;
     }
     if(staged.stagedPdb.empty())
     {
-        Log::Write(LogLevel::Info, "PDB not found for DLL: " + dllPath);
+        Log::Write(LogLevel::Info, L"PDB not found for DLL: " + dllPath.wstring());
     }
 
 	// PDBのロード
@@ -1900,7 +1912,7 @@ void theatria::FileSystem::ScriptProject::LoadScriptDLL()
 	m_DllHandle = LoadLibraryA(staged.stagedDll.string().c_str());
     if (!m_DllHandle)
     {
-		Log::Write(LogLevel::Info, "Failed to load DLL: " + dllPath);
+		Log::Write(LogLevel::Info, L"Failed to load DLL: " + dllPath.wstring());
         return;
     }
 }
@@ -1996,7 +2008,7 @@ std::vector<std::string> theatria::FileSystem::ScriptProject::GetScriptFiles()
 	return scriptNames;
 }
 
-bool theatria::FileSystem::ScriptProject::LoadPDB(const std::string& dllPath)
+bool theatria::FileSystem::ScriptProject::LoadPDB(const path& dllPath)
 {
     HANDLE process = GetCurrentProcess();
 
@@ -2014,7 +2026,7 @@ bool theatria::FileSystem::ScriptProject::LoadPDB(const std::string& dllPath)
     }
 
     // DLLを読み込んで、PDBも自動で探してロード
-    DWORD64 baseAddress = SymLoadModuleEx(
+    DWORD64 baseAddress = SymLoadModuleExW(
         process,
         nullptr,
         dllPath.c_str(),
@@ -2528,16 +2540,27 @@ bool theatria::FileSystem::ScriptProject::iequals(const std::wstring& a, const s
 std::wstring theatria::FileSystem::ScriptProject::NowStamp()
 {
     using namespace std::chrono;
-    auto tp = system_clock::now();
-    auto tt = system_clock::to_time_t(tp);
-    auto tm = *std::localtime(&tt);
-    auto usec = duration_cast<microseconds>(tp.time_since_epoch()).count() % 1000000;
+
+    const auto tp = system_clock::now();
+    const std::time_t tt = system_clock::to_time_t(tp);
+
+    // 安全版：呼び出し側バッファに書き込む
+    std::tm lt{};
+    localtime_s(&lt, &tt);
+
+    // マイクロ秒（0～999999）
+    const auto usec =
+        duration_cast<microseconds>(tp.time_since_epoch()).count() % 1'000'000;
+
     wchar_t buf[64];
-    swprintf(buf, 64, L"%04d%02d%02d-%02d%02d%02d-%06lld",
-        tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
-        tm.tm_hour, tm.tm_min, tm.tm_sec,
+    // 安全版フォーマット
+    swprintf_s(buf, sizeof(buf) / sizeof(buf[0]),
+        L"%04d%02d%02d-%02d%02d%02d-%06lld",
+        lt.tm_year + 1900, lt.tm_mon + 1, lt.tm_mday,
+        lt.tm_hour, lt.tm_min, lt.tm_sec,
         static_cast<long long>(usec));
-    return buf;
+
+    return std::wstring(buf);
 }
 
 bool theatria::FileSystem::ScriptProject::CopyWithRetry(const fs::path& src, const fs::path& dst, int retries, DWORD waitMs, bool overwrite)
@@ -3195,8 +3218,12 @@ void theatria::FileSystem::GameBuilder::CopyFilesToBuildFolder([[maybe_unused]]E
             fs::create_directories(buildRoot);
         }
 
+        LaunchConfig config;
+        config.projectName = m_sProjectName;
+        SaveLaunchConfig(config, buildRoot);
+
         // コピーするパス一覧（構造維持したいパス）
-        std::vector<fs::path> sources = {
+        std::vector<fs::path> engineSources = {
             L"TheatriaEngine_GameRuntime.dll",
             L"TheatriaEngine_GameRuntime.exp",
             L"TheatriaEngine_GameRuntime.lib",
@@ -3205,14 +3232,16 @@ void theatria::FileSystem::GameBuilder::CopyFilesToBuildFolder([[maybe_unused]]E
             L"dxil_GameRuntime.dll",
             L"GameTemplate.exe",
             L"imgui.ini", // 後で消す
-            fs::path(m_sProjectFolderPath) / fs::path(L"Assets"),
-            fs::path(m_sProjectFolderPath) / fs::path(L"bin"),
-            fs::path(m_sProjectFolderPath) / fs::path(L"ProjectSettings"),
             L"Cho/Engine",
             L"Cho/Resources/EngineAssets",
             L"Cho/pch",
             L"Cho/APIExportsMacro.h",
             L"Cho/TheatriaEngineAPI.h",
+        };
+        std::vector<fs::path> gameSources = {
+            fs::path(m_sProjectFolderPath) / fs::path(L"Assets"),
+            fs::path(m_sProjectFolderPath) / fs::path(L"bin"),
+            fs::path(m_sProjectFolderPath) / fs::path(L"ProjectSettings"),
         };
 
         /*for (const auto& scene : engineCommand->GetGameCore()->GetSceneManager()->GetScenes())
@@ -3220,7 +3249,7 @@ void theatria::FileSystem::GameBuilder::CopyFilesToBuildFolder([[maybe_unused]]E
 			sources.push_back(fs::path(L"GameProjects") / m_sProjectName / fs::path(scene.GetName()).replace_extension(L".json"));
         }*/
 
-        for (const auto& src : sources)
+        for (const auto& src : engineSources)
         {
             fs::path sourcePath = fs::absolute(src);
 
@@ -3242,6 +3271,33 @@ void theatria::FileSystem::GameBuilder::CopyFilesToBuildFolder([[maybe_unused]]E
             {
                 fs::copy(sourcePath, destinationPath, fs::copy_options::recursive | fs::copy_options::overwrite_existing);
             } else if (fs::is_regular_file(sourcePath))
+            {
+                fs::copy_file(sourcePath, destinationPath, fs::copy_options::overwrite_existing);
+            }
+        }
+        for (const auto& src : gameSources)
+        {
+            fs::path sourcePath = src;
+
+            if (!fs::exists(src))
+            {
+                theatria::Log::Write(LogLevel::Assert, "Source file or directory does not exist: " + sourcePath.string());
+                continue;
+            }
+
+            // 構造を維持するコピー先パスを決定
+            //fs::path relativePath = fs::relative(sourcePath, fs::current_path());
+            fs::path destinationPath = buildRoot / src.filename();
+
+            // フォルダを作成
+            fs::create_directories(destinationPath.parent_path());
+
+            // コピー実行
+            if (fs::is_directory(sourcePath))
+            {
+                fs::copy(sourcePath, destinationPath, fs::copy_options::recursive | fs::copy_options::overwrite_existing);
+            }
+            else if (fs::is_regular_file(sourcePath))
             {
                 fs::copy_file(sourcePath, destinationPath, fs::copy_options::overwrite_existing);
             }
