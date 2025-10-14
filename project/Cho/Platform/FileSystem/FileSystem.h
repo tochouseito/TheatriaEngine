@@ -245,7 +245,7 @@ namespace theatria
             static bool BuildScriptDLL();
 			static std::vector<std::string> GetScriptFiles();
 			static HMODULE GetScriptDLLHandle() { return m_DllHandle; }
-			static bool LoadPDB(const std::string& dllPath);
+			static bool LoadPDB(const path& dllPath);
             static void UnloadPDB();
             static bool WaitForBuild(const std::wstring& dllPath, int timeoutMs = 60000);
             static bool WaitForBuildNotification(int timeoutMs);

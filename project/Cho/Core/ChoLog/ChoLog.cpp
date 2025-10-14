@@ -5,38 +5,33 @@
 std::string theatria::Log::LogFileName = "TheatriaEngineLog.txt";
 std::mutex theatria::Log::logMutex;
 
-std::wstring ConvertString(const std::string& str)
+std::wstring ConvertString(const std::string& s)
 {
-    if (str.empty())
-    {
-        return std::wstring();
-    }
-
-    auto sizeNeeded = MultiByteToWideChar(CP_UTF8, 0, reinterpret_cast<const char*>(&str[0]), static_cast<int>(str.size()), NULL, 0);
-    if (sizeNeeded == 0)
-    {
-        return std::wstring();
-    }
-    std::wstring result(sizeNeeded, 0);
-    MultiByteToWideChar(CP_UTF8, 0, reinterpret_cast<const char*>(&str[0]), static_cast<int>(str.size()), &result[0], sizeNeeded);
-    return result;
+    if (s.empty()) return {};
+    int size = ::MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS,
+        s.c_str(), static_cast<int>(s.size()),
+        nullptr, 0);
+    if (size <= 0) return {};
+    std::wstring ws(size, L'\0');
+    ::MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS,
+        s.c_str(), static_cast<int>(s.size()),
+        ws.data(), size);
+    return ws;
 }
 
-std::string ConvertString(const std::wstring& str)
+std::string ConvertString(const std::wstring& ws)
 {
-    if (str.empty())
-    {
-        return std::string();
-    }
-
-    auto sizeNeeded = WideCharToMultiByte(CP_UTF8, 0, str.data(), static_cast<int>(str.size()), NULL, 0, NULL, NULL);
-    if (sizeNeeded == 0)
-    {
-        return std::string();
-    }
-    std::string result(sizeNeeded, 0);
-    WideCharToMultiByte(CP_UTF8, 0, str.data(), static_cast<int>(str.size()), result.data(), sizeNeeded, NULL, NULL);
-    return result;
+    if (ws.empty()) return {};
+    // 無効文字検出を有効化
+    int size = ::WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS,
+        ws.c_str(), static_cast<int>(ws.size()),
+        nullptr, 0, nullptr, nullptr);
+    if (size <= 0) return {};
+    std::string utf8(size, '\0');
+    ::WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS,
+        ws.c_str(), static_cast<int>(ws.size()),
+        utf8.data(), size, nullptr, nullptr);
+    return utf8;
 }
 
 void theatria::Log::Write(

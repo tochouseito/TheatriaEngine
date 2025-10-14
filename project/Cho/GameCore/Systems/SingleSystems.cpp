@@ -9,6 +9,7 @@
 #include "OS/Windows/WinApp/WinApp.h"
 #include "Core/ChoLog/ChoLog.h"
 #include "Platform/Timer/Timer.h"
+#include "Editor/Console/Console.h"
 
 void TransformSystem::InitializeComponent(Entity e, TransformComponent& transform)
 {
@@ -341,6 +342,8 @@ void ScriptSystem::InitializeComponent(Entity, ScriptComponent& script)
 	{
 		// その他のエラー処理
 		Log::Write(LogLevel::Debug, "Unknown script error");
+        std::string err = "Script error in " + script.scriptName;
+        m_pConsole->AddColored(Console::LogColor::Red, err.c_str());
 		script.isActive = false;
 	}
     // fieldの上書き
@@ -397,12 +400,18 @@ void ScriptSystem::UpdateComponent(Entity, ScriptComponent& script)
 	{
 		// スクリプトのエラー処理
 		Log::Write(LogLevel::Debug, "Script error: " + std::string(e.what()));
+        std::string err = "Script error in " + script.scriptName;
+        std::string errInfo = std::string(e.what());
+        m_pConsole->AddColored(Console::LogColor::Red, err.c_str());
+        m_pConsole->AddColored(Console::LogColor::Red, errInfo.c_str());
 		script.isActive = false;
 	}
 	catch (...)
 	{
 		// その他のエラー処理
 		Log::Write(LogLevel::Debug, "Unknown script error");
+        std::string err = "Script error in " + script.scriptName;
+        m_pConsole->AddColored(Console::LogColor::Red, err.c_str());
 		script.isActive = false;
 	}
 }

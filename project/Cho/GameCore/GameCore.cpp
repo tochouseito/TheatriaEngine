@@ -6,6 +6,7 @@
 #include "GameCore/Systems/SingleSystems.h"
 #include "GameCore/Systems/MultiSystems.h"
 #include "EngineCommand/EngineCommands.h"
+#include "Editor/EditorManager/EditorManager.h"
 
 void GameCore::Initialize(ResourceManager* resourceManager, GraphicsEngine* graphicsEngine)
 {
@@ -148,6 +149,12 @@ void GameCore::UpdateEnvironmentSetting()
 	// 環境情報バッファ
 	ConstantBuffer<BUFFER_DATA_ENVIRONMENT>* envBuffer = m_EngineCommand->GetResourceManager()->GetEnvironmentBuffer();
 	envBuffer->UpdateData(m_EnvironmentData);
+}
+
+void GameCore::SetScriptSystemEngineCommand()
+{
+    ScriptSystem* scriptSystem = m_pECSManager->GetSystem<ScriptSystem>();
+    scriptSystem->SetConsole(m_EngineCommand->GetEditorManager()->GetConsole());
 }
 
 void GameCore::RegisterECSEvents()

@@ -17,7 +17,7 @@ bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 	// 変数の宣言
 	std::string line;// ファイルから読んだ1行を格納するもの
 	Assimp::Importer importer;
-	std::string filePathString = filePath.string();
+	std::wstring filePathString = filePath.wstring();
 	ModelData modelData;
 
 	// ここからファイルを開く
@@ -27,7 +27,7 @@ bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 	importer.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_LINE | aiPrimitiveType_POINT);
 
 	const aiScene* scene = importer.ReadFile(
-		filePathString.c_str(),
+		ConvertString(filePathString).c_str(),
 		aiProcess_FlipWindingOrder |
 		aiProcess_FlipUVs |
 		aiProcess_Triangulate|				// 三角形化
@@ -41,7 +41,7 @@ bool ModelManager::LoadModelFile(const std::filesystem::path& filePath)
 		);
 	if (!scene)
 	{
-		Log::Write(LogLevel::Assert, "Assimp ReadFile Error");
+        Log::Write(LogLevel::Assert, L"Assimp ReadFile Error: file name = " + filePathString);
 	}
 	Log::Write(LogLevel::Info, "End ReadFile");
 	std::string err = importer.GetErrorString();

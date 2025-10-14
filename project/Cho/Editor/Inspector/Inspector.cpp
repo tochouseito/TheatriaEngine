@@ -341,39 +341,42 @@ void Inspector::ScriptComponentView(GameObject* object)
     }
     else
     {
-        for(auto& field : scriptData->saveFields)
+        if (scriptData)
         {
-            if (field.second.type == typeid(int))
+            for (auto& field : scriptData->saveFields)
             {
-                ImGui::DragInt(field.first.c_str(), &std::get<int>(field.second.value), 1.0f, field.second.minmax.first, field.second.minmax.second);
-            }
-            else if (field.second.type == typeid(float))
-            {
-                ImGui::DragFloat(field.first.c_str(), &std::get<float>(field.second.value), 0.1f, static_cast<float>(field.second.minmax.first), static_cast<float>(field.second.minmax.second));
-            }
-            else if (field.second.type == typeid(std::string))
-            {
-                /*char buffer[256];
-                std::string* strPtr = static_cast<std::string*>(field.second.ptr);
-                strncpy(buffer, strPtr->c_str(), sizeof(buffer));
-                if (ImGui::InputText(field.first.c_str(), buffer, sizeof(buffer)))
+                if (field.second.type == typeid(int))
                 {
-                    *strPtr = std::string(buffer);
-                }*/
-                ImGui::Text("%s", field.first.c_str());
-            }
-            else if (field.second.type == typeid(bool))
-            {
-                ImGui::Checkbox(field.first.c_str(), &std::get<bool>(field.second.value));
-            }
-            else if (field.second.type == typeid(Vector3))
-            {
-                Vector3 vec = std::get<Vector3>(field.second.value);
-                ImGui::DragFloat3(field.first.c_str(), &vec.x, 0.1f);
-            }
-            else
-            {
-                ImGui::Text("Unknown Type");
+                    ImGui::DragInt(field.first.c_str(), &std::get<int>(field.second.value), 1.0f, field.second.minmax.first, field.second.minmax.second);
+                }
+                else if (field.second.type == typeid(float))
+                {
+                    ImGui::DragFloat(field.first.c_str(), &std::get<float>(field.second.value), 0.1f, static_cast<float>(field.second.minmax.first), static_cast<float>(field.second.minmax.second));
+                }
+                else if (field.second.type == typeid(std::string))
+                {
+                    /*char buffer[256];
+                    std::string* strPtr = static_cast<std::string*>(field.second.ptr);
+                    strncpy(buffer, strPtr->c_str(), sizeof(buffer));
+                    if (ImGui::InputText(field.first.c_str(), buffer, sizeof(buffer)))
+                    {
+                        *strPtr = std::string(buffer);
+                    }*/
+                    ImGui::Text("%s", field.first.c_str());
+                }
+                else if (field.second.type == typeid(bool))
+                {
+                    ImGui::Checkbox(field.first.c_str(), &std::get<bool>(field.second.value));
+                }
+                else if (field.second.type == typeid(Vector3))
+                {
+                    Vector3 vec = std::get<Vector3>(field.second.value);
+                    ImGui::DragFloat3(field.first.c_str(), &vec.x, 0.1f);
+                }
+                else
+                {
+                    ImGui::Text("Unknown Type");
+                }
             }
         }
     }

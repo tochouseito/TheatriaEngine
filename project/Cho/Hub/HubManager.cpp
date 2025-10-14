@@ -18,6 +18,8 @@ void HubManager::Initialize()
     if (m_IsGameRuntime)
     {
         // 起動Configの読み込み
+        //std::wstring path = L"C:\\TheatriaGames\\PortfolioPiece";
+        //LaunchConfig config = FileSystem::LoadLaunchConfig(path);
         LaunchConfig config = FileSystem::LoadLaunchConfig(std::filesystem::current_path().wstring());
         FileSystem::m_sProjectName = config.projectName;
     }
@@ -32,13 +34,15 @@ void HubManager::Update()
     }
     if (m_IsGameRuntime)
     {
-        std::wstring selectedProjectName = FileSystem::m_sProjectName;
+        //std::wstring selectedProjectName = FileSystem::m_sProjectName;
         // プロジェクトの読み込み
-        FileSystem::LoadProjectFolder(selectedProjectName, m_pEngineCommand);
+        FileSystem::LoadProjectFolder(std::filesystem::current_path().wstring(), m_pEngineCommand);
+        //std::wstring path = L"C:\\TheatriaGames\\PortfolioPiece";
+        //FileSystem::LoadProjectFolder(path, m_pEngineCommand);
         // プロジェクトのパスを保存
-        FileSystem::ScriptProject::LoadProjectPath(selectedProjectName);
+        //FileSystem::ScriptProject::LoadProjectPath(selectedProjectName);
         // ブランチを取得
-        GetCurrentBranch();
+        //GetCurrentBranch();
         // ウィンドウのタイトルバーを変更
         SetWindowTextW(WinApp::GetHWND(), FileSystem::g_GameSettings.titleBar.c_str());
         // プロジェクト選択後、Hubを終了

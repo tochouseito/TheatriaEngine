@@ -63,6 +63,9 @@ public:
 	void ReloadEditingScene();
 	// Sceneを取得
 	GameScene* GetEditScene(const std::wstring& sceneName);
+
+    // Console取得
+    Console* GetConsole() { return m_Console.get(); }
 	 
 private:
 	EngineCommand* m_EngineCommand = nullptr;

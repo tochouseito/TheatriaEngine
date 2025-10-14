@@ -6,8 +6,6 @@ DirectX12共通クラス
 
 #include "SDK/DirectX/DirectX12/stdafx/stdafx.h"
 
-#include<dxgidebug.h>
-
 class DirectX12Common
 {
 public:// メンバ関数

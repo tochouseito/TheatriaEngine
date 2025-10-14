@@ -5,7 +5,15 @@
 /*========================
   Console lifecycle
 ========================*/
-void Console::Initialize() {}
+void Console::Initialize()
+{
+    // カラーパレット初期化
+    m_Palette[static_cast<size_t>(LogColor::White)] = Color::RGBAu8(255, 255, 255);
+    m_Palette[static_cast<size_t>(LogColor::Red)] = Color::RGBAu8(255, 100, 100);
+    m_Palette[static_cast<size_t>(LogColor::Green)] = Color::RGBAu8(100, 255, 100);
+    m_Palette[static_cast<size_t>(LogColor::Blue)] = Color::RGBAu8(100, 100, 255);
+    m_Palette[static_cast<size_t>(LogColor::Yellow)] = Color::RGBAu8(255, 255, 100);
+}
 
 void Console::Update()
 {
@@ -120,6 +128,14 @@ void Console::AddColored(const Color& color, const char* fmt, ...)
 {
     va_list args; va_start(args, fmt);
     AddV(PackRGBA32(color), fmt, args);
+    va_end(args);
+}
+
+void Console::AddColored(LogColor cc, const char* fmt, ...)
+{
+    const uint32_t col = m_Palette[static_cast<size_t>(cc)];
+    va_list args; va_start(args, fmt);
+    AddV(col, fmt, args);
     va_end(args);
 }
 
