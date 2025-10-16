@@ -1617,9 +1617,9 @@ void theatria::FileSystem::ScriptProject::UpdateVcxproj()
 
     // インクルードディレクトリ
 	// スクリプトファイルのパス
-    //fs::path includeBase = fs::relative(currentPath, projectDir);
-    //includeBase /= "Packages";
     fs::path includeBase = std::filesystem::current_path();
+    includeBase = includeBase.parent_path();
+    includeBase = includeBase /= "$(Configuration)";
     fs::path systemPath = includeBase / "Cho";
     fs::path mathLibPath = includeBase / "ChoMath/include";
     fs::path mathPath = includeBase / "ChoMath";
@@ -1630,8 +1630,6 @@ void theatria::FileSystem::ScriptProject::UpdateVcxproj()
     fs::path projectDirPath2 = "$(ProjectDir)Assets/Scripts";
 
     // ライブラリディレクトリ
-    //fs::path libraryPath = currentPath / "../generated/outputs/$(Configuration)/";
-    //fs::path libraryPath2 = includeBase / "../../";
     fs::path libraryPath = std::filesystem::current_path();
     fs::path libraryPath2 = "$(ProjectDir)";
 

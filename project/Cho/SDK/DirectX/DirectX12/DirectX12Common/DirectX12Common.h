@@ -40,6 +40,17 @@ private:// メンバ変数
 	ComPtr<IDXGIFactory7> m_DXGIFactory = nullptr;// DXGIファクトリ
 	ComPtr<ID3D12Device8> m_Device = nullptr;// デバイス
 
+    // d3d11on12
+    ComPtr<ID3D11Device> m_D3D11Device = nullptr;
+    ComPtr<ID3D11DeviceContext> m_D3D11Context = nullptr;
+    ComPtr<ID3D11On12Device> m_D3D11On12Device = nullptr;
+
+    // d2d / DWrite
+    ComPtr<ID2D1Factory3> m_D2DFactory = nullptr;
+    ComPtr<ID2D1Device> m_D2DDevice = nullptr;
+    ComPtr<ID2D1DeviceContext5> m_D2DContext = nullptr;
+    ComPtr<IDWriteFactory5> m_DWriteFactory = nullptr;
+
 	// D3D12Options
 	D3D12_FEATURE_DATA_D3D12_OPTIONS m_Options;
 	D3D12_FEATURE_DATA_D3D12_OPTIONS1 m_Options1;
