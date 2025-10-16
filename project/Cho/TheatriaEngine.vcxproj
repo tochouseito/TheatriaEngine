@@ -235,29 +235,6 @@
     <None Include="Resources\EngineAssets\Shader\header\ViewProjection.hlsli" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ChoMath\ChoMath.vcxproj">
-      <Project>{3cf8afa4-25ac-4b52-92f3-3af6824d3643}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\ChoPhysics\ChoPhysics.vcxproj">
-      <Project>{65d0069a-9075-49d7-9cc7-decf7ce300c2}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\External\assimp\assimp.vcxproj">
-      <Project>{a6d704e6-3b06-3b7c-a488-6a6bfa5352cf}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\External\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">
-      <Project>{371b9fa9-4c90-4ac6-a123-aced756d6c77}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\External\imgui\imgui.vcxproj">
-      <Project>{b4e3cfd6-cd84-4565-84e7-03feb4c6881e}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\External\imgui_Extensions\imgui_Extensions.vcxproj">
-      <Project>{cc238f44-9c9b-4f73-849c-61b4cef32ffe}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\PhysicsEngine\PhysicsEngine.vcxproj">
-      <Project>{9900bf4d-d7fc-4feb-868e-65fbad0d6a2d}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <FxCompile Include="Resources\EngineAssets\Shader\Culling\Culling.CS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
@@ -419,6 +396,23 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ChoMath\ChoMath.vcxproj">
+      <Project>{3cf8afa4-25ac-4b52-92f3-3af6824d3643}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\External\assimp\assimp.vcxproj">
+      <Project>{a6d704e6-3b06-3b7c-a488-6a6bfa5352cf}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\External\imgui\imgui.vcxproj">
+      <Project>{b4e3cfd6-cd84-4565-84e7-03feb4c6881e}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\External\imgui_Extensions\imgui_Extensions.vcxproj">
+      <Project>{cc238f44-9c9b-4f73-849c-61b4cef32ffe}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\PhysicsEngine\PhysicsEngine.vcxproj">
+      <Project>{9900bf4d-d7fc-4feb-868e-65fbad0d6a2d}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -473,11 +467,15 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 /bigobj %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)External\assimp\include;$(SolutionDir)External\imgui\include;$(SolutionDir)External\nlohmann;$(SolutionDir)ChoMath\include;$(ProjectDir)GameCore\Marionnette;$(ProjectDir)Core\Utility;$(ProjectDir)pch\;$(SolutionDir)ChoMath;$(SolutionDir)External\DirectXTex\;$(SolutionDir)External\imgui_Extensions;$(SolutionDir)External\assimp\build\include;$(SolutionDir)PhysicsEngine\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)External\assimp\include;$(SolutionDir)External\imgui\include;$(SolutionDir)External\nlohmann;$(SolutionDir)ChoMath\include;$(ProjectDir)GameCore\Marionnette;$(ProjectDir)Core\Utility;$(ProjectDir)pch\;$(SolutionDir)ChoMath;$(SolutionDir)External\DirectXTex\;$(SolutionDir)External\imgui_Extensions;$(SolutionDir)PhysicsEngine\include;$(SolutionDir)External\assimp\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <ForcedIncludeFiles>pch.h</ForcedIncludeFiles>
+      <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <ExternalTemplatesDiagnostics>true</ExternalTemplatesDiagnostics>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -536,11 +534,15 @@ xcopy "$(SolutionDir)Cho\TheaReflectDeclare.h" "$(TargetDir)Cho\" /E /I /Y</Comm
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 /bigobj %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)External\assimp\include;$(SolutionDir)External\imgui\include;$(SolutionDir)External\nlohmann;$(SolutionDir)ChoMath\include;$(ProjectDir)GameCore\Marionnette;$(ProjectDir)Core\Utility;$(ProjectDir)pch\;$(SolutionDir)ChoMath;$(SolutionDir)External\DirectXTex\;$(SolutionDir)External\imgui_Extensions;$(SolutionDir)External\assimp\build\include;$(SolutionDir)PhysicsEngine\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)External\assimp\include;$(SolutionDir)External\imgui\include;$(SolutionDir)External\nlohmann;$(SolutionDir)ChoMath\include;$(ProjectDir)GameCore\Marionnette;$(ProjectDir)Core\Utility;$(ProjectDir)pch\;$(SolutionDir)ChoMath;$(SolutionDir)External\DirectXTex\;$(SolutionDir)External\imgui_Extensions;$(SolutionDir)PhysicsEngine\include;$(SolutionDir)External\assimp\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <ForcedIncludeFiles>pch.h</ForcedIncludeFiles>
+      <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <ExternalTemplatesDiagnostics>true</ExternalTemplatesDiagnostics>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

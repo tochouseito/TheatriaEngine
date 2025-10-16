@@ -198,14 +198,14 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\imgui\imgui.vcxproj">
-      <Project>{b4e3cfd6-cd84-4565-84e7-03feb4c6881e}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="imgui-node-editor\imgui_bezier_math.inl" />
     <None Include="imgui-node-editor\imgui_extra_math.inl" />
     <None Include="imgui-node-editor\imgui_node_editor_internal.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\imgui\imgui.vcxproj">
+      <Project>{b4e3cfd6-cd84-4565-84e7-03feb4c6881e}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

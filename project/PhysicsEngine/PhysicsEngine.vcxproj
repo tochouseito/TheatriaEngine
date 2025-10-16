@@ -149,9 +149,6 @@
     <ClCompile Include="src\3D\d3_common.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ChoMath\ChoMath.vcxproj">
-      <Project>{3cf8afa4-25ac-4b52-92f3-3af6824d3643}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\ChoPhysics\ChoPhysics.vcxproj">
       <Project>{65d0069a-9075-49d7-9cc7-decf7ce300c2}</Project>
     </ProjectReference>

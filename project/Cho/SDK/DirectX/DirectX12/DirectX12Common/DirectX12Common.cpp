@@ -174,13 +174,13 @@ void DirectX12Common::CreateDevice()
 	}
 #endif // DEBUG
 
-    // d3d11on12デバイス作成
-    // BGRAサポートはD2Dと連携するために必須
-    UINT d3d11Flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
-#ifdef _DEBUG
-    d3d11Flags |= D3D11_CREATE_DEVICE_DEBUG;
-#endif
-    D3D_FEATURE_LEVEL 
+//    // d3d11on12デバイス作成
+//    // BGRAサポートはD2Dと連携するために必須
+//    UINT d3d11Flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
+//#ifdef _DEBUG
+//    d3d11Flags |= D3D11_CREATE_DEVICE_DEBUG;
+//#endif
+//    D3D_FEATURE_LEVEL 
 }
 
 // 各サポートチェック
