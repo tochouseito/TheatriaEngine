@@ -1,5 +1,8 @@
 #pragma once
-class ResourceManager
+namespace Theatria::Graphics
 {
+    class ResourceManager
+    {
+    };
 };
 

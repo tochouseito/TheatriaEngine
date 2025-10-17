@@ -1,5 +1,7 @@
 #pragma once
-class LogAssert
+namespace Theatria::Core
 {
+    class LogAssert
+    {
+    };
 };
-

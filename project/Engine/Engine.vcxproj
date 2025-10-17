@@ -63,7 +63,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
-      <SmallerTypeCheck>true</SmallerTypeCheck>
+      <SmallerTypeCheck>false</SmallerTypeCheck>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -125,6 +125,8 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\Main\Engine.cpp" />
+    <ClCompile Include="source\Graphics\ShaderCompiler.cpp" />
     <ClCompile Include="source\Core\Allocators.cpp" />
     <ClCompile Include="source\Audio\AudioEngine.cpp" />
     <ClCompile Include="source\Core\CommandSystem.cpp" />
@@ -140,7 +142,6 @@
     <ClCompile Include="source\Core\JobSystem.cpp" />
     <ClCompile Include="source\Assets\Loader.cpp" />
     <ClCompile Include="source\Core\LogAssert.cpp" />
-    <ClCompile Include="main.cpp" />
     <ClCompile Include="source\Core\MemoryManager.cpp" />
     <ClCompile Include="source\Platform\Network.cpp" />
     <ClCompile Include="source\Physics\PhysicsWorld.cpp" />
@@ -179,6 +180,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Main\Engine.h" />
     <ClInclude Include="include\Core\Allocators.h" />
     <ClInclude Include="include\Audio\AudioEngine.h" />
     <ClInclude Include="include\Core\CommandSystem.h" />
@@ -207,6 +209,7 @@
     <ClInclude Include="include\Platform\Timer.h" />
     <ClInclude Include="include\Core\UUID.h" />
     <ClInclude Include="include\Platform\WinApp.h" />
+    <ClInclude Include="include\Graphics\ShaderCompiler.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

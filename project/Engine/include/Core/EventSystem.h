@@ -1,5 +1,7 @@
 #pragma once
-class EventSystem
+namespace Theatria::Core
 {
+    class EventSystem
+    {
+    };
 };
-

@@ -1,5 +1,8 @@
 #pragma once
-class CommandSystem
+namespace Theatria::Core
 {
+    class CommandSystem
+    {
+    };
 };
 

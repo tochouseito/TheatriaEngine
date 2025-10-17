@@ -1,5 +1,8 @@
 #pragma once
-class Input
+namespace Theatria::Platform
 {
+    class Input
+    {
+    };
 };
 

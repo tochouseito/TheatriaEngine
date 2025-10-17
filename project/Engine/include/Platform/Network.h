@@ -1,5 +1,8 @@
 #pragma once
-class Network
+namespace Theatria::Platform
 {
+    class Network
+    {
+    };
 };
 

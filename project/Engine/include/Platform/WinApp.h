@@ -1,5 +1,8 @@
 #pragma once
-class WinApp
+namespace Theatria::Platform
 {
+    class WinApp
+    {
+    };
 };
 

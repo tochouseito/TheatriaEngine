@@ -1,5 +1,8 @@
 #pragma once
-class SceneManager
+namespace Theatria::GameCore
 {
+    class SceneManager
+    {
+    };
 };
 

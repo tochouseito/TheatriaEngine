@@ -1,5 +1,8 @@
 #pragma once
-class Allocators
+namespace Theatria::Core
 {
+    class Allocators
+    {
+    };
 };
 

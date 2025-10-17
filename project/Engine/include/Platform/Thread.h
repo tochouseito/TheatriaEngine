@@ -1,5 +1,8 @@
 #pragma once
-class Thread
+namespace Theatria::Platform
 {
+    class Thread
+    {
+    };
 };
 

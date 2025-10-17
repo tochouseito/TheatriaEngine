@@ -1,5 +1,8 @@
 #pragma once
-class UUID
+namespace Theatria::Core
 {
+    class UUID
+    {
+    };
 };
 

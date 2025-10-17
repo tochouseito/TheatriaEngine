@@ -1,7 +1,7 @@
 #pragma once
 namespace Theatria::Graphics
 {
-    class Renderer
+    class ShaderCompiler
     {
     };
 };

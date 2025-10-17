@@ -1,5 +1,10 @@
 #pragma once
-class ScriptAPI
+
+namespace Theatria::Scripting
 {
+    /// @brief スクリプトのAPIクラス
+    class ScriptAPI
+    {
+    };
 };
 

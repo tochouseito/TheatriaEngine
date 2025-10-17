@@ -1,5 +1,8 @@
 #pragma once
-class GPUTimeline
+namespace Theatria::Graphics
 {
+    class GPUTimeline
+    {
+    };
 };
 

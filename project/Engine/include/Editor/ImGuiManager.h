@@ -1,5 +1,8 @@
 #pragma once
-class ImGuiManager
+namespace Theatria::Editor
 {
+    class ImGuiManager
+    {
+    };
 };
 

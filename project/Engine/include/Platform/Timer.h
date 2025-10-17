@@ -1,5 +1,8 @@
 #pragma once
-class Timer
+namespace Theatria::Platform
 {
-};
+    class Timer
+    {
+    };
+}
 

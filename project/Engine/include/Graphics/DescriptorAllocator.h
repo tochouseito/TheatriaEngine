@@ -1,5 +1,8 @@
 #pragma once
-class DescriptorAllocator
+namespace Theatria::Graphics
 {
+    class DescriptorAllocator
+    {
+    };
 };
 

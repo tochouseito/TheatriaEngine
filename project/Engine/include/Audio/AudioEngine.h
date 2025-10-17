@@ -1,5 +1,8 @@
 #pragma once
-class AudioEngine
+namespace Theatria::Audio
 {
+    class AudioEngine
+    {
+    };
 };
 

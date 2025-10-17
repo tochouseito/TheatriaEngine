@@ -1,5 +1,8 @@
 #pragma once
-class PhysicsWorld
+namespace Theatria::Physics
 {
+    class PhysicsWorld
+    {
+    };
 };
 

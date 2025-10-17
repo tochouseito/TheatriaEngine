@@ -1,5 +1,8 @@
 #pragma once
-class FileController
+namespace Theatria::Core
 {
+    class FileController
+    {
+    };
 };
 

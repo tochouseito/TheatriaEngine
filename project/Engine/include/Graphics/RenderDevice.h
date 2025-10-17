@@ -1,5 +1,8 @@
 #pragma once
-class RenderDevice
+namespace Theatria::Graphics
 {
+    class RenderDevice
+    {
+    };
 };
 

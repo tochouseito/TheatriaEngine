@@ -1,5 +1,11 @@
 #pragma once
-class FileSystem
+
+namespace Theatria::Platform
 {
+    /// @brief ファイルシステムクラス
+    class FileSystem
+    {
+
+    };
 };
 

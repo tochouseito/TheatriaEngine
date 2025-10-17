@@ -1,5 +1,8 @@
 #pragma once
-class JobSystem
+namespace Theatria::Core
 {
+    class JobSystem
+    {
+    };
 };
 

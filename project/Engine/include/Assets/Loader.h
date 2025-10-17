@@ -1,5 +1,8 @@
 #pragma once
-class Loader
+namespace Theatria::Assets
 {
+    class Loader
+    {
+    };
 };
 

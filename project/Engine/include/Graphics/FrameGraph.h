@@ -1,5 +1,7 @@
 #pragma once
-class FrameGraph
+namespace Theatria::Graphics
 {
+    class FrameGraph
+    {
+    };
 };
-
