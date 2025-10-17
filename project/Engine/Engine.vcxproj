@@ -125,11 +125,38 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\Core\Allocators.cpp" />
+    <ClCompile Include="source\Audio\AudioEngine.cpp" />
+    <ClCompile Include="source\Core\CommandSystem.cpp" />
+    <ClCompile Include="source\Graphics\DescriptorAllocator.cpp" />
+    <ClCompile Include="source\Core\EventSystem.cpp" />
+    <ClCompile Include="source\Core\FileController.cpp" />
+    <ClCompile Include="source\Platform\FileSystem.cpp" />
+    <ClCompile Include="source\Graphics\FrameGraph.cpp" />
+    <ClCompile Include="source\Graphics\GPUTimeline.cpp" />
+    <ClCompile Include="source\Assets\IDManager.cpp" />
+    <ClCompile Include="source\Editor\ImGuiManager.cpp" />
+    <ClCompile Include="source\Platform\Input.cpp" />
+    <ClCompile Include="source\Core\JobSystem.cpp" />
+    <ClCompile Include="source\Assets\Loader.cpp" />
+    <ClCompile Include="source\Core\LogAssert.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="source\Core\MemoryManager.cpp" />
+    <ClCompile Include="source\Platform\Network.cpp" />
+    <ClCompile Include="source\Physics\PhysicsWorld.cpp" />
+    <ClCompile Include="source\Graphics\RenderDevice.cpp" />
+    <ClCompile Include="source\Graphics\Renderer.cpp" />
+    <ClCompile Include="source\Graphics\ResourceManager.cpp" />
+    <ClCompile Include="source\GameCore\SceneManager.cpp" />
+    <ClCompile Include="source\Scripting\ScriptAPI.cpp" />
     <ClCompile Include="source\Core\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="source\Platform\Thread.cpp" />
+    <ClCompile Include="source\Platform\Timer.cpp" />
+    <ClCompile Include="source\Core\UUID.cpp" />
+    <ClCompile Include="source\Platform\WinApp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ChoMath\ChoMath.vcxproj">
@@ -152,7 +179,34 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Core\Allocators.h" />
+    <ClInclude Include="include\Audio\AudioEngine.h" />
+    <ClInclude Include="include\Core\CommandSystem.h" />
+    <ClInclude Include="include\Graphics\DescriptorAllocator.h" />
+    <ClInclude Include="include\Core\EventSystem.h" />
+    <ClInclude Include="include\Core\FileController.h" />
+    <ClInclude Include="include\Platform\FileSystem.h" />
+    <ClInclude Include="include\Graphics\FrameGraph.h" />
+    <ClInclude Include="include\Graphics\GPUTimeline.h" />
+    <ClInclude Include="include\Assets\IDManager.h" />
+    <ClInclude Include="include\Editor\ImGuiManager.h" />
     <ClInclude Include="include\Core\pch.h" />
+    <ClInclude Include="include\Platform\Input.h" />
+    <ClInclude Include="include\Core\JobSystem.h" />
+    <ClInclude Include="include\Assets\Loader.h" />
+    <ClInclude Include="include\Core\LogAssert.h" />
+    <ClInclude Include="include\Core\MemoryManager.h" />
+    <ClInclude Include="include\Platform\Network.h" />
+    <ClInclude Include="include\Physics\PhysicsWorld.h" />
+    <ClInclude Include="include\Graphics\RenderDevice.h" />
+    <ClInclude Include="include\Graphics\Renderer.h" />
+    <ClInclude Include="include\Graphics\ResourceManager.h" />
+    <ClInclude Include="include\GameCore\SceneManager.h" />
+    <ClInclude Include="include\Scripting\ScriptAPI.h" />
+    <ClInclude Include="include\Platform\Thread.h" />
+    <ClInclude Include="include\Platform\Timer.h" />
+    <ClInclude Include="include\Core\UUID.h" />
+    <ClInclude Include="include\Platform\WinApp.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
